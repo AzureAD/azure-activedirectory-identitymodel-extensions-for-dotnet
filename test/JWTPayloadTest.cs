@@ -1,15 +1,22 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Test
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [TestClass]
     public class JwtPayloadTests
     {
@@ -25,13 +32,11 @@ namespace System.IdentityModel.Test
         [ClassInitialize]
         public static void ClassSetup( TestContext testContext )
         {
-            // Start local STS
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            // Stop local STS
         }
 
         [TestInitialize]
@@ -42,14 +47,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F443747C-5AA1-406D-B0FE-53152CA92DA3" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests adding non-strings as 'exp'" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtPalyoad_ObjectClaims()
         {
             JwtPayload jwtPayload = new JwtPayload();

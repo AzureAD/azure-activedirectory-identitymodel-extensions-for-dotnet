@@ -1,20 +1,25 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Reflection;
-using System.Text;
 
 namespace System.IdentityModel.Test
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [TestClass]
     public class JwtSecurityTokenTests
     {
@@ -41,19 +46,11 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F5803908-4CFA-4038-B506-045CF65D39BD" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests JwtSecurityToken Constructor that takes an EncodedString" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityToken_EncodedStringConstruction()
         {
-            Console.WriteLine( string.Format( "Entering: '{0}'", MethodBase.GetCurrentMethod() ) );
+            Console.WriteLine( "Entering: "+ MethodBase.GetCurrentMethod() );
             JwtSecurityToken jwt = null;
-
             foreach ( JwtSecurityTokenTestVariation variation in JwtEncodedStringVariations() )
             {
                 Console.WriteLine( string.Format( "Variation: {0}", variation.Name ) );
@@ -84,6 +81,7 @@ namespace System.IdentityModel.Test
 
         private List<JwtSecurityTokenTestVariation> JwtEncodedStringVariations()
         {
+            string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
             List<JwtSecurityTokenTestVariation> variationsencodedStringParams = new List<JwtSecurityTokenTestVariation>() 
             {
                 new JwtSecurityTokenTestVariation
@@ -116,7 +114,7 @@ namespace System.IdentityModel.Test
                     EncodedString = "1.2", 
                     ExpectedException = ExpectedException.ArgEx( id:"Jwt10400"),
                 },
-#if false  // TODO replace these tests with something dynamic.
+
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "EncodedString: header is not encoded properly: '123'", 
@@ -153,7 +151,6 @@ namespace System.IdentityModel.Test
                     EncodedString = string.Format( "{0}.{1}.", tokenParts[0], tokenParts[1] ),
                     ExpectedException = ExpectedException.Null,
                 },                
-#endif
             };
 
             return variationsencodedStringParams;
@@ -161,14 +158,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F5803908-4CFA-4038-B506-045CF65D39BD" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests JWTSecurityToken Constructor that takes .Net params. Claims, issuer, etc." )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityToken_ConstructionParams()
         {
             Console.WriteLine( string.Format( "Entering: '{0}'", MethodBase.GetCurrentMethod() ) );
@@ -211,7 +201,6 @@ namespace System.IdentityModel.Test
         {
             List<JwtSecurityTokenTestVariation> constructionParams = new List<JwtSecurityTokenTestVariation>() 
             {
-                // ensure format is not format is not checked
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "ClaimsSet with all Reserved claim types, ensures that users can add as they see fit",
@@ -288,8 +277,6 @@ namespace System.IdentityModel.Test
         [TestProperty( "Framework", "TAEF" )]
         public void JWTSecurityToken_DifferentConstructorsSameJWT()
         {
-            //Log.Error( "Tests not written" );
-
             foreach ( JwtSecurityTokenTestVariation param in GetConstructorsSameJWT() )
             {
                 var jwt = new JwtSecurityToken( param.Issuer, param.Audience );
@@ -313,22 +300,5 @@ namespace System.IdentityModel.Test
 
             return constructionParams;
         }
-
-#if false
-        [TestMethod]
-        [TestProperty( "TestCaseID", "C9E6FCC2-4695-4A5D-B250-D9C7B514B81E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that cascading constructors result in the same JWT" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void JwtSecurityToken_JwtTypedConstructors()
-        {
-            Log.Warning( "Test not written" );
-        }
-#endif
     }
 }

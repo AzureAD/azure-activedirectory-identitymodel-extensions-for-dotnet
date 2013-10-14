@@ -1,22 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
-using System.Reflection;
-using System.Security.Claims;
 using System.Text;
 using System.Xml;
 
 namespace System.IdentityModel.Test
 {
     /// <summary>
-    /// 
+    /// This test is a good place to grook how to create tokens.
     /// </summary>
     [TestClass]
     public class PerformanceTests
@@ -44,14 +51,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Performance tests for creating Jwts" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         [Ignore]
         public void Jwt_Performance()
         {            
@@ -97,7 +97,6 @@ namespace System.IdentityModel.Test
         private void RunValidationTests( SecurityTokenDescriptor tokenDescriptor, SecurityToken securityToken, SecurityKey key, int iterations, bool display = true )
         {
             // Create jwts using wif
-            // Create jwts using ACS
             // Create Saml2 tokens
             // Create Saml tokens
 
@@ -197,7 +196,6 @@ namespace System.IdentityModel.Test
         private void RunCreationTests( SecurityTokenDescriptor tokenDescriptor, int iterations, bool display = true )
         {
             // Create jwts using wif
-            // Create jwts using ACS
             // Create Saml2 tokens
             // Create Saml tokens
 

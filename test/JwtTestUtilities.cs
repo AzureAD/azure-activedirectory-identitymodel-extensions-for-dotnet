@@ -1,6 +1,16 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -81,9 +91,6 @@ namespace System.IdentityModel.Test
         public XmlWriter XmlWriter { get; set; }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public class JwtTestUtilities
     {
         public static TokenValidationParameters SignatureValidationParameters( SecurityToken signingToken = null, List<SecurityToken> signingTokens = null )
@@ -110,7 +117,7 @@ namespace System.IdentityModel.Test
                 return string.Format( "{0}.{1}.", parts[0], parts[1] );
             }
 
-            Console.WriteLine( string.Format("Hey, the 'whichParts' parameter wasn't recognized: '{0}'.  Returnin 'string.Empty' hope that is what you wanted", whichParts ) );
+            Console.WriteLine( string.Format("Hey, the 'whichParts' parameter wasn't recognized: '{0}'.  Returning'string.Empty' hope that is what you wanted", whichParts ) );
 
             return string.Empty;
         }
@@ -119,7 +126,7 @@ namespace System.IdentityModel.Test
         /// Calls all public instance and static properties on an object
         /// </summary>
         /// <param name="obj"></param>
-        /// <param name="parm">contains info about the current test case</param>
+        /// <param name="testcase">contains info about the current test case</param>
         public static void CallAllPublicInstanceAndStaticPropertyGets( object obj, string testcase )
         {
             if ( obj == null )
@@ -133,9 +140,7 @@ namespace System.IdentityModel.Test
 
             // call get all public static properties of MyClass type
 
-            PropertyInfo[] propertyInfos;
-
-            propertyInfos = type.GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static );
+            PropertyInfo[] propertyInfos = type.GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static );
 
             // Touch each public property
             foreach ( PropertyInfo propertyInfo in propertyInfos )
