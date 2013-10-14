@@ -1,6 +1,16 @@
-﻿//----------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//----------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -8,10 +18,6 @@ using System.Configuration;
 
 namespace System.IdentityModel.Test
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
     [Serializable]
     public class TestContextProvider
     {
@@ -22,17 +28,17 @@ namespace System.IdentityModel.Test
             @"At {0} we found Parameter {1} is passed through multiple places, 
             You should pass it either through TAEF or ETCM Environment or ETCM Parameter attributes";
 
-        private TestContext _taefTestContext;
+        private TestContext _testContext;
 
         private Dictionary<string, object> _customProperties;
 
         /// <summary>
         /// Constructor for the TestContext provider class, Initializes all the contexts.
         /// </summary>
-        /// <param name="taefTestContext">TAEF test context.</param>
-        public TestContextProvider( TestContext taefTestContext )
+        /// <param name="testContext">TAEF test context.</param>
+        public TestContextProvider( TestContext testContext )
         {
-            _taefTestContext = taefTestContext;
+            _testContext = testContext;
             _customProperties = new Dictionary<string, object>();
             _customProperties.Add("Observations", new List<object>());
         }
@@ -102,22 +108,22 @@ namespace System.IdentityModel.Test
                 return (TValue)_customProperties[propertyName];
             }
 
-            if (_taefTestContext != null)
+            if (_testContext != null)
             {
                 // Try to read from the TAEF command line arguments.
-                if (_taefTestContext.Properties.Contains(propertyName) == true)
+                if (_testContext.Properties.Contains(propertyName) == true)
                 {
-                    retVal = ConvertParameter<TValue>(_taefTestContext.Properties[propertyName]);
+                    retVal = ConvertParameter<TValue>(_testContext.Properties[propertyName]);
                     retValSet |= true;
                 }
 
                 // Try to read from the TAEF data driven test parameters.
-                if (_taefTestContext.DataRow != null && _taefTestContext.DataRow.Table.Columns.Contains(propertyName) == true &&
-                   _taefTestContext.DataRow[propertyName] != DBNull.Value)
+                if (_testContext.DataRow != null && _testContext.DataRow.Table.Columns.Contains(propertyName) == true &&
+                   _testContext.DataRow[propertyName] != DBNull.Value)
                 {
                     Assert.IsFalse(retValSet, string.Format(MultipleParametersErrorString, "reading from TAEF Context", propertyName));
 
-                    retVal = ConvertParameter<TValue>(_taefTestContext.DataRow[propertyName]);
+                    retVal = ConvertParameter<TValue>(_testContext.DataRow[propertyName]);
                     retValSet |= true;
                 }
             }

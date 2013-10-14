@@ -1,6 +1,16 @@
-﻿//------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
@@ -46,21 +56,10 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "4A9C4A2E-C50F-4A57-A85B-2D6D4F14ADF1" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests for SignatureProviderFactory" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void SignatureProviderFactoryTests()
         {
             SignatureProviderFactory factory = new SignatureProviderFactory();
-
-            // null signingCredentials
-            //FactoryCreateFor( "Siging:    - NUll SigningCredentials", null, factory, ExpectedException.ArgNull );
-            //FactoryCreateFor( "Verifying: - NUll SigningCredentials", null, factory, ExpectedException.ArgNull );
 
             // Asymmetric / Symmetric both need signature alg specified
             FactoryCreateFor( "Siging:    - algorithm string.Empty", KeyingMaterial.AsymmetricKey_1024, string.Empty, factory, ExpectedException.ArgEx() );
@@ -147,14 +146,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F7B5A336-BF04-4589-9F8E-36451E1E3B7F" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "AsymmetricSignatureProvider Constructor" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void AsymmetricSignatureProvider_ConstructorTests()
         {
             AsymmetricSecurityKey privateKey = KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey;
@@ -213,14 +205,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "8A43293F-196C-47B8-8C1D-59CDAD30C39E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests for AsymmetricSignatureProvider.Dispose" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void AsymmetricSignatureProvider_Dispose()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider( KeyingMaterial.AsymmetricKey_Public_2048, SecurityAlgorithms.RsaSha256Signature );
@@ -256,14 +241,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "4923DA59-3F32-4995-84D3-C49B0A08EEDE" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests for Asymmetric and Symmetric SignAndVerify" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void SignatureProviders_SignAndVerify()
         {
             // asymmetric
@@ -335,33 +313,9 @@ namespace System.IdentityModel.Test
             }
         }
 
-#if false
-        [TestMethod]
-        [TestProperty( "TestCaseID", "2E622C4A-121C-4A72-8179-B29BBEFCF761" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Tests for AsymmetricSignatureProvider.Sign" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void AsymmetricSignatureProvider_Sign()
-        {
-            Log.Warning( "Test not written" );
-        }
-#endif 
-
         [TestMethod]
         [TestProperty( "TestCaseID", "89AF7B31-7707-4E60-AC32-363C9CA78363" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Parameter checking for AsymmetricSignatureProvider..Sign and .Verify" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void AsymmetricSignatureProvider_Sign_Verify_ParameterChecking()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider( KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm );
@@ -399,14 +353,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F59BC1A3-C2D7-43F6-99FC-D25E57D1B99C" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Tests for SymmetricSignatureProvider Constructor" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void SymmetricSignatureProviderTests_Constructor()
         {
             // no errors
@@ -461,14 +408,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "E4E5F329-12D8-431A-A971-21F86299DBB1" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Parameter checking for SymmetricSignatureProvider.Sign and .Verify" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking()
         {
             SymmetricSignatureProvider provider = new SymmetricSignatureProvider( KeyingMaterial.SymmetricSigningCreds_256_Sha2.SigningKey as SymmetricSecurityKey, KeyingMaterial.SymmetricSigningCreds_256_Sha2.SignatureAlgorithm );
@@ -509,22 +449,5 @@ namespace System.IdentityModel.Test
                 ExpectedException.ProcessException( exceptionExpected, ex );
             }
         }
-
-#if false
-        [TestMethod]
-        [TestProperty( "TestCaseID", "467A35CC-6382-4E6E-AA6B-1D71EE4D2E29" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Tests for SymmetricSignatureProvider Signing" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void SymmetricSignatureProviderTests_Verify()
-        {
-            Log.Warning( "Test is not implemented" );
-        }
-#endif        
     }
 }

@@ -1,10 +1,21 @@
-//------------------------------------------------------------------------------
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IdentityModel.Configuration;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
@@ -81,27 +92,27 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse(
                 MaxTokenSizeInBytes != null && MaxTokenSizeInBytes.Value != requirement.MaximumTokenSizeInBytes,
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "MaximumTokenSizeInBytes (expected, config): '{0}'. '{1}'.",
                     MaxTokenSizeInBytes.ToString(),
                     requirement.MaximumTokenSizeInBytes.ToString()));
             Assert.IsFalse(
                 MaxTokenSizeInBytes == null
                 && requirement.MaximumTokenSizeInBytes != controlRequirement.MaximumTokenSizeInBytes,
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "MaximumTokenSizeInBytes should be default (default, config): '{0}'. '{1}'.",
                     controlRequirement.MaximumTokenSizeInBytes.ToString(),
                     requirement.MaximumTokenSizeInBytes.ToString()));
 
             Assert.IsFalse(
                 MaxClockSkew != null && MaxClockSkew.Value != requirement.MaxClockSkew,
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "MaxClockSkew (expected, config): '{0}'. '{1}'.",
                     MaxClockSkew.ToString(),
                     requirement.MaxClockSkew.ToString() ) );
             Assert.IsFalse(
                 MaxClockSkew == null && requirement.MaxClockSkew != controlRequirement.MaxClockSkew,
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "MaxClockSkew should be default (default, config): '{0}'. '{1}'.",
                     controlRequirement.MaxClockSkew.ToString(),
                     requirement.MaxClockSkew.ToString() ) );
@@ -109,14 +120,14 @@ namespace System.IdentityModel.Test
             Assert.IsFalse(
                 DefaultTokenLifetimeInMinutes != null
                 && DefaultTokenLifetimeInMinutes.Value != requirement.DefaultTokenLifetimeInMinutes,
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "DefaultTokenLifetimeInMinutes (expected, config): '{0}'. '{1}'.",
                     DefaultTokenLifetimeInMinutes.ToString(),
                     requirement.DefaultTokenLifetimeInMinutes.ToString() ) );
             Assert.IsFalse(
                 DefaultTokenLifetimeInMinutes == null
                 && requirement.DefaultTokenLifetimeInMinutes != controlRequirement.DefaultTokenLifetimeInMinutes,
-                string.Format(
+                string.Format(CultureInfo.InvariantCulture,
                     "DefaultTokenLifetimeInMinutes should be default (default, config): '{0}'. '{1}'.",
                     controlRequirement.DefaultTokenLifetimeInMinutes.ToString(),
                     requirement.DefaultTokenLifetimeInMinutes.ToString() ) );
@@ -129,7 +140,7 @@ namespace System.IdentityModel.Test
             if ( ( NameClaimType != null && requirement.NameClaimType != null )
             && ( NameClaimType != requirement.NameClaimType ) )
             {
-                Assert.Fail( string.Format( "NameClaimType (expected, config): '{0}'. '{1}'.", NameClaimType, requirement.NameClaimType ) );
+                Assert.Fail(string.Format(CultureInfo.InvariantCulture, "NameClaimType (expected, config): '{0}'. '{1}'.", NameClaimType, requirement.NameClaimType));
                 asExpected = false;
             }
 
@@ -140,7 +151,7 @@ namespace System.IdentityModel.Test
             if ( ( RoleClaimType != null && requirement.RoleClaimType != null )
             && ( RoleClaimType != requirement.RoleClaimType ) )
             {
-                Assert.Fail( string.Format( "RoleClaimType (expected, config): '{0}'. '{1}'.", RoleClaimType, requirement.RoleClaimType ) );
+                Assert.Fail(string.Format(CultureInfo.InvariantCulture, "RoleClaimType (expected, config): '{0}'. '{1}'.", RoleClaimType, requirement.RoleClaimType));
                 asExpected = false;
             }
 
@@ -172,7 +183,7 @@ namespace System.IdentityModel.Test
                     ||   CertValidationMode == CertMode.PeerOrChainTrust && ( validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() )
                     ||   CertValidationMode == CertMode.None             && ( validator.GetType() != X509CertificateValidator.None.GetType() ) )
                     {
-                        Assert.Fail( string.Format( "X509CertificateValidator type. expected: '{0}', actual: '{1}'", CertValidationMode.HasValue ? CertValidationMode.Value.ToString() : "null", validator.GetType().ToString() ) );
+                        Assert.Fail(string.Format(CultureInfo.InvariantCulture, "X509CertificateValidator type. expected: '{0}', actual: '{1}'", CertValidationMode.HasValue ? CertValidationMode.Value.ToString() : "null", validator.GetType().ToString()));
                         asExpected = false;
                     }
 
@@ -181,7 +192,7 @@ namespace System.IdentityModel.Test
                     CertMode certMode = (CertMode)fi.GetValue( requirement.CertificateValidator );
                     if ( CertValidationMode.HasValue )
                     {
-                        Assert.IsFalse( CertValidationMode.Value != certMode , string.Format( "X509CertificateValidationMode. expected: '{0}', actual: '{1}'", CertValidationMode.Value.ToString(), certMode.ToString() ) );
+                        Assert.IsFalse(CertValidationMode.Value != certMode, string.Format(CultureInfo.InvariantCulture, "X509CertificateValidationMode. expected: '{0}', actual: '{1}'", CertValidationMode.Value.ToString(), certMode.ToString()));
                     }
 
                     // check inner policy
@@ -189,18 +200,18 @@ namespace System.IdentityModel.Test
                     X509RevocationMode revocationMode = (X509RevocationMode)fi.GetValue( requirement.CertificateValidator );
                     if ( CertRevocationMode.HasValue )
                     {
-                        Assert.IsFalse( CertRevocationMode.Value != revocationMode , string.Format( "CertRevocationMode. expected: '{0}', actual: '{1}'", CertRevocationMode.Value.ToString(), revocationMode.ToString() ) );
+                        Assert.IsFalse(CertRevocationMode.Value != revocationMode, string.Format(CultureInfo.InvariantCulture, "CertRevocationMode. expected: '{0}', actual: '{1}'", CertRevocationMode.Value.ToString(), revocationMode.ToString()));
 
                         fi = type.GetField( "_chainPolicy", BindingFlags.NonPublic | BindingFlags.Instance );
                         X509ChainPolicy chainPolicy = (X509ChainPolicy)fi.GetValue( requirement.CertificateValidator );
-                        Assert.IsFalse( chainPolicy.RevocationMode != CertRevocationMode.Value , string.Format( "chainPolicy.RevocationMode.  . expected: '{0}', actual: '{1}'", CertRevocationMode.Value.ToString(), chainPolicy.RevocationMode.ToString() ) );
+                        Assert.IsFalse(chainPolicy.RevocationMode != CertRevocationMode.Value, string.Format(CultureInfo.InvariantCulture, "chainPolicy.RevocationMode.  . expected: '{0}', actual: '{1}'", CertRevocationMode.Value.ToString(), chainPolicy.RevocationMode.ToString()));
                     }
 
                     fi = type.GetField( "_storeLocation", BindingFlags.NonPublic | BindingFlags.Instance );
                     StoreLocation storeLocation = (StoreLocation)fi.GetValue( requirement.CertificateValidator );
                     if ( CertStoreLocation.HasValue )
                     {
-                        Assert.IsFalse( CertStoreLocation.Value != storeLocation , string.Format( "CertStoreLocation. expected: '{0}', actual: '{1}'", CertStoreLocation.Value.ToString(), storeLocation.ToString() ) );
+                        Assert.IsFalse(CertStoreLocation.Value != storeLocation, string.Format(CultureInfo.InvariantCulture, "CertStoreLocation. expected: '{0}', actual: '{1}'", CertStoreLocation.Value.ToString(), storeLocation.ToString()));
                     }
                 }
             }
@@ -370,12 +381,6 @@ namespace System.IdentityModel.Test
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: TimeSpan.FromMinutes( 15 ), cert: new AlwaysSucceedCertificateValidator(), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( role: @"http://AllItemsSet/roleClaim",  cert: new AlwaysSucceedCertificateValidator(), clock: TimeSpan.FromMinutes( 15 ), certMode: X509CertificateValidationMode.Custom ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( certMode: X509CertificateValidationMode.PeerTrust, cert: new AlwaysSucceedCertificateValidator(), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
-
-            //defaults in jwtSecurityTokenRequirement
-            //private static X509RevocationMode _defaultRevocationMode = X509RevocationMode.Online;
-            //private static X509CertificateValidationMode _defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
-            //private static StoreLocation _defaultStoreLocation = StoreLocation.LocalMachine;
-            //public ExpectedJwtSecurityTokenRequirement( UInt32? tokenSize = null, TimeSpan? clock = null, UInt32? life = null, X509CertificateValidator cert = null, string name = null, string role = null, X509RevocationMode?  = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null )
         }
 
         //
@@ -470,14 +475,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "1E62250E-9208-4917-8677-0C82EFE6823E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.Description( "JwtSecurityTokenHandler Configuration Tests" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
+        [Description( "JwtSecurityTokenHandler Configuration Tests" )]
         public void JwtSecurityTokenHandler_ConfigTests()
         {
             JwtHandlerConfigVariation.BuildExpectedRequirements();

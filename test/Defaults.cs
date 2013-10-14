@@ -1,18 +1,26 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.ObjectModel;
-using System.Security.Claims;
-using System.IdentityModel.Tokens;
 using System.Collections.Generic;
 using System.IdentityModel.Selectors;
+using System.IdentityModel.Tokens;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace System.IdentityModel.Test
 {
-
     /// <summary>
     /// This module is responsible for ensuring that defaults are as expected for all types in the Jwt deliverable.
     /// </summary>
@@ -42,17 +50,9 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "FC949834-617F-4C57-8643-C30F160E309D" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that AsymmetricSignatureProvider defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void AsymmetricSignatureProvider_Defaults()
         {
-
             try
             {
                 AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider( KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, false );
@@ -74,14 +74,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "E01771B7-2D9E-435E-A933-09FAB429881E" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that JwtHeader defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtHeader_Defaults()
         {
             JwtHeader jwtHeader = new JwtHeader();
@@ -104,14 +97,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "0B55BD6C-40F7-4C82-A0B7-D0B799EA3289" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that JwtPayload defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtPayload_Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -148,14 +134,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "EEA6CD8E-DC65-485E-9EC9-9037AC3382A4" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that JwtSecurityToken defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityToken_Defaults()
         {
             JwtSecurityToken jwt = new JwtSecurityToken();
@@ -210,14 +189,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "7F6372F7-36A7-47AE-8C1E-A4EF230194D5" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that JwtSecurityTokenHandler defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_Defaults()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -271,107 +243,9 @@ namespace System.IdentityModel.Test
             Assert.IsFalse( validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() , "validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() " );
         }
 
-#if false
-        [TestMethod]
-        [TestProperty( "TestCaseID", "D540296C-BEFD-4D37-BC94-6E3FD9DBBC31" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that JwtSecurityTokenRequirement defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void JwtSecurityTokenRequirement_Defaults()
-        {
-            Log.Warning( "Test not written" );
-        }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "A922C76A-1313-49BC-9234-96A1A422293F" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that NamedKeyIssuerTokenResolver defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void NamedKeyIssuerTokenResolver_Defaults()
-        {
-            Log.Warning( "Test not written" );
-        }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "7A4A417C-551F-4DF7-A3FB-85EA2D6E2B20" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that NamedSecurityKeyIdentifierClause defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void NamedSecurityKeyIdentifierClause_Defaults()
-        {
-            Log.Warning( "Test not written" );
-        }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "B510063E-991F-42C5-B275-866CC530C315" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that NamedKeySecurityToken defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void NamedKeySecurityToken_Defaults()
-        {
-            Log.Warning( "Test not written" );
-        }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "A418CC58-AB19-49AA-A03D-5E29FE1AD62D" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that SignatureProviderFactory defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void SignatureProviderFactory_Defaults()
-        {
-            Log.Warning( "Test not written" );
-        }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "2E9E7437-D97E-43F9-8711-CD3A81D0F03B" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Ensures that SymmetricSignatureProvider defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void SymmetricSignatureProvider_Defaults()
-        {
-            Log.Warning( "Test not written" );
-        }
-#endif
         [TestMethod]
         [TestProperty( "TestCaseID", "606DF40C-2B55-4DA2-A4F1-521E9BDF2A1E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that TokenValidationParameters defaults are as expected" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void TokenValidationParameters_Defaults()
         {
             TokenValidationParameters tvp = new TokenValidationParameters();

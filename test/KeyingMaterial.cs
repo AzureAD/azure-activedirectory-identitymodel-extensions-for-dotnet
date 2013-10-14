@@ -1,6 +1,16 @@
-﻿//------------------------------------------------------------------------------
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.IdentityModel.Selectors;
@@ -8,7 +18,6 @@ using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel.Security.Tokens;
-using System.Text;
 
 namespace System.IdentityModel.Test
 {
@@ -41,7 +50,6 @@ namespace System.IdentityModel.Test
         public static X509SigningCredentials AsymmetricSigningCreds_2048_RsaSha2_Sha2  = new X509SigningCredentials( Cert_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );
         public static X509AsymmetricSecurityKey AsymmetricKey_2048 = X509Token_2048.SecurityKeys[0] as X509AsymmetricSecurityKey;
 
-        //public static string X509DataPublic_2048                   = @"MIIDJjCCAg6gAwIBAgIQaD50CsiJfrJHEyAj3NYklTANBgkqhkiG9w0BAQUFADA3MTUwMwYDVQQDEyxodW1vbmdvdXNpbnN1cmFuY2UuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDAeFw0xMjA3MTMwMDA3MTdaFw0xMzA3MTMwNjA3MTdaMDcxNTAzBgNVBAMTLGh1bW9uZ291c2luc3VyYW5jZS5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwPbiE0y4CuU+BWpfRBdwFeQRC2fKZ79C6zcoGFGIzKjHC+6uPfxVGoXrFj2LC5y08fPZVTtIoEXgCwEGlQcraHP3g5yn+RyjewHE9sVmuTGlwjRzPziRdpihRF9LAlIPKBB/zQB5V8at9YgNaF3foMjoZqlEf6mBUPFgyqMpMZ6HwfdY6fuH19atB7BuWkucmV1Wd7cEqZqvxcJSikR6Rd/yLOcXyq4/9pjDSkIKSLX9qE3CFD3pQ/LhpoA1OA21C7tXTL6YfN577r2mLX3nIhnw2SJEqN9eOoVM3InqGSl8KrqU7zuoWBcpOiH0T8Qpphf0Hbpgr3iaGv1UCb+bJQIDAQABoy4wLDALBgNVHQ8EBAMCBPAwHQYDVR0OBBYEFGOrUCC9M+P3n8kJDc5Ls8lyG0H/MA0GCSqGSIb3DQEBBQUAA4IBAQCupvFL+XmObPcJXMDDsXxWzz0XhKMvYc+MCKCStVXvHBj5KxmptA7oUiTxU5zqmyBMzXOmLVD7gI0xOwd7TzM6EZppNArLZ1ZiJqituAtPFZU7MxC9XOsncatN3DZqlQuB62cGFSk98fURJs9pJXj1CgdMb2O5RbnMtCo5ggfMrKwKuB+kPKhpZ+C8XymXLvLiSuoWeBc6nsx+RWj5wYW8nZkDIjpZmcbHHR2loOehGVofJwejC8f68R1uFMfwWS/f6abNOc6RGs6E7QdxA5Vu52HJOEC2rFugcUbjCnjd11RhiXXVii30H815q6BMVNq9b48N9YTXj+QsC/HUkz7m";
         public static string X509Data_Public_2048                          = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
         public static X509Certificate2 CertPublic_2048                    = new X509Certificate2( Convert.FromBase64String( X509Data_Public_2048 ) );
         public static X509SecurityToken X509Token_Public_2048             = new X509SecurityToken( CertPublic_2048 );

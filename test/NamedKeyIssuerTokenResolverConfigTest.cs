@@ -1,6 +1,16 @@
-//------------------------------------------------------------------------------
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -11,7 +21,6 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.IdentityModel.Test
 {
-
     [TestClass]
     public class NamedKeyIssuerTokenResolverDefaultConfigTest : ConfigurationTest
     {
@@ -78,14 +87,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "5BD621E8-9427-499D-A9D3-941BD2672752" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Default NamedKeyIssuerTokenResolver" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void LoadNamedKeyIssuerTokenResolver()
         {
             RunTestCase( string.Empty );
@@ -106,7 +108,7 @@ namespace System.IdentityModel.Test
         }
 
         public NamedKeyIssuerTokenResolverMultipleKeysConfigTest()
-        { }
+        {}
 
         protected override string GetConfiguration( string testVariation )
         {
@@ -148,27 +150,11 @@ namespace System.IdentityModel.Test
             Assert.IsTrue( resolver.TryResolveToken( clause, out token ) );
             Assert.IsNotNull( token );
 
-            //Verify.IsNotNull( resolver.XmlNodes );
-
-            List<string> nodeNames = new List<string>() { "securityKeyProvider", "List" };
-            //int index = 0;
-
-            //foreach ( XmlNode node in resolver.XmlNodes )
-            //{
-            //    Assert.IsTrue( string.Equals( node.Name, nodeNames[index++], StringComparison.Ordinal ) );
-            //}
         }
 
         [TestMethod]
         [TestProperty( "TestCaseID", "1E62250E-9208-4917-8677-0C82EFE6823E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "MultiKey NamedKeyIssuerTokenResolver" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void MultiKeyNamedKeyIssuerTokenResolver()
         {
             RunTestCase( string.Empty );
@@ -260,19 +246,10 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "1E62250E-9208-4917-8677-0C82EFE6823E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "NamedKeyIssuerTokenResolver BadConfig" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        [TestProperty( "Config", "{AsymmetricKey, MissingSymmetricKey, KeyTooSmall, NameMissing, EncodingWrong, KeyDoesNotParse}" )]
         public void Case()
         {
             RunTestCase( string.Empty );
         }
     }
-
 }

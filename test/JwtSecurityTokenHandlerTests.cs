@@ -1,6 +1,16 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -10,7 +20,6 @@ using System.IdentityModel.Tokens;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Claims;
-using System.ServiceModel.Security.Tokens;
 using System.Text;
 using System.Xml;
 
@@ -160,14 +169,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "B237EA9D-0453-4717-8870-E6A49DE04F0E" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Actor Tests.  Ensure that 'actors' work correctly inbound and outbound.  Signed, with and without bootstrap context" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_Actor()
         {
             // Set up tests artifacts here.
@@ -299,17 +301,9 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "63193E6B-CF8A-4EA5-B9E0-EF4760B5CEEB" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Claim Type Mapping - Inbound and Outbound" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_BootstrapContextSerialize()
         {
-
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             List<SecurityToken> tokens = new List<SecurityToken>() { KeyingMaterial.X509Token_2048 };
             handler.Configuration = new SecurityTokenHandlerConfiguration()
@@ -336,21 +330,11 @@ namespace System.IdentityModel.Test
             IdentityComparer.AreEqual( identity, identityDeserialized );
         }
 
-
         [TestMethod]
         [TestProperty( "TestCaseID", "A1976E06-F5D5-4DDB-88F8-E57B86B4EC64" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Claim Type Mapping - Inbound and Outbound" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_ClaimTypeMapping()
         {
-            // Exported from ADD as csv, would be great to link right to xls.
-
             List<KeyValuePair<string, string>> aadStrings = new List<KeyValuePair<string, string>>();
             aadStrings.Add( new KeyValuePair<string, string>( "amr", "http://schemas.microsoft.com/claims/authnmethodsreferences" ) );
             aadStrings.Add( new KeyValuePair<string, string>( "deviceid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier" ) );
@@ -464,10 +448,8 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             ValidateClaimMapping( jwt, handler, null, null, "Jwt with all ShortClaimTypes, InboundClaimTypeMap.Clear()" );
 
-            // test that
-            // 
+            // test that setting the NameClaimType override works.
             handler.NameClaimType = ClaimTypes.Email;
-
             List<Claim> claims = new List<Claim>()
             {
                 new Claim( ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
@@ -500,9 +482,6 @@ namespace System.IdentityModel.Test
                 new Claim( "Mapped_" + ReservedClaims.Principal, "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
                 new Claim( "Mapped_" + ReservedClaims.Subject, "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
             };
-
-            //ValidateClaimMapping( jwt, handler, expectedClaims, "Principal1", "All Jwt claims mapped to identity.NameClaimType, InboundClaimTypeMap has alternate map" );
-
         }
 
         private void ValidateClaimMapping( JwtSecurityToken jwt, JwtSecurityTokenHandler handler, IEnumerable<Claim> expectedClaims, string identityName, string variation )
@@ -545,14 +524,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "2CADC17D-D1F4-4A20-B54A-44FE37445348" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Public calls into JwtSecurityTokenHandler" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_PublicCalls()
         {
             string methodToCall = _testContextProvider.GetValue<string>( "Method" );
@@ -898,10 +870,6 @@ namespace System.IdentityModel.Test
                     ExpectedException = ExpectedException.ArgEx(id:"Jwt10200"),
                 },
 #endregion
-            //   // public override void WriteToken( XmlWriter writer, SecurityToken token 
-            //   //     public override string WriteToken( SecurityToken token )
-            //   //         public virtual string WriteToken( SecurityTokenDescriptor tokenDescriptor )
-            //   //         public virtual string WriteToken( string issuer = null, string audience = null, IEnumerable<Claim> claims = null, SigningCredentials signingCredentials = null, Lifetime lifetime = null, JwtSecurityToken actor = null )
             };
 
             return variations;
@@ -909,14 +877,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "18BBAFC8-52F8-4A51-8182-8EB192BF5FA5" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "JWTSecurityTokenHandler - Tampering tests" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_TamperingTests()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -996,15 +957,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "B6C1D4D1-3CF9-4281-B024-39FCBD03160E" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "JWTSecurityTokenHandler - BootstrapContext tests" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        [Ignore]  // TODO re-enable this test after coming up with a suitable fix.
         public void JwtSecurityTokenHandler_BootstrapTokenTests()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -1102,18 +1055,10 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "D540296C-BEFD-4D37-BC94-6E3FD9DBBC31" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "JWTSecurityTokenHandler - ReadToken" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_ReadTokenTests()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-
             ExpectedException expectedException = ExpectedException.ArgRange();
             try
             {
@@ -1141,14 +1086,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "00E34491-C6F0-40FA-AA66-090729F46927" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Test Signature Validation" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_SignatureValidation_Config()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -1215,38 +1153,10 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "00E34491-C6F0-40FA-AA66-090729F46927" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Test Signature Validation" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
+        [Description( "Test Signature Validation using Token Validation Parameters" )]
         public void JwtSecurityTokenHandler_SignatureValidation_TVP()
         {
-            //JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            //ClaimsIdentity subject = new ClaimsIdentity( "Forms" );
-            //subject.AddClaim( new Claim( ClaimsIdentity.DefaultNameClaimType, "indgaunt" ) );
-            //Lifetime lifetime = new Lifetime( DateTime.Now, DateTime.Now + TimeSpan.FromHours( 8 ) );
-
-            //SymmetricSecurityKey key = new InMemorySymmetricSecurityKey( Convert.FromBase64String( "sCLlKQ5m8qWDAZzaI8qjIjdXOgcjMtaZijZNGEiLWB4=" ) );
-            //SigningCredentials credentials = new SigningCredentials( key, "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "http://www.w3.org/2001/04/xmlenc#sha256" );
-
-            //JwtSecurityToken token = (JwtSecurityToken)handler.CreateToken( "sts", "audience", subject, lifetime, null );
-
-            //string tokenString = handler.WriteToken( token );
-
-            //TokenValidationParameters parameters = new TokenValidationParameters()
-            //{
-            //    ValidIssuer = "sts",
-            //    AllowedAudience = "audience",
-            //    SigningToken = new BinarySecretSecurityToken( Convert.FromBase64String( "sCLlKQ5m8qWDAZzaI8qjIjdXOgcjMtaZijZNGEiLWB4=" ) )
-            //};
-
-            //ClaimsPrincipal cp = handler.ValidateToken( token, parameters );          
-
-            Console.WriteLine( "Method: JWTSignatureValidation" );
+            Console.WriteLine( "Method: JWT SignatureValidation TVP" );
             foreach ( JwtSecurityTokenTestVariation variation in SignatureValidationTVPVariations() )
             {
 
@@ -1310,17 +1220,14 @@ namespace System.IdentityModel.Test
                     ExpectedException = ExpectedException.SecVal( "Jwt10312" ),
                     EncodedString = JwtTestUtilities.GetJwtParts( EncodedJwts.Asymmetric_2048, "Parts-0-1"),
                 },
-#if false  // TODO Need to find a a way to re-enable this test.
                 new JwtSecurityTokenTestVariation
                 { 
                     TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters(),
                     Name = "SigningToken and SigningTokens both null",
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler(){ RequireExpirationTime = false },
                     ExpectedException = ExpectedException.InvalidOp( id:"Jwt10309" ),
-                    EncodedString = JwtTestUtilities.GetJwtParts( EncodedJwts.JwtIntegratedAcsV2Libs_2048, "ALLParts"),
+                    EncodedString = JwtTestUtilities.GetJwtParts( EncodedJwts.Asymmetric_2048, "ALLParts"),
                 },
-#endif
-
                 new JwtSecurityTokenTestVariation
                 { 
                     TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters( signingTokens: new List<SecurityToken> { KeyingMaterial.X509Token_2048 } ),
@@ -1365,38 +1272,10 @@ namespace System.IdentityModel.Test
 
             return constructionParams;
         }
-#if false  // TODO figure out how to re-enable this test.
-        [TestMethod]
-        [TestProperty("TestCaseID", "1EE06E5A-F199-49AE-AF68-E7F4665A39E8")]
-        [TestProperty("TestType", "BVT")]
-        [TestProperty("Environments", "ACSDevBox")]
-        [Description("Test lifetime")]
-        [Priority(0)]
-        [Owner("BrentSch")]
-        [TestProperty("DisciplineOwner", "Dev")]
-        [TestProperty("Feature", "ACS/AAL")]
-        [TestProperty("Framework", "TAEF")]
-        public void JwtSecurityTokenHandler_LifetimeValidationTests()
-        {
-            new JwtSecurityTokenTestVariation
-            {
-                TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters(KeyingMaterial.X509Token_Public_2048_AcsV2),
-                Name = "JWT_AsymmetricSigned_AcsV2",
-                ExpectedException = ExpectedException.Null,
-                EncodedString = JwtTestUtilities.GetJwtParts(EncodedJwts.JwtIntegratedAcsV2Libs_2048, "ALLParts"),
-            };
-        }
-#endif
+
         [TestMethod]
         [TestProperty( "TestCaseID", "35870865-9DA5-45A8-9D6D-B7CAF03A50D3" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Test Issuer Validation using SecurityTokenConfiguration" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_IssuerValidationTests_Config()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -1457,21 +1336,18 @@ namespace System.IdentityModel.Test
                 ExpectedException.ProcessException( ee, ex );
             }
         }
-#if false // TODO re-enable this test.
         [TestMethod]
         [TestProperty( "TestCaseID", "6356C21F-280C-4A9E-875C-F6543DF0A5E3" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Test Issuer Validation with TVP" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_IssuerValidationTests_TVP()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             handler.CertificateValidator = X509CertificateValidator.None;
+            JwtSecurityToken jwt = handler.CreateToken(issuer: "http://www.GotJwt.com",
+                                                       audience: "http://audience",
+                                                       lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(2)),
+                                                       subject: new ClaimsIdentity(ClaimSets.Simple("http://idp", "http://origIdp")),
+                                                       signingCredentials: KeyingMaterial.AsymmetricSigningCreds_2048_RsaSha2_Sha2);
 
             TokenValidationParameters jwtParams = new TokenValidationParameters
             {
@@ -1487,7 +1363,7 @@ namespace System.IdentityModel.Test
             ExpectedException ee = ExpectedException.ArgEx(id:"Jwt10317");
             try
             {
-                handler.ValidateToken( EncodedJwts.JwtIntegratedAcsV2Libs_2048, jwtParams );
+                handler.ValidateToken( jwt.RawData );
                 ExpectedException.ProcessNoException( ee );
             }
             catch ( Exception ex )
@@ -1502,7 +1378,7 @@ namespace System.IdentityModel.Test
                 List<string> issuers = new List<string>();
                 jwtParams.ValidIssuers = issuers;
                 jwtParams.ValidIssuer = string.Empty;
-                handler.ValidateToken( EncodedJwts.JwtIntegratedAcsV2Libs_2048, jwtParams );
+                handler.ValidateToken( jwt.RawData, jwtParams );
                 ExpectedException.ProcessNoException( ee );
             }
             catch ( Exception ex )
@@ -1518,7 +1394,7 @@ namespace System.IdentityModel.Test
                 jwtParams.ValidateIssuer = false;
                 jwtParams.ValidIssuers = issuers;
                 jwtParams.ValidIssuer = string.Empty;
-                handler.ValidateToken( EncodedJwts.JwtIntegratedAcsV2Libs_2048, jwtParams );
+                handler.ValidateToken( jwt.RawData, jwtParams );
                 ExpectedException.ProcessNoException( ee );
             }
             catch ( Exception ex )
@@ -1534,7 +1410,7 @@ namespace System.IdentityModel.Test
                 jwtParams.ValidateIssuer = false;
                 jwtParams.ValidIssuers = issuers;
                 jwtParams.ValidIssuer = "http://Simple.CertData_2049";
-                handler.ValidateToken( EncodedJwts.JwtIntegratedAcsV2Libs_2048, jwtParams );
+                handler.ValidateToken( jwt.RawData, jwtParams );
                 ExpectedException.ProcessNoException( ee );
             }
             catch ( Exception ex )
@@ -1544,26 +1420,18 @@ namespace System.IdentityModel.Test
 
 
             // issuer matches
-            jwtParams.ValidIssuer = "http://Simple.CertData_2048";
-            handler.ValidateToken( EncodedJwts.JwtIntegratedAcsV2Libs_2048, jwtParams );
+            jwtParams.ValidIssuer = "http://www.GotJwt.com";
+            handler.ValidateToken( jwt.RawData, jwtParams );
 
             // issuer matches
-            jwtParams.ValidIssuers = new List<string>();
-            jwtParams.ValidIssuers = new string[] { "http://Simple.CertData_2048" };
+            jwtParams.ValidIssuers = new string[] { "http://Simple.CertData_2048", "http://www.GotJwt.com" };
             jwtParams.ValidIssuer = null;
-            handler.ValidateToken( EncodedJwts.JwtIntegratedAcsV2Libs_2048, jwtParams );
+            handler.ValidateToken( jwt.RawData, jwtParams );
         }
-#endif
+
         [TestMethod]
         [TestProperty( "TestCaseID", "6356C21F-280C-4A9E-875C-F6543DF0A5E3" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Test Audience Validation" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_AudienceValidationTests()
         {
             foreach ( JwtSecurityTokenTestVariation variation in AudienceValidationVariations() )

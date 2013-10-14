@@ -1,21 +1,28 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
-
+// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
-using System.Reflection;
 using System.Security.Claims;
-using System.Text;
 
 namespace System.IdentityModel.Test
 {
     /// <summary>
-    /// 
+    /// Test some key extensibility scenarios
     /// </summary>
     [TestClass]
     public class ExtensibilityTests
@@ -43,14 +50,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Extensibility tests for SecurityKeyIdentifier for JWT key identifiers" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandler_Extensibility()
         {
             DerivedJwtSecurityTokenHandler handler = new DerivedJwtSecurityTokenHandler() 
@@ -104,7 +104,6 @@ namespace System.IdentityModel.Test
             ValidateDerived( null, encodedJwt, handler, tvp, ExpectedException.Null );
             ValidateDerived( null, encodedJwt, handler, null, ExpectedException.Null );
             ValidateDerived( jwtRead as JwtSecurityToken, null, handler, null, ExpectedException.Null );
-
         }
 
         private void ValidateDerived( JwtSecurityToken jwt, string encodedJwt, DerivedJwtSecurityTokenHandler derivedHandler, TokenValidationParameters tvp, ExpectedException ee )
@@ -162,14 +161,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Extensibility tests for SecurityKeyIdentifier for JWT key identifiers" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityKeyIdentifyier_Extensibility()
         {
             string clauseName = "kid";
@@ -218,14 +210,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "E9A1AB3E-6AAE-4AC4-9DD4-1DDA5FAC70CF" )]
-        [TestProperty( "TestType", "CIT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Extensibility tests for JwtSecurityTokenHandler" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JwtSecurityTokenHandlerExtensibility()
         {
             // TODO: Review and fix.  Log.Warning( "Test not completed" );
@@ -238,43 +223,17 @@ namespace System.IdentityModel.Test
 
         }
 
-#if false
-        [TestMethod]
-        [TestProperty( "TestCaseID", "A8D2EC36-51C6-426A-8EEF-DB0FC56B1EAC" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Extensibility tests for SignatureProvider" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void SignatureProviderExtensibility()
-        {
-            Log.Warning( "Test not written" );
-        }
-#endif
-
         [TestMethod]
         [TestProperty( "TestCaseID", "C4FC2FC1-5AB0-4A73-A620-59D1FBF92D7A" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Extensibility tests for AsymmetricSignatureProvider" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void AsymmetricSignatureProvider_Extensibility()
         {            
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-
             Console.WriteLine( "Testvariation: " + "outbound signature algorithm - bobsYourUncle" );
 
             // inbound signature algorithm - bobsYourUncle
             JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.RsaSha256Signature );
             JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string,string>( SecurityAlgorithms.RsaSha256Signature, "bobsYourUncle") );
-
             JwtSecurityToken jwt = handler.CreateToken( issuer: Issuers.GotJwt,  signingCredentials: KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2 ) as JwtSecurityToken;
             List<SecurityToken> tokens = new List<SecurityToken>(){ KeyingMaterial.X509Token_2048 };
             handler.Configuration = new SecurityTokenHandlerConfiguration() 
@@ -305,24 +264,15 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "A8068888-87D8-49D6-919F-CDF9AAC26F57" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Extensibility tests for SymmetricSignatureProvider" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void SymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-
             Console.WriteLine( "Testvariation: " + "outbound signature algorithm - bobsYourUncle" );
 
             // inbound signature algorithm - bobsYourUncle
             JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.HmacSha256Signature );
             JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string, string>( SecurityAlgorithms.HmacSha256Signature, "bobsYourUncle" ) );
-
             JwtSecurityToken jwt = handler.CreateToken( issuer: "http://GotJwt.com", signingCredentials: KeyingMaterial.SymmetricSigningCreds_256_Sha2 ) as JwtSecurityToken;
             List<SecurityToken> tokens = new List<SecurityToken>() { KeyingMaterial.BinarySecretToken_256 };
             TokenValidationParameters tvp = new TokenValidationParameters()
@@ -349,24 +299,6 @@ namespace System.IdentityModel.Test
                 JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.HmacSha256Signature );
                 JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string, string>( SecurityAlgorithms.HmacSha256Signature, "HS256" ) );
             }
-
         }
-
-#if false
-        [TestMethod]
-        [TestProperty( "TestCaseID", "0D5BCDFB-624E-497D-B6D1-4A6D0B81901F" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
-        [Description( "Extensibility tests for SignatureProviderFactory" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
-        public void SignatureProviderFactoryExtensibility()
-        {
-            Log.Warning( "Test not written" );
-        }
-#endif        
     }
 }

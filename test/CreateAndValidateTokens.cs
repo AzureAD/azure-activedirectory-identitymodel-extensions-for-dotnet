@@ -1,10 +1,20 @@
-﻿//------------------------------------------------------------------------------
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------------
+//
+// Copyright Microsoft Corporation
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------------
 
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
@@ -36,14 +46,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "0FA94A41-B904-46C9-B9F1-BF0AEC23045A" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Create EMPTY JwtToken" )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void EmptyToken()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -54,14 +57,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "8058D994-9600-455D-8B6C-753DE2E26529" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Serialize / Deserialize in different ways." )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void RoundTripTokens()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -69,22 +65,21 @@ namespace System.IdentityModel.Test
 
             foreach ( CreateAndValidateParams jwtParams in JwtTestTokens.All )
             {
-                Console.WriteLine( string.Format( "Validating streaming from JwtSecurityToken and TokenValidationParameters is same for Case: '{0}'", jwtParams.Case ) );
+                Console.WriteLine( "Validating streaming from JwtSecurityToken and TokenValidationParameters is same for Case: '" +  jwtParams.Case );
 
                 string jwt = handler.WriteToken( jwtParams.CompareTo );
-                ClaimsPrincipal claimsPrincipal = handler.ValidateToken( jwt, jwtParams.TokenValidationParameters );
+                handler.ValidateToken( jwt, jwtParams.TokenValidationParameters );
 
                 // create from security descriptor
                 SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
                 tokenDescriptor.SigningCredentials = jwtParams.SigningCredentials;
-                tokenDescriptor.Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime( jwtParams.CompareTo.ValidFrom, jwtParams.CompareTo.ValidTo );
+                tokenDescriptor.Lifetime = new Lifetime( jwtParams.CompareTo.ValidFrom, jwtParams.CompareTo.ValidTo );
                 tokenDescriptor.Subject = new ClaimsIdentity( jwtParams.Claims );
                 tokenDescriptor.TokenIssuerName = jwtParams.CompareTo.Issuer;
                 tokenDescriptor.AppliesToAddress = jwtParams.CompareTo.Audience;
 
                 JwtSecurityToken token = handler.CreateToken( tokenDescriptor ) as JwtSecurityToken;
-
-                Assert.IsFalse( !IdentityComparer.AreEqual( token, jwtParams.CompareTo ) , String.Format( "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )" ) );
+                Assert.IsFalse( !IdentityComparer.AreEqual( token, jwtParams.CompareTo ), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )" );
 
                 // write as xml
                 MemoryStream ms = new MemoryStream();
@@ -98,25 +93,16 @@ namespace System.IdentityModel.Test
                 handler.CertificateValidator = X509CertificateValidator.None;
                 token  = handler.ReadToken( reader ) as JwtSecurityToken;
                 ms.Close();
-
                 IdentityComparer.AreEqual( token, jwtParams.CompareTo );
             }
-
         }
 
         [TestMethod]
         [TestProperty( "TestCaseID", "DD27BA83-2621-4DF9-A863-C436A9F73BB9" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "These Jwts are created with duplicate claims." )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void DuplicateClaims()
         {
-            Console.WriteLine( string.Format( "Entering: '{0}'", MethodBase.GetCurrentMethod() ) );
+            Console.WriteLine( "Entering: " + MethodBase.GetCurrentMethod() );
 
             string issuer = "http://www.dupsRus.com";
             string audience = "http://www.contoso.com";
@@ -133,7 +119,7 @@ namespace System.IdentityModel.Test
                 ValidIssuer = issuer,
             };
 
-            Console.WriteLine( string.Format( "Comparing jwt.Claims" ) );
+            Console.WriteLine( "Comparing jwt.Claims" );
             IEnumerable<Claim> claims = ClaimSets.ClaimsPlus( claims: ClaimSets.DuplicateTypes( issuer, issuer ), lifetime: new Lifetime( jwt.ValidFrom, jwt.ValidTo ), issuer: issuer, audience: audience );
             
             // ClaimTypes would have been translated outbound, when the jwt was created.
@@ -149,10 +135,9 @@ namespace System.IdentityModel.Test
                 Assert.Fail( "Claims are different" );
             }
 
-
             // ClaimTypes would have been translated inbound, when the identity was created.
             // Comparision should take that into account.
-            Console.WriteLine( string.Format( "Comparing Claimsprincipal Claims" ) );
+            Console.WriteLine( "Comparing Claimsprincipal Claims" );
             var cp = jwtHandler.ValidateToken( jwtRead, validationParameters );
             translatedClaims.Clear();
             foreach ( Claim c in claims )
@@ -165,14 +150,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "FC7354C3-140B-4036-862A-BAFEA948D262" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "This test ensures that a Json serialized object, when added as the value of a claim, can be recognized and reconstituted." )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void JsonClaims()
         {
             string issuer = "http://www.GotJWT.com";
@@ -190,26 +168,17 @@ namespace System.IdentityModel.Test
             };
 
             var cp = jwtHandler.ValidateToken( jwtRead, validationParameters );
-
             Claim jsonClaim = cp.FindFirst(typeof( Entity ).ToString());
-            Assert.IsFalse( jsonClaim == null , string.Format("Did not find Jsonclaims. Looking for claim of type: '{0}'",  typeof( Entity).ToString() ) );
+            Assert.IsFalse( jsonClaim == null, "Did not find Jsonclaims. Looking for claim of type: '" + typeof( Entity).ToString()  + "'");
 
             JavaScriptSerializer js = new JavaScriptSerializer();
             string jsString = js.Serialize( Entity.Default );
-
-            Assert.IsFalse( jsString != jsonClaim.Value , string.Format( "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof( Entity ).ToString(), jsString, jsonClaim.Value ) );
+            Assert.IsFalse(jsString != jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
         }
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F443747C-5AA1-406D-B0FE-53152CA92DA3" )]
-        [TestProperty( "TestType", "BVT" )]
-        [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "These test ensures that the SubClaim is used the identity, when ClaimsIdentity.Name is called." )]
-        [Priority( 0 )]
-        [Owner( "BrentSch" )]
-        [TestProperty( "DisciplineOwner", "Dev" )]
-        [TestProperty( "Feature", "ACS/AAL" )]
-        [TestProperty( "Framework", "TAEF" )]
         public void SubClaim()
         {
             string issuer = "http://www.GotJWT.com";
@@ -227,15 +196,12 @@ namespace System.IdentityModel.Test
             };
 
             var cp = jwtHandler.ValidateToken( jwtRead, validationParameters );
-
             Claim jsonClaim = cp.FindFirst( typeof( Entity ).ToString() );
-            Assert.IsFalse( jsonClaim == null , string.Format( "Did not find Jsonclaims. Looking for claim of type: '{0}'", typeof( Entity ).ToString() ) );
+            Assert.IsFalse(jsonClaim == null, string.Format(CultureInfo.InvariantCulture, "Did not find Jsonclaims. Looking for claim of type: '{0}'", typeof(Entity).ToString()));
 
             JavaScriptSerializer js = new JavaScriptSerializer();
             string jsString = js.Serialize( Entity.Default );
-
-            Assert.IsFalse( jsString != jsonClaim.Value , string.Format( "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof( Entity ).ToString(), jsString, jsonClaim.Value ) );
+            Assert.IsFalse(jsString != jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
         }
-
     }
 }
