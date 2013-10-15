@@ -101,15 +101,6 @@ namespace System.IdentityModel.Tokens
         #region IDisposable Members
 
         /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
-        /// </summary>
-        public override void Dispose()
-        {
-            Dispose( true );
-            GC.SuppressFinalize( this );
-        }
-
-        /// <summary>
         /// Disposes of internal components.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
@@ -117,6 +108,8 @@ namespace System.IdentityModel.Tokens
         {
             if ( !_disposed )
             {
+                _disposed = true;
+
                 if ( disposing )
                 {
                     if ( _keyedHash != null )
@@ -125,8 +118,6 @@ namespace System.IdentityModel.Tokens
                         _keyedHash = null;
                     }
                 }
-
-                _disposed = true;
             }
         }
 
