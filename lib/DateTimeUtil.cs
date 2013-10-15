@@ -56,19 +56,5 @@ namespace System.IdentityModel.Tokens
         {
             return new DateTime( DateTime.MinValue.Ticks, kind );
         }
-
-        /// <summary>
-        /// Checks that an instant in time falls within a valid date range, accounting for clock skew.
-        /// </summary>
-        /// <param name="instant">Instant in time to validate against the date range.</param>
-        /// <param name="startDate">Start date of the date range.</param>
-        /// <param name="endDate">End date of the date range.</param>
-        /// <param name="clockSkew">Clock skew tolerance.</param>
-        /// <returns>true if the instant falls between the date range, false otherwise.</returns>
-        public static bool IsDateTimeWithinAllowedRange( DateTime instant, DateTime startDate, DateTime endDate, TimeSpan clockSkew )
-        {
-            return startDate <= Add( instant, clockSkew )
-                && endDate >= Add( instant, clockSkew.Negate() );
-        }
     }
 }

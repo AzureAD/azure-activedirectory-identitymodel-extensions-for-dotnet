@@ -70,7 +70,7 @@ namespace System.IdentityModel.Tokens
            return CreateProvider( key, algorithm, false );
         }
 
-        private SignatureProvider CreateProvider( SecurityKey key, string algorithm, bool willCreateSignatures )
+        private static SignatureProvider CreateProvider( SecurityKey key, string algorithm, bool willCreateSignatures )
         {
             if ( key == null )
             {
@@ -79,7 +79,7 @@ namespace System.IdentityModel.Tokens
 
             if ( algorithm == null )
             {
-                throw new ArgumentException( "algorithm" );
+                throw new ArgumentNullException( "algorithm" );
             }
 
             if ( string.IsNullOrWhiteSpace( algorithm ) )

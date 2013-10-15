@@ -17,7 +17,7 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Returns the absolute DateTime or the Seconds since Unix Epoch, where Epoch is UTC 1970-01-01T0:0:0Z.
     /// </summary>
-    internal class EpochTime
+    internal static class EpochTime
     {
         public static readonly DateTime UnixEpoch = new DateTime( 1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc );
        

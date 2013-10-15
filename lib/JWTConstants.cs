@@ -18,7 +18,7 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Constants for Json Web tokens.
     /// </summary>
-    internal class JwtConstants
+    internal static class JwtConstants
     {
         /// <summary>
         /// Short header type.

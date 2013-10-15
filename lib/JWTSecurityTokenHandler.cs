@@ -709,7 +709,7 @@ namespace System.IdentityModel.Tokens
             XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader( reader );
             string wsuId    = dictionaryReader.GetAttribute( WSSecurityUtilityConstants.Attributes.Id, WSSecurityUtilityConstants.Namespace );
             JwtSecurityToken jwt = ReadToken( Encoding.UTF8.GetString( dictionaryReader.ReadElementContentAsBase64() ) ) as JwtSecurityToken;
-            if ( wsuId != null )
+            if ( wsuId != null && jwt != null )
             {
                 jwt.SetId( wsuId );
             }
@@ -720,30 +720,30 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Reads a token encoded in JSON Compact serialized format.
         /// </summary>
-        /// <param name="jwtEncodedString">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
+        /// <param name="tokenString">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
         /// using 'JSON Web Signature' (JWS).</param>
         /// <remarks>
         /// The JWT must be encoded using Base64Url encoding of the UTF-8 representation of the JWT: Header, Payload and Signature. 
         /// The contents of the JWT returned are not validated in any way, the token is simply decoded. Use ValidateToken to validate the JWT.
         /// </remarks>
-        public override SecurityToken ReadToken( string jwtEncodedString )
+        public override SecurityToken ReadToken( string tokenString )
         {
-            if ( jwtEncodedString == null )
+            if (tokenString == null)
             {
-                throw new ArgumentNullException( "jwtEncodedString" );
+                throw new ArgumentNullException("tokenString");
             }
 
-            if ( jwtEncodedString.Length * 2 > MaxTokenSizeInBytes )
+            if (tokenString.Length * 2 > MaxTokenSizeInBytes)
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10206, jwtEncodedString.Length, MaxTokenSizeInBytes ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10206, tokenString.Length, MaxTokenSizeInBytes));
             }
 
-            if ( !CanReadToken( jwtEncodedString ) )
+            if (!CanReadToken(tokenString))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10204, GetType(), jwtEncodedString ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10204, GetType(), tokenString));
             }
 
-            return new JwtSecurityToken( jwtEncodedString );
+            return new JwtSecurityToken(tokenString);
         }
 
         /// <summary>
@@ -1547,6 +1547,11 @@ namespace System.IdentityModel.Tokens
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JwtSecurityToken.Claims"/>.</returns>
         protected ClaimsIdentity ClaimsIdentityFromJwt( JwtSecurityToken jwt, string issuer, bool saveBootstrapContext )
         {
+            if (jwt == null)
+            {
+                throw new ArgumentNullException("jwt");
+            }
+
             ClaimsIdentity identity = new ClaimsIdentity( AuthenticationTypes.Federation, NameClaimType, RoleClaimType );
 
             if ( saveBootstrapContext )
