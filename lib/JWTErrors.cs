@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10518 = "Jwt10518: AsymmetricSecurityKey.GetHashAlgorithmForSignature( '{0}' ) threw an exception.\nAsymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
         internal const string Jwt10520 = "Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this AsymmetricSignatureProvider constructor called specifying setting parameter: 'willCreateSignatures' == 'true'?.";
         internal const string Jwt10521 = "Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of: '{0}', the AsymmetricSecurityKey in has a KeySize of: '{1}'.";
-        internal const string Jwt10523 = "Jwt10523: The KeyedHashAlgorithm is null, cannont sign data.";
+        internal const string Jwt10523 = "Jwt10523: The KeyedHashAlgorithm is null, cannot sign data.";
         internal const string Jwt10524 = "Jwt10524: Cannot sign 'input' byte array has length 0.";
         internal const string Jwt10525 = "Jwt10525: Cannot verify signature 'input' byte array has length 0.";
         internal const string Jwt10526 = "Jwt10526: Cannot verify signature 'signature' byte array has length 0.";
