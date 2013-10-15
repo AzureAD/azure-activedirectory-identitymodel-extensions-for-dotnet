@@ -61,7 +61,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10317 = "Jwt10317: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
         internal const string Jwt10318 = "Jwt10318: Issuer validation failed. Configuration.IssuerNameRegistry.GetIssuerName returned a null or empty string. jwt.Issuer: '{0}'";
         internal const string Jwt10319 = "Jwt10319: Issuer validation failed. jwt.Issuer is null or whitespace.";
-        internal const string Jwt10320 = "Jwt10320: Unable to validate signature, JwtHeader specifies: { alg, '{0}' } as the signature algorithm, it should specify a valid signature algorithm.\njwt: '{1}'.";        
+        internal const string Jwt10320 = "Jwt10320: Unable to validate signature, JwtHeader specifies: [ alg, '{0}' ] as the signature algorithm, it should specify a valid signature algorithm.\njwt: '{1}'.";        
         internal const string Jwt10322 = "Jwt10322: Lifetime validation failed. The token is missing the 'exp' (Expiration Time) claim.\njwt: '{0}'.";
         internal const string Jwt10323 = "Jwt10323: MaximumTokenSize must be greater than zero. value: '{0}'";
         internal const string Jwt10328 = "Jwt10328: Unable to validate signature. Configuration.IssuerTokenResolver is null.";
@@ -88,8 +88,8 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10516 = "Jwt10516: AsymmetricSecurityKey.GetSignatureDeformatter( '{0}' ) threw an exception.\nKey: '{1}'\nSignatureAlgorithm: '{0}, check to make sure the SignatureAlgorithm is supported.'\nException:'{2}'.";
         internal const string Jwt10517 = "Jwt10517: AsymmetricSecurityKey.GetSignatureDeFormater( '{0}' ) returned null.\nKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.";
         internal const string Jwt10518 = "Jwt10518: AsymmetricSecurityKey.GetHashAlgorithmForSignature( '{0}' ) threw an exception.\nAsymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
-        internal const string Jwt10520 = "Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this AsymmetricSignatureProvider constructor called specifying setting parameter: 'willBeUsedForSigning' == 'true'?.";
-        internal const string Jwt10521 = "Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of: '{0}', the AsymmetricKey in has a KeySize of: '{1}'.";
+        internal const string Jwt10520 = "Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this AsymmetricSignatureProvider constructor called specifying setting parameter: 'willCreateSignatures' == 'true'?.";
+        internal const string Jwt10521 = "Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of: '{0}', the AsymmetricSecurityKey in has a KeySize of: '{1}'.";
         internal const string Jwt10523 = "Jwt10523: The KeyedHashAlgorithm is null, cannont sign data.";
         internal const string Jwt10524 = "Jwt10524: Cannot sign 'input' byte array has length 0.";
         internal const string Jwt10525 = "Jwt10525: Cannot verify signature 'input' byte array has length 0.";

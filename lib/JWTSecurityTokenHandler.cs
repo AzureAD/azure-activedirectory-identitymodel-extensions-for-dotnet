@@ -1393,6 +1393,11 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the <see cref="JwtSecurityToken.SigningToken"/> is a <see cref="X509SecurityToken"/> then the X509Certificate2 will be validated using <see cref="JwtSecurityTokenHandler.CertificateValidator"/>.</remarks>
         protected virtual void ValidateSigningToken( JwtSecurityToken jwt )
         {
+            if (jwt == null)
+            {
+                throw new ArgumentNullException("jwt");
+            }
+
             X509SecurityToken x509SecurityToken = jwt.SigningToken as X509SecurityToken;
             if ( x509SecurityToken != null )
             {
@@ -1623,12 +1628,12 @@ namespace System.IdentityModel.Tokens
         {
             if ( writer == null )
             {
-                throw new ArgumentNullException( "writer " );
+                throw new ArgumentNullException( "writer" );
             }
 
             if ( token == null )
             {
-                throw new ArgumentNullException( "token " );
+                throw new ArgumentNullException( "token" );
             }
 
             if ( !( token is JwtSecurityToken ) )

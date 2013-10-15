@@ -28,15 +28,10 @@ namespace System.IdentityModel.Tokens
         internal X509CertificateValidationMode _certificateValidationMode;
         internal X509ChainPolicy _chainPolicy;
         internal X509CertificateValidator _validator;
-        internal X509RevocationMode _revocationMode;
-        internal StoreLocation _storeLocation;
 
         public X509CertificateValidatorEx( X509CertificateValidationMode certificateValidationMode, X509RevocationMode revocationMode, StoreLocation trustedStoreLocation )
         {
             _certificateValidationMode = certificateValidationMode;
-            _revocationMode = revocationMode;
-            _storeLocation = trustedStoreLocation;
-
             switch ( _certificateValidationMode )
             {
                 case X509CertificateValidationMode.None:
