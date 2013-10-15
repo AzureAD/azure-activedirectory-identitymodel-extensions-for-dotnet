@@ -47,9 +47,13 @@ namespace System.IdentityModel.Tokens
         #region IDisposable Members
 
         /// <summary>
-        /// Implement in derived derived class for resource cleanup.
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
         /// </summary>
-        public abstract void Dispose();
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Can be over written in descendants to dispose of internal components.

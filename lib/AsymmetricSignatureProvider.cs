@@ -144,15 +144,6 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
-        /// </summary>
-        public override void Dispose()
-        {
-            Dispose( true );
-            GC.SuppressFinalize( this );
-        }
-
-        /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( AsymmetricSecurityKey, string, bool )"/>.
         /// </summary>
         /// <param name="input">bytes to be signed.</param>
@@ -255,14 +246,14 @@ namespace System.IdentityModel.Tokens
             {
                 if ( disposing )
                 {
+                    _disposed = true;
+
                     if ( _hash != null )
                     {
                         _hash.Dispose();
                         _hash = null;
                     }
                 }
-
-                _disposed = true;
             }
         }
     }
