@@ -138,7 +138,6 @@ namespace System.IdentityModel.Test
                 Console.WriteLine( string.Format( validating, "Saml2SecurityTokenHandler", iterations, DateTime.UtcNow - started ) );
             }
 
-
             JwtSecurityTokenHandler jwtTokenHandler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwt = jwtTokenHandler.CreateToken( tokenDescriptor ) as JwtSecurityToken;
             jwtTokenHandler.Configuration = tokenHandlerConfiguration;
@@ -190,7 +189,6 @@ namespace System.IdentityModel.Test
             {
                 Console.WriteLine( string.Format( validating, "JwtSecurityTokenHandle - ReadToken( reader ), ValidateToken( jwtToken.RawData )", iterations, DateTime.UtcNow - started ) );
             }
-
         }
 
         private void RunCreationTests( SecurityTokenDescriptor tokenDescriptor, int iterations, bool display = true )

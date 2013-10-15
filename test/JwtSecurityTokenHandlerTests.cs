@@ -1044,8 +1044,8 @@ namespace System.IdentityModel.Test
             else
             {
                 Assert.IsFalse( !expectBC , "identity.BootstrapContext != null, but wasn't expected" );
-                string jwtEncoding = identity.BootstrapContext as string;
-                Assert.IsFalse( jwtEncoding == null , "( identity.BootstrapContext as string ) == null" );
+                string jwtEncoding = ( identity.BootstrapContext as BootstrapContext ).Token;
+                Assert.IsFalse( jwtEncoding == null , "( identity.BootstrapContext.Token ) == null" );
 
                 JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
                 Assert.IsFalse( !handler.CanReadToken( jwtEncoding ) , " !handler.CanReadToken( jwtEncoding )" );
@@ -1363,7 +1363,7 @@ namespace System.IdentityModel.Test
             ExpectedException ee = ExpectedException.ArgEx(id:"Jwt10317");
             try
             {
-                handler.ValidateToken( jwt.RawData );
+                handler.ValidateToken( jwt.RawData, jwtParams );
                 ExpectedException.ProcessNoException( ee );
             }
             catch ( Exception ex )
