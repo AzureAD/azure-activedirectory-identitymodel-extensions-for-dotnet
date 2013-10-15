@@ -245,26 +245,27 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Determines if the string is a well formed Json Web token (see http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-07)
         /// </summary>
+        /// <param name="tokenString">string that should represent a valid JSON Web Token.</param>
         /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/>( token, @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$" ).
         /// </remarks>
         /// <returns>
         /// <para>'true' if the token is in JSON compact serialization format.</para>
         /// <para>'false' if token.Length * 2 >  <see cref="MaxTokenSizeInBytes"/>.</para>
         /// </returns>
-        /// <exception cref="ArgumentNullException">'token' is null.</exception>
-        public override bool CanReadToken( string token )
+        /// <exception cref="ArgumentNullException">'tokenString' is null.</exception>
+        public override bool CanReadToken( string tokenString )
         {
-            if ( token == null )
+            if (tokenString == null)
             {
-                throw new ArgumentNullException( "token" );
+                throw new ArgumentNullException("tokenString");
             }
 
-            if ( token.Length * 2 > MaxTokenSizeInBytes )
+            if (tokenString.Length * 2 > MaxTokenSizeInBytes)
             {
                 return false;
             }
 
-            return Regex.IsMatch( token, JsonCompactSerializationRegex );
+            return Regex.IsMatch(tokenString, JsonCompactSerializationRegex);
         }
 
         /// <summary>
