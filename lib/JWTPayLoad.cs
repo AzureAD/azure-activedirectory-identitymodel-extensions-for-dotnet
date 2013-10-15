@@ -214,7 +214,7 @@ namespace System.IdentityModel.Tokens
         {
             if ( claim == null )
             {
-                throw new ArgumentNullException( "claim " );
+                throw new ArgumentNullException( "claim" );
             }
 
             AddClaims( new Claim[] { claim } );
@@ -409,13 +409,6 @@ namespace System.IdentityModel.Tokens
 
                 throw;
             }            
-        }
-
-        private T GetValue<T>( string key )
-        {
-            object value;
-            TryGetValue( key, out value );
-            return (T)value;
         }
     }
 }

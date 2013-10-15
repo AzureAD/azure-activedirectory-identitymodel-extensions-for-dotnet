@@ -78,7 +78,7 @@ namespace System.IdentityModel.Test
 
             SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = 2048;
             FactoryCreateFor( "Verifying: - AsymmetricKeySize Key to small", KeyingMaterial.AsymmetricKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgRange( "Jwt10531" ) );
-            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying;
+            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
 
             SignatureProviderFactory.MinimumSymmetricKeySizeInBits = 512;
             FactoryCreateFor( "Siging:    - SymmetricKeySize Key to small", KeyingMaterial.SymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgRange( "Jwt10503" ) );
@@ -99,8 +99,8 @@ namespace System.IdentityModel.Test
 
             try
             {
-                Console.WriteLine( string.Format( "Testcase: '{0}'", "SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying < AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying" ) );
-                SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying - 10;
+                Console.WriteLine( string.Format( "Testcase: '{0}'", "SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying < AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying" ) );
+                SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying - 10;
                 Assert.Fail( string.Format( "Expected exception: '{0}'", typeof( ArgumentOutOfRangeException ) ) );
             }
             catch ( Exception ex )

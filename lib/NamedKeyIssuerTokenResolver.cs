@@ -169,7 +169,7 @@ namespace System.IdentityModel.Tokens
         {
             if ( element == null )
             {
-                throw new ArgumentNullException( "node" );
+                throw new ArgumentNullException("element");
             }
 
             string key = null;
