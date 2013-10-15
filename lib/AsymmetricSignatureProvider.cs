@@ -70,13 +70,13 @@ namespace System.IdentityModel.Tokens
             {
                 if ( key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning )
                 {
-                    throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10531, SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning ) );
+                    throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10531, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning ) );
                 }
             }
 
             if ( key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying )
             {
-                throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10530, SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying ) );
+                throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying ) );
             }
 
             _key = key;

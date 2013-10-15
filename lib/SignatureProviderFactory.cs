@@ -30,7 +30,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// This is the minimum <see cref="AsymmetricSecurityKey"/>.KeySize when verifying signatures.
         /// </summary>
-        public static readonly uint AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying = 1024;
+        public static readonly uint AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying = 1024;
 
         /// <summary>
         /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
@@ -38,7 +38,7 @@ namespace System.IdentityModel.Tokens
         public static readonly uint AbsoluteMinimumSymmetricKeySizeInBits = 128;
 
         private static uint _minimumAsymmetricKeySizeInBitsForSigning = AbsoluteMinimumAsymmetricKeySizeInBitsForSigning;
-        private static uint _minimumAsymmetricKeySizeInBitsForVerfying = AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying;
+        private static uint _minimumAsymmetricKeySizeInBitsForVerifying = AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
         private static uint _minimumSymmetricKeySizeInBits = AbsoluteMinimumSymmetricKeySizeInBits;
 
         /// <summary>
@@ -167,23 +167,23 @@ namespace System.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for verifying signatures.
-        /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying"/>.</exception>
         /// </summary>
         public static uint MinimumAsymmetricKeySizeInBitsForVerifying
         {
             get 
             { 
-                return _minimumAsymmetricKeySizeInBitsForVerfying; 
+                return _minimumAsymmetricKeySizeInBitsForVerifying; 
             }
 
             set
             {
-                if ( value < AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying )
+                if ( value < AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying )
                 {
-                    throw new ArgumentOutOfRangeException( "value", value, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10527, AbsoluteMinimumAsymmetricKeySizeInBitsForVerfying ) );
+                    throw new ArgumentOutOfRangeException( "value", value, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10527, AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying ) );
                 }
 
-                _minimumAsymmetricKeySizeInBitsForVerfying = value;
+                _minimumAsymmetricKeySizeInBitsForVerifying = value;
             }
         }
 
