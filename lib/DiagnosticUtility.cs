@@ -24,38 +24,6 @@ namespace System.IdentityModel
     internal static class DiagnosticUtility
     {
         /// <summary>
-        /// Provides a basic assertion facility to output stack trace details to trace, and in a debug build
-        /// to additionally print a message to the console and invoke <see cref="System.Environment.FailFast(string)"/>.
-        /// </summary>
-        public static void Assert(bool condition, string message)
-        {            
-            if (!condition)
-            {
-                message = string.Format(CultureInfo.InvariantCulture, "{0}: {1}", message, new StackTrace().ToString());
-#if DEBUG
-                Console.WriteLine(message);
-                Environment.FailFast(message);
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Provides a basic assertion facility to output stack trace details to trace, and in a debug build
-        /// to additionally print a message to the console and invoke <see cref="System.Environment.FailFast(string)"/>.
-        /// </summary>
-        public static void Assert(bool condition, string format, params object[] args)
-        {
-            if (!condition)
-            {
-                string message = string.Format(CultureInfo.InvariantCulture, format, args);
-#if DEBUG
-                Console.WriteLine(message);
-                Environment.FailFast(message);
-#endif
-            }
-        }
-
-        /// <summary>
         /// Returns true if the provided exception matches any of a list of hard system faults that should be allowed
         /// through to outer exception handlers.
         /// </summary>
@@ -99,23 +67,6 @@ namespace System.IdentityModel
             }
 
             return returnValue;
-        }
-
-        /// <summary>
-        /// Prints the message to the console, then executes <see cref="System.Environment.FailFast(string)"/>.
-        /// </summary>
-        public static void FailFast(string message)
-        {
-            message = string.Format(CultureInfo.InvariantCulture, "{0}: {1}", message, new StackTrace().ToString());
-            Environment.FailFast(message);
-        }
-
-        public static void FailFastIfFatal(Exception exception)
-        {
-            if (DiagnosticUtility.IsFatal(exception))
-            {
-                DiagnosticUtility.FailFast(exception.Message);
-            }
         }
     }
 }
