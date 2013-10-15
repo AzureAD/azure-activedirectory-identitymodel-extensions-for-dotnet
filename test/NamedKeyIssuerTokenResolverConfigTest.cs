@@ -188,11 +188,6 @@ namespace System.IdentityModel.Test
                         <securityKey name='LocalSTS' />
                     </issuerTokenResolver>" );
 
-            _testCases.Add( "KeyTooSmall",
-                    @"<issuerTokenResolver type='System.IdentityModel.Tokens.NamedKeyIssuerTokenResolver, System.IdentityModel.Tokens.JWT'>
-                        <securityKey symmetricKey = '05mPwwjMPhI==' name='LocalSTS' />
-                    </issuerTokenResolver>" );
-
             _testCases.Add( "NameMissing",
                     @"<issuerTokenResolver type='System.IdentityModel.Tokens.NamedKeyIssuerTokenResolver, System.IdentityModel.Tokens.JWT'>
                         <securityKey symmetricKey = 'jWo8qtxA05mPwwjMPhIS7w==' />
@@ -227,7 +222,7 @@ namespace System.IdentityModel.Test
 
         protected override string GetConfiguration( string testVariation )
         {
-            string caseToRun = _testContextProvider.GetValue<string>( "Config" );
+            string caseToRun = _testCases[testVariation];
             return @"<system.identityModel><identityConfiguration>" + caseToRun + @"</identityConfiguration></system.identityModel>";
         }
 
@@ -249,7 +244,12 @@ namespace System.IdentityModel.Test
         [Description( "NamedKeyIssuerTokenResolver BadConfig" )]
         public void Case()
         {
-            RunTestCase( string.Empty );
+            RunTestCase("AsymmetricKey");
+            RunTestCase("MissingSymmetricKey");
+            RunTestCase("NameMissing");
+            RunTestCase("EncodingWrong");
+            RunTestCase("KeyDoesNotParse");
+            RunTestCase("EncodingRight");            
         }
     }
 }
