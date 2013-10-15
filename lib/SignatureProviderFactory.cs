@@ -188,7 +188,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose"/>
+        /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose(bool)"/>
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be released.</param>
         public virtual void ReleaseProvider( SignatureProvider signatureProvider )

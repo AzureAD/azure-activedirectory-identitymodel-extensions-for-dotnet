@@ -21,14 +21,6 @@ namespace System.IdentityModel.Tokens
     public abstract class SignatureProvider : IDisposable
     {
         /// <summary>
-        /// Can be over written in descendants to dispose of internal components.
-        /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer</param>     
-        protected virtual void Dispose( bool disposing )
-        {
-        }
-
-        /// <summary>
         /// Produces a signature over the 'input'
         /// </summary>
         /// <param name="input">bytes to sign.</param>
@@ -58,6 +50,12 @@ namespace System.IdentityModel.Tokens
         /// Implement in derived derived class for resource cleanup.
         /// </summary>
         public abstract void Dispose();
+
+        /// <summary>
+        /// Can be over written in descendants to dispose of internal components.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer</param>     
+        protected abstract void Dispose(bool disposing);
 
         #endregion
     }
