@@ -34,7 +34,7 @@ namespace System.IdentityModel.Test
     {
         public ExpectedJwtSecurityTokenRequirement
         (
-            Uint? tokenSize = null, TimeSpan? clock = null, Uint? life = null, X509CertificateValidator cert = null, string name = JwtConstants.ReservedClaims.Subject, string role = null, X509RevocationMode? revMode = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null, ExpectedException expectedException = null,
+            uint? tokenSize = null, TimeSpan? clock = null, uint? life = null, X509CertificateValidator cert = null, string name = JwtConstants.ReservedClaims.Subject, string role = null, X509RevocationMode? revMode = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null, ExpectedException expectedException = null,
             string handler = JwtSecurityTokenHandlerType, string requirement = Elements.JwtSecurityTokenRequirement,
             string attributeEx1 = "", string attributeEx2 = "", string attributeEx3 = "", string attributeEx4 = "",
             string elementEx1 = comment, string elementEx2 = comment, string elementEx3 = comment, string elementEx4 = comment, string elementEx5 = comment, string elementEx6 = comment,
@@ -218,12 +218,12 @@ namespace System.IdentityModel.Test
             return asExpected;
         }
 
-        public Uint? MaxTokenSizeInBytes { get; set; }
+        public uint? MaxTokenSizeInBytes { get; set; }
         public TimeSpan? MaxClockSkew { get; set; }
         public string NameClaimType { get; set; }
         public string RoleClaimType { get; set; }
         public X509CertificateValidator CertValidator { get; set; }
-        public Uint? DefaultTokenLifetimeInMinutes { get; set; }
+        public uint? DefaultTokenLifetimeInMinutes { get; set; }
         public X509RevocationMode? CertRevocationMode { get; set; }
         public X509CertificateValidationMode? CertValidationMode  { get; set; }
         public StoreLocation? CertStoreLocation { get; set; }
