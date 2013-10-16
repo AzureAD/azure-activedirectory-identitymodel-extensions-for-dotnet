@@ -12,14 +12,14 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Security.Cryptography.X509Certificates;
+
     /// <summary>
-    /// The <see cref="JwtHeader"/> contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
+    /// Initializes a new instance of <see cref="JwtHeader"/> which contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
     /// The member names within the JWT Header are referred to as Header Parameter Names. 
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
@@ -31,12 +31,12 @@ namespace System.IdentityModel.Tokens
         /// Creates an empty <see cref="JwtHeader"/>
         /// </summary>
         public JwtHeader()
-            : base( StringComparer.Ordinal )
+            : base(StringComparer.Ordinal)
         {
         }
 
         /// <summary>
-        /// Creates a new <see cref="JwtHeader"/> with the Header Parameters as follows: 
+        /// Initializes a new instance of <see cref="JwtHeader"/> with the Header Parameters as follows: 
         /// <para>{ { typ, JWT }, { alg, Mapped( <see cref="System.IdentityModel.Tokens.SigningCredentials.SignatureAlgorithm"/> } }
         /// See: Algorithm Mapping below.</para>
         /// </summary>
@@ -57,43 +57,43 @@ namespace System.IdentityModel.Tokens
         /// <para>&#160;&#160;&#160;&#160;'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' => 'RS256'</para>
         /// <para>&#160;&#160;&#160;&#160;'http://www.w3.org/2001/04/xmldsig-more#hmac-sha256' => 'HS256'</para>
         /// </remarks>
-        public JwtHeader( SigningCredentials signingCredentials = null )
-            : base( StringComparer.Ordinal )
+        public JwtHeader(SigningCredentials signingCredentials = null)
+            : base(StringComparer.Ordinal)
         {
-            Add( JwtConstants.ReservedHeaderParameters.Type, JwtConstants.HeaderType );
+            this.Add(JwtConstants.ReservedHeaderParameters.Type, JwtConstants.HeaderType);
 
-            if ( signingCredentials != null )
+            if (signingCredentials != null)
             {
-                _signingCredentials = signingCredentials;
+                this._signingCredentials = signingCredentials;
 
                 string algorithm = signingCredentials.SignatureAlgorithm;
-                if ( JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey( signingCredentials.SignatureAlgorithm ) )
+                if (JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey(signingCredentials.SignatureAlgorithm))
                 {
                     algorithm = JwtSecurityTokenHandler.OutboundAlgorithmMap[algorithm];
                 }
 
-                Add( JwtConstants.ReservedHeaderParameters.Algorithm, algorithm );
-                if ( signingCredentials.SigningKeyIdentifier != null )
+                this.Add(JwtConstants.ReservedHeaderParameters.Algorithm, algorithm);
+                if (signingCredentials.SigningKeyIdentifier != null)
                 {
-                    foreach ( SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier )
+                    foreach (SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier)
                     {
                         NamedKeySecurityKeyIdentifierClause namedKeyClause = clause as NamedKeySecurityKeyIdentifierClause;
-                        if ( namedKeyClause != null )
+                        if (namedKeyClause != null)
                         {
-                            Add( namedKeyClause.Name, namedKeyClause.KeyIdentifier );
+                            this.Add(namedKeyClause.Name, namedKeyClause.KeyIdentifier);
                         }
                     }
                 }
-                
+
                 X509SigningCredentials x509SigningCredentials = signingCredentials as X509SigningCredentials;
-                if ( x509SigningCredentials != null  && x509SigningCredentials.Certificate != null )
+                if (x509SigningCredentials != null && x509SigningCredentials.Certificate != null)
                 {
-                    Add( JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint, Base64UrlEncoder.Encode( x509SigningCredentials.Certificate.GetCertHash() ) );
+                    this.Add(JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint, Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash()));
                 }
             }
             else
             {
-                Add( JwtConstants.ReservedHeaderParameters.Algorithm, JwtConstants.Algorithms.NONE );
+                this.Add(JwtConstants.ReservedHeaderParameters.Algorithm, JwtConstants.Algorithms.NONE);
             }
         }
 
@@ -106,7 +106,7 @@ namespace System.IdentityModel.Tokens
             get
             {
                 string algorithm = null;
-                TryGetValue( JwtConstants.ReservedHeaderParameters.Algorithm, out algorithm );
+                TryGetValue(JwtConstants.ReservedHeaderParameters.Algorithm, out algorithm);
                 return algorithm;
             }
         }
@@ -119,7 +119,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _signingCredentials;
+                return this._signingCredentials;
             }
         }
 
@@ -141,46 +141,46 @@ namespace System.IdentityModel.Tokens
                 SecurityKeyIdentifier ski = new SecurityKeyIdentifier();
                 string keyIdentifier = null;
 
-                if ( this.TryGetValue( JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint, out keyIdentifier ) )
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint, out keyIdentifier))
                 {
                     try
                     {
-                        ski.Add( new X509ThumbprintKeyIdentifierClause( Base64UrlEncoder.DecodeBytes( keyIdentifier ) ) );
+                        ski.Add(new X509ThumbprintKeyIdentifierClause(Base64UrlEncoder.DecodeBytes(keyIdentifier)));
                     }
-                    catch ( Exception ex )
+                    catch (Exception ex)
                     {
-                        if ( DiagnosticUtility.IsFatal( ex ) )
+                        if (DiagnosticUtility.IsFatal(ex))
                         {
                             throw;
                         }
 
-                        throw new FormatException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10118, JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint ), ex );
+                        throw new FormatException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10118, JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint), ex);
                     }
                 }
 
-                if ( this.TryGetValue( JwtConstants.ReservedHeaderParameters.JsonSetUrl, out keyIdentifier ) )
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.JsonSetUrl, out keyIdentifier))
                 {
-                    ski.Add( new NamedKeySecurityKeyIdentifierClause( JwtConstants.ReservedHeaderParameters.JsonSetUrl, keyIdentifier ) );
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.JsonSetUrl, keyIdentifier));
                 }
 
-                if ( this.TryGetValue( JwtConstants.ReservedHeaderParameters.JsonWebKey, out keyIdentifier ) )
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.JsonWebKey, out keyIdentifier))
                 {
-                    ski.Add( new NamedKeySecurityKeyIdentifierClause( JwtConstants.ReservedHeaderParameters.JsonWebKey, keyIdentifier ) );
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.JsonWebKey, keyIdentifier));
                 }
 
-                if ( this.TryGetValue( JwtConstants.ReservedHeaderParameters.X509Url, out keyIdentifier ) )
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X509Url, out keyIdentifier))
                 {
-                    ski.Add( new NamedKeySecurityKeyIdentifierClause( JwtConstants.ReservedHeaderParameters.X509Url, keyIdentifier ) );
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.X509Url, keyIdentifier));
                 }
 
-                if ( this.TryGetValue( JwtConstants.ReservedHeaderParameters.X509CertificateChain, out keyIdentifier ) )
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X509CertificateChain, out keyIdentifier))
                 {
-                    ski.Add( new NamedKeySecurityKeyIdentifierClause( JwtConstants.ReservedHeaderParameters.X509CertificateChain, keyIdentifier ) );
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.X509CertificateChain, keyIdentifier));
                 }
 
-                if ( this.TryGetValue( JwtConstants.ReservedHeaderParameters.KeyId, out keyIdentifier ) )
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.KeyId, out keyIdentifier))
                 {
-                    ski.Add( new NamedKeySecurityKeyIdentifierClause( JwtConstants.ReservedHeaderParameters.KeyId, keyIdentifier ) );
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.KeyId, keyIdentifier));
                 }
 
                 return ski;
@@ -191,9 +191,10 @@ namespace System.IdentityModel.Tokens
         /// Encodes this instance as a Base64UrlEncoded string.
         /// </summary>
         /// <remarks>Returns the current state. If this instance has changed since the last call, the value will be different.</remarks>
+        /// <returns>a string BaseUrlEndoded representing the contents of this header.</returns>
         public string Encode()
         {
-            return Base64UrlEncoder.Encode( this.SerializeToJson() );
+            return Base64UrlEncoder.Encode(this.SerializeToJson());
         }
     }
 }

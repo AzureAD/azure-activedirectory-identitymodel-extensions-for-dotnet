@@ -54,7 +54,7 @@ namespace System.IdentityModel.Test
         public X509CertificateValidator CertificateValidator { get; set; }
         public IEnumerable<Claim> Claims { get; set; }
         public ClaimsPrincipal ClaimsPrincipal { get; set; }
-        public UInt32 DefaultTokenLifetimeInMinutes { get; set; }
+        public uint DefaultTokenLifetimeInMinutes { get; set; }
         public SecurityKeyIdentifierClause SecurityKeyIdentifierClause { get; set; }
         public string EncodedString { get; set; }
         public IList<Exception> Exceptions { get; set; }
@@ -68,7 +68,7 @@ namespace System.IdentityModel.Test
         public string Name { get; set; }
         public string NameClaimType { get; set; }
         public TimeSpan MaxClockSkew { get; set; }
-        public UInt32 MaxTokenSizeInBytes { get; set; }
+        public uint MaxTokenSizeInBytes { get; set; }
         public string OriginalIssuer { get; set; }
         public bool RequireExpirationTime { get; set; }
         public bool RequireSignedTokens { get; set; }

@@ -1,0 +1,2429 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FxCopProject Version="12.0" Name="My FxCop Project">
+ <ProjectOptions>
+  <SharedProject>True</SharedProject>
+  <Stylesheet Apply="False">$(FxCopDir)\Xml\FxCopReport.xsl</Stylesheet>
+  <SaveMessages>
+   <Project Status="Active, Excluded, Good, Noise" NewOnly="False" />
+   <Report Status="Active, Good, Noise" NewOnly="False" />
+  </SaveMessages>
+  <ProjectFile Compress="True" DefaultTargetCheck="True" DefaultRuleCheck="True" SaveByRuleGroup="" Deterministic="True" />
+  <EnableMultithreadedLoad>True</EnableMultithreadedLoad>
+  <EnableMultithreadedAnalysis>True</EnableMultithreadedAnalysis>
+  <SourceLookup>True</SourceLookup>
+  <AnalysisExceptionsThreshold>10</AnalysisExceptionsThreshold>
+  <RuleExceptionsThreshold>1</RuleExceptionsThreshold>
+  <Spelling Locale="en-US" />
+  <OverrideRuleVisibilities>False</OverrideRuleVisibilities>
+  <CustomDictionaries SearchFxCopDir="True" SearchUserProfile="True" SearchProjectDir="True" />
+  <SearchGlobalAssemblyCache>False</SearchGlobalAssemblyCache>
+  <DeadlockDetectionTimeout>120</DeadlockDetectionTimeout>
+  <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
+ </ProjectOptions>
+ <Targets>
+  <AssemblyReferenceDirectories>
+   <Directory>$(ProjectDir)/test/bin/Debug/</Directory>
+   <Directory>$(ProjectDir)/test/bin/Release/</Directory>
+   <Directory>$(ProjectDir)/../../Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE/PublicAssemblies/</Directory>
+  </AssemblyReferenceDirectories>
+  <Target Name="$(ProjectDir)/lib/bin/Debug/System.IdentityModel.Tokens.Jwt.dll" Analyze="True" AnalyzeAllChildren="True" />
+ </Targets>
+ <Rules>
+  <RuleFiles>
+   <RuleFile Name="$(FxCopDir)\Rules\DataflowRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\DesignRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\GlobalizationRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\InteroperabilityRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\MaintainabilityRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\MobilityRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\MSInternalRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\NamingRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\PerformanceRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\PortabilityRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\ReliabilityRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\SecurityCryptographyRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\SecurityRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\SecurityTransparencyRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\SecurityWebConfigurationRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\SecurityWebDataflowRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\SecurityXmlRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\UsageRules.dll" Enabled="True" AllRulesEnabled="True" />
+  </RuleFiles>
+  <Groups />
+  <Settings />
+ </Rules>
+ <FxCopReport Version="12.0">
+  <Namespaces>
+   <Namespace Name="System.IdentityModel.Tokens">
+    <Messages>
+     <Message TypeName="SystemNamespacesRequireApproval" Category="Microsoft.MSInternal" CheckId="CA905" Created="2013-10-15 20:04:39Z">
+      <Issue>
+       <Item>System.IdentityModel.Tokens</Item>
+      </Issue>
+     </Message>
+    </Messages>
+   </Namespace>
+  </Namespaces>
+  <Targets>
+   <Target Name="$(ProjectDir)/lib/bin/Debug/System.IdentityModel.Tokens.Jwt.dll">
+    <Modules>
+     <Module Name="system.identitymodel.tokens.jwt.dll">
+      <Messages>
+       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2013-10-15 20:04:39Z">
+        <Issue Name="NotValid">
+         <Item>'System.IdentityModel.Tokens.Jwt.dll'</Item>
+        </Issue>
+       </Message>
+       <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Created="2013-10-15 20:04:39Z">
+        <Issue>
+         <Item>'System.IdentityModel.Tokens.Jwt.dll'</Item>
+        </Issue>
+       </Message>
+       <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+        <Issue Name="Assembly">
+         <Item>Jwt</Item>
+         <Item>'System.IdentityModel.Tokens.Jwt.dll'</Item>
+        </Issue>
+        <Notes>
+         <User Name="brentsch">
+          <Note Id="0" />
+         </User>
+        </Notes>
+       </Message>
+      </Messages>
+      <Namespaces>
+       <Namespace Name="System.IdentityModel.Tokens">
+        <Types>
+         <Type Name="AsymmetricSignatureProvider">
+          <Members>
+           <Member Name="#.ctor(System.IdentityModel.Tokens.AsymmetricSecurityKey,System.String,System.Boolean)">
+            <Messages>
+             <Message TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'AsymmetricSignatureProvider.AsymmetricSignatureProvider(AsymmetricSecurityKey, string, bool)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AsymmetricSecurityKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10511: AsymmetricSecurityKey.GetHashAlgorithmForSignature( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10514: AsymmetricSecurityKey.GetSignatureFormater( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10515: AsymmetricSecurityKey.GetSignatureFormater( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10516: AsymmetricSecurityKey.GetSignatureDeformatter( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10517: AsymmetricSecurityKey.GetSignatureDeFormater( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10518: AsymmetricSecurityKey.GetHashAlgorithmForSignature( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"\' ) threw an exception.\nAsymmetricSecurityKey: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetHashAlgorithmForSignature" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetHashAlgorithmForSignature</Item>
+               <Item>"Jwt10511: AsymmetricSecurityKey.GetHashAlgorithmForSignature( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>GetHashAlgorithmForSignature</Item>
+               <Item>"Jwt10518: AsymmetricSecurityKey.GetHashAlgorithmForSignature( \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetSignatureDeFormater" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetSignatureDeFormater</Item>
+               <Item>"Jwt10517: AsymmetricSecurityKey.GetSignatureDeFormater( \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetSignatureDeformatter" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetSignatureDeformatter</Item>
+               <Item>"Jwt10516: AsymmetricSecurityKey.GetSignatureDeformatter( \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetSignatureFormater" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetSignatureFormater</Item>
+               <Item>"Jwt10514: AsymmetricSecurityKey.GetSignatureFormater( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>GetSignatureFormater</Item>
+               <Item>"Jwt10515: AsymmetricSecurityKey.GetSignatureFormater( \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SignatureAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>", check to make sure the SignatureAlgorithm is supported.\'\nException:\'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\', check to make sure the SignatureAlgorithm is supported."</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\', check to make sure the SignatureAlgorithm is supported."</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\', check to make sure the SignatureAlgorithm is supported.\nException: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\', check to make sure the SignatureAlgorithm is supported.\nException:\'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="willBeUseForSigning" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>willBeUseForSigning</Item>
+               <Item>"\'.\nIf you only need to verify signatures the parameter \'willBeUseForSigning\'..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Sign(System.Byte[])">
+            <Messages>
+             <Message Id="AsymmetricSecurityKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AsymmetricSignatureFormatter" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSignatureFormatter</Item>
+               <Item>"Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this ..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AsymmetricSignatureProvider" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSignatureProvider</Item>
+               <Item>"Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this ..."</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSignatureProvider</Item>
+               <Item>"Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="KeySize" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>KeySize</Item>
+               <Item>"Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="willCreateSignatures" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>willCreateSignatures</Item>
+               <Item>"Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this ..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Verify(System.Byte[],System.Byte[])">
+            <Messages>
+             <Message Id="AsymmetricSecurityKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSecurityKey</Item>
+               <Item>"Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AsymmetricSignatureDeformatter" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSignatureDeformatter</Item>
+               <Item>"Jwt10529: The AsymmetricSignatureDeformatter is null, cannot sign data. If a der..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AsymmetricSignatureProvider" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AsymmetricSignatureProvider</Item>
+               <Item>"Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of..."</Item>
+              </Issue>
+              <Issue>
+               <Item>AsymmetricSignatureProvider</Item>
+               <Item>"Jwt10529: The AsymmetricSignatureDeformatter is null, cannot sign data. If a der..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="KeySize" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>KeySize</Item>
+               <Item>"Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="4" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ClaimTypeMapping">
+          <Members>
+           <Member Name="#.cctor()">
+            <Messages>
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'ClaimTypeMapping'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="18" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="JwtHeader">
+          <Messages>
+           <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue Name="Type">
+             <Item>Jwt</Item>
+             <Item>'JwtHeader'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="5" />
+             </User>
+            </Notes>
+           </Message>
+           <Message TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue>
+             <Item>'JwtHeader'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="15" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#.ctor(System.IdentityModel.Tokens.SigningCredentials)">
+            <Messages>
+             <Message TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtHeader.JwtHeader(SigningCredentials)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SigningKeyIdentifier">
+            <Accessors>
+             <Accessor Name="#get_SigningKeyIdentifier()">
+              <Messages>
+               <Message TypeName="DoNotRaiseExceptionsInUnexpectedLocations" Category="Microsoft.Design" CheckId="CA1065" Status="Excluded" Created="2013-10-15 20:04:39Z" FixCategory="Breaking">
+                <Issue Name="PropertyGetter" Level="Warning">
+                 <Item>'JwtHeader.SigningKeyIdentifier.get()'</Item>
+                 <Item>'FormatException'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="brentsch">
+                  <Note Id="14" />
+                 </User>
+                </Notes>
+               </Message>
+               <Message Id="SigningKeyIdentifier" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+                <Issue>
+                 <Item>SigningKeyIdentifier</Item>
+                 <Item>"Jwt10118: The SigningKeyIdentifier was of type: \'"</Item>
+                </Issue>
+                <Notes>
+                 <User Name="brentsch">
+                  <Note Id="5" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="JwtPayload">
+          <Messages>
+           <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue Name="Type">
+             <Item>Jwt</Item>
+             <Item>'JwtPayload'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="5" />
+             </User>
+            </Notes>
+           </Message>
+           <Message TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue>
+             <Item>'JwtPayload'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="15" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#.ctor(System.String,System.String,System.Collections.Generic.IEnumerable`1&lt;System.Security.Claims.Claim&gt;,System.IdentityModel.Protocols.WSTrust.Lifetime)">
+            <Messages>
+             <Message TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtPayload.JwtPayload(string, string, IEnumerable&lt;Claim&gt;, Lifetime)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetDateTime(System.String)">
+            <Messages>
+             <Message Id="InnerException" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>InnerException</Item>
+               <Item>"\' does not lie in the valid range. \nInnerException: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>InnerException</Item>
+               <Item>"\' which is could not be parsed to an integer.\nInnerException: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="JwtSecurityToken">
+          <Messages>
+           <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue Name="Type">
+             <Item>Jwt</Item>
+             <Item>'JwtSecurityToken'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="1" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#.ctor(System.IdentityModel.Tokens.JwtHeader,System.IdentityModel.Tokens.JwtPayload,System.String)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityToken.JwtSecurityToken(JwtHeader, JwtPayload, string)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="LanguageIndependentMemberParameter">
+               <Item>'JwtSecurityToken.JwtSecurityToken(JwtHeader, JwtPayload, string)'</Item>
+               <Item>String</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="7" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#.ctor(System.String)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityToken.JwtSecurityToken(string)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="LanguageIndependentMemberParameter">
+               <Item>'JwtSecurityToken.JwtSecurityToken(string)'</Item>
+               <Item>String</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="7" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#.ctor(System.String,System.String,System.Collections.Generic.IEnumerable`1&lt;System.Security.Claims.Claim&gt;,System.IdentityModel.Protocols.WSTrust.Lifetime,System.IdentityModel.Tokens.SigningCredentials)">
+            <Messages>
+             <Message TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityToken.JwtSecurityToken(string, string, IEnumerable&lt;Claim&gt;, Lifetime, SigningCredentials)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#_id">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityToken._id'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="12" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Decode(System.String)">
+            <Messages>
+             <Message Id="Jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>Jwt</Item>
+               <Item>"Jwt10112: Jwt header type specified, must be \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"http://openid.net/specs/jwt/1.0"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="openid" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>openid</Item>
+               <Item>"http://openid.net/specs/jwt/1.0"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="JwtSecurityTokenHandler">
+          <Messages>
+           <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue Name="Type">
+             <Item>Jwt</Item>
+             <Item>'JwtSecurityTokenHandler'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="0" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#ClaimsIdentityFromJwt(System.IdentityModel.Tokens.JwtSecurityToken,System.String,System.Boolean)">
+            <Messages>
+             <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="Member">
+               <Item>Jwt</Item>
+               <Item>'JwtSecurityTokenHandler.ClaimsIdentityFromJwt(JwtSecurityToken, string, bool)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ClaimsIdentityFromJwt(JwtSecurityToken, string, bool)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="actort" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>actort</Item>
+               <Item>"actort"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CreateSignature(System.String,System.IdentityModel.Tokens.SecurityKey,System.String,System.IdentityModel.Tokens.SignatureProvider)">
+            <Messages>
+             <Message Id="SecurityKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SecurityKey</Item>
+               <Item>"\'. SecurityKey: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CreateToken(System.String,System.String,System.Security.Claims.ClaimsIdentity,System.IdentityModel.Protocols.WSTrust.Lifetime,System.IdentityModel.Tokens.SigningCredentials,System.IdentityModel.Tokens.SignatureProvider)">
+            <Messages>
+             <Message TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenHandler.CreateToken(string, string, ClaimsIdentity, Lifetime, SigningCredentials, SignatureProvider)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InboundAlgorithmMap">
+            <Messages>
+             <Message TypeName="CollectionPropertiesShouldBeReadOnly" Category="Microsoft.Usage" CheckId="CA2227" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenHandler.InboundAlgorithmMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="8" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InboundClaimTypeMap">
+            <Messages>
+             <Message TypeName="CollectionPropertiesShouldBeReadOnly" Category="Microsoft.Usage" CheckId="CA2227" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenHandler.InboundClaimTypeMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="8" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#JwtSecurityTokenRequirement">
+            <Messages>
+             <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="Member">
+               <Item>Jwt</Item>
+               <Item>'JwtSecurityTokenHandler.JwtSecurityTokenRequirement'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LoadCustomConfiguration(System.Xml.XmlNodeList)">
+            <Messages>
+             <Message Id="LocalName" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>LocalName</Item>
+               <Item>"Jwt10601: element.LocalName \'jwtSecurityTokenRequirement\' was expected. found:..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="OuterXml" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwtSecurityTokenRequirement" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwtSecurityTokenRequirement</Item>
+               <Item>"Jwt10601: element.LocalName \'jwtSecurityTokenRequirement\' was expected. found:..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OutboundAlgorithmMap">
+            <Messages>
+             <Message TypeName="CollectionPropertiesShouldBeReadOnly" Category="Microsoft.Usage" CheckId="CA2227" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenHandler.OutboundAlgorithmMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="8" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OutboundClaimTypeMap">
+            <Messages>
+             <Message TypeName="CollectionPropertiesShouldBeReadOnly" Category="Microsoft.Usage" CheckId="CA2227" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenHandler.OutboundClaimTypeMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="8" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ReadToken(System.Xml.XmlReader)">
+            <Messages>
+             <Message TypeName="Dispose objects before losing scope" Category="Microsoft.Reliability" CheckId="CA2000" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="NonExceptionEdge">
+               <Item>'JwtSecurityTokenHandler.ReadToken(XmlReader)'</Item>
+               <Item>'dictionaryReader'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="6" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateAudience(System.IdentityModel.Tokens.JwtSecurityToken)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateAudience(JwtSecurityToken)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="IssuerTokenResolver" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>IssuerTokenResolver</Item>
+               <Item>"Jwt10328: Unable to validate signature. Configuration.IssuerTokenResolver is nul..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="JwtSecurityTokenHandler" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>JwtSecurityTokenHandler</Item>
+               <Item>"Jwt10205: Unable to validate token. this.Configuration is null. In code you can ..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10300: Unable to validate audience. jwt.Audience is null or whitespace only."</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10332: Audience validation failed. jwt.Audience: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateAudience(System.IdentityModel.Tokens.JwtSecurityToken,System.IdentityModel.Tokens.TokenValidationParameters)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateAudience(JwtSecurityToken, TokenValidationParameters)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AllowedAudience" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AllowedAudience</Item>
+               <Item>"\'. Could not match:  validationParameters.AllowedAudience: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="AllowedAudiences" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>AllowedAudiences</Item>
+               <Item>"\' and validationParameters.AllowedAudiences: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10300: Unable to validate audience. jwt.Audience is null or whitespace only."</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10303: Audience validation failed. jwt.Audience: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validationParameters" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validationParameters</Item>
+               <Item>"\' and validationParameters.AllowedAudiences: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>validationParameters</Item>
+               <Item>"\'. Could not match:  validationParameters.AllowedAudience: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateIssuer(System.IdentityModel.Tokens.JwtSecurityToken)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateIssuer(JwtSecurityToken)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetIssuerName" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetIssuerName</Item>
+               <Item>"Jwt10318: Issuer validation failed. Configuration.IssuerNameRegistry.GetIssuerNa..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="IssuerNameRegistry" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>IssuerNameRegistry</Item>
+               <Item>"Jwt10318: Issuer validation failed. Configuration.IssuerNameRegistry.GetIssuerNa..."</Item>
+              </Issue>
+              <Issue>
+               <Item>IssuerNameRegistry</Item>
+               <Item>"Jwt10330: Unable to validate issuer. Configuration.IssuerNameRegistry is null."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="JwtSecurityTokenHandler" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>JwtSecurityTokenHandler</Item>
+               <Item>"Jwt10205: Unable to validate token. this.Configuration is null. In code you can ..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10318: Issuer validation failed. Configuration.IssuerNameRegistry.GetIssuerNa..."</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10319: Issuer validation failed. jwt.Issuer is null or whitespace."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateIssuer(System.IdentityModel.Tokens.JwtSecurityToken,System.IdentityModel.Tokens.TokenValidationParameters)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateIssuer(JwtSecurityToken, TokenValidationParameters)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>Jwt</Item>
+               <Item>"\' did not match Jwt.Issuer: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="ValidIssuer" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ValidIssuer</Item>
+               <Item>"Jwt10311: Unable to validate issuer, validationParameters.ValidIssuer: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="ValidIssuers" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ValidIssuers</Item>
+               <Item>"\' or validationParameters.ValidIssuers: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10319: Issuer validation failed. jwt.Issuer is null or whitespace."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validationParameters" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validationParameters</Item>
+               <Item>"Jwt10311: Unable to validate issuer, validationParameters.ValidIssuer: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>validationParameters</Item>
+               <Item>"\' or validationParameters.ValidIssuers: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateLifetime(System.IdentityModel.Tokens.JwtSecurityToken)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateLifetime(JwtSecurityToken)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="ValidFrom" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ValidFrom</Item>
+               <Item>"Jwt10306: Lifetime validation failed. The token is not yet valid.\nValidFrom: \'..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="ValidTo" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ValidTo</Item>
+               <Item>"Jwt10305: Lifetime validation failed. The token is expired.\nValidTo: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="exp" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>exp</Item>
+               <Item>"Jwt10322: Lifetime validation failed. The token is missing the \'exp\' (Expirati..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10322: Lifetime validation failed. The token is missing the \'exp\' (Expirati..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validFrom" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validFrom</Item>
+               <Item>"Jwt10403: Invalid dates. validFrom: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validTo" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validTo</Item>
+               <Item>"\' &gt; validTo: "</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateSignature(System.IdentityModel.Tokens.JwtSecurityToken)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateSignature(JwtSecurityToken)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="IssuerTokenResolver" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>IssuerTokenResolver</Item>
+               <Item>"Jwt10328: Unable to validate signature. Configuration.IssuerTokenResolver is nul..."</Item>
+              </Issue>
+              <Issue>
+               <Item>IssuerTokenResolver</Item>
+               <Item>"Jwt10329: Unable to validate signature, Configuration.IssuerTokenResolver.Resolv..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="JwtHeader" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>JwtHeader</Item>
+               <Item>"Jwt10320: Unable to validate signature, JwtHeader specifies: [ alg, \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="JwtSecurityTokenHandler" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>JwtSecurityTokenHandler</Item>
+               <Item>"Jwt10205: Unable to validate token. this.Configuration is null. In code you can ..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="ResolveToken" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ResolveToken</Item>
+               <Item>"Jwt10329: Unable to validate signature, Configuration.IssuerTokenResolver.Resolv..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SigningKeyIdentifier" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SigningKeyIdentifier</Item>
+               <Item>"Jwt10329: Unable to validate signature, Configuration.IssuerTokenResolver.Resolv..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="alg" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>alg</Item>
+               <Item>"Jwt10320: Unable to validate signature, JwtHeader specifies: [ alg, \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10312: Unable to validate signature, jwt does not have a signature: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10329: Unable to validate signature, Configuration.IssuerTokenResolver.Resolv..."</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"\' ] as the signature algorithm, it should specify a valid signature algorithm.\n..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateSignature(System.IdentityModel.Tokens.JwtSecurityToken,System.Byte[],System.Collections.Generic.IEnumerable`1&lt;System.IdentityModel.Tokens.SecurityToken&gt;)">
+            <Messages>
+             <Message TypeName="AvoidExcessiveComplexity" Category="Microsoft.Maintainability" CheckId="CA1502" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenHandler.ValidateSignature(JwtSecurityToken, byte[], IEnumerable&lt;SecurityToken&gt;)'</Item>
+               <Item>28</Item>
+               <Item>25</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="17" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SecurityKeys" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SecurityKeys</Item>
+               <Item>"No non-null SecurityKeys were found"</Item>
+              </Issue>
+              <Issue>
+               <Item>SecurityKeys</Item>
+               <Item>"No non-null SecurityKeys were found"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"\'.\njwt: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"\'.\njwt: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateSignature(System.IdentityModel.Tokens.JwtSecurityToken,System.IdentityModel.Tokens.TokenValidationParameters)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateSignature(JwtSecurityToken, TokenValidationParameters)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="JwtHeader" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>JwtHeader</Item>
+               <Item>"Jwt10320: Unable to validate signature, JwtHeader specifies: [ alg, \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SigningToken" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SigningToken</Item>
+               <Item>"Jwt10309: Unable to validate signature.  Both validationParamters.SigningToken a..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SigningTokens" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SigningTokens</Item>
+               <Item>"Jwt10309: Unable to validate signature.  Both validationParamters.SigningToken a..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="alg" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>alg</Item>
+               <Item>"Jwt10320: Unable to validate signature, JwtHeader specifies: [ alg, \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwt" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"Jwt10312: Unable to validate signature, jwt does not have a signature: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>jwt</Item>
+               <Item>"\' ] as the signature algorithm, it should specify a valid signature algorithm.\n..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validationParameters" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validationParameters</Item>
+               <Item>"Jwt10309: Unable to validate signature.  Both validationParamters.SigningToken a..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validationParamters" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validationParamters</Item>
+               <Item>"Jwt10309: Unable to validate signature.  Both validationParamters.SigningToken a..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateSignature(System.IdentityModel.Tokens.SecurityKey,System.String,System.Byte[],System.Byte[])">
+            <Messages>
+             <Message Id="CreateForVerifying" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>CreateForVerifying</Item>
+               <Item>"Jwt10314: SignatureProviderFactory.CreateForVerifying returned null for key: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SignatureProviderFactory" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SignatureProviderFactory</Item>
+               <Item>"Jwt10314: SignatureProviderFactory.CreateForVerifying returned null for key: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="signatureAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>signatureAlgorithm</Item>
+               <Item>"\', signatureAlgorithm: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateSigningToken(System.IdentityModel.Tokens.JwtSecurityToken)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateSigningToken(JwtSecurityToken)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateToken(System.IdentityModel.Tokens.JwtSecurityToken)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateToken(JwtSecurityToken)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateToken(System.IdentityModel.Tokens.JwtSecurityToken,System.IdentityModel.Tokens.TokenValidationParameters)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateToken(JwtSecurityToken, TokenValidationParameters)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateToken(System.String)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateToken(string)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="LanguageIndependentMemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateToken(string)'</Item>
+               <Item>String</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="7" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ValidateToken(System.String,System.IdentityModel.Tokens.TokenValidationParameters)">
+            <Messages>
+             <Message Id="jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="MemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateToken(string, TokenValidationParameters)'</Item>
+               <Item>jwt</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="LanguageIndependentMemberParameter">
+               <Item>'JwtSecurityTokenHandler.ValidateToken(string, TokenValidationParameters)'</Item>
+               <Item>String</Item>
+               <Item>'jwtEncodedString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="7" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="JwtSecurityTokenRequirement">
+          <Messages>
+           <Message Id="Jwt" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2013-10-15 20:04:39Z">
+            <Issue Name="Type">
+             <Item>Jwt</Item>
+             <Item>'JwtSecurityTokenRequirement'</Item>
+            </Issue>
+            <Notes>
+             <User Name="brentsch">
+              <Note Id="1" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#.ctor(System.Xml.XmlElement)">
+            <Messages>
+             <Message TypeName="AvoidExcessiveClassCoupling" Category="Microsoft.Maintainability" CheckId="CA1506" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="Method" Certainty="75">
+               <Item>'JwtSecurityTokenRequirement.JwtSecurityTokenRequirement(XmlElement)'</Item>
+               <Item>31</Item>
+               <Item>13</Item>
+               <Item>40</Item>
+               <Item>30</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="13" />
+               </User>
+              </Notes>
+             </Message>
+             <Message TypeName="AvoidExcessiveComplexity" Category="Microsoft.Maintainability" CheckId="CA1502" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'JwtSecurityTokenRequirement.JwtSecurityTokenRequirement(XmlElement)'</Item>
+               <Item>41</Item>
+               <Item>25</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="10" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="ChainTrust" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ChainTrust</Item>
+               <Item>"ChainTrust"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="CurrentUser" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>CurrentUser</Item>
+               <Item>"CurrentUser"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetType" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetType</Item>
+               <Item>"Jwt10613: Type.GetType( \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="InnerException" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>InnerException</Item>
+               <Item>"\'.\nInnerException: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>InnerException</Item>
+               <Item>"\'.\nInnerException: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>InnerException</Item>
+               <Item>"\'.\nInnerException: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="LocalMachine" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>LocalMachine</Item>
+               <Item>"LocalMachine"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="LocalName" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>LocalName</Item>
+               <Item>"Jwt10601: element.LocalName \'jwtSecurityTokenRequirement\' was expected. found:..."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="NoCheck" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>NoCheck</Item>
+               <Item>"NoCheck"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="OuterXml" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' (all values are case insensitive).\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' (all values are case insensitive).\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' (all values are case insensitive).\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' (all values are case sensitive).\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' attribute must be specified as it contains the \'type\' of the X509Certificat..."</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' is duplicated. Each attribute can only occur once.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' is duplicated. Each element can only occur once.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' is null or whitespace.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' is null or whitespace.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\', multiple attributes were found.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\', see inner exception for details.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\', see inner exception for details.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\', see inner exception for details.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'. The attribute was not found.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\'.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="PeerOrChainTrust" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>PeerOrChainTrust</Item>
+               <Item>"PeerOrChainTrust"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="PeerTrust" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>PeerTrust</Item>
+               <Item>"PeerTrust"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="defaultTokenLifetimeInMinutes" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>defaultTokenLifetimeInMinutes</Item>
+               <Item>"defaultTokenLifetimeInMinutes"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="issuerCertificateRevocationMode" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>issuerCertificateRevocationMode</Item>
+               <Item>"issuerCertificateRevocationMode"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="issuerCertificateTrustedStoreLocation" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>issuerCertificateTrustedStoreLocation</Item>
+               <Item>"issuerCertificateTrustedStoreLocation"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="issuerCertificateValidationMode" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>issuerCertificateValidationMode</Item>
+               <Item>"issuerCertificateValidationMode"</Item>
+              </Issue>
+              <Issue>
+               <Item>issuerCertificateValidationMode</Item>
+               <Item>"issuerCertificateValidationMode"</Item>
+              </Issue>
+              <Issue>
+               <Item>issuerCertificateValidationMode</Item>
+               <Item>"issuerCertificateValidationMode"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="issuerCertificateValidator" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>issuerCertificateValidator</Item>
+               <Item>"issuerCertificateValidator"</Item>
+              </Issue>
+              <Issue>
+               <Item>issuerCertificateValidator</Item>
+               <Item>"issuerCertificateValidator"</Item>
+              </Issue>
+              <Issue>
+               <Item>issuerCertificateValidator</Item>
+               <Item>"issuerCertificateValidator"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="jwtSecurityTokenRequirement" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>jwtSecurityTokenRequirement</Item>
+               <Item>"Jwt10601: element.LocalName \'jwtSecurityTokenRequirement\' was expected. found:..."</Item>
+              </Issue>
+              <Issue>
+               <Item>jwtSecurityTokenRequirement</Item>
+               <Item>"jwtSecurityTokenRequirement"</Item>
+              </Issue>
+              <Issue>
+               <Item>jwtSecurityTokenRequirement</Item>
+               <Item>"jwtSecurityTokenRequirement"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="maximumClockSkewInMinutes" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>maximumClockSkewInMinutes</Item>
+               <Item>"maximumClockSkewInMinutes"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="maximumTokenSizeInBytes" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>maximumTokenSizeInBytes</Item>
+               <Item>"maximumTokenSizeInBytes"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="nameClaimType" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>nameClaimType</Item>
+               <Item>"nameClaimType"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="roleClaimType" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>roleClaimType</Item>
+               <Item>"roleClaimType"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="2" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="Xml">
+               <Item>'JwtSecurityTokenRequirement.JwtSecurityTokenRequirement(XmlElement)'</Item>
+               <Item>'XmlElement'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="11" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="NamedKeyIssuerTokenResolver">
+          <Members>
+           <Member Name="#.ctor(System.Collections.Generic.IDictionary`2&lt;System.String,System.Collections.Generic.IList`1&lt;System.IdentityModel.Tokens.SecurityKey&gt;&gt;,System.IdentityModel.Tokens.IssuerTokenResolver)">
+            <Messages>
+             <Message TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'NamedKeyIssuerTokenResolver.NamedKeyIssuerTokenResolver(IDictionary&lt;string, IList&lt;SecurityKey&gt;&gt;, IssuerTokenResolver)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+             <Message TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'NamedKeyIssuerTokenResolver.NamedKeyIssuerTokenResolver(IDictionary&lt;string, IList&lt;SecurityKey&gt;&gt;, IssuerTokenResolver)'</Item>
+               <Item>'IDictionary&lt;string, IList&lt;SecurityKey&gt;&gt;'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="16" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ReadSecurityKey(System.Xml.XmlElement)">
+            <Messages>
+             <Message Id="EncodingType" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>EncodingType</Item>
+               <Item>"Jwt10105: EncodingType attribute must be one of: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Encodingtype" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>Encodingtype</Item>
+               <Item>"\'. Encodingtype found: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="NamedKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>NamedKey</Item>
+               <Item>"Jwt10106: A NamedKey must specify the \'symmetricKey\' attribute. XML received: ..."</Item>
+              </Issue>
+              <Issue>
+               <Item>NamedKey</Item>
+               <Item>"Jwt10107: A NamedKey must specify the \'name\' attribute. XML received: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="OuterXml" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' is null or whitespace.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>OuterXml</Item>
+               <Item>"\' is null or whitespace.\nelement.OuterXml: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="symmetricKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>symmetricKey</Item>
+               <Item>"Jwt10106: A NamedKey must specify the \'symmetricKey\' attribute. XML received: ..."</Item>
+              </Issue>
+              <Issue>
+               <Item>symmetricKey</Item>
+               <Item>"symmetricKey"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="wss" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>wss</Item>
+               <Item>"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1...."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="1" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="Xml">
+               <Item>'NamedKeyIssuerTokenResolver.ReadSecurityKey(XmlElement)'</Item>
+               <Item>'XmlElement'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="11" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SecurityKeys">
+            <Messages>
+             <Message TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>'NamedKeyIssuerTokenResolver.SecurityKeys'</Item>
+               <Item>'IDictionary&lt;string, IList&lt;SecurityKey&gt;&gt;'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="16" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="SignatureProvider">
+          <Members>
+           <Member Name="#Dispose()">
+            <Messages>
+             <Message TypeName="ImplementIDisposableCorrectly" Category="Microsoft.Design" CheckId="CA1063" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue Name="DisposeImplementation">
+               <Item>'SignatureProvider.Dispose()'</Item>
+              </Issue>
+              <Issue Name="DisposeSignature">
+               <Item>'SignatureProvider.Dispose()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="19" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="SymmetricSignatureProvider">
+          <Members>
+           <Member Name="#.ctor(System.IdentityModel.Tokens.SymmetricSecurityKey,System.String)">
+            <Messages>
+             <Message Id="GetKeyedHashAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetKeyedHashAlgorithm</Item>
+               <Item>"Jwt10532: SymmetricSecurityKey.GetKeyedHashAlgorithm( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>GetKeyedHashAlgorithm</Item>
+               <Item>"Jwt10533: SymmetricSecurityKey.GetKeyedHashAlgorithm( \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="GetSymmetricKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>GetSymmetricKey</Item>
+               <Item>"Jwt10534: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw...."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="KeyedHashAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>KeyedHashAlgorithm</Item>
+               <Item>"Jwt10534: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw...."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SignatureAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\' check to make sure the SignatureAlgorithm is supported.\nException: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\', check to make sure the SignatureAlgorithm is supported."</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\', check to make sure the SignatureAlgorithm is supported.\nException: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SignatureAlgorithm</Item>
+               <Item>"\'\nSignatureAlgorithm: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="SymmetricSecurityKey" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>SymmetricSecurityKey</Item>
+               <Item>"Jwt10532: SymmetricSecurityKey.GetKeyedHashAlgorithm( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SymmetricSecurityKey</Item>
+               <Item>"Jwt10533: SymmetricSecurityKey.GetKeyedHashAlgorithm( \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SymmetricSecurityKey</Item>
+               <Item>"Jwt10534: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw...."</Item>
+              </Issue>
+              <Issue>
+               <Item>SymmetricSecurityKey</Item>
+               <Item>"Jwt10534: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw...."</Item>
+              </Issue>
+              <Issue>
+               <Item>SymmetricSecurityKey</Item>
+               <Item>"\' ) returned null.\n\nSymmetricSecurityKey: \'"</Item>
+              </Issue>
+              <Issue>
+               <Item>SymmetricSecurityKey</Item>
+               <Item>"\' ) threw and exception.\nSymmetricSecurityKey: \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Sign(System.Byte[])">
+            <Messages>
+             <Message Id="KeyedHashAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>KeyedHashAlgorithm</Item>
+               <Item>"Jwt10523: The KeyedHashAlgorithm is null, cannot sign data."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Verify(System.Byte[],System.Byte[])">
+            <Messages>
+             <Message Id="KeyedHashAlgorithm" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>KeyedHashAlgorithm</Item>
+               <Item>"Jwt10523: The KeyedHashAlgorithm is null, cannot sign data."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="X509CertificateValidatorEx">
+          <Members>
+           <Member Name="#.ctor(System.ServiceModel.Security.X509CertificateValidationMode,System.Security.Cryptography.X509Certificates.X509RevocationMode,System.Security.Cryptography.X509Certificates.StoreLocation)">
+            <Messages>
+             <Message Id="ChainTrust" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>ChainTrust</Item>
+               <Item>"\'.  Supported values are: \'ChainTrust, PeerTrust, PeerOrChainTrust, None\'."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="PeerOrChainTrust" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>PeerOrChainTrust</Item>
+               <Item>"\'.  Supported values are: \'ChainTrust, PeerTrust, PeerOrChainTrust, None\'."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="PeerTrust" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>PeerTrust</Item>
+               <Item>"\'.  Supported values are: \'ChainTrust, PeerTrust, PeerOrChainTrust, None\'."</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="validationMode" TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204" Status="Excluded" Created="2013-10-15 20:04:39Z">
+              <Issue>
+               <Item>validationMode</Item>
+               <Item>"Jwt10614: the \'validationMode\' is not supported \'"</Item>
+              </Issue>
+              <Notes>
+               <User Name="brentsch">
+                <Note Id="0" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
+  </Targets>
+  <Notes>
+   <User Name="brentsch">
+    <Note Id="0" Modified="2013-10-15 20:06:14Z">jwt is consistantly used for JSON Web Security Token. Identifiers used in error messages are used with class and parameter names</Note>
+    <Note Id="1" Modified="2013-10-15 20:06:45Z">jwt is consistantly used for JSON Web Security Token. Identifiers used in error messages are used with class and parameter names</Note>
+    <Note Id="2" Modified="2013-10-15 20:06:52Z">jwt is consistantly used for JSON Web Security Token. Identifiers used in error messages are used with class and parameter names</Note>
+    <Note Id="3" Modified="2013-10-15 20:07:00Z">jwt is consistantly used for JSON Web Security Token. Identifiers used in error messages are used with class and parameter names</Note>
+    <Note Id="4" Modified="2013-10-15 20:07:13Z">jwt is consistantly used for JSON Web Security Token. Identifiers used in error messages are used with class and parameter names</Note>
+    <Note Id="5" Modified="2013-10-15 20:07:42Z">jwt is consistantly used for JSON Web Security Token. Identifiers used in error messages are used with class and parameter names</Note>
+    <Note Id="6" Modified="2013-10-15 20:08:27Z">XmlDictionary is just used as a wrapper does not consume memory.</Note>
+    <Note Id="7" Modified="2013-10-15 20:09:02Z">Used to enforce that jwt is a string.</Note>
+    <Note Id="8" Modified="2013-10-15 20:09:33Z">Users need to set and get mapping.</Note>
+    <Note Id="9" Modified="2013-10-15 20:09:52Z">Used to reduce OM size.</Note>
+    <Note Id="10" Modified="2013-10-15 20:10:25Z">Reading config and setting internals is simplified in a single method.</Note>
+    <Note Id="11" Modified="2013-10-15 20:11:05Z">Do not want to encourage random serialization.</Note>
+    <Note Id="12" Modified="2013-10-15 20:11:13Z">field is used.</Note>
+    <Note Id="13" Modified="2013-10-15 20:11:36Z">reading form config, using .net classes, unavoidable.</Note>
+    <Note Id="14" Modified="2013-10-15 20:12:01Z">Helps users understand that config is not well formed.</Note>
+    <Note Id="15" Modified="2013-10-15 20:12:22Z">Do not want to encourage random serializations.</Note>
+    <Note Id="16" Modified="2013-10-15 20:12:53Z">Scenario requires multiple keys to be returned for single ID.</Note>
+    <Note Id="17" Modified="2013-10-15 20:13:23Z">All Validate signatures pass through this method.</Note>
+    <Note Id="18" Modified="2013-10-15 20:25:09Z">shortToLong needs to be created first.</Note>
+    <Note Id="19" Modified="2013-10-15 22:45:27Z">this is an abstract class and it does the right thing.</Note>
+   </User>
+  </Notes>
+  <Rules>
+   <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
+    <Resolution Name="NotValid">Verify that {0} has a valid strong name before deploying.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidExcessiveClassCoupling" Category="Microsoft.Maintainability" CheckId="CA1506">
+    <Resolution Name="Method">{0} is coupled with {1} different types from {2} different namespaces. Rewrite or refactor the method to decrease its class coupling, or consider moving the method to one of the other types it is tightly coupled with. A class coupling above {3} indicates poor maintainability, a class coupling between {3} and {4} indicates moderate maintainability, and a class coupling below {4} indicates good maintainability.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidExcessiveComplexity" Category="Microsoft.Maintainability" CheckId="CA1502">
+    <Resolution Name="Default">{0} has a cyclomatic complexity of {1}. Rewrite or refactor the method to reduce complexity to {2}.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
+    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
+   </Rule>
+   <Rule TypeName="CollectionPropertiesShouldBeReadOnly" Category="Microsoft.Usage" CheckId="CA2227">
+    <Resolution Name="Default">Change {0} to be read-only by removing the property setter.</Resolution>
+   </Rule>
+   <Rule TypeName="DefaultParametersShouldNotBeUsed" Category="Microsoft.Design" CheckId="CA1026">
+    <Resolution Name="Default">Replace method {0} with an overload that supplies all default arguments.</Resolution>
+   </Rule>
+   <Rule TypeName="Dispose objects before losing scope" Category="Microsoft.Reliability" CheckId="CA2000">
+    <Resolution Name="NonExceptionEdge">In method {0}, call System.IDisposable.Dispose on object {1} before all references to it are out of scope.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006">
+    <Resolution Name="Default">Consider a design where {0} doesn't nest generic type {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotRaiseExceptionsInUnexpectedLocations" Category="Microsoft.Design" CheckId="CA1065">
+    <Resolution Name="PropertyGetter">{0} creates an exception of type {1}, an exception type that should not be raised in a property. If this exception instance might be raised, use a different exception type, convert this property into a method, or change this property's logic so that it no longer raises an exception.</Resolution>
+   </Rule>
+   <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
+    <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
+    <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+    <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+    <Resolution Name="Type">Correct the spelling of '{0}' in type name {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720">
+    <Resolution Name="LanguageIndependentMemberParameter">In member {0}, consider replacing the data type identifier '{1}' in parameter name {2} with a more generic term, such as 'value'.</Resolution>
+   </Rule>
+   <Rule TypeName="ImplementIDisposableCorrectly" Category="Microsoft.Design" CheckId="CA1063">
+    <Resolution Name="DisposeImplementation">Modify {0} so that it calls Dispose(true), then calls GC.SuppressFinalize on the current object instance ('this' or 'Me' in Visual Basic), and then returns.</Resolution>
+    <Resolution Name="DisposeSignature">Ensure that {0} is declared as public and sealed.</Resolution>
+   </Rule>
+   <Rule TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810">
+    <Resolution Name="Default">Initialize all static fields in {0} when those fields are declared and remove the explicit static constructor.</Resolution>
+   </Rule>
+   <Rule TypeName="Literals should be spelled correctly" Category="Microsoft.Naming" CheckId="CA2204">
+    <Resolution Name="Default">Correct the spelling of the unrecognized token '{0}' in the literal '{1}'.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
+    <Resolution Name="Default">Mark {0} with CLSCompliant(true) because it exposes externally visible types.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237">
+    <Resolution Name="Default">Add [Serializable] to {0} as this type implements ISerializable.</Resolution>
+   </Rule>
+   <Rule TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059">
+    <Resolution Name="Xml">Modify member {0} so that it no longer exposes the concrete type {1}. Use IXPathNavigable to represent XML data sources.</Resolution>
+   </Rule>
+   <Rule TypeName="SystemNamespacesRequireApproval" Category="Microsoft.MSInternal" CheckId="CA905">
+    <Resolution Name="Default">All namespaces under the 'System' namespace need to be approved by the .NET Framework team. Namespace '{0}' has not been approved. See http://fxreviews for info on getting this namespace approved. See http://fxcop/docs/rules.aspx?url=/MSInternal/SystemNamespacesRequireApproval.html for information on how to stop this rule from firing after the namespace has been approved.</Resolution>
+   </Rule>
+  </Rules>
+ </FxCopReport>
+</FxCopProject>

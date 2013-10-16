@@ -12,10 +12,10 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Diagnostics;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Diagnostics;
+
     [DebuggerNonUserCode]
     internal static class DateTimeUtil
     {
@@ -26,35 +26,35 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <param name="time">Initial <see cref="DateTime"/> value.</param>
         /// <param name="timespan"><see cref="TimeSpan"/> to add.</param>
-        /// <returns></returns>
-        public static DateTime Add( DateTime time, TimeSpan timespan )
+        /// <returns><see cref="DateTime"/> as the sum of time and timespan.</returns>
+        public static DateTime Add(DateTime time, TimeSpan timespan)
         {
-            if ( timespan == TimeSpan.Zero )
+            if (timespan == TimeSpan.Zero)
             {
                 return time;
             }
 
-            if ( timespan > TimeSpan.Zero && DateTime.MaxValue - time <= timespan )
+            if (timespan > TimeSpan.Zero && DateTime.MaxValue - time <= timespan)
             {
-                return GetMaxValue( time.Kind );
+                return GetMaxValue(time.Kind);
             }
 
-            if ( timespan < TimeSpan.Zero && DateTime.MinValue - time >= timespan )
+            if (timespan < TimeSpan.Zero && DateTime.MinValue - time >= timespan)
             {
-                return GetMinValue( time.Kind );
+                return GetMinValue(time.Kind);
             }
 
             return time + timespan;
         }
 
-        public static DateTime GetMaxValue( DateTimeKind kind )
+        public static DateTime GetMaxValue(DateTimeKind kind)
         {
-            return new DateTime( DateTime.MaxValue.Ticks, kind );
+            return new DateTime(DateTime.MaxValue.Ticks, kind);
         }
 
-        public static DateTime GetMinValue( DateTimeKind kind )
+        public static DateTime GetMinValue(DateTimeKind kind)
         {
-            return new DateTime( DateTime.MinValue.Ticks, kind );
+            return new DateTime(DateTime.MinValue.Ticks, kind);
         }
     }
 }

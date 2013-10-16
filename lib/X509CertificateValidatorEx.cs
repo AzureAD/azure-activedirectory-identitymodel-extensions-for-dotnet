@@ -19,7 +19,6 @@ using System.ServiceModel.Security;
 
 namespace System.IdentityModel.Tokens
 {
-
     /// <summary>
     /// This class also resets the _chainPolicy.VerificationTime = DateTime.Now each time a certificate is validated otherwise certificates created after the validator is created will not chain.
     /// </summary>
@@ -29,10 +28,10 @@ namespace System.IdentityModel.Tokens
         internal X509ChainPolicy _chainPolicy;
         internal X509CertificateValidator _validator;
 
-        public X509CertificateValidatorEx( X509CertificateValidationMode certificateValidationMode, X509RevocationMode revocationMode, StoreLocation trustedStoreLocation )
+        public X509CertificateValidatorEx(X509CertificateValidationMode certificateValidationMode, X509RevocationMode revocationMode, StoreLocation trustedStoreLocation)
         {
             _certificateValidationMode = certificateValidationMode;
-            switch ( _certificateValidationMode )
+            switch (_certificateValidationMode)
             {
                 case X509CertificateValidationMode.None:
                     {
@@ -68,13 +67,13 @@ namespace System.IdentityModel.Tokens
 
                 case X509CertificateValidationMode.Custom:
                 default:
-                    throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10614, _certificateValidationMode ) );
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10614, _certificateValidationMode));
             }
         }
 
-        public override void Validate( X509Certificate2 certificate )
+        public override void Validate(X509Certificate2 certificate)
         {
-            if ( _certificateValidationMode == X509CertificateValidationMode.ChainTrust || _certificateValidationMode == X509CertificateValidationMode.PeerOrChainTrust )
+            if (_certificateValidationMode == X509CertificateValidationMode.ChainTrust || _certificateValidationMode == X509CertificateValidationMode.PeerOrChainTrust)
             {
                 // This is needed otherwise certificates created after the creation of the validator to fail chain trust.
                 _chainPolicy.VerificationTime = DateTime.Now;

@@ -12,10 +12,10 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Globalization;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Globalization;
+
     /// <summary>
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
     /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>
@@ -51,9 +51,9 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">'<see cref="SymmetricSecurityKey"/>' is smaller than <see cref="MinimumSymmetricKeySizeInBits"/>.</exception>
         /// <exception cref="ArgumentException">'<see cref="SecurityKey"/>' is not a <see cref="AsymmetricSecurityKey"/> or a <see cref="SymmetricSecurityKey"/>.</exception>
         /// <remarks>AsymmetricSignatureProviders require access to a PrivateKey for Signing.</remarks>
-        public virtual SignatureProvider CreateForSigning( SecurityKey key, string algorithm )
+        public virtual SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
         {
-            return CreateProvider( key, algorithm, true );
+            return CreateProvider(key, algorithm, true);
         }
 
         /// <summary>
@@ -65,60 +65,59 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">'<see cref="AsymmetricSecurityKey"/>' is smaller than <see cref="MinimumAsymmetricKeySizeInBitsForVerifying"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">'<see cref="SymmetricSecurityKey"/>' is smaller than <see cref="MinimumSymmetricKeySizeInBits"/>.</exception>
         /// <exception cref="ArgumentException">'<see cref="SecurityKey"/>' is not a <see cref="AsymmetricSecurityKey"/> or a <see cref="SymmetricSecurityKey"/>.</exception>
-        public virtual SignatureProvider CreateForVerifying( SecurityKey key, string algorithm )
+        public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
-           return CreateProvider( key, algorithm, false );
+            return CreateProvider(key, algorithm, false);
         }
 
-        private static SignatureProvider CreateProvider( SecurityKey key, string algorithm, bool willCreateSignatures )
+        private static SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
-            if ( key == null )
+            if (key == null)
             {
-                throw new ArgumentNullException( "key" );
+                throw new ArgumentNullException("key");
             }
 
-            if ( algorithm == null )
+            if (algorithm == null)
             {
-                throw new ArgumentNullException( "algorithm" );
+                throw new ArgumentNullException("algorithm");
             }
 
-            if ( string.IsNullOrWhiteSpace( algorithm ) )
+            if (string.IsNullOrWhiteSpace(algorithm))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm " ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm "));
             }
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
-            if ( asymmetricKey != null )
+            if (asymmetricKey != null)
             {
-                if ( willCreateSignatures )
+                if (willCreateSignatures)
                 {
-                    if ( asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForSigning )
+                    if (asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForSigning)
                     {
-                        throw new ArgumentOutOfRangeException( "key.KeySize", asymmetricKey.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigning ) );
+                        throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigning));
                     }
-
                 }
-                
-                if ( asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForVerifying )
+
+                if (asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForVerifying)
                 {
-                    throw new ArgumentOutOfRangeException( "key.KeySize", asymmetricKey.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10531, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifying ) );
+                    throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10531, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifying));
                 }
 
-                return new AsymmetricSignatureProvider( asymmetricKey, algorithm, willCreateSignatures );
+                return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures);
             }
 
             SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
-            if ( symmetricKey != null )
+            if (symmetricKey != null)
             {
-                if ( symmetricKey.KeySize < MinimumSymmetricKeySizeInBits )
+                if (symmetricKey.KeySize < MinimumSymmetricKeySizeInBits)
                 {
-                    throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10503, key.GetType(), MinimumSymmetricKeySizeInBits ) );
+                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10503, key.GetType(), MinimumSymmetricKeySizeInBits));
                 }
 
-                return new SymmetricSignatureProvider( symmetricKey, algorithm );
+                return new SymmetricSignatureProvider(symmetricKey, algorithm);
             }
 
-            throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10500, typeof(SignatureProvider).ToString(), typeof( SecurityKey ), typeof( AsymmetricSecurityKey ), typeof( SymmetricSecurityKey ), key.GetType() ) );
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10500, typeof(SignatureProvider).ToString(), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType()));
         }
 
         /// <summary>
@@ -127,16 +126,16 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumSymmetricKeySizeInBits"/>.</exception>
         public static uint MinimumSymmetricKeySizeInBits
         {
-            get 
-            { 
-                return _minimumSymmetricKeySizeInBits; 
+            get
+            {
+                return _minimumSymmetricKeySizeInBits;
             }
 
             set
             {
-                if ( value < AbsoluteMinimumSymmetricKeySizeInBits )
+                if (value < AbsoluteMinimumSymmetricKeySizeInBits)
                 {
-                    throw new ArgumentOutOfRangeException( "value", value, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10528, AbsoluteMinimumSymmetricKeySizeInBits ) );
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10528, AbsoluteMinimumSymmetricKeySizeInBits));
                 }
 
                 _minimumSymmetricKeySizeInBits = value;
@@ -149,16 +148,16 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumAsymmetricKeySizeInBitsForSigning"/>.</exception>
         public static uint MinimumAsymmetricKeySizeInBitsForSigning
         {
-            get 
-            { 
-                return _minimumAsymmetricKeySizeInBitsForSigning; 
+            get
+            {
+                return _minimumAsymmetricKeySizeInBitsForSigning;
             }
 
             set
             {
-                if ( value < AbsoluteMinimumAsymmetricKeySizeInBitsForSigning )
+                if (value < AbsoluteMinimumAsymmetricKeySizeInBitsForSigning)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10513, AbsoluteMinimumAsymmetricKeySizeInBitsForSigning ) );
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10513, AbsoluteMinimumAsymmetricKeySizeInBitsForSigning));
                 }
 
                 _minimumAsymmetricKeySizeInBitsForSigning = value;
@@ -171,16 +170,16 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public static uint MinimumAsymmetricKeySizeInBitsForVerifying
         {
-            get 
-            { 
-                return _minimumAsymmetricKeySizeInBitsForVerifying; 
+            get
+            {
+                return _minimumAsymmetricKeySizeInBitsForVerifying;
             }
 
             set
             {
-                if ( value < AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying )
+                if (value < AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying)
                 {
-                    throw new ArgumentOutOfRangeException( "value", value, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10527, AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying ) );
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10527, AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying));
                 }
 
                 _minimumAsymmetricKeySizeInBitsForVerifying = value;
@@ -191,9 +190,9 @@ namespace System.IdentityModel.Tokens
         /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose(bool)"/>
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be released.</param>
-        public virtual void ReleaseProvider( SignatureProvider signatureProvider )
+        public virtual void ReleaseProvider(SignatureProvider signatureProvider)
         {
-            if ( signatureProvider != null )
+            if (signatureProvider != null)
             {
                 signatureProvider.Dispose();
             }

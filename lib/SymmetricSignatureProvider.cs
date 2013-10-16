@@ -12,18 +12,17 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Globalization;
+    using System.Runtime.CompilerServices;
+    using System.Security.Cryptography;
+
     /// <summary>
     /// Provides signing and verifying operations using a <see cref="SymmetricSecurityKey"/> and specifying an algorithm.
     /// </summary>
     public class SymmetricSignatureProvider : SignatureProvider
     {
-
         private static byte[] _bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
         private static byte[] _bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
         private bool _disposed;
@@ -41,61 +40,60 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetKeyedHashAlgorithm"/> throws.</exception>
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetKeyedHashAlgorithm"/> returns null.</exception>
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetSymmetricKey"/> throws.</exception>
-        public SymmetricSignatureProvider( SymmetricSecurityKey key, string algorithm )
+        public SymmetricSignatureProvider(SymmetricSecurityKey key, string algorithm)
         {
-            if ( key == null )
+            if (key == null)
             {
-                throw new ArgumentNullException( "key" );
+                throw new ArgumentNullException("key");
             }
 
-            if ( null == algorithm )
+            if (null == algorithm)
             {
-                throw new ArgumentNullException( algorithm );
+                throw new ArgumentNullException(algorithm);
             }
 
-            if ( string.IsNullOrWhiteSpace( algorithm ) )
+            if (string.IsNullOrWhiteSpace(algorithm))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm" ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm"));
             }
 
-            if ( key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits )
+            if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
             {
-                throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10503, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits ) );
-            }
-
-            try
-            {
-                _keyedHash = key.GetKeyedHashAlgorithm( algorithm );
-            }
-            catch ( Exception ex )
-            {
-                if ( DiagnosticUtility.IsFatal( ex ) )
-                {
-                    throw;
-                }
-
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10532, algorithm, key.ToString(), ex ), ex );
-            }
-
-            if ( _keyedHash == null )
-            {
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10533, algorithm, key.ToString() ) );
+                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10503, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits));
             }
 
             try
             {
-                _keyedHash.Key = key.GetSymmetricKey();
+                this._keyedHash = key.GetKeyedHashAlgorithm(algorithm);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                if ( DiagnosticUtility.IsFatal( ex ) )
+                if (DiagnosticUtility.IsFatal(ex))
                 {
                     throw;
                 }
 
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10534, algorithm, key.ToString(), ex ), ex );
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10532, algorithm, key.ToString(), ex), ex);
             }
 
+            if (this._keyedHash == null)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10533, algorithm, key.ToString()));
+            }
+
+            try
+            {
+                this._keyedHash.Key = key.GetSymmetricKey();
+            }
+            catch (Exception ex)
+            {
+                if (DiagnosticUtility.IsFatal(ex))
+                {
+                    throw;
+                }
+
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10534, algorithm, key.ToString(), ex), ex);
+            }
         }
 
         #region IDisposable Members
@@ -104,18 +102,18 @@ namespace System.IdentityModel.Tokens
         /// Disposes of internal components.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if ( !_disposed )
+            if (!this._disposed)
             {
-                _disposed = true;
+                this._disposed = true;
 
-                if ( disposing )
+                if (disposing)
                 {
-                    if ( _keyedHash != null )
+                    if (this._keyedHash != null)
                     {
-                        _keyedHash.Dispose();
-                        _keyedHash = null;
+                        this._keyedHash.Dispose();
+                        this._keyedHash = null;
                     }
                 }
             }
@@ -132,29 +130,29 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'input.Length' == 0. </exception>
         /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
         /// <exception cref="InvalidOperationException"><see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
-        public override byte[] Sign( byte[] input )
+        public override byte[] Sign(byte[] input)
         {
-            if ( input == null )
+            if (input == null)
             {
-                throw new ArgumentNullException( "input" );
+                throw new ArgumentNullException("input");
             }
 
-            if ( input.Length == 0 )
+            if (input.Length == 0)
             {
-                throw new ArgumentException( JwtErrors.Jwt10524 );
+                throw new ArgumentException(JwtErrors.Jwt10524);
             }
 
-            if ( _disposed )
+            if (this._disposed)
             {
-                throw new ObjectDisposedException( typeof( SymmetricSignatureProvider ).ToString() );
+                throw new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString());
             }
 
-            if ( _keyedHash == null )
+            if (this._keyedHash == null)
             {
-                throw new InvalidOperationException( JwtErrors.Jwt10523 );
+                throw new InvalidOperationException(JwtErrors.Jwt10523);
             }
 
-            return _keyedHash.ComputeHash( input );
+            return this._keyedHash.ComputeHash(input);
         }
 
         /// <summary>
@@ -169,62 +167,64 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'signature.Length' == 0. </exception>
         /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
         /// <exception cref="InvalidOperationException">if the internal <see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
-        public override bool Verify( byte[] input, byte[] signature )
+        public override bool Verify(byte[] input, byte[] signature)
         {
-            if ( input == null )
+            if (input == null)
             {
-                throw new ArgumentNullException( "input" );
+                throw new ArgumentNullException("input");
             }
 
-            if ( signature == null )
+            if (signature == null)
             {
-                throw new ArgumentNullException( "signature" );
+                throw new ArgumentNullException("signature");
             }
 
-            if ( input.Length == 0 )
+            if (input.Length == 0)
             {
-                throw new ArgumentException( JwtErrors.Jwt10525 );
+                throw new ArgumentException(JwtErrors.Jwt10525);
             }
 
-            if ( signature.Length == 0 )
+            if (signature.Length == 0)
             {
-                throw new ArgumentException( JwtErrors.Jwt10526 );
+                throw new ArgumentException(JwtErrors.Jwt10526);
             }
 
-            if ( _disposed )
+            if (this._disposed)
             {
-                throw new ObjectDisposedException( typeof( SymmetricSignatureProvider ).ToString() );
+                throw new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString());
             }
 
-            if ( _keyedHash == null )
+            if (this._keyedHash == null)
             {
-                throw new InvalidOperationException( JwtErrors.Jwt10523 );
+                throw new InvalidOperationException(JwtErrors.Jwt10523);
             }
 
-            return AreEqual( signature, _keyedHash.ComputeHash( input ) );
+            return AreEqual(signature, this._keyedHash.ComputeHash(input));
         }
 
         /// <summary>
         /// Compares two byte arrays for equality. Hash size is fixed normally it is 32 bytes.
         /// The attempt here is to take the same time if an attacker shortens the signature OR changes some of the signed contents.
         /// </summary>
-        [MethodImpl( MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining )]
-        private static bool AreEqual( byte[] a, byte[] b )
+        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+        private static bool AreEqual(byte[] a, byte[] b)
         {
-            Int32 result = 0;
+            int result = 0;
             byte[] a1, a2;
 
-            if ( ( ( null == a ) || ( null == b ) )
-            || ( a.Length != b.Length ) )
+            if (((null == a) || (null == b))
+            || (a.Length != b.Length))
             {
-                a1 = _bytesA; a2 = _bytesB;
+                a1 = _bytesA; 
+                a2 = _bytesB;
             }
             else
             {
-                a1 = a; a2 = b;
+                a1 = a; 
+                a2 = b;
             }
 
-            for ( int i = 0; i < a.Length; i++ )
+            for (int i = 0; i < a.Length; i++)
             {
                 result |= a1[i] ^ a2[i];
             }

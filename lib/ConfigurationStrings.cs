@@ -19,13 +19,11 @@ namespace System.IdentityModel
     /// </summary>
     internal static class ConfigurationStrings
     {
-
         public const string NamespacePrefix                       = "fed";
-        //
+
         // Federation metadata spec 1.2, section 3.2.2
         // Federation metadata SHOULD be hosted at the following address:
-        // http[s]://server-name/FederationMetadata/spec-version/FederationMetadata.xml
-        //
+        // http[s]://server-name/FederationMetadata/spec-version/FederationMetadata.xml        
         public const string DefaultFederationMetadataPathExtension = "FederationMetadata/2007-06/FederationMetadata.xml";
 
         public const string Separator                                       = "/";

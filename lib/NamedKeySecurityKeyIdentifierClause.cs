@@ -12,16 +12,16 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Globalization;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Globalization;
+
     /// <summary>
     /// A <see cref="SecurityKeyIdentifierClause"/> that can be used to match <see cref="NamedKeySecurityToken"/>.
     /// </summary>
     public class NamedKeySecurityKeyIdentifierClause : SecurityKeyIdentifierClause
     {
-        private const string NameKeySecurityKeyIdentifierClauseType = "NamedKeySecurityKeyIdentifierClause";        
+        private const string NameKeySecurityKeyIdentifierClauseType = "NamedKeySecurityKeyIdentifierClause";
         private string _keyIdentifier;
         private string _name;
 
@@ -34,31 +34,31 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'keyIdentifier' is null.</exception>
         /// <exception cref="ArgumentException">string.IsNullOrWhiteSpace( 'name' ) is true.</exception>
         /// <exception cref="ArgumentException">string.IsNullOrWhiteSpace( 'keyIdentifier' ) is true.</exception>
-        public NamedKeySecurityKeyIdentifierClause( string name, string keyIdentifier )
-            : base( NameKeySecurityKeyIdentifierClauseType )
+        public NamedKeySecurityKeyIdentifierClause(string name, string keyIdentifier)
+            : base(NameKeySecurityKeyIdentifierClauseType)
         {
-            if ( name == null )
+            if (name == null)
             {
-                throw new ArgumentNullException( "name" );
+                throw new ArgumentNullException("name");
             }
 
-            if ( keyIdentifier == null )
+            if (keyIdentifier == null)
             {
-                throw new ArgumentNullException( "keyIdentifier" );
+                throw new ArgumentNullException("keyIdentifier");
             }
 
-            if ( string.IsNullOrWhiteSpace( name ) )
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name));
             }
 
-            if ( string.IsNullOrWhiteSpace( keyIdentifier ) )
+            if (string.IsNullOrWhiteSpace(keyIdentifier))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, keyIdentifier ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, keyIdentifier));
             }
 
-            _name = name;
-            _keyIdentifier = keyIdentifier;
+            this._name = name;
+            this._keyIdentifier = keyIdentifier;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string Name
         {
-            get { return _name; }
+            get { return this._name; }
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string KeyIdentifier
         {
-            get { return _keyIdentifier; }
+            get { return this._keyIdentifier; }
         }
 
         /// <summary>
@@ -88,24 +88,24 @@ namespace System.IdentityModel.Tokens
         /// <para>Otherwise calls base.Matches( keyIdentifierClause ).</para>
         /// </returns>
         /// <exception cref="ArgumentNullException">'keyIdentifierClause' is null.</exception>
-        public override bool Matches( SecurityKeyIdentifierClause keyIdentifierClause )
+        public override bool Matches(SecurityKeyIdentifierClause keyIdentifierClause)
         {
-            if ( keyIdentifierClause == null )
+            if (keyIdentifierClause == null)
             {
-                throw new ArgumentNullException( "keyIdentifierClause" );
+                throw new ArgumentNullException("keyIdentifierClause");
             }
 
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
-            if ( namedKeyIdentifierClause != null )
+            if (namedKeyIdentifierClause != null)
             {
-                if ( string.Equals( namedKeyIdentifierClause.Name, Name, StringComparison.Ordinal )
-                &&   string.Equals( namedKeyIdentifierClause.KeyIdentifier, KeyIdentifier, StringComparison.Ordinal ) )
+                if (string.Equals(namedKeyIdentifierClause.Name, Name, StringComparison.Ordinal)
+                && string.Equals(namedKeyIdentifierClause.KeyIdentifier, this.KeyIdentifier, StringComparison.Ordinal))
                 {
                     return true;
                 }
             }
 
-            return base.Matches( keyIdentifierClause );
+            return base.Matches(keyIdentifierClause);
         }
     }
 }

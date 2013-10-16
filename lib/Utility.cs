@@ -12,42 +12,40 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-
 namespace System.IdentityModel
 {
+    using System.Collections.Generic;
+    using System.Text;
+
     internal static class Utility
     {
         /// <summary>
         /// Serializes the list of strings into string as follows:
         /// 'str1','str2','str3'
         /// </summary>
-        internal static string SerializeAsSingleCommaDelimitedString( IEnumerable<string> strings )
+        internal static string SerializeAsSingleCommaDelimitedString(IEnumerable<string> strings)
         {
-            if ( null == strings )
+            if (null == strings)
             {
                 return TextStrings.Null;
             }
 
             StringBuilder sb = new StringBuilder();
             bool first = true;
-            foreach ( string str in strings )
+            foreach (string str in strings)
             {
-
-                if ( first )
+                if (first)
                 {
-                    sb.AppendFormat( "{0}", str ?? TextStrings.Null );
+                    sb.AppendFormat("{0}", str ?? TextStrings.Null);
                     first = false;
                 }
                 else
                 {
-                    sb.AppendFormat( ", {0}", str ?? TextStrings.Null );
+                    sb.AppendFormat(", {0}", str ?? TextStrings.Null);
                 }
             }
 
-            if ( first )
+            if (first)
             {
                 return TextStrings.Empty;
             }

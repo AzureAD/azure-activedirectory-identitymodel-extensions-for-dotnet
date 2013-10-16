@@ -12,7 +12,6 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-
 namespace System.IdentityModel.Tokens
 {
     /// <summary>
@@ -25,7 +24,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <param name="input">bytes to sign.</param>
         /// <returns>signed bytes</returns>
-        public abstract byte[] Sign( byte[] input );
+        public abstract byte[] Sign(byte[] input);
 
         /// <summary>
         /// Verifies that a signature created over the 'input' matches the signature.
@@ -33,15 +32,15 @@ namespace System.IdentityModel.Tokens
         /// <param name="input">bytes to verify.</param>
         /// <param name="signature">signature to compare against.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
-        public abstract bool Verify( byte[] input, byte[] signature );
+        public abstract bool Verify(byte[] input, byte[] signature);
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
         /// </summary>
         public string Context
         {
-            set;
             get;
+            set;
         }
 
         #region IDisposable Members
@@ -51,7 +50,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -64,4 +63,3 @@ namespace System.IdentityModel.Tokens
         #endregion
     }
 }
-

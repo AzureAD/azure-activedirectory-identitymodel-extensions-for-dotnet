@@ -19,37 +19,38 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     internal static class EpochTime
     {
-        public static readonly DateTime UnixEpoch = new DateTime( 1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc );
-       
+        public static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
         /// <summary>
         /// Per JWT spec:
         /// Gets the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the desired date/time.
         /// </summary>
         /// <remarks>if dateTimeUtc less than UnixEpoch, return 0</remarks>
-        public static Int64 GetIntDate( DateTime datetime )
+        /// <returns>the number of seconds since Unix Epoch.</returns>
+        public static long GetIntDate(DateTime datetime)
         {
             DateTime dateTimeUtc = datetime;
-            if ( datetime.Kind != DateTimeKind.Utc )
+            if (datetime.Kind != DateTimeKind.Utc)
             {
                 dateTimeUtc = datetime.ToUniversalTime();
             }
 
-            if ( dateTimeUtc.ToUniversalTime() <= UnixEpoch )
+            if (dateTimeUtc.ToUniversalTime() <= UnixEpoch)
             {
                 return 0;
             }
 
-            return (Int64)( dateTimeUtc - UnixEpoch ).TotalSeconds;
+            return (long)(dateTimeUtc - UnixEpoch).TotalSeconds;
         }
 
-        public static DateTime DateTime( Int64 secondsSinceUnixEpoch )
+        public static DateTime DateTime(long secondsSinceUnixEpoch)
         {
-            if ( secondsSinceUnixEpoch <= 0 )
+            if (secondsSinceUnixEpoch <= 0)
             {
                 return UnixEpoch;
             }
 
-            return DateTimeUtil.Add( UnixEpoch, TimeSpan.FromSeconds( secondsSinceUnixEpoch ) ).ToUniversalTime();
+            return DateTimeUtil.Add(UnixEpoch, TimeSpan.FromSeconds(secondsSinceUnixEpoch)).ToUniversalTime();
         }
     }
 }

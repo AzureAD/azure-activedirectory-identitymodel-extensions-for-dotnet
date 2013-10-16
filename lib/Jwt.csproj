@@ -31,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -64,8 +65,12 @@
     <Compile Include="EpochTime.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="JwtConfigurationStrings.cs" />
-    <Compile Include="JwtConstants.cs" />
-    <Compile Include="JwtErrors.cs" />
+    <Compile Include="JwtConstants.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="JwtErrors.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="JwtHeader.cs" />
     <Compile Include="JwtPayLoad.cs" />
     <Compile Include="JwtSecurityToken.cs" />
@@ -74,7 +79,9 @@
     <Compile Include="NamedKeyIssuerTokenResolver.cs" />
     <Compile Include="NamedKeySecurityKeyIdentifierClause.cs" />
     <Compile Include="NamedKeySecurityToken.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="SignatureProvider.cs" />
     <Compile Include="SignatureProviderFactory.cs" />
     <Compile Include="SymmetricSignatureProvider.cs" />
@@ -84,7 +91,9 @@
     <Compile Include="WifExtensionsErrors.cs" />
     <Compile Include="WSSecurity10Constants.cs" />
     <Compile Include="WSSecurityUtilityConstants.cs" />
-    <Compile Include="X509CertificateValidatorEx.cs" />
+    <Compile Include="X509CertificateValidatorEx.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="XmlUtil.cs" />
   </ItemGroup>
   <ItemGroup>

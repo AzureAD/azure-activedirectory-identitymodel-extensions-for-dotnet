@@ -12,32 +12,32 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Web.Script.Serialization;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Web.Script.Serialization;
+
     internal static class JsonExtensions
     {
-        public static string SerializeToJson( this object value )
+        public static string SerializeToJson(this object value)
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Serialize( value );
+            return serializer.Serialize(value);
         }
 
-        public static T DeserializeFromJson<T>( this string value )
+        public static T DeserializeFromJson<T>(this string value)
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Deserialize<T>( value );
+            return serializer.Deserialize<T>(value);
         }
 
-        public static JwtHeader DeserializeJwtHeader( this string value )
+        public static JwtHeader DeserializeJwtHeader(this string value)
         {
-            return DeserializeFromJson<JwtHeader>( value );
+            return DeserializeFromJson<JwtHeader>(value);
         }
 
-        public static JwtPayload DeserializeJwtPayload( this string value )
+        public static JwtPayload DeserializeJwtPayload(this string value)
         {
-            return DeserializeFromJson<JwtPayload>( value );
+            return DeserializeFromJson<JwtPayload>(value);
         }
     }
 }

@@ -14,6 +14,9 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using System.Diagnostics.CodeAnalysis;
+
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
     internal static class JwtErrors
     {
         // general errors 10000 - 10099
