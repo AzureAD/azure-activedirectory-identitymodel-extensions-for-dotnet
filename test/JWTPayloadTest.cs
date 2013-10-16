@@ -51,14 +51,14 @@ namespace System.IdentityModel.Test
         public void JwtPalyoad_ObjectClaims()
         {
             JwtPayload jwtPayload = new JwtPayload();
-            Int32? time = 10000;
+            int? time = 10000;
             jwtPayload.Add( "exp", time );
             DateTime payloadTime = EpochTime.DateTime( time.Value );
             DateTime payloadValidTo = jwtPayload.ValidTo;
 
             Assert.IsFalse(EpochTime.DateTime(time.Value) != jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
 
-            Int32? expirationTime = jwtPayload.Expiration;
+            int? expirationTime = jwtPayload.Expiration;
             Assert.IsTrue(expirationTime == time, "expirationTime != time");
         }
     }

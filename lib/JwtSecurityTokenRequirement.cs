@@ -12,43 +12,42 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Configuration;
-using System.Globalization;
-using System.IdentityModel.Configuration;
-using System.IdentityModel.Selectors;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
-using System.ServiceModel.Security;
-using System.Xml;
-
-using Attributes = System.IdentityModel.Tokens.JwtConfigurationStrings.Attributes;
-using AttributeValues = System.IdentityModel.Tokens.JwtConfigurationStrings.AttributeValues;
-using Elements = System.IdentityModel.Tokens.JwtConfigurationStrings.Elements;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
+    using System.IdentityModel.Configuration;
+    using System.IdentityModel.Selectors;
+    using System.Security.Claims;
+    using System.Security.Cryptography.X509Certificates;
+    using System.ServiceModel.Security;
+    using System.Xml;
+
+    using Attributes = System.IdentityModel.Tokens.JwtConfigurationStrings.Attributes;
+    using AttributeValues = System.IdentityModel.Tokens.JwtConfigurationStrings.AttributeValues;
+    using Elements = System.IdentityModel.Tokens.JwtConfigurationStrings.Elements;
+
     /// <summary>
     /// Provides a location for settings that control how the <see cref="JwtSecurityTokenHandler"/> validates or creates a <see cref="JwtSecurityToken"/>. 
     /// </summary>
     /// <remarks>These values have precedence over <see cref="SecurityTokenHandler.Configuration"/>.</remarks>
     public class JwtSecurityTokenRequirement
     {
-        //
         // The defaults will only be used if some verification properties are set in config and others are not
-        //
-        private X509RevocationMode _defaultRevocationMode = X509RevocationMode.Online;
+        private X509RevocationMode __defaultRevocationMode = X509RevocationMode.Online;
         private X509CertificateValidationMode _defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
         private StoreLocation _defaultStoreLocation = StoreLocation.LocalMachine;
-        private UInt32 _defaultTokenLifetimeInMinutes = 600;
-        private UInt32 _maxTokenSizeInBytes = 2 * 1024 * 1024;
+        private uint _defaultTokenLifetimeInMinutes = 600;
+        private uint _maxTokenSizeInBytes = 2 * 1024 * 1024;
         private string _nameClaimType;
         private string _roleClaimType;
-        private X509CertificateValidator _certificateValidator;        
+        private X509CertificateValidator _certificateValidator;
 
         // This indicates that the clockSkew was never set
         private TimeSpan? _maxClockSkew = null;
-       
+
         /// <summary>
         /// Creates an instance of <see cref="JwtSecurityTokenRequirement"/>
         /// </summary>
@@ -56,24 +55,24 @@ namespace System.IdentityModel.Tokens
         {
         }
 
-        ///<summary>
-        ///Provides additional configuration to the <see cref="JwtSecurityTokenHandler"/> when validating or creating a <see cref="JwtSecurityToken"/>. 
-        ///</summary>
-        ///<remarks>
-        ///<para>A single XML element is expected with up to four optional attributes: {'expected values'} and up to five optional child elements.</para>
-        ///<para>&lt;jwtSecurityTokenRequirement</para>
-        ///<para>&#160;&#160;&#160;&#160;issuerCertificateRevocationMode: {NoCheck, OnLine, OffLine}</para>
-        ///<para>&#160;&#160;&#160;&#160;issuerCertificateTrustedStoreLocation: {CurrentUser, LocalMachine}</para>
-        ///<para>&#160;&#160;&#160;&#160;issuerCertificateValidator: type derived from <see cref="X509CertificateValidator"/></para>
-        ///<para>&#160;&#160;&#160;&#160;issuerCertificateValidationMode: {ChainTrust, Custom, None, PeerTrust, PeerOrChainTrust}</para>
-        ///<para>></para>
-        ///<para>&#160;&#160;&#160;&#160;&lt;nameClaimType value = 'somestring'/></para>
-        ///<para>&#160;&#160;&#160;&#160;&lt;roleClaimType value = 'somestring'/></para>
-        ///<para>&#160;&#160;&#160;&#160;&lt;defaultTokenLifetimeInMinutes value = 'UInt32'/></para>
-        ///<para>&#160;&#160;&#160;&#160;&lt;maxTokenSizeInBytes value = 'UInt32'/></para>
-        ///<para>&#160;&#160;&#160;&#160;&lt;maxClockSkewInMinutes value = 'UInt32'/></para>
-        ///<para>&lt;/jwtSecurityTokenRequirement></para>
-        ///</remarks>
+        /// <summary>
+        /// Provides additional configuration to the <see cref="JwtSecurityTokenHandler"/> when validating or creating a <see cref="JwtSecurityToken"/>. 
+        /// </summary>
+        /// <remarks>
+        /// <para>A single XML element is expected with up to four optional attributes: {'expected values'} and up to five optional child elements.</para>
+        /// <para>&lt;jwtSecurityTokenRequirement</para>
+        /// <para>&#160;&#160;&#160;&#160;issuerCertificateRevocationMode: {NoCheck, OnLine, OffLine}</para>
+        /// <para>&#160;&#160;&#160;&#160;issuerCertificateTrustedStoreLocation: {CurrentUser, LocalMachine}</para>
+        /// <para>&#160;&#160;&#160;&#160;issuerCertificateValidator: type derived from <see cref="X509CertificateValidator"/></para>
+        /// <para>&#160;&#160;&#160;&#160;issuerCertificateValidationMode: {ChainTrust, Custom, None, PeerTrust, PeerOrChainTrust}</para>
+        /// <para>></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;nameClaimType value = 'somestring'/></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;roleClaimType value = 'somestring'/></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;defaultTokenLifetimeInMinutes value = 'uint'/></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;maxTokenSizeInBytes value = 'uint'/></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;maxClockSkewInMinutes value = 'uint'/></para>
+        /// <para>&lt;/jwtSecurityTokenRequirement></para>
+        /// </remarks>
         /// <param name="element">The <see cref="XmlElement"/> to be parsed.</param>
         /// <exception cref="ArgumentNullException">'element' is null.</exception>
         /// <exception cref="ConfigurationErrorsException"><see cref="XmlElement.LocalName"/> is not 'jwtSecurityTokenRequirement'.</exception>
@@ -85,146 +84,145 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ConfigurationErrorsException">if the 'issuerCertificateValidationMode' == 'Custom' and a 'issuerCertificateValidator' attribute was not specified.</exception>
         /// <exception cref="ConfigurationErrorsException">if the runtime was not able to create the type specified by a the 'issuerCertificateValidator' attribute.</exception>
         /// <exception cref="ConfigurationErrorsException">if a child element of &lt;jwtSecurityTokenRequirement> is not well formed.</exception>
-        public JwtSecurityTokenRequirement( XmlElement element )
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Reviewed. Suppression is OK here.")]
+        public JwtSecurityTokenRequirement(XmlElement element)
         {
-            if ( element == null )
+            if (element == null)
             {
                 throw new ArgumentNullException("element");
             }
 
-            if ( element.LocalName != Elements.JwtSecurityTokenRequirement )
+            if (element.LocalName != Elements.JwtSecurityTokenRequirement)
             {
-                throw new ConfigurationErrorsException( String.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10601, element.LocalName, element.OuterXml ) );
+                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10601, element.LocalName, element.OuterXml));
             }
 
-            X509RevocationMode revocationMode = _defaultRevocationMode;
-            X509CertificateValidationMode certificateValidationMode = _defaultValidationMode;
-            StoreLocation trustedStoreLocation = _defaultStoreLocation;
+            X509RevocationMode revocationMode = this.__defaultRevocationMode;
+            X509CertificateValidationMode certificateValidationMode = this._defaultValidationMode;
+            StoreLocation trustedStoreLocation = this._defaultStoreLocation;
             string customValidator = null;
             bool createCertificateValidator = false;
             HashSet<string> itemsProcessed = new HashSet<string>();
 
-            foreach ( XmlAttribute attribute in element.Attributes  )
+            foreach (XmlAttribute attribute in element.Attributes)
             {
-                if ( String.IsNullOrWhiteSpace( attribute.Value ) )
+                if (string.IsNullOrWhiteSpace(attribute.Value))
                 {
-                    throw new InvalidOperationException( String.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10600, attribute.LocalName, element.OuterXml ) );
-                }
-                
-                if ( itemsProcessed.Contains( attribute.Value ) )
-                {
-                    throw new InvalidOperationException( String.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10617, attribute.LocalName, element.OuterXml ) );
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10600, attribute.LocalName, element.OuterXml));
                 }
 
-                if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.LocalName, Attributes.Validator ) )
+                if (itemsProcessed.Contains(attribute.Value))
+                {
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10617, attribute.LocalName, element.OuterXml));
+                }
+
+                if (StringComparer.OrdinalIgnoreCase.Equals(attribute.LocalName, Attributes.Validator))
                 {
                     customValidator = attribute.Value;
                 }
-                else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.LocalName, Attributes.RevocationMode ) )
+                else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.LocalName, Attributes.RevocationMode))
                 {
                     createCertificateValidator = true;
 
-					if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509RevocationModeNoCheck ) )
-					{
-						revocationMode = X509RevocationMode.NoCheck;
-					}
-					else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509RevocationModeOffline ) )
-					{
-						revocationMode = X509RevocationMode.Offline;
-					}
-					else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509RevocationModeOnline ) )
-					{
-						revocationMode = X509RevocationMode.Online;
-					}
+                    if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509RevocationModeNoCheck))
+                    {
+                        revocationMode = X509RevocationMode.NoCheck;
+                    }
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509RevocationModeOffline))
+                    {
+                        revocationMode = X509RevocationMode.Offline;
+                    }
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509RevocationModeOnline))
+                    {
+                        revocationMode = X509RevocationMode.Online;
+                    }
                     else
-					{
-                        throw new ConfigurationErrorsException( 
-                            string.Format( 
-                                CultureInfo.InvariantCulture, 
-                                JwtErrors.Jwt10606, 
-                                Attributes.RevocationMode, 
-                                attribute.Value, 
-                                string.Format(  
-                                    CultureInfo.InvariantCulture, 
-                                    "'{0}', '{1}', '{2}'", 
-                                    AttributeValues.X509RevocationModeNoCheck, 
-                                    AttributeValues.X509RevocationModeOffline, 
-                                    AttributeValues.X509RevocationModeOnline ),
-                                element.OuterXml ) );
-					}
-				}
-                else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.LocalName, Attributes.ValidationMode ) )
+                    {
+                        throw new ConfigurationErrorsException(
+                            string.Format(
+                                CultureInfo.InvariantCulture,
+                                JwtErrors.Jwt10606,
+                                Attributes.RevocationMode,
+                                attribute.Value,
+                                string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "'{0}', '{1}', '{2}'",
+                                    AttributeValues.X509RevocationModeNoCheck,
+                                    AttributeValues.X509RevocationModeOffline,
+                                    AttributeValues.X509RevocationModeOnline),
+                                element.OuterXml));
+                    }
+                }
+                else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.LocalName, Attributes.ValidationMode))
                 {
                     createCertificateValidator = true;
 
-                    if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509CertificateValidationModeChainTrust ) )
+                    if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509CertificateValidationModeChainTrust))
                     {
                         certificateValidationMode = X509CertificateValidationMode.ChainTrust;
                     }
-                    else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509CertificateValidationModePeerOrChainTrust ) )
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509CertificateValidationModePeerOrChainTrust))
                     {
                         certificateValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
                     }
-                    else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509CertificateValidationModePeerTrust ) )
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509CertificateValidationModePeerTrust))
                     {
                         certificateValidationMode = X509CertificateValidationMode.PeerTrust;
                     }
-                    else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509CertificateValidationModeNone ) )
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509CertificateValidationModeNone))
                     {
                         certificateValidationMode = X509CertificateValidationMode.None;
                     }
-                    else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509CertificateValidationModeCustom ) )
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509CertificateValidationModeCustom))
                     {
                         certificateValidationMode = X509CertificateValidationMode.Custom;
                     }
                     else
                     {
                         throw new ConfigurationErrorsException(
-                            string.Format( 
-                                CultureInfo.InvariantCulture, 
+                            string.Format(
+                                CultureInfo.InvariantCulture,
                                 JwtErrors.Jwt10606,
                                 Attributes.ValidationMode,
                                 attribute.Value,
-                                string.Format( 
-                                    CultureInfo.InvariantCulture, 
-                                    "'{0}', '{1}', '{2}', '{3}', '{4}'", 
-                                    AttributeValues.X509CertificateValidationModeChainTrust, 
-                                    AttributeValues.X509CertificateValidationModePeerOrChainTrust, 
+                                string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "'{0}', '{1}', '{2}', '{3}', '{4}'",
+                                    AttributeValues.X509CertificateValidationModeChainTrust,
+                                    AttributeValues.X509CertificateValidationModePeerOrChainTrust,
                                     AttributeValues.X509CertificateValidationModePeerTrust,
                                     AttributeValues.X509CertificateValidationModeNone,
-                                    AttributeValues.X509CertificateValidationModeCustom 
-                                    ),
-                                element.OuterXml ) );
+                                    AttributeValues.X509CertificateValidationModeCustom),
+                                element.OuterXml));
                     }
                 }
-                else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.LocalName, Attributes.TrustedStoreLocation ) )
+                else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.LocalName, Attributes.TrustedStoreLocation))
                 {
                     createCertificateValidator = true;
 
-                    if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509TrustedStoreLocationCurrentUser ) )
+                    if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509TrustedStoreLocationCurrentUser))
                     {
                         trustedStoreLocation = StoreLocation.CurrentUser;
                     }
-                    else if ( StringComparer.OrdinalIgnoreCase.Equals( attribute.Value, AttributeValues.X509TrustedStoreLocationLocalMachine ) )
+                    else if (StringComparer.OrdinalIgnoreCase.Equals(attribute.Value, AttributeValues.X509TrustedStoreLocationLocalMachine))
                     {
                         trustedStoreLocation = StoreLocation.LocalMachine;
                     }
                     else
                     {
                         throw new ConfigurationErrorsException(
-                            string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10606,
+                            string.Format(
+                                CultureInfo.InvariantCulture, 
+                                JwtErrors.Jwt10606,
                                 Attributes.TrustedStoreLocation,
                                 attribute.Value,
-                                string.Format( CultureInfo.InvariantCulture, "'{0}', '{1}'",
-                                    AttributeValues.X509TrustedStoreLocationCurrentUser,
-                                    AttributeValues.X509TrustedStoreLocationLocalMachine
-                                    ),
-                                element.OuterXml ) );
+                                "'" + AttributeValues.X509TrustedStoreLocationCurrentUser + "', '" + AttributeValues.X509TrustedStoreLocationLocalMachine + "'",
+                                element.OuterXml));
                     }
                 }
                 else
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10608, Elements.JwtSecurityTokenRequirement, attribute.LocalName, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10608, Elements.JwtSecurityTokenRequirement, attribute.LocalName, element.OuterXml));
                 }
             }
 
@@ -233,129 +231,127 @@ namespace System.IdentityModel.Tokens
 
             foreach (XmlElement childElement in configElements)
             {
-                if ( childElement.Attributes.Count > 1 )
+                if (childElement.Attributes.Count > 1)
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10609, childElement.LocalName, Attributes.Value, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10609, childElement.LocalName, Attributes.Value, element.OuterXml));
                 }
 
-                if ( childElement.Attributes.Count == 0 )
+                if (childElement.Attributes.Count == 0)
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10607, childElement.LocalName, Attributes.Value, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10607, childElement.LocalName, Attributes.Value, element.OuterXml));
                 }
 
-                if ( string.IsNullOrWhiteSpace( childElement.Attributes[0].LocalName ) )
+                if (string.IsNullOrWhiteSpace(childElement.Attributes[0].LocalName))
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10600, Attributes.Value, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10600, Attributes.Value, element.OuterXml));
                 }
 
-                if ( !StringComparer.Ordinal.Equals( childElement.Attributes[0].LocalName, Attributes.Value ) )
+                if (!StringComparer.Ordinal.Equals(childElement.Attributes[0].LocalName, Attributes.Value))
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10610, childElement.LocalName, Attributes.Value, childElement.Attributes[0].LocalName, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10610, childElement.LocalName, Attributes.Value, childElement.Attributes[0].LocalName, element.OuterXml));
                 }
 
-                if ( elementsProcessed.Contains( childElement.LocalName ) )
+                if (elementsProcessed.Contains(childElement.LocalName))
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10616, childElement.LocalName, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10616, childElement.LocalName, element.OuterXml));
                 }
 
-                elementsProcessed.Add( childElement.LocalName );
+                elementsProcessed.Add(childElement.LocalName);
 
-                if ( StringComparer.Ordinal.Equals( childElement.LocalName, Elements.NameClaimType ) )
+                if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.NameClaimType))
                 {
-                    NameClaimType = childElement.Attributes[0].Value;                    
+                    this.NameClaimType = childElement.Attributes[0].Value;
                 }
                 else if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.RoleClaimType))
                 {
-                    RoleClaimType = childElement.Attributes[0].Value;
+                    this.RoleClaimType = childElement.Attributes[0].Value;
                 }
-                else 
+                else
                 {
                     try
                     {
-                        if ( StringComparer.Ordinal.Equals( childElement.LocalName, Elements.MaxTokenSizeInBytes ) )
+                        if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.MaxTokenSizeInBytes))
                         {
-                            MaximumTokenSizeInBytes = Convert.ToUInt32( childElement.Attributes[0].Value, CultureInfo.InvariantCulture );
+                            this.MaximumTokenSizeInBytes = Convert.ToUInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
                         }
-                        else if ( StringComparer.Ordinal.Equals( childElement.LocalName, Elements.DefaultTokenLifetimeInMinutes ) )
+                        else if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.DefaultTokenLifetimeInMinutes))
                         {
-                            DefaultTokenLifetimeInMinutes = Convert.ToUInt32( childElement.Attributes[0].Value, CultureInfo.InvariantCulture );
+                            this.DefaultTokenLifetimeInMinutes = Convert.ToUInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
                         }
-                        else if ( StringComparer.Ordinal.Equals( childElement.LocalName, Elements.MaxClockSkewInMinutes ) )
+                        else if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.MaxClockSkewInMinutes))
                         {
-                            // UInt32.MaxValue < TimeSpan.MaxValue.TotalMinutes.  If this can be parsed, we can set it.
-                            UInt32 clockSkewInMinutes = Convert.ToUInt32( childElement.Attributes[0].Value, CultureInfo.InvariantCulture );
-                            MaxClockSkew = TimeSpan.FromMinutes( clockSkewInMinutes );
+                            // uint.MaxValue < TimeSpan.MaxValue.TotalMinutes.  If this can be parsed, we can set it.
+                            uint clockSkewInMinutes = Convert.ToUInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
+                            this.MaxClockSkew = TimeSpan.FromMinutes(clockSkewInMinutes);
                         }
-                        else 
+                        else
                         {
                             throw new ConfigurationErrorsException(
-                                string.Format( 
-                                    CultureInfo.InvariantCulture, 
+                                string.Format(
+                                    CultureInfo.InvariantCulture,
                                     JwtErrors.Jwt10611,
                                     Elements.JwtSecurityTokenRequirement,
                                     childElement.LocalName,
-                                    string.Format( 
-                                        CultureInfo.InvariantCulture, 
+                                    string.Format(
+                                        CultureInfo.InvariantCulture,
                                         "{0}', '{1}', '{2}', '{3}', '{4}",
                                         Elements.NameClaimType,
                                         Elements.RoleClaimType,
                                         Elements.MaxTokenSizeInBytes,
                                         Elements.MaxClockSkewInMinutes,
-                                        Elements.DefaultTokenLifetimeInMinutes ),
-                                    element.OuterXml ) );
+                                        Elements.DefaultTokenLifetimeInMinutes),
+                                    element.OuterXml));
                         }
                     }
-                    catch ( OverflowException oex )
+                    catch (OverflowException oex)
                     {
-                        throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10603, childElement.LocalName, childElement.OuterXml, oex ), oex );
+                        throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10603, childElement.LocalName, childElement.OuterXml, oex), oex);
                     }
-                    catch ( FormatException fex )
+                    catch (FormatException fex)
                     {
-                        throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10603, childElement.LocalName, childElement.OuterXml, fex ), fex );
+                        throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10603, childElement.LocalName, childElement.OuterXml, fex), fex);
                     }
-                    catch ( ArgumentOutOfRangeException aex )
+                    catch (ArgumentOutOfRangeException aex)
                     {
-                        throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10603, childElement.LocalName, childElement.OuterXml, aex ), aex );
+                        throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10603, childElement.LocalName, childElement.OuterXml, aex), aex);
                     }
                 }
             }
 
-            if ( certificateValidationMode == X509CertificateValidationMode.Custom )
+            if (certificateValidationMode == X509CertificateValidationMode.Custom)
             {
                 Type customValidatorType = null;
 
-                if ( customValidator == null )
+                if (customValidator == null)
                 {
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10612, Attributes.ValidationMode, Attributes.Validator, element.OuterXml ) );
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10612, Attributes.ValidationMode, Attributes.Validator, element.OuterXml));
                 }
 
                 try
                 {
-                    customValidatorType = Type.GetType( customValidator, true ) ;
+                    customValidatorType = Type.GetType(customValidator, true);
                     CustomTypeElement typeElement = new CustomTypeElement();
                     typeElement.Type = customValidatorType;
 
-                    _certificateValidator = CustomTypeElement.Resolve<X509CertificateValidator>( typeElement );
-
+                    this._certificateValidator = CustomTypeElement.Resolve<X509CertificateValidator>(typeElement);
                 }
-                catch ( Exception ex )
+                catch (Exception ex)
                 {
-                    if ( DiagnosticUtility.IsFatal( ex ) )
+                    if (DiagnosticUtility.IsFatal(ex))
                     {
                         throw;
                     }
 
-                    throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10613, customValidator, Attributes.Validator, ex, element.OuterXml ) );
-
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10613, customValidator, Attributes.Validator, ex, element.OuterXml));
                 }
-            }            
-            else if ( customValidator != null )
-            {
-                throw new ConfigurationErrorsException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10619, Attributes.Validator, Attributes.ValidationMode, AttributeValues.X509CertificateValidationModeCustom, certificateValidationMode, typeof( X509CertificateValidator ).ToString(), customValidator, element.OuterXml ) );
             }
-            else if ( createCertificateValidator )
+            else if (customValidator != null)
             {
-                _certificateValidator = new X509CertificateValidatorEx( certificateValidationMode, revocationMode, trustedStoreLocation );
+                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10619, Attributes.Validator, Attributes.ValidationMode, AttributeValues.X509CertificateValidationModeCustom, certificateValidationMode, typeof(X509CertificateValidator).ToString(), customValidator, element.OuterXml));
+            }
+            else if (createCertificateValidator)
+            {
+                this._certificateValidator = new X509CertificateValidatorEx(certificateValidationMode, revocationMode, trustedStoreLocation);
             }
         }
 
@@ -366,12 +362,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _certificateValidator;
+                return this._certificateValidator;
             }
 
             set
             {
-                _certificateValidator = value;
+                this._certificateValidator = value;
             }
         }
 
@@ -383,12 +379,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _nameClaimType;
+                return this._nameClaimType;
             }
 
             set
             {
-                _nameClaimType = value;
+                this._nameClaimType = value;
             }
         }
 
@@ -400,12 +396,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _roleClaimType;
+                return this._roleClaimType;
             }
 
             set
             {
-                _roleClaimType = value;
+                this._roleClaimType = value;
             }
         }
 
@@ -414,21 +410,21 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Default: 2 megabytes.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">if value is 0.</exception>
-        public UInt32 MaximumTokenSizeInBytes
+        public uint MaximumTokenSizeInBytes
         {
-            get 
-            { 
-                return _maxTokenSizeInBytes; 
+            get
+            {
+                return this._maxTokenSizeInBytes;
             }
 
             set
             {
-                if ( value == 0 )
+                if (value == 0)
                 {
-                    throw new ArgumentOutOfRangeException( "value", JwtErrors.Jwt10116 );
+                    throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
                 }
 
-                _maxTokenSizeInBytes = value;
+                this._maxTokenSizeInBytes = value;
             }
         }
 
@@ -438,21 +434,21 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Default: 600.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">value == 0.</exception>
-        public UInt32 DefaultTokenLifetimeInMinutes
+        public uint DefaultTokenLifetimeInMinutes
         {
-            get 
-            { 
-                return _defaultTokenLifetimeInMinutes; 
+            get
+            {
+                return this._defaultTokenLifetimeInMinutes;
             }
 
             set
             {
-                if ( value == 0 )
+                if (value == 0)
                 {
-                    throw new ArgumentOutOfRangeException( "value", JwtErrors.Jwt10115 );
+                    throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
                 }
-                
-                _defaultTokenLifetimeInMinutes = value;
+
+                this._defaultTokenLifetimeInMinutes = value;
             }
         }
 
@@ -464,17 +460,17 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _maxClockSkew;
+                return this._maxClockSkew;
             }
 
             set
             {
-                if ( value == null  && value.HasValue && value.Value  < TimeSpan.Zero )
+                if (value == null && value.HasValue && value.Value < TimeSpan.Zero)
                 {
-                    throw new ArgumentOutOfRangeException( String.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10111, value.Value ) );
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10111, value.Value));
                 }
 
-                _maxClockSkew = value;
+                this._maxClockSkew = value;
             }
         }
     }

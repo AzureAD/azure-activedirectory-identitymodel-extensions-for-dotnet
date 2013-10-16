@@ -12,12 +12,11 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Diagnostics;
-using System.Globalization;
-using System.Reflection;
-
 namespace System.IdentityModel
 {
+    using System.Reflection;
+    using System.Runtime.InteropServices;
+
     /// <summary>
     /// Provides common code for services to use in generating diagnostics and taking actions.
     /// </summary>
@@ -27,17 +26,15 @@ namespace System.IdentityModel
         /// Returns true if the provided exception matches any of a list of hard system faults that should be allowed
         /// through to outer exception handlers.
         /// </summary>
+        /// <param name="exception"></param>
         /// <remarks>
         /// <para>Typically this method is used when there is a need to catch all exceptions, but to ensure that .NET runtime
         /// and execution engine exceptions are not absorbed by the catch block. Use of this method also avoids FxCop
         /// warnings about not using general catch blocks.</para>
-        ///
         /// <para>Please note that use of this method is expensive because of the amount of reflection it performs.
         /// If you can refactor your code to catch more specific exceptions than Exception to avoid using this method,
         /// you should.</para>
-        ///
         /// <para>Example of use:</para>
-        ///
         /// <code>
         /// try
         /// {
@@ -53,13 +50,14 @@ namespace System.IdentityModel
         /// }
         /// </code>
         /// </remarks>
+        /// <returns>true if the exception should NOT be trapped</returns>
         public static bool IsFatal(Exception exception)
         {
             bool returnValue = false;
 
             if ((exception is OutOfMemoryException && !(exception is InsufficientMemoryException)) ||                
                 exception is AccessViolationException ||
-                exception is System.Runtime.InteropServices.SEHException ||
+                exception is SEHException ||
                 exception is TypeInitializationException ||
                 exception is TargetInvocationException)
             {

@@ -12,64 +12,64 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.IdentityModel.Protocols.WSTrust;
-using System.Linq;
-using System.Security.Claims;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IdentityModel.Protocols.WSTrust;
+    using System.Linq;
+    using System.Security.Claims;
+
     /// <summary>
-    /// The <see cref="JwtPayload"/> contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.
+    /// Initializes a new instance of <see cref="JwtPayload"/> which contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.
     /// </summary>
     public class JwtPayload : Dictionary<string, object>
     {
         /// <summary>
         /// Creates a empty <see cref="JwtPayload"/>
         /// </summary>
-        public JwtPayload( )
-            : base( StringComparer.Ordinal )
+        public JwtPayload()
+            : base(StringComparer.Ordinal)
         {
         }
 
         /// <summary>
-        /// Creates a <see cref="JwtPayload"/> with claims added for each of the parameters were specified.
+        /// Initializes a new instance of <see cref="JwtPayload"/> with claims added for each parameter specified.
         /// </summary>
         /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
         /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
         /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
         /// <param name="lifetime">if this value is not null, then if <para><see cref="Lifetime" />.Created.HasValue a { nbf, 'value' } is added.</para><para>if <see cref="Lifetime"/>.Expires.HasValue a { exp, 'value' } claim is added.</para></param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/></remarks>
-        public JwtPayload( string issuer = null, string audience = null, IEnumerable<Claim> claims = null, Lifetime lifetime = null )
-            : base( StringComparer.Ordinal )
+        public JwtPayload(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, Lifetime lifetime = null)
+            : base(StringComparer.Ordinal)
         {
-            if ( null != issuer )
+            if (null != issuer)
             {
-                Add( JwtConstants.ReservedClaims.Issuer, issuer );
+                this.Add(JwtConstants.ReservedClaims.Issuer, issuer);
             }
 
-            if ( null != audience )
+            if (null != audience)
             {
-                Add( JwtConstants.ReservedClaims.Audience, audience );
+                this.Add(JwtConstants.ReservedClaims.Audience, audience);
             }
 
-            if ( lifetime != null )
+            if (lifetime != null)
             {
-                if ( lifetime.Created.HasValue )
+                if (lifetime.Created.HasValue)
                 {
-                    Add( JwtConstants.ReservedClaims.NotBefore, EpochTime.GetIntDate( lifetime.Created.Value ) );
+                    this.Add(JwtConstants.ReservedClaims.NotBefore, EpochTime.GetIntDate(lifetime.Created.Value));
                 }
 
-                if ( lifetime.Expires.HasValue )
+                if (lifetime.Expires.HasValue)
                 {
-                    Add( JwtConstants.ReservedClaims.ExpirationTime, EpochTime.GetIntDate( lifetime.Expires.Value ) );
+                    this.Add(JwtConstants.ReservedClaims.ExpirationTime, EpochTime.GetIntDate(lifetime.Expires.Value));
                 }
             }
 
-            if ( claims != null )
+            if (claims != null)
             {
-                AddClaims( claims );
+                this.AddClaims(claims);
             }
         }
 
@@ -81,7 +81,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return GetStandardClaim( JwtConstants.ReservedClaims.Actor );
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Actor);
             }
         }
 
@@ -91,16 +91,16 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'audience' claim is not found, null is returned.</remarks>
         public string Audience
         {
-            get { return GetStandardClaim( JwtConstants.ReservedClaims.Audience ); }
+            get { return this.GetStandardClaim(JwtConstants.ReservedClaims.Audience); }
         }
 
         /// <summary>
         /// Gets the 'value' of the 'expiration' claim { exp, 'value' }.
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public Int32? Expiration
+        public int? Expiration
         {
-            get { return GetIntClaim( JwtConstants.ReservedClaims.ExpirationTime ); }
+            get { return this.GetIntClaim(JwtConstants.ReservedClaims.ExpirationTime); }
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return GetStandardClaim( JwtConstants.ReservedClaims.JwtId );
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.JwtId);
             }
         }
 
@@ -119,9 +119,9 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
         /// </summary>
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        public Int32? IssuedAt
+        public int? IssuedAt
         {
-            get { return GetIntClaim( JwtConstants.ReservedClaims.IssuedAt ); }
+            get { return this.GetIntClaim(JwtConstants.ReservedClaims.IssuedAt); }
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return GetStandardClaim( JwtConstants.ReservedClaims.Issuer );
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Issuer);
             }
         }
 
@@ -144,7 +144,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return GetStandardClaim( JwtConstants.ReservedClaims.Subject );
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Subject);
             }
         }
 
@@ -156,7 +156,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return GetDateTime( JwtConstants.ReservedClaims.NotBefore );
+                return this.GetDateTime(JwtConstants.ReservedClaims.NotBefore);
             }
         }
 
@@ -168,7 +168,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return GetDateTime( JwtConstants.ReservedClaims.ExpirationTime );
+                return this.GetDateTime(JwtConstants.ReservedClaims.ExpirationTime);
             }
         }
 
@@ -182,21 +182,21 @@ namespace System.IdentityModel.Tokens
             get
             {
                 List<Claim> claims = new List<Claim>();
-                string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;                   
+                string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;
 
-                foreach ( KeyValuePair<string, object> keyValuePair in this )
+                foreach (KeyValuePair<string, object> keyValuePair in this)
                 {
                     string claimType = keyValuePair.Key;
                     IEnumerable<object> values = keyValuePair.Value as IEnumerable<object>;
-                    if ( values != null )
+                    if (values != null)
                     {
-                        claims.AddRange( from claimValue in values
-                                         select new Claim( claimType, claimValue.ToString(), ClaimValueTypes.String, issuer, issuer ) );
+                        claims.AddRange(from claimValue in values
+                                        select new Claim(claimType, claimValue.ToString(), ClaimValueTypes.String, issuer, issuer));
                     }
                     else
                     {
-                        Claim claim = new Claim( claimType, keyValuePair.Value.ToString(), ClaimValueTypes.String, issuer, issuer );
-                        claims.Add( claim );
+                        Claim claim = new Claim(claimType, keyValuePair.Value.ToString(), ClaimValueTypes.String, issuer, issuer);
+                        claims.Add(claim);
                     }
                 }
 
@@ -210,14 +210,14 @@ namespace System.IdentityModel.Tokens
         /// <param name="claim">{ 'Claim.Type', 'Claim.Value' } is added. If a JSON object is found with the name == <see cref="Claim.Type"/> then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
         /// <remarks>See <see cref="AddClaims"/> for details on how <see cref="JwtSecurityTokenHandler.OutboundClaimTypeMap"/> is applied.</remarks>
         /// <exception cref="ArgumentNullException">'claim' is null.</exception>
-        public void AddClaim( Claim claim )
+        public void AddClaim(Claim claim)
         {
-            if ( claim == null )
+            if (claim == null)
             {
-                throw new ArgumentNullException( "claim" );
+                throw new ArgumentNullException("claim");
             }
 
-            AddClaims( new Claim[] { claim } );
+            this.AddClaims(new Claim[] { claim });
         }
 
         /// <summary>
@@ -228,42 +228,42 @@ namespace System.IdentityModel.Tokens
         /// will affect the name component of the Json claim</para>
         /// <para>Any <see cref="Claim"/> in the <see cref="IEnumerable{claims}"/> that is null, will be ignored.</para></remarks>
         /// <exception cref="ArgumentNullException">'claims' is null.</exception>
-        public void AddClaims( IEnumerable<Claim> claims )
+        public void AddClaims(IEnumerable<Claim> claims)
         {
-            if ( claims == null )
+            if (claims == null)
             {
-                throw new ArgumentNullException( "claims" );
+                throw new ArgumentNullException("claims");
             }
 
-            foreach ( Claim claim in claims )
+            foreach (Claim claim in claims)
             {
-                if ( claim == null )
+                if (claim == null)
                 {
                     continue;
                 }
 
                 string jsonClaimType = claim.Type;
-                if ( JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey( jsonClaimType ) )
+                if (JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey(jsonClaimType))
                 {
                     jsonClaimType = JwtSecurityTokenHandler.OutboundClaimTypeMap[jsonClaimType];
                 }
 
                 object value;
-                if ( this.TryGetValue( jsonClaimType, out value ) )
+                if (this.TryGetValue(jsonClaimType, out value))
                 {
                     IList<object> claimValues = value as IList<object>;
-                    if ( claimValues == null )
+                    if (claimValues == null)
                     {
                         claimValues = new List<object>();
-                        claimValues.Add( value );
+                        claimValues.Add(value);
                         this[jsonClaimType] = claimValues;
                     }
 
-                    claimValues.Add( claim.Value );
+                    claimValues.Add(claim.Value);
                 }
                 else
                 {
-                    Add( jsonClaimType, claim.Value );
+                    this.Add(jsonClaimType, claim.Value);
                 }
             }
         }
@@ -273,18 +273,19 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Returns the current state. If this instance has changed since the last call, the value will be different.
         /// <para>No cryptographic operations are performed. See <see cref="JwtSecurityTokenHandler"/> for details.</para></remarks>
+        /// <returns>a string BaseUrlEndoded representing the contents of this payload.</returns>
         public string Encode()
         {
-            return Base64UrlEncoder.Encode( this.SerializeToJson() );
+            return Base64UrlEncoder.Encode(this.SerializeToJson());
         }
 
-        internal string GetStandardClaim( string claimType )
+        internal string GetStandardClaim(string claimType)
         {
             object value;
-            if ( this.TryGetValue( claimType, out value ) )
+            if (this.TryGetValue(claimType, out value))
             {
                 IList<object> claimValues = value as IList<object>;
-                if ( claimValues != null )
+                if (claimValues != null)
                 {
                     return claimValues.SerializeToJson();
                 }
@@ -295,42 +296,42 @@ namespace System.IdentityModel.Tokens
             return null;
         }
 
-        internal Int32? GetIntClaim( string claimType )
+        internal int? GetIntClaim(string claimType)
         {
             object value;
-            Int32? retval = null;
+            int? retval = null;
 
-            if ( this.TryGetValue( claimType, out value ) )
+            if (this.TryGetValue(claimType, out value))
             {
                 IList<object> claimValues = value as IList<object>;
-                if ( claimValues != null )
+                if (claimValues != null)
                 {
-                    foreach ( object obj in claimValues )
+                    foreach (object obj in claimValues)
                     {
                         retval = null;
-                        if ( obj == null )
+                        if (obj == null)
                         {
                             continue;
                         }
 
                         try
                         {
-                            retval = Convert.ToInt32( obj, CultureInfo.InvariantCulture );
+                            retval = Convert.ToInt32(obj, CultureInfo.InvariantCulture);
                         }
-                        catch ( System.FormatException )
+                        catch (System.FormatException)
                         {
                             retval = null;
                         }
-                        catch ( System.InvalidCastException )
+                        catch (System.InvalidCastException)
                         {
                             retval = null;
                         }
-                        catch ( OverflowException )
+                        catch (OverflowException)
                         {
                             retval = null;
                         }
 
-                        if ( retval != null )
+                        if (retval != null)
                         {
                             return retval;
                         }
@@ -340,13 +341,13 @@ namespace System.IdentityModel.Tokens
                 {
                     try
                     {
-                        retval = Convert.ToInt32( value, CultureInfo.InvariantCulture );
+                        retval = Convert.ToInt32(value, CultureInfo.InvariantCulture);
                     }
-                    catch ( System.FormatException )
+                    catch (System.FormatException)
                     {
                         retval = null;
                     }
-                    catch ( OverflowException )
+                    catch (OverflowException)
                     {
                         retval = null;
                     }
@@ -364,12 +365,13 @@ namespace System.IdentityModel.Tokens
         /// <param name="key">Claim in the payload that should map to an integer.</param>
         /// <remarks>If the claim is not found, the function returns: DateTime.MinValue
         /// </remarks>
-        /// <exception cref="SecurityTokenException">if value fails to parse.</exception>
-        private DateTime GetDateTime( string key )
+        /// <exception cref="SecurityTokenException">if an overflow exception is thrown by the runtime.</exception>
+        /// <returns>the DateTime representation of a claim.</returns>
+        private DateTime GetDateTime(string key)
         {
             object dateValue;
-            
-            if ( !TryGetValue( key, out dateValue ) )
+
+            if (!this.TryGetValue(key, out dateValue))
             {
                 return DateTime.MinValue;
             }
@@ -377,11 +379,11 @@ namespace System.IdentityModel.Tokens
             // if there are multiple dates, take the first one.
             try
             {
-                Int64 secondsAfterBaseTime;
+                long secondsAfterBaseTime;
                 IList<object> dateValues = dateValue as IList<object>;
-                if ( dateValues != null )
+                if (dateValues != null)
                 {
-                    if ( dateValues.Count == 0 )
+                    if (dateValues.Count == 0)
                     {
                         return DateTime.MinValue;
                     }
@@ -392,23 +394,23 @@ namespace System.IdentityModel.Tokens
                 }
 
                 // null converts to 0.
-                secondsAfterBaseTime = Convert.ToInt64( dateValue, CultureInfo.InvariantCulture );
-                return EpochTime.DateTime( secondsAfterBaseTime );
+                secondsAfterBaseTime = Convert.ToInt64(dateValue, CultureInfo.InvariantCulture);
+                return EpochTime.DateTime(secondsAfterBaseTime);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                if ( ex is FormatException || ex is ArgumentException || ex is InvalidCastException )
+                if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw new SecurityTokenException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10100, key, dateValue ?? "<null>", ex ) );
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10100, key, dateValue ?? "<null>", ex));
                 }
 
-                if ( ex is OverflowException )
+                if (ex is OverflowException)
                 {
-                    throw new SecurityTokenException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10101, key, dateValue ?? "<null>", ex ) );
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10101, key, dateValue ?? "<null>", ex));
                 }
 
                 throw;
-            }            
+            }
         }
     }
 }

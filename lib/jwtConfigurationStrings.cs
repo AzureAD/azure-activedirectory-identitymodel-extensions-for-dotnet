@@ -14,9 +14,12 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using System.Diagnostics.CodeAnalysis;
+
     /// <summary>
     /// contains the element and attribute names used in config when parsing the JwtSecurityTokenHandler from XML.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
     internal static class JwtConfigurationStrings
     {
         public static class Elements

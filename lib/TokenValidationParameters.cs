@@ -12,13 +12,13 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IdentityModel.Selectors;
-using System.Security.Claims;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.IdentityModel.Selectors;
+    using System.Security.Claims;
+
     /// <summary>
     /// Contains a set of parameters that are used by <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
@@ -31,26 +31,26 @@ namespace System.IdentityModel.Tokens
         public TokenValidationParameters()
         {
             AudienceUriMode = AudienceUriMode.BearerKeyOnly;
-            SaveBootstrapContext = false;
-            ValidateIssuer = true;
+            this.SaveBootstrapContext = false;
+            this.ValidateIssuer = true;
         }
 
         /// <summary>
         /// Gets or sets an audience that is considered valid.
         /// </summary>
-        public string AllowedAudience 
-        { 
-            get; 
-            set; 
+        public string AllowedAudience
+        {
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets a collection of audiences that are considered valid.
         /// </summary>
-        public IEnumerable<string> AllowedAudiences 
-        { 
-            get; 
-            set; 
+        public IEnumerable<string> AllowedAudiences
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -76,10 +76,10 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a <see cref="SecurityToken"/> to use when validating signatures.
         /// </summary>
-        public SecurityToken SigningToken 
-        { 
-            get; 
-            set; 
+        public SecurityToken SigningToken
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets a value indicating whether the <see cref="JwtSecurityToken.Issuer"/> should be validated.
         /// </summary>
         /// <remarks>The <see cref="JwtSecurityToken"/> must have an Issuer that is other than whitespace.</remarks>
-        [DefaultValue( true )]
+        [DefaultValue(true)]
         public bool ValidateIssuer
         {
             get;
@@ -105,8 +105,8 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets an issuer that is considered valid.
         /// </summary>
-        public string ValidIssuer 
-        { 
+        public string ValidIssuer
+        {
             get;
             set;
         }
@@ -114,10 +114,10 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a collection of issuers that is considered valid.
         /// </summary>
-        public IEnumerable<string> ValidIssuers 
-        { 
-            get; 
-            set; 
+        public IEnumerable<string> ValidIssuers
+        {
+            get;
+            set;
         }
     }
 }

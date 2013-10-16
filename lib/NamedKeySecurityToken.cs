@@ -12,12 +12,12 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-
 namespace System.IdentityModel.Tokens
 {
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Globalization;
+
     /// <summary>
     /// A <see cref="SecurityToken"/> that contains multiple <see cref="SecurityKey"/> that have a name.
     /// </summary>
@@ -26,7 +26,7 @@ namespace System.IdentityModel.Tokens
         private string _name;
         private DateTime _validFrom;
         private List<SecurityKey> _securityKeys;
-        
+
         /// <summary>
         /// A <see cref="SecurityToken"/> that contains a <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey) that can be matched by name.
         /// </summary>
@@ -35,26 +35,26 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'name' is null.</exception>
         /// <exception cref="ArgumentNullException">'keys' is null.</exception>
         /// <exception cref="ArgumentException">string.IsNullOrWhiteSpace( 'name' ) is true.</exception>
-        public NamedKeySecurityToken( string name, IEnumerable<SecurityKey> keys )
+        public NamedKeySecurityToken(string name, IEnumerable<SecurityKey> keys)
         {
-            if ( null == name )
+            if (null == name)
             {
-                throw new ArgumentNullException( name );
+                throw new ArgumentNullException("name");
             }
 
-            if ( keys == null )
+            if (keys == null)
             {
-                throw new ArgumentNullException( "keys" );
+                throw new ArgumentNullException("keys");
             }
 
-            if ( string.IsNullOrWhiteSpace( name ) )
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name));
             }
 
-            _securityKeys = new List<SecurityKey>( keys );
-            _name = name;
-            _validFrom = DateTime.UtcNow;
+            this._securityKeys = new List<SecurityKey>(keys);
+            this._name = name;
+            this._validFrom = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The default this is the 'name' passed to <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/></remarks>
         public override string Id
         {
-            get { return _name; }
+            get { return this._name; }
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The default is: <see cref="DateTime.UtcNow"/> set in <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/>.</remarks>
         public override DateTime ValidFrom
         {
-            get { return _validFrom; }
+            get { return this._validFrom; }
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public override ReadOnlyCollection<SecurityKey> SecurityKeys
         {
-            get { return _securityKeys.AsReadOnly(); }
+            get { return this._securityKeys.AsReadOnly(); }
         }
 
         /// <summary>
@@ -101,22 +101,22 @@ namespace System.IdentityModel.Tokens
         /// <para>null if there is no match.</para></returns>
         /// <para>Only <see cref="NamedKeySecurityKeyIdentifierClause"/> are matched.</para>
         /// <exception cref="ArgumentNullException">'keyIdentifierClause' is null.</exception>
-        public override SecurityKey ResolveKeyIdentifierClause( SecurityKeyIdentifierClause keyIdentifierClause )
+        public override SecurityKey ResolveKeyIdentifierClause(SecurityKeyIdentifierClause keyIdentifierClause)
         {
-            if ( keyIdentifierClause == null )
+            if (keyIdentifierClause == null)
             {
-                throw new ArgumentNullException( "keyIdentifierClause" );
+                throw new ArgumentNullException("keyIdentifierClause");
             }
 
             // if name matches, return first non null
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
-            if ( namedKeyIdentifierClause != null )
+            if (namedKeyIdentifierClause != null)
             {
-                if ( string.Equals( namedKeyIdentifierClause.Name, _name, StringComparison.Ordinal ) )
+                if (string.Equals(namedKeyIdentifierClause.Name, this._name, StringComparison.Ordinal))
                 {
-                    foreach ( SecurityKey securityKey in _securityKeys )
+                    foreach (SecurityKey securityKey in this._securityKeys)
                     {
-                        if ( securityKey == null )
+                        if (securityKey == null)
                         {
                             continue;
                         }
@@ -137,21 +137,22 @@ namespace System.IdentityModel.Tokens
         /// <remarks><para>A successful match occurs when <see cref="NamedKeySecurityKeyIdentifierClause.Name"/> == <see cref="Id"/>.</para>
         /// <para>Only <see cref="NamedKeySecurityKeyIdentifierClause"/> are matched.</para></remarks>
         /// <exception cref="ArgumentNullException">'keyIdentifierClause' is null.</exception>
-        public override bool MatchesKeyIdentifierClause( SecurityKeyIdentifierClause keyIdentifierClause )
+        public override bool MatchesKeyIdentifierClause(SecurityKeyIdentifierClause keyIdentifierClause)
         {
-            if ( keyIdentifierClause == null )
+            if (keyIdentifierClause == null)
             {
-                throw new ArgumentNullException( "keyIdentifierClause" );
+                throw new ArgumentNullException("keyIdentifierClause");
             }
 
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
-            if ( namedKeyIdentifierClause != null )
+            if (namedKeyIdentifierClause != null)
             {
-                if ( string.Equals( namedKeyIdentifierClause.Name, _name, StringComparison.Ordinal ) )
+                if (string.Equals(namedKeyIdentifierClause.Name, this._name, StringComparison.Ordinal))
                 {
                     return true;
                 }
             }
+
             return false;
         }
     }

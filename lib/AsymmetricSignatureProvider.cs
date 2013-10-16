@@ -1,22 +1,24 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="AsymmetricSignatureProvider.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
-
-using System.Globalization;
-using System.Security.Cryptography;
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
+    using System.Globalization;
+    using System.Security.Cryptography;
+
     /// <summary>
     /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
     /// </summary>
@@ -29,7 +31,7 @@ namespace System.IdentityModel.Tokens
         private AsymmetricSecurityKey _key;
 
         /// <summary>
-        /// Creates an instance of a signature provider that uses a <see cref="AsymmetricSecurityKey"/> to create and verify signatures.
+        /// Initializes a new instance of <see cref="AsymmetricSignatureProvider"/> to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="AsymmetricSecurityKey"/> that will be used for cryptographic operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
@@ -49,97 +51,97 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">Is thrown if the <see cref="AsymmetricSecurityKey.GetSignatureDeformatter"/> returns null.</exception>         
         /// <exception cref="InvalidOperationException">Is thrown if the <see cref="AsymmetricSignatureFormatter.SetHashAlgorithm"/> throws.</exception>         
         /// <exception cref="InvalidOperationException">Is thrown if the <see cref="AsymmetricSignatureDeformatter.SetHashAlgorithm"/> throws.</exception>         
-        public AsymmetricSignatureProvider( AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false )
+        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false)
         {
-            if ( key == null )
+            if (key == null)
             {
-                throw new ArgumentNullException( "key" );
+                throw new ArgumentNullException("key");
             }
 
-            if ( algorithm == null )
+            if (algorithm == null)
             {
-                throw new ArgumentNullException( "algorithm" );
+                throw new ArgumentNullException("algorithm");
             }
 
-            if ( string.IsNullOrWhiteSpace( algorithm ) )
+            if (string.IsNullOrWhiteSpace(algorithm))
             {
-                throw new ArgumentException( string.Format( CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm" ) );
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm"));
             }
 
-            if ( willCreateSignatures )
+            if (willCreateSignatures)
             {
-                if ( key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning )
+                if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning)
                 {
-                    throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10531, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning ) );
+                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10531, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning));
                 }
             }
 
-            if ( key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying )
+            if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying)
             {
-                throw new ArgumentOutOfRangeException( "key.KeySize", key.KeySize, string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying ) );
+                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
-            _key = key;
+            this._key = key;
             try
             {
-                _hash = _key.GetHashAlgorithmForSignature( algorithm );
+                this._hash = this._key.GetHashAlgorithmForSignature(algorithm);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                if ( DiagnosticUtility.IsFatal( ex ) )
+                if (DiagnosticUtility.IsFatal(ex))
                 {
                     throw;
                 }
 
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10518, algorithm, _key.ToString(), ex ), ex );
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10518, algorithm, this._key.ToString(), ex), ex);
             }
 
-            if ( _hash == null )
+            if (this._hash == null)
             {
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10511, algorithm, _key.ToString() ) );
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10511, algorithm, this._key.ToString()));
             }
 
-            if ( willCreateSignatures )
+            if (willCreateSignatures)
             {
                 try
                 {
-                    _formatter = _key.GetSignatureFormatter( algorithm );
-                    _formatter.SetHashAlgorithm( _hash.GetType().ToString() );
+                    this._formatter = this._key.GetSignatureFormatter(algorithm);
+                    this._formatter.SetHashAlgorithm(this._hash.GetType().ToString());
                 }
-                catch (Exception ex )
+                catch (Exception ex)
                 {
-                    if ( DiagnosticUtility.IsFatal( ex ) )
+                    if (DiagnosticUtility.IsFatal(ex))
                     {
                         throw;
                     }
 
-                    throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10514, algorithm, _key.ToString(), ex ), ex );
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10514, algorithm, this._key.ToString(), ex), ex);
                 }
 
-                if ( _formatter == null )
+                if (this._formatter == null)
                 {
-                    throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10515, algorithm, _key.ToString() ) );
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10515, algorithm, this._key.ToString()));
                 }
             }
 
             try
             {
-                _deformatter = _key.GetSignatureDeformatter( algorithm );
-                _deformatter.SetHashAlgorithm( _hash.GetType().ToString() );
+                this._deformatter = this._key.GetSignatureDeformatter(algorithm);
+                this._deformatter.SetHashAlgorithm(this._hash.GetType().ToString());
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                if ( DiagnosticUtility.IsFatal( ex ) )
+                if (DiagnosticUtility.IsFatal(ex))
                 {
                     throw;
                 }
 
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10516, algorithm, _key.ToString(), ex ), ex );
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10516, algorithm, this._key.ToString(), ex), ex);
             }
 
-            if ( _deformatter == null )
+            if (this._deformatter == null)
             {
-                throw new InvalidOperationException( string.Format( CultureInfo.InvariantCulture, JwtErrors.Jwt10517, algorithm, _key.ToString() ) );
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10517, algorithm, this._key.ToString()));
             }
         }
 
@@ -153,34 +155,34 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">if <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
         /// <exception cref="InvalidOperationException">if the internal <see cref="AsymmetricSignatureFormatter"/> is null. This can occur if the constructor parameter 'willBeUsedforSigning' was not 'true'.</exception>
         /// <exception cref="InvalidOperationException">if the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
-        public override byte[] Sign( byte[] input )
+        public override byte[] Sign(byte[] input)
         {
-            if ( input == null )
+            if (input == null)
             {
-                throw new ArgumentNullException( "input" );
+                throw new ArgumentNullException("input");
             }
 
-            if ( input.Length == 0 )
+            if (input.Length == 0)
             {
-                throw new ArgumentException( JwtErrors.Jwt10524 );
+                throw new ArgumentException(JwtErrors.Jwt10524);
             }
 
-            if ( _disposed )
+            if (this._disposed)
             {
-                throw new ObjectDisposedException( GetType().ToString() );
+                throw new ObjectDisposedException(GetType().ToString());
             }
 
-            if ( _formatter == null )
+            if (this._formatter == null)
             {
-                throw new InvalidOperationException( JwtErrors.Jwt10520 );
+                throw new InvalidOperationException(JwtErrors.Jwt10520);
             }
 
-            if ( _hash == null )
+            if (this._hash == null)
             {
-                throw new InvalidOperationException( JwtErrors.Jwt10521 );
+                throw new InvalidOperationException(JwtErrors.Jwt10521);
             }
-            
-             return _formatter.CreateSignature( _hash.ComputeHash( input ) );
+
+            return this._formatter.CreateSignature(this._hash.ComputeHash(input));
         }
 
         /// <summary>
@@ -196,62 +198,62 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">if <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
         /// <exception cref="InvalidOperationException">if the internal <see cref="AsymmetricSignatureDeformatter"/> is null. This can occur if a derived type does not call the base constructor.</exception>
         /// <exception cref="InvalidOperationException">if the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
-        public override bool Verify( byte[] input, byte[] signature )
+        public override bool Verify(byte[] input, byte[] signature)
         {
-            if ( input == null )
+            if (input == null)
             {
-                throw new ArgumentNullException( "input" );
+                throw new ArgumentNullException("input");
             }
 
-            if ( signature == null )
+            if (signature == null)
             {
-                throw new ArgumentNullException( "signature" );
+                throw new ArgumentNullException("signature");
             }
 
-            if ( input.Length == 0 )
+            if (input.Length == 0)
             {
-                throw new ArgumentException( JwtErrors.Jwt10525 );
+                throw new ArgumentException(JwtErrors.Jwt10525);
             }
 
-            if ( signature.Length == 0 )
+            if (signature.Length == 0)
             {
-                throw new ArgumentException( JwtErrors.Jwt10526 );
+                throw new ArgumentException(JwtErrors.Jwt10526);
             }
 
-            if ( _disposed )
+            if (this._disposed)
             {
-                throw new ObjectDisposedException( GetType().ToString() );
+                throw new ObjectDisposedException(GetType().ToString());
             }
 
-            if ( _deformatter == null )
+            if (this._deformatter == null)
             {
-                throw new InvalidOperationException( JwtErrors.Jwt10529 );
+                throw new InvalidOperationException(JwtErrors.Jwt10529);
             }
 
-            if ( _hash == null )
+            if (this._hash == null)
             {
-                throw new InvalidOperationException( JwtErrors.Jwt10521 );
+                throw new InvalidOperationException(JwtErrors.Jwt10521);
             }
 
-            return _deformatter.VerifySignature( _hash.ComputeHash( input ), signature );
+            return this._deformatter.VerifySignature(this._hash.ComputeHash(input), signature);
         }
 
         /// <summary>
         /// Calls <see cref="HashAlgorithm.Dispose()"/> to release this managed resources.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if ( !_disposed )
+            if (!this._disposed)
             {
-                if ( disposing )
+                if (disposing)
                 {
-                    _disposed = true;
+                    this._disposed = true;
 
-                    if ( _hash != null )
+                    if (this._hash != null)
                     {
-                        _hash.Dispose();
-                        _hash = null;
+                        this._hash.Dispose();
+                        this._hash = null;
                     }
                 }
             }

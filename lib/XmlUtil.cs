@@ -29,14 +29,14 @@ namespace System.IdentityModel
         {
             List<XmlElement> xmlElements = new List<XmlElement>();
 
-            if ( null != nodeList )
+            if (null != nodeList)
             {
-                foreach ( XmlNode node in nodeList )
+                foreach (XmlNode node in nodeList)
                 {
                     XmlElement tempElement = node as XmlElement;
-                    if ( tempElement != null )
+                    if (tempElement != null)
                     {
-                        xmlElements.Add( tempElement );
+                        xmlElements.Add(tempElement);
                     }
                 }
             }
