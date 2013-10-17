@@ -81,10 +81,10 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
-            this._key = key;
+            _key = key;
             try
             {
-                this._hash = this._key.GetHashAlgorithmForSignature(algorithm);
+                _hash = _key.GetHashAlgorithmForSignature(algorithm);
             }
             catch (Exception ex)
             {
@@ -93,20 +93,20 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10518, algorithm, this._key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10518, algorithm, _key.ToString(), ex), ex);
             }
 
-            if (this._hash == null)
+            if (_hash == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10511, algorithm, this._key.ToString()));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10511, algorithm, _key.ToString()));
             }
 
             if (willCreateSignatures)
             {
                 try
                 {
-                    this._formatter = this._key.GetSignatureFormatter(algorithm);
-                    this._formatter.SetHashAlgorithm(this._hash.GetType().ToString());
+                    _formatter = _key.GetSignatureFormatter(algorithm);
+                    _formatter.SetHashAlgorithm(_hash.GetType().ToString());
                 }
                 catch (Exception ex)
                 {
@@ -115,19 +115,19 @@ namespace System.IdentityModel.Tokens
                         throw;
                     }
 
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10514, algorithm, this._key.ToString(), ex), ex);
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10514, algorithm, _key.ToString(), ex), ex);
                 }
 
-                if (this._formatter == null)
+                if (_formatter == null)
                 {
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10515, algorithm, this._key.ToString()));
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10515, algorithm, _key.ToString()));
                 }
             }
 
             try
             {
-                this._deformatter = this._key.GetSignatureDeformatter(algorithm);
-                this._deformatter.SetHashAlgorithm(this._hash.GetType().ToString());
+                _deformatter = _key.GetSignatureDeformatter(algorithm);
+                _deformatter.SetHashAlgorithm(_hash.GetType().ToString());
             }
             catch (Exception ex)
             {
@@ -136,12 +136,12 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10516, algorithm, this._key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10516, algorithm, _key.ToString(), ex), ex);
             }
 
-            if (this._deformatter == null)
+            if (_deformatter == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10517, algorithm, this._key.ToString()));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10517, algorithm, _key.ToString()));
             }
         }
 
@@ -167,22 +167,22 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(JwtErrors.Jwt10524);
             }
 
-            if (this._disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            if (this._formatter == null)
+            if (_formatter == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10520);
             }
 
-            if (this._hash == null)
+            if (_hash == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10521);
             }
 
-            return this._formatter.CreateSignature(this._hash.ComputeHash(input));
+            return _formatter.CreateSignature(_hash.ComputeHash(input));
         }
 
         /// <summary>
@@ -220,22 +220,22 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(JwtErrors.Jwt10526);
             }
 
-            if (this._disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            if (this._deformatter == null)
+            if (_deformatter == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10529);
             }
 
-            if (this._hash == null)
+            if (_hash == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10521);
             }
 
-            return this._deformatter.VerifySignature(this._hash.ComputeHash(input), signature);
+            return _deformatter.VerifySignature(_hash.ComputeHash(input), signature);
         }
 
         /// <summary>
@@ -244,16 +244,16 @@ namespace System.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected override void Dispose(bool disposing)
         {
-            if (!this._disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
-                    this._disposed = true;
+                    _disposed = true;
 
-                    if (this._hash != null)
+                    if (_hash != null)
                     {
-                        this._hash.Dispose();
-                        this._hash = null;
+                        _hash.Dispose();
+                        _hash = null;
                     }
                 }
             }

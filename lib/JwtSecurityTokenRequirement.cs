@@ -36,7 +36,10 @@ namespace System.IdentityModel.Tokens
     public class JwtSecurityTokenRequirement
     {
         // The defaults will only be used if some verification properties are set in config and others are not
-        private X509RevocationMode __defaultRevocationMode = X509RevocationMode.Online;
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:FieldNamesMustNotBeginWithUnderscore", Justification = "Reviewed. Suppression is OK here."),SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
+        private X509RevocationMode _defaultRevocationMode = X509RevocationMode.Online;
+
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:FieldNamesMustNotBeginWithUnderscore", Justification = "Reviewed. Suppression is OK here.")]
         private X509CertificateValidationMode _defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
         private StoreLocation _defaultStoreLocation = StoreLocation.LocalMachine;
         private uint _defaultTokenLifetimeInMinutes = 600;
@@ -97,9 +100,9 @@ namespace System.IdentityModel.Tokens
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10601, element.LocalName, element.OuterXml));
             }
 
-            X509RevocationMode revocationMode = this.__defaultRevocationMode;
-            X509CertificateValidationMode certificateValidationMode = this._defaultValidationMode;
-            StoreLocation trustedStoreLocation = this._defaultStoreLocation;
+            X509RevocationMode revocationMode = this._defaultRevocationMode;
+            X509CertificateValidationMode certificateValidationMode = _defaultValidationMode;
+            StoreLocation trustedStoreLocation = _defaultStoreLocation;
             string customValidator = null;
             bool createCertificateValidator = false;
             HashSet<string> itemsProcessed = new HashSet<string>();
@@ -333,7 +336,7 @@ namespace System.IdentityModel.Tokens
                     CustomTypeElement typeElement = new CustomTypeElement();
                     typeElement.Type = customValidatorType;
 
-                    this._certificateValidator = CustomTypeElement.Resolve<X509CertificateValidator>(typeElement);
+                    _certificateValidator = CustomTypeElement.Resolve<X509CertificateValidator>(typeElement);
                 }
                 catch (Exception ex)
                 {
@@ -351,7 +354,7 @@ namespace System.IdentityModel.Tokens
             }
             else if (createCertificateValidator)
             {
-                this._certificateValidator = new X509CertificateValidatorEx(certificateValidationMode, revocationMode, trustedStoreLocation);
+                _certificateValidator = new X509CertificateValidatorEx(certificateValidationMode, revocationMode, trustedStoreLocation);
             }
         }
 
@@ -362,12 +365,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._certificateValidator;
+                return _certificateValidator;
             }
 
             set
             {
-                this._certificateValidator = value;
+                _certificateValidator = value;
             }
         }
 
@@ -379,12 +382,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._nameClaimType;
+                return _nameClaimType;
             }
 
             set
             {
-                this._nameClaimType = value;
+                _nameClaimType = value;
             }
         }
 
@@ -396,12 +399,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._roleClaimType;
+                return _roleClaimType;
             }
 
             set
             {
-                this._roleClaimType = value;
+                _roleClaimType = value;
             }
         }
 
@@ -414,7 +417,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._maxTokenSizeInBytes;
+                return _maxTokenSizeInBytes;
             }
 
             set
@@ -424,7 +427,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
                 }
 
-                this._maxTokenSizeInBytes = value;
+                _maxTokenSizeInBytes = value;
             }
         }
 
@@ -438,7 +441,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._defaultTokenLifetimeInMinutes;
+                return _defaultTokenLifetimeInMinutes;
             }
 
             set
@@ -448,7 +451,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
                 }
 
-                this._defaultTokenLifetimeInMinutes = value;
+                _defaultTokenLifetimeInMinutes = value;
             }
         }
 
@@ -460,7 +463,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._maxClockSkew;
+                return _maxClockSkew;
             }
 
             set
@@ -470,7 +473,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10111, value.Value));
                 }
 
-                this._maxClockSkew = value;
+                _maxClockSkew = value;
             }
         }
     }

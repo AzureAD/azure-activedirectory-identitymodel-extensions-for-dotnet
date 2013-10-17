@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens
 
             if (signingCredentials != null)
             {
-                this._signingCredentials = signingCredentials;
+                _signingCredentials = signingCredentials;
 
                 string algorithm = signingCredentials.SignatureAlgorithm;
                 if (JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey(signingCredentials.SignatureAlgorithm))
@@ -119,7 +119,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._signingCredentials;
+                return _signingCredentials;
             }
         }
 
