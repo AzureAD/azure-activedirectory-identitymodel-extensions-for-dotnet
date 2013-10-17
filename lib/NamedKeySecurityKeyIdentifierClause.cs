@@ -57,8 +57,8 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, keyIdentifier));
             }
 
-            this._name = name;
-            this._keyIdentifier = keyIdentifier;
+            _name = name;
+            _keyIdentifier = keyIdentifier;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string Name
         {
-            get { return this._name; }
+            get { return _name; }
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string KeyIdentifier
         {
-            get { return this._keyIdentifier; }
+            get { return _keyIdentifier; }
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this._keyedHash = key.GetKeyedHashAlgorithm(algorithm);
+                _keyedHash = key.GetKeyedHashAlgorithm(algorithm);
             }
             catch (Exception ex)
             {
@@ -76,14 +76,14 @@ namespace System.IdentityModel.Tokens
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10532, algorithm, key.ToString(), ex), ex);
             }
 
-            if (this._keyedHash == null)
+            if (_keyedHash == null)
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10533, algorithm, key.ToString()));
             }
 
             try
             {
-                this._keyedHash.Key = key.GetSymmetricKey();
+                _keyedHash.Key = key.GetSymmetricKey();
             }
             catch (Exception ex)
             {
@@ -104,16 +104,16 @@ namespace System.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected override void Dispose(bool disposing)
         {
-            if (!this._disposed)
+            if (!_disposed)
             {
-                this._disposed = true;
+                _disposed = true;
 
                 if (disposing)
                 {
-                    if (this._keyedHash != null)
+                    if (_keyedHash != null)
                     {
-                        this._keyedHash.Dispose();
-                        this._keyedHash = null;
+                        _keyedHash.Dispose();
+                        _keyedHash = null;
                     }
                 }
             }
@@ -142,17 +142,17 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(JwtErrors.Jwt10524);
             }
 
-            if (this._disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString());
             }
 
-            if (this._keyedHash == null)
+            if (_keyedHash == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10523);
             }
 
-            return this._keyedHash.ComputeHash(input);
+            return _keyedHash.ComputeHash(input);
         }
 
         /// <summary>
@@ -189,17 +189,17 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(JwtErrors.Jwt10526);
             }
 
-            if (this._disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString());
             }
 
-            if (this._keyedHash == null)
+            if (_keyedHash == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10523);
             }
 
-            return AreEqual(signature, this._keyedHash.ComputeHash(input));
+            return AreEqual(signature, _keyedHash.ComputeHash(input));
         }
 
         /// <summary>

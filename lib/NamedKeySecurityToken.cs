@@ -52,9 +52,9 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name));
             }
 
-            this._securityKeys = new List<SecurityKey>(keys);
-            this._name = name;
-            this._validFrom = DateTime.UtcNow;
+            _securityKeys = new List<SecurityKey>(keys);
+            _name = name;
+            _validFrom = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The default this is the 'name' passed to <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/></remarks>
         public override string Id
         {
-            get { return this._name; }
+            get { return _name; }
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The default is: <see cref="DateTime.UtcNow"/> set in <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/>.</remarks>
         public override DateTime ValidFrom
         {
-            get { return this._validFrom; }
+            get { return _validFrom; }
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public override ReadOnlyCollection<SecurityKey> SecurityKeys
         {
-            get { return this._securityKeys.AsReadOnly(); }
+            get { return _securityKeys.AsReadOnly(); }
         }
 
         /// <summary>
@@ -112,9 +112,9 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                if (string.Equals(namedKeyIdentifierClause.Name, this._name, StringComparison.Ordinal))
+                if (string.Equals(namedKeyIdentifierClause.Name, _name, StringComparison.Ordinal))
                 {
-                    foreach (SecurityKey securityKey in this._securityKeys)
+                    foreach (SecurityKey securityKey in _securityKeys)
                     {
                         if (securityKey == null)
                         {
@@ -147,7 +147,7 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                if (string.Equals(namedKeyIdentifierClause.Name, this._name, StringComparison.Ordinal))
+                if (string.Equals(namedKeyIdentifierClause.Name, _name, StringComparison.Ordinal))
                 {
                     return true;
                 }

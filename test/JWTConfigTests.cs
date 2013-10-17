@@ -193,25 +193,27 @@ namespace System.IdentityModel.Test
                     if ( CertValidationMode.HasValue )
                     {
                         Assert.IsFalse(CertValidationMode.Value != certMode, string.Format(CultureInfo.InvariantCulture, "X509CertificateValidationMode. expected: '{0}', actual: '{1}'", CertValidationMode.Value.ToString(), certMode.ToString()));
-                    }
+                        // if mode includes chain  building, revocation mode Policy s/b null.
 
-                    // check inner policy
-                    fi = type.GetField( "_revocationMode", BindingFlags.NonPublic | BindingFlags.Instance );
-                    X509RevocationMode revocationMode = (X509RevocationMode)fi.GetValue( requirement.CertificateValidator );
-                    if ( CertRevocationMode.HasValue )
-                    {
-                        Assert.IsFalse(CertRevocationMode.Value != revocationMode, string.Format(CultureInfo.InvariantCulture, "CertRevocationMode. expected: '{0}', actual: '{1}'", CertRevocationMode.Value.ToString(), revocationMode.ToString()));
+                        if (CertValidationMode.Value == X509CertificateValidationMode.ChainTrust
+                            || CertValidationMode.Value == X509CertificateValidationMode.PeerOrChainTrust)
+                        {
+                            // check inner policy
+                            if (CertRevocationMode.HasValue)
+                            {
+                                fi = type.GetField("_chainPolicy", BindingFlags.NonPublic | BindingFlags.Instance);
+                                X509ChainPolicy chainPolicy =
+                                    (X509ChainPolicy)fi.GetValue(requirement.CertificateValidator);
 
-                        fi = type.GetField( "_chainPolicy", BindingFlags.NonPublic | BindingFlags.Instance );
-                        X509ChainPolicy chainPolicy = (X509ChainPolicy)fi.GetValue( requirement.CertificateValidator );
-                        Assert.IsFalse(chainPolicy.RevocationMode != CertRevocationMode.Value, string.Format(CultureInfo.InvariantCulture, "chainPolicy.RevocationMode.  . expected: '{0}', actual: '{1}'", CertRevocationMode.Value.ToString(), chainPolicy.RevocationMode.ToString()));
-                    }
-
-                    fi = type.GetField( "_storeLocation", BindingFlags.NonPublic | BindingFlags.Instance );
-                    StoreLocation storeLocation = (StoreLocation)fi.GetValue( requirement.CertificateValidator );
-                    if ( CertStoreLocation.HasValue )
-                    {
-                        Assert.IsFalse(CertStoreLocation.Value != storeLocation, string.Format(CultureInfo.InvariantCulture, "CertStoreLocation. expected: '{0}', actual: '{1}'", CertStoreLocation.Value.ToString(), storeLocation.ToString()));
+                                Assert.IsFalse(
+                                    chainPolicy.RevocationMode != CertRevocationMode.Value,
+                                    string.Format(
+                                        CultureInfo.InvariantCulture,
+                                        "chainPolicy.RevocationMode.  . expected: '{0}', actual: '{1}'",
+                                        CertRevocationMode.Value.ToString(),
+                                        chainPolicy.RevocationMode.ToString()));
+                            }
+                        }
                     }
                 }
             }

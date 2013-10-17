@@ -365,7 +365,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._jwtSecurityTokenRequirement;
+                return _jwtSecurityTokenRequirement;
             }
 
             set
@@ -375,7 +375,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentNullException("value");
                 }
 
-                this._jwtSecurityTokenRequirement = value;
+                _jwtSecurityTokenRequirement = value;
             }
         }
 
@@ -524,7 +524,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._signatureProviderFactory;
+                return _signatureProviderFactory;
             }
 
             set
@@ -534,7 +534,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentNullException("value");
                 }
 
-                this._signatureProviderFactory = value;
+                _signatureProviderFactory = value;
             }
         }
 
@@ -666,7 +666,7 @@ namespace System.IdentityModel.Tokens
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10601, elements[0].LocalName, elements[0].OuterXml));
             }
 
-            this._jwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(elements[0]);
+            _jwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(elements[0]);
         }
 
         /// <summary>

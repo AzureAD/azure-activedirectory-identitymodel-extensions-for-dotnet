@@ -49,14 +49,14 @@ namespace System.IdentityModel.Tokens
         {
             if (keys == null)
             {
-                this._keys = new Dictionary<string, IList<SecurityKey>>();
+                _keys = new Dictionary<string, IList<SecurityKey>>();
             }
             else
             {
-                this._keys = keys;
+                _keys = keys;
             }
 
-            this._issuerTokenResolver = innerTokenResolver;
+            _issuerTokenResolver = innerTokenResolver;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public IDictionary<string, IList<SecurityKey>> SecurityKeys
         {
-            get { return this._keys; }
+            get { return _keys; }
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._issuerTokenResolver;
+                return _issuerTokenResolver;
             }
 
             set
@@ -91,7 +91,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentException(JwtErrors.Jwt10117);
                 }
 
-                this._issuerTokenResolver = value;
+                _issuerTokenResolver = value;
             }
         }
 
@@ -120,12 +120,12 @@ namespace System.IdentityModel.Tokens
                     }
                     else
                     {
-                        this._unprocessedNodes.Add(nodeList[i]);
+                        _unprocessedNodes.Add(nodeList[i]);
                     }
                 }
                 else
                 {
-                    this._unprocessedNodes.Add(nodeList[i]);
+                    _unprocessedNodes.Add(nodeList[i]);
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks><see cref="LoadCustomConfiguration"/> processes only <see cref="XmlElement"/>(s) that have the <see cref="XmlElement.LocalName"/> == 'securityKey'. Unprocessed <see cref="XmlNode"/>(s) are accessible here.</remarks>
         public IList<XmlNode> UnprocessedXmlNodes
         {
-            get { return this._unprocessedNodes; }
+            get { return _unprocessedNodes; }
         }
 
         /// <summary>
@@ -217,10 +217,10 @@ namespace System.IdentityModel.Tokens
 
             byte[] keybytes = Convert.FromBase64String(key);
             IList<SecurityKey> keys = null;
-            if (!this._keys.TryGetValue(name, out keys))
+            if (!_keys.TryGetValue(name, out keys))
             {
                 keys = new List<SecurityKey>();
-                this._keys.Add(name, keys);
+                _keys.Add(name, keys);
             }
 
             keys.Add(new InMemorySymmetricSecurityKey(keybytes));
@@ -242,7 +242,7 @@ namespace System.IdentityModel.Tokens
             if (namedKeyIdentifierClause != null)
             {
                 IList<SecurityKey> keys = null;
-                if (this._keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                if (_keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
                 {
                     key = keys[0];
                     return true;
@@ -280,7 +280,7 @@ namespace System.IdentityModel.Tokens
                 if (namedKeyIdentifierClause != null)
                 {
                     IList<SecurityKey> keys = null;
-                    if (this._keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                    if (_keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
                     {
                         token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, keys);
                         return true;
@@ -312,7 +312,7 @@ namespace System.IdentityModel.Tokens
             if (namedKeyIdentifierClause != null)
             {
                 IList<SecurityKey> keys = null;
-                if (this._keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                if (_keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
                 {
                     token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, keys);
                     return true;

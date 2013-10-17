@@ -108,10 +108,10 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
             }
 
-            this._header = header;
-            this._payload = payload;
-            this._encodedToken = jwtEncodedString;
-            this._signature = tokenParts[2];
+            _header = header;
+            _payload = payload;
+            _encodedToken = jwtEncodedString;
+            _signature = tokenParts[2];
         }
 
         /// <summary>
@@ -124,8 +124,8 @@ namespace System.IdentityModel.Tokens
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be or was used to sign the <see cref="JwtSecurityToken"/>. See <see cref="JwtHeader(SigningCredentials)"/> for details pertaining to the Header Parameter(s).</param>
         public JwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, Lifetime lifetime = null, SigningCredentials signingCredentials = null)
         {
-            this._payload = new JwtPayload(issuer, audience, claims, lifetime);
-            this._header = new JwtHeader(signingCredentials);
+            _payload = new JwtPayload(issuer, audience, claims, lifetime);
+            _header = new JwtHeader(signingCredentials);
         }
 
         /// <summary>
@@ -142,11 +142,11 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this._header = Base64UrlEncoder.Decode(tokenParts[0]).DeserializeJwtHeader();
+                _header = Base64UrlEncoder.Decode(tokenParts[0]).DeserializeJwtHeader();
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
                 string type = null;
-                if (this._header.TryGetValue(JwtConstants.ReservedHeaderParameters.Type, out type))
+                if (_header.TryGetValue(JwtConstants.ReservedHeaderParameters.Type, out type))
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {
@@ -166,7 +166,7 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this._payload = Base64UrlEncoder.Decode(tokenParts[1]).DeserializeJwtPayload();
+                _payload = Base64UrlEncoder.Decode(tokenParts[1]).DeserializeJwtPayload();
             }
             catch (Exception ex)
             {
@@ -178,8 +178,8 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "payload", tokenParts[1], jwtEncodedString), ex);
             }
 
-            this._encodedToken = jwtEncodedString;
-            this._signature = tokenParts[2];
+            _encodedToken = jwtEncodedString;
+            _signature = tokenParts[2];
             return;
         }
 
@@ -189,7 +189,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return this._payload.Actor; }
+            get { return _payload.Actor; }
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace System.IdentityModel.Tokens
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public string Audience
         {
-            get { return this._payload.Audience; }
+            get { return _payload.Audience; }
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get { return this._payload.Claims; }
+            get { return _payload.Claims; }
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string EncodedHeader
         {
-            get { return this._header.Encode(); }
+            get { return _header.Encode(); }
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string EncodedPayload
         {
-            get { return this._payload.Encode(); }
+            get { return _payload.Encode(); }
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
         public int? Expiration
         {
-            get { return this._payload.Expiration; }
+            get { return _payload.Expiration; }
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public JwtHeader Header
         {
-            get { return this._header; }
+            get { return _header; }
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
         public override string Id
         {
-            get { return this._payload.Id; }
+            get { return _payload.Id; }
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
         public int? IssuedAt
         {
-            get { return this._payload.IssuedAt; }
+            get { return _payload.IssuedAt; }
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public string Issuer
         {
-            get { return this._payload.Issuer; }
+            get { return _payload.Issuer; }
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public JwtPayload Payload
         {
-            get { return this._payload; }
+            get { return _payload; }
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace System.IdentityModel.Tokens
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string )"/></remarks>
         public string RawData
         {
-            get { return this._encodedToken; }
+            get { return _encodedToken; }
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string EncodedSignature
         {
-            get { return this._signature; }
+            get { return _signature; }
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>if there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
-            get { return this._header.SignatureAlgorithm; }
+            get { return _header.SignatureAlgorithm; }
         }
 
         /// <summary>
@@ -320,7 +320,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get { return this._header.SigningCredentials; }
+            get { return _header.SigningCredentials; }
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace System.IdentityModel.Tokens
 
         internal void SetId(string id)
         {
-            this._id = id;
+            _id = id;
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this._payload.Subject;
+                return _payload.Subject;
             }
         }
 
@@ -366,7 +366,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom
         {
-            get { return this._payload.ValidFrom; }
+            get { return _payload.ValidFrom; }
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidTo
         {
-            get { return this._payload.ValidTo; }
+            get { return _payload.ValidTo; }
         }
 
         /// <summary>
@@ -384,7 +384,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this._header.SerializeToJson(), this._payload.SerializeToJson());
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", _header.SerializeToJson(), _payload.SerializeToJson());
         }
     }
 }
