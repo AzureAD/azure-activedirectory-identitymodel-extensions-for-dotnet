@@ -1,16 +1,18 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="JwtSecurityToken.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
@@ -25,13 +27,14 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for internal or private fields.")]
     public class JwtSecurityToken : SecurityToken
     {
-        private JwtHeader _header;
-        private string _id;
-        private JwtPayload _payload;
-        private string _encodedToken;
-        private string _signature = string.Empty;
+        private JwtHeader header;
+        private string id;
+        private JwtPayload payload;
+        private string encodedToken;
+        private string signature = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JwtSecurityToken"/> from a string in JWS Compact serialized format.
@@ -56,7 +59,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "jwtEncodedString"));
             }
 
-            if (!Regex.IsMatch(jwtEncodedString, JwtSecurityTokenHandler.JsonCompactSerializationRegex))
+            if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
             }
@@ -65,7 +68,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="JwtSecurityToken"/> where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the encoded <see cref="JwtHeader"/> and <see cref="JwtPayload"/>. The jwtEncodedString is the result of those operations.
+        /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the encoded <see cref="JwtHeader"/> and <see cref="JwtPayload"/>. The jwtEncodedString is the result of those operations.
         /// </summary>
         /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
         /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
@@ -97,7 +100,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "jwtEncodedString"));
             }
 
-            if (!Regex.IsMatch(jwtEncodedString, JwtSecurityTokenHandler.JsonCompactSerializationRegex))
+            if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
             }
@@ -108,14 +111,14 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
             }
 
-            _header = header;
-            _payload = payload;
-            _encodedToken = jwtEncodedString;
-            _signature = tokenParts[2];
+            this.header = header;
+            this.payload = payload;
+            this.encodedToken = jwtEncodedString;
+            this.signature = tokenParts[2];
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="JwtSecurityToken"/> specifying optional parameters.
+        /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class specifying optional parameters.
         /// </summary>
         /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
         /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
@@ -124,63 +127,8 @@ namespace System.IdentityModel.Tokens
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be or was used to sign the <see cref="JwtSecurityToken"/>. See <see cref="JwtHeader(SigningCredentials)"/> for details pertaining to the Header Parameter(s).</param>
         public JwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, Lifetime lifetime = null, SigningCredentials signingCredentials = null)
         {
-            _payload = new JwtPayload(issuer, audience, claims, lifetime);
-            _header = new JwtHeader(signingCredentials);
-        }
-
-        /// <summary>
-        /// Decodes the string into the header, payload and signature
-        /// </summary>
-        /// <param name="jwtEncodedString">Base64Url encoded string.</param>
-        internal void Decode(string jwtEncodedString)
-        {
-            string[] tokenParts = jwtEncodedString.Split('.');
-            if (tokenParts.Length != 3)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
-            }
-
-            try
-            {
-                _header = Base64UrlEncoder.Decode(tokenParts[0]).DeserializeJwtHeader();
-
-                // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
-                string type = null;
-                if (_header.TryGetValue(JwtConstants.ReservedHeaderParameters.Type, out type))
-                {
-                    if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
-                    {
-                        throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10112, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
-
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "header", tokenParts[0], jwtEncodedString), ex);
-            }
-
-            try
-            {
-                _payload = Base64UrlEncoder.Decode(tokenParts[1]).DeserializeJwtPayload();
-            }
-            catch (Exception ex)
-            {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
-
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "payload", tokenParts[1], jwtEncodedString), ex);
-            }
-
-            _encodedToken = jwtEncodedString;
-            _signature = tokenParts[2];
-            return;
+            this.payload = new JwtPayload(issuer, audience, claims, lifetime);
+            this.header = new JwtHeader(signingCredentials);
         }
 
         /// <summary>
@@ -189,17 +137,16 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return _payload.Actor; }
+            get { return this.payload.Actor; }
         }
 
         /// <summary>
         /// Gets the 'value' of the 'audience' claim { aud, 'value' }.
         /// </summary>
         /// <remarks>If the 'audience' claim is not found, null is returned.</remarks>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public string Audience
         {
-            get { return _payload.Audience; }
+            get { return this.payload.Audience; }
         }
 
         /// <summary>
@@ -208,7 +155,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get { return _payload.Claims; }
+            get { return this.payload.Claims; }
         }
 
         /// <summary>
@@ -216,7 +163,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string EncodedHeader
         {
-            get { return _header.Encode(); }
+            get { return this.header.Encode(); }
         }
 
         /// <summary>
@@ -224,7 +171,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string EncodedPayload
         {
-            get { return _payload.Encode(); }
+            get { return this.payload.Encode(); }
         }
 
         /// <summary>
@@ -233,7 +180,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
         public int? Expiration
         {
-            get { return _payload.Expiration; }
+            get { return this.payload.Expiration; }
         }
 
         /// <summary>
@@ -241,7 +188,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public JwtHeader Header
         {
-            get { return _header; }
+            get { return this.header; }
         }
 
         /// <summary>
@@ -250,7 +197,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
         public override string Id
         {
-            get { return _payload.Id; }
+            get { return this.payload.Id; }
         }
 
         /// <summary>
@@ -259,7 +206,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
         public int? IssuedAt
         {
-            get { return _payload.IssuedAt; }
+            get { return this.payload.IssuedAt; }
         }
 
         /// <summary>
@@ -268,7 +215,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public string Issuer
         {
-            get { return _payload.Issuer; }
+            get { return this.payload.Issuer; }
         }
 
         /// <summary>
@@ -276,7 +223,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public JwtPayload Payload
         {
-            get { return _payload; }
+            get { return this.payload; }
         }
 
         /// <summary>
@@ -286,7 +233,7 @@ namespace System.IdentityModel.Tokens
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string )"/></remarks>
         public string RawData
         {
-            get { return _encodedToken; }
+            get { return this.encodedToken; }
         }
 
         /// <summary>
@@ -294,7 +241,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string EncodedSignature
         {
-            get { return _signature; }
+            get { return this.signature; }
         }
 
         /// <summary>
@@ -312,7 +259,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>if there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
-            get { return _header.SignatureAlgorithm; }
+            get { return this.header.SignatureAlgorithm; }
         }
 
         /// <summary>
@@ -320,7 +267,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get { return _header.SigningCredentials; }
+            get { return this.header.SigningCredentials; }
         }
 
         /// <summary>
@@ -343,11 +290,6 @@ namespace System.IdentityModel.Tokens
             set;
         }
 
-        internal void SetId(string id)
-        {
-            _id = id;
-        }
-
         /// <summary>
         /// Gets "value" of the 'subject' claim { sub, 'value' }.
         /// </summary>
@@ -356,7 +298,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _payload.Subject;
+                return this.payload.Subject;
             }
         }
 
@@ -366,7 +308,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom
         {
-            get { return _payload.ValidFrom; }
+            get { return this.payload.ValidFrom; }
         }
 
         /// <summary>
@@ -375,7 +317,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidTo
         {
-            get { return _payload.ValidTo; }
+            get { return this.payload.ValidTo; }
         }
 
         /// <summary>
@@ -384,7 +326,66 @@ namespace System.IdentityModel.Tokens
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", _header.SerializeToJson(), _payload.SerializeToJson());
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this.header.SerializeToJson(), this.payload.SerializeToJson());
+        }
+
+        /// <summary>
+        /// Decodes the string into the header, payload and signature
+        /// </summary>
+        /// <param name="jwtEncodedString">Base64Url encoded string.</param>
+        internal void Decode(string jwtEncodedString)
+        {
+            string[] tokenParts = jwtEncodedString.Split('.');
+            if (tokenParts.Length != 3)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
+            }
+
+            try
+            {
+                this.header = Base64UrlEncoder.Decode(tokenParts[0]).DeserializeJwtHeader();
+
+                // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
+                string type = null;
+                if (this.header.TryGetValue(JwtConstants.ReservedHeaderParameters.Type, out type))
+                {
+                    if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
+                    {
+                        throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10112, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (DiagnosticUtility.IsFatal(ex))
+                {
+                    throw;
+                }
+
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "header", tokenParts[0], jwtEncodedString), ex);
+            }
+
+            try
+            {
+                this.payload = Base64UrlEncoder.Decode(tokenParts[1]).DeserializeJwtPayload();
+            }
+            catch (Exception ex)
+            {
+                if (DiagnosticUtility.IsFatal(ex))
+                {
+                    throw;
+                }
+
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "payload", tokenParts[1], jwtEncodedString), ex);
+            }
+
+            this.encodedToken = jwtEncodedString;
+            this.signature = tokenParts[2];
+        }
+
+        internal void SetId(string id)
+        {
+            this.id = id;
         }
     }
 }

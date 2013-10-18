@@ -1,16 +1,18 @@
-// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+//-----------------------------------------------------------------------
+// <copyright file="JwtSecurityTokenRequirement.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
@@ -33,33 +35,31 @@ namespace System.IdentityModel.Tokens
     /// Provides a location for settings that control how the <see cref="JwtSecurityTokenHandler"/> validates or creates a <see cref="JwtSecurityToken"/>. 
     /// </summary>
     /// <remarks>These values have precedence over <see cref="SecurityTokenHandler.Configuration"/>.</remarks>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class JwtSecurityTokenRequirement
     {
         // The defaults will only be used if some verification properties are set in config and others are not
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:FieldNamesMustNotBeginWithUnderscore", Justification = "Reviewed. Suppression is OK here."),SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
-        private X509RevocationMode _defaultRevocationMode = X509RevocationMode.Online;
-
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:FieldNamesMustNotBeginWithUnderscore", Justification = "Reviewed. Suppression is OK here.")]
-        private X509CertificateValidationMode _defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
-        private StoreLocation _defaultStoreLocation = StoreLocation.LocalMachine;
-        private uint _defaultTokenLifetimeInMinutes = 600;
-        private uint _maxTokenSizeInBytes = 2 * 1024 * 1024;
-        private string _nameClaimType;
-        private string _roleClaimType;
-        private X509CertificateValidator _certificateValidator;
+        private X509RevocationMode defaultRevocationMode = X509RevocationMode.Online;
+        private X509CertificateValidationMode defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
+        private StoreLocation defaultStoreLocation = StoreLocation.LocalMachine;
+        private uint defaultTokenLifetimeInMinutes = 600;
+        private uint maxTokenSizeInBytes = 2 * 1024 * 1024;
+        private string nameClaimType;
+        private string roleClaimType;
+        private X509CertificateValidator certificateValidator;
 
         // This indicates that the clockSkew was never set
-        private TimeSpan? _maxClockSkew = null;
+        private TimeSpan? maxClockSkew = null;
 
         /// <summary>
-        /// Creates an instance of <see cref="JwtSecurityTokenRequirement"/>
+        /// Initializes a new instance of the <see cref="JwtSecurityTokenRequirement"/> class. 
         /// </summary>
         public JwtSecurityTokenRequirement()
         {
         }
 
         /// <summary>
-        /// Provides additional configuration to the <see cref="JwtSecurityTokenHandler"/> when validating or creating a <see cref="JwtSecurityToken"/>. 
+        /// Initializes a new instance of the <see cref="JwtSecurityTokenRequirement"/> class.
         /// </summary>
         /// <remarks>
         /// <para>A single XML element is expected with up to four optional attributes: {'expected values'} and up to five optional child elements.</para>
@@ -69,8 +69,8 @@ namespace System.IdentityModel.Tokens
         /// <para>&#160;&#160;&#160;&#160;issuerCertificateValidator: type derived from <see cref="X509CertificateValidator"/></para>
         /// <para>&#160;&#160;&#160;&#160;issuerCertificateValidationMode: {ChainTrust, Custom, None, PeerTrust, PeerOrChainTrust}</para>
         /// <para>></para>
-        /// <para>&#160;&#160;&#160;&#160;&lt;nameClaimType value = 'somestring'/></para>
-        /// <para>&#160;&#160;&#160;&#160;&lt;roleClaimType value = 'somestring'/></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;nameClaimType value = 'user defined type'/></para>
+        /// <para>&#160;&#160;&#160;&#160;&lt;roleClaimType value = 'user defined type'/></para>
         /// <para>&#160;&#160;&#160;&#160;&lt;defaultTokenLifetimeInMinutes value = 'uint'/></para>
         /// <para>&#160;&#160;&#160;&#160;&lt;maxTokenSizeInBytes value = 'uint'/></para>
         /// <para>&#160;&#160;&#160;&#160;&lt;maxClockSkewInMinutes value = 'uint'/></para>
@@ -100,9 +100,9 @@ namespace System.IdentityModel.Tokens
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10601, element.LocalName, element.OuterXml));
             }
 
-            X509RevocationMode revocationMode = this._defaultRevocationMode;
-            X509CertificateValidationMode certificateValidationMode = _defaultValidationMode;
-            StoreLocation trustedStoreLocation = _defaultStoreLocation;
+            X509RevocationMode revocationMode = this.defaultRevocationMode;
+            X509CertificateValidationMode certificateValidationMode = this.defaultValidationMode;
+            StoreLocation trustedStoreLocation = this.defaultStoreLocation;
             string customValidator = null;
             bool createCertificateValidator = false;
             HashSet<string> itemsProcessed = new HashSet<string>();
@@ -336,7 +336,7 @@ namespace System.IdentityModel.Tokens
                     CustomTypeElement typeElement = new CustomTypeElement();
                     typeElement.Type = customValidatorType;
 
-                    _certificateValidator = CustomTypeElement.Resolve<X509CertificateValidator>(typeElement);
+                    this.certificateValidator = CustomTypeElement.Resolve<X509CertificateValidator>(typeElement);
                 }
                 catch (Exception ex)
                 {
@@ -354,7 +354,7 @@ namespace System.IdentityModel.Tokens
             }
             else if (createCertificateValidator)
             {
-                _certificateValidator = new X509CertificateValidatorEx(certificateValidationMode, revocationMode, trustedStoreLocation);
+                this.certificateValidator = new X509CertificateValidatorEx(certificateValidationMode, revocationMode, trustedStoreLocation);
             }
         }
 
@@ -365,12 +365,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _certificateValidator;
+                return this.certificateValidator;
             }
 
             set
             {
-                _certificateValidator = value;
+                this.certificateValidator = value;
             }
         }
 
@@ -382,12 +382,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _nameClaimType;
+                return this.nameClaimType;
             }
 
             set
             {
-                _nameClaimType = value;
+                this.nameClaimType = value;
             }
         }
 
@@ -399,12 +399,12 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _roleClaimType;
+                return this.roleClaimType;
             }
 
             set
             {
-                _roleClaimType = value;
+                this.roleClaimType = value;
             }
         }
 
@@ -417,7 +417,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _maxTokenSizeInBytes;
+                return this.maxTokenSizeInBytes;
             }
 
             set
@@ -427,7 +427,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
                 }
 
-                _maxTokenSizeInBytes = value;
+                this.maxTokenSizeInBytes = value;
             }
         }
 
@@ -441,7 +441,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _defaultTokenLifetimeInMinutes;
+                return this.defaultTokenLifetimeInMinutes;
             }
 
             set
@@ -451,7 +451,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
                 }
 
-                _defaultTokenLifetimeInMinutes = value;
+                this.defaultTokenLifetimeInMinutes = value;
             }
         }
 
@@ -463,7 +463,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _maxClockSkew;
+                return this.maxClockSkew;
             }
 
             set
@@ -473,7 +473,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10111, value.Value));
                 }
 
-                _maxClockSkew = value;
+                this.maxClockSkew = value;
             }
         }
     }

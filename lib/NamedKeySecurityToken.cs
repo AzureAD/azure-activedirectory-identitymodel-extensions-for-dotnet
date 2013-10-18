@@ -1,40 +1,54 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="NamedKeySecurityToken.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
 
     /// <summary>
     /// A <see cref="SecurityToken"/> that contains multiple <see cref="SecurityKey"/> that have a name.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class NamedKeySecurityToken : SecurityToken
     {
-        private string _name;
-        private DateTime _validFrom;
-        private List<SecurityKey> _securityKeys;
+        private string name;
+        private DateTime validFrom;
+        private List<SecurityKey> securityKeys;
 
         /// <summary>
-        /// A <see cref="SecurityToken"/> that contains a <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey) that can be matched by name.
+        /// Initializes a new instance of the <see cref="NamedKeySecurityToken"/> class that contains a <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey) that can be matched by name.
         /// </summary>
-        /// <param name="name">A name for the <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey).</param>
-        /// <param name="keys">A collection of <see cref="SecurityKey"/></param>
-        /// <exception cref="ArgumentNullException">'name' is null.</exception>
-        /// <exception cref="ArgumentNullException">'keys' is null.</exception>
-        /// <exception cref="ArgumentException">string.IsNullOrWhiteSpace( 'name' ) is true.</exception>
+        /// <param name="name">
+        /// A name for the <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey).
+        /// </param>
+        /// <param name="keys">
+        /// A collection of <see cref="SecurityKey"/>
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// 'name' is null.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// 'keys' is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// string.IsNullOrWhiteSpace( 'name' ) is true.
+        /// </exception>
         public NamedKeySecurityToken(string name, IEnumerable<SecurityKey> keys)
         {
             if (null == name)
@@ -52,9 +66,9 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name));
             }
 
-            _securityKeys = new List<SecurityKey>(keys);
-            _name = name;
-            _validFrom = DateTime.UtcNow;
+            this.securityKeys = new List<SecurityKey>(keys);
+            this.name = name;
+            this.validFrom = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -63,7 +77,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The default this is the 'name' passed to <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/></remarks>
         public override string Id
         {
-            get { return _name; }
+            get { return this.name; }
         }
 
         /// <summary>
@@ -72,7 +86,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The default is: <see cref="DateTime.UtcNow"/> set in <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/>.</remarks>
         public override DateTime ValidFrom
         {
-            get { return _validFrom; }
+            get { return this.validFrom; }
         }
 
         /// <summary>
@@ -90,7 +104,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public override ReadOnlyCollection<SecurityKey> SecurityKeys
         {
-            get { return _securityKeys.AsReadOnly(); }
+            get { return this.securityKeys.AsReadOnly(); }
         }
 
         /// <summary>
@@ -112,9 +126,9 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                if (string.Equals(namedKeyIdentifierClause.Name, _name, StringComparison.Ordinal))
+                if (string.Equals(namedKeyIdentifierClause.Name, this.name, StringComparison.Ordinal))
                 {
-                    foreach (SecurityKey securityKey in _securityKeys)
+                    foreach (SecurityKey securityKey in this.securityKeys)
                     {
                         if (securityKey == null)
                         {
@@ -147,7 +161,7 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                if (string.Equals(namedKeyIdentifierClause.Name, _name, StringComparison.Ordinal))
+                if (string.Equals(namedKeyIdentifierClause.Name, this.name, StringComparison.Ordinal))
                 {
                     return true;
                 }

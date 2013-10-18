@@ -63,10 +63,11 @@
     <Compile Include="DateTimeUtil.cs" />
     <Compile Include="DiagnosticUtility.cs" />
     <Compile Include="EpochTime.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="JwtConfigurationStrings.cs" />
     <Compile Include="JwtConstants.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="JwtErrors.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
@@ -92,7 +93,7 @@
     <Compile Include="WSSecurity10Constants.cs" />
     <Compile Include="WSSecurityUtilityConstants.cs" />
     <Compile Include="X509CertificateValidatorEx.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="XmlUtil.cs" />
   </ItemGroup>

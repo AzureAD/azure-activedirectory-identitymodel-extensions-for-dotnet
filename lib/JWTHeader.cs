@@ -1,20 +1,23 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="JwtHeader.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Security.Cryptography.X509Certificates;
 
@@ -23,12 +26,13 @@ namespace System.IdentityModel.Tokens
     /// The member names within the JWT Header are referred to as Header Parameter Names. 
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     public class JwtHeader : Dictionary<string, string>
     {
-        private SigningCredentials _signingCredentials;
+        private SigningCredentials signingCredentials;
 
         /// <summary>
-        /// Creates an empty <see cref="JwtHeader"/>
+        /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
             : base(StringComparer.Ordinal)
@@ -36,7 +40,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="JwtHeader"/> with the Header Parameters as follows: 
+        /// Initializes a new instance of the <see cref="JwtHeader"/> class. With the Header Parameters as follows: 
         /// <para>{ { typ, JWT }, { alg, Mapped( <see cref="System.IdentityModel.Tokens.SigningCredentials.SignatureAlgorithm"/> } }
         /// See: Algorithm Mapping below.</para>
         /// </summary>
@@ -44,7 +48,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>
         /// <para>For each <see cref="SecurityKeyIdentifierClause"/> in signingCredentials.SigningKeyIdentifier</para>
         /// <para>if the clause  is a <see cref="NamedKeySecurityKeyIdentifierClause"/> Header Parameter { clause.Name, clause.KeyIdentifier } will be added.</para>
-        /// <para>For example, if clause.Name == 'kid' and clause.Keyidentifier == 'SecretKey99'. The JSON object { kid, SecretKey99 } would be added.</para>
+        /// <para>For example, if clause.Name == 'kid' and clause.KeyIdentifier == 'SecretKey99'. The JSON object { kid, SecretKey99 } would be added.</para>
         /// <para>In addition, if the <see cref="SigningCredentials"/> is a <see cref="X509SigningCredentials"/> the JSON object { x5t, Base64UrlEncoded( <see cref="X509Certificate.GetCertHashString()"/> } will be added.</para>
         /// <para>This simplifies the common case where a X509Certificate is used.</para>
         /// <para>================= </para>
@@ -64,7 +68,7 @@ namespace System.IdentityModel.Tokens
 
             if (signingCredentials != null)
             {
-                _signingCredentials = signingCredentials;
+                this.signingCredentials = signingCredentials;
 
                 string algorithm = signingCredentials.SignatureAlgorithm;
                 if (JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey(signingCredentials.SignatureAlgorithm))
@@ -106,7 +110,7 @@ namespace System.IdentityModel.Tokens
             get
             {
                 string algorithm = null;
-                TryGetValue(JwtConstants.ReservedHeaderParameters.Algorithm, out algorithm);
+                this.TryGetValue(JwtConstants.ReservedHeaderParameters.Algorithm, out algorithm);
                 return algorithm;
             }
         }
@@ -119,7 +123,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _signingCredentials;
+                return this.signingCredentials;
             }
         }
 
@@ -191,7 +195,7 @@ namespace System.IdentityModel.Tokens
         /// Encodes this instance as a Base64UrlEncoded string.
         /// </summary>
         /// <remarks>Returns the current state. If this instance has changed since the last call, the value will be different.</remarks>
-        /// <returns>a string BaseUrlEndoded representing the contents of this header.</returns>
+        /// <returns>a string BaseUrlEncoded representing the contents of this header.</returns>
         public string Encode()
         {
             return Base64UrlEncoder.Encode(this.SerializeToJson());

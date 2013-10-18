@@ -174,7 +174,7 @@ namespace System.IdentityModel.Test
                     // get and check _certificateValidationMode
                     Type type = requirement.CertificateValidator.GetType();
                     
-                    FieldInfo fi = type.GetField( "_validator", BindingFlags.NonPublic | BindingFlags.Instance );
+                    FieldInfo fi = type.GetField( "validator", BindingFlags.NonPublic | BindingFlags.Instance );
                     X509CertificateValidator validator = (X509CertificateValidator)fi.GetValue( requirement.CertificateValidator );
 
                     // make sure we created the right validator
@@ -188,7 +188,7 @@ namespace System.IdentityModel.Test
                     }
 
                     // if  these 'Modes' HasValue, then it should be matched, otherwise expect default.
-                    fi = type.GetField( "_certificateValidationMode", BindingFlags.NonPublic | BindingFlags.Instance );
+                    fi = type.GetField( "certificateValidationMode", BindingFlags.NonPublic | BindingFlags.Instance );
                     CertMode certMode = (CertMode)fi.GetValue( requirement.CertificateValidator );
                     if ( CertValidationMode.HasValue )
                     {
@@ -201,7 +201,7 @@ namespace System.IdentityModel.Test
                             // check inner policy
                             if (CertRevocationMode.HasValue)
                             {
-                                fi = type.GetField("_chainPolicy", BindingFlags.NonPublic | BindingFlags.Instance);
+                                fi = type.GetField("chainPolicy", BindingFlags.NonPublic | BindingFlags.Instance);
                                 X509ChainPolicy chainPolicy =
                                     (X509ChainPolicy)fi.GetValue(requirement.CertificateValidator);
 

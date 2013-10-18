@@ -1,20 +1,23 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="JwtPayload.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IdentityModel.Protocols.WSTrust;
     using System.Linq;
@@ -23,9 +26,11 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Initializes a new instance of <see cref="JwtPayload"/> which contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     public class JwtPayload : Dictionary<string, object>
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with no claims. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// Creates a empty <see cref="JwtPayload"/>
         /// </summary>
         public JwtPayload()
@@ -34,7 +39,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="JwtPayload"/> with claims added for each parameter specified.
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// </summary>
         /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
         /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
@@ -182,7 +187,7 @@ namespace System.IdentityModel.Tokens
             get
             {
                 List<Claim> claims = new List<Claim>();
-                string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;
+                string issuer = this.Issuer ?? ClaimsIdentity.DefaultIssuer;
 
                 foreach (KeyValuePair<string, object> keyValuePair in this)
                 {
@@ -273,7 +278,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Returns the current state. If this instance has changed since the last call, the value will be different.
         /// <para>No cryptographic operations are performed. See <see cref="JwtSecurityTokenHandler"/> for details.</para></remarks>
-        /// <returns>a string BaseUrlEndoded representing the contents of this payload.</returns>
+        /// <returns>a string BaseUrlEncoded representing the contents of this payload.</returns>
         public string Encode()
         {
             return Base64UrlEncoder.Encode(this.SerializeToJson());

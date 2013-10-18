@@ -1,21 +1,24 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="NamedKeyIssuerTokenResolver.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IdentityModel.Selectors;
     using System.Xml;
@@ -24,14 +27,15 @@ namespace System.IdentityModel.Tokens
     /// <see cref="NamedKeyIssuerTokenResolver"/> represents a collection of named sets of <see cref="SecurityKey"/>(s) that can be matched by a
     /// <see cref="NamedKeySecurityKeyIdentifierClause"/> and return a <see cref="NamedKeySecurityToken"/> that contains <see cref="SecurityKey"/>(s).
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class NamedKeyIssuerTokenResolver : IssuerTokenResolver
     {
-        private IDictionary<string, IList<SecurityKey>> _keys;
-        private List<XmlNode> _unprocessedNodes = new List<XmlNode>();
-        IssuerTokenResolver _issuerTokenResolver;
+        private IDictionary<string, IList<SecurityKey>> keys;
+        private List<XmlNode> unprocessedNodes = new List<XmlNode>();
+        private IssuerTokenResolver issuerTokenResolver;
 
         /// <summary>
-        /// Default constructor
+        /// Initializes a new instance of the <see cref="NamedKeyIssuerTokenResolver"/> class. 
         /// </summary>
         public NamedKeyIssuerTokenResolver()
             : this(null, null)
@@ -39,24 +43,31 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="NamedKeyIssuerTokenResolver"/> class. 
         /// Populates this instance with a named collection of <see cref="SecurityKey"/>(s) and an optional <see cref="SecurityTokenResolver"/> that will be called when a 
         /// <see cref="SecurityKeyIdentifier"/> or <see cref="SecurityKeyIdentifierClause"/> cannot be resolved.
         /// </summary>
-        /// <param name="keys">A named collection of <see cref="SecurityKey"/>(s).</param>
-        /// <param name="innerTokenResolver">A <see cref="IssuerTokenResolver"/> to call when resolving fails, before calling base.</param>
-        /// <remarks>if 'keys' is null an empty collection will be created. A named collection of <see cref="SecurityKey"/>(s) can be added by accessing the property <see cref="SecurityKeys"/>.</remarks>
+        /// <param name="keys">
+        /// A named collection of <see cref="SecurityKey"/>(s).
+        /// </param>
+        /// <param name="innerTokenResolver">
+        /// A <see cref="IssuerTokenResolver"/> to call when resolving fails, before calling base.
+        /// </param>
+        /// <remarks>
+        /// if 'keys' is null an empty collection will be created. A named collection of <see cref="SecurityKey"/>(s) can be added by accessing the property <see cref="SecurityKeys"/>.
+        /// </remarks>
         public NamedKeyIssuerTokenResolver(IDictionary<string, IList<SecurityKey>> keys = null, IssuerTokenResolver innerTokenResolver = null)
         {
             if (keys == null)
             {
-                _keys = new Dictionary<string, IList<SecurityKey>>();
+                this.keys = new Dictionary<string, IList<SecurityKey>>();
             }
             else
             {
-                _keys = keys;
+                this.keys = keys;
             }
 
-            _issuerTokenResolver = innerTokenResolver;
+            this.issuerTokenResolver = innerTokenResolver;
         }
 
         /// <summary>
@@ -64,7 +75,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public IDictionary<string, IList<SecurityKey>> SecurityKeys
         {
-            get { return _keys; }
+            get { return this.keys; }
         }
 
         /// <summary>
@@ -76,7 +87,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _issuerTokenResolver;
+                return this.issuerTokenResolver;
             }
 
             set
@@ -91,8 +102,17 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentException(JwtErrors.Jwt10117);
                 }
 
-                _issuerTokenResolver = value;
+                this.issuerTokenResolver = value;
             }
+        }
+
+        /// <summary>
+        /// Gets the unprocessed <see cref="XmlNode"/>(s) from <see cref="LoadCustomConfiguration"/>.
+        /// </summary>
+        /// <remarks><see cref="LoadCustomConfiguration"/> processes only <see cref="XmlElement"/>(s) that have the <see cref="XmlElement.LocalName"/> == 'securityKey'. Unprocessed <see cref="XmlNode"/>(s) are accessible here.</remarks>
+        public IList<XmlNode> UnprocessedXmlNodes
+        {
+            get { return this.unprocessedNodes; }
         }
 
         /// <summary>
@@ -116,27 +136,18 @@ namespace System.IdentityModel.Tokens
                 {
                     if (string.Equals(element.LocalName, JwtConfigurationStrings.Elements.SecurityKey, StringComparison.Ordinal))
                     {
-                        ReadSecurityKey(element);
+                        this.ReadSecurityKey(element);
                     }
                     else
                     {
-                        _unprocessedNodes.Add(nodeList[i]);
+                        this.unprocessedNodes.Add(nodeList[i]);
                     }
                 }
                 else
                 {
-                    _unprocessedNodes.Add(nodeList[i]);
+                    this.unprocessedNodes.Add(nodeList[i]);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the unprocessed <see cref="XmlNode"/>(s) from <see cref="LoadCustomConfiguration"/>.
-        /// </summary>
-        /// <remarks><see cref="LoadCustomConfiguration"/> processes only <see cref="XmlElement"/>(s) that have the <see cref="XmlElement.LocalName"/> == 'securityKey'. Unprocessed <see cref="XmlNode"/>(s) are accessible here.</remarks>
-        public IList<XmlNode> UnprocessedXmlNodes
-        {
-            get { return _unprocessedNodes; }
         }
 
         /// <summary>
@@ -174,8 +185,7 @@ namespace System.IdentityModel.Tokens
             string key = null;
             string name = null;
 
-            XmlNode attributeNode;
-            attributeNode = element.Attributes.GetNamedItem(JwtConfigurationStrings.Attributes.SymmetricKey);
+            XmlNode attributeNode = element.Attributes.GetNamedItem(JwtConfigurationStrings.Attributes.SymmetricKey);
             if (attributeNode == null)
             {
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10106, element.OuterXml));
@@ -217,10 +227,10 @@ namespace System.IdentityModel.Tokens
 
             byte[] keybytes = Convert.FromBase64String(key);
             IList<SecurityKey> keys = null;
-            if (!_keys.TryGetValue(name, out keys))
+            if (!this.keys.TryGetValue(name, out keys))
             {
                 keys = new List<SecurityKey>();
-                _keys.Add(name, keys);
+                this.keys.Add(name, keys);
             }
 
             keys.Add(new InMemorySymmetricSecurityKey(keybytes));
@@ -229,7 +239,18 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Finds the first <see cref="SecurityKey"/> in a named collection that match the <see cref="SecurityKeyIdentifierClause"/>.
         /// </summary>
-        /// <remarks>If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.</remarks>
+        /// <param name="keyIdentifierClause">
+        /// The <see cref="SecurityKeyIdentifierClause"/> to resolve to a <see cref="SecurityKey"/>
+        /// </param>
+        /// <param name="key">
+        /// The resolved <see cref="SecurityKey"/>.
+        /// </param>
+        /// <remarks>
+        /// If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.
+        /// </remarks>
+        /// <returns>
+        /// true if key resolved, false otherwise.
+        /// </returns>
         protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
         {
             if (keyIdentifierClause == null)
@@ -242,7 +263,7 @@ namespace System.IdentityModel.Tokens
             if (namedKeyIdentifierClause != null)
             {
                 IList<SecurityKey> keys = null;
-                if (_keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
                 {
                     key = keys[0];
                     return true;
@@ -260,7 +281,23 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Finds a named collection of <see cref="SecurityKey"/>(s) that match the <see cref="SecurityKeyIdentifier"/> and returns a <see cref="NamedKeySecurityToken"/> that contains the <see cref="SecurityKey"/>(s).
         /// </summary>
-        /// <remarks><para>A <see cref="SecurityKeyIdentifier"/> can contain multiple <see cref="SecurityKeyIdentifierClause"/>(s). This method will return the named collection that matches the first <see cref="SecurityKeyIdentifierClause"/></para><para>If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.</para></remarks>
+        /// <param name="keyIdentifier">
+        /// The <see cref="SecurityKeyIdentifier"/> to resolve to a <see cref="SecurityToken"/>
+        /// </param>
+        /// <param name="token">
+        /// The resolved <see cref="SecurityToken"/>.
+        /// </param>
+        /// <remarks>
+        /// <para>
+        /// A <see cref="SecurityKeyIdentifier"/> can contain multiple <see cref="SecurityKeyIdentifierClause"/>(s). This method will return the named collection that matches the first <see cref="SecurityKeyIdentifierClause"/>
+        /// </para>
+        /// <para>
+        /// If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// true is the keyIdentifier is resolved, false otherwise.
+        /// </returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
         {
             if (keyIdentifier == null)
@@ -280,7 +317,7 @@ namespace System.IdentityModel.Tokens
                 if (namedKeyIdentifierClause != null)
                 {
                     IList<SecurityKey> keys = null;
-                    if (_keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                    if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
                     {
                         token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, keys);
                         return true;
@@ -299,7 +336,18 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Finds a named collection of <see cref="SecurityKey"/>(s) that match the <see cref="SecurityKeyIdentifierClause"/> and returns a <see cref="NamedKeySecurityToken"/> that contains the <see cref="SecurityKey"/>(s).
         /// </summary>
-        /// <remarks>If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.</remarks>
+        /// <param name="keyIdentifierClause">
+        /// The <see cref="SecurityKeyIdentifier"/> to resolve to a <see cref="SecurityToken"/>
+        /// </param>
+        /// <param name="token">
+        /// The resolved <see cref="SecurityToken"/>.
+        /// </param>
+        /// <remarks>
+        /// If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.
+        /// </remarks>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
         {
             if (keyIdentifierClause == null)
@@ -312,7 +360,7 @@ namespace System.IdentityModel.Tokens
             if (namedKeyIdentifierClause != null)
             {
                 IList<SecurityKey> keys = null;
-                if (_keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
                 {
                     token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, keys);
                     return true;
