@@ -1,39 +1,55 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="NamedKeySecurityKeyIdentifierClause.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
 
     /// <summary>
     /// A <see cref="SecurityKeyIdentifierClause"/> that can be used to match <see cref="NamedKeySecurityToken"/>.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class NamedKeySecurityKeyIdentifierClause : SecurityKeyIdentifierClause
     {
         private const string NameKeySecurityKeyIdentifierClauseType = "NamedKeySecurityKeyIdentifierClause";
-        private string _keyIdentifier;
-        private string _name;
+        private string keyIdentifier;
+        private string name;
 
         /// <summary>
-        /// A <see cref="NamedKeySecurityToken"> will use the 'name' for matching.</see>
+        /// Initializes a new instance of the <see cref="NamedKeySecurityKeyIdentifierClause"/> class. The 'name' for matching key identifiers found in the jwt.
         /// </summary>
-        /// <param name="name">Used to identify a named collection of keys.</param>
-        /// <param name="keyIdentifier">Additional information for matching.</param>
-        /// <exception cref="ArgumentNullException">'name' is null.</exception>
-        /// <exception cref="ArgumentNullException">'keyIdentifier' is null.</exception>
-        /// <exception cref="ArgumentException">string.IsNullOrWhiteSpace( 'name' ) is true.</exception>
-        /// <exception cref="ArgumentException">string.IsNullOrWhiteSpace( 'keyIdentifier' ) is true.</exception>
+        /// <param name="name">
+        /// Used to identify a named collection of keys.
+        /// </param>
+        /// <param name="keyIdentifier">
+        /// Additional information for matching.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// 'name' is null.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// 'keyIdentifier' is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// string.IsNullOrWhiteSpace( 'name' ) is true.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// string.IsNullOrWhiteSpace( 'keyIdentifier' ) is true.
+        /// </exception>
         public NamedKeySecurityKeyIdentifierClause(string name, string keyIdentifier)
             : base(NameKeySecurityKeyIdentifierClauseType)
         {
@@ -57,8 +73,8 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, keyIdentifier));
             }
 
-            _name = name;
-            _keyIdentifier = keyIdentifier;
+            this.name = name;
+            this.keyIdentifier = keyIdentifier;
         }
 
         /// <summary>
@@ -66,15 +82,15 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public string Name
         {
-            get { return _name; }
+            get { return this.name; }
         }
 
         /// <summary>
-        /// Gets the keyidentifier can be used for additional matching.
+        /// Gets the key identifier used for matching.
         /// </summary>
         public string KeyIdentifier
         {
-            get { return _keyIdentifier; }
+            get { return this.keyIdentifier; }
         }
 
         /// <summary>
@@ -98,7 +114,7 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                if (string.Equals(namedKeyIdentifierClause.Name, Name, StringComparison.Ordinal)
+                if (string.Equals(namedKeyIdentifierClause.Name, this.Name, StringComparison.Ordinal)
                 && string.Equals(namedKeyIdentifierClause.KeyIdentifier, this.KeyIdentifier, StringComparison.Ordinal))
                 {
                     return true;

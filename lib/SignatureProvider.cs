@@ -1,16 +1,18 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="SignatureProvider.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
@@ -19,6 +21,15 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     public abstract class SignatureProvider : IDisposable
     {
+        /// <summary>
+        /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
+        /// </summary>
+        public string Context
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Produces a signature over the 'input'
         /// </summary>
@@ -33,15 +44,6 @@ namespace System.IdentityModel.Tokens
         /// <param name="signature">signature to compare against.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
         public abstract bool Verify(byte[] input, byte[] signature);
-
-        /// <summary>
-        /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
-        /// </summary>
-        public string Context
-        {
-            get;
-            set;
-        }
 
         #region IDisposable Members
 

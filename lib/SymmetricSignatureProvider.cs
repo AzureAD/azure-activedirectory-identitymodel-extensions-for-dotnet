@@ -1,19 +1,22 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
+﻿//-----------------------------------------------------------------------
+// <copyright file="SymmetricSignatureProvider.cs" company="Microsoft">Copyright 2012 Microsoft Corporation</copyright>
+// <license>
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// ----------------------------------------------------------------------------------
+// </license>
 
 namespace System.IdentityModel.Tokens
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Runtime.CompilerServices;
     using System.Security.Cryptography;
@@ -21,15 +24,16 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Provides signing and verifying operations using a <see cref="SymmetricSecurityKey"/> and specifying an algorithm.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class SymmetricSignatureProvider : SignatureProvider
     {
-        private static byte[] _bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-        private static byte[] _bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
-        private bool _disposed;
-        private KeyedHashAlgorithm _keyedHash;
+        private static byte[] bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+        private static byte[] bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+        private bool disposed;
+        private KeyedHashAlgorithm keyedHash;
 
         /// <summary>
-        /// Creates an instance of a signature provider that uses an <see cref="SymmetricSecurityKey"/> to create and / or verify signatures over a array of bytes.
+        /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SymmetricSecurityKey"/> to create and / or verify signatures over a array of bytes.
         /// </summary>
         /// <param name="key">The <see cref="SymmetricSecurityKey"/> used for signing.</param>
         /// <param name="algorithm">The signature algorithm to use.</param>
@@ -64,7 +68,7 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                _keyedHash = key.GetKeyedHashAlgorithm(algorithm);
+                this.keyedHash = key.GetKeyedHashAlgorithm(algorithm);
             }
             catch (Exception ex)
             {
@@ -73,17 +77,17 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10532, algorithm, key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10532, algorithm, key, ex), ex);
             }
 
-            if (_keyedHash == null)
+            if (this.keyedHash == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10533, algorithm, key.ToString()));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10533, algorithm, key));
             }
 
             try
             {
-                _keyedHash.Key = key.GetSymmetricKey();
+                this.keyedHash.Key = key.GetSymmetricKey();
             }
             catch (Exception ex)
             {
@@ -92,34 +96,9 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10534, algorithm, key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10534, algorithm, key, ex), ex);
             }
         }
-
-        #region IDisposable Members
-
-        /// <summary>
-        /// Disposes of internal components.
-        /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                if (disposing)
-                {
-                    if (_keyedHash != null)
-                    {
-                        _keyedHash.Dispose();
-                        _keyedHash = null;
-                    }
-                }
-            }
-        }
-
-        #endregion
 
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="SymmetricSecurityKey"/> and 'algorithm' passed to <see cref="SymmetricSignatureProvider( SymmetricSecurityKey, string )"/>.
@@ -142,17 +121,17 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(JwtErrors.Jwt10524);
             }
 
-            if (_disposed)
+            if (this.disposed)
             {
                 throw new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString());
             }
 
-            if (_keyedHash == null)
+            if (this.keyedHash == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10523);
             }
 
-            return _keyedHash.ComputeHash(input);
+            return this.keyedHash.ComputeHash(input);
         }
 
         /// <summary>
@@ -189,23 +168,57 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(JwtErrors.Jwt10526);
             }
 
-            if (_disposed)
+            if (this.disposed)
             {
                 throw new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString());
             }
 
-            if (_keyedHash == null)
+            if (this.keyedHash == null)
             {
                 throw new InvalidOperationException(JwtErrors.Jwt10523);
             }
 
-            return AreEqual(signature, _keyedHash.ComputeHash(input));
+            return AreEqual(signature, this.keyedHash.ComputeHash(input));
         }
+
+        #region IDisposable Members
+
+        /// <summary>
+        /// Disposes of internal components.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                this.disposed = true;
+
+                if (disposing)
+                {
+                    if (this.keyedHash != null)
+                    {
+                        this.keyedHash.Dispose();
+                        this.keyedHash = null;
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Compares two byte arrays for equality. Hash size is fixed normally it is 32 bytes.
         /// The attempt here is to take the same time if an attacker shortens the signature OR changes some of the signed contents.
         /// </summary>
+        /// <param name="a">
+        /// One set of bytes to compare.
+        /// </param>
+        /// <param name="b">
+        /// The other set of bytes to compare with.
+        /// </param>
+        /// <returns>
+        /// true if the bytes are equal, false otherwise.
+        /// </returns>
         [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
         private static bool AreEqual(byte[] a, byte[] b)
         {
@@ -215,8 +228,8 @@ namespace System.IdentityModel.Tokens
             if (((null == a) || (null == b))
             || (a.Length != b.Length))
             {
-                a1 = _bytesA; 
-                a2 = _bytesB;
+                a1 = bytesA; 
+                a2 = bytesB;
             }
             else
             {
