@@ -161,7 +161,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets the Base64UrlEncoded <see cref="JwtHeader"/> associated with this instance.
         /// </summary>
-        public string EncodedHeader
+        public virtual string EncodedHeader
         {
             get { return this.header.Encode(); }
         }
@@ -169,7 +169,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets the Base64UrlEncoded <see cref="JwtPayload"/> associated with this instance.
         /// </summary>
-        public string EncodedPayload
+        public virtual string EncodedPayload
         {
             get { return this.payload.Encode(); }
         }
