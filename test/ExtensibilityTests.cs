@@ -170,34 +170,26 @@ namespace System.IdentityModel.Test
             NamedKeySecurityKeyIdentifierClause clause = new NamedKeySecurityKeyIdentifierClause( clauseName, keyId );
             SecurityKeyIdentifier keyIdentifier = new SecurityKeyIdentifier( clause );
             SigningCredentials signingCredentials = new SigningCredentials( KeyingMaterial.SymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256Digest, keyIdentifier );
-            JwtHeader jwtHeader = new JwtHeader( signingCredentials );
-            
+            JwtHeader jwtHeader = new JwtHeader( signingCredentials );            
             SecurityKeyIdentifier ski = jwtHeader.SigningKeyIdentifier;
-
             Assert.IsFalse( ski.Count != 1, "ski.Count != 1 " );
 
             NamedKeySecurityKeyIdentifierClause clauseOut = ski.Find<NamedKeySecurityKeyIdentifierClause>();
             Assert.IsFalse( clauseOut == null , "NamedKeySecurityKeyIdentifierClause not found" );
-
             Assert.IsFalse( clauseOut.Name != clauseName , "clauseOut.Id != clauseId" );
-
             Assert.IsFalse( clauseOut.KeyIdentifier != keyId , "clauseOut.KeyIdentifier != keyId" );
 
             NamedKeySecurityToken NamedKeySecurityToken = new NamedKeySecurityToken( clauseName, new SecurityKey[]{ KeyingMaterial.SymmetricSecurityKey_256 } );
-
             Assert.IsFalse( !NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ) , "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed" );
 
             List<SecurityKey> list = new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 };
             Dictionary< string, IList<SecurityKey>> keys = new Dictionary< string, IList<SecurityKey>>() { { "kid", list }, };
-
             NamedKeyIssuerTokenResolver nkitr = new NamedKeyIssuerTokenResolver( keys: keys );
             SecurityKey sk =  nkitr.ResolveSecurityKey( clause );
             Assert.IsFalse( sk == null , "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed" );
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwt = handler.CreateToken( issuer: Issuers.GotJwt, signingCredentials: signingCredentials ) as JwtSecurityToken;
-
-
             handler.Configuration = new SecurityTokenHandlerConfiguration() 
             { 
                 IssuerTokenResolver = new NamedKeyIssuerTokenResolver( keys: keys ), 

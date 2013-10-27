@@ -74,6 +74,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10330 = "Jwt10330: Unable to validate issuer. Configuration.IssuerNameRegistry is null.";
         internal const string Jwt10331 = "Jwt10331: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
         internal const string Jwt10332 = "Jwt10332: Audience validation failed. jwt.Audience: '{0}'.";
+        internal const string Jwt10333 = "Jwt10333: Unable to create claims from jwt, 'issuer' is null or empty.\njwt: '{0}'.";
 
         internal const string NoNonNullKeysFound = "No non-null SecurityKeys were found";
         internal const string KeysTried          = "{0}";

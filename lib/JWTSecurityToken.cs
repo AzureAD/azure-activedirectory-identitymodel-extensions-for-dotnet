@@ -33,7 +33,7 @@ namespace System.IdentityModel.Tokens
         private JwtHeader header;
         private string id;
         private JwtPayload payload;
-        private string encodedToken;
+        private string rawData;
         private string signature = string.Empty;
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace System.IdentityModel.Tokens
 
             this.header = header;
             this.payload = payload;
-            this.encodedToken = jwtEncodedString;
+            this.rawData = jwtEncodedString;
             this.signature = tokenParts[2];
         }
 
@@ -233,7 +233,7 @@ namespace System.IdentityModel.Tokens
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string )"/></remarks>
         public string RawData
         {
-            get { return this.encodedToken; }
+            get { return this.rawData; }
         }
 
         /// <summary>
@@ -379,7 +379,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "payload", tokenParts[1], jwtEncodedString), ex);
             }
 
-            this.encodedToken = jwtEncodedString;
+            this.rawData = jwtEncodedString;
             this.signature = tokenParts[2];
         }
 

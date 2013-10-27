@@ -830,7 +830,7 @@ namespace System.IdentityModel.Test
                 {
                     Name = "ValidateToken_SecurityToken_Config_Null",
                     SecurityToken = new JwtSecurityToken( EncodedJwts.Asymmetric_LocalSts ),
-                    ExpectedException = ExpectedException.InvalidOp(id:"Jwt10205"),
+                    ExpectedException = ExpectedException.SecVal(id:"Jwt10315"),
                 },
 #endregion
 
@@ -1127,7 +1127,7 @@ namespace System.IdentityModel.Test
 
             Console.WriteLine( "Test variation: Using 'iss', is added as default, but not resolved" );
             nkitr.SecurityKeys.Clear();
-            ee = ExpectedException.SecVal( id: "Jwt10329" );
+            ee = ExpectedException.SecVal( id: "Jwt10315" );
             try
             {
                 ClaimsPrincipal cp = handler.ValidateToken( jwt );
@@ -1137,9 +1137,9 @@ namespace System.IdentityModel.Test
                 ExpectedException.ProcessException( ee, ex );
             }
 
-            Console.WriteLine( "Test variation: Using 'iss', is added as default, should be resolved" );
+            Console.WriteLine( "Test variation: Using 'iss', is added as default, will not be resolved" );
             nkitr.SecurityKeys.Add( "", new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 } );
-            ee = ExpectedException.SecVal( id: "Jwt10329" );
+            ee = ExpectedException.SecVal( id: "Jwt10315" );
             try
             {
                 ClaimsPrincipal cp = handler.ValidateToken( jwt );
@@ -1225,7 +1225,7 @@ namespace System.IdentityModel.Test
                     TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters(),
                     Name = "SigningToken and SigningTokens both null",
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler(){ RequireExpirationTime = false },
-                    ExpectedException = ExpectedException.InvalidOp( id:"Jwt10309" ),
+                    ExpectedException = ExpectedException.SecVal( id:"Jwt10315" ),
                     EncodedString = JwtTestUtilities.GetJwtParts( EncodedJwts.Asymmetric_2048, "ALLParts"),
                 },
                 new JwtSecurityTokenTestVariation
