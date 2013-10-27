@@ -108,7 +108,6 @@ namespace System.IdentityModel.Test
         {
             if ( jwtEncodedString.StartsWith( DerivedJwtSecurityToken.Prefix ) )
             {
-
                 return new DerivedJwtSecurityToken( jwtEncodedString.Substring( DerivedJwtSecurityToken.Prefix.Length ) );
             }
             
@@ -186,7 +185,7 @@ namespace System.IdentityModel.Test
             base.ValidateLifetime( jwt );
         }
 
-        protected override void ValidateSignature( JwtSecurityToken jwt )
+        protected override void ValidateSignature(JwtSecurityToken jwt, byte[] encodedBytes, byte[] signatureBytes, IEnumerable<SecurityToken> signingTokens)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             if ( derivedJwt != null )
@@ -196,20 +195,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse( jwt.GetType() != DerivedTokenType , "jwt.GetType() != DerivedTokenType, types:" + jwt.GetType() + ",  " + DerivedTokenType.ToString() );
 
-            base.ValidateSignature( jwt );
-        }
-
-        protected override void ValidateSignature( JwtSecurityToken jwt, TokenValidationParameters validationParameters )
-        {
-            DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
-            if ( derivedJwt != null )
-            {
-                derivedJwt.ValidateSignatureCalled = true;
-            }
-
-            Assert.IsFalse( jwt.GetType() != DerivedTokenType , "jwt.GetType() != DerivedTokenType, types:" + jwt.GetType() + ",  " + DerivedTokenType.ToString() );
-
-            base.ValidateSignature( jwt, validationParameters );
+            base.ValidateSignature(jwt, encodedBytes, signatureBytes, signingTokens);
         }
 
         protected override void ValidateSigningToken( JwtSecurityToken jwt )
