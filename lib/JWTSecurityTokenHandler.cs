@@ -856,7 +856,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("jwt");
             }
 
-            IList<SecurityToken> signingTokens = GetSigningTokens(jwt);
+            IList<SecurityToken> signingTokens = this.GetSigningTokens(jwt);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload);
             this.ValidateSignature(jwt, encodedBytes, Base64UrlEncoder.DecodeBytes(jwt.EncodedSignature), signingTokens);
             this.ValidateSigningToken(jwt);
@@ -893,7 +893,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("validationParameters");
             }
 
-            IList<SecurityToken> signingTokens = GetSigningTokens(validationParameters);
+            IList<SecurityToken> signingTokens = this.GetSigningTokens(validationParameters);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload);
             this.ValidateSignature(jwt, encodedBytes, Base64UrlEncoder.DecodeBytes(jwt.EncodedSignature), signingTokens);
             this.ValidateSigningToken(jwt);
@@ -1043,12 +1043,12 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("encodedBytes");
             }
 
-            if ( signatureBytes == null )
+            if (signatureBytes == null)
             {
                 throw new ArgumentNullException("signatureBytes");
             }
 
-            if ( signingTokens == null)
+            if (signingTokens == null)
             {
                 throw new ArgumentNullException("signingTokens");
             }
@@ -1172,6 +1172,7 @@ namespace System.IdentityModel.Tokens
                     {
                         sb.Append("\n");
                     }
+
                     first = false;
                     sb.AppendLine(ex.ToString());
                 }
@@ -1595,14 +1596,20 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Obtains possible signing tokens for a jwt
+        /// Uses IssuerTokenResolver to obtains possible signing tokens for a jwt.
         /// </summary>
-        /// <param name="jwt"></param>
-        /// <returns></returns>
+        /// <param name="jwt">The <see cref="JwtSecurityToken"/> to resolve tokens.</param>
+        /// <returns><see cref="IList{SecurityToken}"/> containing all resolved tokens. The list can be empty.</returns>
+        /// <exception cref="ArgumentNullException">'jwt' is null.</exception>
         protected virtual IList<SecurityToken> GetSigningTokens(JwtSecurityToken jwt)
         {
+            if (jwt == null)
+            {
+                throw new ArgumentNullException("jwt");
+            }
+
             List<SecurityToken> signingTokens = new List<SecurityToken>();
-            if (jwt == null || this.Configuration == null || this.Configuration.IssuerTokenResolver == null)
+            if (this.Configuration == null || this.Configuration.IssuerTokenResolver == null)
             {
                 return signingTokens;
             }
@@ -1629,17 +1636,17 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Consolidates the possible signing tokens from <see cref="TokenValidationParameters"/>.
         /// </summary>
-        /// <param name="validationParameters">returns a list of <see cref="SecurityToken"/> found in the <see cref="TokenValidationParameters"/>.</param>
-        /// <returns></returns>
+        /// <param name="validationParameters">contains <see cref="SecurityToken"/> in different places.</param>
+        /// <returns>Returns a <see cref="IList{SecurityToken}"/> containing all <see cref="SecurityToken"/> found in validationParameters.</returns>
+        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         protected virtual IList<SecurityToken> GetSigningTokens(TokenValidationParameters validationParameters)
         {
-            List<SecurityToken> signingTokens = new List<SecurityToken>();
-
             if (validationParameters == null)
             {
-                return signingTokens;
+                throw new ArgumentNullException("validationParameters");
             }
 
+            List<SecurityToken> signingTokens = new List<SecurityToken>();
             if (validationParameters.SigningToken != null)
             {
                 signingTokens.Add(validationParameters.SigningToken);
