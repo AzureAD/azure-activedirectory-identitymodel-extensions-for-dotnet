@@ -1033,6 +1033,26 @@ namespace System.IdentityModel.Tokens
         /// <param name="signingTokens">contains the <see cref="SecurityToken"/>(s) used to check the signature.</param>
         protected virtual void ValidateSignature(JwtSecurityToken jwt, byte[] encodedBytes, byte[] signatureBytes, IEnumerable<SecurityToken> signingTokens)
         {
+            if (jwt == null)
+            {
+                throw new ArgumentNullException("jwt");
+            }
+
+            if (encodedBytes == null)
+            {
+                throw new ArgumentNullException("encodedBytes");
+            }
+
+            if ( signatureBytes == null )
+            {
+                throw new ArgumentNullException("signatureBytes");
+            }
+
+            if ( signingTokens == null)
+            {
+                throw new ArgumentNullException("signingTokens");
+            }
+
             string mappedAlgorithm = jwt.Header.SignatureAlgorithm;
             if (mappedAlgorithm != null && InboundAlgorithmMap.ContainsKey(mappedAlgorithm))
             {
