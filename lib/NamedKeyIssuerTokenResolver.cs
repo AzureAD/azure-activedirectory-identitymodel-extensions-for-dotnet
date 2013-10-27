@@ -226,14 +226,14 @@ namespace System.IdentityModel.Tokens
             }
 
             byte[] keybytes = Convert.FromBase64String(key);
-            IList<SecurityKey> keys = null;
-            if (!this.keys.TryGetValue(name, out keys))
+            IList<SecurityKey> resolvedKeys = null;
+            if (!this.keys.TryGetValue(name, out resolvedKeys))
             {
-                keys = new List<SecurityKey>();
-                this.keys.Add(name, keys);
+                resolvedKeys = new List<SecurityKey>();
+                this.keys.Add(name, resolvedKeys);
             }
 
-            keys.Add(new InMemorySymmetricSecurityKey(keybytes));
+            resolvedKeys.Add(new InMemorySymmetricSecurityKey(keybytes));
         }
 
         /// <summary>
@@ -262,10 +262,10 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                IList<SecurityKey> keys = null;
-                if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                IList<SecurityKey> resolvedKeys = null;
+                if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out resolvedKeys))
                 {
-                    key = keys[0];
+                    key = resolvedKeys[0];
                     return true;
                 }
             }
@@ -316,10 +316,10 @@ namespace System.IdentityModel.Tokens
                 NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = clause as NamedKeySecurityKeyIdentifierClause;
                 if (namedKeyIdentifierClause != null)
                 {
-                    IList<SecurityKey> keys = null;
-                    if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                    IList<SecurityKey> resolvedKeys = null;
+                    if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out resolvedKeys))
                     {
-                        token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, keys);
+                        token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, resolvedKeys);
                         return true;
                     }
                 }
@@ -359,10 +359,10 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                IList<SecurityKey> keys = null;
-                if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out keys))
+                IList<SecurityKey> resolvedKeys = null;
+                if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out resolvedKeys))
                 {
-                    token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, keys);
+                    token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, resolvedKeys);
                     return true;
                 }
             }
