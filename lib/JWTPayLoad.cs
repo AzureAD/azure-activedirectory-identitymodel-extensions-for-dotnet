@@ -264,11 +264,11 @@ namespace System.IdentityModel.Tokens
                         this[jsonClaimType] = claimValues;
                     }
 
-                    claimValues.Add(claim.Value);
+                    claimValues.Add(GetClaimValueUsingValueType(claim));
                 }
                 else
                 {
-                    this.Add(jsonClaimType, claim.Value);
+                    this.Add(jsonClaimType, GetClaimValueUsingValueType(claim));
                 }
             }
         }
@@ -282,6 +282,56 @@ namespace System.IdentityModel.Tokens
         public string Encode()
         {
             return Base64UrlEncoder.Encode(this.SerializeToJson());
+        }
+
+        internal object GetClaimValueUsingValueType(Claim claim)
+        {
+            if (claim.ValueType == ClaimValueTypes.Integer)
+            {
+                int intValue;
+                if (int.TryParse(claim.Value, out intValue))
+                {
+                    return intValue;
+                }
+            }
+
+            if (claim.ValueType == ClaimValueTypes.Integer32)
+            {
+                Int32 intValue;
+                if (Int32.TryParse(claim.Value, out intValue))
+                {
+                    return intValue;
+                }
+            }
+
+            if (claim.ValueType == ClaimValueTypes.Integer64)
+            {
+                Int64 intValue;
+                if (Int64.TryParse(claim.Value, out intValue))
+                {
+                    return intValue;
+                }
+            }
+
+            if (claim.ValueType == ClaimValueTypes.Boolean)
+            {
+                bool boolValue;
+                if (bool.TryParse(claim.Value, out boolValue))
+                {
+                    return boolValue;
+                }
+            }
+
+            if (claim.ValueType == ClaimValueTypes.Double)
+            {
+                double doubleValue;
+                if (double.TryParse(claim.Value, out doubleValue))
+                {
+                    return doubleValue;
+                }
+            }
+
+            return claim.Value;
         }
 
         internal string GetStandardClaim(string claimType)
