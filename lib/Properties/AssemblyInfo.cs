@@ -25,11 +25,11 @@ using System.Resources;
 [assembly: AssemblyCulture("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4D15AC3D-74C3-4903-B0A7-80A89F04F0BA")]
+[assembly: Guid("ED55D03C-8832-4483-BD91-1AFAF42C0731")]
 [assembly: AssemblyCompanyAttribute("Microsoft")]
 [assembly: AssemblyProductAttribute("JSON Web Security Token")]
 [assembly: AssemblyCopyrightAttribute("Microsoft")]
-[assembly: AssemblyVersionAttribute("3.0.0.0")]
-[assembly: AssemblyFileVersionAttribute("3.0.0.0")]
+[assembly: AssemblyVersionAttribute("4.0.0.0")]
+[assembly: AssemblyFileVersionAttribute("4.0.0.0")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
