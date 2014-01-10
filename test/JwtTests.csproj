@@ -73,7 +73,6 @@
     <Compile Include="KeyingMaterial.cs" />
     <Compile Include="NamedKeyIssuerTokenResolverConfigTest.cs" />
     <Compile Include="NamedKeyTests.cs" />
-    <Compile Include="Performance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="References.cs" />
     <Compile Include="RemoteDomain.cs" />
@@ -86,7 +85,7 @@
     <Compile Include="ValidateTokenConfigTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\lib\JwtConfigurationStrings.cs">    
+    <Compile Include="..\lib\JwtConfigurationStrings.cs">
       <Link>jwtConfigurationStrings.cs</Link>
     </Compile>
     <Compile Include="..\lib\JwtConstants.cs">
