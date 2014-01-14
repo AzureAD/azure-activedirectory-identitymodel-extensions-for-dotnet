@@ -79,8 +79,8 @@ namespace System.IdentityModel.Test
 
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
-                SigningToken = KeyingMaterial.BinarySecretToken_256,
-                AudienceUriMode = Selectors.AudienceUriMode.Never,
+                IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
+                ValidateAudience = false,
                 ValidIssuer = Issuers.GotJwt,
             };
 
@@ -273,8 +273,8 @@ namespace System.IdentityModel.Test
             List<SecurityToken> tokens = new List<SecurityToken>() { KeyingMaterial.BinarySecretToken_256 };
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
-                SigningToken = KeyingMaterial.BinarySecretToken_256,
-                AudienceUriMode = AudienceUriMode.Never,
+                IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
+                ValidateAudience = false,
                 ValidIssuer = "http://GotJwt.com",
 
             };

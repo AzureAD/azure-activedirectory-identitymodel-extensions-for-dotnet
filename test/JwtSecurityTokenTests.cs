@@ -162,8 +162,8 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "F5803908-4CFA-4038-B506-045CF65D39BD" )]
-        [Description( "Tests JWTSecurityToken Constructor that takes .Net params. Claims, issuer, etc." )]
-        public void JwtSecurityToken_ConstructionParams()
+        [Description( "Tests: Constructor" )]
+        public void JwtSecurityToken_Constructor()
         {
             Console.WriteLine( string.Format( "Entering: '{0}'", MethodBase.GetCurrentMethod() ) );
             JwtSecurityToken jwt = null;

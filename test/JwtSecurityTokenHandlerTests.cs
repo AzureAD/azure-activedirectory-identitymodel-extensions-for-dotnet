@@ -528,8 +528,8 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "2CADC17D-D1F4-4A20-B54A-44FE37445348" )]
-        [Description( "Public calls into JwtSecurityTokenHandler" )]
-        public void JwtSecurityTokenHandler_PublicCalls()
+        [Description( "Tests: Publics" )]
+        public void JwtSecurityTokenHandler_Publics()
         {
             string methodToCall = _testContextProvider.GetValue<string>( "Method" );
 
@@ -940,9 +940,9 @@ namespace System.IdentityModel.Test
             jwt = handler.CreateToken( issuer: "http://GotJwt.com", signingCredentials: KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2 ) as JwtSecurityToken;
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
-                AudienceUriMode = Selectors.AudienceUriMode.Never,
+                IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                ValidateAudience = false,
                 ValidateIssuer = false,
-                SigningToken = KeyingMaterial.AsymmetricX509Token_2048,
             };
 
             ClaimsPrincipal principalValidated = handler.ValidateToken( jwt, tvp );
@@ -975,12 +975,13 @@ namespace System.IdentityModel.Test
             List<SecurityToken> tokens = new List<SecurityToken>(){ KeyingMaterial.X509Token_2048 };
             handler.Configuration = new SecurityTokenHandlerConfiguration() 
                                         {
-                                            IssuerTokenResolver =  SecurityTokenResolver.CreateDefaultSecurityTokenResolver( tokens.AsReadOnly(), true ), 
-                                            SaveBootstrapContext = true,
+                                            AudienceRestriction = new AudienceRestriction(AudienceUriMode.Never),
                                             CertificateValidator = AlwaysSucceedCertificateValidator.New,
-                                            AudienceRestriction = new AudienceRestriction( AudienceUriMode.Never ),
                                             IssuerNameRegistry = new SetNameIssuerNameRegistry( "http://GotJwt.com" ),
+                                            IssuerTokenResolver = SecurityTokenResolver.CreateDefaultSecurityTokenResolver(tokens.AsReadOnly(), true), 
+                                            SaveBootstrapContext = true,
                                         };
+
             ClaimsPrincipal principal = handler.ValidateToken( jwt );
             ClaimsIdentity identity = principal.Identity as ClaimsIdentity;
             CheckBootstrapContext( identity, true, jwt.RawData );
@@ -991,8 +992,8 @@ namespace System.IdentityModel.Test
             CheckBootstrapContext( principal.Identity as ClaimsIdentity, true, jwt.RawData );
             TokenValidationParameters tvp = new TokenValidationParameters
                                                 {
-                                                    AudienceUriMode = AudienceUriMode.Never,
-                                                    SigningToken = KeyingMaterial.X509Token_2048,
+                                                    IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                                                    ValidateAudience = false,
                                                     ValidIssuer = "http://GotJwt.com",
                                                 };
 
@@ -1002,10 +1003,10 @@ namespace System.IdentityModel.Test
             Console.WriteLine( "SaveBootstrapContext = true, jwt, tvp" );
             tvp = new TokenValidationParameters
             {
-                AudienceUriMode = AudienceUriMode.Never,
-                SigningToken = KeyingMaterial.X509Token_2048,
+                IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                SaveSigninToken = true,
+                ValidateAudience = false,
                 ValidIssuer = "http://GotJwt.com",
-                SaveBootstrapContext = true,
             };
 
             principal = handler.ValidateToken( jwt, tvp );
@@ -1015,12 +1016,13 @@ namespace System.IdentityModel.Test
             // don't save bootstrap
             handler.Configuration = new SecurityTokenHandlerConfiguration()
             {
+                AudienceRestriction = new AudienceRestriction(AudienceUriMode.Never),
+                CertificateValidator = AlwaysSucceedCertificateValidator.New,
+                IssuerNameRegistry = new SetNameIssuerNameRegistry("http://GotJwt.com"),
                 IssuerTokenResolver = SecurityTokenResolver.CreateDefaultSecurityTokenResolver( tokens.AsReadOnly(), true ),
                 SaveBootstrapContext = false,
-                CertificateValidator = AlwaysSucceedCertificateValidator.New,
-                AudienceRestriction = new AudienceRestriction( AudienceUriMode.Never ),
-                IssuerNameRegistry = new SetNameIssuerNameRegistry( "http://GotJwt.com" ),
             };
+
             principal = handler.ValidateToken( jwt );
             CheckBootstrapContext( principal.Identity as ClaimsIdentity, false, jwt.RawData );
 
@@ -1028,10 +1030,10 @@ namespace System.IdentityModel.Test
             Console.WriteLine( "SaveBootstrapContext = false, jwt, tvp" );
             tvp = new TokenValidationParameters
             {
-                AudienceUriMode = AudienceUriMode.Never,
-                SigningToken = KeyingMaterial.X509Token_2048,
+                IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                SaveSigninToken = false,
+                ValidateAudience = false,
                 ValidIssuer = "http://GotJwt.com",
-                SaveBootstrapContext = false,
             };
 
             principal = handler.ValidateToken( jwt, tvp );
@@ -1355,9 +1357,9 @@ namespace System.IdentityModel.Test
 
             TokenValidationParameters jwtParams = new TokenValidationParameters
             {
-                AudienceUriMode = AudienceUriMode.Never,
-                SigningToken = KeyingMaterial.X509Token_2048,
-                AllowedAudience = "urn:InteractiveAuthentication",
+                IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                ValidateAudience = false,                
+                ValidAudience = "urn:InteractiveAuthentication",
                 ValidIssuer = "http://Simple.CertData_2048",
             };
 
@@ -1463,7 +1465,7 @@ namespace System.IdentityModel.Test
                    ExpectedException = ExpectedException.Aud( id: "Jwt10300" ),
                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                    JwtSecurityToken = new JwtSecurityToken(issuer: "http://GotJwt.com", audience: null ),
-                   TokenValidationParameters = new TokenValidationParameters(){ AudienceUriMode = AudienceUriMode.BearerKeyOnly }, 
+                   TokenValidationParameters = new TokenValidationParameters(),
                 },
                 new JwtSecurityTokenTestVariation
                 {
@@ -1471,7 +1473,7 @@ namespace System.IdentityModel.Test
                     ExpectedException = ExpectedException.Aud( id: "Jwt10300" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( issuer: "http://GotJwt.com" , audience: string.Empty),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly },
+                    TokenValidationParameters = new TokenValidationParameters(),
                 },
                 new JwtSecurityTokenTestVariation
                 {
@@ -1479,110 +1481,110 @@ namespace System.IdentityModel.Test
                     ExpectedException = ExpectedException.Aud( id: "Jwt10300" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "    " ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly },
+                    TokenValidationParameters = new TokenValidationParameters(),
                 },
                 new JwtSecurityTokenTestVariation
                 {
-                    Name = "jwtParams.AllowedAudience jwtParams.AllowedAudiences both null",
+                    Name = "TokenValidationParameters.ValidAudience TokenValidationParameters.ValidAudiences both null",
                     ExpectedException = ExpectedException.ArgEx( id: "Jwt10301" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "http://GotJwt.com" ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly },
+                    TokenValidationParameters = new TokenValidationParameters(),
                 },
                 new JwtSecurityTokenTestVariation()
                 {
-                    Name = "jwtParams.AllowedAudience empty jwtParams.AllowedAudiences empty",
+                    Name = "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudiences empty",
                     ExpectedException = ExpectedException.Aud( id: "Jwt10303" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "http://GotJwt.com" ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly, AllowedAudience = string.Empty, AllowedAudiences = new List<string>() },
+                    TokenValidationParameters = new TokenValidationParameters() { ValidAudience = string.Empty, ValidAudiences = new List<string>() },
                 },
                 new JwtSecurityTokenTestVariation()
                 {
-                    Name = "jwtParams.AllowedAudience whitespace jwtParams.AllowedAudiences empty",
+                    Name = "TokenValidationParameters.ValidAudience whitespace, TokenValidationParameters.ValidAudiences empty",
                     ExpectedException = ExpectedException.Aud( id: "Jwt10303" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "http://GotJwt.com" ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly, AllowedAudience = "   ", AllowedAudiences = new List<string>() },
+                    TokenValidationParameters = new TokenValidationParameters() { ValidAudience = "   ", ValidAudiences = new List<string>() },
                 },
                 new JwtSecurityTokenTestVariation()
                 {
-                    Name = "jwtParams.AllowedAudience empty jwtParams.AllowedAudiences one null string",
+                    Name = "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudience one null string",
                     ExpectedException = ExpectedException.Aud( id: "Jwt10303" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "http://GotJwt.com" ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly, AllowedAudience = "", AllowedAudiences = new List<string>(){ null } },
+                    TokenValidationParameters = new TokenValidationParameters() { ValidAudience = "", ValidAudiences = new List<string>(){ null } },
                 },
                 new JwtSecurityTokenTestVariation()
                 {
-                    Name = "jwtParams.AllowedAudience empty jwtParams.AllowedAudiences one empty string",
+                    Name = "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudiences one empty string",
                     ExpectedException = ExpectedException.Aud( id: "Jwt10303" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "http://GotJwt.com" ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly, AllowedAudience = "", AllowedAudiences = new List<string>(){ string.Empty } },
+                    TokenValidationParameters = new TokenValidationParameters() { ValidAudience = "", ValidAudiences = new List<string>(){ string.Empty } },
                 },
                 new JwtSecurityTokenTestVariation()
                 {
-                    Name = "jwtParams.AllowedAudience empty jwtParams.AllowedAudiences one string whitespace",
+                    Name = "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudiences one string whitespace",
                     ExpectedException = ExpectedException.Aud( id: "Jwt10303" ),
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false, RequireSignedTokens = false },
                     JwtSecurityToken = new JwtSecurityToken( "http://GotJwt.com", audience: "http://GotJwt.com" ),
-                    TokenValidationParameters = new TokenValidationParameters() { AudienceUriMode = AudienceUriMode.BearerKeyOnly, AllowedAudience = "", AllowedAudiences = new List<string>(){ "     " } },
+                    TokenValidationParameters = new TokenValidationParameters() { ValidAudience = "", ValidAudiences = new List<string>(){ "     " } },
                 }
             };
 
             return testVariations;
         }
 
-        private static void AudienceValidationLoop( IEnumerable<string> audiences, IEnumerable<string> allowedAudiences, bool expectException )
-        {
-            JwtSecurityToken jwt;
-            TokenValidationParameters jwtParams = new TokenValidationParameters();
-            JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
+        //private static void AudienceValidationLoop( IEnumerable<string> audiences, IEnumerable<string> validAudiences, bool expectException )
+        //{
+        //    JwtSecurityToken jwt;
+        //    TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
+        //    JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
 
-            foreach ( string aud in audiences )
-            {
-                foreach ( string allowed in audiences )
-                {
-                    try
-                    {
-                        jwt = AudienceValidationTestSetUp( jwtParams, aud, AudienceUriMode.BearerKeyOnly, allowed, null );
-                        jwtHandler.ValidateToken( jwt, jwtParams );
-                        Assert.IsFalse( expectException , string.Format( "Expected to throw: aud: '{0}', allowedUri: '{1}'", aud, allowed ) );
-                    }
-                    catch ( SecurityTokenValidationException )
-                    {
-                        Assert.IsFalse( !expectException , string.Format( "Did not Expect to throw: aud: '{0}', allowedUri: '{1}'", aud, allowed ) );
-                    }
-                }
+        //    foreach ( string audience in audiences )
+        //    {
+        //        foreach (string validAudience in validAudiences)
+        //        {
+        //            try
+        //            {
+        //                jwt = AudienceValidationTestSetUp( tokenValidationParameters, audience, true, validAudience, null );
+        //                jwtHandler.ValidateToken( jwt, tokenValidationParameters );
+        //                Assert.IsFalse( expectException , string.Format( "Expected to throw: aud: '{0}', allowedUri: '{1}'", audience, validAudience ) );
+        //            }
+        //            catch ( SecurityTokenValidationException )
+        //            {
+        //                Assert.IsFalse( !expectException , string.Format( "Did not Expect to throw: aud: '{0}', allowedUri: '{1}'", audience, validAudience ) );
+        //            }
+        //        }
 
-                try
-                {
-                    jwt = AudienceValidationTestSetUp( jwtParams, aud, AudienceUriMode.BearerKeyOnly, null, allowedAudiences );
-                    jwtHandler.ValidateToken( jwt, jwtParams );
-                    Assert.IsFalse( expectException , string.Format( "Expected to throw: aud: '{0}', allowedUri: '{1}'", aud, JwtTestUtilities.SerializeAsSingleCommaDelimitedString( allowedAudiences ) ) );
+        //        try
+        //        {
+        //            jwt = AudienceValidationTestSetUp( tokenValidationParameters, audience, true, null, validAudiences );
+        //            jwtHandler.ValidateToken( jwt, tokenValidationParameters );
+        //            Assert.IsFalse( expectException , string.Format( "Expected to throw: aud: '{0}', allowedUri: '{1}'", audience, JwtTestUtilities.SerializeAsSingleCommaDelimitedString( validAudiences ) ) );
 
-                }
-                catch ( SecurityTokenValidationException )
-                {
-                    Assert.IsFalse( !expectException , string.Format( "Did not Expect to throw: aud: '{0}', allowedUri: '{1}'", aud, JwtTestUtilities.SerializeAsSingleCommaDelimitedString( allowedAudiences ) ) );
-                }
-            }
-        }
+        //        }
+        //        catch ( SecurityTokenValidationException )
+        //        {
+        //            Assert.IsFalse( !expectException , string.Format( "Did not Expect to throw: aud: '{0}', allowedUri: '{1}'", audience, JwtTestUtilities.SerializeAsSingleCommaDelimitedString( validAudiences ) ) );
+        //        }
+        //    }
+        //}
 
-        private static JwtSecurityToken AudienceValidationTestSetUp( TokenValidationParameters jwtParms, string audience, AudienceUriMode mode, string allowedAudience, IEnumerable<string> allowedAudiences )
-        {
-            jwtParms.AudienceUriMode = mode;
-            jwtParms.AllowedAudience = allowedAudience;
-            jwtParms.AllowedAudiences = allowedAudiences;
-            return new JwtSecurityToken( "urn:jwtTest", audience );
-        }
+        //private static JwtSecurityToken AudienceValidationTestSetUp( TokenValidationParameters tokenValidationParameters, string audience, bool validateAudience, string validAudience, IEnumerable<string> validAudiences )
+        //{
+        //    tokenValidationParameters.ValidateAudience = validateAudience;
+        //    tokenValidationParameters.ValidAudience = validAudience;
+        //    tokenValidationParameters.ValidAudiences = validAudiences;
+        //    return new JwtSecurityToken( "urn:jwtTest", audience );
+        //}
 
-        private static void SignatureValidationTestSetUp( TokenValidationParameters jwtParms, SecurityToken token, IssuerTokenResolver tokenResolver )
-        {
-            jwtParms.AudienceUriMode = AudienceUriMode.Never;
-            jwtParms.SigningToken = token;
-            return;
-        }
+        //private static void SignatureValidationTestSetUp( TokenValidationParameters tokenValidationParameters, SecurityToken token, IssuerTokenResolver tokenResolver )
+        //{
+        //    tokenValidationParameters.ValidateAudience = false;
+        //    tokenValidationParameters.IssuerSigningKeys = token.SecurityKeys;
+        //    return;
+        //}
     }
 }
