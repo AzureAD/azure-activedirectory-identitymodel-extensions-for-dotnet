@@ -56,8 +56,8 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "5763D198-1A0A-474D-A5D3-A5BBC496EE7B" )]
-        [Description( "ensures that constructor / set / gets are working" )]
-        public void SetGet()
+        [Description( "Tests: Publics" )]
+        public void TokenValidationParameters_Publics()
         {
             Int32 clockSkewInSeconds = 600;
             SecurityKey issuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256;
@@ -119,6 +119,50 @@ namespace System.IdentityModel.Test
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudience, validAudience));
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudiences, validAudiences));
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
+
+            ExpectedException expectedException = new ExpectedException(thrown: typeof(ArgumentOutOfRangeException), id: "Jwt10119");
+            try
+            {
+                tokenValidationParameters.MaximumTokenSizeInBytes = 0;
+                ExpectedException.ProcessNoException(expectedException);
+            }
+            catch (Exception exception)
+            {
+                ExpectedException.ProcessException(expectedException, exception);
+            }
+
+            expectedException = new ExpectedException(thrown: typeof(ArgumentOutOfRangeException), id: "Jwt10120");
+            try
+            {
+                tokenValidationParameters.ClockSkewInSeconds = -1;
+                ExpectedException.ProcessNoException(expectedException);
+            }
+            catch (Exception exception)
+            {
+                ExpectedException.ProcessException(expectedException, exception);
+            }
+
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "5C8D86B6-08C8-416D-995E-FE6856E70999")]
+        [Description("Tests: Defaults")]
+        public void TokenValidationParameters_Defaults()
+        {
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
+            Assert.IsTrue(TokenValidationParameters.DefaultMaximumTokenSizeInBytes == 2 * 1024 * 1024, "TokenValidationParameters.DefaultMaximumTokenSizeInBytes");
+            Assert.IsTrue(tokenValidationParameters.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "tokenValidationParameters.MaximumTokenSizeInBytes");
+            Assert.IsTrue(TokenValidationParameters.DefaultClockSkewInSeconds == 300, "TokenValidationParameters.DefaultClockSkewInSeconds");
+            Assert.IsTrue(tokenValidationParameters.ClockSkewInSeconds == TokenValidationParameters.DefaultClockSkewInSeconds, "tokenValidationParameters.ClockSkewInSeconds");
+            Assert.IsTrue(tokenValidationParameters.IssuerSigningKey == null, "Expecting default: validationParameters.IssuerSigningKey == null.");
+            Assert.IsTrue(tokenValidationParameters.IssuerSigningKeys == null, "Expecting default: validationParameters.IssuerSigningKeys == null.");            
+            Assert.IsFalse(tokenValidationParameters.SaveSigninToken, "Expecting default: validationParameters.SaveSigninToken by default to be false");
+            Assert.IsTrue(tokenValidationParameters.ValidateAudience, "Expecting default: validationParameters.ValidateAudience by default to be true");
+            Assert.IsTrue(tokenValidationParameters.ValidateIssuer, "Expecting default: validationParameters.ValidateIssuer by default to be true");
+            Assert.IsTrue(tokenValidationParameters.ValidAudience == null, "Expecting default: validationParameters.ValidAudience == null.");
+            Assert.IsTrue(tokenValidationParameters.ValidAudiences == null, "Expecting default: validationParameters.ValidAudience == null.");
+            Assert.IsTrue(tokenValidationParameters.ValidIssuer == null, "Expecting default: validationParameters.ValidAudience == null.");
+            Assert.IsTrue(tokenValidationParameters.ValidAudiences == null, "Expecting default: validationParameters.ValidAudience == null.");
         }
     }
 }
