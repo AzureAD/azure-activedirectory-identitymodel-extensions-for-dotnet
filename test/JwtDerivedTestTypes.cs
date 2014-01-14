@@ -202,6 +202,19 @@ namespace System.IdentityModel.Test
             base.ValidateSignature(jwt, encodedBytes, signatureBytes, signingTokens);
         }
 
+        protected override void ValidateSignature(JwtSecurityToken jwt, byte[] encodedBytes, byte[] signatureBytes, IEnumerable<SecurityKey> securityKeys)
+        {
+            DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
+            if (derivedJwt != null)
+            {
+                derivedJwt.ValidateSignatureCalled = true;
+            }
+
+            Assert.IsFalse(jwt.GetType() != DerivedTokenType, "jwt.GetType() != DerivedTokenType, types:" + jwt.GetType() + ",  " + DerivedTokenType.ToString());
+
+            base.ValidateSignature(jwt, encodedBytes, signatureBytes, securityKeys);
+        }
+
         protected override void ValidateSigningToken( JwtSecurityToken jwt )
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;

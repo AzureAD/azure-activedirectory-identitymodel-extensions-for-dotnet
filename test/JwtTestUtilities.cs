@@ -67,7 +67,7 @@ namespace System.IdentityModel.Test
         public string Issuer { get; set; }
         public JwtSecurityTokenHandler JwtSecurityTokenHandler { get { return _jwtHandler; } set { _jwtHandler = value; } }
         public JwtSecurityToken JwtSecurityToken { get; set; }
-        public JwtSecurityTokenRequirement JwtSecurityTokenRequirement { get; set; }
+        public JwtSecurityTokenRequirementTests JwtSecurityTokenRequirement { get; set; }
         public Lifetime Lifetime { get; set; }
         public string Name { get; set; }
         public string NameClaimType { get; set; }
@@ -99,13 +99,23 @@ namespace System.IdentityModel.Test
     {
         public static TokenValidationParameters SignatureValidationParameters( SecurityToken signingToken = null, List<SecurityToken> signingTokens = null )
         {
-            return new TokenValidationParameters()
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
             {
-                AudienceUriMode = AudienceUriMode.Never,
-                SigningToken = signingToken,
-                SigningTokens = signingTokens,
+                ValidateAudience = false,
                 ValidIssuer = "http://GotJwt.com",
             };
+
+            List<SecurityKey> securityKeys = new List<SecurityKey>();
+            if (signingToken != null)
+                securityKeys.AddRange(signingToken.SecurityKeys);
+
+            if (signingTokens != null)
+                foreach(SecurityToken securityToken in signingTokens)
+                    if (securityToken != null)
+                        securityKeys.AddRange(securityToken.SecurityKeys);
+
+            tokenValidationParameters.IssuerSigningKeys = securityKeys;
+            return tokenValidationParameters;
         }
 
         public static string GetJwtParts( string jwt, string whichParts )

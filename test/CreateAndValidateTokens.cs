@@ -118,8 +118,8 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwtRead = jwtHandler.ReadToken( encodedJwt ) as JwtSecurityToken;
             TokenValidationParameters validationParameters = new TokenValidationParameters()
             {
-                SigningToken = KeyingMaterial.BinarySecretToken_256,
-                AudienceUriMode = Selectors.AudienceUriMode.Never,
+                IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
+                ValidateAudience = false,
                 ValidIssuer = issuer,
             };
 
@@ -167,7 +167,7 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwtRead = jwtHandler.ReadToken( encodedJwt ) as JwtSecurityToken;
             TokenValidationParameters validationParameters = new TokenValidationParameters()
             {
-                AudienceUriMode = Selectors.AudienceUriMode.Never,
+                ValidateAudience = false,
                 ValidIssuer = issuer,
             };
 
@@ -195,7 +195,7 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwtRead = jwtHandler.ReadToken( encodedJwt ) as JwtSecurityToken;
             TokenValidationParameters validationParameters = new TokenValidationParameters()
             {
-                AudienceUriMode = Selectors.AudienceUriMode.Never,
+                ValidateAudience = false,
                 ValidIssuer = issuer,
             };
 

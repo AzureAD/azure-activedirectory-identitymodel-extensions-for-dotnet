@@ -246,29 +246,5 @@ namespace System.IdentityModel.Test
             X509CertificateValidator validator = (X509CertificateValidator)fi.GetValue( handler.CertificateValidator );
             Assert.IsFalse( validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() , "validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() " );
         }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "606DF40C-2B55-4DA2-A4F1-521E9BDF2A1E" )]
-        [Description( "Ensures that TokenValidationParameters defaults are as expected" )]
-        public void TokenValidationParameters_Defaults()
-        {
-            TokenValidationParameters tvp = new TokenValidationParameters();
-
-            Assert.IsFalse( tvp.AllowedAudience != null , string.Format( "Expecting: validationParameters.AllowedAudience == null. Was: '{0}'", tvp.AllowedAudience ) );
-
-            Assert.IsFalse( tvp.AllowedAudiences != null , string.Format( "Expecting: validationParameters.AllowedAudiences == null. Was: '{0}'", tvp.AllowedAudiences ) );
-
-            Assert.IsFalse( tvp.AudienceUriMode != AudienceUriMode.BearerKeyOnly , string.Format( "Expecting: validationParameters.AudienceUriMode == AudienceUriMode.BearerKeyOnly. Was: '{0}'", tvp.AudienceUriMode ) );
-
-            Assert.IsFalse( tvp.SaveBootstrapContext , string.Format( "Expecting: validationParameters.SaveBootstrapContext == false. Was: '{0}'", tvp.SaveBootstrapContext ) );
-
-            Assert.IsFalse( tvp.SigningToken != null , string.Format( "Expecting: validationParameters.SigningToken == null. Was: '{0}'", tvp.SigningToken ) );
-
-            Assert.IsFalse( !tvp.ValidateIssuer , string.Format( "Expecting: validationParameters.ValidateIssuer == true. Was: '{0}'", tvp.ValidateIssuer ) );
-
-            Assert.IsFalse( tvp.ValidIssuer != null , string.Format( "Expecting: validationParameters.ValidIssuer == null. Was: '{0}'", tvp.ValidIssuer ) );
-
-            Assert.IsFalse( tvp.ValidIssuers != null , string.Format( "Expecting: validationParameters.ValidIssuers == null. Was: '{0}'", tvp.ValidIssuers ) );
-        }        
     }
 }

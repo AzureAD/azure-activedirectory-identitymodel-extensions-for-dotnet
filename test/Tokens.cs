@@ -68,8 +68,8 @@ namespace System.IdentityModel.Test
                     SigningToken = KeyingMaterial.X509Token_2048,
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        AudienceUriMode = AudienceUriMode.Never,
-                        SigningToken = KeyingMaterial.X509Token_2048,
+                        ValidateAudience = false,
+                        IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
                         ValidIssuer = issuer,
                     }
                 };
@@ -84,8 +84,8 @@ namespace System.IdentityModel.Test
                     SigningToken = KeyingMaterial.BinarySecretToken_256,
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        AudienceUriMode = AudienceUriMode.Never,
-                        SigningToken = KeyingMaterial.BinarySecretToken_256,
+                        ValidateAudience = false,
+                        IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
                         ValidIssuer = issuer,
                     }
                 };

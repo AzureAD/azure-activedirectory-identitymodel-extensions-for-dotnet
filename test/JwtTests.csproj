@@ -61,18 +61,20 @@
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="CreateAndValidateTokens.cs" />
     <Compile Include="Defaults.cs" />
-    <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="ExpectedException.cs" />
     <Compile Include="ExtensibilityTests.cs" />
     <Compile Include="IdentityComparer.cs" />
     <Compile Include="JwtConfigTests.cs" />
     <Compile Include="JwtDerivedTestTypes.cs" />
     <Compile Include="JwtPayloadTest.cs" />
     <Compile Include="JwtSecurityTokenHandlerTests.cs" />
+    <Compile Include="JwtSecurityTokenRequirementTests.cs" />
     <Compile Include="JwtSecurityTokenTests.cs" />
     <Compile Include="JwtTestUtilities.cs" />
     <Compile Include="KeyingMaterial.cs" />
     <Compile Include="NamedKeyIssuerTokenResolverConfigTest.cs" />
     <Compile Include="NamedKeyTests.cs" />
+    <Compile Include="NamedKeySecurityKeyIdentifierClauseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="References.cs" />
     <Compile Include="RemoteDomain.cs" />
@@ -81,8 +83,10 @@
     <Compile Include="Subjects.cs" />
     <Compile Include="TestContextProvider.cs" />
     <Compile Include="Tokens.cs" />
-    <Compile Include="TokenValidationParamsTests.cs" />
+    <Compile Include="TokenValidationParametersTests.cs" />
     <Compile Include="ValidateTokenConfigTests.cs" />
+    <Compile Include="X509CertificateValidatorExTests.cs" />
+    <Compile Include="X509SecurityKeyTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\lib\JwtConfigurationStrings.cs">
