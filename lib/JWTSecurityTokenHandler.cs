@@ -27,6 +27,7 @@ namespace System.IdentityModel.Tokens
     using System.IdentityModel.Protocols.WSTrust;
     using System.IdentityModel.Selectors;
     using System.Security.Claims;
+    using System.ServiceModel.Security.Tokens;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Xml;
@@ -59,6 +60,23 @@ namespace System.IdentityModel.Tokens
         private static string shortClaimTypeProperty = ClaimProperties.Namespace + "/ShortTypeName";
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
         private JwtSecurityTokenRequirement jwtSecurityTokenRequirement = new JwtSecurityTokenRequirement();
+        private static Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> s_IssuerKeyResolver;
+
+        /// <summary>
+        /// A delegate the will get called to resolve issuer signing key
+        /// </summary>
+        public static Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> ResolveIssuerSigningKeys
+        {
+            get { return s_IssuerKeyResolver; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("value");
+                }
+                s_IssuerKeyResolver = value;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenHandler"/> class.
@@ -830,11 +848,11 @@ namespace System.IdentityModel.Tokens
 
             JwtSecurityToken jwt = this.ReadToken(jwtEncodedString) as JwtSecurityToken;           
             string[] parts = jwt.RawData.Split('.');
-            this.ValidateSignature(jwt, Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]), Base64UrlEncoder.DecodeBytes(parts[2]), this.GetSigningTokens(validationParameters));
+            this.ValidateSignature(jwt, Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]), Base64UrlEncoder.DecodeBytes(parts[2]), this.GetSigningKeys(jwt, validationParameters));
             this.ValidateSigningToken(jwt);
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
-            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveBootstrapContext));
+            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveSigninToken));
         }
 
         /// <summary>
@@ -895,13 +913,12 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("validationParameters");
             }
 
-            IList<SecurityToken> signingTokens = this.GetSigningTokens(validationParameters);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload);
-            this.ValidateSignature(jwt, encodedBytes, Base64UrlEncoder.DecodeBytes(jwt.EncodedSignature), signingTokens);
+            this.ValidateSignature(jwt, encodedBytes, Base64UrlEncoder.DecodeBytes(jwt.EncodedSignature), this.GetSigningKeys(jwt, validationParameters));
             this.ValidateSigningToken(jwt);
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
-            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveBootstrapContext));
+            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveSigninToken));
         }
 
         /// <summary>
@@ -1024,6 +1041,135 @@ namespace System.IdentityModel.Tokens
             }
 
             return signatureProvider.Verify(encodedBytes, signature);
+        }
+
+        private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm)
+        {
+            // in the case that a SignatureProviderFactory can handle nulls, just don't check here.
+            SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
+            if (signatureProvider == null)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10314, key == null ? TextStrings.Null : key.ToString(), algorithm == null ? TextStrings.Null : algorithm));
+            }
+
+            return signatureProvider.Verify(encodedBytes, signature);
+        }
+
+        /// <summary>
+        /// Validates that the signature, if found and / or required is valid.
+        /// </summary>
+        /// <param name="jwt"><see cref="JwtSecurityToken"/> if the signature validates, jwt.SigningToken and jwt.SigningKey will be set.</param>
+        /// <param name="encodedBytes">bytes representing the header and payload.</param>
+        /// <param name="signatureBytes">bytes representing the signature.</param>
+        /// <param name="securityKeys">contains the <see cref="SecurityKey"/>(s) used to check the signature.</param>
+        protected virtual void ValidateSignature(JwtSecurityToken jwt, byte[] encodedBytes, byte[] signatureBytes, IEnumerable<SecurityKey> securityKeys)
+        {
+            if (jwt == null)
+            {
+                throw new ArgumentNullException("jwt");
+            }
+
+            if (encodedBytes == null)
+            {
+                throw new ArgumentNullException("encodedBytes");
+            }
+
+            if (signatureBytes == null)
+            {
+                throw new ArgumentNullException("signatureBytes");
+            }
+
+            string mappedAlgorithm = jwt.Header.SignatureAlgorithm;
+            if (mappedAlgorithm != null && InboundAlgorithmMap.ContainsKey(mappedAlgorithm))
+            {
+                mappedAlgorithm = InboundAlgorithmMap[mappedAlgorithm];
+            }
+
+            if (signatureBytes.Length == 0)
+            {
+                if (!this.RequireSignedTokens)
+                {
+                    return;
+                }
+
+                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10312, jwt.RawData));
+            }
+
+            if (securityKeys == null)
+            {
+                throw new ArgumentNullException("securityKeys");
+            }
+
+            // maintain a list of all the exceptions that were thrown, display them to the user at the end.
+            List<Exception> exceptions = new List<Exception>();
+            List<SecurityKey> keysTried = new List<SecurityKey>();
+
+            // run through all the tokens, actively searching for a clause match
+            foreach (SecurityKey securityKey in securityKeys)
+            {
+                keysTried.Add(securityKey);
+                try
+                {
+                
+                    if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
+                    {
+                        jwt.SigningKey = securityKey;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (DiagnosticUtility.IsFatal(ex))
+                    {
+                        throw;
+                    }
+                    exceptions.Add(ex);
+                }
+            }
+
+            string keysAttempted = string.Empty;
+            if (keysTried.Count == 0)
+            {
+                keysAttempted = JwtErrors.NoNonNullKeysFound;
+            }
+            else
+            {
+                bool first = true;
+                foreach (SecurityKey key in keysTried)
+                {
+                    if (!first && key != null)
+                    {
+                        keysAttempted += "\n";
+                    }
+
+                    first = false;
+                    keysAttempted += key.ToString();
+                }
+
+                keysAttempted = string.Format(CultureInfo.InvariantCulture, JwtErrors.KeysTried, keysAttempted);
+            }
+
+            if (null != exceptions && exceptions.Count > 0)
+            {
+                bool first = true;
+                StringBuilder sb = new StringBuilder();
+                foreach (Exception ex in exceptions)
+                {
+                    if (!first)
+                    {
+                        sb.Append("\n");
+                    }
+
+                    first = false;
+                    sb.AppendLine(ex.ToString());
+                }
+
+                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
+            }
+            else
+            {
+                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
+            }
         }
 
         /// <summary>
@@ -1388,28 +1534,27 @@ namespace System.IdentityModel.Tokens
         /// <param name="jwt">The <see cref="JwtSecurityToken"/> to validate.</param>
         /// <param name="validationParameters">Contains valid audiences.</param>
         /// <remarks><para>If <see cref="AudienceRestriction.AudienceMode"/> == <see cref="AudienceUriMode.Never"/> OR  <para>( <see cref="AudienceUriMode"/> == <see cref="AudienceUriMode.BearerKeyOnly"/>  AND  <see cref="JwtSecurityToken.SecurityKeys"/>.Count == 0 ) </para><para>then validation is skipped.</para></para>
-        /// <para>If validation is performed, <see cref="JwtSecurityToken.Audience"/> is compared first to <see cref="TokenValidationParameters.AllowedAudience"/> and then to each string in <see cref="TokenValidationParameters.AllowedAudiences"/>. Returns when first compare succeeds. Compare is performed using <see cref="StringComparison"/>.Ordinal (case sensitive).</para></remarks>
+        /// <para>If validation is performed, <see cref="JwtSecurityToken.Audience"/> is compared first to <see cref="TokenValidationParameters.ValidateAudience"/> and then to each string in <see cref="TokenValidationParameters.ValidAudiences"/>. Returns when first compare succeeds. Compare is performed using <see cref="StringComparison"/>.Ordinal (case sensitive).</para></remarks>
         /// <exception cref="ArgumentNullException">'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenValidationException">if <see cref="string.IsNullOrWhiteSpace"/>( <see cref="JwtSecurityToken.Audience"/> ) is true.</exception>
-        /// <exception cref="ArgumentException">'<see cref="TokenValidationParameters.AllowedAudience"/>' is null or whitespace AND <see cref="TokenValidationParameters.AllowedAudiences"/> is null.</exception>
-        /// <exception cref="AudienceUriValidationFailedException"><see cref="JwtSecurityToken.Audience"/> fails to match <see cref="TokenValidationParameters.AllowedAudience"/> or one of <see cref="TokenValidationParameters.AllowedAudiences"/>.</exception>
+        /// <exception cref="ArgumentException">'<see cref="TokenValidationParameters.ValidAudience"/>' is null or whitespace AND <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
+        /// <exception cref="AudienceUriValidationFailedException"><see cref="JwtSecurityToken.Audience"/> fails to match <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
         protected virtual void ValidateAudience(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            if (jwt == null)
-            {
-                throw new ArgumentNullException("jwt");
-            }
-
             if (validationParameters == null)
             {
                 throw new ArgumentNullException("validationParameters");
             }
 
-            if ((validationParameters.AudienceUriMode == AudienceUriMode.Never) ||
-                 (validationParameters.AudienceUriMode == AudienceUriMode.BearerKeyOnly && jwt.SecurityKeys.Count > 0))
+            if (!validationParameters.ValidateAudience)
             {
                 return;
+            }
+
+            if (jwt == null)
+            {
+                throw new ArgumentNullException("jwt");
             }
 
             if (string.IsNullOrWhiteSpace(jwt.Audience))
@@ -1417,22 +1562,23 @@ namespace System.IdentityModel.Tokens
                 throw new AudienceUriValidationFailedException(JwtErrors.Jwt10300);
             }
 
-            if (string.IsNullOrWhiteSpace(validationParameters.AllowedAudience) && (validationParameters.AllowedAudiences == null))
+            if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
                 throw new ArgumentException(JwtErrors.Jwt10301);
             }
 
-            if (!string.IsNullOrWhiteSpace(validationParameters.AllowedAudience))
+            if (!string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
             {
-                if (string.Equals(validationParameters.AllowedAudience, jwt.Audience, StringComparison.Ordinal))
+                if (string.Equals(validationParameters.ValidAudience, jwt.Audience, StringComparison.Ordinal))
                 {
                     return;
                 }
             }
 
-            if (validationParameters.AllowedAudiences != null)
+            // TODO - jwt.audience can be multivalued
+            if (validationParameters.ValidAudiences != null)
             {
-                foreach (string str in validationParameters.AllowedAudiences)
+                foreach (string str in validationParameters.ValidAudiences)
                 {
                     if (string.Equals(str, jwt.Audience, StringComparison.Ordinal))
                     {
@@ -1441,7 +1587,7 @@ namespace System.IdentityModel.Tokens
                 }
             }
 
-            throw new AudienceUriValidationFailedException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10303, jwt.Audience, validationParameters.AllowedAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.AllowedAudiences)));
+            throw new AudienceUriValidationFailedException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10303, jwt.Audience, validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)));
         }
 
         /// <summary>
@@ -1638,28 +1784,95 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Consolidates the possible signing tokens from <see cref="TokenValidationParameters"/>.
         /// </summary>
+        /// <param name="jwt"><see cref="JwtSecurityToken"/> the jwt to find a signing token for.</param>
         /// <param name="validationParameters">contains <see cref="SecurityToken"/> in different places.</param>
-        /// <returns>Returns a <see cref="IList{SecurityToken}"/> containing all <see cref="SecurityToken"/> found in validationParameters.</returns>
+        /// <returns>Returns a <see cref="IList{SecurityKey}"/> ntaining  <see cref="SecurityKey"/> found in validationParameters.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        protected virtual IList<SecurityToken> GetSigningTokens(TokenValidationParameters validationParameters)
+        protected virtual IList<SecurityToken> GetSigningTokens(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
             {
                 throw new ArgumentNullException("validationParameters");
             }
 
+            //TODO - deal with different key types.
+            //TODO - try to deal with only keys
+
             List<SecurityToken> signingTokens = new List<SecurityToken>();
-            if (validationParameters.SigningToken != null)
+
+            if (validationParameters.IssuerSigningKey != null)
             {
-                signingTokens.Add(validationParameters.SigningToken);
+                SymmetricSecurityKey symmetricSecurityKey = validationParameters.IssuerSigningKey as SymmetricSecurityKey;
+                if (symmetricSecurityKey != null)
+                {                   
+                    signingTokens.Add(new BinarySecretSecurityToken(symmetricSecurityKey.GetSymmetricKey()));
+                }
+
+                X509SecurityKey x509SecurityKey = validationParameters.IssuerSigningKey as X509SecurityKey;
+                if (x509SecurityKey != null)
+                {
+                    signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
+                }
             }
 
-            if (validationParameters.SigningTokens != null)
+            if (validationParameters.IssuerSigningKeys != null)
             {
-                signingTokens.AddRange(validationParameters.SigningTokens);
+                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+                {
+                    SymmetricSecurityKey symmetricSecurityKey = securityKey as SymmetricSecurityKey;
+                    if (symmetricSecurityKey != null)
+                    {
+                        signingTokens.Add(new BinarySecretSecurityToken(symmetricSecurityKey.GetSymmetricKey()));
+                        continue;
+                    }
+
+                    X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
+                    if (x509SecurityKey != null)
+                    {
+                        signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
+                    }                    
+                }
             }
 
             return signingTokens;
+        }
+
+        /// <summary>
+        /// Produces a list of keys to try Consolidates the possible signing tokens from <see cref="TokenValidationParameters"/>.
+        /// </summary>
+        /// <param name="jwt"><see cref="JwtSecurityToken"/> the jwt to find a signing token for.</param>
+        /// <param name="validationParameters">contains <see cref="SecurityToken"/> in different places.</param>
+        /// <returns>Returns a <see cref="IList{SecurityKey}"/> ntaining  <see cref="SecurityKey"/> found in validationParameters.</returns>
+        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
+        protected virtual IEnumerable<SecurityKey> GetSigningKeys(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        {
+            if (ResolveIssuerSigningKeys != null)
+            {
+                return ResolveIssuerSigningKeys(jwt, validationParameters);
+            }
+
+            if (validationParameters == null)
+            {
+                throw new ArgumentNullException("validationParameters");
+            }
+
+            List<SecurityKey> signingKeys = new List<SecurityKey>();
+            if (validationParameters.IssuerSigningKey != null)
+            {
+                signingKeys.Add(validationParameters.IssuerSigningKey);
+            }
+
+            if (validationParameters.IssuerSigningKeys != null)
+            {
+                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+                {
+                    if (securityKey == null)
+                        continue;
+                    signingKeys.Add(securityKey);
+                }
+            }
+
+            return signingKeys;
         }
 
         /// <summary>

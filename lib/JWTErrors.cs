@@ -42,6 +42,8 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10116 = "Jwt10116: MaximumTokenSizeInBytes cannot be set to 0.";
         internal const string Jwt10117 = "Jwt10117: Cannot set inner IssuerTokenResolver to self.";
         internal const string Jwt10118 = "Jwt10118: The SigningKeyIdentifier was of type: '{0}' and was expected to be encoded as a Base64UrlEncoded string. See inner exception for more details.";
+        internal const string Jwt10119 = "Jwt10119: MaximumTokenSizeInBytes cannot be less than 1.";
+        internal const string Jwt10120 = "Jwt10120: ClockSkew cannot be less than 0.";
 
         // JwtSecurityTokenHandler errors 10200 - 10299
         internal const string Jwt10200 = "Jwt10200: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";

@@ -95,6 +95,7 @@
     <Compile Include="X509CertificateValidatorEx.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="X509SecurityKey.cs" />
     <Compile Include="XmlUtil.cs" />
   </ItemGroup>
   <ItemGroup>
