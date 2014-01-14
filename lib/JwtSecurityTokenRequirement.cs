@@ -347,7 +347,7 @@ namespace System.IdentityModel.Tokens
                         throw;
                     }
 
-                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10613, customValidator, Attributes.Validator, ex, element.OuterXml));
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10613, customValidator, Attributes.Validator, ex, element.OuterXml), ex);
                 }
             }
             else if (customValidator != null)
@@ -437,7 +437,7 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets the default for token lifetime.
         /// <see cref="JwtSecurityTokenHandler"/> uses this value when creating a <see cref="JwtSecurityToken"/> if the expiration time is not specified.  The expiration time will be set to <see cref="DateTime.UtcNow"/> + <see cref="TimeSpan.FromMinutes"/> with <see cref="JwtSecurityTokenRequirement.DefaultTokenLifetimeInMinutes"/> as the parameter.
         /// </summary>
-        /// <remarks>Default: 600.</remarks>
+        /// <remarks>Default: 600 (10 hours).</remarks>
         /// <exception cref="ArgumentOutOfRangeException">value == 0.</exception>
         public uint DefaultTokenLifetimeInMinutes
         {

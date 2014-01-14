@@ -22,82 +22,123 @@ namespace System.IdentityModel.Tokens
     using System.ComponentModel;
     using System.IdentityModel.Selectors;
     using System.Security.Claims;
+    using System.Security.Cryptography.X509Certificates;
 
     /// <summary>
-    /// Contains a set of parameters that are used by <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
+    /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
     public class TokenValidationParameters
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenValidationParameters"/> class with <see cref="AudienceUriMode"/> = BearerKeyOnly and <see cref="SaveBootstrapContext"/> = false.
+        /// The default maximum size of a token that the runtime will process.
         /// </summary>
+        public static readonly Int32 DefaultMaximumTokenSizeInBytes = 2 * 1024 * 1024; // 2MB
+
+        /// <summary>
+        /// The default clock skew.
+        /// </summary>
+        public static readonly Int32 DefaultClockSkewInSeconds = 300;
+
+        private Int32 _clockSkew;
+        private Int32 _maximumTokenSizeInBytes;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TokenValidationParameters"/> class.
+        /// </summary>        
         public TokenValidationParameters()
         {
-            AudienceUriMode = AudienceUriMode.BearerKeyOnly;
-            this.SaveBootstrapContext = false;
-            this.ValidateIssuer = true;
+            SaveSigninToken = false;
+            ValidateAudience = true;
+            ValidateIssuer = true;
+            _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+            _clockSkew = TokenValidationParameters.DefaultClockSkewInSeconds;
         }
-
+        
         /// <summary>
-        /// Gets or sets an audience that is considered valid.
+        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
         /// </summary>
-        public string AllowedAudience
+        public SecurityKey IssuerSigningKey
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that are to be used for validating signed tokens. 
+        /// </summary>
+        public IEnumerable<SecurityKey> IssuerSigningKeys
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets a collection of audiences that are considered valid.
+        /// Gets or sets the clock skew to apply when validatin times
         /// </summary>
-        public IEnumerable<string> AllowedAudiences
+        /// <exception cref="ArgumentOutOfRangeException"> if value is less than 0.</exception>
+        [DefaultValue(300)]
+        public Int32 ClockSkewInSeconds
         {
-            get;
-            set;
+            get
+            {
+                return _clockSkew;
+            }
+
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException("ClockSkew", JwtErrors.Jwt10120);
+                }
+
+                _clockSkew = value;
+            }
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="AudienceUriMode"/> to use when validating audience values.
+        /// Gets or sets the maximum size for a token that the runtime will process.
         /// </summary>
-        [DefaultValue(AudienceUriMode.BearerKeyOnly)]
-        public AudienceUriMode AudienceUriMode
+        /// <exception cref="ArgumentOutOfRangeException">thrown if 'value' is less than 1.</exception>
+        [DefaultValue(2087152)]
+        public Int32 MaximumTokenSizeInBytes 
         {
-            get;
-            set;
+            get 
+            { 
+                return _maximumTokenSizeInBytes; 
+            }
+            
+            set
+            {
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException("MaximumTokenSizeInBytes", JwtErrors.Jwt10119 );
+                }
+                _maximumTokenSizeInBytes = value;
+            }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether <see cref="JwtSecurityToken"/> should be attached to <see cref="ClaimsIdentity.BootstrapContext"/> during validation.
+        /// Gets or sets a boolean to control if the original token is saved when a session is created.
         /// </summary>
         [DefaultValue(false)]
-        public bool SaveBootstrapContext
+        public bool SaveSigninToken
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets a <see cref="SecurityToken"/> to use when validating signatures.
-        /// </summary>
-        public SecurityToken SigningToken
+        /// Gets or sets a boolean to control if the audience will be validated during token validation.
+        /// </summary>        
+        [DefaultValue(true)]        
+        public bool ValidateAudience
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets a collection of <see cref="SecurityToken"/> to use when validating signatures.
-        /// </summary>
-        public IEnumerable<SecurityToken> SigningTokens
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="JwtSecurityToken.Issuer"/> should be validated.
-        /// </summary>
-        /// <remarks>The <see cref="JwtSecurityToken"/> must have an Issuer that is other than whitespace.</remarks>
+        /// Gets or sets a boolean to control if the issuer will be validated during token validation.
+        /// </summary>                
         [DefaultValue(true)]
         public bool ValidateIssuer
         {
@@ -106,7 +147,24 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets an issuer that is considered valid.
+        /// Gets or sets a string that represents a valid audience that will be used during token validation.
+        /// </summary>
+        public string ValidAudience
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// Gets or sets a <see cref="IEnumerable{String}"/> that contains valid audiences that will be used during token validation.
+        /// </summary>
+        public IEnumerable<string> ValidAudiences
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a <see cref="String"/> that represents a valid issuer that will be used during token validation.
         /// </summary>
         public string ValidIssuer
         {
@@ -115,7 +173,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a collection of issuers that is considered valid.
+        /// Gets or sets a <see cref="IEnumerable{String}"/> that contains valid issuers that will be used during token validation.
         /// </summary>
         public IEnumerable<string> ValidIssuers
         {
