@@ -19,6 +19,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
 
 namespace System.IdentityModel.Test
 {
@@ -55,55 +56,70 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty( "TestCaseID", "5763D198-1A0A-474D-A5D3-A5BBC496EE7B" )]
-        [Description( "ensures that set / gets are working" )]
+        [Description( "ensures that constructor / set / gets are working" )]
         public void SetGet()
         {
-            List<string> validAudiences = new List<string>() { "Audience1" };
-            List<SecurityToken> signingTokens = new List<SecurityToken>(){ KeyingMaterial.AsymmetricX509Token_2048 };
-            List<string> validIssuers =  new List<string>() { "ValidIssuer1" };
+            Int32 clockSkewInSeconds = 600;
+            SecurityKey issuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256;
+            List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 };        
+            Int32 maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes * 2;
+            string validAudience = "ValidAudience";
+            List<string> validAudiences = new List<string>() { validAudience };
+            string validIssuer = "ValidIssuer";
+            List<string> validIssuers = new List<string>() { validIssuer };
 
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
             {
-                AllowedAudience = "AllowedAudience",
-                AudienceUriMode = Selectors.AudienceUriMode.Always,
-                AllowedAudiences = validAudiences,
-                SaveBootstrapContext = true,
-                SigningToken = KeyingMaterial.BinarayToken56BitKey,
-                SigningTokens = signingTokens,
+                ClockSkewInSeconds = clockSkewInSeconds,
+                IssuerSigningKey = issuerSigningKey,
+                IssuerSigningKeys = issuerSigningKeys,
+                MaximumTokenSizeInBytes = maximumTokenSizeInBytes,
+                SaveSigninToken = true,
+                ValidateAudience = false,
                 ValidateIssuer = false,
-                ValidIssuer = "ValidIssuer",
+                ValidAudience = validAudience,
+                ValidAudiences = validAudiences,
+                ValidIssuer = validIssuer,
                 ValidIssuers = validIssuers,
             };
 
-            Assert.IsFalse( tokenValidationParameters.AllowedAudience != "AllowedAudience" , string.Format( "Expecting: tokenValidationParameters.AllowedAudience == 'AllowedAudience'. Was: '{0}'", tokenValidationParameters.AllowedAudience ) );
+            Assert.IsTrue(tokenValidationParameters.ClockSkewInSeconds == clockSkewInSeconds);
+            Assert.IsTrue(TokenValidationParameters.DefaultMaximumTokenSizeInBytes == 2 * 1024 * 1024);
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKeys, issuerSigningKeys));
+            Assert.IsTrue(tokenValidationParameters.MaximumTokenSizeInBytes == maximumTokenSizeInBytes);
+            Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
+            Assert.IsFalse(tokenValidationParameters.ValidateAudience);
+            Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudience, validAudience));
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudiences, validAudiences));
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
 
-            Assert.IsFalse( tokenValidationParameters.AudienceUriMode != Selectors.AudienceUriMode.Always , string.Format( "Expecting: tokenValidationParameters.AudienceUriMode == Selectors.AudienceUriMode.Always. Was: '{0}'", tokenValidationParameters.AudienceUriMode ) );
+            tokenValidationParameters = new TokenValidationParameters();
+            tokenValidationParameters.ClockSkewInSeconds = clockSkewInSeconds;
+            tokenValidationParameters.IssuerSigningKey = issuerSigningKey;
+            tokenValidationParameters.IssuerSigningKeys = issuerSigningKeys;
+            tokenValidationParameters.MaximumTokenSizeInBytes = maximumTokenSizeInBytes;
+            tokenValidationParameters.SaveSigninToken = true;
+            tokenValidationParameters.ValidateAudience = false;
+            tokenValidationParameters.ValidateIssuer = false;
+            tokenValidationParameters.ValidAudience = validAudience;
+            tokenValidationParameters.ValidAudiences = validAudiences;
+            tokenValidationParameters.ValidIssuer = validIssuer;
+            tokenValidationParameters.ValidIssuers = validIssuers;
 
-            Assert.IsFalse( tokenValidationParameters.AllowedAudiences == null , string.Format( "Expecting: tokenValidationParameters.AllowedAudiences != null.") );
-
-            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.AllowedAudiences, validAudiences ) , "object.ReferenceEquals( tokenValidationParameters.AllowedAudiences,  validAudiences ) is false" );
-            
-            Assert.IsFalse( !tokenValidationParameters.SaveBootstrapContext , "tokenValidationParameters.SaveBootstrapContext != true" );
-
-            Assert.IsFalse( tokenValidationParameters.SigningToken == null , string.Format( "Expecting: tokenValidationParameters.SigningToken != null." ) );
-
-            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.SigningToken,  KeyingMaterial.BinarayToken56BitKey ) , "object.ReferenceEquals( tokenValidationParameters.SigningToken,  KeyingMaterial.BinarayToken56BitKey ) is false" );
-
-            Assert.IsFalse( tokenValidationParameters.SigningTokens == null , string.Format( "Expecting: tokenValidationParameters.SigningTokens != null." ) );
-
-            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) , "object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) is false" );
-
-            Assert.IsFalse( tokenValidationParameters.ValidateIssuer , string.Format( "Expecting: tokenValidationParameters.ValidateIssuer to be false" ) );
-
-            Assert.IsFalse( tokenValidationParameters.ValidIssuer == null , string.Format( "Expecting: tokenValidationParameters.ValidIssuer != null." ) );
-
-            Assert.IsFalse( tokenValidationParameters.ValidIssuer != "ValidIssuer" , string.Format( "Expecting: tokenValidationParameters.ValidIssuer !== ValidIssuer. Was: '{0}'", tokenValidationParameters.ValidIssuer ) );
-
-            Assert.IsFalse( tokenValidationParameters.ValidIssuers == null , string.Format( "Expecting: tokenValidationParameters.ValidIssuers != null." ) );
-
-            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) , "object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) is false" );
+            Assert.IsTrue(tokenValidationParameters.ClockSkewInSeconds == clockSkewInSeconds);
+            Assert.IsTrue(TokenValidationParameters.DefaultMaximumTokenSizeInBytes == 2 * 1024 * 1024);
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKeys, issuerSigningKeys));
+            Assert.IsTrue(tokenValidationParameters.MaximumTokenSizeInBytes == maximumTokenSizeInBytes);
+            Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
+            Assert.IsFalse(tokenValidationParameters.ValidateAudience);
+            Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudience, validAudience));
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudiences, validAudiences));
+            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
         }
-
     }
 }
 
