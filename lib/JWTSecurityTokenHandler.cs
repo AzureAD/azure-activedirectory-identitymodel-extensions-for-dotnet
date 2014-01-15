@@ -110,7 +110,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentNullException("value");
                 }
 
-                outboundAlgorithmMap = value;
+                inboundAlgorithmMap = value;
             }
         }
 
