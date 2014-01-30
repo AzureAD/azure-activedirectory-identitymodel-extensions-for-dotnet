@@ -210,7 +210,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse( handler.MaxClockSkew != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew , "handler.MaxClockSkew != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew" );
 
-            Assert.IsFalse( handler.MaxTokenSizeInBytes != 2 * 1024 * 1024 , "handler.MaxTokenSizeInBytes != 2 * 1024 * 1024" );
+            Assert.IsFalse( handler.MaximumTokenSizeInBytes != 2 * 1024 * 1024 , "handler.MaxTokenSizeInBytes != 2 * 1024 * 1024" );
             
             Assert.IsFalse( handler.RoleClaimType != ClaimsIdentity.DefaultRoleClaimType , "handler.RoleClaimType != ClaimsIdentity.DefaultRoleClaimType" );
             

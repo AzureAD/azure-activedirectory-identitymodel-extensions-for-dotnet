@@ -716,7 +716,7 @@ namespace System.IdentityModel.Test
                 new JwtSecurityTokenTestVariation
                 {
                     Name = "ReadToken_String_TooLarge",
-                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MaxTokenSizeInBytes = 100 },
+                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 },
                     EncodedString = EncodedJwts.Asymmetric_LocalSts,
                     ExpectedException = ExpectedException.ArgEx(id:"Jwt10206"),
                 },
@@ -745,7 +745,7 @@ namespace System.IdentityModel.Test
                 new JwtSecurityTokenTestVariation
                 {
                     Name = "ValidateToken_String_Only_TooLarge",
-                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MaxTokenSizeInBytes = 100 },
+                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 },
                     EncodedString = EncodedJwts.Asymmetric_LocalSts,
                     ExpectedException = ExpectedException.ArgEx(id:"Jwt10206"),
                 },
@@ -779,7 +779,7 @@ namespace System.IdentityModel.Test
                 new JwtSecurityTokenTestVariation
                 {
                     Name = "ValidateToken_String_TVP_EncodingTooLarge",
-                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MaxTokenSizeInBytes = 100, Configuration = new SecurityTokenHandlerConfiguration() },
+                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100, Configuration = new SecurityTokenHandlerConfiguration() },
                     EncodedString = EncodedJwts.Asymmetric_LocalSts,
                     ExpectedException = ExpectedException.ArgEx(id:"Jwt10206"),
                     TokenValidationParameters = new TokenValidationParameters(),
@@ -1068,7 +1068,7 @@ namespace System.IdentityModel.Test
             ExpectedException expectedException = ExpectedException.ArgRange();
             try
             {
-                handler.MaxTokenSizeInBytes = 0;
+                handler.MaximumTokenSizeInBytes = 0;
                 ExpectedException.ProcessNoException( expectedException );
             }
             catch ( Exception ex )

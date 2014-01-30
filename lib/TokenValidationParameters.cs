@@ -20,9 +20,6 @@ namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.IdentityModel.Selectors;
-    using System.Security.Claims;
-    using System.Security.Cryptography.X509Certificates;
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
@@ -30,14 +27,15 @@ namespace System.IdentityModel.Tokens
     public class TokenValidationParameters
     {
         /// <summary>
+        /// The default clock skew.
+        /// </summary>
+        public static readonly Int32 DefaultClockSkewInSeconds = 300;
+
+        /// <summary>
         /// The default maximum size of a token that the runtime will process.
         /// </summary>
         public static readonly Int32 DefaultMaximumTokenSizeInBytes = 2 * 1024 * 1024; // 2MB
 
-        /// <summary>
-        /// The default clock skew.
-        /// </summary>
-        public static readonly Int32 DefaultClockSkewInSeconds = 300;
 
         private Int32 _clockSkew;
         private Int32 _maximumTokenSizeInBytes;
@@ -53,26 +51,9 @@ namespace System.IdentityModel.Tokens
             _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
             _clockSkew = TokenValidationParameters.DefaultClockSkewInSeconds;
         }
-        
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
-        /// </summary>
-        public SecurityKey IssuerSigningKey
-        {
-            get;
-            set;
-        }
-        /// <summary>
-        /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that are to be used for validating signed tokens. 
-        /// </summary>
-        public IEnumerable<SecurityKey> IssuerSigningKeys
-        {
-            get;
-            set;
-        }
 
         /// <summary>
-        /// Gets or sets the clock skew to apply when validatin times
+        /// Gets or sets the clock skew to apply when validating times
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException"> if value is less than 0.</exception>
         [DefaultValue(300)]
@@ -95,30 +76,56 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the maximum size for a token that the runtime will process.
+        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">thrown if 'value' is less than 1.</exception>
-        [DefaultValue(2087152)]
-        public Int32 MaximumTokenSizeInBytes 
+        public SecurityKey IssuerSigningKey
         {
-            get 
-            { 
-                return _maximumTokenSizeInBytes; 
-            }
-            
-            set
-            {
-                if (value < 1)
-                {
-                    throw new ArgumentOutOfRangeException("MaximumTokenSizeInBytes", JwtErrors.Jwt10119 );
-                }
-                _maximumTokenSizeInBytes = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that are to be used for validating signed tokens. 
+        /// </summary>
+        public IEnumerable<SecurityKey> IssuerSigningKeys
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityToken"/> that is used for validating signed tokens. 
+        /// </summary>
+        public SecurityToken IssuerSigningToken
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IEnumerable{SecurityToken}"/> that are to be used for validating signed tokens. 
+        /// </summary>
+        public IEnumerable<SecurityToken> IssuerSigningTokens
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to find signing keys.
+        /// </summary>
+        /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
+        /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
+        public Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> ResolveIssuerSigningKeys
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
         /// Gets or sets a boolean to control if the original token is saved when a session is created.
         /// </summary>
+        /// <remarks>The SecurityTokenValidator will use this value to save the orginal string that was validated.</remarks>
         [DefaultValue(false)]
         public bool SaveSigninToken
         {

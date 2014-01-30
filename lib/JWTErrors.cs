@@ -38,8 +38,8 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10112 = "Jwt10112: Jwt header type specified, must be '{0}' or '{1}'.  Type received: '{2}'.";
         internal const string Jwt10113 = "Jwt10113: Unable to decode the '{0}': '{1}' as Base64url encoded string. jwtEncodedString: '{2}'.";
         internal const string Jwt10114 = "Jwt10114: Unable to decode: '{0}' as Base64url encoded string.";
-        internal const string Jwt10115 = "Jwt10115: DefaultTokenLifetimeInMinutes cannot be set to 0.";
-        internal const string Jwt10116 = "Jwt10116: MaximumTokenSizeInBytes cannot be set to 0.";
+        internal const string Jwt10115 = "Jwt10115: DefaultTokenLifetimeInMinutes cannot be less than 1.";
+        internal const string Jwt10116 = "Jwt10116: MaximumTokenSizeInBytes cannot be less than 1.";
         internal const string Jwt10117 = "Jwt10117: Cannot set inner IssuerTokenResolver to self.";
         internal const string Jwt10118 = "Jwt10118: The SigningKeyIdentifier was of type: '{0}' and was expected to be encoded as a Base64UrlEncoded string. See inner exception for more details.";
         internal const string Jwt10119 = "Jwt10119: MaximumTokenSizeInBytes cannot be less than 1.";
