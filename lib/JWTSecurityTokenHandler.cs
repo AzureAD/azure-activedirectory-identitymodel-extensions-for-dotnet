@@ -37,7 +37,7 @@ namespace System.IdentityModel.Tokens
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-07.
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
-    public class JwtSecurityTokenHandler : SecurityTokenHandler
+    public class JwtSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
         // the Sts pipeline expects the first identifier to be a string that 
         // Uri.TryCreate( tokenIdentifiers[0], UriKind.Absolute, out result ) will be true.
@@ -60,23 +60,6 @@ namespace System.IdentityModel.Tokens
         private static string shortClaimTypeProperty = ClaimProperties.Namespace + "/ShortTypeName";
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
         private JwtSecurityTokenRequirement jwtSecurityTokenRequirement = new JwtSecurityTokenRequirement();
-        private static Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> s_IssuerKeyResolver;
-
-        /// <summary>
-        /// A delegate the will get called to resolve issuer signing key
-        /// </summary>
-        public static Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> ResolveIssuerSigningKeys
-        {
-            get { return s_IssuerKeyResolver; }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-                s_IssuerKeyResolver = value;
-            }
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenHandler"/> class.
@@ -281,7 +264,7 @@ namespace System.IdentityModel.Tokens
         /// <para>If only <see cref="Lifetime.Created"/> is specified, expiration will add to that value.</para>
         /// <para>Default is 600 (minutes).</para></remarks>
         /// <exception cref="ArgumentOutOfRangeException">'value' == 0.</exception>
-        public uint DefaultTokenLifetimeInMinutes
+        public Int32 DefaultTokenLifetimeInMinutes
         {
             get
             {
@@ -290,7 +273,7 @@ namespace System.IdentityModel.Tokens
 
             set
             {
-                if (value == 0)
+                if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
                 }
@@ -392,11 +375,11 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the size limit when reading a token as a string.
+        /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
         /// <remarks>This does not set limits when reading tokens using a <see cref="XmlReader"/>. Use xml quotas on the <see cref="XmlReader"/> for those limits.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">'value' == 0.</exception>
-        public uint MaxTokenSizeInBytes
+        public Int32 MaximumTokenSizeInBytes
         {
             get
             {
@@ -405,7 +388,7 @@ namespace System.IdentityModel.Tokens
 
             set
             {
-                if (value == 0)
+                if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10323, value));
                 }
@@ -546,7 +529,7 @@ namespace System.IdentityModel.Tokens
         /// </remarks>
         /// <returns>
         /// <para>'true' if the token is in JSON compact serialization format.</para>
-        /// <para>'false' if token.Length * 2 >  <see cref="MaxTokenSizeInBytes"/>.</para>
+        /// <para>'false' if token.Length * 2 >  <see cref="MaximumTokenSizeInBytes"/>.</para>
         /// </returns>
         /// <exception cref="ArgumentNullException">'tokenString' is null.</exception>
         public override bool CanReadToken(string tokenString)
@@ -556,7 +539,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("tokenString");
             }
 
-            if (tokenString.Length * 2 > this.MaxTokenSizeInBytes)
+            if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
                 return false;
             }
@@ -757,9 +740,9 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("tokenString");
             }
 
-            if (tokenString.Length * 2 > this.MaxTokenSizeInBytes)
+            if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10206, tokenString.Length, this.MaxTokenSizeInBytes));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10206, tokenString.Length, this.MaximumTokenSizeInBytes));
             }
 
             if (!this.CanReadToken(tokenString))
@@ -1846,33 +1829,50 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         protected virtual IEnumerable<SecurityKey> GetSigningKeys(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            if (ResolveIssuerSigningKeys != null)
-            {
-                return ResolveIssuerSigningKeys(jwt, validationParameters);
-            }
-
             if (validationParameters == null)
             {
                 throw new ArgumentNullException("validationParameters");
             }
 
-            List<SecurityKey> signingKeys = new List<SecurityKey>();
+            if (validationParameters.ResolveIssuerSigningKeys != null)
+            {
+                foreach (SecurityKey securityKey in validationParameters.ResolveIssuerSigningKeys(jwt, validationParameters))
+                {
+                    yield return securityKey;
+                }
+            }
+
             if (validationParameters.IssuerSigningKey != null)
             {
-                signingKeys.Add(validationParameters.IssuerSigningKey);
+                yield return validationParameters.IssuerSigningKey;
             }
 
             if (validationParameters.IssuerSigningKeys != null)
             {
                 foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
                 {
-                    if (securityKey == null)
-                        continue;
-                    signingKeys.Add(securityKey);
+                    yield return securityKey;
                 }
             }
 
-            return signingKeys;
+            if (validationParameters.IssuerSigningToken != null)
+            {
+                foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
+                {
+                    yield return securityKey;
+                }
+            }
+
+            if (validationParameters.IssuerSigningTokens != null)
+            {
+                foreach (SecurityToken securityToken in validationParameters.IssuerSigningTokens)
+                {
+                    foreach (SecurityKey securityKey in securityToken.SecurityKeys)
+                    {
+                        yield return securityKey;
+                    }
+                }
+            }
         }
 
         /// <summary>

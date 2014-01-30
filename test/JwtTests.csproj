@@ -66,6 +66,7 @@
     <Compile Include="IdentityComparer.cs" />
     <Compile Include="JwtConfigTests.cs" />
     <Compile Include="JwtDerivedTestTypes.cs" />
+    <Compile Include="JwtHandler.cs" />
     <Compile Include="JwtPayloadTest.cs" />
     <Compile Include="JwtSecurityTokenHandlerTests.cs" />
     <Compile Include="JwtSecurityTokenRequirementTests.cs" />

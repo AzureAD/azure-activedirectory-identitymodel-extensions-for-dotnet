@@ -44,8 +44,8 @@ namespace System.IdentityModel.Tokens
         private X509RevocationMode defaultRevocationMode = X509RevocationMode.Online;
         private X509CertificateValidationMode defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
         private StoreLocation defaultStoreLocation = StoreLocation.LocalMachine;
-        private uint defaultTokenLifetimeInMinutes = 600;
-        private uint maxTokenSizeInBytes = 2 * 1024 * 1024;
+        private int defaultTokenLifetimeInMinutes = 600;
+        private int maxTokenSizeInBytes = 2 * 1024 * 1024;
         private string nameClaimType;
         private string roleClaimType;
         private X509CertificateValidator certificateValidator;
@@ -277,16 +277,16 @@ namespace System.IdentityModel.Tokens
                     {
                         if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.MaxTokenSizeInBytes))
                         {
-                            this.MaximumTokenSizeInBytes = Convert.ToUInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
+                            this.MaximumTokenSizeInBytes = Convert.ToInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
                         }
                         else if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.DefaultTokenLifetimeInMinutes))
                         {
-                            this.DefaultTokenLifetimeInMinutes = Convert.ToUInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
+                            this.DefaultTokenLifetimeInMinutes = Convert.ToInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
                         }
                         else if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.MaxClockSkewInMinutes))
                         {
                             // uint.MaxValue < TimeSpan.MaxValue.TotalMinutes.  If this can be parsed, we can set it.
-                            uint clockSkewInMinutes = Convert.ToUInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
+                            Int32 clockSkewInMinutes = Convert.ToInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
                             this.MaxClockSkew = TimeSpan.FromMinutes(clockSkewInMinutes);
                         }
                         else
@@ -415,7 +415,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Default: 2 megabytes.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">if value is 0.</exception>
-        public uint MaximumTokenSizeInBytes
+        public int MaximumTokenSizeInBytes
         {
             get
             {
@@ -439,7 +439,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Default: 600 (10 hours).</remarks>
         /// <exception cref="ArgumentOutOfRangeException">value == 0.</exception>
-        public uint DefaultTokenLifetimeInMinutes
+        public int DefaultTokenLifetimeInMinutes
         {
             get
             {
@@ -448,7 +448,7 @@ namespace System.IdentityModel.Tokens
 
             set
             {
-                if (value == 0)
+                if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
                 }

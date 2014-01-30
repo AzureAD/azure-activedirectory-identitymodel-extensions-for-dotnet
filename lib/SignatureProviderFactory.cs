@@ -31,27 +31,27 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// This is the minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
         /// </summary>
-        public static readonly uint AbsoluteMinimumAsymmetricKeySizeInBitsForSigning = 2048;
+        public static readonly Int32 AbsoluteMinimumAsymmetricKeySizeInBitsForSigning = 2048;
 
         /// <summary>
         /// This is the minimum <see cref="AsymmetricSecurityKey"/>.KeySize when verifying signatures.
         /// </summary>
-        public static readonly uint AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying = 1024;
+        public static readonly Int32 AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying = 1024;
 
         /// <summary>
         /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
         /// </summary>
-        public static readonly uint AbsoluteMinimumSymmetricKeySizeInBits = 128;
+        public static readonly Int32 AbsoluteMinimumSymmetricKeySizeInBits = 128;
 
-        private static uint minimumAsymmetricKeySizeInBitsForSigning = AbsoluteMinimumAsymmetricKeySizeInBitsForSigning;
-        private static uint minimumAsymmetricKeySizeInBitsForVerifying = AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
-        private static uint minimumSymmetricKeySizeInBits = AbsoluteMinimumSymmetricKeySizeInBits;
+        private static Int32 minimumAsymmetricKeySizeInBitsForSigning = AbsoluteMinimumAsymmetricKeySizeInBitsForSigning;
+        private static Int32 minimumAsymmetricKeySizeInBitsForVerifying = AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
+        private static Int32 minimumSymmetricKeySizeInBits = AbsoluteMinimumSymmetricKeySizeInBits;
 
         /// <summary>
         /// Gets or sets the minimum <see cref="SymmetricSecurityKey"/>.KeySize"/>.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumSymmetricKeySizeInBits"/>.</exception>
-        public static uint MinimumSymmetricKeySizeInBits
+        public static Int32 MinimumSymmetricKeySizeInBits
         {
             get
             {
@@ -73,7 +73,7 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for creating signatures.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumAsymmetricKeySizeInBitsForSigning"/>.</exception>
-        public static uint MinimumAsymmetricKeySizeInBitsForSigning
+        public static Int32 MinimumAsymmetricKeySizeInBitsForSigning
         {
             get
             {
@@ -95,7 +95,7 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for verifying signatures.
         /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying"/>.</exception>
         /// </summary>
-        public static uint MinimumAsymmetricKeySizeInBitsForVerifying
+        public static Int32 MinimumAsymmetricKeySizeInBitsForVerifying
         {
             get
             {
