@@ -27,20 +27,6 @@ namespace System.IdentityModel.Tokens
     public class TokenValidationParameters
     {
         /// <summary>
-        /// The default clock skew.
-        /// </summary>
-        public static readonly Int32 DefaultClockSkewInSeconds = 300;
-
-        /// <summary>
-        /// The default maximum size of a token that the runtime will process.
-        /// </summary>
-        public static readonly Int32 DefaultMaximumTokenSizeInBytes = 2 * 1024 * 1024; // 2MB
-
-
-        private Int32 _clockSkew;
-        private Int32 _maximumTokenSizeInBytes;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="TokenValidationParameters"/> class.
         /// </summary>        
         public TokenValidationParameters()
@@ -48,31 +34,6 @@ namespace System.IdentityModel.Tokens
             SaveSigninToken = false;
             ValidateAudience = true;
             ValidateIssuer = true;
-            _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-            _clockSkew = TokenValidationParameters.DefaultClockSkewInSeconds;
-        }
-
-        /// <summary>
-        /// Gets or sets the clock skew to apply when validating times
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException"> if value is less than 0.</exception>
-        [DefaultValue(300)]
-        public Int32 ClockSkewInSeconds
-        {
-            get
-            {
-                return _clockSkew;
-            }
-
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException("ClockSkew", JwtErrors.Jwt10120);
-                }
-
-                _clockSkew = value;
-            }
         }
 
         /// <summary>

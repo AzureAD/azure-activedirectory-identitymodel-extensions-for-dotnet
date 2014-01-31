@@ -32,15 +32,19 @@ namespace System.IdentityModel.Tokens
         bool CanReadToken(string securityToken);
 
         /// <summary>
+        /// Gets or sets the clock skew to apply when validating times
+        /// </summary>
+        Int32 ClockSkewInSeconds { get; set; }
+
+        /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
         Int32 MaximumTokenSizeInBytes { get; set; }
-
+        
         /// <summary>
         /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>
         /// </summary>
         ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters);
-
         
         // TODO - brentsch, add post preview.
         // <summary>

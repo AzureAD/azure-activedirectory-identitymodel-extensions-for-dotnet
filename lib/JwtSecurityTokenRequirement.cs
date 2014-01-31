@@ -40,18 +40,30 @@ namespace System.IdentityModel.Tokens
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class JwtSecurityTokenRequirement
     {
+        /// <summary>
+        /// The default clock skew.
+        /// </summary>
+        public static readonly Int32 DefaultClockSkewInSeconds = 300;
+
+        /// <summary>
+        /// The default maximum size of a token that the runtime will process.
+        /// </summary>
+        public static readonly Int32 DefaultMaximumTokenSizeInBytes = 2 * 1024 * 1024; // 2MB
+
+
         // The defaults will only be used if some verification properties are set in config and others are not
+        private X509CertificateValidator certificateValidator;
         private X509RevocationMode defaultRevocationMode = X509RevocationMode.Online;
-        private X509CertificateValidationMode defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
         private StoreLocation defaultStoreLocation = StoreLocation.LocalMachine;
         private int defaultTokenLifetimeInMinutes = 600;
+        private X509CertificateValidationMode defaultValidationMode = X509CertificateValidationMode.PeerOrChainTrust;
         private int maxTokenSizeInBytes = 2 * 1024 * 1024;
         private string nameClaimType;
         private string roleClaimType;
-        private X509CertificateValidator certificateValidator;
 
         // This indicates that the clockSkew was never set
-        private TimeSpan? maxClockSkew = null;
+        //private TimeSpan? maxClockSkew = null;
+        private Int32 clockSkewInSeconds = 5;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenRequirement"/> class. 
@@ -217,7 +229,7 @@ namespace System.IdentityModel.Tokens
                     {
                         throw new ConfigurationErrorsException(
                             string.Format(
-                                CultureInfo.InvariantCulture, 
+                                CultureInfo.InvariantCulture,
                                 JwtErrors.Jwt10606,
                                 Attributes.TrustedStoreLocation,
                                 attribute.Value,
@@ -285,9 +297,7 @@ namespace System.IdentityModel.Tokens
                         }
                         else if (StringComparer.Ordinal.Equals(childElement.LocalName, Elements.MaxClockSkewInMinutes))
                         {
-                            // uint.MaxValue < TimeSpan.MaxValue.TotalMinutes.  If this can be parsed, we can set it.
-                            Int32 clockSkewInMinutes = Convert.ToInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
-                            this.MaxClockSkew = TimeSpan.FromMinutes(clockSkewInMinutes);
+                            this.ClockSkewInSeconds = Convert.ToInt32(childElement.Attributes[0].Value, CultureInfo.InvariantCulture);
                         }
                         else
                         {
@@ -377,6 +387,75 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets the clock skew to use when validating times.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"> if 'value' is less than 0.</exception>
+        public Int32 ClockSkewInSeconds
+        {
+            get
+            {
+                return this.clockSkewInSeconds;
+            }
+
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(JwtErrors.Jwt10120);
+                }
+
+                this.clockSkewInSeconds = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the default for token lifetime.
+        /// <see cref="JwtSecurityTokenHandler"/> uses this value when creating a <see cref="JwtSecurityToken"/> if the expiration time is not specified.  The expiration time will be set to <see cref="DateTime.UtcNow"/> + <see cref="TimeSpan.FromMinutes"/> with <see cref="JwtSecurityTokenRequirement.DefaultTokenLifetimeInMinutes"/> as the parameter.
+        /// </summary>
+        /// <remarks>Default: 600 (10 hours).</remarks>
+        /// <exception cref="ArgumentOutOfRangeException">value == 0.</exception>
+        public int DefaultTokenLifetimeInMinutes
+        {
+            get
+            {
+                return this.defaultTokenLifetimeInMinutes;
+            }
+
+            set
+            {
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
+                }
+
+                this.defaultTokenLifetimeInMinutes = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum size of a <see cref="JwtSecurityToken"/> the <see cref="JwtSecurityTokenHandler"/> will read and validate.
+        /// </summary>
+        /// <remarks>Default: 2 megabytes.</remarks>
+        /// <exception cref="ArgumentOutOfRangeException">if value is 0.</exception>
+        public int MaximumTokenSizeInBytes
+        {
+            get
+            {
+                return this.maxTokenSizeInBytes;
+            }
+
+            set
+            {
+                if (value == 0)
+                {
+                    throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
+                }
+
+                this.maxTokenSizeInBytes = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="string"/> the <see cref="JwtSecurityTokenHandler"/> passes as a parameter to <see cref="ClaimsIdentity(string, string, string)"/>. 
         /// <para>This defines the <see cref="Claim.Type"/> to match when finding the <see cref="Claim.Value"/> that is used for the <see cref="ClaimsIdentity.Name"/> property.</para>
         /// </summary>
@@ -407,75 +486,6 @@ namespace System.IdentityModel.Tokens
             set
             {
                 this.roleClaimType = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum size of a <see cref="JwtSecurityToken"/> the <see cref="JwtSecurityTokenHandler"/> will read and validate.
-        /// </summary>
-        /// <remarks>Default: 2 megabytes.</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">if value is 0.</exception>
-        public int MaximumTokenSizeInBytes
-        {
-            get
-            {
-                return this.maxTokenSizeInBytes;
-            }
-
-            set
-            {
-                if (value == 0)
-                {
-                    throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
-                }
-
-                this.maxTokenSizeInBytes = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the default for token lifetime.
-        /// <see cref="JwtSecurityTokenHandler"/> uses this value when creating a <see cref="JwtSecurityToken"/> if the expiration time is not specified.  The expiration time will be set to <see cref="DateTime.UtcNow"/> + <see cref="TimeSpan.FromMinutes"/> with <see cref="JwtSecurityTokenRequirement.DefaultTokenLifetimeInMinutes"/> as the parameter.
-        /// </summary>
-        /// <remarks>Default: 600 (10 hours).</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">value == 0.</exception>
-        public int DefaultTokenLifetimeInMinutes
-        {
-            get
-            {
-                return this.defaultTokenLifetimeInMinutes;
-            }
-
-            set
-            {
-                if (value < 1)
-                {
-                    throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10115);
-                }
-
-                this.defaultTokenLifetimeInMinutes = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum clock skew to use when validating lifetime of a <see cref="JwtSecurityToken"/>.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException"><see cref="TimeSpan"/>? has a value and it is less than <see cref="TimeSpan.Zero"/>.</exception>
-        public TimeSpan? MaxClockSkew
-        {
-            get
-            {
-                return this.maxClockSkew;
-            }
-
-            set
-            {
-                if (value == null && value.HasValue && value.Value < TimeSpan.Zero)
-                {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10111, value.Value));
-                }
-
-                this.maxClockSkew = value;
             }
         }
     }

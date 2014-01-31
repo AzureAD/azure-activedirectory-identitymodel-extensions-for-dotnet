@@ -212,6 +212,29 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets the clock skew to apply when validating times
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"> if 'value' is less than 0.</exception>
+        [DefaultValue(5)]
+        public Int32 ClockSkewInSeconds
+        {
+            get
+            {
+                return JwtSecurityTokenRequirement.ClockSkewInSeconds;
+            }
+
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException("ClockSkewInSeconds", JwtErrors.Jwt10120);
+                }
+
+                JwtSecurityTokenRequirement.ClockSkewInSeconds = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="X509CertificateValidator"/> responsible for validating the certificate that signed the <see cref="JwtSecurityToken"/>.
         /// </summary>
         /// <remarks>The <see cref="X509CertificateValidator"/> returned using the following search path:
@@ -326,51 +349,6 @@ namespace System.IdentityModel.Tokens
             set
             {
                 JwtSecurityTokenRequirement.NameClaimType = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the clockskew to use when validating times.
-        /// </summary>
-        /// <remarks>The following search path is used to obtain the clockskew to return:
-        /// <para>
-        /// 1. If <see cref="JwtSecurityTokenHandler.JwtSecurityTokenRequirement"/>.MaxClockSkew.HasValue, return this value.
-        /// </para>
-        /// ----
-        /// <para>
-        /// 2. If <see cref="JwtSecurityTokenHandler"/>.Configuration is not null, return <see cref="JwtSecurityTokenHandler"/>.Configuration.MaxClockSkew.
-        /// </para>
-        /// ----
-        /// <para>
-        /// 3. default: <see cref="SecurityTokenHandlerConfiguration.DefaultMaxClockSkew"/>.
-        /// </para>
-        /// </remarks>
-        /// <exception cref="ArgumentOutOfRangeException">'value' is less than <see cref="TimeSpan.Zero"/></exception>
-        public TimeSpan MaxClockSkew
-        {
-            get
-            {
-                if (JwtSecurityTokenRequirement.MaxClockSkew.HasValue)
-                {
-                    return JwtSecurityTokenRequirement.MaxClockSkew.Value;
-                }
-                
-                if (this.Configuration != null)
-                {
-                    return Configuration.MaxClockSkew;
-                }
-
-                return SecurityTokenHandlerConfiguration.DefaultMaxClockSkew;
-            }
-
-            set
-            {
-                if (value < TimeSpan.Zero)
-                {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10111, value));
-                }
-
-                JwtSecurityTokenRequirement.MaxClockSkew = value;
             }
         }
 
@@ -1581,7 +1559,7 @@ namespace System.IdentityModel.Tokens
         /// <see cref="JwtSecurityTokenHandler.RequireExpirationTime"/> mandates if claim { exp, 'value' } is required. Default is true.
         /// <para>If the <see cref="JwtSecurityToken"/> contains the claim { exp, 'value' } it will be validated regardless of <see cref="JwtSecurityTokenHandler.RequireExpirationTime"/>.</para>
         /// <para>If the <see cref="JwtSecurityToken"/> contains the claim { nbf, 'value' } it will be validated.</para>
-        /// <para><see cref="JwtSecurityTokenHandler.MaxClockSkew"/> is applied.</para>
+        /// <para><see cref="JwtSecurityTokenHandler.ClockSkewInSeconds"/> is applied.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">'jwt' is null.</exception>
         /// <exception cref="SecurityTokenValidationException"><see cref="JwtSecurityToken"/> does not contain the claim { exp, 'value' } and <see cref="JwtSecurityTokenHandler.RequireExpirationTime"/> is true.</exception>
@@ -1612,12 +1590,12 @@ namespace System.IdentityModel.Tokens
             }
 
             DateTime utcNow = DateTime.UtcNow;
-            if (nbfExists && (jwt.ValidFrom > DateTimeUtil.Add(utcNow, this.MaxClockSkew)))
+            if (nbfExists && (jwt.ValidFrom > DateTimeUtil.Add(utcNow, TimeSpan.FromMinutes(this.ClockSkewInSeconds))))
             {
                 throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10306, jwt.ValidFrom, utcNow));
             }
 
-            if (expExists && (jwt.ValidTo < DateTimeUtil.Add(utcNow, this.MaxClockSkew.Negate())))
+            if (expExists && (jwt.ValidTo < DateTimeUtil.Add(utcNow, TimeSpan.FromMinutes(this.ClockSkewInSeconds).Negate())))
             {
                 throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10305, jwt.ValidTo, utcNow));
             }
