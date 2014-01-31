@@ -38,7 +38,7 @@ namespace System.IdentityModel.Test
     {
         public ExpectedJwtSecurityTokenRequirement
         (
-            uint? tokenSize = null, TimeSpan? clock = null, uint? life = null, X509CertificateValidator cert = null, string name = JwtConstants.ReservedClaims.Subject, string role = null, X509RevocationMode? revMode = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null, ExpectedException expectedException = null,
+            uint? tokenSize = null, Int32? clock = null, uint? life = null, X509CertificateValidator cert = null, string name = JwtConstants.ReservedClaims.Subject, string role = null, X509RevocationMode? revMode = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null, ExpectedException expectedException = null,
             string handler = JwtSecurityTokenHandlerType, string requirement = Elements.JwtSecurityTokenRequirement,
             string attributeEx1 = "", string attributeEx2 = "", string attributeEx3 = "", string attributeEx4 = "",
             string elementEx1 = comment, string elementEx2 = comment, string elementEx3 = comment, string elementEx4 = comment, string elementEx5 = comment, string elementEx6 = comment,
@@ -50,7 +50,7 @@ namespace System.IdentityModel.Test
             NameClaimType = name;
             RoleClaimType = role;
             CertValidator = cert;
-            MaxClockSkew = clock;
+            ClockSkewInSeconds = clock;
             DefaultTokenLifetimeInMinutes = life;
             CertRevocationMode = revMode;
             CertValidationMode = certMode;
@@ -69,7 +69,7 @@ namespace System.IdentityModel.Test
                 CertStoreLocation == null ? string.Empty : Attribute( Attributes.TrustedStoreLocation, CertStoreLocation.ToString() ),
                 attributeEx4,
                 elementEx1,
-                MaxClockSkew == null ? string.Empty : ElementValue( Elements.MaxClockSkewInMinutes, MaxClockSkew.Value.TotalMinutes.ToString() ),
+                ClockSkewInSeconds == null ? string.Empty : ElementValue( Elements.MaxClockSkewInMinutes, ClockSkewInSeconds.Value.ToString() ),
                 elementEx2,
                 MaxTokenSizeInBytes == null ? string.Empty : ElementValue( Elements.MaxTokenSizeInBytes, MaxTokenSizeInBytes.Value.ToString() ),
                 elementEx3,
@@ -109,17 +109,17 @@ namespace System.IdentityModel.Test
                     requirement.MaximumTokenSizeInBytes.ToString()));
 
             Assert.IsFalse(
-                MaxClockSkew != null && MaxClockSkew.Value != requirement.MaxClockSkew,
+                ClockSkewInSeconds != null && ClockSkewInSeconds.Value != requirement.ClockSkewInSeconds,
                 string.Format(CultureInfo.InvariantCulture,
-                    "MaxClockSkew (expected, config): '{0}'. '{1}'.",
-                    MaxClockSkew.ToString(),
-                    requirement.MaxClockSkew.ToString() ) );
+                    "ClockSkew (expected, config): '{0}'. '{1}'.",
+                    ClockSkewInSeconds.ToString(),
+                    requirement.ClockSkewInSeconds.ToString() ) );
             Assert.IsFalse(
-                MaxClockSkew == null && requirement.MaxClockSkew != controlRequirement.MaxClockSkew,
+                ClockSkewInSeconds == null && requirement.ClockSkewInSeconds != controlRequirement.ClockSkewInSeconds,
                 string.Format(CultureInfo.InvariantCulture,
-                    "MaxClockSkew should be default (default, config): '{0}'. '{1}'.",
-                    controlRequirement.MaxClockSkew.ToString(),
-                    requirement.MaxClockSkew.ToString() ) );
+                    "ClockSkew should be default (default, config): '{0}'. '{1}'.",
+                    controlRequirement.ClockSkewInSeconds.ToString(),
+                    requirement.ClockSkewInSeconds.ToString() ) );
 
             Assert.IsFalse(
                 DefaultTokenLifetimeInMinutes != null
@@ -225,7 +225,7 @@ namespace System.IdentityModel.Test
         }
 
         public uint? MaxTokenSizeInBytes { get; set; }
-        public TimeSpan? MaxClockSkew { get; set; }
+        public Int32? ClockSkewInSeconds { get; set; }
         public string NameClaimType { get; set; }
         public string RoleClaimType { get; set; }
         public X509CertificateValidator CertValidator { get; set; }
@@ -265,7 +265,7 @@ namespace System.IdentityModel.Test
                 CertStoreLocation == null ? string.Empty : Attribute( Attributes.TrustedStoreLocation, CertStoreLocation.ToString() ),
                 attributeEx4,
                 elementEx1,
-                MaxClockSkew == null ? string.Empty : ElementValue( Elements.MaxClockSkewInMinutes, MaxClockSkew.Value.TotalMinutes.ToString() ),
+                ClockSkewInSeconds == null ? string.Empty : ElementValue( Elements.MaxClockSkewInMinutes, ClockSkewInSeconds.Value.ToString() ),
                 elementEx2,
                 MaxTokenSizeInBytes == null ? string.Empty : ElementValue( Elements.MaxTokenSizeInBytes, MaxTokenSizeInBytes.Value.ToString() ),
                 elementEx3,
@@ -344,13 +344,13 @@ namespace System.IdentityModel.Test
 
             // Error Conditions - lifetime
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( life: 0, expectedException: ExpectedException.Config( inner: new ArgumentOutOfRangeException(), id: "Jwt10603" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( elementEx1: ElementValue( Elements.DefaultTokenLifetimeInMinutes, "-1" ), expectedException: ExpectedException.Config( inner: new OverflowException(), id: "Jwt10603" ) ) );
+            RequirementVariations.Add(new ExpectedJwtSecurityTokenRequirement(elementEx1: ElementValue(Elements.DefaultTokenLifetimeInMinutes, "-1"), expectedException: ExpectedException.Config(inner: new ArgumentOutOfRangeException(), id: "Jwt10603")));
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( elementEx1: ElementValue( Elements.DefaultTokenLifetimeInMinutes, "abc" ), expectedException: ExpectedException.Config( inner: new FormatException() ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( elementEx1: ElementValue( Elements.DefaultTokenLifetimeInMinutes, "15372286729" ), expectedException: ExpectedException.Config( inner: new OverflowException() ) ) );           
             
             // Error Conditions - tokensSize
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 0, expectedException: ExpectedException.Config( inner: new ArgumentOutOfRangeException(), id: "Jwt10603" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( elementEx1: ElementValue( Elements.MaxTokenSizeInBytes, "-1" ), expectedException: ExpectedException.Config(inner: new OverflowException(), id: "Jwt10603" ) ) );
+            RequirementVariations.Add(new ExpectedJwtSecurityTokenRequirement(elementEx1: ElementValue(Elements.MaxTokenSizeInBytes, "-1"), expectedException: ExpectedException.Config(inner: new ArgumentOutOfRangeException(), id: "Jwt10603")));
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( elementEx1: ElementValue( Elements.MaxTokenSizeInBytes, "abc" ), expectedException: ExpectedException.Config( inner: new FormatException() ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( elementEx1: ElementValue( Elements.MaxTokenSizeInBytes, "4294967296" ), expectedException: ExpectedException.Config( inner: new OverflowException() ) ) );
 
@@ -361,8 +361,8 @@ namespace System.IdentityModel.Test
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( name: @"http://AllItemsSet/nameClaim", revMode: X509RevocationMode.NoCheck, elementEx5: ElementValue( Elements.NameClaimType, "1024" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( role: @"http://AllItemsSet/roleClaim", revMode: X509RevocationMode.NoCheck, elementEx3: ElementValue( Elements.RoleClaimType, "1024" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( role: @"http://AllItemsSet/roleClaim", revMode: X509RevocationMode.NoCheck, elementEx6: ElementValue( Elements.RoleClaimType, "1024" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( clock: TimeSpan.FromMinutes( 15 ), certMode: X509CertificateValidationMode.PeerTrust, elementEx1: ElementValue( Elements.MaxClockSkewInMinutes, "5" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( clock: TimeSpan.FromMinutes( 15 ), revMode: X509RevocationMode.NoCheck, elementEx2: ElementValue( Elements.MaxClockSkewInMinutes, "5" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( clock: 15, certMode: X509CertificateValidationMode.PeerTrust, elementEx1: ElementValue( Elements.MaxClockSkewInMinutes, "5" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( clock: 15, revMode: X509RevocationMode.NoCheck, elementEx2: ElementValue( Elements.MaxClockSkewInMinutes, "5" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( life: 1000, revMode: X509RevocationMode.NoCheck, elementEx1: ElementValue( Elements.DefaultTokenLifetimeInMinutes, "60" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( life: 1000, revMode: X509RevocationMode.NoCheck, elementEx4: ElementValue( Elements.DefaultTokenLifetimeInMinutes, "60" ), expectedException: ExpectedException.Config( id: "Jwt10616" ) ) );
 
@@ -375,17 +375,17 @@ namespace System.IdentityModel.Test
             // certificate validator
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( certMode: X509CertificateValidationMode.Custom, cert: new AlwaysSucceedCertificateValidator() ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000 ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 4294967295 ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 2147483647 ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( name: @"http://AllItemsSet/nameClaim" ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( role: @"http://AllItemsSet/roleClaim" ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( cert: new AlwaysSucceedCertificateValidator(), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( clock: TimeSpan.FromMinutes( 15 ) ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( clock: 15 ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim" ) ) ;
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( cert: new AlwaysSucceedCertificateValidator(), clock: TimeSpan.FromMinutes( 15 ), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: TimeSpan.FromMinutes( 15 ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: TimeSpan.FromMinutes( 15 ), cert: new AlwaysSucceedCertificateValidator(), certMode: X509CertificateValidationMode.Custom ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: TimeSpan.FromMinutes( 15 ), cert: new AlwaysSucceedCertificateValidator(), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
-            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( role: @"http://AllItemsSet/roleClaim",  cert: new AlwaysSucceedCertificateValidator(), clock: TimeSpan.FromMinutes( 15 ), certMode: X509CertificateValidationMode.Custom ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( cert: new AlwaysSucceedCertificateValidator(), clock: 15, expectedException: ExpectedException.Config( "Jwt10619" ) ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: 15 ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: 15, cert: new AlwaysSucceedCertificateValidator(), certMode: X509CertificateValidationMode.Custom ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( tokenSize: 1000, name: @"http://AllItemsSet/nameClaim", role: @"http://AllItemsSet/roleClaim", clock: 15, cert: new AlwaysSucceedCertificateValidator(), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
+            RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( role: @"http://AllItemsSet/roleClaim",  cert: new AlwaysSucceedCertificateValidator(), clock: 15, certMode: X509CertificateValidationMode.Custom ) );
             RequirementVariations.Add( new ExpectedJwtSecurityTokenRequirement( certMode: X509CertificateValidationMode.PeerTrust, cert: new AlwaysSucceedCertificateValidator(), expectedException: ExpectedException.Config( "Jwt10619" ) ) );
         }
 

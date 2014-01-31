@@ -62,7 +62,6 @@ namespace System.IdentityModel.Test
             Int32 clockSkewInSeconds = 600;
             SecurityKey issuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256;
             List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 };        
-            Int32 maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes * 2;
             string validAudience = "ValidAudience";
             List<string> validAudiences = new List<string>() { validAudience };
             string validIssuer = "ValidIssuer";
@@ -70,10 +69,8 @@ namespace System.IdentityModel.Test
 
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
             {
-                ClockSkewInSeconds = clockSkewInSeconds,
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeys = issuerSigningKeys,
-                MaximumTokenSizeInBytes = maximumTokenSizeInBytes,
                 SaveSigninToken = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -83,11 +80,8 @@ namespace System.IdentityModel.Test
                 ValidIssuers = validIssuers,
             };
 
-            Assert.IsTrue(tokenValidationParameters.ClockSkewInSeconds == clockSkewInSeconds);
-            Assert.IsTrue(TokenValidationParameters.DefaultMaximumTokenSizeInBytes == 2 * 1024 * 1024);
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKeys, issuerSigningKeys));
-            Assert.IsTrue(tokenValidationParameters.MaximumTokenSizeInBytes == maximumTokenSizeInBytes);
             Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
             Assert.IsFalse(tokenValidationParameters.ValidateAudience);
             Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
@@ -96,10 +90,8 @@ namespace System.IdentityModel.Test
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
 
             tokenValidationParameters = new TokenValidationParameters();
-            tokenValidationParameters.ClockSkewInSeconds = clockSkewInSeconds;
             tokenValidationParameters.IssuerSigningKey = issuerSigningKey;
             tokenValidationParameters.IssuerSigningKeys = issuerSigningKeys;
-            tokenValidationParameters.MaximumTokenSizeInBytes = maximumTokenSizeInBytes;
             tokenValidationParameters.SaveSigninToken = true;
             tokenValidationParameters.ValidateAudience = false;
             tokenValidationParameters.ValidateIssuer = false;
@@ -108,40 +100,14 @@ namespace System.IdentityModel.Test
             tokenValidationParameters.ValidIssuer = validIssuer;
             tokenValidationParameters.ValidIssuers = validIssuers;
 
-            Assert.IsTrue(tokenValidationParameters.ClockSkewInSeconds == clockSkewInSeconds);
-            Assert.IsTrue(TokenValidationParameters.DefaultMaximumTokenSizeInBytes == 2 * 1024 * 1024);
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKeys, issuerSigningKeys));
-            Assert.IsTrue(tokenValidationParameters.MaximumTokenSizeInBytes == maximumTokenSizeInBytes);
             Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
             Assert.IsFalse(tokenValidationParameters.ValidateAudience);
             Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudience, validAudience));
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudiences, validAudiences));
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
-
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(ArgumentOutOfRangeException), id: "Jwt10119");
-            try
-            {
-                tokenValidationParameters.MaximumTokenSizeInBytes = 0;
-                ExpectedException.ProcessNoException(expectedException);
-            }
-            catch (Exception exception)
-            {
-                ExpectedException.ProcessException(expectedException, exception);
-            }
-
-            expectedException = new ExpectedException(thrown: typeof(ArgumentOutOfRangeException), id: "Jwt10120");
-            try
-            {
-                tokenValidationParameters.ClockSkewInSeconds = -1;
-                ExpectedException.ProcessNoException(expectedException);
-            }
-            catch (Exception exception)
-            {
-                ExpectedException.ProcessException(expectedException, exception);
-            }
-
         }
 
         [TestMethod]
@@ -150,10 +116,6 @@ namespace System.IdentityModel.Test
         public void TokenValidationParameters_Defaults()
         {
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
-            Assert.IsTrue(TokenValidationParameters.DefaultMaximumTokenSizeInBytes == 2 * 1024 * 1024, "TokenValidationParameters.DefaultMaximumTokenSizeInBytes");
-            Assert.IsTrue(tokenValidationParameters.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "tokenValidationParameters.MaximumTokenSizeInBytes");
-            Assert.IsTrue(TokenValidationParameters.DefaultClockSkewInSeconds == 300, "TokenValidationParameters.DefaultClockSkewInSeconds");
-            Assert.IsTrue(tokenValidationParameters.ClockSkewInSeconds == TokenValidationParameters.DefaultClockSkewInSeconds, "tokenValidationParameters.ClockSkewInSeconds");
             Assert.IsTrue(tokenValidationParameters.IssuerSigningKey == null, "Expecting default: validationParameters.IssuerSigningKey == null.");
             Assert.IsTrue(tokenValidationParameters.IssuerSigningKeys == null, "Expecting default: validationParameters.IssuerSigningKeys == null.");            
             Assert.IsFalse(tokenValidationParameters.SaveSigninToken, "Expecting default: validationParameters.SaveSigninToken by default to be false");
