@@ -41,7 +41,8 @@ namespace System.IdentityModel.Tokens
     {
         // the Sts pipeline expects the first identifier to be a string that 
         // Uri.TryCreate( tokenIdentifiers[0], UriKind.Absolute, out result ) will be true.
-        // if that is not true, sts's using our sts class will start failing.
+        // if that is not true, sts's using the .Net sts class will start failing.
+
         private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
         private static IDictionary<string, string> outboundAlgorithmMap = new Dictionary<string, string>() 
                                                                             { 
@@ -215,7 +216,7 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets the clock skew to apply when validating times
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException"> if 'value' is less than 0.</exception>
-        [DefaultValue(5)]
+        [DefaultValue(300)]
         public Int32 ClockSkewInSeconds
         {
             get
@@ -1799,11 +1800,11 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Produces a list of keys to try Consolidates the possible signing tokens from <see cref="TokenValidationParameters"/>.
+        /// Produces a <see cref="IEnumerable{SecurityKey}"/> to use when validating the signature of the jwt.
         /// </summary>
-        /// <param name="jwt"><see cref="JwtSecurityToken"/> the jwt to find a signing token for.</param>
-        /// <param name="validationParameters">contains <see cref="SecurityToken"/> in different places.</param>
-        /// <returns>Returns a <see cref="IList{SecurityKey}"/> ntaining  <see cref="SecurityKey"/> found in validationParameters.</returns>
+        /// <param name="jwt">A <see cref="JwtSecurityToken"/> that will have the signture validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
+        /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         protected virtual IEnumerable<SecurityKey> GetSigningKeys(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
@@ -1812,9 +1813,9 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("validationParameters");
             }
 
-            if (validationParameters.ResolveIssuerSigningKeys != null)
+            if (validationParameters.RetreiveIssuerSigningKeys != null)
             {
-                foreach (SecurityKey securityKey in validationParameters.ResolveIssuerSigningKeys(jwt, validationParameters))
+                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(jwt, validationParameters))
                 {
                     yield return securityKey;
                 }
