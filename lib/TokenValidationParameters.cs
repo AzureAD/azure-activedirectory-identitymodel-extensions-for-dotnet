@@ -73,11 +73,11 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to find signing keys.
+        /// Gets or sets a delegate that will be used to retreive signing keys.
         /// </summary>
         /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
         /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
-        public Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> ResolveIssuerSigningKeys
+        public Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> RetreiveIssuerSigningKeys
         {
             get;
             set;
