@@ -30,7 +30,7 @@
     <DefineConstants>TRACE;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Microsoft.IdentityModel.Tokens.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Microsoft.IdentityModel.Extensions.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>AllMicrosoftFxCopRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
