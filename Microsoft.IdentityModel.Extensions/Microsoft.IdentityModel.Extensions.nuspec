@@ -1,18 +1,24 @@
 ﻿<?xml version="1.0"?>
 <package>
   <metadata>
-    <title>Extensions for Microsoft's Windows Identity Model 4.5</title>
+    <title>Identity Protocols Extensions for the Microsoft .NET Framework 4.5</title>
     <id>Microsoft.IdentityModel.Extensions</id>
-    <version>0.1.0</version>
+    <version>1.0.0-alpha</version>
     <authors>>Microsoft Open Technologies, Inc.</authors>
-    <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_rtw_enu.htm</licenseUrl>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_enu.htm</licenseUrl>
     <projectUrl>http://go.microsoft.com/fwlink/?LinkId=272508</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>This package provides an assembly containing classes which extend the .NET Framework 4.5 with the support for OpenIdConnect and WsFederation</description>
-    <summary>This package provides an assembly containing classes which extend the .NET Framework 4.5 with the support for OpenIdConnect and WsFederation.</summary>
+    <description>This package provides an assembly containing classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols</description>
+    <summary>This package provides an assembly containing classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols</summary>
     <language>en-US</language>
     <owners>Microsoft</owners>
-    <tags>WIF, Windows Identity Foundation, OpenIdConnect, WsFed, WsFederation</tags>
+    <tags>Identity, Claims, OpenIdConnect, WS-Federation</tags>
     <copyright>Copyright 2014</copyright>
   </metadata>
+  <files>
+    <file src="Microsoft.IdentityModel.Extensions.dll" target="lib\net45" />
+    <file src="Microsoft.IdentityModel.Extensions.pdb" target="lib\net45" />
+    <file src="Microsoft.IdentityModel.Extensions.xml" target="lib\net45" />
+  </files>
 </package>
+
