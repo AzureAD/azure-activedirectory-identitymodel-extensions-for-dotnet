@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Xml;
 
@@ -27,6 +28,11 @@ namespace System.IdentityModel.Tokens
     public interface ISecurityTokenValidator
     {
         /// <summary>
+        /// Gets or sets the authentication type to use when creating the claims identity
+        /// </summary>
+        string AuthenticationType { get; set; }
+
+        /// <summary>
         /// Answers the question if the token can be read, it is assumed if the token can be read, it can be validated.
         /// </summary>
         bool CanReadToken(string securityToken);
@@ -35,6 +41,14 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets the clock skew to apply when validating times
         /// </summary>
         Int32 ClockSkewInSeconds { get; set; }
+
+        /// <summary>
+        /// Gets the SigningKeys that will be used to check the signature of the token.
+        /// </summary>
+        /// <param name="securityToken">the security token that keys will be used to check signature.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that may contain keys.</param>
+        /// <returns></returns>
+        IEnumerable<SecurityKey> GetSigningKeys(SecurityToken securityToken, TokenValidationParameters validationParameters);
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.

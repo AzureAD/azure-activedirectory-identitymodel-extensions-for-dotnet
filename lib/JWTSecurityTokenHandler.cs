@@ -197,6 +197,11 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
+        /// </summary>
+        public string AuthenticationType { get; set; }
+
+        /// <summary>
         /// Returns 'true' which indicates this instance can validate a <see cref="JwtSecurityToken"/>.
         /// </summary>
         public override bool CanValidateToken
@@ -1806,7 +1811,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
         /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        protected virtual IEnumerable<SecurityKey> GetSigningKeys(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        public virtual IEnumerable<SecurityKey> GetSigningKeys(SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
             {
@@ -1815,7 +1820,7 @@ namespace System.IdentityModel.Tokens
 
             if (validationParameters.RetreiveIssuerSigningKeys != null)
             {
-                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(jwt, validationParameters))
+                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(jwt))
                 {
                     yield return securityKey;
                 }

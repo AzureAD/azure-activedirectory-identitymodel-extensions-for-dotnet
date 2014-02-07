@@ -37,6 +37,15 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets a delegate that will be used to validate the audience of the token
+        /// </summary>
+        public Func<string, SecurityToken, bool> AudienceValidator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
         /// </summary>
         public SecurityKey IssuerSigningKey
@@ -73,16 +82,25 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to retreive signing keys.
+        /// Gets or sets a delegate that will be used to validate the issuer of the token
         /// </summary>
-        /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
-        /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
-        public Func<SecurityToken, TokenValidationParameters, IEnumerable<SecurityKey>> RetreiveIssuerSigningKeys
+        public Func<string, SecurityToken, bool> IssuerValidator
         {
             get;
             set;
         }
-        
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to retreive signing keys.
+        /// </summary>
+        /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
+        /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
+        public Func<SecurityToken, IEnumerable<SecurityKey>> RetreiveIssuerSigningKeys
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Gets or sets a boolean to control if the original token is saved when a session is created.
         /// </summary>
