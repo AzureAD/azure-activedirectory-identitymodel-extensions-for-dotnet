@@ -14,7 +14,7 @@
     <RootDir>.\Microsoft.IdentityModel.Extensions</RootDir>
     <SourceBin>$(RootDir)\src</SourceBin>
     <TestDirectory>$(RootDir)\tests</TestDirectory>
-    <TestAssemblyName>..\$(TestDirectory)\bin\debug\Microsoft.IdentityModel.Extensions.Tests.dll</TestAssemblyName>	
+    <TestAssemblyName>..\$(TestDirectory)\bin\debug\Microsoft.IdentityModel.Extensions.Test.dll</TestAssemblyName>	
     <PublishDirectory>.\Publish</PublishDirectory>
     <PackageDirectory>.\Package</PackageDirectory>
     <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>     
