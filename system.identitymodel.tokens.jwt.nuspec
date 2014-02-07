@@ -17,6 +17,6 @@ This package provides an assembly containing classes which extend the .NET Frame
     <language>en-US</language>
     <owners>Microsoft</owners>
     <tags>JWT, JSON Web Token, WIF, Windows Identity Foundation, OAuth, OAuth2, Bearer, TokenHandler, Windows Azure Active Directory, Claims, Identity, Authentication</tags>
-    <copyright>Copyright 2013</copyright>
+    <copyright>Copyright 2014</copyright>
   </metadata>
 </package>
