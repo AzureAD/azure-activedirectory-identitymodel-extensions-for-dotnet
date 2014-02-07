@@ -30,7 +30,7 @@ namespace System.IdentityModel.Tokens
         private static char base64Character62 = '+';
         private static char base64Character63 = '/';
         private static char base64UrlCharacter62 = '-';
-        private static char base64UrlCharacter63 = '_';
+        private static char _base64UrlCharacter63 = '_';
 
         /// <summary>
         /// The following functions perform base64url encoding which differs from regular base64 encoding as follows
@@ -65,7 +65,7 @@ namespace System.IdentityModel.Tokens
             string s = Convert.ToBase64String(arg);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
             s = s.Replace(base64Character62, base64UrlCharacter62);  // 62nd char of encoding
-            s = s.Replace(base64Character63, base64UrlCharacter63);  // 63rd char of encoding
+            s = s.Replace(base64Character63, _base64UrlCharacter63);  // 63rd char of encoding
 
             return s;
         }
@@ -86,7 +86,7 @@ namespace System.IdentityModel.Tokens
             str = str.Replace(base64UrlCharacter62, base64Character62);
             
             // 63rd char of encoding
-            str = str.Replace(base64UrlCharacter63, base64Character63);
+            str = str.Replace(_base64UrlCharacter63, base64Character63);
 
             // check for padding
             switch (str.Length % 4)
