@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <title>Extensions for Microsoft's Windows Identity Model 4.5</title>
+    <id>Microsoft.IdentityModel.Extensions</id>
+    <version>0.1.0</version>
+    <authors>>Microsoft Open Technologies, Inc.</authors>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_rtw_enu.htm</licenseUrl>
+    <projectUrl>http://go.microsoft.com/fwlink/?LinkId=272508</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>This package provides an assembly containing classes which extend the .NET Framework 4.5 with the support for OpenIdConnect and WsFederation</description>
+    <summary>This package provides an assembly containing classes which extend the .NET Framework 4.5 with the support for OpenIdConnect and WsFederation.</summary>
+    <language>en-US</language>
+    <owners>Microsoft</owners>
+    <tags>WIF, Windows Identity Foundation, OpenIdConnect, WsFed, WsFederation</tags>
+    <copyright>Copyright 2014</copyright>
+  </metadata>
+</package>
