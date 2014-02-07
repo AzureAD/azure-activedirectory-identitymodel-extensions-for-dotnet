@@ -11,9 +11,10 @@
   
    <!-- Define build properties -->
   <PropertyGroup>
-    <SourceBin>.\Microsoft.IdentityModel.Extensions\src</SourceBin>
-    <TestDirectory>.\Microsoft.IdentityModel.Extensions\tests</TestDirectory>
-    <TestAssemblyName>.\Microsoft.IdentityModel.Extensions\test\bin\debug\Microsoft.IdentityModel.Extensions.Tests.dll</TestAssemblyName>	
+    <RootDir>.\Microsoft.IdentityModel.Extensions</RootDir>
+    <SourceBin>$(RootDir)\src</SourceBin>
+    <TestDirectory>$(RootDir)\tests</TestDirectory>
+    <TestAssemblyName>$(TestDirectory)\bin\debug\Microsoft.IdentityModel.Extensions.Tests.dll</TestAssemblyName>	
     <PublishDirectory>.\Publish</PublishDirectory>
     <PackageDirectory>.\Package</PackageDirectory>
     <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>     
