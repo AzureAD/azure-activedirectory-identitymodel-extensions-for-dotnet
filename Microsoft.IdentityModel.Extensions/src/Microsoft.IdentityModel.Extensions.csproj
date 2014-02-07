@@ -65,10 +65,6 @@
     <Compile Include="WsFederationConstants.cs" />
     <Compile Include="WsFederationMessage.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Microsoft.IdentityModel.Extensions.cd" />
-    <None Include="Microsoft.IdentityModel.Protocols.cd" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(TargetPath) $(LocalDrops)</PostBuildEvent>
