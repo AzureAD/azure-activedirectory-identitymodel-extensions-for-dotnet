@@ -15,10 +15,5 @@
     <tags>Identity, Claims, OpenIdConnect, WS-Federation</tags>
     <copyright>Copyright 2014</copyright>
   </metadata>
-  <files>
-    <file src="Microsoft.IdentityModel.Extensions.dll" target="drop\lib\net45" />
-    <file src="Microsoft.IdentityModel.Extensions.pdb" target="drop\lib\net45" />
-    <file src="Microsoft.IdentityModel.Extensions.xml" target="drop\lib\net45" />
-  </files>
 </package>
 
