@@ -68,12 +68,6 @@
   <ItemGroup>
     <None Include="Microsoft.IdentityModel.Extensions.cd" />
     <None Include="Microsoft.IdentityModel.Protocols.cd" />
-    <None Include="SequenceDiagram1.sequencediagram" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="SequenceDiagram1.sequencediagram.layout">
-      <DependentUpon>SequenceDiagram1.sequencediagram</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
