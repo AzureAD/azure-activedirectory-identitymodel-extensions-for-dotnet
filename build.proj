@@ -5,20 +5,19 @@
   DefaultTargets="Clean;BuildDebug;BuildRelease">
   
   <ItemGroup>
-    <JwtSln Include=".\lib\jwt.csproj" />
-	  <JwtSln Include=".\test\jwtTests.csproj" />
+    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\src\Microsoft.IdentityModel.Extensions.csproj" />
+    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\tests\Microsoft.IdentityModel.Extensions.Tests.csproj" />
   </ItemGroup>
   
    <!-- Define build properties -->
   <PropertyGroup>
-    <SourceBin>.\lib</SourceBin>
-    <TestDirectory>.\test\</TestDirectory>
-    <TestAssemblyName>.\test\bin\debug\System.IdentityModel.Tokens.JWT.Test.dll</TestAssemblyName>	
+    <SourceBin>.\Microsoft.IdentityModel.Extensions\src</SourceBin>
+    <TestDirectory>.\Microsoft.IdentityModel.Extensions\tests</TestDirectory>
+    <TestAssemblyName>.\Microsoft.IdentityModel.Extensions\test\bin\debug\Microsoft.IdentityModel.Extensions.Tests.dll</TestAssemblyName>	
     <PublishDirectory>.\Publish</PublishDirectory>
     <PackageDirectory>.\Package</PackageDirectory>
     <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>     
-    <TestOutputDirectory>$(PublishDirectory)\TestResults</TestOutputDirectory>
-	
+    <TestOutputDirectory>$(PublishDirectory)\TestResults</TestOutputDirectory>	
   </PropertyGroup>
   
   <!-- Clean the build in all configurations -->
@@ -26,12 +25,12 @@
     <!-- Clean the solutions -->
     <Message Importance="high" Text="Cleaning the projects..." ContinueOnError="true" />
     <MSBuild
-      Projects="@(JwtSln)"
+      Projects="@(MicrosoftIdentityModelExtensions)"
       Targets="Clean"
       Properties="Configuration=Debug"
       ContinueOnError="true" />
 	  <MSBuild
-      Projects="@(JwtSln)"
+      Projects="@(MicrosoftIdentityModelExtensions)"
       Targets="Clean"
       Properties="Configuration=Release"
       ContinueOnError="true" />   
@@ -62,45 +61,34 @@
       ContinueOnError="false" />
   </Target>
   
- 
-
-  <!-- Build the Cmdlets in Debug configuration -->
   <Target Name="BuildDebug">
     <Message Importance="high" Text="Building debug version the projects..." />
     <MSBuild
-      Projects="@(JwtSln)"
+      Projects="@(MicrosoftIdentityModelExtensions)"
       Targets="Build"
       Properties="Configuration=Debug"
-      ContinueOnError="true" />
-	
+      ContinueOnError="true" />	
   </Target>
   
-   <!-- Build the Cmdlets in Release configuration -->
   <Target Name="BuildRelease">
     <Message Importance="high" Text="Building release version the projects..." />
     <MSBuild
-      Projects="@(JwtSln)"
+      Projects="@(MicrosoftIdentityModelExtensions)"
       Targets="Build"
       Properties="Configuration=Release"
       ContinueOnError="true" />
-	
   </Target>
   
    <Target Name="Build" DependsOnTargets="Clean;BuildDebug;BuildRelease" />
   
-   <!-- Publish any build artificates to the Publish directory -->
-  <Target Name="Publish" DependsOnTargets="Build">
-    
+  <Target Name="Publish" DependsOnTargets="Build">    
     <!-- Copy code artifacts -->
     <Message Importance="high" Text="Publishing ..." ContinueOnError="false" />
     <ItemGroup>
       <DebugFiles Include="$(SourceBin)\Debug\**\*.*" />      
       <ReleaseFiles Include="$(SourceBin)\Release\**\*.*" />
     </ItemGroup>
-    <MakeDir
-      Directories="$(BuildOutputDirectory)"
-      ContinueOnError="false" />
-	  
+    <MakeDir Directories="$(BuildOutputDirectory)" ContinueOnError="false" />	  
     <Copy
       SourceFiles="@(DebugFiles)"
       DestinationFiles="@(DebugFiles->'$(BuildOutputDirectory)\Debug\%(RecursiveDir)%(Filename)%(Extension)')"
@@ -110,34 +98,25 @@
       SourceFiles="@(ReleaseFiles)"
       DestinationFiles="@(ReleaseFiles->'$(BuildOutputDirectory)\Release\%(RecursiveDir)%(Filename)%(Extension)')"
       SkipUnchangedFiles="true"
-      ContinueOnError="false" />    
-   
+      ContinueOnError="false" />       
   </Target>
   
-   <!-- Run the scenario tests -->
   <Target Name="ScenarioTest">
     <Message Importance="high" Text="Running scenario tests..." />
     <Message Importance="high" Text="You are required to have installed a version of Visual Studio with support for MSTest (and MSTest on your path)." />
-    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />
-    
+    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />    
     <Message Importance="high" Text="Scenario tests:" />
-    <Exec
-      Command="MSTest.exe /testcontainer:$(TestAssemblyName) /resultsfile:$(TestOutputDirectory)\FullTestRun.trx"
-      ContinueOnError="false" />
-   
+    <Exec  Command="MSTest.exe /testcontainer:$(TestAssemblyName) /resultsfile:$(TestOutputDirectory)\FullTestRun.trx" ContinueOnError="false" />   
   </Target>
   
-   <!-- Run the scenario tests -->
   <Target Name="PullRequestValidation">
     <Message Importance="high" Text="Running PullRequestValidation tests..." />
     <Message Importance="high" Text="You are required to have installed a version of Visual Studio with support for MSTest (and MSTest on your path)." />
-    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />
-    
+    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />    
     <Message Importance="high" Text="PullRequestValidation tests:" />
-    <Exec
-      Command="MSTest.exe /testcontainer:$(TestAssemblyName) /resultsfile:$(TestOutputDirectory)\PullRequestValidation.trx /category:PullRequestValidation"
-      ContinueOnError="false" />   
+    <Exec Command="MSTest.exe /testcontainer:$(TestAssemblyName) /resultsfile:$(TestOutputDirectory)\PullRequestValidation.trx /category:PullRequestValidation" ContinueOnError="false" />   
   </Target>
+
   <Target
     Name="FullWithScenarioTests"
     DependsOnTargets="Clean;BuildDebug;BuildRelease;ScenarioTest" />
