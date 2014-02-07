@@ -8,6 +8,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Provides access to common OpenIdConnect request parameters.
     /// </summary>
+    [class: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707")]  
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
         /// <summary>
