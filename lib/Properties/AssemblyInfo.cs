@@ -32,6 +32,7 @@ using System;
 [assembly: AssemblyCopyrightAttribute("Microsoft")]
 [assembly: AssemblyVersionAttribute("4.0.0.0")]
 [assembly: AssemblyFileVersionAttribute("4.0.0.0")]
+[assembly: AssemblyInformationalVersion("4.0.0.0-alpha")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
 [assembly: CLSCompliant(true)]
