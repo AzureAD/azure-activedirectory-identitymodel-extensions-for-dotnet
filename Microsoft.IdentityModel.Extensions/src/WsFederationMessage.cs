@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
-        /// <param name="parameters">Enumeration of key value pairs.</param>
+        /// <param name="parameters">Enumeration of key value pairs.</param>        
         public WsFederationMessage(IEnumerable<KeyValuePair<string, string[]>> parameters)
         { 
             if (parameters == null)
@@ -121,22 +121,24 @@ namespace Microsoft.IdentityModel.Protocols
                 return null;
             }
 
-            StringReader sr = new StringReader(Wresult);
-            XmlReader xmlReader = XmlReader.Create(sr);
-            xmlReader.MoveToContent();
-
-            WSTrustResponseSerializer serializer = new WSTrust13ResponseSerializer();
-            if (serializer.CanRead(xmlReader))
+            using (StringReader sr = new StringReader(Wresult))
             {
-                RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
-                return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
-            }
+                XmlReader xmlReader = XmlReader.Create(sr);
+                xmlReader.MoveToContent();
 
-            serializer = new WSTrustFeb2005ResponseSerializer();
-            if (serializer.CanRead(xmlReader))
-            {
-                RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
-                return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
+                WSTrustResponseSerializer serializer = new WSTrust13ResponseSerializer();
+                if (serializer.CanRead(xmlReader))
+                {
+                    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
+                    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
+                }
+
+                serializer = new WSTrustFeb2005ResponseSerializer();
+                if (serializer.CanRead(xmlReader))
+                {
+                    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
+                    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
+                }
             }
 
             return null;

@@ -8,7 +8,6 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Provides access to common OpenIdConnect request parameters.
     /// </summary>
-    [class: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707")]  
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
         /// <summary>
@@ -24,6 +23,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'access_Token'.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707", Justification = "Follows protocol names")]
         public string Access_Token
         {
             get { return GetParameter(OpenIdConnectParameterNames.Access_Token); }
@@ -186,6 +186,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'login_hint'.
         /// </summary>
+        [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707")]  
         public string Login_Hint
         {
             get { return GetParameter(OpenIdConnectParameterNames.Login_Hint); }
