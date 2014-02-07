@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="value">The value to be assigned to parameter.</param>
         /// <exception cref="ArgumentNullException">if 'parameterName' is null or empty.</exception>
         /// <remarks>If null is passed as value and a parameter of parametetorName exists, the parameter is removed.</remarks>
-        public virtual void SetParameter(string parameter, string value) 
+        public void SetParameter(string parameter, string value) 
         {
             // TODO - calling with null value has a different behavior than AuthenticationProtocolMessage.Prameters.Add(key,null)
             if (String.IsNullOrEmpty(parameter))
