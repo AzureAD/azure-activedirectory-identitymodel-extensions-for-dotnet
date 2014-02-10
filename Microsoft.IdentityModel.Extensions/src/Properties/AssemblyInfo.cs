@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Extensions")]
+[assembly: AssemblyTitle("Microsoft.IdentityModel.Protocol.Extensions")]
 [assembly: AssemblyDescription("Contains classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Extensions")]
+[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocol.Extensions")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
