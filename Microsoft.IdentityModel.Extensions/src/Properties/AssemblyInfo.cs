@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Extensions")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Contains classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Extensions")]

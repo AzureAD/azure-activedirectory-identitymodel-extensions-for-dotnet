@@ -19,6 +19,7 @@ namespace Microsoft.IdentityModel.Extensions
     ///     
     public class Saml2SecurityTokenHandler : System.IdentityModel.Tokens.Saml2SecurityTokenHandler, ISecurityTokenValidator
     {
+        private string _authenticationType = AuthenticationTypes.Federation;
         private Int32 _clockSkewInSeconds = Saml2SecurityTokenHandler.DefaultClockSkewInSeconds;
         private Int32 _maximumTokenSizeInBytes = Saml2SecurityTokenHandler.DefaultMaximumTokenSizeInBytes;
         private TokenValidationParameters _tokenValidationParameters;
@@ -26,7 +27,23 @@ namespace Microsoft.IdentityModel.Extensions
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
         /// </summary>
-        public string AuthenticationType { get; set; }
+        /// <exception cref="ArgumentNullException"> if 'value' is null or whitespace.</exception>
+        public string AuthenticationType
+        {
+            get
+            {
+                return _authenticationType;
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException("AuthenticationType");
+                }
+
+                _authenticationType = value;
+            }
+        }
 
         /// <summary>
         /// Default for the clock skew.
@@ -118,7 +135,7 @@ namespace Microsoft.IdentityModel.Extensions
             }
 
             string issuer = ValidateIssuer(samlToken, _tokenValidationParameters);
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationTypes.Federation, SamlSecurityTokenRequirement.NameClaimType, SamlSecurityTokenRequirement.RoleClaimType);
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, SamlSecurityTokenRequirement.NameClaimType, SamlSecurityTokenRequirement.RoleClaimType);
             this.ProcessSamlSubject(assertion.Subject, identity, issuer);
             this.ProcessStatement(assertion.Statements, identity, issuer);
             return identity;
@@ -127,16 +144,12 @@ namespace Microsoft.IdentityModel.Extensions
         /// <summary>
         /// Produces a <see cref="IEnumerable{SecurityKey}"/> to use when validating the signature of the jwt.
         /// </summary>
-        /// <param name="jwt">A <see cref="JwtSecurityToken"/> that will have the signture validated.</param>
+        /// <param name="securityToken">A security token that needs to have its signture validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
         /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        public virtual IEnumerable<SecurityKey> GetSigningKeys(SecurityToken securityToken, TokenValidationParameters validationParameters)
+        public virtual IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
 
             if (validationParameters.RetreiveIssuerSigningKeys != null)
             {
@@ -146,34 +159,56 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            if (validationParameters.IssuerSigningKey != null)
+            if (validationParameters != null)
             {
-                yield return validationParameters.IssuerSigningKey;
-            }
-
-            if (validationParameters.IssuerSigningKeys != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+                if (validationParameters.IssuerSigningKey != null)
                 {
-                    yield return securityKey;
+                    yield return validationParameters.IssuerSigningKey;
                 }
-            }
 
-            if (validationParameters.IssuerSigningToken != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
+                if (validationParameters.IssuerSigningKeys != null)
                 {
-                    yield return securityKey;
-                }
-            }
-
-            if (validationParameters.IssuerSigningTokens != null)
-            {
-                foreach (SecurityToken token in validationParameters.IssuerSigningTokens)
-                {
-                    foreach (SecurityKey securityKey in token.SecurityKeys)
+                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
                     {
                         yield return securityKey;
+                    }
+                }
+
+                if (validationParameters.IssuerSigningToken != null && validationParameters.IssuerSigningToken.SecurityKeys != null)
+                {
+                    X509SecurityToken x509SecurityToken = validationParameters.IssuerSigningToken as X509SecurityToken;
+                    if (x509SecurityToken != null)
+                    {
+                        yield return new X509SecurityKey(x509SecurityToken.Certificate);
+                    }
+                    else
+                    {
+                        foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
+                        {
+                            yield return securityKey;
+                        }
+                    }
+                }
+
+                if (validationParameters.IssuerSigningTokens != null)
+                {
+                    foreach (SecurityToken token in validationParameters.IssuerSigningTokens)
+                    {
+                        X509SecurityToken x509SecurityToken = token as X509SecurityToken;
+                        if (x509SecurityToken != null)
+                        {
+                            yield return new X509SecurityKey(x509SecurityToken.Certificate);
+                        }
+                        else
+                        {
+                            if (token.SecurityKeys != null)
+                            {
+                                foreach (SecurityKey securityKey in token.SecurityKeys)
+                                {
+                                    yield return securityKey;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -228,15 +263,6 @@ namespace Microsoft.IdentityModel.Extensions
             _tokenValidationParameters = validationParameters;
 
             List<SecurityToken> signingTokens = new List<SecurityToken>();
-            if (validationParameters.IssuerSigningKey != null)
-            {
-                X509SecurityKey key = validationParameters.IssuerSigningKey as X509SecurityKey;
-                if ( key != null )
-                {
-                    signingTokens.Add(new X509SecurityToken(key.Certificate));
-                }
-            }
-
             AudienceRestriction audienceRestriction = validationParameters.ValidateAudience ? new AudienceRestriction(AudienceUriMode.Always) : new AudienceRestriction(AudienceUriMode.Never);
 
             // Saml2 spec requires all audiences to be URI's.
@@ -259,16 +285,31 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            if (validationParameters.RetreiveIssuerSigningKeys != null)
+            List<SecurityKey> namedKeys = new List<SecurityKey>();
+            foreach (SecurityKey securityKey in RetreiveIssuerSigningKeys(tokenString, validationParameters))
             {
-                foreach (SecurityKey key in validationParameters.RetreiveIssuerSigningKeys(null))
+                X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
+                if (x509SecurityKey != null)
                 {
-                    X509SecurityKey x509Key = key as X509SecurityKey;
-                    if (x509Key != null)
+                    signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
+                }
+                else
+                {
+                    X509AsymmetricSecurityKey x509AsymmetricSecurityKey = securityKey as X509AsymmetricSecurityKey;
+                    if (x509AsymmetricSecurityKey != null)
                     {
-                        signingTokens.Add(new X509SecurityToken(x509Key.Certificate));
+
+                    }
+                    else
+                    {
+                        namedKeys.Add(securityKey);
                     }
                 }
+            }
+
+            if (namedKeys.Count > 0)
+            {
+                signingTokens.Add(new NamedKeySecurityToken("unknown", namedKeys));
             }
 
             // TODO: brent, post preview - ServiceTokenResolver needs to be set for encrypted tokens.
