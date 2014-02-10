@@ -5,8 +5,8 @@
   DefaultTargets="Clean;BuildDebug;BuildRelease">
   
   <ItemGroup>
-    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\src\Microsoft.IdentityModel.Extensions.csproj" />
-    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\tests\Microsoft.IdentityModel.Extensions.Tests.csproj" />
+    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\src\Microsoft.IdentityModel.Protocols.Extensions.csproj" />
+    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\tests\Microsoft.IdentityModel.Protocols.Extensions.Tests.csproj" />
   </ItemGroup>
   
    <!-- Define build properties -->
