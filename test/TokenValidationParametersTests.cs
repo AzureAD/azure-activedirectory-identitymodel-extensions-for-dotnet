@@ -59,7 +59,6 @@ namespace System.IdentityModel.Test
         [Description( "Tests: Publics" )]
         public void TokenValidationParameters_Publics()
         {
-            Int32 clockSkewInSeconds = 600;
             SecurityKey issuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256;
             List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 };        
             string validAudience = "ValidAudience";
@@ -68,7 +67,7 @@ namespace System.IdentityModel.Test
             List<string> validIssuers = new List<string>() { validIssuer };
 
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
-            {
+            {               
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeys = issuerSigningKeys,
                 SaveSigninToken = true,
