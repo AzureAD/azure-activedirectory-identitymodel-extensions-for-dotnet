@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0"?>
 <package>
   <metadata>
-    <title>Identity Protocols Extensions for the Microsoft .NET Framework 4.5</title>
-    <id>Microsoft.IdentityModel.Protocols.Extensions</id>
+    <title>Identity Protocol Extensions for the Microsoft .NET Framework 4.5</title>
+    <id>Microsoft.IdentityModel.Protocol.Extensions</id>
     <version>1.0.0-alpha</version>
     <authors>>Microsoft Open Technologies, Inc.</authors>
     <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_enu.htm</licenseUrl>
