@@ -2,10 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IO;
-using System.Text;
 using System.Web;
 using System.Xml;
 
@@ -66,16 +64,35 @@ namespace Microsoft.IdentityModel.Protocols
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
         /// <param name="parameters">Enumeration of key value pairs.</param>        
+        public WsFederationMessage(WsFederationMessage wsFederationMessage)
+        {
+            if (wsFederationMessage == null)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<string, string> keyValue in wsFederationMessage.Parameters)
+            {
+                SetParameter(keyValue.Key, keyValue.Value);
+            }
+
+            IssuerAddress = wsFederationMessage.IssuerAddress;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
+        /// </summary>
+        /// <param name="parameters">Enumeration of key value pairs.</param>        
         public WsFederationMessage(IEnumerable<KeyValuePair<string, string[]>> parameters)
-        { 
+        {
             if (parameters == null)
             {
                 return;
             }
 
-            foreach(KeyValuePair<string, string[]> keyValue in parameters )
+            foreach (KeyValuePair<string, string[]> keyValue in parameters)
             {
-                foreach(string strValue in keyValue.Value)
+                foreach (string strValue in keyValue.Value)
                 {
                     SetParameter(keyValue.Key, strValue);
                 }
@@ -87,27 +104,27 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
 
-        public string CreateSignInRequest()
+        public string CreateSignInQueryString()
         {
-            Wa = WsFederationActions.SignIn;
-            return BuildRedirectUri();
+            WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
+            wsFederationMessage.Wa = WsFederationActions.SignIn;
+            //if (string.IsNullOrWhiteSpace(wsFederationMessage.Wreq))
+            //{
+            //    wsFederationMessage.Wreq = @"<?xml version='1.0' encoding='utf-16'?><t:RequestSecurityToken xmlns:t='http://docs.oasis-open.org/ws-sx/ws-trust/200512'><t:TokenType>urn:oasis:names:tc:SAML:2.0:assertion</t:TokenType></t:RequestSecurityToken>";
+            //}
+            
+            return wsFederationMessage.BuildRedirectUri();
         }
 
         /// <summary>
         /// Creates a 'wsignout1.0' message using the current contents of this <see cref="WsFederationMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-        public string CreateSignOutMessage()
+        public string CreateSignOutQueryString()
         {
-            //WsFederationMessage
-            //https://login.windows.net/GotJwt.onmicrosoft.com/wsfed
-            //?wa=wsignout1.0
-            //&wreply=https%3a%2f%2flocalhost%3a44300%2fAccount%2fSignOutCallback
-            //&wtrealm=https%3a%2f%2fGotJwt.onmicrosoft.com%2fMvcWithSignout
-            Wa = WsFederationActions.SignOut;
-            return BuildRedirectUri();
-            //Wreply = "https://localhost/"
-            
+            WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
+            wsFederationMessage.Wa = WsFederationActions.SignOut;
+            return wsFederationMessage.BuildRedirectUri();
         }
         
         /// <summary>
