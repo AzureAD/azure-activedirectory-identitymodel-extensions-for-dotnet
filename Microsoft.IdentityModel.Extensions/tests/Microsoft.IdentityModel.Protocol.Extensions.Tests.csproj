@@ -69,9 +69,9 @@
     <Compile Include="WsFederationMessageTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Microsoft.IdentityModel.Protocols.Extensions.csproj">
+    <ProjectReference Include="..\src\Microsoft.IdentityModel.Protocol.Extensions.csproj">
       <Project>{1070AA57-ABCD-44DB-B212-B90880DBD261}</Project>
-      <Name>Microsoft.IdentityModel.Protocols.Extensions</Name>
+      <Name>Microsoft.IdentityModel.Protocol.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
