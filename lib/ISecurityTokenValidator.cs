@@ -45,10 +45,10 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets the SigningKeys that will be used to check the signature of the token.
         /// </summary>
-        /// <param name="securityToken">the security token that keys will be used to check signature.</param>
+        /// <param name="securityToken">the security token that needs to have its signature validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that may contain keys.</param>
-        /// <returns></returns>
-        IEnumerable<SecurityKey> GetSigningKeys(SecurityToken securityToken, TokenValidationParameters validationParameters);
+        /// <returns><see cref="IEnumerable{SecurityKey}"/> in the order that they will be applied.</returns>
+        IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters);
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
