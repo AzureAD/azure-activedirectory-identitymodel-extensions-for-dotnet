@@ -32,7 +32,7 @@ namespace System.IdentityModel.Tokens
         private string name;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NamedKeySecurityKeyIdentifierClause"/> class. The 'name' for matching key identifiers found in the jwt.
+        /// Initializes a new instance of the <see cref="NamedKeySecurityKeyIdentifierClause"/> class. The 'name' for matching key identifiers found in the securityToken.
         /// </summary>
         /// <param name="name">
         /// Used to identify a named collection of keys.

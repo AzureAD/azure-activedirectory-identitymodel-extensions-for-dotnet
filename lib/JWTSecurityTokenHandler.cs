@@ -43,7 +43,6 @@ namespace System.IdentityModel.Tokens
         // Uri.TryCreate( tokenIdentifiers[0], UriKind.Absolute, out result ) will be true.
         // if that is not true, sts's using the .Net sts class will start failing.
 
-        private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
         private static IDictionary<string, string> outboundAlgorithmMap = new Dictionary<string, string>() 
                                                                             { 
                                                                                 { SecurityAlgorithms.RsaSha256Signature, JwtConstants.Algorithms.RSA_SHA256 }, 
@@ -59,8 +58,12 @@ namespace System.IdentityModel.Tokens
         private static IDictionary<string, string> inboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
         private static IDictionary<string, string> outboundClaimTypeMap = ClaimTypeMapping.OutboundClaimTypeMap;
         private static string shortClaimTypeProperty = ClaimProperties.Namespace + "/ShortTypeName";
-        private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
+        private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
+
+        private string _authenticationType = AuthenticationTypes.Federation;
         private JwtSecurityTokenRequirement jwtSecurityTokenRequirement = new JwtSecurityTokenRequirement();
+        private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenHandler"/> class.
@@ -199,7 +202,23 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
         /// </summary>
-        public string AuthenticationType { get; set; }
+        /// <exception cref="ArgumentNullException"> if 'value' is null or whitespace.</exception>
+        public string AuthenticationType
+        {
+            get
+            {
+                return _authenticationType;
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException("AuthenticationType");
+                }
+
+                _authenticationType = value;
+            }
+        }
 
         /// <summary>
         /// Returns 'true' which indicates this instance can validate a <see cref="JwtSecurityToken"/>.
@@ -818,7 +837,7 @@ namespace System.IdentityModel.Tokens
 
             JwtSecurityToken jwt = this.ReadToken(jwtEncodedString) as JwtSecurityToken;           
             string[] parts = jwt.RawData.Split('.');
-            this.ValidateSignature(jwt, Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]), Base64UrlEncoder.DecodeBytes(parts[2]), this.GetSigningKeys(jwt, validationParameters));
+            this.ValidateSignature(jwt, Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]), Base64UrlEncoder.DecodeBytes(parts[2]), this.RetreiveIssuerSigningKeys(jwtEncodedString, validationParameters));
             this.ValidateSigningToken(jwt);
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
@@ -884,7 +903,7 @@ namespace System.IdentityModel.Tokens
             }
 
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload);
-            this.ValidateSignature(jwt, encodedBytes, Base64UrlEncoder.DecodeBytes(jwt.EncodedSignature), this.GetSigningKeys(jwt, validationParameters));
+            this.ValidateSignature(jwt, encodedBytes, Base64UrlEncoder.DecodeBytes(jwt.EncodedSignature), this.RetreiveIssuerSigningKeys(jwt.RawData, validationParameters));
             this.ValidateSigningToken(jwt);
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
@@ -1311,7 +1330,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="issuer">The value to set <see cref="Claim.Issuer"/></param>
         /// <param name="saveBootstrapContext">Flag indicating if the <see cref="JwtSecurityToken"/> should be attached to <see cref="ClaimsIdentity.BootstrapContext"/></param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JwtSecurityToken.Claims"/>.</returns>
-        protected ClaimsIdentity ClaimsIdentityFromJwt(JwtSecurityToken jwt, string issuer, bool saveBootstrapContext)
+        protected virtual ClaimsIdentity ClaimsIdentityFromJwt(JwtSecurityToken jwt, string issuer, bool saveBootstrapContext)
         {
             if (jwt == null)
             {
@@ -1323,8 +1342,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10333, jwt.ToString()));
             }
 
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationTypes.Federation, this.NameClaimType, this.RoleClaimType);
-
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, this.NameClaimType, this.RoleClaimType);
             if (saveBootstrapContext)
             {
                 if (jwt.RawData != null)
@@ -1715,7 +1733,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Uses IssuerTokenResolver to obtains possible signing tokens for a jwt.
+        /// Uses IssuerTokenResolver to obtain signing tokens for a jwt.
         /// </summary>
         /// <param name="jwt">The <see cref="JwtSecurityToken"/> to resolve tokens.</param>
         /// <returns><see cref="IList{SecurityToken}"/> containing all resolved tokens. The list can be empty.</returns>
@@ -1753,111 +1771,58 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Consolidates the possible signing tokens from <see cref="TokenValidationParameters"/>.
+        /// Produces a <see cref="IEnumerable{SecurityKey}"/> to use when validating the signature of a securityToken.
         /// </summary>
-        /// <param name="jwt"><see cref="JwtSecurityToken"/> the jwt to find a signing token for.</param>
-        /// <param name="validationParameters">contains <see cref="SecurityToken"/> in different places.</param>
-        /// <returns>Returns a <see cref="IList{SecurityKey}"/> ntaining  <see cref="SecurityKey"/> found in validationParameters.</returns>
-        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        protected virtual IList<SecurityToken> GetSigningTokens(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
-        {
-            if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
-
-            //TODO - deal with different key types.
-            //TODO - try to deal with only keys
-
-            List<SecurityToken> signingTokens = new List<SecurityToken>();
-
-            if (validationParameters.IssuerSigningKey != null)
-            {
-                SymmetricSecurityKey symmetricSecurityKey = validationParameters.IssuerSigningKey as SymmetricSecurityKey;
-                if (symmetricSecurityKey != null)
-                {                   
-                    signingTokens.Add(new BinarySecretSecurityToken(symmetricSecurityKey.GetSymmetricKey()));
-                }
-
-                X509SecurityKey x509SecurityKey = validationParameters.IssuerSigningKey as X509SecurityKey;
-                if (x509SecurityKey != null)
-                {
-                    signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
-                }
-            }
-
-            if (validationParameters.IssuerSigningKeys != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
-                {
-                    SymmetricSecurityKey symmetricSecurityKey = securityKey as SymmetricSecurityKey;
-                    if (symmetricSecurityKey != null)
-                    {
-                        signingTokens.Add(new BinarySecretSecurityToken(symmetricSecurityKey.GetSymmetricKey()));
-                        continue;
-                    }
-
-                    X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
-                    if (x509SecurityKey != null)
-                    {
-                        signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
-                    }                    
-                }
-            }
-
-            return signingTokens;
-        }
-
-        /// <summary>
-        /// Produces a <see cref="IEnumerable{SecurityKey}"/> to use when validating the signature of the jwt.
-        /// </summary>
-        /// <param name="jwt">A <see cref="JwtSecurityToken"/> that will have the signture validated.</param>
+        /// <param name="securityToken"> the security token that needs to have it's signature validated validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
         /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        public virtual IEnumerable<SecurityKey> GetSigningKeys(SecurityToken jwt, TokenValidationParameters validationParameters)
+        public virtual IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
 
             if (validationParameters.RetreiveIssuerSigningKeys != null)
             {
-                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(jwt))
+                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(securityToken))
                 {
                     yield return securityKey;
                 }
             }
 
-            if (validationParameters.IssuerSigningKey != null)
+            if (validationParameters != null)
             {
-                yield return validationParameters.IssuerSigningKey;
-            }
 
-            if (validationParameters.IssuerSigningKeys != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+                if (validationParameters.IssuerSigningKey != null)
                 {
-                    yield return securityKey;
+                    yield return validationParameters.IssuerSigningKey;
                 }
-            }
 
-            if (validationParameters.IssuerSigningToken != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
+                if (validationParameters.IssuerSigningKeys != null)
                 {
-                    yield return securityKey;
-                }
-            }
-
-            if (validationParameters.IssuerSigningTokens != null)
-            {
-                foreach (SecurityToken securityToken in validationParameters.IssuerSigningTokens)
-                {
-                    foreach (SecurityKey securityKey in securityToken.SecurityKeys)
+                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
                     {
                         yield return securityKey;
+                    }
+                }
+
+                if (validationParameters.IssuerSigningToken != null && validationParameters.IssuerSigningToken.SecurityKeys != null)
+                {
+                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
+                    {
+                        yield return securityKey;
+                    }
+                }
+
+                if (validationParameters.IssuerSigningTokens != null)
+                {
+                    foreach (SecurityToken token in validationParameters.IssuerSigningTokens)
+                    {
+                        if (token.SecurityKeys != null)
+                        {
+                            foreach (SecurityKey securityKey in token.SecurityKeys)
+                            {
+                                yield return securityKey;
+                            }
+                        }
                     }
                 }
             }
