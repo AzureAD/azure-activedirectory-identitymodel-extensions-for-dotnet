@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -43,7 +44,6 @@ namespace Microsoft.IdentityModel.Extensions
             }
 
             bool iSecurityTokenValidatorFound = false;
-
             foreach (SecurityTokenHandler tokenHandler in tokenHandlers)
             {
                 ISecurityTokenValidator securityTokenValidator = tokenHandler as ISecurityTokenValidator;
@@ -62,6 +62,16 @@ namespace Microsoft.IdentityModel.Extensions
             {
                 throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10201, securityToken));
             }
+        }
+
+        public static SecurityTokenHandlerCollection GetDefaultHandlers(string authenticationType)
+        {
+            return new SecurityTokenHandlerCollection
+            {
+                new JwtSecurityTokenHandler{ AuthenticationType = authenticationType},
+                new SamlSecurityTokenHandler{ AuthenticationType = authenticationType},
+                new Saml2SecurityTokenHandler{ AuthenticationType = authenticationType},
+            };
         }
     }
 }
