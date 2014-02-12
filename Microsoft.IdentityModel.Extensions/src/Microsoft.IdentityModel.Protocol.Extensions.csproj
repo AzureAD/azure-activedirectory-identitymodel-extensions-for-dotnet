@@ -71,14 +71,19 @@
     <Compile Include="OpenIdConnectMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Saml2SecurityTokenHandler.cs" />
+    <Compile Include="SamlSecurityTokenHandler.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensions.cs" />
     <Compile Include="WsFederationConstants.cs" />
     <Compile Include="WsFederationMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="35MSSharedLib1024.snk" />
+    <None Include="Microsoft.IdentityModel.Protocol.Extensions.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) $(LocalDrops)</PostBuildEvent>
+  </PropertyGroup> -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
