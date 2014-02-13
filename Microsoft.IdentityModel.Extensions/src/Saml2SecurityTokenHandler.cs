@@ -316,8 +316,9 @@ namespace Microsoft.IdentityModel.Extensions
             Configuration = new SecurityTokenHandlerConfiguration
             {
                 AudienceRestriction = audienceRestriction,
-                SaveBootstrapContext = validationParameters.SaveSigninToken,
+                CertificateValidator = X509CertificateValidator.None,
                 IssuerTokenResolver = SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true),
+                SaveBootstrapContext = validationParameters.SaveSigninToken,
             };
 
             Saml2SecurityToken samlToken;
