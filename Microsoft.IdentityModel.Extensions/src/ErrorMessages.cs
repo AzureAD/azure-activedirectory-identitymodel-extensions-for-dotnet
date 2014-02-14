@@ -31,7 +31,8 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX30000 = "IDX30000: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
 
         // messages pertaining to setting protperties, configuration 
-        public const string IDX10100 = "IDX10100: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
+        public const string IDX10100 = "IDX10100: ClockSkewInSeconds must be greater than zero. value: '{0}'";
+        public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
 
         // messages pertaining to validation 10200 - 10299
         public const string IDX10200 = "IDX10200: Support for ValidateToken(string, TokenValidationParameters) requires a handler to implement ISecurityTokenValidator, none of the SecurityTokenHandlers did.";
@@ -44,5 +45,10 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX10207 = "IDX10207: Unable to validate audience, the Saml2 token did not contain any audiences.";
         public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.AllowedAudience is null or whitespace and validationParameters.AllowedAudiences is null.";
         public const string IDX10209 = "IDX10209: 'tokenString' has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
+        public const string IDX10210 = "IDX10210: SamlToken.Assertion.Issuer is null, can not create an identity.";
+        public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace";
+        public const string IDX10212 = "IDX10212: {0} can only validate tokens of type {1}.";
+        public const string IDX10213 = "IDX10213: SecurityTokens must be signed. SecurityToken: '{0}'.";
+        public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Could not match:  validationParameters.AllowedAudience: '{1}' and validationParameters.AllowedAudiences: '{2}'";
     }
 }

@@ -64,14 +64,30 @@ namespace Microsoft.IdentityModel.Extensions
             }
         }
 
+        public static SecurityTokenHandlerCollection GetDefaultHandlers()
+        {
+            return GetDefaultHandlers(null);
+        }
         public static SecurityTokenHandlerCollection GetDefaultHandlers(string authenticationType)
         {
-            return new SecurityTokenHandlerCollection
+            if (string.IsNullOrWhiteSpace(authenticationType))
             {
-                new JwtSecurityTokenHandler{ AuthenticationType = authenticationType},
-                new SamlSecurityTokenHandler{ AuthenticationType = authenticationType},
-                new Saml2SecurityTokenHandler{ AuthenticationType = authenticationType},
-            };
+                return new SecurityTokenHandlerCollection
+                {
+                    new JwtSecurityTokenHandler{ AuthenticationType = AuthenticationTypes.Federation},
+                    new SamlSecurityTokenHandler{ AuthenticationType = AuthenticationTypes.Federation},
+                    new Saml2SecurityTokenHandler{ AuthenticationType = AuthenticationTypes.Federation},
+                };
+            }
+            else
+            {
+                return new SecurityTokenHandlerCollection
+                {
+                    new JwtSecurityTokenHandler{ AuthenticationType = authenticationType},
+                    new SamlSecurityTokenHandler{ AuthenticationType = authenticationType},
+                    new Saml2SecurityTokenHandler{ AuthenticationType = authenticationType},
+                };
+            }
         }
     }
 }

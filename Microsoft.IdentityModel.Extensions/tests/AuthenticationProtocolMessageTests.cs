@@ -25,19 +25,6 @@ using System.Reflection;
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
-    /// AuthenticationProtocolMessage is abstract use this to test.
-    /// </summary>
-    class DerivedAuthenticationProtocolMessage : AuthenticationProtocolMessage
-    {
-        public DerivedAuthenticationProtocolMessage(string issuerAddress)
-            : base( issuerAddress)
-        {}
-
-        public DerivedAuthenticationProtocolMessage()
-        {}
-    }
-
-    /// <summary>
     /// Tests for AuthenticationProtocolMessage.
     /// </summary>
     [TestClass]
@@ -172,6 +159,19 @@ namespace Microsoft.IdentityModel.Test
             authenticationProtocolMessage.IssuerAddress = string.Empty;
             queryString = authenticationProtocolMessage.BuildRedirectUri();
             Assert.IsNotNull(queryString);
+        }
+
+        /// <summary>
+        /// AuthenticationProtocolMessage is abstract use this to test.
+        /// </summary>
+        private class DerivedAuthenticationProtocolMessage : AuthenticationProtocolMessage
+        {
+            public DerivedAuthenticationProtocolMessage(string issuerAddress)
+                : base(issuerAddress)
+            { }
+
+            public DerivedAuthenticationProtocolMessage()
+            { }
         }
     }
 }

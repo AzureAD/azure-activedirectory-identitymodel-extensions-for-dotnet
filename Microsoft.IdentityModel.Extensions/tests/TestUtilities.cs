@@ -16,15 +16,22 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Protocols;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Selectors;
+using System.IdentityModel.Tokens;
 using System.Reflection;
+using System.Security.Claims;
+using System.Text;
+using System.Xml;
+using SamlSecurityTokenHandler = Microsoft.IdentityModel.Extensions.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
-    /// Common utilities
+    /// Mixed bag of funtionality:
+    ///     Generically calling Properties
     /// </summary>
     public static class TestUtilities
     {
