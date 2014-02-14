@@ -90,6 +90,10 @@ namespace Microsoft.IdentityModel.Test
             {
                 Assert.IsNotNull(exception, "Expected exception of type: '" + TypeExpected + " 'exception' parameter was null");
                 Assert.AreEqual(TypeExpected, exception.GetType(), "Expected exception of type: '" + TypeExpected + "', caught: '" + exception + "'");
+                if (!string.IsNullOrWhiteSpace(SubstringExpected))
+                {
+                    Assert.IsTrue(exception.ToString().Contains(SubstringExpected), string.Format(CultureInfo.InvariantCulture, "Substring expected: '{0}', exception: '{1}'", SubstringExpected, exception.ToString()));
+                }
             }
 
             if (InnerTypeExpected == null)

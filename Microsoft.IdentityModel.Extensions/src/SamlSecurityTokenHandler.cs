@@ -22,7 +22,6 @@ namespace Microsoft.IdentityModel.Extensions
         private string _authenticationType = AuthenticationTypes.Federation;
         private Int32 _clockSkewInSeconds = Saml2SecurityTokenHandler.DefaultClockSkewInSeconds;
         private Int32 _maximumTokenSizeInBytes = Saml2SecurityTokenHandler.DefaultMaximumTokenSizeInBytes;
-        private TokenValidationParameters _tokenValidationParameters;
 
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
@@ -116,13 +115,8 @@ namespace Microsoft.IdentityModel.Extensions
         /// </summary>
         /// <param name="samlToken">The SamlSecurityToken.</param>
         /// <returns>A <see cref="ClaimIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
-        protected override ClaimsIdentity CreateClaims(SamlSecurityToken samlToken)
+        protected virtual ClaimsIdentity CreateClaims(SamlSecurityToken samlToken, TokenValidationParameters validationParameters)
         {
-            if (_tokenValidationParameters == null)
-            {
-                return base.CreateClaims(samlToken);
-            }
-
             if (samlToken == null)
             {
                 throw new ArgumentNullException("samlToken");
@@ -134,7 +128,12 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            string issuer = ValidateIssuer(samlToken, _tokenValidationParameters);
+            if (string.IsNullOrEmpty(assertion.Issuer))
+            {
+                throw new SecurityTokenException(ErrorMessages.IDX10203);
+            }
+
+            string issuer = ValidateIssuer(assertion.Issuer, validationParameters, samlToken);
             ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, SamlSecurityTokenRequirement.NameClaimType, SamlSecurityTokenRequirement.RoleClaimType);
             this.ProcessStatement(assertion.Statements, identity, issuer);
             return identity;
@@ -149,68 +148,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         public virtual IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-
-            if (validationParameters.RetreiveIssuerSigningKeys != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(securityToken))
-                {
-                    yield return securityKey;
-                }
-            }
-
-            if (validationParameters != null)
-            {
-                if (validationParameters.IssuerSigningKey != null)
-                {
-                    yield return validationParameters.IssuerSigningKey;
-                }
-
-                if (validationParameters.IssuerSigningKeys != null)
-                {
-                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
-                    {
-                        yield return securityKey;
-                    }
-                }
-
-                if (validationParameters.IssuerSigningToken != null && validationParameters.IssuerSigningToken.SecurityKeys != null)
-                {
-                    X509SecurityToken x509SecurityToken = validationParameters.IssuerSigningToken as X509SecurityToken;
-                    if (x509SecurityToken != null)
-                    {
-                        yield return new X509SecurityKey(x509SecurityToken.Certificate);
-                    }
-                    else
-                    {
-                        foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
-                        {
-                            yield return securityKey;
-                        }
-                    }
-                }
-
-                if (validationParameters.IssuerSigningTokens != null)
-                {
-                    foreach (SecurityToken token in validationParameters.IssuerSigningTokens)
-                    {
-                        X509SecurityToken x509SecurityToken = token as X509SecurityToken;
-                        if (x509SecurityToken != null)
-                        {
-                            yield return new X509SecurityKey(x509SecurityToken.Certificate);
-                        }
-                        else
-                        {
-                            if (token.SecurityKeys != null)
-                            {
-                                foreach (SecurityKey securityKey in token.SecurityKeys)
-                                {
-                                    yield return securityKey;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return IssuerKeyRetriever.RetreiveIssuerSigningKeys(securityToken, validationParameters);
         }
 
         /// <summary>
@@ -229,117 +167,30 @@ namespace Microsoft.IdentityModel.Extensions
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10100, value.ToString(CultureInfo.InvariantCulture)));
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)));
                 }
 
                 _maximumTokenSizeInBytes = value;
             }
         }
 
+        public virtual string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
+        {
+            return IssuerValidator.Validate(issuer, validationParameters, securityToken);
+        }
+
         /// <summary>
-        /// Reads and validates a well fromed Saml2 token.
+        /// Reads and validates a well formed Saml2 token.
         /// </summary>
-        /// <param name="tokenString">A Saml2 token.</param>
+        /// <param name="securityToken">A Saml2 token.</param>
         /// <param name="validationParameters">Contains data and information needed to validation Saml2 token.</param>
-        /// <exception cref="ArgumentNullException">'tokenString' is null.</exception>
+        /// <exception cref="ArgumentNullException">'securityToken' is null.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenException">'tokenString.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml2 token.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204")]
-        public virtual ClaimsPrincipal ValidateToken(string tokenString, TokenValidationParameters validationParameters)
-        {
-            if (tokenString == null)
-            {
-                throw new ArgumentNullException("tokenString");
-            }
-
-            if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
-
-            if (tokenString.Length > MaximumTokenSizeInBytes)
-            {
-                throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, tokenString.Length, MaximumTokenSizeInBytes));
-            }
-
-            _tokenValidationParameters = validationParameters;
-
-            List<SecurityToken> signingTokens = new List<SecurityToken>();
-            AudienceRestriction audienceRestriction = validationParameters.ValidateAudience ? new AudienceRestriction(AudienceUriMode.Always) : new AudienceRestriction(AudienceUriMode.Never);
-
-            // Saml spec requires all audiences to be URI's.
-            if (validationParameters.ValidAudience != null && Uri.IsWellFormedUriString(validationParameters.ValidAudience, UriKind.RelativeOrAbsolute))
-            {
-                audienceRestriction.AllowedAudienceUris.Add(new Uri(validationParameters.ValidAudience));
-            }
-
-            if (validationParameters.ValidAudiences != null)
-            {
-                foreach ( string audience in validationParameters.ValidAudiences)
-                {
-                    if (string.IsNullOrWhiteSpace(audience))
-                        continue;
-
-                    if (Uri.IsWellFormedUriString(validationParameters.ValidAudience, UriKind.RelativeOrAbsolute))
-                    {
-                        audienceRestriction.AllowedAudienceUris.Add(new Uri(audience));
-                    }
-                }
-            }
-
-            List<SecurityKey> namedKeys = new List<SecurityKey>();
-            foreach (SecurityKey securityKey in RetreiveIssuerSigningKeys(tokenString, validationParameters))
-            {
-                X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
-                if (x509SecurityKey != null)
-                {
-                    signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
-                }
-                else
-                {
-                    X509AsymmetricSecurityKey x509AsymmetricSecurityKey = securityKey as X509AsymmetricSecurityKey;
-                    if (x509AsymmetricSecurityKey != null)
-                    {
-
-                    }
-                    else
-                    {
-                        namedKeys.Add(securityKey);
-                    }
-                }
-            }
-
-            if (namedKeys.Count > 0)
-            {
-                signingTokens.Add(new NamedKeySecurityToken("unknown", namedKeys));
-            }
-
-            // TODO: brent, post preview - ServiceTokenResolver needs to be set for encrypted tokens.
-            Configuration = new SecurityTokenHandlerConfiguration
-            {
-                AudienceRestriction = audienceRestriction,
-                SaveBootstrapContext = validationParameters.SaveSigninToken,
-                IssuerTokenResolver = SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true),
-                //TODO - why doesn't SAML2 need this?
-                CertificateValidator = X509CertificateValidator.None,
-            };
-
-            SamlSecurityToken samlToken;
-            using (StringReader sr = new StringReader(tokenString))
-            {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    samlToken = ReadToken(reader) as SamlSecurityToken;
-                }
-            }
-
-            ReadOnlyCollection<ClaimsIdentity> identities = ValidateToken(samlToken);
-            return new ClaimsPrincipal(identities);
-        }
-
-        protected virtual string ValidateIssuer(SecurityToken securityToken, TokenValidationParameters validationParameters)
+        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters)
         {
             if (securityToken == null)
             {
@@ -351,79 +202,74 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentNullException("validationParameters");
             }
 
-            SamlSecurityToken samlToken = securityToken as SamlSecurityToken;
-            if (samlToken == null)
+            if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10206, typeof(SamlSecurityToken).ToString(), typeof(SecurityToken)));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
 
-            SamlAssertion assertion = samlToken.Assertion;
-            if (assertion == null)
+            Configuration = new SecurityTokenHandlerConfiguration
+            {
+                IssuerTokenResolver = IssuerKeyRetriever.CreateIssuerTokenResolver(securityToken, validationParameters),
+                MaxClockSkew = TimeSpan.FromSeconds(ClockSkewInSeconds),
+            };
+
+            SamlSecurityToken samlToken;
+            using (StringReader sr = new StringReader(securityToken))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    samlToken = ReadToken(reader) as SamlSecurityToken;
+                }
+            }
+
+            if (samlToken.Assertion.SigningToken == null)
+            {
+                throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
+            }
+
+            if (samlToken.Assertion == null)
             {
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
-
-            string issuer = assertion.Issuer;
-            if (string.IsNullOrEmpty(issuer))
+            
+            ValidateConditions(samlToken.Assertion.Conditions, false);
+            if (validationParameters.ValidateAudience)
             {
-                throw new SecurityTokenException(ErrorMessages.IDX10203);
+                ValidateAudience(samlToken.Assertion.Conditions, validationParameters, samlToken);
             }
 
-            if (!validationParameters.ValidateIssuer)
+            ClaimsIdentity claimsIdentity = CreateClaims(samlToken, validationParameters);
+
+            if (validationParameters.SaveSigninToken)
             {
-                return issuer;
+                claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
             }
 
-            if (validationParameters.IssuerValidator != null)
+            return new ClaimsPrincipal(claimsIdentity);
+        }
+
+        protected virtual void ValidateAudience(SamlConditions conditions, TokenValidationParameters validationParameters, SamlSecurityToken samlToken)
+        {
+            List<string> audiences = new List<string>();
+            if (conditions != null)
             {
-                if (validationParameters.IssuerValidator(issuer, samlToken))
+                foreach (SamlCondition condition in conditions.Conditions)
                 {
-                    return issuer;
-                }
-            }
-
-            // Throw if all possible places to validate against are null or empty
-            if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && (validationParameters.ValidIssuers == null))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10204));
-            }
-
-            if (!string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
-            {
-                return issuer;
-            }
-
-            if (null != validationParameters.ValidIssuers)
-            {
-                foreach (string str in validationParameters.ValidIssuers)
-                {
-                    if (string.Equals(str, issuer, StringComparison.Ordinal))
+                    SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
+                    if (null == audienceRestriction)
                     {
-                        return issuer;
+                        // Skip other conditions
+                        continue;
+                    }
+
+                    foreach (Uri uri in audienceRestriction.Audiences)
+                    {
+                        audiences.Add(uri.OriginalString);
                     }
                 }
             }
 
-            string validIssuer = validationParameters.ValidIssuer ?? "null";
-            string validIssuers = "null";
-            if (validationParameters.ValidIssuers != null)
-            {
-                bool first = true;
-                foreach( string str in validationParameters.ValidIssuers)
-                {
-                    if (!string.IsNullOrWhiteSpace(str))
-                    {
-                        validIssuers += str;
-                        if (!first)
-                        {
-                            validIssuers += ", ";
-                        }
-                        first = false;
-                    }
-                }
-            }
-
-            throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10205, validIssuer, validIssuers, issuer));
+            AudienceValidator.Validate(audiences, validationParameters, samlToken);
         }
     }
 }

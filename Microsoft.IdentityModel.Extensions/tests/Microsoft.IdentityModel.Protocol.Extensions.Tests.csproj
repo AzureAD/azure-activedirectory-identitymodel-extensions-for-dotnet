@@ -35,11 +35,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.IdentityModel.Protocol.Extensions">
+      <HintPath>..\..\..\..\LocalDrops\Microsoft.IdentityModel.Protocol.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.LoadTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt">
+      <HintPath>..\..\..\..\LocalDrops\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
@@ -60,19 +66,19 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AuthenticationProtocolMessageTests.cs" />
+    <Compile Include="DerivedTypes.cs" />
     <Compile Include="ExceptionProcessor.cs" />
+    <Compile Include="IdentityUtilities.cs" />
+    <Compile Include="KeyingMaterial.cs" />
     <Compile Include="MessageComparer.cs" />
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
+    <Compile Include="Saml2SecurityTokenHandlerTests.cs" />
+    <Compile Include="SamlSecurityTokenHandlerTests.cs" />
+    <Compile Include="SecurityTokenHandlerCollectionExtensionsTests.cs" />
     <Compile Include="TestUtilities.cs" />
     <Compile Include="WsFederationConstantsTests.cs" />
     <Compile Include="WsFederationMessageTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\src\Microsoft.IdentityModel.Protocol.Extensions.csproj">
-      <Project>{1070AA57-ABCD-44DB-B212-B90880DBD261}</Project>
-      <Name>Microsoft.IdentityModel.Protocol.Extensions</Name>
-    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

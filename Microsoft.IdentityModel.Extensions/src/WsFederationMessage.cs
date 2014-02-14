@@ -108,11 +108,6 @@ namespace Microsoft.IdentityModel.Protocols
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
             wsFederationMessage.Wa = WsFederationActions.SignIn;
-            //if (string.IsNullOrWhiteSpace(wsFederationMessage.Wreq))
-            //{
-            //    wsFederationMessage.Wreq = @"<?xml version='1.0' encoding='utf-16'?><t:RequestSecurityToken xmlns:t='http://docs.oasis-open.org/ws-sx/ws-trust/200512'><t:TokenType>urn:oasis:names:tc:SAML:2.0:assertion</t:TokenType></t:RequestSecurityToken>";
-            //}
-            
             return wsFederationMessage.BuildRedirectUri();
         }
 
