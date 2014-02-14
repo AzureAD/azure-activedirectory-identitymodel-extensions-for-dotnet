@@ -43,14 +43,6 @@ namespace System.IdentityModel.Tokens
         Int32 ClockSkewInSeconds { get; set; }
 
         /// <summary>
-        /// Gets the SigningKeys that will be used to check the signature of the token.
-        /// </summary>
-        /// <param name="securityToken">the security token that needs to have its signature validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that may contain keys.</param>
-        /// <returns><see cref="IEnumerable{SecurityKey}"/> in the order that they will be applied.</returns>
-        IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters);
-
-        /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
         Int32 MaximumTokenSizeInBytes { get; set; }
@@ -58,12 +50,6 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>
         /// </summary>
-        ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters);
-        
-        // TODO - brentsch, add post preview.
-        // <summary>
-        // Validates a token that is point to by an <see cref="XmlReader"/> using <see cref="TokenValidationParameters"/>
-        // <summary>
-        // ClaimsPrincipal ValidateToken(XmlReader securityToken, TokenValidationParameters validationParameters);
+        ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters);        
     }
 }
