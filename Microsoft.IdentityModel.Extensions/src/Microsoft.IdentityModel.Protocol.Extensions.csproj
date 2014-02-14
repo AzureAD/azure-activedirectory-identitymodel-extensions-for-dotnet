@@ -72,7 +72,6 @@
     <Compile Include="IssuerValidator.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
-    <Compile Include="OpenTechClass1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Saml2SecurityTokenHandler.cs" />
     <Compile Include="SamlSecurityTokenHandler.cs" />
