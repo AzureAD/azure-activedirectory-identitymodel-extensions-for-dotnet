@@ -63,7 +63,7 @@ namespace System.IdentityModel.Tokens
 
         // This indicates that the clockSkew was never set
         //private TimeSpan? maxClockSkew = null;
-        private Int32 clockSkewInSeconds = 5;
+        private Int32 clockSkewInSeconds = JwtSecurityTokenRequirement.DefaultClockSkewInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenRequirement"/> class. 
