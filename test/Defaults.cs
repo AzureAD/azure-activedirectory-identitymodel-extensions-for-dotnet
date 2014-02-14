@@ -18,6 +18,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Reflection;
@@ -208,7 +209,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse( handler.NameClaimType != ClaimsIdentity.DefaultNameClaimType , "handler.NameClaimType != ClaimsIdentity.DefaultNameClaimType" );
 
-            Assert.IsFalse( TimeSpan.FromSeconds(handler.ClockSkewInSeconds) != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew , "handler.ClockSkewInSeconds != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew" );
+            Assert.IsFalse( TimeSpan.FromSeconds(handler.ClockSkewInSeconds) != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew , string.Format(CultureInfo.InvariantCulture, "handler.ClockSkewInSeconds: '{0}' != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew: '{1}'", TimeSpan.FromSeconds(handler.ClockSkewInSeconds), SecurityTokenHandlerConfiguration.DefaultMaxClockSkew));
 
             Assert.IsFalse( handler.MaximumTokenSizeInBytes != 2 * 1024 * 1024 , "handler.MaxTokenSizeInBytes != 2 * 1024 * 1024" );
             
