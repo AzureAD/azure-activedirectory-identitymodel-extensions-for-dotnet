@@ -414,7 +414,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Default: 600 (10 hours).</remarks>
         /// <exception cref="ArgumentOutOfRangeException">value == 0.</exception>
-        public int DefaultTokenLifetimeInMinutes
+        public Int32 DefaultTokenLifetimeInMinutes
         {
             get
             {
@@ -437,7 +437,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Default: 2 megabytes.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">if value is 0.</exception>
-        public int MaximumTokenSizeInBytes
+        public Int32 MaximumTokenSizeInBytes
         {
             get
             {
@@ -446,7 +446,7 @@ namespace System.IdentityModel.Tokens
 
             set
             {
-                if (value == 0)
+                if (value < 0)
                 {
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
                 }
