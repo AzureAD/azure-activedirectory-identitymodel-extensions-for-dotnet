@@ -446,7 +446,7 @@ namespace System.IdentityModel.Tokens
 
             set
             {
-                if (value < 0)
+                if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException("value", JwtErrors.Jwt10116);
                 }
