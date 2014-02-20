@@ -109,7 +109,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\lib\Jwt.csproj">
+    <ProjectReference Include="..\lib\System.IdentityModel.Tokens.Jwt.csproj">
       <Project>{BA7803C7-0585-4EEE-8672-F6E18E12E3E8}</Project>
       <Name>Jwt</Name>
     </ProjectReference>
