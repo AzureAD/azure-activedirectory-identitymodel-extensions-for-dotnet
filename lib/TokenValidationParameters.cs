@@ -106,7 +106,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
         /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
-        public Func<string, IEnumerable<SecurityKey>> RetreiveIssuerSigningKeys
+        public Func<string, IEnumerable<SecurityKey>> RetrieveIssuerSigningKeys
         {
             get;
             set;

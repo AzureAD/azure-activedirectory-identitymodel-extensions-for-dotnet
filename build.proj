@@ -5,15 +5,15 @@
   DefaultTargets="Clean;BuildDebug;BuildRelease">
   
   <ItemGroup>
-    <JwtSln Include=".\lib\jwt.csproj" />
-	  <JwtSln Include=".\test\jwtTests.csproj" />
+    <JwtSln Include=".\lib\System.IdentityModel.Tokens.Jwt.csproj" />
+	  <JwtSln Include=".\test\System.IdentityModel.Tokens.Jwt.Tests.csproj" />
   </ItemGroup>
   
    <!-- Define build properties -->
   <PropertyGroup>
     <SourceBin>.\lib</SourceBin>
     <TestDirectory>.\test\</TestDirectory>
-    <TestAssemblyName>.\test\bin\debug\System.IdentityModel.Tokens.JWT.Test.dll</TestAssemblyName>	
+    <TestAssemblyName>.\test\bin\debug\System.IdentityModel.Tokens.Jwt.Test.dll</TestAssemblyName>	
     <PublishDirectory>.\Publish</PublishDirectory>
     <PackageDirectory>.\Package</PackageDirectory>
     <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>     
