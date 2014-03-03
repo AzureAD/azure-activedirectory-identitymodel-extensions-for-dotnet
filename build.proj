@@ -36,7 +36,6 @@
       Properties="Configuration=Release"
       ContinueOnError="true" />   
    
-  
    <!-- Delete the publish files -->
     <Message Importance="high" Text="Cleaning publish files..." ContinueOnError="false" />
     <ItemGroup>
