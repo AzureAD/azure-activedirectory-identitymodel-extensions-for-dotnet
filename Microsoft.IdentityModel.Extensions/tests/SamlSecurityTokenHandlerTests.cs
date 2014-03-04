@@ -328,9 +328,9 @@ namespace Microsoft.IdentityModel.Test
                 return base.CreateClaims(samlToken);
             }
 
-            public IEnumerable<SecurityKey> RetreiveIssuerSigningKeys_public(string securityToken, TokenValidationParameters validationParameters)
+            public IEnumerable<SecurityKey> RetrieveIssuerSigningKeys_public(string securityToken, TokenValidationParameters validationParameters)
             {
-                return base.RetreiveIssuerSigningKeys(securityToken, validationParameters);
+                return base.RetrieveIssuerSigningKeys(securityToken, validationParameters);
             }
         }
 
