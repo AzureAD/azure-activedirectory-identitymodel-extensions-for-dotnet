@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -15,10 +16,83 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public OpenIdConnectMessage() : this(string.Empty) {}
 
-                /// <summary>
+        /// <summary>
         /// Initializes an instance of <see cref="AuthenticationProtocolMessage"/> class with a specific issuerAddress.
         /// </summary>
         public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) {}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="parameters">Enumeration of key value pairs.</param>        
+        public OpenIdConnectMessage(OpenIdConnectMessage openIdConnectMessage)
+        {
+            if (openIdConnectMessage == null)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<string, string> keyValue in openIdConnectMessage.Parameters)
+            {
+                SetParameter(keyValue.Key, keyValue.Value);
+            }
+
+            IssuerAddress = openIdConnectMessage.IssuerAddress;
+        }
+
+                /// <summary>
+        /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
+        /// </summary>
+        /// <param name="parameters">Enumeration of key value pairs.</param>        
+        public OpenIdConnectMessage(IEnumerable<KeyValuePair<string, string[]>> parameters)
+        {
+            if (parameters == null)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<string, string[]> keyValue in parameters)
+            {
+                foreach (string strValue in keyValue.Value)
+                {
+                    if (strValue != null)
+                    {
+                        SetParameter(keyValue.Key, strValue);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
+        /// With response_type == 'id_token'.
+        /// </summary>
+        /// <returns>The uri to use for a redirect.</returns>
+
+        public string CreateIdTokenQueryString()
+        {
+            OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            return openIdConnectMessage.BuildRedirectUri();
+        }
+
+        /// <summary>
+        /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
+        /// With response_type == 'id_token'.
+        /// </summary>
+        /// <returns>The uri to use for a redirect.</returns>
+
+        public string CreateLogoutQueryString()
+        {
+            OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            return openIdConnectMessage.BuildRedirectUri();
+        }
+
+        public string TokenEndpoint { get; set; }
+
+        public string AuthorizeEndpoint { get; set; }
+
+        public string LogoutEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets 'access_Token'.

@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX10205 = "IDX10205: Unable to validate issuer, validationParameters.ValidIssuer: '{0}' or validationParameters.ValidIssuers: '{1}' did not match Issuer: '{2}'. Comparison is: Equals ";
         public const string IDX10206 = "IDX10206: Unable to validate issuer, 'securityToken' type was not a: '{0}', was a: '{1}'";
         public const string IDX10207 = "IDX10207: Unable to validate audience, the Saml2 token did not contain any audiences.";
-        public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.AllowedAudience is null or whitespace and validationParameters.AllowedAudiences is null.";
+        public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null.";
         public const string IDX10209 = "IDX10209: 'tokenString' has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
         public const string IDX10210 = "IDX10210: SamlToken.Assertion.Issuer is null, can not create an identity.";
         public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace";
