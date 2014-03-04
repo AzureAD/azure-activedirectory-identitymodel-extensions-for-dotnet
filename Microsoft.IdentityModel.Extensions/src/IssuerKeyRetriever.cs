@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Extensions
             List<SecurityToken> signingTokens = new List<SecurityToken>();
             // TODO: we need to stick with keys as they may be derived.
             List<SecurityKey> namedKeys = new List<SecurityKey>();
-            foreach (SecurityKey securityKey in RetreiveIssuerSigningKeys(securityToken, validationParameters))
+            foreach (SecurityKey securityKey in RetrieveIssuerSigningKeys(securityToken, validationParameters))
             {
                 X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
                 if (x509SecurityKey != null)
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Extensions
 
             return SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true);
         }
-        public static IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
+        public static IEnumerable<SecurityKey> RetrieveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters.RetrieveIssuerSigningKeys != null)
             {
