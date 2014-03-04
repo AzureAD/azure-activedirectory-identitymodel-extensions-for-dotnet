@@ -8,13 +8,16 @@ using System.Runtime.Serialization;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Signing metadata parsed from a WSFed endpoint.
+    /// Contains metadata used in the OpenIdConnect protocol.
     /// </summary>
     [DataContract]
     public class OpenIdConnectMetadata
     {
         Collection<X509SecurityToken> _signingTokens = new Collection<X509SecurityToken>();
 
+        /// <summary>
+        /// Creates a <see cref="OpenIdConnectMetadata"/>.
+        /// </summary>
         public OpenIdConnectMetadata()
         {
         }
@@ -44,9 +47,8 @@ namespace Microsoft.IdentityModel.Protocols
         public string Jwks_Uri{ get; set; }
 
         /// <summary>
-        /// Gets or sets the Signing tokens.
+        /// Gets the collection of Signing tokens.
         /// </summary>
-
         public ICollection<X509SecurityToken> SigningTokens 
         { 
             get 

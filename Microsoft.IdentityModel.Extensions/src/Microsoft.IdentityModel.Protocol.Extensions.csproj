@@ -30,8 +30,7 @@
     <DefineConstants>TRACE;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Release\Microsoft.IdentityModel.Protocol.Extensions.XML</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>AllMicrosoftFxCopRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -72,10 +71,10 @@
     <Compile Include="AudienceValidator.cs" />
     <Compile Include="AuthenticationProtocolMessage.cs" />
     <Compile Include="ErrorMessages.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IssuerKeyRetriever.cs" />
     <Compile Include="IssuerValidator.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
-    <Compile Include="OpenIdConnectException.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
     <Compile Include="OpenIdConnectMetadata.cs" />
     <Compile Include="OpenIdConnectMetadataRetriever.cs" />
@@ -92,6 +91,9 @@
     <None Include="Microsoft.IdentityModel.Protocol.Extensions.nuspec">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
-        /// <param name="parameters">Enumeration of key value pairs.</param>        
+        /// <param name="openIdConnectMessage"> an <see cref="OpenIdConnectMessage"/> to copy.</param>        
         public OpenIdConnectMessage(OpenIdConnectMessage openIdConnectMessage)
         {
             if (openIdConnectMessage == null)
@@ -88,10 +88,19 @@ namespace Microsoft.IdentityModel.Protocols
             return openIdConnectMessage.BuildRedirectUri();
         }
 
+        /// <summary>
+        /// Gets or sets the value for the token endpoint.
+        /// </summary>
         public string TokenEndpoint { get; set; }
 
+        /// <summary>
+        /// Gets or sets the value for the AuthorizeEndpoint
+        /// </summary>
         public string AuthorizeEndpoint { get; set; }
 
+        /// <summary>
+        /// Gets or sets the value for the LogoutEndpoint
+        /// </summary>
         public string LogoutEndpoint { get; set; }
 
         /// <summary>

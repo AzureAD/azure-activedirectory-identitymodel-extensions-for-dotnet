@@ -114,6 +114,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// Creates claims from a Saml2 token.
         /// </summary>
         /// <param name="samlToken">The Saml2SecurityToken.</param>
+        /// <param name="validationParameters"> contains parameters for validating the token.</param>
         /// <returns>An IClaimIdentity.</returns>
         protected virtual ClaimsIdentity CreateClaims(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
         {
@@ -153,9 +154,9 @@ namespace Microsoft.IdentityModel.Extensions
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
         /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        public virtual IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
+        public virtual IEnumerable<SecurityKey> RetrieveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-            return IssuerKeyRetriever.RetreiveIssuerSigningKeys(securityToken, validationParameters);
+            return IssuerKeyRetriever.RetrieveIssuerSigningKeys(securityToken, validationParameters);
         }
 
         /// <summary>
@@ -185,7 +186,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// Reads and validates a well fromed Saml2 token.
         /// </summary>
         /// <param name="securityToken">A Saml2 token.</param>
-        /// <param name="validationParameters">Contains data and information needed to validation Saml2 token.</param>
+        /// <param name="validationParameters">Contains data and information needed for validation.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
@@ -254,20 +255,20 @@ namespace Microsoft.IdentityModel.Extensions
             return new ClaimsPrincipal(claimsIdentity);
         }
 
-        public virtual string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
-        {
-            return IssuerValidator.Validate(issuer, validationParameters, securityToken);
-        }
-
-
+        /// <summary>
+        /// Determines if the audience of a <see cref="Saml2SecurityToken"/> is valid.
+        /// </summary>
+        /// <param name="conditions">the <see cref="Saml2Conditions"/> containing the audiences</param>
+        /// <param name="validationParameters">parameters to define valid.</param>
+        /// <param name="samlToken">the <see cref="Saml2SecurityToken"/> that is being validated.</param>
         protected virtual void ValidateAudience(Saml2Conditions conditions, TokenValidationParameters validationParameters, Saml2SecurityToken samlToken)
         {
             List<string> audiences = new List<string>();
-            if ( conditions != null)
+            if (conditions != null)
             {
-                foreach(Saml2AudienceRestriction restriction in conditions.AudienceRestrictions )
+                foreach (Saml2AudienceRestriction restriction in conditions.AudienceRestrictions)
                 {
-                    foreach(Uri uri in restriction.Audiences)
+                    foreach (Uri uri in restriction.Audiences)
                     {
                         audiences.Add(uri.OriginalString);
                     }
@@ -275,6 +276,18 @@ namespace Microsoft.IdentityModel.Extensions
             }
 
             AudienceValidator.Validate(audiences, validationParameters, samlToken);
+        }
+
+        /// <summary>
+        /// Determines if an issuer is valid.
+        /// </summary>
+        /// <param name="issuer">the issuer to validate</param>
+        /// <param name="validationParameters">parameters to define valid.</param>
+        /// <param name="securityToken">the <see cref="SecurityToken"/> that is being validated.</param>
+        /// <returns></returns>
+        public virtual string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
+        {
+            return IssuerValidator.Validate(issuer, validationParameters, securityToken);
         }
     }
 }
