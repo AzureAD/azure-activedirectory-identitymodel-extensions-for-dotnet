@@ -48,7 +48,6 @@ namespace Microsoft.IdentityModel.Protocols
             return new WsFederationMessage();
         }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
@@ -63,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
-        /// <param name="parameters">Enumeration of key value pairs.</param>        
+        /// <param name="wsFederationMessage"> message to copy.</param>        
         public WsFederationMessage(WsFederationMessage wsFederationMessage)
         {
             if (wsFederationMessage == null)

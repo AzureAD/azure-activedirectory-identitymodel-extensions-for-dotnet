@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Test
             ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException("issuerAddress");
             try
             {
-                openIdConnectMessage = new OpenIdConnectMessage(null);
+                openIdConnectMessage = new OpenIdConnectMessage((string)null);
                 exceptionProcessor.ProcessNoException();
             }
             catch (Exception exception)

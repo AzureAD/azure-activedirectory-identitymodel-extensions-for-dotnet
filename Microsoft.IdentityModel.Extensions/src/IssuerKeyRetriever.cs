@@ -64,9 +64,9 @@ namespace Microsoft.IdentityModel.Extensions
         }
         public static IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters.RetreiveIssuerSigningKeys != null)
+            if (validationParameters.RetrieveIssuerSigningKeys != null)
             {
-                foreach (SecurityKey securityKey in validationParameters.RetreiveIssuerSigningKeys(securityToken))
+                foreach (SecurityKey securityKey in validationParameters.RetrieveIssuerSigningKeys(securityToken))
                 {
                     yield return securityKey;
                 }

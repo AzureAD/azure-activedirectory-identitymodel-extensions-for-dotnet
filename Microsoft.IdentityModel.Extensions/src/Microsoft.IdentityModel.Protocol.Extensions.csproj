@@ -30,7 +30,8 @@
     <DefineConstants>TRACE;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Microsoft.IdentityModel.Protocol.Extensions.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>AllMicrosoftFxCopRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -52,7 +53,7 @@
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\bin\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization" />
@@ -70,11 +71,9 @@
   <ItemGroup>
     <Compile Include="AudienceValidator.cs" />
     <Compile Include="AuthenticationProtocolMessage.cs" />
-    <Compile Include="ClaimsPrincipalSerializer.cs" />
     <Compile Include="ErrorMessages.cs" />
     <Compile Include="IssuerKeyRetriever.cs" />
     <Compile Include="IssuerValidator.cs" />
-    <Compile Include="JsonWebKey.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
     <Compile Include="OpenIdConnectException.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
@@ -84,8 +83,6 @@
     <Compile Include="Saml2SecurityTokenHandler.cs" />
     <Compile Include="SamlSecurityTokenHandler.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensions.cs" />
-    <Compile Include="SessionDictionary.cs" />
-    <Compile Include="TicketSerializer.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WsFederationConstants.cs" />
     <Compile Include="WsFederationMessage.cs" />

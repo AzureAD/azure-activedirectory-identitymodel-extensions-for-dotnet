@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Test
             get
             {
                 if (_simpleClaimsIdentity == null)
-                    _simpleClaimsIdentity = new ClaimsIdentity(IdentityUtilities.SimpleClaims());
+                    _simpleClaimsIdentity = new ClaimsIdentity(IdentityUtilities.SimpleClaims(), "IdentitiesUtilities");
 
                 return _simpleClaimsIdentity;
             }

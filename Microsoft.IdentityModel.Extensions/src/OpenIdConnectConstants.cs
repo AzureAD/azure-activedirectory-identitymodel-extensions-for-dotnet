@@ -2,6 +2,19 @@
 
 namespace Microsoft.IdentityModel.Protocols
 {
+
+    public static class JsonWebKeysValueNames
+    {
+        public static readonly string Keys = "keys";
+        public static readonly string Kty = "kty";
+        public static readonly string Use = "use";
+        public static readonly string Kid = "Kid";
+        public static readonly string X5t = "x5t";
+        public static readonly string X5c = "x5c";
+        public static readonly string E   = "e";
+        public static readonly string N   = "n";  
+    }
+
     /// <summary>
     /// Specific scope values that are interesting to OpenID Connect.  See http://openid.net/specs/openid-connect-messages-1_0.html#scopes
     /// </summary>
@@ -11,8 +24,32 @@ namespace Microsoft.IdentityModel.Protocols
 
         public static readonly string Openid = "openid";
         public static readonly string Openid_Profile = "openid profile";
+        public static readonly string User_Impersonation = "user_impersonation";
 
         #pragma warning restore 1591
+    }
+
+    public static class ActiveDirectoryOpenIdConnectEndpoints
+    {
+        public const string Authorize = "oauth2/authorize";
+        public const string Logout = "oauth2/logout";
+        public const string Token = "oauth2/token";
+    }
+
+    public static class OpenIdConnectMetadataNames
+    {
+        public const string Authorization_Endpoint = "authorization_endpoint";
+        public const string Check_Session_Iframe = "check_session_iframe";
+        public const string End_Session_Endpoint = "end_session_endpoint";
+        public const string Id_Token_Signing_Alg_Balues_Supported = "id_token_signing_alg_values_supported";
+        public const string Jwks_Uri = "jwks_uri";
+        public const string Issuer = "issuer";
+        public const string Microsoft_Multi_Refresh_Token = "microsoft_multi_refresh_token";
+        public const string Response_Modes_Supported = "response_modes_supported";
+        public const string Response_Types_Supported = "response_types_supported";
+        public const string Subject_Types_Supported = "subject_types_supported";
+        public const string Token_Endpoint = "token_endpoint";
+        public const string Token_Endpoint_Auth_Methods_Supported = "token_endpoint";
     }
 
     /// <summary>
