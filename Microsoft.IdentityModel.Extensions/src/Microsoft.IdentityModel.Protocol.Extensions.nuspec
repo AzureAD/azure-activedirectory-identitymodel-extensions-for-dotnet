@@ -22,7 +22,6 @@
     <file src="Microsoft.IdentityModel.Protocol.Extensions.dll" target="lib\net45" />
     <file src="Microsoft.IdentityModel.Protocol.Extensions.pdb" target="lib\net45" />
     <file src="Microsoft.IdentityModel.Protocol.Extensions.xml" target="lib\net45" />
-    <file src="..\src\**" target="src" />
   </files>
 </package>
 
