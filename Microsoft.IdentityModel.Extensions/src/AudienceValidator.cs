@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Extensions
     /// </summary>
     internal class AudienceValidator
     {
-        public static void Validate(IEnumerable<string> issuers, TokenValidationParameters validationParameters, SecurityToken samlToken)
+        public static void Validate(IEnumerable<string> audiences, TokenValidationParameters validationParameters, SecurityToken securityToken)
         {
             if (validationParameters == null)
             {
@@ -42,14 +42,28 @@ namespace Microsoft.IdentityModel.Extensions
                 return;
             }
 
+            if (audiences == null)
+            {
+                throw new AudienceUriValidationFailedException(ErrorMessages.IDX10215);
+            }
+
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
                 throw new ArgumentException(ErrorMessages.IDX10208);
             }
 
-            foreach (string issuer in issuers)
+            foreach (string audience in audiences)
             {
-                if (string.IsNullOrWhiteSpace(issuer))
+
+                if (validationParameters.AudienceValidator != null)
+                {
+                    if (validationParameters.AudienceValidator(audience, securityToken))
+                    {
+                            return;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(audience))
                 {
                     continue;
                 }
@@ -58,7 +72,7 @@ namespace Microsoft.IdentityModel.Extensions
                 {
                     foreach (string str in validationParameters.ValidAudiences)
                     {
-                        if (string.Equals(issuer, str, StringComparison.Ordinal))
+                        if (string.Equals(audience, str, StringComparison.Ordinal))
                         {
                             return;
                         }
@@ -67,14 +81,14 @@ namespace Microsoft.IdentityModel.Extensions
 
                 if (!string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
                 {
-                    if (string.Equals(issuer, validationParameters.ValidAudience, StringComparison.Ordinal))
+                    if (string.Equals(audience, validationParameters.ValidAudience, StringComparison.Ordinal))
                     {
                         return;
                     }
                 }
             }
 
-            throw new AudienceUriValidationFailedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(issuers), validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)));
+            throw new AudienceUriValidationFailedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)));
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="uri"> uri string to extract parameters.</param>
         /// <returns>An instance of <see cref="WsFederationMessage"/>.</returns>
-        /// <remarks><see cref="WsFederationMessage.IssuerAddress"/> is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
+        /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
             if (uri != null && uri.Query.Length > 1)

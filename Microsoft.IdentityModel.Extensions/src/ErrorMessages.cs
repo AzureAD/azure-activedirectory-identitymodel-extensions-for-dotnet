@@ -22,9 +22,10 @@ namespace Microsoft.IdentityModel.Extensions
     /// <summary>
     /// Error codes and messages
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
+    [ SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
     public static class ErrorMessages
     {
+#pragma warning disable 1591
         // general messages 10000 - 10099
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty string.";
         public const string IDX20000 = "IDX20000: The property value '{0}' cannot be a 'null' or an empty string.";
@@ -49,6 +50,8 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace";
         public const string IDX10212 = "IDX10212: {0} can only validate tokens of type {1}.";
         public const string IDX10213 = "IDX10213: SecurityTokens must be signed. SecurityToken: '{0}'.";
-        public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Could not match:  validationParameters.AllowedAudience: '{1}' and validationParameters.AllowedAudiences: '{2}'";
+        public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Could not match:  validationParameters.ValidAudience: '{1}' and validationParameters.ValidAudiences: '{2}'";
+        public const string IDX10215 = "IDX10215: Audience validation failed. Audiences passed in was null";
+#pragma warning restore 1591
     }
 }

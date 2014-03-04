@@ -17,8 +17,24 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectMetadataRetriever
     {
+        /// <summary>
+        /// Obtains <see cref="OpenIdConnectMetadata"/> from an endpoint.
+        /// </summary>
+        /// <param name="metadataEndpoint"> the endpoint to query.</param>
+        /// <param name="httpClient">the <see cref="HttpClient"/> to use to make the call.</param>
+        /// <returns></returns>
         public static OpenIdConnectMetadata GetMetatadata(string metadataEndpoint, HttpClient httpClient)
         {
+            if (metadataEndpoint == null)
+            {
+                throw new ArgumentNullException("metadataEndpoint");
+            }
+
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException("httpClient");
+            }
+
             string issuer = string.Empty;
             string passiveTokenEndpoint = string.Empty;
             List<X509SecurityToken> signingTokens = new List<X509SecurityToken>();
