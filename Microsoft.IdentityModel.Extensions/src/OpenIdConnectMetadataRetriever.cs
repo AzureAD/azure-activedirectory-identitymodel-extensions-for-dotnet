@@ -13,7 +13,7 @@ using System.Web.Script.Serialization;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Helper for parsing WSFed metadata.
+    /// Helper for parsing OpenidConnect metadata.
     /// </summary>
     public static class OpenIdConnectMetadataRetriever
     {
