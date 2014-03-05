@@ -9,7 +9,7 @@ using System;
 [assembly: AssemblyDescription(".Net 4.5 support for JSON Web Security Tokens")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocol.Extensions")]
+[assembly: AssemblyProduct("System.IdentityModel.Tokens.Jwt")]
 [assembly: AssemblyCopyright("\x00a9 Microsoft Corporation All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
