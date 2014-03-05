@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class JsonWebKeysValueNames
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public static readonly string Keys = "keys";
         public static readonly string Kty = "kty";
         public static readonly string Use = "use";
@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols
         public static readonly string X5c = "x5c";
         public static readonly string E   = "e";
         public static readonly string N   = "n";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -25,12 +25,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectScopes
     {
-#pragma warning disable 1591
-#pragma warning disable 1707
+        #pragma warning disable 1591
         public static readonly string OpenId = "openid";
         public static readonly string OpenId_Profile = "openid profile";
         public static readonly string User_Impersonation = "user_impersonation";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -38,11 +37,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class ActiveDirectoryOpenIdConnectEndpoints
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string Authorize = "oauth2/authorize";
         public const string Logout = "oauth2/logout";
         public const string Token = "oauth2/token";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -50,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectMetadataNames
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string Authorization_Endpoint = "authorization_endpoint";
         public const string Check_Session_Iframe = "check_session_iframe";
         public const string End_Session_Endpoint = "end_session_endpoint";
@@ -63,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string Subject_Types_Supported = "subject_types_supported";
         public const string Token_Endpoint = "token_endpoint";
         public const string Token_Endpoint_Auth_Methods_Supported = "token_endpoint";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -72,7 +71,6 @@ namespace Microsoft.IdentityModel.Protocols
     public static class OpenIdConnectParameterNames
     {
         #pragma warning disable 1591
-        #pragma warning disable 1707
         public const string Access_Token = "access_token"; 
         public const string Acr_Values = "acr_values";
         public const string Claims_Locales = "claims_locales";
@@ -101,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string Refresh_token = "refresh_token";
         public const string Request_Uri = "request_uri";
         public const string Response_Mode = "response_mode";        
-        public const string Response_Type = "response_type";
+        public const string Response_Type = "response_type";       
         public const string Scope = "scope";
         public const string Session_State = "session_state";
         public const string State = "state";
@@ -111,8 +109,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string Ui_Locales = "ui_locales";
         public const string User_Id = "user_id";
         public const string Username = "username";
-#pragma warning restore 1591
-#pragma warning restore 1707
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -121,10 +118,8 @@ namespace Microsoft.IdentityModel.Protocols
     public static class OpenIdConnectResponseTypes
     {
         #pragma warning disable 1591
-
         public const string Code_Id_Token = "code id_token";
         public const string Id_Token = "id_token";
-
         #pragma warning restore 1591
     }
 }
