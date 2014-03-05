@@ -78,6 +78,7 @@
     <Compile Include="OpenIdConnectMessage.cs" />
     <Compile Include="OpenIdConnectMetadata.cs" />
     <Compile Include="OpenIdConnectMetadataRetriever.cs" />
+    <Compile Include="OpenIdConnectProtocolException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Saml2SecurityTokenHandler.cs" />
     <Compile Include="SamlSecurityTokenHandler.cs" />
