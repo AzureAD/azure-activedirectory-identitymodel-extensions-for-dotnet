@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
             IssuerAddress = openIdConnectMessage.IssuerAddress;
         }
 
-                /// <summary>
+        /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
         /// <param name="parameters">Enumeration of key value pairs.</param>        
