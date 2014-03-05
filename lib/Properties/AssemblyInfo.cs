@@ -17,4 +17,4 @@ using System;
 [assembly: Guid("ED55D03C-8832-4483-BD91-1AFAF42C0731")]
 [assembly: CLSCompliant(true)]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
-[assembly: AssemblyFileVersion("4.0.10304.1702")]
+[assembly: AssemblyFileVersion("4.0.00000.0000")]
