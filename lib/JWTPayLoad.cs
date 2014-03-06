@@ -102,6 +102,18 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets 'value' of the 'c_hash' claim { c_hash, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'c_hash' claim is not found, null is returned.</remarks>
+        public string C_Hash
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.C_Hash);
+            }
+        }
+        
+        /// <summary>
         /// Gets the 'value' of the 'expiration' claim { exp, 'value' }.
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
@@ -143,6 +155,18 @@ namespace System.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Gets 'value' of the 'nonce' claim { nonce, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'nonce' claim is not found, null is returned.</remarks>
+        public string Nonce
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Nonce);
+            }
+        }
+        
         /// <summary>
         /// Gets "value" of the 'subject' claim { sub, 'value' }.
         /// </summary>

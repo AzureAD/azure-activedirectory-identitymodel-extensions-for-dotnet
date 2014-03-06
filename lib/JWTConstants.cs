@@ -24,7 +24,7 @@ namespace System.IdentityModel.Tokens
     /// Constants for Json Web tokens.
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Following definitions in spec.")]
-    internal static class JwtConstants
+    public static class JwtConstants
     {
         /// <summary>
         /// Short header type.
@@ -131,6 +131,11 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
+            public const string C_Hash = "c_hash";
+
+            /// <summary>
+            /// Claim short name.
+            /// </summary>
             public const string Email = "email";
 
             /// <summary>
@@ -172,6 +177,11 @@ namespace System.IdentityModel.Tokens
             /// Claim short name.
             /// </summary>
             public const string NameId = "nameid";
+
+            /// <summary>
+            /// Claim short name.
+            /// </summary>
+            public const string Nonce = "nonce";
 
             /// <summary>
             /// Claim short name.
