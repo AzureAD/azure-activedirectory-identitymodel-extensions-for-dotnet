@@ -1189,6 +1189,15 @@ namespace System.IdentityModel.Test
                 new JwtSecurityTokenTestVariation
                 { 
                     TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters( KeyingMaterial.X509Token_LocalSts ),
+                    Name = "Security Key Identifier not found",
+                    JwtSecurityTokenHandler = new JwtSecurityTokenHandler(){ RequireExpirationTime = false },
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureValidationException), "Jwt10334:"),
+                    EncodedString = JwtTestUtilities.GetJwtParts( EncodedJwts.Symmetric_256, "ALLParts" ),
+                },
+
+                new JwtSecurityTokenTestVariation
+                { 
+                    TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters( KeyingMaterial.X509Token_LocalSts ),
                     Name = "Asymmetric_LocalSts",
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler(){ RequireExpirationTime = false },
                     ExpectedException = ExpectedException.Null,

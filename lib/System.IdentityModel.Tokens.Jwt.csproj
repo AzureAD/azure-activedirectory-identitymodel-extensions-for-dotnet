@@ -68,12 +68,8 @@
     <Compile Include="ISecurityTokenValidator.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="JwtConfigurationStrings.cs" />
-    <Compile Include="JwtConstants.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="JwtErrors.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="JwtConstants.cs" />
+    <Compile Include="JwtErrors.cs" />
     <Compile Include="JwtHeader.cs" />
     <Compile Include="JwtPayLoad.cs" />
     <Compile Include="JwtSecurityToken.cs" />
@@ -82,9 +78,8 @@
     <Compile Include="NamedKeyIssuerTokenResolver.cs" />
     <Compile Include="NamedKeySecurityKeyIdentifierClause.cs" />
     <Compile Include="NamedKeySecurityToken.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecurityTokenSignatureValidationException.cs" />
     <Compile Include="SignatureProvider.cs" />
     <Compile Include="SignatureProviderFactory.cs" />
     <Compile Include="SymmetricSignatureProvider.cs" />
@@ -94,19 +89,22 @@
     <Compile Include="WifExtensionsErrors.cs" />
     <Compile Include="WSSecurity10Constants.cs" />
     <Compile Include="WSSecurityUtilityConstants.cs" />
-    <Compile Include="X509CertificateValidatorEx.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="X509CertificateValidatorEx.cs" />
     <Compile Include="X509SecurityKey.cs" />
     <Compile Include="XmlUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="35MSSharedLib1024.snk" />
+    <None Include="system.identitymodel.tokens.jwt.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

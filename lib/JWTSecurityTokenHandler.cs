@@ -1017,18 +1017,6 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        internal bool ValidateSignature(SecurityKey key, string algorithm, byte[] encodedBytes, byte[] signature)
-        {
-            // in the case that a SignatureProviderFactory can handle nulls, just don't check here.
-            SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
-            if (signatureProvider == null)
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10314, key == null ? TextStrings.Null : key.ToString(), algorithm == null ? TextStrings.Null : algorithm));
-            }
-
-            return signatureProvider.Verify(encodedBytes, signature);
-        }
-
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm)
         {
             // in the case that a SignatureProviderFactory can handle nulls, just don't check here.
@@ -1065,12 +1053,6 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("signatureBytes");
             }
 
-            string mappedAlgorithm = jwt.Header.SignatureAlgorithm;
-            if (mappedAlgorithm != null && InboundAlgorithmMap.ContainsKey(mappedAlgorithm))
-            {
-                mappedAlgorithm = InboundAlgorithmMap[mappedAlgorithm];
-            }
-
             if (signatureBytes.Length == 0)
             {
                 if (!this.RequireSignedTokens)
@@ -1086,19 +1068,33 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("securityKeys");
             }
 
+            string mappedAlgorithm = jwt.Header.SignatureAlgorithm;
+            if (mappedAlgorithm != null && InboundAlgorithmMap.ContainsKey(mappedAlgorithm))
+            {
+                mappedAlgorithm = InboundAlgorithmMap[mappedAlgorithm];
+            }
+
             // maintain a list of all the exceptions that were thrown, display them to the user at the end.
             List<Exception> exceptions = new List<Exception>();
             List<SecurityKey> keysTried = new List<SecurityKey>();
+            SecurityKeyIdentifier ski = jwt.Header.SigningKeyIdentifier;
+            string keysAttempted = string.Empty;
+            string exceptionString = string.Empty;
+            Exception firstException = null;
 
-            // run through all the tokens, actively searching for a clause match
             foreach (SecurityKey securityKey in securityKeys)
             {
+                if (keysTried.Count > 0)
+                {
+                    keysAttempted += Environment.NewLine;
+                }
+                keysAttempted += CreateKeyString(securityKey);
                 keysTried.Add(securityKey);
                 try
-                {
-                
+                {                
                     if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
                     {
+                        // TODO log any exceptions before exiting
                         jwt.SigningKey = securityKey;
                         return;
                     }
@@ -1109,30 +1105,25 @@ namespace System.IdentityModel.Tokens
                     {
                         throw;
                     }
+                    if (firstException == null)
+                    {
+                        firstException = ex;
+                    }
+                    else
+                    {
+                        exceptionString += Environment.NewLine;
+                    }
+
+                    ex.ToString();
+
                     exceptions.Add(ex);
                 }
             }
 
-            string keysAttempted = string.Empty;
+
             if (keysTried.Count == 0)
             {
-                keysAttempted = JwtErrors.NoNonNullKeysFound;
-            }
-            else
-            {
-                bool first = true;
-                foreach (SecurityKey key in keysTried)
-                {
-                    if (!first && key != null)
-                    {
-                        keysAttempted += "\n";
-                    }
-
-                    first = false;
-                    keysAttempted += key.ToString();
-                }
-
-                keysAttempted = string.Format(CultureInfo.InvariantCulture, JwtErrors.KeysTried, keysAttempted);
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
             }
 
             if (null != exceptions && exceptions.Count > 0)
@@ -1150,7 +1141,7 @@ namespace System.IdentityModel.Tokens
                     sb.AppendLine(ex.ToString());
                 }
 
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
             }
             else
             {
@@ -1205,7 +1196,7 @@ namespace System.IdentityModel.Tokens
 
             // maintain a list of all the exceptions that were thrown, display them to the user at the end.
             List<Exception> exceptions = new List<Exception>();
-            List<SecurityKey> keysTried = new List<SecurityKey>();
+            List<SecurityKey> keysThatMatchedSecurityKeyIdentifier = new List<SecurityKey>();
 
             // run through all the tokens, actively searching for a clause match
             foreach (SecurityToken securityToken in signingTokens)
@@ -1215,10 +1206,10 @@ namespace System.IdentityModel.Tokens
                     SecurityKey resolvedSecurityKey = securityToken.ResolveKeyIdentifierClause(clause);
                     if (resolvedSecurityKey != null)
                     {
-                        keysTried.Add(resolvedSecurityKey);
+                        keysThatMatchedSecurityKeyIdentifier.Add(resolvedSecurityKey);
                         try
                         {
-                            if (this.ValidateSignature(resolvedSecurityKey, mappedAlgorithm, encodedBytes, signatureBytes))
+                            if (this.ValidateSignature(encodedBytes, signatureBytes, resolvedSecurityKey, mappedAlgorithm))
                             {
                                 jwt.SigningKey = resolvedSecurityKey;
                                 jwt.SigningToken = securityToken;
@@ -1243,7 +1234,7 @@ namespace System.IdentityModel.Tokens
             {
                 foreach (SecurityKey key in securityToken.SecurityKeys)
                 {
-                    if (keysTried.Contains(key))
+                    if (keysThatMatchedSecurityKeyIdentifier.Contains(key))
                     {
                         continue;
                     }
@@ -1252,10 +1243,10 @@ namespace System.IdentityModel.Tokens
                     {
                         if (key != null)
                         {
-                            keysTried.Add(key);
+                            keysThatMatchedSecurityKeyIdentifier.Add(key);
                         }
 
-                        if (this.ValidateSignature(key, mappedAlgorithm, encodedBytes, signatureBytes))
+                        if (this.ValidateSignature(encodedBytes, signatureBytes, key, mappedAlgorithm))
                         {
                             jwt.SigningKey = key;
                             jwt.SigningToken = securityToken;
@@ -1275,14 +1266,14 @@ namespace System.IdentityModel.Tokens
             }
 
             string keysAttempted = string.Empty;
-            if (keysTried.Count == 0)
+            if (keysThatMatchedSecurityKeyIdentifier.Count == 0)
             {
-                keysAttempted = JwtErrors.NoNonNullKeysFound;
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
             }
             else
             {
                 bool first = true;
-                foreach (SecurityKey key in keysTried)
+                foreach (SecurityKey key in keysThatMatchedSecurityKeyIdentifier)
                 {
                     if (!first && key != null)
                     {
@@ -1290,10 +1281,8 @@ namespace System.IdentityModel.Tokens
                     }
 
                     first = false;
-                    keysAttempted += key.ToString();
+                    keysAttempted += CreateKeyString(key);
                 }
-
-                keysAttempted = string.Format(CultureInfo.InvariantCulture, JwtErrors.KeysTried, keysAttempted);
             }
 
             if (null != exceptions && exceptions.Count > 0)
@@ -1311,14 +1300,25 @@ namespace System.IdentityModel.Tokens
                     sb.AppendLine(ex.ToString());
                 }
 
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
             }
             else
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
             }
         }
 
+        private string CreateKeyString(SecurityKey securityKey)
+        {
+            if (securityKey == null)
+            {
+                return "null";
+            }
+            else 
+            {
+                return securityKey.ToString();
+            }
+        }
         /// <summary>
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JwtSecurityToken"/>.
         /// </summary>
@@ -1776,9 +1776,9 @@ namespace System.IdentityModel.Tokens
         public virtual IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
 
-            if (validationParameters.RetrieveIssuerSigningKeys != null)
+            if (validationParameters.IssuerSigningKeyRetriever != null)
             {
-                foreach (SecurityKey securityKey in validationParameters.RetrieveIssuerSigningKeys(securityToken))
+                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))
                 {
                     yield return securityKey;
                 }
