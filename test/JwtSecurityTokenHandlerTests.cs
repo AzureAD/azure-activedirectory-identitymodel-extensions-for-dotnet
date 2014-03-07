@@ -832,9 +832,9 @@ namespace System.IdentityModel.Test
                 },
                 new JwtSecurityTokenTestVariation
                 {
-                    Name = "ValidateToken_SecurityToken_Config_Null",
+                    Name = "ValidateToken_SecurityToken_Key_Not_Found",
                     SecurityToken = new JwtSecurityToken( EncodedJwts.Asymmetric_LocalSts ),
-                    ExpectedException = ExpectedException.SecVal(id:"Jwt10315"),
+                    ExpectedException = new ExpectedException(typeof( SecurityTokenSignatureKeyNotFoundException), id:"Jwt10334"),
                 },
 #endregion
 
@@ -1133,7 +1133,7 @@ namespace System.IdentityModel.Test
 
             Console.WriteLine( "Test variation: Using 'iss', is added as default, but not resolved" );
             nkitr.SecurityKeys.Clear();
-            ee = ExpectedException.SecVal( id: "Jwt10315" );
+            ee = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException), id: "Jwt10334" );
             try
             {
                 ClaimsPrincipal cp = handler.ValidateToken( jwt );
@@ -1145,7 +1145,7 @@ namespace System.IdentityModel.Test
 
             Console.WriteLine( "Test variation: Using 'iss', is added as default, will not be resolved" );
             nkitr.SecurityKeys.Add( "", new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 } );
-            ee = ExpectedException.SecVal( id: "Jwt10315" );
+            ee = new ExpectedException( typeof(SecurityTokenSignatureKeyNotFoundException), id: "Jwt10334" );
             try
             {
                 ClaimsPrincipal cp = handler.ValidateToken( jwt );
@@ -1191,7 +1191,7 @@ namespace System.IdentityModel.Test
                     TokenValidationParameters = JwtTestUtilities.SignatureValidationParameters( KeyingMaterial.X509Token_LocalSts ),
                     Name = "Security Key Identifier not found",
                     JwtSecurityTokenHandler = new JwtSecurityTokenHandler(){ RequireExpirationTime = false },
-                    ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureValidationException), "Jwt10334:"),
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException), "Jwt10334:"),
                     EncodedString = JwtTestUtilities.GetJwtParts( EncodedJwts.Symmetric_256, "ALLParts" ),
                 },
 

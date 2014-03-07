@@ -92,9 +92,6 @@
     <Compile Include="..\lib\JwtConfigurationStrings.cs">
       <Link>jwtConfigurationStrings.cs</Link>
     </Compile>
-    <Compile Include="..\lib\JwtConstants.cs">
-      <Link>JWTConstants.cs</Link>
-    </Compile>
     <Compile Include="..\lib\DateTimeUtil.cs">
       <Link>DateTimeUtil.cs</Link>
     </Compile>

@@ -1079,23 +1079,60 @@ namespace System.IdentityModel.Tokens
             }
 
             // maintain a list of all the exceptions that were thrown, display them to the user at the end.
-            List<Exception> exceptions = new List<Exception>();
             List<SecurityKey> keysTried = new List<SecurityKey>();
-            SecurityKeyIdentifier ski = jwt.Header.SigningKeyIdentifier;
+            SecurityKeyIdentifier jwtSigningKeyIdentifier = jwt.Header.SigningKeyIdentifier;
             string keysAttempted = string.Empty;
             string exceptionString = string.Empty;
             Exception firstException = null;
+            bool aKeyMatchedTheSecurityKeyIdentifier = false;
 
+            // First run through all keys looking for a match with jwt key identifier
             foreach (SecurityKey securityKey in securityKeys)
             {
-                if (keysTried.Count > 0)
+                foreach (SecurityKeyIdentifierClause clause in jwtSigningKeyIdentifier)
                 {
-                    keysAttempted += Environment.NewLine;
+                    if (KeyMatchesClause(securityKey, clause))
+                    {
+                        aKeyMatchedTheSecurityKeyIdentifier = true;
+                        keysTried.Add(securityKey);
+                        try
+                        {
+                            if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
+                            {
+                                jwt.SigningKey = securityKey;
+                                return;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (DiagnosticUtility.IsFatal(ex))
+                            {
+                                throw;
+                            }
+
+                            if (firstException == null)
+                            {
+                                firstException = ex;
+                            }
+
+                            exceptionString += ex.ToString();
+                            exceptionString += Environment.NewLine;
+                        }
+                    }
                 }
-                keysAttempted += CreateKeyString(securityKey);
+            }
+
+            // try rest of the keys
+            foreach (SecurityKey securityKey in securityKeys)
+            {
+                if (keysTried.Contains(securityKey))
+                {
+                    continue;
+                }
+
                 keysTried.Add(securityKey);
                 try
-                {                
+                {
                     if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
                     {
                         // TODO log any exceptions before exiting
@@ -1109,48 +1146,59 @@ namespace System.IdentityModel.Tokens
                     {
                         throw;
                     }
+
                     if (firstException == null)
                     {
                         firstException = ex;
                     }
-                    else
-                    {
-                        exceptionString += Environment.NewLine;
-                    }
 
-                    ex.ToString();
-
-                    exceptions.Add(ex);
+                    exceptionString += ex.ToString();
+                    exceptionString += Environment.NewLine;
                 }
+
             }
 
-
-            if (keysTried.Count == 0)
+            if (aKeyMatchedTheSecurityKeyIdentifier && jwtSigningKeyIdentifier.Count > 0)
             {
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
+                throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
             }
 
-            if (null != exceptions && exceptions.Count > 0)
+            if (keysTried.Count > 0)
             {
-                bool first = true;
-                StringBuilder sb = new StringBuilder();
-                foreach (Exception ex in exceptions)
+                keysAttempted = string.Empty;
+                foreach(SecurityKey securityKey in keysTried)
                 {
-                    if (!first)
-                    {
-                        sb.Append("\n");
-                    }
-
-                    first = false;
-                    sb.AppendLine(ex.ToString());
+                    keysAttempted += CreateKeyString(securityKey) + Environment.NewLine;
                 }
-
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
             }
             else
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
+                keysAttempted = JwtErrors.NoSecurityKeysTried;
             }
+            
+            if (firstException != null)
+            {
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, exceptionString, jwt.ToString()), firstException);
+            }
+            else
+            {
+                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
+            }
+        }
+
+        private bool KeyMatchesClause(SecurityKey securityKey, SecurityKeyIdentifierClause clause)
+        {
+            X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
+            if (x509SecurityKey != null)
+            {
+                X509SecurityToken x509SecurityToken = new X509SecurityToken(x509SecurityKey.Certificate);
+                if (x509SecurityToken.MatchesKeyIdentifierClause(clause))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1272,7 +1320,7 @@ namespace System.IdentityModel.Tokens
             string keysAttempted = string.Empty;
             if (keysThatMatchedSecurityKeyIdentifier.Count == 0)
             {
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
+                throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
             }
             else
             {

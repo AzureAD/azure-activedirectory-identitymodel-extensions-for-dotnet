@@ -82,6 +82,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10334 = "Jwt10334: Signature validation failed. No keys were available for checking the signature.\njwt: '{0}'";
 
         internal const string NoNonNullKeysFound = "No non-null SecurityKeys were found";
+        internal const string NoSecurityKeysTried = "No SecurityKeys were available to check signature";
         internal const string KeysTried          = "{0}";
 
         // JwtSecurityToken errors 10400 - 10499

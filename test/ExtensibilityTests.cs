@@ -222,26 +222,41 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty( "TestCaseID", "C4FC2FC1-5AB0-4A73-A620-59D1FBF92D7A" )]
         [Description( "Extensibility tests for AsymmetricSignatureProvider" )]
-        public void AsymmetricSignatureProvider_Extensibility()
+        public void AsymmetricSignatureProvider_Extensibility_AlgorithmMapping()
         {            
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             Console.WriteLine( "Testvariation: " + "outbound signature algorithm - bobsYourUncle" );
 
-            // inbound signature algorithm - bobsYourUncle
-            JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.RsaSha256Signature );
-            JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string,string>( SecurityAlgorithms.RsaSha256Signature, "bobsYourUncle") );
+            // tests that algorithm names can be mapped inbound and outbound
+            // bobsYourUncle <=> RsaSha256Signature
+
+            KeyValuePair<string, string> originalOutbound = new KeyValuePair<string,string>(null, null);
+            if (JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey(SecurityAlgorithms.RsaSha256Signature))
+            {
+                originalOutbound = new KeyValuePair<string,string>(SecurityAlgorithms.RsaSha256Signature, JwtSecurityTokenHandler.OutboundAlgorithmMap[SecurityAlgorithms.RsaSha256Signature]);
+                JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove(SecurityAlgorithms.RsaSha256Signature);
+            }
+
+            JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string,string>(SecurityAlgorithms.RsaSha256Signature, "bobsYourUncle"));
             JwtSecurityToken jwt = handler.CreateToken( issuer: Issuers.GotJwt,  signingCredentials: KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2 ) as JwtSecurityToken;
+            JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove(SecurityAlgorithms.RsaSha256Signature);
+            if (originalOutbound.Key != null)
+            {
+                JwtSecurityTokenHandler.OutboundAlgorithmMap.Add(originalOutbound);
+            }
+
             List<SecurityToken> tokens = new List<SecurityToken>(){ KeyingMaterial.X509Token_2048 };
             handler.Configuration = new SecurityTokenHandlerConfiguration() 
-                                        {
-                                            IssuerTokenResolver =  SecurityTokenResolver.CreateDefaultSecurityTokenResolver( tokens.AsReadOnly(), true ), 
-                                            SaveBootstrapContext = true,
-                                            CertificateValidator = AlwaysSucceedCertificateValidator.New,
-                                            AudienceRestriction = new AudienceRestriction( AudienceUriMode.Never ),
-                                        };
+                                    {
+                                        AudienceRestriction = new AudienceRestriction(AudienceUriMode.Never),
+                                        CertificateValidator = AlwaysSucceedCertificateValidator.New,
+                                        IssuerNameRegistry = new SetNameIssuerNameRegistry("bobsYourUncle"),
+                                        IssuerTokenResolver =  SecurityTokenResolver.CreateDefaultSecurityTokenResolver( tokens.AsReadOnly(), true ), 
+                                        SaveBootstrapContext = true,
+                                    };
 
             // inbound unknown algorithm
-            ExpectedException expectedException = ExpectedException.SecVal( id: "Jwt10316" );
+            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10316");
             try
             {
                 handler.ValidateToken( jwt );
@@ -251,36 +266,70 @@ namespace System.IdentityModel.Test
             {
                 ExpectedException.ProcessException( expectedException, ex );
             }
+
+            // inbound is mapped
+            KeyValuePair<string, string> originalInbound = new KeyValuePair<string, string>(null, null);
+            if (JwtSecurityTokenHandler.InboundAlgorithmMap.ContainsKey("bobsYourUncle"))
+            {
+                originalInbound = new KeyValuePair<string, string>("bobsYourUncle", JwtSecurityTokenHandler.InboundAlgorithmMap["bobsYourUncle"]);
+                JwtSecurityTokenHandler.InboundAlgorithmMap.Remove("bobsYourUncle");
+            }
+
+            JwtSecurityTokenHandler.InboundAlgorithmMap.Add(new KeyValuePair<string, string>("bobsYourUncle", SecurityAlgorithms.RsaSha256Signature));
+            expectedException = ExpectedException.Null;
+            try
+            {
+                handler.ValidateToken(jwt);
+                ExpectedException.ProcessNoException(expectedException);
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ProcessException(expectedException, ex);
+            }
             finally
             {
-                JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.RsaSha256Signature );
-                JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string, string>( SecurityAlgorithms.RsaSha256Signature, "RS256" ) );
+                if (originalInbound.Key != null)
+                {
+                    JwtSecurityTokenHandler.InboundAlgorithmMap.Remove(originalInbound.Key);
+                    JwtSecurityTokenHandler.InboundAlgorithmMap.Add(originalInbound);
+                }
             }
         }
 
         [TestMethod]
         [TestProperty( "TestCaseID", "A8068888-87D8-49D6-919F-CDF9AAC26F57" )]
         [Description( "Extensibility tests for SymmetricSignatureProvider" )]
-        public void SymmetricSignatureProvider_Extensibility()
+        public void SymmetricSignatureProvider_Extensibility_AlgorithmMapping()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             Console.WriteLine( "Testvariation: " + "outbound signature algorithm - bobsYourUncle" );
 
-            // inbound signature algorithm - bobsYourUncle
-            JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.HmacSha256Signature );
-            JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string, string>( SecurityAlgorithms.HmacSha256Signature, "bobsYourUncle" ) );
-            JwtSecurityToken jwt = handler.CreateToken( issuer: "http://GotJwt.com", signingCredentials: KeyingMaterial.SymmetricSigningCreds_256_Sha2 ) as JwtSecurityToken;
+            KeyValuePair<string, string> originalOutbound = new KeyValuePair<string, string>(null, null);
+            if (JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey(SecurityAlgorithms.HmacSha256Signature))
+            {
+                originalOutbound = new KeyValuePair<string, string>(SecurityAlgorithms.HmacSha256Signature, JwtSecurityTokenHandler.OutboundAlgorithmMap[SecurityAlgorithms.HmacSha256Signature]);
+                JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove(SecurityAlgorithms.HmacSha256Signature);
+            }
+
+            JwtSecurityTokenHandler.OutboundAlgorithmMap.Add(new KeyValuePair<string, string>(SecurityAlgorithms.HmacSha256Signature, "bobsYourUncle"));
+            JwtSecurityToken jwt = handler.CreateToken(issuer: Issuers.GotJwt, signingCredentials: KeyingMaterial.SymmetricSigningCreds_256_Sha2) as JwtSecurityToken;
+            JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove(SecurityAlgorithms.HmacSha256Signature);
+            if (originalOutbound.Key != null)
+            {
+                JwtSecurityTokenHandler.OutboundAlgorithmMap.Add(originalOutbound);
+            }
+
             List<SecurityToken> tokens = new List<SecurityToken>() { KeyingMaterial.BinarySecretToken_256 };
+
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
                 IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
                 ValidateAudience = false,
-                ValidIssuer = "http://GotJwt.com",
-
+                ValidIssuer = Issuers.GotJwt,
             };
 
             // inbound unknown algorithm
-            ExpectedException expectedException = ExpectedException.SecVal( id: "Jwt10316" );
+            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10316" );
             try
             {
                 ClaimsPrincipal principal = handler.ValidateToken( jwt, tvp );
@@ -290,10 +339,33 @@ namespace System.IdentityModel.Test
             {
                 ExpectedException.ProcessException( expectedException, ex );
             }
+
+            // inbound is mapped
+            KeyValuePair<string, string> originalInbound = new KeyValuePair<string, string>(null, null);
+            if (JwtSecurityTokenHandler.InboundAlgorithmMap.ContainsKey("bobsYourUncle"))
+            {
+                originalInbound = new KeyValuePair<string, string>("bobsYourUncle", JwtSecurityTokenHandler.InboundAlgorithmMap["bobsYourUncle"]);
+                JwtSecurityTokenHandler.InboundAlgorithmMap.Remove("bobsYourUncle");
+            }
+
+            JwtSecurityTokenHandler.InboundAlgorithmMap.Add(new KeyValuePair<string, string>("bobsYourUncle", SecurityAlgorithms.HmacSha256Signature));
+            expectedException = ExpectedException.Null;
+            try
+            {
+                handler.ValidateToken(jwt.RawData, tvp);
+                ExpectedException.ProcessNoException(expectedException);
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ProcessException(expectedException, ex);
+            }
             finally
             {
-                JwtSecurityTokenHandler.OutboundAlgorithmMap.Remove( SecurityAlgorithms.HmacSha256Signature );
-                JwtSecurityTokenHandler.OutboundAlgorithmMap.Add( new KeyValuePair<string, string>( SecurityAlgorithms.HmacSha256Signature, "HS256" ) );
+                if (originalInbound.Key != null)
+                {
+                    JwtSecurityTokenHandler.InboundAlgorithmMap.Remove(originalInbound.Key);
+                    JwtSecurityTokenHandler.InboundAlgorithmMap.Add(originalInbound);
+                }
             }
         }
     }
