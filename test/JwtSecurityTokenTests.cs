@@ -271,7 +271,6 @@ namespace System.IdentityModel.Test
         [TestProperty( "Environments", "ACSDevBox" )]
         [Description( "Ensures that cascading constructors result in the same JWT" )]
         [Priority( 0 )]
-        [Owner( "BrentSch" )]
         [TestProperty( "DisciplineOwner", "Dev" )]
         [TestProperty( "Feature", "ACS/AAL" )]
         [TestProperty( "Framework", "TAEF" )]
