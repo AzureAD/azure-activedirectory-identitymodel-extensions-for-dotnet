@@ -838,7 +838,8 @@ namespace System.IdentityModel.Tokens
             this.ValidateSigningToken(jwt);
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
-            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveSigninToken));
+            string issuer = this.ValidateIssuer(jwt, validationParameters);
+            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, issuer, validationParameters.SaveSigninToken));
         }
 
         /// <summary>
@@ -1151,10 +1152,9 @@ namespace System.IdentityModel.Tokens
                     exceptionString += ex.ToString();
                     exceptionString += Environment.NewLine;
                 }
-
             }
 
-            if (aKeyMatchedTheSecurityKeyIdentifier && jwtSigningKeyIdentifier.Count > 0)
+            if (!aKeyMatchedTheSecurityKeyIdentifier && jwtSigningKeyIdentifier.Count > 0)
             {
                 throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10334, jwt.ToString()));
             }
@@ -1595,6 +1595,14 @@ namespace System.IdentityModel.Tokens
                 throw new AudienceUriValidationFailedException(JwtErrors.Jwt10300);
             }
 
+            if (validationParameters.AudienceValidator != null)
+            {
+                if (validationParameters.AudienceValidator(jwt.Audience, jwt))
+                {
+                    return;
+                }
+            }
+
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
                 throw new ArgumentException(JwtErrors.Jwt10301);
@@ -1746,6 +1754,14 @@ namespace System.IdentityModel.Tokens
             if (!validationParameters.ValidateIssuer)
             {
                 return jwt.Issuer;
+            }
+
+            if (validationParameters.IssuerValidator != null)
+            {
+                if (validationParameters.IssuerValidator(jwt.Issuer, jwt))
+                {
+                    return jwt.Issuer;
+                }
             }
 
             // Throw if all possible places to validate against are null or empty

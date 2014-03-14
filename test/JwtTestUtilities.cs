@@ -97,26 +97,6 @@ namespace System.IdentityModel.Test
 
     public class JwtTestUtilities
     {
-        public static TokenValidationParameters SignatureValidationParameters( SecurityToken signingToken = null, List<SecurityToken> signingTokens = null )
-        {
-            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidateAudience = false,
-                ValidIssuer = "http://GotJwt.com",
-            };
-
-            List<SecurityKey> securityKeys = new List<SecurityKey>();
-            if (signingToken != null)
-                securityKeys.AddRange(signingToken.SecurityKeys);
-
-            if (signingTokens != null)
-                foreach(SecurityToken securityToken in signingTokens)
-                    if (securityToken != null)
-                        securityKeys.AddRange(securityToken.SecurityKeys);
-
-            tokenValidationParameters.IssuerSigningKeys = securityKeys;
-            return tokenValidationParameters;
-        }
 
         public static string GetJwtParts( string jwt, string whichParts )
         {
