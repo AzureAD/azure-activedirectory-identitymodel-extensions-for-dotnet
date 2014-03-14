@@ -170,10 +170,10 @@ namespace Microsoft.IdentityModel.Test
             ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException(substringExpected: "name: validationParameters");
             ValidateIssuer(null, null, samlSecurityTokenHandler, exceptionProcessor);
 
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            exceptionProcessor = ExceptionProcessor.SecurityTokenValidationException(substringExpected: "IDX10211");
             ValidateIssuer(null, new TokenValidationParameters{ ValidateIssuer = false}, samlSecurityTokenHandler, exceptionProcessor);
 
-            exceptionProcessor = ExceptionProcessor.ArgumentException(substringExpected: "IDX10211");
+            exceptionProcessor = ExceptionProcessor.SecurityTokenValidationException(substringExpected: "IDX10211");
             ValidateIssuer(null, new TokenValidationParameters(), samlSecurityTokenHandler, exceptionProcessor);
 
             exceptionProcessor = ExceptionProcessor.ArgumentException(substringExpected: "IDX10204");
@@ -190,10 +190,57 @@ namespace Microsoft.IdentityModel.Test
             exceptionProcessor = ExceptionProcessor.SecurityTokenValidationException(substringExpected: "IDX10205");
             ValidateIssuer("bob", new TokenValidationParameters { ValidIssuers = validIssuers }, samlSecurityTokenHandler, exceptionProcessor);
 
+            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            ValidateIssuer("bob", new TokenValidationParameters { ValidateIssuer = false }, samlSecurityTokenHandler, exceptionProcessor);
+
             validIssuers.Add("bob");
             exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
             issuer = ValidateIssuer("bob", new TokenValidationParameters { ValidIssuers = validIssuers }, samlSecurityTokenHandler, exceptionProcessor);
             Assert.IsTrue(issuer == "bob", "issuer mismatch");
+
+            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            TokenValidationParameters validationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                IssuerValidator =
+                    (tokenIssuer, token) =>
+                    {
+                        return true;
+                    },
+            };
+
+            ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, exceptionProcessor);
+
+            // delegate returns false, secondary should still succeed
+            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            validationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidIssuers = validIssuers,
+                IssuerValidator =
+                    (tokenIssuer, token) =>
+                    {
+                        return false;
+                    },
+            };
+
+            issuer = ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, exceptionProcessor);
+            Assert.IsTrue(issuer == "bob", "issuer mismatch");
+
+            // delegate returns false, secondary should fail
+            validIssuers = new List<string> { "john", "paul", "george", "ringo" };
+            exceptionProcessor = ExceptionProcessor.SecurityTokenValidationException(substringExpected: "IDX10205");
+            validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                ValidateAudience = false,
+                ValidIssuer = "http://Bob",
+                IssuerValidator =
+                    (tokenIssuer, token) =>
+                    {
+                        return false;
+                    },
+            };
         }
 
         private string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SamlSecurityTokenHandler samlSecurityTokenHandler, ExceptionProcessor exceptionProcessor)

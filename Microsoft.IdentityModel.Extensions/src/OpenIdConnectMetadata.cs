@@ -53,11 +53,6 @@ namespace Microsoft.IdentityModel.Protocols
         { 
             get 
             { 
-                if ( _signingTokens == null)
-                {
-                    _signingTokens = new Collection<X509SecurityToken>();
-                }
-
                 return _signingTokens; 
             } 
         }

@@ -48,6 +48,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\bin\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
@@ -75,6 +76,8 @@
     <Compile Include="MessageComparer.cs" />
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
+    <Compile Include="OpenIdConnectMetadataRetrieverTests.cs" />
+    <Compile Include="OpenIdConnectMetadataTests.cs" />
     <Compile Include="Saml2SecurityTokenHandlerTests.cs" />
     <Compile Include="SamlSecurityTokenHandlerTests.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensionsTests.cs" />

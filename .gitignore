@@ -178,6 +178,8 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 =======
+=======
+>>>>>>> updated for delegates in tokenvalidation parameters. Updated tests
 bin
 obj
 *.suo
@@ -200,5 +202,14 @@ node_modules
 .nuget/NuGet.exe
 docs/build
 build/*
+<<<<<<< HEAD
 Classes
 lib/net45
+=======
+Microsoft.IdentityModel.Extensions/TestResults/*
+Microsoft.IdentityModel.Extensions/drop/*
+Microsoft.IdentityModel.Extensions/nuget/*
+Microsoft.IdentityModel.Extensions/src/Backup/*
+Microsoft.IdentityModel.Extensions/build/*
+Microsoft.IdentityModel.Extensions/src/SequenceDiagram*
+Microsoft.IdentityModel.Extensions/src/lib
