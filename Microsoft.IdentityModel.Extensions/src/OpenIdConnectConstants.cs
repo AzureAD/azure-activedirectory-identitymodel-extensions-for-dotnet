@@ -80,6 +80,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string Client_Secret = "client_secret";
         public const string Code = "code";
         public const string Display = "display";
+        public const string Domain_Hint = "domain_hint";
         public const string Error = "error";
         public const string Error_Description = "error_description";
         public const string Error_Uri = "error_uri";
@@ -96,8 +97,8 @@ namespace Microsoft.IdentityModel.Protocols
         public const string Post_Logout_Redirect_Uri = "post_logout_redirect_uri";
         public const string Prompt = "prompt";
         public const string Redirect_Uri = "redirect_uri";
-        public const string Refresh_token = "refresh_token";
         public const string Request_Uri = "request_uri";
+        public const string Resource = "resource";        
         public const string Response_Mode = "response_mode";        
         public const string Response_Type = "response_type";       
         public const string Scope = "scope";

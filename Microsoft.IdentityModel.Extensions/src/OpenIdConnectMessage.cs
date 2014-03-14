@@ -186,6 +186,15 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Gets or sets 'domain_hint'.
+        /// </summary>
+        public string Domain_Hint
+        {
+            get { return GetParameter(OpenIdConnectParameterNames.Domain_Hint); }
+            set { SetParameter(OpenIdConnectParameterNames.Domain_Hint, value); }
+        }
+
+        /// <summary>
         /// Gets or sets 'error'.
         /// </summary>
         public string Error
@@ -331,15 +340,6 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets or sets 'refresh_token'.
-        /// </summary>
-        public string Refresh_token
-        {
-            get { return GetParameter(OpenIdConnectParameterNames.Refresh_token); }
-            set { SetParameter(OpenIdConnectParameterNames.Refresh_token, value); }
-        }
-
-        /// <summary>
         /// Gets or sets 'request_uri'.
         /// </summary>
         public string Request_Uri
@@ -366,6 +366,15 @@ namespace Microsoft.IdentityModel.Protocols
             set { SetParameter(OpenIdConnectParameterNames.Response_Type, value); }
         }
 
+        /// <summary>
+        /// Gets or sets 'resource'
+        /// </summary>
+        public string Resource
+        {
+            get { return GetParameter(OpenIdConnectParameterNames.Resource); }
+            set { SetParameter(OpenIdConnectParameterNames.Resource, value); }
+        }
+        
         /// <summary>
         /// Gets or sets 'scope'.
         /// </summary>

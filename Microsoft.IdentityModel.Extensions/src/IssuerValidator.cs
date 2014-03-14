@@ -34,11 +34,6 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentNullException("validationParameters");
             }
 
-            if (!validationParameters.ValidateIssuer)
-            {
-                return issuer;
-            }
-
             if (validationParameters.IssuerValidator != null)
             {
                 if (validationParameters.IssuerValidator(issuer, securityToken))
@@ -49,7 +44,12 @@ namespace Microsoft.IdentityModel.Extensions
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211));
+                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211));
+            }
+
+            if (!validationParameters.ValidateIssuer)
+            {
+                return issuer;
             }
 
             // Throw if all possible places to validate against are null or empty
