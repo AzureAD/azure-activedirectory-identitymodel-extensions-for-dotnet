@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Protocols
     [DataContract]
     public class OpenIdConnectMetadata
     {
-        Collection<X509SecurityToken> _signingTokens = new Collection<X509SecurityToken>();
+        Collection<X509SecurityToken> _signingTokens = null;
 
         /// <summary>
         /// Creates a <see cref="OpenIdConnectMetadata"/>.
@@ -52,7 +52,12 @@ namespace Microsoft.IdentityModel.Protocols
         public ICollection<X509SecurityToken> SigningTokens 
         { 
             get 
-            { 
+            {
+                if (_signingTokens == null)
+                {
+                    _signingTokens = new Collection<X509SecurityToken>();
+                }
+
                 return _signingTokens; 
             } 
         }
