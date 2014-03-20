@@ -209,6 +209,7 @@ namespace Microsoft.IdentityModel.Extensions
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
+
             Configuration = new SecurityTokenHandlerConfiguration
             {
                 IssuerTokenResolver = IssuerKeyRetriever.CreateIssuerTokenResolver(securityToken, validationParameters),
@@ -238,6 +239,7 @@ namespace Microsoft.IdentityModel.Extensions
             Saml2SubjectConfirmation subjectConfirmation = samlToken.Assertion.Subject.SubjectConfirmations[0];
             if (subjectConfirmation.SubjectConfirmationData != null)
             {
+                // TODO handle confirmation data and ensure exceptions are the same as jwt security token handler
                 ValidateConfirmationData(subjectConfirmation.SubjectConfirmationData);
             }
 

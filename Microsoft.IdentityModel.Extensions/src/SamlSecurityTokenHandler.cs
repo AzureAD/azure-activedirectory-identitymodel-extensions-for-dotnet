@@ -237,8 +237,10 @@ namespace Microsoft.IdentityModel.Extensions
             {
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
-            
+
+            // TODO handle confirmation data and ensure exceptions are the same as jwt security token handler
             ValidateConditions(samlToken.Assertion.Conditions, false);
+
             if (validationParameters.ValidateAudience)
             {
                 ValidateAudience(samlToken.Assertion.Conditions, validationParameters, samlToken);

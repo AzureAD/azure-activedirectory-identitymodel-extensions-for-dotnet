@@ -131,6 +131,21 @@ namespace Microsoft.IdentityModel.Test
         public static ExceptionProcessor SecurityTokenValidationException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExceptionProcessor(typeExpected: typeof(SecurityTokenValidationException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
+        public static ExceptionProcessor SecurityTokenInvalidAudienceException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExceptionProcessor(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
+        public static ExceptionProcessor SecurityTokenInvalidLifetimeException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExceptionProcessor(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }                
+
+        public static ExceptionProcessor SecurityTokenInvalidIssuerException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExceptionProcessor(typeExpected: typeof(SecurityTokenInvalidIssuerException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }                
 
         public string SubstringExpected { get; set; }
