@@ -79,8 +79,11 @@
     <Compile Include="NamedKeySecurityKeyIdentifierClause.cs" />
     <Compile Include="NamedKeySecurityToken.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecurityTokenInvalidAudienceException.cs" />
+    <Compile Include="SecurityTokenInvalidIssuerException.cs" />
+    <Compile Include="SecurityTokenInvalidLifetimeException.cs" />
+    <Compile Include="SecurityTokenInvalidSignatureException.cs" />
     <Compile Include="SecurityTokenSignatureKeyNotFoundException.cs" />
-    <Compile Include="SecurityTokenSignatureValidationException.cs" />
     <Compile Include="SignatureProvider.cs" />
     <Compile Include="SignatureProviderFactory.cs" />
     <Compile Include="SymmetricSignatureProvider.cs" />

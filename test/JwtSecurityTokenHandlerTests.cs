@@ -900,7 +900,7 @@ namespace System.IdentityModel.Test
            
             // add new claim, signauture should fail
             jwt.Payload.AddClaim(new Claim("foo", "bar"));
-            ExpectedException ee = new ExpectedException(typeof(SecurityTokenSignatureValidationException), id: "Jwt10315");
+            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), id: "Jwt10315");
             CheckVariation(jwt, handler, ee);
 
             // add claim to payload directly
@@ -1125,7 +1125,7 @@ namespace System.IdentityModel.Test
         {
             // "Security Key Identifier not found",
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler() { RequireExpirationTime = false };
-            ExpectedException ee = new ExpectedException(typeof(SecurityTokenSignatureValidationException), "Jwt10315:");
+            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "Jwt10315:");
             TokenValidationParameters validationParameters = SignatureValidationParameters(signingToken: KeyingMaterial.X509Token_LocalSts);
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, ee);
 
@@ -1155,7 +1155,7 @@ namespace System.IdentityModel.Test
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1"), tokenHandler, validationParameters, ee);
 
             // "SigningToken and SigningTokens both null",
-            ee = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10315:");
+            ee = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10315:");
             validationParameters = SignatureValidationParameters();
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, ee);
 
@@ -1165,7 +1165,7 @@ namespace System.IdentityModel.Test
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, ee);
 
             // "SigningToken no keys",
-            ee = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10315:");
+            ee = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10315:");
             validationParameters = SignatureValidationParameters( signingToken: new UserNameSecurityToken( "username", "password" ) );
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"), tokenHandler, validationParameters, ee);
 
@@ -1183,7 +1183,7 @@ namespace System.IdentityModel.Test
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, ee);
 
             // "BinaryKey 56Bits",
-            ee = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10316:");
+            ee = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10316:");
             validationParameters = SignatureValidationParameters(signingToken: KeyingMaterial.BinarayToken56BitKey);
             CheckVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, ee);
         }
@@ -1277,12 +1277,12 @@ namespace System.IdentityModel.Test
             string jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: null) as JwtSecurityToken).RawData; 
             
             // validIssuer null, validIssuers null
-            ExpectedException ee = ExpectedException.ArgEx(id: "Jwt10317");
+            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), id: "Jwt10317");
             TokenValidationParameters validationParameters = new TokenValidationParameters() { ValidateAudience = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // no issuers should fail.
-            ee = ExpectedException.SecVal(id: "Jwt10311");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), id: "Jwt10311");
             validationParameters = new TokenValidationParameters() { ValidateAudience = false, ValidIssuers = new List<string>() };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
@@ -1335,7 +1335,7 @@ namespace System.IdentityModel.Test
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // delegate returns false, secondary should fail
-            ee = new ExpectedException(typeof(SecurityTokenValidationException));
+            ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), id: "Jwt10311");
             validationParameters = new TokenValidationParameters
             {
                 IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
@@ -1363,51 +1363,51 @@ namespace System.IdentityModel.Test
 
             // "Jwt.Audience == null"
             TokenValidationParameters validationParameters = new TokenValidationParameters() { ValidateIssuer = false };
-            ExpectedException ee = ExpectedException.Aud(id: "Jwt10300");
+            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10300");
             string jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: null) as JwtSecurityToken).RawData;
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "jwt.Audience == EmptyString"
-            ee = ExpectedException.Aud(id: "Jwt10300");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10300");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: string.Empty) as JwtSecurityToken).RawData;
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "jwt.Audience == whitespace"
-            ee = ExpectedException.Aud(id: "Jwt10300");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10300");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "    ") as JwtSecurityToken).RawData;
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience TokenValidationParameters.ValidAudiences both null"
-            ee = ExpectedException.ArgEx(id: "Jwt10301");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10301");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudiences empty"
-            ee = ExpectedException.Aud(id: "Jwt10303");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10303");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             validationParameters = new TokenValidationParameters() { ValidAudience = string.Empty, ValidAudiences = new List<string>(), ValidateIssuer = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience whitespace, TokenValidationParameters.ValidAudiences empty"
-            ee = ExpectedException.Aud(id: "Jwt10303");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10303");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             validationParameters = new TokenValidationParameters() { ValidAudience = "   ", ValidAudiences = new List<string>(), ValidateIssuer = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudience one null string"
-            ee = ExpectedException.Aud(id: "Jwt10303");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10303");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             validationParameters = new TokenValidationParameters() { ValidAudience = "", ValidAudiences = new List<string>() { null }, ValidateIssuer = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience empty, TokenValidationParameters.ValidAudiences one empty string"
-            ee = ExpectedException.Aud(id: "Jwt10303");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10303");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience:  "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             validationParameters = new TokenValidationParameters() { ValidAudience = "", ValidAudiences = new List<string>() { string.Empty }, ValidateIssuer = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience string.Empty, TokenValidationParameters.ValidAudiences one string whitespace"
-            ee = ExpectedException.Aud(id: "Jwt10303");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), id: "Jwt10303");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             validationParameters = new TokenValidationParameters() { ValidAudience = "", ValidAudiences = new List<string>() { "     " }, ValidateIssuer = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);

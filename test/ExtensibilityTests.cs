@@ -256,7 +256,7 @@ namespace System.IdentityModel.Test
                                     };
 
             // inbound unknown algorithm
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10316");
+            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10316");
             try
             {
                 handler.ValidateToken( jwt );
@@ -329,7 +329,7 @@ namespace System.IdentityModel.Test
             };
 
             // inbound unknown algorithm
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenSignatureValidationException), id: "Jwt10316" );
+            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10316" );
             try
             {
                 ClaimsPrincipal principal = handler.ValidateToken( jwt, tvp );

@@ -1174,11 +1174,11 @@ namespace System.IdentityModel.Tokens
             
             if (firstException != null)
             {
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, exceptionString, jwt.ToString()), firstException);
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, exceptionString, jwt.ToString()), firstException);
             }
             else
             {
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
             }
         }
 
@@ -1348,11 +1348,11 @@ namespace System.IdentityModel.Tokens
                     sb.AppendLine(ex.ToString());
                 }
 
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10316, keysAttempted, sb.ToString(), jwt.ToString()));
             }
             else
             {
-                throw new SecurityTokenSignatureValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10315, keysAttempted, jwt.ToString()));
             }
         }
 
@@ -1592,7 +1592,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(jwt.Audience))
             {
-                throw new AudienceUriValidationFailedException(JwtErrors.Jwt10300);
+                throw new SecurityTokenInvalidAudienceException(JwtErrors.Jwt10300);
             }
 
             if (validationParameters.AudienceValidator != null)
@@ -1605,7 +1605,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
-                throw new ArgumentException(JwtErrors.Jwt10301);
+                throw new SecurityTokenInvalidAudienceException(JwtErrors.Jwt10301);
             }
 
             if (!string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
@@ -1628,7 +1628,7 @@ namespace System.IdentityModel.Tokens
                 }
             }
 
-            throw new AudienceUriValidationFailedException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10303, jwt.Audience, validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)));
+            throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10303, jwt.Audience, validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)));
         }
 
         /// <summary>
@@ -1661,23 +1661,23 @@ namespace System.IdentityModel.Tokens
             expExists = jwt.Payload.TryGetValue(JwtConstants.ReservedClaims.ExpirationTime, out obj);
             if (!expExists && this.RequireExpirationTime)
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10322, jwt));
+                throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10322, jwt));
             }
 
             if (nbfExists && expExists && (jwt.ValidFrom > jwt.ValidTo))
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10403, jwt.ValidFrom, jwt.ValidTo));
+                throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10403, jwt.ValidFrom, jwt.ValidTo));
             }
 
             DateTime utcNow = DateTime.UtcNow;
             if (nbfExists && (jwt.ValidFrom > DateTimeUtil.Add(utcNow, TimeSpan.FromMinutes(this.ClockSkewInSeconds))))
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10306, jwt.ValidFrom, utcNow));
+                throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10306, jwt.ValidFrom, utcNow));
             }
 
             if (expExists && (jwt.ValidTo < DateTimeUtil.Add(utcNow, TimeSpan.FromMinutes(this.ClockSkewInSeconds).Negate())))
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10305, jwt.ValidTo, utcNow));
+                throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10305, jwt.ValidTo, utcNow));
             }
         }
 
@@ -1748,7 +1748,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(jwt.Issuer))
             {
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10319));
+                throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10319));
             }
 
             if (!validationParameters.ValidateIssuer)
@@ -1767,7 +1767,7 @@ namespace System.IdentityModel.Tokens
             // Throw if all possible places to validate against are null or empty
             if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && (validationParameters.ValidIssuers == null))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10317));
+                throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10317));
             }
 
             if (!string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && string.Equals(validationParameters.ValidIssuer, jwt.Issuer, StringComparison.Ordinal))
@@ -1789,7 +1789,7 @@ namespace System.IdentityModel.Tokens
             string validIssuer = validationParameters.ValidIssuer ?? "null";
             string validIssuers = validationParameters.ValidIssuers == null ? "null" : Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers);
 
-            throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10311, validIssuer, validIssuers, jwt.Issuer));
+            throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10311, validIssuer, validIssuers, jwt.Issuer));
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace System.IdentityModel.Tokens
     /// The member names within the JWT Header are referred to as Header Parameter Names. 
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     public class JwtHeader : Dictionary<string, string>
     {
         private SigningCredentials signingCredentials;
@@ -140,6 +140,7 @@ namespace System.IdentityModel.Tokens
         /// <para>   </para>
         /// <para>If no keys are found, an empty <see cref="SecurityKeyIdentifier"/> will be returned.</para>
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations", Justification="Back compat")]
         public virtual SecurityKeyIdentifier SigningKeyIdentifier
         {
             get
