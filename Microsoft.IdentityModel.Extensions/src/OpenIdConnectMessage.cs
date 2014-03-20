@@ -66,10 +66,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
-        /// With response_type == 'id_token'.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-
         public string CreateIdTokenQueryString()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
@@ -77,31 +75,20 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
-        /// With response_type == 'id_token'.
+        /// Creates a query string using the using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-
         public string CreateLogoutQueryString()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            openIdConnectMessage.IssuerAddress = openIdConnectMessage.LogoutEndpoint;
             return openIdConnectMessage.BuildRedirectUri();
         }
-
-        /// <summary>
-        /// Gets or sets the value for the token endpoint.
-        /// </summary>
-        public string TokenEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets the value for the AuthorizeEndpoint
         /// </summary>
         public string AuthorizeEndpoint { get; set; }
-
-        /// <summary>
-        /// Gets or sets the value for the LogoutEndpoint
-        /// </summary>
-        public string LogoutEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets 'access_Token'.
@@ -286,6 +273,11 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Gets or sets the value for the LogoutEndpoint
+        /// </summary>
+        public string LogoutEndpoint { get; set; }
+
+        /// <summary>
         /// Gets or sets 'max_age'.
         /// </summary>
         public string Max_Age
@@ -419,6 +411,11 @@ namespace Microsoft.IdentityModel.Protocols
             get { return GetParameter(OpenIdConnectParameterNames.Token); }
             set { SetParameter(OpenIdConnectParameterNames.Token, value); }
         }
+
+        /// <summary>
+        /// Gets or sets the value for the token endpoint.
+        /// </summary>
+        public string TokenEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets 'token_type'.
