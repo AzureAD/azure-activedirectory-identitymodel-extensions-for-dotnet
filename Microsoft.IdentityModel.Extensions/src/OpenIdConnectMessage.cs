@@ -81,7 +81,6 @@ namespace Microsoft.IdentityModel.Protocols
         public string CreateLogoutQueryString()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
-            openIdConnectMessage.IssuerAddress = openIdConnectMessage.LogoutEndpoint;
             return openIdConnectMessage.BuildRedirectUri();
         }
 
@@ -271,11 +270,6 @@ namespace Microsoft.IdentityModel.Protocols
             get { return GetParameter(OpenIdConnectParameterNames.Login_Hint); }
             set { SetParameter(OpenIdConnectParameterNames.Login_Hint, value); }
         }
-
-        /// <summary>
-        /// Gets or sets the value for the LogoutEndpoint
-        /// </summary>
-        public string LogoutEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets 'max_age'.
