@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual string BuildRedirectUri()
         {
             StringBuilder strBuilder = new StringBuilder();
-            strBuilder.Append(_issuerAddress + "?");
+            strBuilder.Append(_issuerAddress);
             bool skipDelimiter = true;
             foreach (KeyValuePair<string, string> parameter in _parameters)
             {
@@ -83,7 +83,11 @@ namespace Microsoft.IdentityModel.Protocols
                     continue;
                 }
 
-                if (!skipDelimiter)
+                if (skipDelimiter)
+                {
+                    strBuilder.Append('?');
+                }
+                else
                 {
                     strBuilder.Append('&');
                 }

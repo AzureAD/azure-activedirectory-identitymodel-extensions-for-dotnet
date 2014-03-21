@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Reflection;
+using System.Web;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -116,6 +117,87 @@ namespace Microsoft.IdentityModel.Test
         [Description( "Tests: Publics" )]
         public void OpenIdConnectRequest_Publics()
         {
+            string issuerAddress = "http://gotJwt.onmicrosoft.com";
+            string redirect_uri = "http://gotJwt.onmicrosoft.com/signedIn";
+            string resource = "location data";
+            string customParameterName = "Custom Parameter Name";
+            string customParameterValue = "Custom Parameter Value";
+
+            // Empty string
+            OpenIdConnectMessage openIdConnectRequest = new OpenIdConnectMessage();
+            string queryString = openIdConnectRequest.BuildRedirectUri();
+            string expectedQueryString = string.Empty;
+            Assert.AreEqual(expectedQueryString, queryString);
+            
+            // IssuerAddress only
+            openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
+            queryString = openIdConnectRequest.BuildRedirectUri();
+            expectedQueryString = issuerAddress;
+            Assert.AreEqual(expectedQueryString, queryString);
+
+            // IssuerAdderss and Redirect_uri
+            openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
+            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            queryString = openIdConnectRequest.BuildRedirectUri();
+            expectedQueryString = 
+                issuerAddress +
+                "?" +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) + 
+                "=" +
+                HttpUtility.UrlEncode(redirect_uri);
+            Assert.AreEqual(expectedQueryString, queryString);
+
+            // IssuerAdderss empty just Redirect_uri
+            openIdConnectRequest = new OpenIdConnectMessage();
+            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            queryString = openIdConnectRequest.BuildRedirectUri();
+            expectedQueryString =
+                "?" +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
+                "=" +
+                HttpUtility.UrlEncode(redirect_uri);
+            Assert.AreEqual(expectedQueryString, queryString);
+
+            // IssuerAdderss, Redirect_uri, Response
+            openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
+            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            openIdConnectRequest.Resource = resource;
+            queryString = openIdConnectRequest.BuildRedirectUri();
+            expectedQueryString =
+                issuerAddress +
+                "?" +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
+                "=" +
+                HttpUtility.UrlEncode(redirect_uri) +
+                "&" +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Resource) +
+                "=" +
+                HttpUtility.UrlEncode(resource);
+
+            Assert.AreEqual(expectedQueryString, queryString);
+
+            // IssuerAdderss, Redirect_uri, Response, customParam
+            openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
+            openIdConnectRequest.Parameters.Add(customParameterName, customParameterValue);
+            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            openIdConnectRequest.Resource = resource;
+            queryString = openIdConnectRequest.BuildRedirectUri();
+            expectedQueryString =
+                issuerAddress +
+                "?" +
+                HttpUtility.UrlEncode(customParameterName) +
+                "=" +
+                HttpUtility.UrlEncode(customParameterValue) +
+                "&" +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
+                "=" +
+                HttpUtility.UrlEncode(redirect_uri) +
+                "&" +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Resource) +
+                "=" +
+                HttpUtility.UrlEncode(resource);
+
+            Assert.AreEqual(expectedQueryString, queryString);
         }
     }
 }
