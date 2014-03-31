@@ -718,15 +718,17 @@ namespace System.IdentityModel.Tokens
                             JwtConstants.TokenType));
             }
 
-            XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader);
-            string wsuId = dictionaryReader.GetAttribute(WSSecurityUtilityConstants.Attributes.Id, WSSecurityUtilityConstants.Namespace);
-            JwtSecurityToken jwt = this.ReadToken(Encoding.UTF8.GetString(dictionaryReader.ReadElementContentAsBase64())) as JwtSecurityToken;
-            if (wsuId != null && jwt != null)
+            using (XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader))
             {
-                jwt.SetId(wsuId);
-            }
+                string wsuId = dictionaryReader.GetAttribute(WSSecurityUtilityConstants.Attributes.Id, WSSecurityUtilityConstants.Namespace);
+                JwtSecurityToken jwt = this.ReadToken(Encoding.UTF8.GetString(dictionaryReader.ReadElementContentAsBase64())) as JwtSecurityToken;
+                if (wsuId != null && jwt != null)
+                {
+                    jwt.SetId(wsuId);
+                }
 
-            return jwt;
+                return jwt;
+            }
         }
 
         /// <summary>
@@ -1371,6 +1373,7 @@ namespace System.IdentityModel.Tokens
                 return securityKey.ToString();
             }
         }
+
         /// <summary>
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JwtSecurityToken"/>.
         /// </summary>
