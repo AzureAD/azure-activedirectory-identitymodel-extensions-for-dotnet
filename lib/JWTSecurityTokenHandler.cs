@@ -220,6 +220,11 @@ namespace System.IdentityModel.Tokens
             }
         }
 
+        /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
+        /// when validating a token.
+        /// </summary>
+        public Func<JwtSecurityToken, string, string> NameClaimTypeDelegate { get; set; }
+
         /// <summary>
         /// Returns 'true' which indicates this instance can validate a <see cref="JwtSecurityToken"/>.
         /// </summary>
@@ -844,7 +849,12 @@ namespace System.IdentityModel.Tokens
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
             string issuer = this.ValidateIssuer(jwt, validationParameters);
-            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, issuer, validationParameters.SaveSigninToken));
+            if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
+            {
+                ValidateToken(jwt.Actor, validationParameters);
+            }
+
+            return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveSigninToken));
         }
 
         /// <summary>
@@ -910,6 +920,11 @@ namespace System.IdentityModel.Tokens
             this.ValidateSigningToken(jwt);
             this.ValidateLifetime(jwt);
             this.ValidateAudience(jwt, validationParameters);
+            if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
+            {
+                ValidateToken(jwt.Actor, validationParameters);
+            }
+
             return new ClaimsPrincipal(this.ClaimsIdentityFromJwt(jwt, this.ValidateIssuer(jwt, validationParameters), validationParameters.SaveSigninToken));
         }
 
@@ -1393,7 +1408,17 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10333, jwt.ToString()));
             }
 
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, this.NameClaimType, this.RoleClaimType);
+            string nameClaimType = null;
+            if (NameClaimTypeDelegate != null)
+            {
+                nameClaimType = NameClaimTypeDelegate(jwt, issuer);
+            }
+            if (string.IsNullOrWhiteSpace(nameClaimType))
+            {
+                nameClaimType = this.NameClaimType;
+            }
+
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationTypes.Federation, nameClaimType, this.RoleClaimType);
             if (saveBootstrapContext)
             {
                 if (jwt.RawData != null)
