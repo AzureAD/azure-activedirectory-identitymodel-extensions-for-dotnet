@@ -220,6 +220,7 @@ namespace System.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
         /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
         /// when validating a token.
         /// </summary>
