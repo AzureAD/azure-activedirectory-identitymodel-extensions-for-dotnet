@@ -123,4 +123,18 @@ namespace Microsoft.IdentityModel.Protocols
         public const string Id_Token = "id_token";
         #pragma warning restore 1591
     }
+
+
+    /// <summary>
+    /// Response types for OpenIdConnect.
+    /// </summary>
+    public static class OpenIdConnectResponseModes
+    {
+#pragma warning disable 1591
+        public const string Query = "query";
+        public const string FormPost = "form_post";
+        public const string Fragment = "fragment";
+#pragma warning restore 1591
+    }
+
 }

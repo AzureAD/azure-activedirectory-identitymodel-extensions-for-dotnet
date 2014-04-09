@@ -125,20 +125,20 @@ namespace Microsoft.IdentityModel.Test
 
             // Empty string
             OpenIdConnectMessage openIdConnectRequest = new OpenIdConnectMessage();
-            string queryString = openIdConnectRequest.BuildRedirectUri();
+            string queryString = openIdConnectRequest.BuildRedirectUrl();
             string expectedQueryString = string.Empty;
             Assert.AreEqual(expectedQueryString, queryString);
             
             // IssuerAddress only
             openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
-            queryString = openIdConnectRequest.BuildRedirectUri();
+            queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString = issuerAddress;
             Assert.AreEqual(expectedQueryString, queryString);
 
             // IssuerAdderss and Redirect_uri
             openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
             openIdConnectRequest.Redirect_Uri = redirect_uri;
-            queryString = openIdConnectRequest.BuildRedirectUri();
+            queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString = 
                 issuerAddress +
                 "?" +
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Test
             // IssuerAdderss empty just Redirect_uri
             openIdConnectRequest = new OpenIdConnectMessage();
             openIdConnectRequest.Redirect_Uri = redirect_uri;
-            queryString = openIdConnectRequest.BuildRedirectUri();
+            queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString =
                 "?" +
                 HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Test
             openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
             openIdConnectRequest.Redirect_Uri = redirect_uri;
             openIdConnectRequest.Resource = resource;
-            queryString = openIdConnectRequest.BuildRedirectUri();
+            queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString =
                 issuerAddress +
                 "?" +
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Test
             openIdConnectRequest.Parameters.Add(customParameterName, customParameterValue);
             openIdConnectRequest.Redirect_Uri = redirect_uri;
             openIdConnectRequest.Resource = resource;
-            queryString = openIdConnectRequest.BuildRedirectUri();
+            queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString =
                 issuerAddress +
                 "?" +

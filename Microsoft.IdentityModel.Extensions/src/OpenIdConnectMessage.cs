@@ -68,20 +68,20 @@ namespace Microsoft.IdentityModel.Protocols
         /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-        public string CreateIdTokenQueryString()
+        public string CreateIdTokenUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
-            return openIdConnectMessage.BuildRedirectUri();
+            return openIdConnectMessage.BuildRedirectUrl();
         }
 
         /// <summary>
         /// Creates a query string using the using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-        public string CreateLogoutQueryString()
+        public string CreateLogoutUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
-            return openIdConnectMessage.BuildRedirectUri();
+            return openIdConnectMessage.BuildRedirectUrl();
         }
 
         /// <summary>

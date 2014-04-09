@@ -35,9 +35,6 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("httpClient");
             }
 
-            string issuer = string.Empty;
-            string passiveTokenEndpoint = string.Empty;
-            List<X509SecurityToken> signingTokens = new List<X509SecurityToken>();
             HttpResponseMessage metadataResponse = httpClient.GetAsync(metadataEndpoint).Result;
             metadataResponse.EnsureSuccessStatusCode();
             Stream stream = metadataResponse.Content.ReadAsStreamAsync().Result;

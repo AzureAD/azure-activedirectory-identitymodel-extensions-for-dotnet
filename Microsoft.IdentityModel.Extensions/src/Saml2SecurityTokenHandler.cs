@@ -235,7 +235,8 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            ValidateConditions(samlToken.Assertion.Conditions, false);
+            ValidateConditions(samlToken.Assertion.Conditions, validationParameters);
+
             Saml2SubjectConfirmation subjectConfirmation = samlToken.Assertion.Subject.SubjectConfirmations[0];
             if (subjectConfirmation.SubjectConfirmationData != null)
             {
@@ -281,6 +282,41 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
+        /// Validates the <see cref="Saml2Conditions"/> for expiration. Audience is checked seperately.
+        /// </summary>
+        /// <param name="conditions">SAML 2.0 condition to be validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> contain details controling validation.</param>
+        protected virtual void ValidateConditions(Saml2Conditions conditions, TokenValidationParameters validationParameters)
+        {
+            if (conditions != null)
+            {
+                DateTime now = DateTime.UtcNow;
+
+                if (conditions.NotBefore != null && conditions.NotBefore.HasValue
+                    && DateTimeUtil.Add(now, TimeSpan.FromSeconds(ClockSkewInSeconds)) < conditions.NotBefore.Value.ToUniversalTime())
+                {
+                    throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10216, now, ClockSkewInSeconds, conditions.NotBefore.Value));
+                }
+
+                if (conditions.NotOnOrAfter != null && conditions.NotOnOrAfter.HasValue
+                    && DateTimeUtil.Add(now, TimeSpan.FromSeconds(ClockSkewInSeconds).Negate()) >= conditions.NotOnOrAfter.Value)
+                {
+                    throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10217, now, ClockSkewInSeconds, conditions.NotBefore.Value));
+                }
+
+                if (conditions.OneTimeUse)
+                {
+                    throw new SecurityTokenValidationException(ErrorMessages.IDX10217);
+                }
+
+                if (conditions.ProxyRestriction != null)
+                {
+                    throw new SecurityTokenValidationException(ErrorMessages.IDX10218);
+                }
+            }
+        }
+
+        /// <summary>
         /// Determines if an issuer is valid.
         /// </summary>
         /// <param name="issuer">the issuer to validate</param>
@@ -291,5 +327,6 @@ namespace Microsoft.IdentityModel.Extensions
         {
             return IssuerValidator.Validate(issuer, validationParameters, securityToken);
         }
+
     }
 }
