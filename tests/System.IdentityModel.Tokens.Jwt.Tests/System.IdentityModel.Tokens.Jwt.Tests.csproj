@@ -89,24 +89,24 @@
     <Compile Include="X509SecurityKeyTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\lib\JwtConfigurationStrings.cs">
+    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\JwtConfigurationStrings.cs">
       <Link>jwtConfigurationStrings.cs</Link>
     </Compile>
-    <Compile Include="..\lib\DateTimeUtil.cs">
+    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\DateTimeUtil.cs">
       <Link>DateTimeUtil.cs</Link>
     </Compile>
-    <Compile Include="..\lib\EpochTime.cs">
+    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\EpochTime.cs">
       <Link>EpochTime.cs</Link>
     </Compile>
-    <Compile Include="..\lib\WSSecurity10Constants.cs">
+    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\WSSecurity10Constants.cs">
       <Link>WSSecurity10Constants.cs</Link>
     </Compile>
-    <Compile Include="..\lib\WSSecurityUtilityConstants.cs">
+    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\WSSecurityUtilityConstants.cs">
       <Link>WSSecurityUtilityConstants.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\lib\System.IdentityModel.Tokens.Jwt.csproj">
+    <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj">
       <Project>{BA7803C7-0585-4EEE-8672-F6E18E12E3E8}</Project>
       <Name>System.IdentityModel.Tokens.Jwt</Name>
     </ProjectReference>
