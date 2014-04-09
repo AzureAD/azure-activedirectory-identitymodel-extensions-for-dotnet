@@ -635,8 +635,11 @@ namespace System.IdentityModel.Tokens
 
             string signature = string.Empty;
             string signingInput = string.Concat(header.Encode(), ".", payload.Encode());
-
-            if (signingCredentials != null)
+            if( signatureProvider != null)
+            {
+                signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
+            }
+            else if (signingCredentials != null)
             {
                 signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, signingCredentials.SigningKey, signingCredentials.SignatureAlgorithm, signatureProvider));
             }
@@ -975,6 +978,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'token' is null.</exception>
         /// <exception cref="ArgumentException">'token' is not a not <see cref="JwtSecurityToken"/>.</exception>
         /// <returns>The <see cref="JwtSecurityToken"/> as a signed (if <see cref="SigningCredentials"/> exist) encoded string.</returns>
+        //TODO - need way to specify signature provider
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
@@ -1005,7 +1009,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="inputString">string to be signed</param>
         /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
         /// <param name="algorithm">the algorithm to use.</param>
-        /// <param name="signatureProvider">signature provider</param>
+        /// <param name="signatureProvider">if provided, the <see cref="SignatureProvider"/> will be used to sign the token</param>
         /// <returns>The signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
         /// <remarks>The <see cref="SignatureProvider"/> used to created the signature is obtained by calling <see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning(SecurityKey, string)"/>.</remarks>
         /// <exception cref="ArgumentNullException">'input' is null.</exception>

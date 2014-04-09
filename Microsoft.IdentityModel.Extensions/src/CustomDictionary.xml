@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Dictionary>
+  <Words>
+    <Acronyms>
+      <CasingExceptions>
+        <Acronym>IDX1000</Acronym>
+        <!-- prefix for error messages -->
+      </CasingExceptions>
+    </Acronyms>
+    <Recognized>
+      <Word>Max_Age</Word>
+      <Word>Acr</Word>
+      <Word>OpenId</Word>
+      <Word>openIdConnectMessage</Word>
+      <Word>User_Impersonation</Word>
+      <Word>RstParameterNotAccepted</Word>
+      <Word>SecurityToken</Word>
+      <Word>securityToken</Word>
+      <Word>Wa</Word>
+      <Word>Wattr</Word>
+      <Word>Wattrptr</Word>
+      <Word>Wauth</Word>
+      <Word>Wct</Word>
+      <Word>Wctx</Word>
+      <Word>Wencoding</Word>
+      <Word>Wfed</Word>
+      <Word>Wfresh</Word>
+      <Word>Whr</Word>
+      <Word>Wp</Word>
+      <Word>Wpseudo</Word>
+      <Word>Wpseudoptr</Word>
+      <Word>Wreply</Word>
+      <Word>Wreq</Word>
+      <Word>Wreqptr</Word>
+      <Word>Wres</Word>
+      <Word>Wreply</Word>
+      <Word>Wresult</Word>
+      <Word>Wresultptr</Word>
+      <Word>Wtrealm</Word>
+      <Word>WsFederationActions</Word>
+      <Word>WsFederationConstants</Word>
+      <Word>WsFederationFaultCodes</Word>
+      <Word>WsFederationParameterNames</Word>      
+    </Recognized>
+  </Words>
+</Dictionary>
+
+
