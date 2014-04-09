@@ -1840,19 +1840,18 @@ namespace System.IdentityModel.Tokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
         /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        public virtual IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
+        internal IEnumerable<SecurityKey> RetreiveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-
-            if (validationParameters.IssuerSigningKeyRetriever != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))
-                {
-                    yield return securityKey;
-                }
-            }
 
             if (validationParameters != null)
             {
+                if (validationParameters.IssuerSigningKeyRetriever != null)
+                {
+                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))
+                    {
+                        yield return securityKey;
+                    }
+                }
 
                 if (validationParameters.IssuerSigningKey != null)
                 {
