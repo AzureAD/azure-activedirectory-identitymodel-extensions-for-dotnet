@@ -181,6 +181,16 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             SignatureProvider asymmetricProvider = (new SignatureProviderFactory().CreateForSigning(KeyingMaterial.AsymmetricKey_2048, SecurityAlgorithms.RsaSha256Signature));
             SigningCredentials signingCreds = KeyingMaterial.AsymmetricSigningCreds_2048_RsaSha2_Sha2;
+            SigningCredentials signingCredsActor = KeyingMaterial.SymmetricSigningCreds_256_Sha2;
+
+            TokenValidationParameters validationParameters =
+                new TokenValidationParameters
+                {
+                    AudienceUriMode = AudienceUriMode.Never,
+                    SigningToken = KeyingMaterial.X509Token_2048,
+                    ValidateActor = true,
+                    ValidateIssuer = false,
+                };
 
             SecurityTokenHandlerConfiguration configSaveBootstrap = new SecurityTokenHandlerConfiguration()
             {
@@ -237,9 +247,13 @@ namespace System.IdentityModel.Test
 
             // ClaimsIdentity.Actor != null and == identitySignedBootstrapRawData
             handler.Configuration.SaveBootstrapContext = true;
-            ClaimsPrincipal cp = handler.ValidateToken(jwtFromClaimsIdentityWithActor);
-            ClaimsIdentity actor = ((cp.Identity) as ClaimsIdentity).Actor;
-            Assert.IsFalse(actor == null, "actor == null");
+
+            ClaimsPrincipal cp = handler.ValidateToken( jwtFromClaimsIdentityWithActor );
+            handler.ValidateToken(jwtFromClaimsIdentityWithActor.RawData, validationParameters);
+            handler.ValidateToken(jwtFromClaimsIdentityWithActor, validationParameters);
+
+            ClaimsIdentity actor = ( ( cp.Identity ) as ClaimsIdentity ).Actor;
+            Assert.IsFalse( actor == null , "actor == null" );
 
             string actorAsEncodedString = actor.BootstrapContext as string;
             Assert.IsFalse(actorAsEncodedString == null, "actorAsEncodedString = actor.BootstrapContext(== null)");
@@ -265,6 +279,28 @@ namespace System.IdentityModel.Test
             Assert.IsFalse(actor.BootstrapContext != null, "actor.BootstrapContext != null");
 
             SerializeAndDeserialize(identity);
+
+            handler.NameClaimTypeDelegate = NameClaimTypeDelegate;
+            ClaimsPrincipal cpActor = handler.ValidateToken(jwtFromClaimsIdentityWithActor.RawData, validationParameters);
+            Assert.IsTrue((cpActor.Identity as ClaimsIdentity).NameClaimType == ClaimTypes.DateOfBirth);
+
+            handler.ValidateToken(jwtFromClaimsIdentityWithActor, validationParameters);
+
+            // sign actor with different ket
+            identity.Actor = null;
+            JwtSecurityToken jwtActorWithDifferentKey = handler.CreateToken(issuer: Issuers.Actor, subject: identity, signingCredentials: signingCredsActor) as JwtSecurityToken;
+            jwtFromClaimsIdentityWithActor.Payload.Remove(JwtConstants.ReservedClaims.Actor);
+            jwtFromClaimsIdentityWithActor.Payload.Add(JwtConstants.ReservedClaims.Actor, jwtActorWithDifferentKey.RawData);
+            string badJwt = handler.WriteToken(jwtFromClaimsIdentityWithActor);
+            try
+            {
+                handler.ValidateToken(badJwt, validationParameters);
+                Assert.IsTrue(false, "Should have throw, signature issue on Actor");
+            }
+            catch(Exception)
+            {
+
+            }
 
             //  actor without rawdata
             //  jwt set actor directly on Payload by adding actor claim
@@ -293,6 +329,12 @@ namespace System.IdentityModel.Test
         }
 
         private void SerializeAndDeserialize(ClaimsIdentity identity)
+        private static string NameClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
+        {
+            return ClaimTypes.DateOfBirth;
+        }
+
+        private void SerializeAndDeserialize( ClaimsIdentity identity )
         {
             // ensure that deserialized picks up bootstrap actor etc.
             MemoryStream ms = new MemoryStream();

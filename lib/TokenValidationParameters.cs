@@ -34,6 +34,7 @@ namespace System.IdentityModel.Tokens
             SaveSigninToken = false;
             ValidateAudience = true;
             ValidateIssuer = true;
+            ValidateActor = false;
         }
 
         /// <summary>
@@ -113,8 +114,17 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a boolean to control if the original token is saved when a session is created.
+        /// Gets or sets a value indicating whether the <see cref="JwtSecurityToken.Actor"/> should be validated.
         /// </summary>
+        [DefaultValue(false)]
+        public bool ValidateActor
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a boolean to control if the original token is saved when a session is created.       /// </summary>
         /// <remarks>The SecurityTokenValidator will use this value to save the orginal string that was validated.</remarks>
         [DefaultValue(false)]
         public bool SaveSigninToken
