@@ -186,8 +186,8 @@ namespace System.IdentityModel.Test
             TokenValidationParameters validationParameters =
                 new TokenValidationParameters
                 {
-                    AudienceUriMode = AudienceUriMode.Never,
-                    SigningToken = KeyingMaterial.X509Token_2048,
+                    ValidateAudience = false,
+                    IssuerSigningToken = KeyingMaterial.X509Token_2048,
                     ValidateActor = true,
                     ValidateIssuer = false,
                 };
@@ -328,7 +328,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-        private void SerializeAndDeserialize(ClaimsIdentity identity)
         private static string NameClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
         {
             return ClaimTypes.DateOfBirth;
