@@ -41,19 +41,20 @@
     <DelaySign>true</DelaySign>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj">
+      <Project>{BA7803C7-0585-4EEE-8672-F6E18E12E3E8}</Project>
+      <Name>System.IdentityModel.Tokens.Jwt</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Activities" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.identitymodel.services" />
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\extern\bin\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -70,6 +71,7 @@
   <ItemGroup>
     <Compile Include="AudienceValidator.cs" />
     <Compile Include="AuthenticationProtocolMessage.cs" />
+    <Compile Include="DateTimeUtil.cs" />
     <Compile Include="ErrorMessages.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IssuerKeyRetriever.cs" />
@@ -88,7 +90,6 @@
     <Compile Include="WsFederationMessage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="35MSSharedLib1024.snk" />
     <None Include="Microsoft.IdentityModel.Protocol.Extensions.nuspec">
       <SubType>Designer</SubType>
     </None>
