@@ -152,12 +152,12 @@ namespace Microsoft.IdentityModel.Test
             authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage(@"http://www.gotjwt.com");
             authenticationProtocolMessage.SetParameter("bob", "     ");
 
-            string queryString = authenticationProtocolMessage.BuildRedirectUri();
+            string queryString = authenticationProtocolMessage.BuildRedirectUrl();
             Assert.IsNotNull(queryString);
             Assert.IsTrue(queryString.Contains("bob"));
 
             authenticationProtocolMessage.IssuerAddress = string.Empty;
-            queryString = authenticationProtocolMessage.BuildRedirectUri();
+            queryString = authenticationProtocolMessage.BuildRedirectUrl();
             Assert.IsNotNull(queryString);
         }
 

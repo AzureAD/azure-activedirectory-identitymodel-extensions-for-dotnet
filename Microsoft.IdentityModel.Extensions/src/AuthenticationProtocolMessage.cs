@@ -67,11 +67,11 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Builds a Uri and Query string using the current IssuerAddress and the parameters that have been set.
+        /// Builds a Url using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>UrlEncoded string.</returns>
         /// <remarks>Each parameter &lt;Key, Value> is first transformed using <see cref="HttpUtility.UrlEncode(string)"/>.</remarks>
-        public virtual string BuildRedirectUri()
+        public virtual string BuildRedirectUrl()
         {
             StringBuilder strBuilder = new StringBuilder();
             strBuilder.Append(_issuerAddress);

@@ -103,22 +103,22 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
 
-        public string CreateSignInQueryString()
+        public string CreateSignInUrl()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
             wsFederationMessage.Wa = WsFederationActions.SignIn;
-            return wsFederationMessage.BuildRedirectUri();
+            return wsFederationMessage.BuildRedirectUrl();
         }
 
         /// <summary>
         /// Creates a 'wsignout1.0' message using the current contents of this <see cref="WsFederationMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-        public string CreateSignOutQueryString()
+        public string CreateSignOutUrl()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
             wsFederationMessage.Wa = WsFederationActions.SignOut;
-            return wsFederationMessage.BuildRedirectUri();
+            return wsFederationMessage.BuildRedirectUrl();
         }
         
         /// <summary>

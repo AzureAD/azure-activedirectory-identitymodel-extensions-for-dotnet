@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Test
 
             wsFederationMessage.SetParameter("bob", null);
             wsFederationMessage.Parameters.Add("bob", null);
-            string uriString = wsFederationMessage.BuildRedirectUri();
+            string uriString = wsFederationMessage.BuildRedirectUrl();
             Uri uri = new Uri(uriString);
 
             WsFederationMessage wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);

@@ -52,6 +52,10 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX10213 = "IDX10213: SecurityTokens must be signed. SecurityToken: '{0}'.";
         public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Could not match:  validationParameters.ValidAudience: '{1}' and validationParameters.ValidAudiences: '{2}'";
         public const string IDX10215 = "IDX10215: Audience validation failed. Audiences passed in was null";
+        public const string IDX10216 = "IDX10216: Token lifetime is invalid because 'NotBefore' preceeds the current time: '{0}', ClockSkew (InSeconds): '{1}', notbefore: '{2}'";
+        public const string IDX10217 = "IDX10217: Token lifetime is invalid because 'NotOnOrAfter' is after the current time: '{0}', ClockSkew (InSeconds): '{1}', notbefore: '{2}'";
+        public const string IDX10218 = "IDX10218: OneTimeUse is not supported";
+        public const string IDX10219 = "IDX10219: ProxyRestriction is not supported";
 #pragma warning restore 1591
     }
 }
