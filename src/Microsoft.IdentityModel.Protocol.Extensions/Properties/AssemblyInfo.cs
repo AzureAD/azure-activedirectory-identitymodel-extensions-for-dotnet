@@ -19,3 +19,5 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(true)]
 [assembly: NeutralResourcesLanguage("en-US")]
 [assembly: AssemblyFileVersion("1.0.00000.0000")]
+[assembly: AssemblyVersion("1.0.000.000")]
+
