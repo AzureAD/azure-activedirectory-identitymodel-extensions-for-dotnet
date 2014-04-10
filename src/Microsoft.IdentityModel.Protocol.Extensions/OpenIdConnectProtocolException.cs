@@ -5,10 +5,10 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    [Serializable]
     /// <summary>
     /// This exception is thrown when an OpenIdConnect protocol handler encounters a protocol error.
     /// </summary>
+    [Serializable]
     public class OpenIdConnectProtocolException : Exception
     {
         /// <summary>

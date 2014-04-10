@@ -64,7 +64,7 @@ namespace System.IdentityModel.Test
                 attributeEx1,
                 CertValidationMode == null ? string.Empty : Attribute( Attributes.ValidationMode, CertValidationMode.Value.ToString() ),
                 attributeEx2,
-                CertValidator == null ? string.Empty : Attribute( Attributes.Validator, CertValidator.GetType().ToString() +", System.IdentityModel.Tokens.JWT.Test" ),
+                CertValidator == null ? string.Empty : Attribute( Attributes.Validator, CertValidator.GetType().ToString() +", System.IdentityModel.Tokens.Jwt.Tests" ),
                 attributeEx3,
                 CertStoreLocation == null ? string.Empty : Attribute( Attributes.TrustedStoreLocation, CertStoreLocation.ToString() ),
                 attributeEx4,

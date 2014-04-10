@@ -2,69 +2,50 @@
 <Project
   xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
   ToolsVersion="4.0"
-  DefaultTargets="Clean;BuildDebug;BuildRelease">
-  
+  DefaultTargets="Tests">
+
+  <PropertyGroup>
+    <Jwt>System.IdentityModel.Tokens.Jwt</Jwt>
+    <Ext>Microsoft.IdentityModel.Protocol.Extensions</Ext>
+  </PropertyGroup>
+
   <ItemGroup>
-    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\src\Microsoft.IdentityModel.Protocol.Extensions.csproj" />
-    <MicrosoftIdentityModelExtensions Include=".\Microsoft.IdentityModel.Extensions\tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.csproj" />
+    <SystemIdentityModelTokensJwt Include=".\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
+    <SystemIdentityModelTokensJwtTests Include=".\tests\System.IdentityModel.Tokens.Jwt.Tests\System.IdentityModel.Tokens.Jwt.Tests.csproj" />
+    <MicrosoftIdentityModelProtocolExtensions Include=".\src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocol.Extensions.csproj" />
+    <MicrosoftIdentityModelProtocolExtensionsTests Include=".\tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.csproj" />
   </ItemGroup>
   
    <!-- Define build properties -->
   <PropertyGroup>
-    <RootDir>.\Microsoft.IdentityModel.Extensions</RootDir>
-    <SourceBin>$(RootDir)\src</SourceBin>
-    <TestDirectory>$(RootDir)\tests</TestDirectory>
-    <TestAssemblyName>$(TestDirectory)\bin\debug\Microsoft.IdentityModel.Protocol.Extensions.Test.dll</TestAssemblyName>	
-    <PublishDirectory>.\Publish</PublishDirectory>
-    <PackageDirectory>.\Package</PackageDirectory>
-    <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>     
-    <TestOutputDirectory>$(PublishDirectory)\TestResults</TestOutputDirectory>	
+    <SourceDirectory>.\src</SourceDirectory>
+    <TestDirectory>.\tests</TestDirectory>
+    <Artifacts>.\Artifacts</Artifacts>
+    <TestOutputDirectory>$(Artifacts)\TestResults</TestOutputDirectory>	
   </PropertyGroup>
+
+  <Target Name="Build" DependsOnTargets="Clean;BuildDebug;BuildRelease" />
   
   <!-- Clean the build in all configurations -->
   <Target Name="Clean">
     <!-- Clean the solutions -->
     <Message Importance="high" Text="Cleaning the projects..." ContinueOnError="true" />
     <MSBuild
-      Projects="@(MicrosoftIdentityModelExtensions)"
+      Projects="@(SystemIdentityModelTokensJwt); @(SystemIdentityModelTokensJwtTests); @(MicrosoftIdentityModelProtocolExtensions); @(MicrosoftIdentityModelProtocolExtensionsTests)"
       Targets="Clean"
       Properties="Configuration=Debug"
       ContinueOnError="true" />
-	  <MSBuild
-      Projects="@(MicrosoftIdentityModelExtensions)"
+    <MSBuild
+      Projects="@(SystemIdentityModelTokensJwt); @(SystemIdentityModelTokensJwtTests); @(MicrosoftIdentityModelProtocolExtensions); @(MicrosoftIdentityModelProtocolExtensionsTests)"
       Targets="Clean"
       Properties="Configuration=Release"
-      ContinueOnError="true" />   
-   
-   <!-- Delete the publish files -->
-    <Message Importance="high" Text="Cleaning publish files..." ContinueOnError="false" />
-    <ItemGroup>
-      <PublishFiles Include="$(PublishDirectory)\**\*.*" />
-    </ItemGroup>
-    <Delete
-      Files="@(PublishFiles)"
-      ContinueOnError="false" />
-    <RemoveDir
-      Directories="$(PublishDirectory)"
-      ContinueOnError="false" />
-
-	<!-- Delete the package files -->
-    <Message Importance="high" Text="Cleaning package files..." ContinueOnError="false" />
-    <ItemGroup>
-      <PackageFiles Include="$(PackageDirectory)\**\*.*" />
-    </ItemGroup>
-    <Delete
-      Files="@(PackageFiles)"
-      ContinueOnError="false" />
-    <RemoveDir
-      Directories="$(PackageDirectory)"
-      ContinueOnError="false" />
+      ContinueOnError="true" />
   </Target>
   
   <Target Name="BuildDebug">
     <Message Importance="high" Text="Building debug version the projects..." />
     <MSBuild
-      Projects="@(MicrosoftIdentityModelExtensions)"
+      Projects="@(SystemIdentityModelTokensJwt); @(SystemIdentityModelTokensJwtTests); @(MicrosoftIdentityModelProtocolExtensions); @(MicrosoftIdentityModelProtocolExtensionsTests)"
       Targets="Build"
       Properties="Configuration=Debug"
       ContinueOnError="true" />	
@@ -73,52 +54,25 @@
   <Target Name="BuildRelease">
     <Message Importance="high" Text="Building release version the projects..." />
     <MSBuild
-      Projects="@(MicrosoftIdentityModelExtensions)"
+      Projects="@(SystemIdentityModelTokensJwt); @(SystemIdentityModelTokensJwtTests); @(MicrosoftIdentityModelProtocolExtensions); @(MicrosoftIdentityModelProtocolExtensionsTests)"
       Targets="Build"
       Properties="Configuration=Release"
       ContinueOnError="true" />
   </Target>
   
-   <Target Name="Build" DependsOnTargets="Clean;BuildDebug;BuildRelease" />
-  
-  <Target Name="Publish" DependsOnTargets="Build">    
-    <!-- Copy code artifacts -->
-    <Message Importance="high" Text="Publishing ..." ContinueOnError="false" />
-    <ItemGroup>
-      <DebugFiles Include="$(SourceBin)\Debug\**\*.*" />      
-      <ReleaseFiles Include="$(SourceBin)\Release\**\*.*" />
-    </ItemGroup>
-    <MakeDir Directories="$(BuildOutputDirectory)" ContinueOnError="false" />	  
-    <Copy
-      SourceFiles="@(DebugFiles)"
-      DestinationFiles="@(DebugFiles->'$(BuildOutputDirectory)\Debug\%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true"
-      ContinueOnError="false" />
-    <Copy
-      SourceFiles="@(ReleaseFiles)"
-      DestinationFiles="@(ReleaseFiles->'$(BuildOutputDirectory)\Release\%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true"
-      ContinueOnError="false" />       
-  </Target>
-  
-  <Target Name="ScenarioTest">
+  <Target Name="Tests" DependsOnTargets="Build">
     <Message Importance="high" Text="Running scenario tests..." />
     <Message Importance="high" Text="You are required to have installed a version of Visual Studio with support for MSTest (and MSTest on your path)." />
-    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />    
+    <ItemGroup>
+      <TestArtifacts Include="$(TestOutputDirectory)\**\*.*" />    
+    </ItemGroup>
+    <Delete Files="@(TestArtifacts)" ContinueOnError="false" />
+    <RemoveDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />
+    <MakeDir Directories="$(TestOutputDirectory)\$(Ext)" ContinueOnError="true" />    
+    <MakeDir Directories="$(TestOutputDirectory)\$(JWT)" ContinueOnError="true" />    
     <Message Importance="high" Text="Scenario tests:" />
-    <Exec  Command="MSTest.exe /testcontainer:$(TestAssemblyName) /resultsfile:$(TestOutputDirectory)\FullTestRun.trx" ContinueOnError="false" />   
+    <Exec  Command="MSTest.exe /testcontainer:$(TestDirectory)\$(Ext).Tests\bin\debug\$(Ext).Tests.dll /resultsfile:$(TestOutputDirectory)\$(Ext)\FullTestRun.trx" ContinueOnError="true" />
+    <Exec  Command="MSTest.exe /testcontainer:$(TestDirectory)\$(Jwt).Tests\bin\debug\$(Jwt).Tests.dll /resultsfile:$(TestOutputDirectory)\$(Jwt)\FullTestRun.trx" ContinueOnError="true" />
   </Target>
-  
-  <Target Name="PullRequestValidation">
-    <Message Importance="high" Text="Running PullRequestValidation tests..." />
-    <Message Importance="high" Text="You are required to have installed a version of Visual Studio with support for MSTest (and MSTest on your path)." />
-    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />    
-    <Message Importance="high" Text="PullRequestValidation tests:" />
-    <Exec Command="MSTest.exe /testcontainer:$(TestAssemblyName) /resultsfile:$(TestOutputDirectory)\PullRequestValidation.trx /category:PullRequestValidation" ContinueOnError="false" />   
-  </Target>
-
-  <Target
-    Name="FullWithScenarioTests"
-    DependsOnTargets="Clean;BuildDebug;BuildRelease;ScenarioTest" />
   
 </Project>
