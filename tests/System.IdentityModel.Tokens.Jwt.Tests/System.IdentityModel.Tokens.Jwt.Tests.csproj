@@ -57,11 +57,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\Shared\ExpectedException.cs">
+      <Link>ExpectedException.cs</Link>
+    </Compile>
     <Compile Include="ClaimSets.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="CreateAndValidateTokens.cs" />
     <Compile Include="Defaults.cs" />
-    <Compile Include="ExpectedException.cs" />
     <Compile Include="ExtensibilityTests.cs" />
     <Compile Include="IdentityComparer.cs" />
     <Compile Include="JwtConfigTests.cs" />

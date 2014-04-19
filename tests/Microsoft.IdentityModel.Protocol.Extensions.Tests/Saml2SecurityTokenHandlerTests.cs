@@ -79,15 +79,15 @@ namespace Microsoft.IdentityModel.Test
         public void Saml2SecurityTokenHandlerTests_GetSets()
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            TestUtilities.GetSet(samlSecurityTokenHandler, "AuthenticationType", null, ExceptionProcessor.ArgumentNullException(substringExpected: "AuthenticationType"));
-            TestUtilities.GetSet(samlSecurityTokenHandler, "AuthenticationType", "   ", ExceptionProcessor.ArgumentNullException(substringExpected: "AuthenticationType"));
-            TestUtilities.GetSet(samlSecurityTokenHandler, "AuthenticationType", "AuthenticationType", ExceptionProcessor.NoExceptionExpected);
+            TestUtilities.GetSet(samlSecurityTokenHandler, "AuthenticationType", null, ExpectedException.ArgumentNullException(substringExpected: "AuthenticationType"));
+            TestUtilities.GetSet(samlSecurityTokenHandler, "AuthenticationType", "   ", ExpectedException.ArgumentNullException(substringExpected: "AuthenticationType"));
+            TestUtilities.GetSet(samlSecurityTokenHandler, "AuthenticationType", "AuthenticationType", ExpectedException.NoExceptionExpected);
 
-            TestUtilities.GetSet(samlSecurityTokenHandler, "ClockSkewInSeconds", (object)0, ExceptionProcessor.ArgumentOutOfRangeException(substringExpected: "IDX10100"));
-            TestUtilities.GetSet(samlSecurityTokenHandler, "ClockSkewInSeconds", (object)1, ExceptionProcessor.NoExceptionExpected);
+            TestUtilities.GetSet(samlSecurityTokenHandler, "ClockSkewInSeconds", (object)0, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10100"));
+            TestUtilities.GetSet(samlSecurityTokenHandler, "ClockSkewInSeconds", (object)1, ExpectedException.NoExceptionExpected);
 
-            TestUtilities.GetSet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExceptionProcessor.ArgumentOutOfRangeException(substringExpected: "IDX10101"));
-            TestUtilities.GetSet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExceptionProcessor.NoExceptionExpected);
+            TestUtilities.GetSet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10101"));
+            TestUtilities.GetSet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
         [TestMethod]
@@ -105,38 +105,38 @@ namespace Microsoft.IdentityModel.Test
         {
             // CanReadToken
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException("securityToken");
-            CanReadToken(securityToken: null, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            ExpectedException expectedException = ExpectedException.ArgumentNullException("securityToken");
+            CanReadToken(securityToken: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             string samlString = new string('S', Saml2SecurityTokenHandler.DefaultMaximumTokenSizeInBytes + 1);
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            Assert.IsFalse(CanReadToken(samlString, samlSecurityTokenHandler, exceptionProcessor));
+            expectedException = ExpectedException.NoExceptionExpected;
+            Assert.IsFalse(CanReadToken(samlString, samlSecurityTokenHandler, expectedException));
 
             samlString = new string('S', Saml2SecurityTokenHandler.DefaultMaximumTokenSizeInBytes);
-            exceptionProcessor = new ExceptionProcessor(typeExpected: typeof(XmlException));
-            CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = new ExpectedException(typeExpected: typeof(XmlException));
+            CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             samlString = IdentityUtilities.CreateSamlToken();
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor));
+            expectedException = ExpectedException.NoExceptionExpected;
+            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException));
 
             samlString = IdentityUtilities.CreateSamlToken();
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor));
+            expectedException = ExpectedException.NoExceptionExpected;
+            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException));
 
         }
 
-        private bool CanReadToken(string securityToken, Saml2SecurityTokenHandler samlSecurityTokenHandler, ExceptionProcessor exceptionProcessor)
+        private bool CanReadToken(string securityToken, Saml2SecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
         {
             bool canReadToken = false;
             try
             {
                 canReadToken = samlSecurityTokenHandler.CanReadToken(securityToken);
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                exceptionProcessor.ProcessException(exception);
+                expectedException.ProcessException(exception);
             }
 
             return canReadToken;
@@ -146,38 +146,38 @@ namespace Microsoft.IdentityModel.Test
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
 
-            ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException(substringExpected: "Parameter name: validationParameters");
-            ValidateIssuer(null, null, samlSecurityTokenHandler, exceptionProcessor);
+            ExpectedException expectedException = ExpectedException.ArgumentNullException(substringExpected: "Parameter name: validationParameters");
+            ValidateIssuer(null, null, samlSecurityTokenHandler, expectedException);
 
-            exceptionProcessor = ExceptionProcessor.SecurityTokenInvalidIssuerException( substringExpected: "IDX10211");
-            ValidateIssuer(null, new TokenValidationParameters { ValidateIssuer = false }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException( substringExpected: "IDX10211");
+            ValidateIssuer(null, new TokenValidationParameters { ValidateIssuer = false }, samlSecurityTokenHandler, expectedException);
 
-            exceptionProcessor = ExceptionProcessor.SecurityTokenInvalidIssuerException( substringExpected: "IDX10211");
-            ValidateIssuer(null, new TokenValidationParameters(), samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException( substringExpected: "IDX10211");
+            ValidateIssuer(null, new TokenValidationParameters(), samlSecurityTokenHandler, expectedException);
 
-            exceptionProcessor = ExceptionProcessor.SecurityTokenInvalidIssuerException(substringExpected: "IDX10204");
-            ValidateIssuer("bob", new TokenValidationParameters { }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10204");
+            ValidateIssuer("bob", new TokenValidationParameters { }, samlSecurityTokenHandler, expectedException);
 
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            string issuer = ValidateIssuer("bob", new TokenValidationParameters { ValidIssuer = "bob" }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            string issuer = ValidateIssuer("bob", new TokenValidationParameters { ValidIssuer = "bob" }, samlSecurityTokenHandler, expectedException);
             Assert.IsTrue(issuer == "bob", "issuer mismatch");
 
-            exceptionProcessor = ExceptionProcessor.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
-            ValidateIssuer("bob", new TokenValidationParameters { ValidIssuer = "frank" }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
+            ValidateIssuer("bob", new TokenValidationParameters { ValidIssuer = "frank" }, samlSecurityTokenHandler, expectedException);
 
             List<string> validIssuers = new List<string> { "john", "paul", "george", "ringo" };
-            exceptionProcessor = ExceptionProcessor.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
-            ValidateIssuer("bob", new TokenValidationParameters { ValidIssuers = validIssuers }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
+            ValidateIssuer("bob", new TokenValidationParameters { ValidIssuers = validIssuers }, samlSecurityTokenHandler, expectedException);
 
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            ValidateIssuer("bob", new TokenValidationParameters { ValidateIssuer = false }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            ValidateIssuer("bob", new TokenValidationParameters { ValidateIssuer = false }, samlSecurityTokenHandler, expectedException);
 
             validIssuers.Add("bob");
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            issuer = ValidateIssuer("bob", new TokenValidationParameters { ValidIssuers = validIssuers }, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            issuer = ValidateIssuer("bob", new TokenValidationParameters { ValidIssuers = validIssuers }, samlSecurityTokenHandler, expectedException);
             Assert.IsTrue(issuer == "bob", "issuer mismatch");
 
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            expectedException = ExpectedException.NoExceptionExpected;
             TokenValidationParameters validationParameters = new TokenValidationParameters
             {
                 ValidateAudience = false,
@@ -188,10 +188,10 @@ namespace Microsoft.IdentityModel.Test
                     },
             };
 
-            ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, exceptionProcessor);
+            ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, expectedException);
                         
             // delegate returns false, secondary should still succeed
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = new TokenValidationParameters
             {
                 ValidateAudience = false,
@@ -203,12 +203,12 @@ namespace Microsoft.IdentityModel.Test
                     },
             };
 
-            issuer = ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, exceptionProcessor);
+            issuer = ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, expectedException);
             Assert.IsTrue(issuer == "bob", "issuer mismatch");
 
             // delegate returns false, secondary should fail
             validIssuers = new List<string> { "john", "paul", "george", "ringo" };
-            exceptionProcessor = ExceptionProcessor.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
             validationParameters = new TokenValidationParameters
             {
                 IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
@@ -221,20 +221,20 @@ namespace Microsoft.IdentityModel.Test
                     },
             };
 
-            ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, exceptionProcessor);
+            ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, expectedException);
         }
 
-        private string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, Saml2SecurityTokenHandler samlSecurityTokenHandler, ExceptionProcessor exceptionProcessor)
+        private string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, Saml2SecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
         {
             string returnVal = string.Empty;
             try
             {
                 returnVal = samlSecurityTokenHandler.ValidateIssuer(issuer, validationParameters, new DerivedSaml2SecurityToken());
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                exceptionProcessor.ProcessException(exception);
+                expectedException.ProcessException(exception);
             }
 
             return returnVal;
@@ -244,15 +244,15 @@ namespace Microsoft.IdentityModel.Test
         {
             // parameter validation
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException(substringExpected: "name: securityToken");
-            ValidateToken(securityToken: null, validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            ExpectedException expectedException = ExpectedException.ArgumentNullException(substringExpected: "name: securityToken");
+            ValidateToken(securityToken: null, validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
-            exceptionProcessor = ExceptionProcessor.ArgumentNullException(substringExpected: "name: validationParameters");
-            ValidateToken(securityToken: "s", validationParameters: null, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = ExpectedException.ArgumentNullException(substringExpected: "name: validationParameters");
+            ValidateToken(securityToken: "s", validationParameters: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
-            exceptionProcessor = ExceptionProcessor.ArgumentException(substringExpected: "IDX10209");
+            expectedException = ExpectedException.ArgumentException(substringExpected: "IDX10209");
             samlSecurityTokenHandler.MaximumTokenSizeInBytes = 1;
-            ValidateToken(securityToken: "ss", validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            ValidateToken(securityToken: "ss", validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             samlSecurityTokenHandler.MaximumTokenSizeInBytes = Saml2SecurityTokenHandler.DefaultMaximumTokenSizeInBytes;
             string samlToken = IdentityUtilities.CreateSaml2Token();
@@ -264,14 +264,14 @@ namespace Microsoft.IdentityModel.Test
                     IssuerSigningToken = IdentityUtilities.DefaultSigningToken,
                 };
 
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            ValidateToken(samlToken, tokenValidationParameters, samlSecurityTokenHandler, exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            ValidateToken(samlToken, tokenValidationParameters, samlSecurityTokenHandler, expectedException);
         }
 
         private void ValidateAudience()
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            ExceptionProcessor exceptionProcessor;
+            ExpectedException expectedException;
 
             string samlString = IdentityUtilities.CreateSaml2Token();
 
@@ -284,66 +284,66 @@ namespace Microsoft.IdentityModel.Test
 
             // Do not validate audience
             tokenValidationParameters.ValidateAudience = false;
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
-            exceptionProcessor = ExceptionProcessor.ArgumentException(substringExpected: "IDX10208");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = ExpectedException.ArgumentException(substringExpected: "IDX10208");
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
             tokenValidationParameters.ValidAudience = "John";
-            exceptionProcessor = new ExceptionProcessor(typeExpected: typeof(AudienceUriValidationFailedException), substringExpected: "IDX10214");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = new ExpectedException(typeExpected: typeof(AudienceUriValidationFailedException), substringExpected: "IDX10214");
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             // UriKind.Absolute, no match.
             tokenValidationParameters.ValidateAudience = true;
             tokenValidationParameters.ValidAudience = IdentityUtilities.NotDefaultAudience;
-            exceptionProcessor = new ExceptionProcessor(typeExpected: typeof(AudienceUriValidationFailedException), substringExpected: "IDX10214");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = new ExpectedException(typeExpected: typeof(AudienceUriValidationFailedException), substringExpected: "IDX10214");
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            expectedException = ExpectedException.NoExceptionExpected;
             tokenValidationParameters.ValidAudience = IdentityUtilities.DefaultAudience;
             tokenValidationParameters.ValidAudiences = null;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             // !UriKind.Absolute
             List<string> audiences = new List<string> { "John", "Paul", "George", "Ringo" };
             tokenValidationParameters.ValidAudience = null;
             tokenValidationParameters.ValidAudiences = audiences;
             tokenValidationParameters.ValidateAudience = false;
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             // UriKind.Absolute, no match
             audiences = new List<string> { "http://www.John.com", "http://www.Paul.com", "http://www.George.com", "http://www.Ringo.com", "    " };
             tokenValidationParameters.ValidAudience = null;
             tokenValidationParameters.ValidAudiences = audiences;
             tokenValidationParameters.ValidateAudience = false;
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = ExpectedException.NoExceptionExpected;
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
-            exceptionProcessor = new ExceptionProcessor(typeExpected: typeof(AudienceUriValidationFailedException), substringExpected: "IDX10214");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            expectedException = new ExpectedException(typeExpected: typeof(AudienceUriValidationFailedException), substringExpected: "IDX10214");
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
-            exceptionProcessor = ExceptionProcessor.NoExceptionExpected;
+            expectedException = ExpectedException.NoExceptionExpected;
             audiences.Add(IdentityUtilities.DefaultAudience);
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, exceptionProcessor: exceptionProcessor);
+            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
         }
 
-        private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, Saml2SecurityTokenHandler samlSecurityTokenHandler, ExceptionProcessor exceptionProcessor)
+        private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, Saml2SecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
         {
             ClaimsPrincipal princiapl = null;
             try
             {
                 princiapl = samlSecurityTokenHandler.ValidateToken(securityToken, validationParameters);
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                exceptionProcessor.ProcessException(exception);
+                expectedException.ProcessException(exception);
             }
 
             return princiapl;

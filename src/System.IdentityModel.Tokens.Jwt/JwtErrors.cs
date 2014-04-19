@@ -111,7 +111,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10529 = "Jwt10529: The AsymmetricSignatureDeformatter is null, cannot sign data. If a derived AsymmetricSignatureProvider is being used, make sure to call the base constructor.";
         internal const string Jwt10530 = "Jwt10530: The '{0}' for signing cannot be smaller than '{1}' bits.";
         internal const string Jwt10531 = "Jwt10531: The '{0}' for verifying cannot be smaller than '{1}' bits.";
-        internal const string Jwt10532 = "Jwt10532: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) threw and exception.\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
+        internal const string Jwt10532 = "Jwt10532: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) threw an exception.\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
         internal const string Jwt10533 = "Jwt10533: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) returned null.\n\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.";
         internal const string Jwt10534 = "Jwt10534: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw.\n\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}' check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
 

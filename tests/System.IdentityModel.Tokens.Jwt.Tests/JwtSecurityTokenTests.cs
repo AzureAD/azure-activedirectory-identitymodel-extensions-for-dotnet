@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
@@ -54,110 +55,109 @@ namespace System.IdentityModel.Test
         public void JwtSecurityToken_EncodedStringConstruction()
         {
             Console.WriteLine( "Entering: "+ MethodBase.GetCurrentMethod() );
-            JwtSecurityToken jwt = null;
-            foreach ( JwtSecurityTokenTestVariation variation in JwtEncodedStringVariations() )
-            {
-                Console.WriteLine( string.Format( "Variation: {0}", variation.Name ) );
-                try
-                {
-                    jwt = new JwtSecurityToken( variation.EncodedString );
-                    ExpectedException.ProcessNoException( variation.ExpectedException );
-                }
-                catch ( Exception ex )
-                {
-                    ExpectedException.ProcessException( variation.ExpectedException, ex );
-                }
 
-                // ensure we can get to every property
-                if ( jwt != null && ( variation.ExpectedException == null || variation.ExpectedException.Thrown == null ) )
-                {
-                    JwtTestUtilities.CallAllPublicInstanceAndStaticPropertyGets( jwt, variation.Name );
-                }
+            string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
 
-                if ( null != variation.ExpectedJwtSecurityToken )
-                {
-                    Assert.IsTrue(
-                        IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt),
-                        string.Format("Testcase: {0}.  JWTSecurityTokens are not equal.", variation.Name));
-                }
-            }
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: InvalidPayloadFormat",
+                EncodedString = EncodedJwts.InvalidPayload,
+                ExpectedException = ExpectedException.ArgumentException( substringExpected: "Jwt10113", inner: typeof(FormatException) ),
+            });                
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: null", 
+                EncodedString = null, 
+                ExpectedException = ExpectedException.ArgumentNullException(),
+            });
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: string.Empty", 
+                EncodedString = string.Empty, 
+                ExpectedException = ExpectedException.ArgumentException(substringExpected:"WIF10002"),
+            });
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: single character: '1'", 
+                EncodedString = "1",
+                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10400"),
+            });
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: two parts each a single character: '1.2'", 
+                EncodedString = "1.2", 
+                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10400"),
+            });
+
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: header is not encoded properly: '123'", 
+                EncodedString = string.Format( "{0}.{1}.{2}", "123", tokenParts[1], tokenParts[2] ), 
+                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10113", inner: typeof(ArgumentException)),
+            });
+
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: header is not encoded properly: '123=='", 
+                EncodedString = string.Format( "{0}.{1}.{2}", "123==", tokenParts[1], tokenParts[2] ),
+                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10400"),
+            });
+
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: payload is not encoded correctly: '123'", 
+                EncodedString = string.Format( "{1}.{0}.{2}", "123", tokenParts[0], tokenParts[2] ),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "Jwt10113", inner: typeof(ArgumentException)),
+            });                                
+
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: payload is not encoded properly: '123=='", 
+                EncodedString = string.Format( "{1}.{0}.{2}", "123==", tokenParts[0], tokenParts[2] ),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "Jwt10400"),
+            });
+
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
+                EncodedString = string.Format( "{0}.{1}.", tokenParts[0], tokenParts[1] ),
+                ExpectedException = ExpectedException.NoExceptionExpected,
+            });                
+
+            RunEncodedTest( new JwtSecurityTokenTestVariation
+            { 
+                Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
+                EncodedString = string.Format( "{0}.{1}.", tokenParts[0], tokenParts[1] ),
+                ExpectedException = ExpectedException.NoExceptionExpected,
+            });                
         }
 
-        private List<JwtSecurityTokenTestVariation> JwtEncodedStringVariations()
+        private void RunEncodedTest(JwtSecurityTokenTestVariation variation)
         {
-            string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
-            List<JwtSecurityTokenTestVariation> variationsencodedStringParams = new List<JwtSecurityTokenTestVariation>() 
+            JwtSecurityToken jwt = null;
+            Console.WriteLine(string.Format("Variation: {0}", variation.Name));
+            try
             {
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: InvalidPayloadFormat",
-                    EncodedString = EncodedJwts.InvalidPayload,
-                    ExpectedException = ExpectedException.ArgEx( id: "Jwt10113" ),
-                },                
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: null", 
-                    EncodedString = null, 
-                    ExpectedException = ExpectedException.ArgNull,
-                },
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: string.Empty", 
-                    EncodedString = string.Empty, 
-                    ExpectedException = ExpectedException.ArgEx(id:"WIF10002"),
-                },
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: single character: '1'", 
-                    EncodedString = "1",
-                    ExpectedException = ExpectedException.ArgEx( id:"Jwt10400"),
-                },
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: two parts each a single character: '1.2'", 
-                    EncodedString = "1.2", 
-                    ExpectedException = ExpectedException.ArgEx( id:"Jwt10400"),
-                },
+                jwt = new JwtSecurityToken(variation.EncodedString);
+                variation.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                variation.ExpectedException.ProcessException(ex);
+            }
 
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: header is not encoded properly: '123'", 
-                    EncodedString = string.Format( "{0}.{1}.{2}", "123", tokenParts[1], tokenParts[2] ), 
-                    ExpectedException = ExpectedException.ArgEx( id:"Jwt10113"),
-                },
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: header is not encoded properly: '123=='", 
-                    EncodedString = string.Format( "{0}.{1}.{2}", "123==", tokenParts[1], tokenParts[2] ),
-                    ExpectedException = ExpectedException.ArgEx( id:"Jwt10400"),
-                },
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: payload is not encoded correctly: '123'", 
-                    EncodedString = string.Format( "{1}.{0}.{2}", "123", tokenParts[0], tokenParts[2] ),
-                    ExpectedException = ExpectedException.ArgEx( id:"Jwt10113"),
-                },                                
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: payload is not encoded properly: '123=='", 
-                    EncodedString = string.Format( "{1}.{0}.{2}", "123==", tokenParts[0], tokenParts[2] ),
-                    ExpectedException = ExpectedException.ArgEx( id:"Jwt10400"),
-                },
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
-                    EncodedString = string.Format( "{0}.{1}.", tokenParts[0], tokenParts[1] ),
-                    ExpectedException = ExpectedException.Null,
-                },                
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
-                    EncodedString = string.Format( "{0}.{1}.", tokenParts[0], tokenParts[1] ),
-                    ExpectedException = ExpectedException.Null,
-                },                
-            };
+            // ensure we can get to every property
+            if (jwt != null && (variation.ExpectedException == null || variation.ExpectedException.TypeExpected == null))
+            {
+                JwtTestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwt, variation.Name);
+            }
 
-            return variationsencodedStringParams;
+            if (null != variation.ExpectedJwtSecurityToken)
+            {
+                Assert.IsTrue(
+                    IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt),
+                    string.Format("Testcase: {0}.  JWTSecurityTokens are not equal.", variation.Name));
+            }
         }
 
         [TestMethod]
@@ -167,50 +167,16 @@ namespace System.IdentityModel.Test
         {
             Console.WriteLine( string.Format( "Entering: '{0}'", MethodBase.GetCurrentMethod() ) );
             JwtSecurityToken jwt = null;
-            foreach ( JwtSecurityTokenTestVariation param in JwtConstructionParamsVariations() )
-            {
-                Console.WriteLine( string.Format( "Testcase: {0}", param.Name ) );
-                try
-                {
-                    //jwt = new JWTSecurityToken( issuer: param.Issuer, audience: param.Audience, claims: param.Claims, signingCredentials: param.SigningCredentials, lifetime: param.Lifetime, actor: param.Actor);
-                    jwt = new JwtSecurityToken( param.Issuer, param.Audience, param.Claims, new Lifetime( param.ValidFrom, param.ValidTo ) );
-                    ExpectedException.ProcessNoException( param.ExpectedException );
-                }
-                catch ( Exception ex )
-                {
-                    ExpectedException.ProcessException( param.ExpectedException, ex );
-                }
 
-                try
-                {
-                    // ensure we can get to every property
-                    if ( jwt != null && ( param.ExpectedException == null || param.ExpectedException.Thrown == null ) )
-                    {
-                        JwtTestUtilities.CallAllPublicInstanceAndStaticPropertyGets( jwt, param.Name );
-                    }
-
-                    if ( null != param.ExpectedJwtSecurityToken )
-                    {
-                        Assert.IsFalse( !IdentityComparer.AreEqual( param.ExpectedJwtSecurityToken, jwt ) , string.Format( "Testcase: {0}.  JWTSecurityTokens are not equal.", param.Name ) );
-                    }
-                }
-                catch ( Exception ex )
-                {
-                    Assert.Fail( string.Format( "Testcase: {0}. UnExpected when getting a properties: '{1}'", param.Name, ex.ToString() ) );
-                }
-            }
-        }
-        
-        private List<JwtSecurityTokenTestVariation> JwtConstructionParamsVariations()
-        {
-            List<JwtSecurityTokenTestVariation> constructionParams = new List<JwtSecurityTokenTestVariation>() 
-            {
+            RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "ClaimsSet with all Reserved claim types, ensures that users can add as they see fit",
                     Claims = ClaimSets.AllReserved, 
-                    ExpectedException = ExpectedException.Null,
-                },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                });
+                        
+            RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "All null params",
@@ -218,57 +184,78 @@ namespace System.IdentityModel.Test
                     Audience =  null, 
                     Claims = null, 
                     SigningCredentials = null,
-                },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                });
+
+            RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "ValidFrom > ValidTo, .Net datetime",
                     ValidFrom = DateTime.UtcNow + TimeSpan.FromHours(1),
                     ValidTo   = DateTime.UtcNow,
-                    ExpectedException = ExpectedException.ArgEx( id: "ID2000" ),
-                },
+                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "ID2000" ),
+                });
+
+            RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "ValidFrom > ValidTo, UnixEpoch - 1 ms",
                     ValidTo = EpochTime.UnixEpoch - TimeSpan.FromMilliseconds(1), 
                     ValidFrom = DateTime.UtcNow, 
-                    ExpectedException = ExpectedException.ArgEx( id: "ID2000" ),
-                },
+                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "ID2000" ),
+                });
+
+            RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "ValidFrom > ValidTo, UnixEpoch - 1 s",
                     ValidTo = EpochTime.UnixEpoch - TimeSpan.FromSeconds(1), 
                     ValidFrom = DateTime.UtcNow, 
-                    ExpectedException = ExpectedException.ArgEx( id: "ID2000" ),
-                },
+                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "ID2000" ),
+                });
+
+            RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
                     Name = "ValidFrom == DateItime.MinValue",
                     ValidFrom = DateTime.MinValue, 
                     ValidTo = DateTime.UtcNow, 
-                },
-            };
+                });
+            }
 
-            return constructionParams;
-        }
-
-        private List<JwtSecurityTokenTestVariation> GetConstructorsSameJWT()
+        private void RunConstructionTest(JwtSecurityTokenTestVariation variation)
         {
-            string issuer = "GetJWTTypedConstructorsCases";
-            
-            List<JwtSecurityTokenTestVariation> constructionParams = new List<JwtSecurityTokenTestVariation>() 
+            JwtSecurityToken jwt = null;
+            try
             {
-                // ensure format is not format is not checked
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "SimpleJwt",
-                    Claims = ClaimSets.Simple(issuer,issuer),
-                    ExpectedJwtSecurityToken = JwtTestTokens.Simple( issuer, issuer ),
-                },
-            };
+                //jwt = new JWTSecurityToken( issuer: param.Issuer, audience: param.Audience, claims: param.Claims, signingCredentials: param.SigningCredentials, lifetime: param.Lifetime, actor: param.Actor);
+                jwt = new JwtSecurityToken( variation.Issuer, variation.Audience, variation.Claims, new Lifetime( variation.ValidFrom, variation.ValidTo ) );
+                variation.ExpectedException.ProcessNoException();
+            }
+            catch ( Exception ex )
+            {
+                variation.ExpectedException.ProcessException(ex);
+            }
 
-            return constructionParams;
+            try
+            {
+                // ensure we can get to every property
+                if ( jwt != null && ( variation.ExpectedException == null || variation.ExpectedException.TypeExpected == null ) )
+                {
+                    JwtTestUtilities.CallAllPublicInstanceAndStaticPropertyGets( jwt, variation.Name );
+                }
+
+                if ( null != variation.ExpectedJwtSecurityToken )
+                {
+                    Assert.IsFalse( !IdentityComparer.AreEqual( variation.ExpectedJwtSecurityToken, jwt ) , string.Format( "Testcase: {0}.  JWTSecurityTokens are not equal.", variation.Name ) );
+                }
+            }
+            catch ( Exception ex )
+            {
+                Assert.Fail( string.Format( "Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString() ) );
+            }
         }
-
+        
         [TestMethod]
         [TestProperty( "TestCaseID", "C04F947D-9CBB-4062-A522-4BC90E56C996" )]
         [TestProperty( "TestType", "BVT" )]
@@ -280,28 +267,13 @@ namespace System.IdentityModel.Test
         [TestProperty( "Framework", "TAEF" )]
         public void JWTSecurityToken_DifferentConstructorsSameJWT()
         {
-            foreach ( JwtSecurityTokenTestVariation param in GetConstructorsSameJWT() )
+            string issuer = "JWTSecurityToken_DifferentConstructorsSameJWT";
+            new JwtSecurityTokenTestVariation
             {
-                var jwt = new JwtSecurityToken( param.Issuer, param.Audience );
-            }
-        }
-
-        private List<JwtSecurityTokenTestVariation> GetJWTTypedConstructorsCases()
-        {
-            string issuer = "GetJWTTypedConstructorsCases";
-
-            List<JwtSecurityTokenTestVariation> constructionParams = new List<JwtSecurityTokenTestVariation>() 
-            {
-                // ensure format is not format is not checked
-                new JwtSecurityTokenTestVariation
-                { 
-                    Name = "SimpleJwt",
-                    Claims = ClaimSets.Simple(issuer,issuer), 
-                    ExpectedJwtSecurityToken = JwtTestTokens.Simple( issuer, issuer ),
-                },
+                Name = "SimpleJwt",
+                Claims = ClaimSets.Simple(issuer, issuer),
+                ExpectedJwtSecurityToken = JwtTestTokens.Simple(issuer, issuer),
             };
-
-            return constructionParams;
         }
     }
 }

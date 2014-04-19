@@ -16,9 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.IdentityModel.Test;
 
 namespace System.IdentityModel.Test
 {
@@ -52,19 +54,19 @@ namespace System.IdentityModel.Test
         public void X509SecurityKey_Constructor()
         {
             X509SecurityKey x509SecurityKey;
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(ArgumentNullException), id: "certificate");
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
             try
             {
                 x509SecurityKey = new X509SecurityKey(null);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch(Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
             X509Certificate2 x509Certificate2 = KeyingMaterial.Cert_2048;
-            expectedException = ExpectedException.Null;
+            expectedException = ExpectedException.NoExceptionExpected;
             try
             {
                 x509SecurityKey = new X509SecurityKey(x509Certificate2);
@@ -72,7 +74,7 @@ namespace System.IdentityModel.Test
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
         }
 

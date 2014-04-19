@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.IdentityModel.Test;
+
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
@@ -84,8 +86,8 @@ namespace System.IdentityModel.Test
                 ValidIssuer = Issuers.GotJwt,
             };
 
-            ValidateDerived( jwtReadAsDerived, null, handler, tvp, ExpectedException.Null );
-            ValidateDerived( null, DerivedJwtSecurityToken.Prefix + encodedJwt, handler, tvp, ExpectedException.Null );
+            ValidateDerived( jwtReadAsDerived, null, handler, tvp, ExpectedException.NoExceptionExpected );
+            ValidateDerived( null, DerivedJwtSecurityToken.Prefix + encodedJwt, handler, tvp, ExpectedException.NoExceptionExpected );
             handler.Configuration = new SecurityTokenHandlerConfiguration() 
             {
                 IssuerTokenResolver = new SetReturnSecurityTokenResolver( KeyingMaterial.BinarySecretToken_256, KeyingMaterial.SymmetricSecurityKey_256 ),
@@ -97,20 +99,20 @@ namespace System.IdentityModel.Test
 
             handler.Configuration.AudienceRestriction.AllowedAudienceUris.Add( new Uri( Audiences.AuthFactors ) );
 
-            ValidateDerived( null, DerivedJwtSecurityToken.Prefix + encodedJwt, handler, null, ExpectedException.Null );
-            ValidateDerived( handler.ReadToken( DerivedJwtSecurityToken.Prefix + encodedJwt ) as JwtSecurityToken, null, handler, null, ExpectedException.Null );
+            ValidateDerived( null, DerivedJwtSecurityToken.Prefix + encodedJwt, handler, null, ExpectedException.NoExceptionExpected );
+            ValidateDerived( handler.ReadToken( DerivedJwtSecurityToken.Prefix + encodedJwt ) as JwtSecurityToken, null, handler, null, ExpectedException.NoExceptionExpected );
 
             handler.DerivedTokenType = typeof( JwtSecurityToken );
 
             JwtSecurityToken jwtRead = handler.ReadToken( encodedJwt ) as JwtSecurityToken;
 
-            ValidateDerived( jwtRead, null, handler, tvp, ExpectedException.Null );
-            ValidateDerived( null, encodedJwt, handler, tvp, ExpectedException.Null );
-            ValidateDerived( null, encodedJwt, handler, null, ExpectedException.Null );
-            ValidateDerived( jwtRead as JwtSecurityToken, null, handler, null, ExpectedException.Null );
+            ValidateDerived( jwtRead, null, handler, tvp, ExpectedException.NoExceptionExpected );
+            ValidateDerived( null, encodedJwt, handler, tvp, ExpectedException.NoExceptionExpected );
+            ValidateDerived( null, encodedJwt, handler, null, ExpectedException.NoExceptionExpected );
+            ValidateDerived( jwtRead as JwtSecurityToken, null, handler, null, ExpectedException.NoExceptionExpected );
         }
 
-        private void ValidateDerived( JwtSecurityToken jwt, string encodedJwt, DerivedJwtSecurityTokenHandler derivedHandler, TokenValidationParameters tvp, ExpectedException ee )
+        private void ValidateDerived(JwtSecurityToken jwt, string encodedJwt, DerivedJwtSecurityTokenHandler derivedHandler, TokenValidationParameters tvp, ExpectedException expectedException)
         {
             try
             {
@@ -155,11 +157,11 @@ namespace System.IdentityModel.Test
                     Assert.IsFalse( !jwtDerived.ValidateSigningTokenCalled , "!jwtDerived.ValidateSigningTokenCalled" );
                 }
 
-                ExpectedException.ProcessNoException( ee );
+                expectedException.ProcessNoException();
             }
             catch ( Exception ex )
             {
-                ExpectedException.ProcessException( ee, ex );
+                expectedException.ProcessException( ex );
             }
         }
 
@@ -256,15 +258,15 @@ namespace System.IdentityModel.Test
                                     };
 
             // inbound unknown algorithm
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10316");
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), substringExpected: "Jwt10316");
             try
             {
                 handler.ValidateToken( jwt );
-                ExpectedException.ProcessNoException( expectedException );
+                expectedException.ProcessNoException();
             }
             catch ( Exception ex )
             {
-                ExpectedException.ProcessException( expectedException, ex );
+                expectedException.ProcessException( ex );
             }
 
             // inbound is mapped
@@ -276,15 +278,15 @@ namespace System.IdentityModel.Test
             }
 
             JwtSecurityTokenHandler.InboundAlgorithmMap.Add(new KeyValuePair<string, string>("bobsYourUncle", SecurityAlgorithms.RsaSha256Signature));
-            expectedException = ExpectedException.Null;
+            expectedException = ExpectedException.NoExceptionExpected;
             try
             {
                 handler.ValidateToken(jwt);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
-                ExpectedException.ProcessException(expectedException, ex);
+                expectedException.ProcessException(ex);
             }
             finally
             {
@@ -320,7 +322,6 @@ namespace System.IdentityModel.Test
             }
 
             List<SecurityToken> tokens = new List<SecurityToken>() { KeyingMaterial.BinarySecretToken_256 };
-
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
                 IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
@@ -329,15 +330,15 @@ namespace System.IdentityModel.Test
             };
 
             // inbound unknown algorithm
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(SecurityTokenInvalidSignatureException), id: "Jwt10316" );
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), substringExpected: "Jwt10316:", innerTypeExpected: typeof(InvalidOperationException));
             try
             {
                 ClaimsPrincipal principal = handler.ValidateToken( jwt, tvp );
-                ExpectedException.ProcessNoException( expectedException );
+                expectedException.ProcessNoException();
             }
             catch ( Exception ex )
             {
-                ExpectedException.ProcessException( expectedException, ex );
+                expectedException.ProcessException(ex);
             }
 
             // inbound is mapped
@@ -349,15 +350,15 @@ namespace System.IdentityModel.Test
             }
 
             JwtSecurityTokenHandler.InboundAlgorithmMap.Add(new KeyValuePair<string, string>("bobsYourUncle", SecurityAlgorithms.HmacSha256Signature));
-            expectedException = ExpectedException.Null;
+            expectedException = ExpectedException.NoExceptionExpected;
             try
             {
                 handler.ValidateToken(jwt.RawData, tvp);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
-                ExpectedException.ProcessException(expectedException, ex);
+                expectedException.ProcessException(ex);
             }
             finally
             {

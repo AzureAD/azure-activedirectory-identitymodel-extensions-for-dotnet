@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
@@ -47,7 +48,7 @@ namespace System.IdentityModel.Test
             _validFrom = DateTime.UtcNow;
             _validTo = DateTime.UtcNow + TimeSpan.FromHours( 1 );
             _jwtHandler = new JwtSecurityTokenHandler();
-            _expectedException = ExpectedException.Null;
+            _expectedException = ExpectedException.NoExceptionExpected;
         }
         // ===========================
         // token setup params - different variations will set different items

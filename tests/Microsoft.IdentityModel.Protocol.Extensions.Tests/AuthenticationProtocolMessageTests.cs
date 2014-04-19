@@ -82,11 +82,11 @@ namespace Microsoft.IdentityModel.Test
             };
 
             foreach(string property in properties)
-            { 
-                TestUtilities.GetSet(authenticationProtocolMessage, property, null, ExceptionProcessor.ArgumentNullException(substringExpected: property));
-                TestUtilities.GetSet(authenticationProtocolMessage, property, property, ExceptionProcessor.NoExceptionExpected);
-                TestUtilities.GetSet(authenticationProtocolMessage, property, "    ", ExceptionProcessor.NoExceptionExpected);
-                TestUtilities.GetSet(authenticationProtocolMessage, property, "\t\n\r", ExceptionProcessor.NoExceptionExpected);
+            {
+                TestUtilities.GetSet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: property));
+                TestUtilities.GetSet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected);
+                TestUtilities.GetSet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected);
+                TestUtilities.GetSet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected);
             }
         }
 
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Test
             string param2 = "param2";
 
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
-            ExceptionProcessor expectedException = ExceptionProcessor.ArgumentNullException(substringExpected: "parameter");
+            ExpectedException expectedException = ExpectedException.ArgumentNullException(substringExpected: "parameter");
             try
             {
                 authenticationProtocolMessage.GetParameter(null);
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = ExceptionProcessor.ArgumentNullException(substringExpected: "parameter");
+            expectedException = ExpectedException.ArgumentNullException(substringExpected: "parameter");
             try
             {
                 authenticationProtocolMessage.RemoveParameter(null);
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = ExceptionProcessor.ArgumentNullException(substringExpected: "parameter");
+            expectedException = ExpectedException.ArgumentNullException(substringExpected: "parameter");
             try
             {
                 authenticationProtocolMessage.SetParameter(null, null);

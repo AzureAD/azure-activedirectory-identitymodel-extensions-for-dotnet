@@ -16,16 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Selectors;
-using System.IdentityModel.Tokens;
 using System.Reflection;
-using System.Security.Claims;
-using System.Text;
-using System.Xml;
-using SamlSecurityTokenHandler = Microsoft.IdentityModel.Extensions.SamlSecurityTokenHandler;
+
+using Microsoft.IdentityModel.Test;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -69,8 +64,8 @@ namespace Microsoft.IdentityModel.Test
         /// <param name="obj">object that has 'get' and 'set'.</param>
         /// <param name="property">the name of the property.</param>
         /// <param name="propertyValue">value to set on the property.</param>
-        /// <param name="exceptionProcessor">checks that exception is correct.</param>
-        public static void GetSet(object obj, string property, object propertyValue, ExceptionProcessor exceptionProcessor)
+        /// <param name="expectedException">checks that exception is correct.</param>
+        public static void GetSet(object obj, string property, object propertyValue, ExpectedException expectedException)
         {
             Assert.IsNotNull(obj, "'obj' can not be null");
             Assert.IsFalse(string.IsNullOrWhiteSpace(property), "'property' can not be null or whitespace");
@@ -86,12 +81,12 @@ namespace Microsoft.IdentityModel.Test
                 propertyInfo.SetValue(obj, propertyValue);
                 object retval = propertyInfo.GetValue(obj);
                 Assert.IsTrue(propertyValue == retval);
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
                 // pass inner exception
-                exceptionProcessor.ProcessException(exception.InnerException);
+                expectedException.ProcessException(exception.InnerException);
             }
         }
     }

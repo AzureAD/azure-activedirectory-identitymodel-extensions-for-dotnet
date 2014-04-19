@@ -58,15 +58,15 @@ namespace Microsoft.IdentityModel.Test
             wsFederationMessage = new WsFederationMessage("http://www.got.jwt.com");
             Assert.AreEqual(wsFederationMessage.IssuerAddress, "http://www.got.jwt.com");
 
-            ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException("issuerAddress");
+            ExpectedException expectedException = ExpectedException.ArgumentNullException("issuerAddress");
             try
             {
                 wsFederationMessage = new WsFederationMessage((string)null);
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch(Exception exception)
             {
-                exceptionProcessor.ProcessException(exception);
+                expectedException.ProcessException(exception);
             }
         }
 
