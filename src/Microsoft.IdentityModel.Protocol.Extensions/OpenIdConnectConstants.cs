@@ -130,11 +130,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectResponseModes
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string Query = "query";
         public const string FormPost = "form_post";
         public const string Fragment = "fragment";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
 }

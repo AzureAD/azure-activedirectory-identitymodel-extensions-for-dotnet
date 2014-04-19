@@ -58,15 +58,15 @@ namespace Microsoft.IdentityModel.Test
             Assert.AreEqual(openIdConnectMessage.IssuerAddress, string.Empty);
             openIdConnectMessage = new OpenIdConnectMessage("http://www.got.jwt.com");
             Assert.AreEqual(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
-            ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException("issuerAddress");
+            ExpectedException expectedException = ExpectedException.ArgumentNullException("issuerAddress");
             try
             {
                 openIdConnectMessage = new OpenIdConnectMessage((string)null);
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                exceptionProcessor.ProcessException(exception);
+                expectedException.ProcessException(exception);
             }
         }
 

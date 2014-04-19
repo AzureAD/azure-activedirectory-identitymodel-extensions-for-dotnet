@@ -92,37 +92,37 @@ namespace Microsoft.IdentityModel.Test
             SecurityTokenHandlerCollection securityTokenHandlerCollection = new SecurityTokenHandlerCollection();
             string defaultSamlToken = IdentityUtilities.CreateSamlToken();
 
-            ExceptionProcessor exceptionProcessor = ExceptionProcessor.ArgumentNullException("Parameter name: securityToken");
-            ValidateToken(null, null, securityTokenHandlerCollection, exceptionProcessor);
+            ExpectedException expectedException = ExpectedException.ArgumentNullException("Parameter name: securityToken");
+            ValidateToken(null, null, securityTokenHandlerCollection, expectedException);
 
-            exceptionProcessor = ExceptionProcessor.ArgumentNullException("Parameter name: validationParameters");
-            ValidateToken(defaultSamlToken, null, securityTokenHandlerCollection, exceptionProcessor);
+            expectedException = ExpectedException.ArgumentNullException("Parameter name: validationParameters");
+            ValidateToken(defaultSamlToken, null, securityTokenHandlerCollection, expectedException);
 
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
-            exceptionProcessor = ExceptionProcessor.SecurityTokenValidationException("IDX10201");
-            ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenHandlerCollection, exceptionProcessor);
+            expectedException = ExpectedException.SecurityTokenValidationException("IDX10201");
+            ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenHandlerCollection, expectedException);
 
             securityTokenHandlerCollection = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
-            exceptionProcessor = new ExceptionProcessor(typeExpected: typeof(SignatureVerificationFailedException), substringExpected: "ID4037");
-            ValidateToken(IdentityUtilities.CreateSamlToken(), tokenValidationParameters, securityTokenHandlerCollection, exceptionProcessor);
+            expectedException = new ExpectedException(typeExpected: typeof(SignatureVerificationFailedException), substringExpected: "ID4037");
+            ValidateToken(IdentityUtilities.CreateSamlToken(), tokenValidationParameters, securityTokenHandlerCollection, expectedException);
 
             securityTokenHandlerCollection = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
             securityTokenHandlerCollection.RemoveAt(1);
-            exceptionProcessor = new ExceptionProcessor(typeExpected: typeof(SecurityTokenValidationException), substringExpected: "IDX10201");
-            ValidateToken(IdentityUtilities.CreateSamlToken(), tokenValidationParameters, securityTokenHandlerCollection, exceptionProcessor);
+            expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenValidationException), substringExpected: "IDX10201");
+            ValidateToken(IdentityUtilities.CreateSamlToken(), tokenValidationParameters, securityTokenHandlerCollection, expectedException);
 
         }
 
-        private void ValidateToken(string securityToken, TokenValidationParameters tokenValidationParameters, SecurityTokenHandlerCollection securityTokenHandlerCollection, ExceptionProcessor exceptionProcessor)
+        private void ValidateToken(string securityToken, TokenValidationParameters tokenValidationParameters, SecurityTokenHandlerCollection securityTokenHandlerCollection, ExpectedException expectedException)
         {
             try
             {
                 securityTokenHandlerCollection.ValidateToken(securityToken, tokenValidationParameters);
-                exceptionProcessor.ProcessNoException();
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                exceptionProcessor.ProcessException(exception);
+                expectedException.ProcessException(exception);
             }
 
         }

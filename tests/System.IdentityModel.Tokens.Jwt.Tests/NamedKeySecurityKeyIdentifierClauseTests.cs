@@ -17,6 +17,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
@@ -53,48 +54,48 @@ namespace System.IdentityModel.Test
         public void NamedKeySecurityKeyIdentifierClause_Constructor()
         {
             NamedKeySecurityKeyIdentifierClause namedKeySecurityKeyIdentifierClause;
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(ArgumentNullException), id: "name");
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "name");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause(null, null);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch(Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(thrown: typeof(ArgumentNullException), id: "keyIdentifier");
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "keyIdentifier");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", null);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(thrown: typeof(ArgumentException), id: "WIF10000");
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "WIF10000");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause(name: "     ", keyIdentifier: "keyIdentifier");
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(thrown: typeof(ArgumentException), id: "WIF10000");
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "WIF10000");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", "     ");
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
         }
 
@@ -117,15 +118,15 @@ namespace System.IdentityModel.Test
             Assert.IsTrue("keyidentifier" == namedKeySecurityKeyIdentifierClause.KeyIdentifier);
 
             // *** Matches (null)
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(ArgumentNullException), id: "keyIdentifierClause");
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "keyIdentifierClause");
             try
             {
                 namedKeySecurityKeyIdentifierClause.Matches(null);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
         }

@@ -72,9 +72,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\Shared\ExpectedException.cs">
+      <Link>ExpectedException.cs</Link>
+    </Compile>
     <Compile Include="AuthenticationProtocolMessageTests.cs" />
     <Compile Include="DerivedTypes.cs" />
-    <Compile Include="ExceptionProcessor.cs" />
     <Compile Include="IdentityUtilities.cs" />
     <Compile Include="KeyingMaterial.cs" />
     <Compile Include="MessageComparer.cs" />

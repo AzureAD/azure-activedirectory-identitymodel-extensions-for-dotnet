@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
 using System.Xml;
@@ -55,33 +56,33 @@ namespace System.IdentityModel.Test
 
             // *** null param
             JwtSecurityTokenRequirement JwtSecurityTokenRequirement;
-            ExpectedException expectedException = new ExpectedException(thrown: typeof(ArgumentNullException), id: "element");
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "element");
             try
             {
                 JwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(null);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch(Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
             // *** wrong namespace
             XmlDocument xmlDocument = new XmlDocument();
-            expectedException = ExpectedException.Config(id: "Jwt10601");
+            expectedException = ExpectedException.ConfigurationErrorsException(substringExpected: "Jwt10601");
             XmlElement xmlElement = new CustomXmlElement("prefix", "localName", "http://www.gotJwt.com", xmlDocument);
             try
             {
                 JwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(xmlElement);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
             // *** unknown X509RevocationMode
-            expectedException = ExpectedException.Config(id: "Jwt10606");
+            expectedException = ExpectedException.ConfigurationErrorsException(substringExpected: "Jwt10606");
             xmlElement = new CustomXmlElement("prefix", "jwtSecurityTokenRequirement", "http://www.gotJwt.com", xmlDocument);
             xmlElement.Attributes.Append(new CustomXmlAttribute("prefix", "issuerCertificateRevocationMode", "http://www.gotJwt.com", xmlDocument)
             {
@@ -90,15 +91,15 @@ namespace System.IdentityModel.Test
             try
             {
                 JwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(xmlElement);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
             // *** unknown ValidationMode
-            expectedException = ExpectedException.Config(id: "Jwt10606");
+            expectedException = ExpectedException.ConfigurationErrorsException(substringExpected: "Jwt10606");
             xmlElement = new CustomXmlElement("prefix", "jwtSecurityTokenRequirement", "http://www.gotJwt.com", xmlDocument);
             xmlElement.Attributes.Append(new CustomXmlAttribute("prefix", "issuerCertificateValidationMode", "http://www.gotJwt.com", xmlDocument)
             {
@@ -107,15 +108,15 @@ namespace System.IdentityModel.Test
             try
             {
                 JwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(xmlElement);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
             // *** unknown TrustedStoreLocation
-            expectedException = ExpectedException.Config(id: "Jwt10606");
+            expectedException = ExpectedException.ConfigurationErrorsException(substringExpected: "Jwt10606");
             xmlElement = new CustomXmlElement("prefix", "jwtSecurityTokenRequirement", "http://www.gotJwt.com", xmlDocument);
             xmlElement.Attributes.Append(new CustomXmlAttribute("prefix", "issuerCertificateTrustedStoreLocation", "http://www.gotJwt.com", xmlDocument)
             {
@@ -124,15 +125,15 @@ namespace System.IdentityModel.Test
             try
             {
                 JwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(xmlElement);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
 
             // *** unbale to create type
-            expectedException = ExpectedException.Config(id: "Jwt10613");
+            expectedException = ExpectedException.ConfigurationErrorsException(substringExpected: "Jwt10613", inner: typeof(TypeLoadException));
             xmlElement = new CustomXmlElement("prefix", "jwtSecurityTokenRequirement", "http://www.gotJwt.com", xmlDocument);
             xmlElement.Attributes.Append(new CustomXmlAttribute("prefix", "issuerCertificateValidator", "http://www.gotJwt.com", xmlDocument)
             {
@@ -147,11 +148,11 @@ namespace System.IdentityModel.Test
             try
             {
                 JwtSecurityTokenRequirement = new JwtSecurityTokenRequirement(xmlElement);
-                ExpectedException.ProcessNoException(expectedException);
+                expectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                ExpectedException.ProcessException(expectedException, exception);
+                expectedException.ProcessException(exception);
             }
         }
 
