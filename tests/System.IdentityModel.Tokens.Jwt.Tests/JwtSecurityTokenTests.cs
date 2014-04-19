@@ -18,7 +18,6 @@
 
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Reflection;
@@ -149,7 +148,7 @@ namespace System.IdentityModel.Test
             // ensure we can get to every property
             if (jwt != null && (variation.ExpectedException == null || variation.ExpectedException.TypeExpected == null))
             {
-                JwtTestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwt, variation.Name);
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwt, variation.Name);
             }
 
             if (null != variation.ExpectedJwtSecurityToken)
@@ -166,8 +165,6 @@ namespace System.IdentityModel.Test
         public void JwtSecurityToken_Constructor()
         {
             Console.WriteLine( string.Format( "Entering: '{0}'", MethodBase.GetCurrentMethod() ) );
-            JwtSecurityToken jwt = null;
-
             RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 { 
@@ -242,7 +239,7 @@ namespace System.IdentityModel.Test
                 // ensure we can get to every property
                 if ( jwt != null && ( variation.ExpectedException == null || variation.ExpectedException.TypeExpected == null ) )
                 {
-                    JwtTestUtilities.CallAllPublicInstanceAndStaticPropertyGets( jwt, variation.Name );
+                    TestUtilities.CallAllPublicInstanceAndStaticPropertyGets( jwt, variation.Name );
                 }
 
                 if ( null != variation.ExpectedJwtSecurityToken )

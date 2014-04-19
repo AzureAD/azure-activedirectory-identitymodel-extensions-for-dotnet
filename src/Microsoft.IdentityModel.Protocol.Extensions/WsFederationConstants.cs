@@ -8,22 +8,22 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class WsFederationActions
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
 
         public const string Attribute = "wattr1.0";
         public const string Pseudonym = "wpseudo1.0";
         public const string SignIn = "wsignin1.0";
         public const string SignOut = "wsignout1.0";
         public const string SignOutCleanup = "wsignoutcleanup1.0";
-
-#pragma warning restore 1591
+        
+        #pragma warning restore 1591
     }
 
     /// <summary>
     /// Constants defined for WsFederation.
     /// </summary>
     public static class WsFederationConstants
-    {
+    {        
         #pragma warning disable 1591
 
         public const string Namespace = "http://docs.oasis-open.org/wsfed/federation/200706";

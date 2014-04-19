@@ -18,12 +18,11 @@
 
 #define  _Verbose
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Configuration;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.IdentityModel.Test
 {

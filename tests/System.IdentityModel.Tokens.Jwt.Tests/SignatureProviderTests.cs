@@ -16,9 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.IdentityModel.Test;
-
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 
@@ -371,9 +370,8 @@ namespace System.IdentityModel.Test
             SymmetricSignatureProviderTests_Constructor("Constructor:   - algorithm == string.Empty", KeyingMaterial.SymmetricSecurityKey_256, string.Empty, ExpectedException.ArgumentException());
 
             // GetKeyedHashAlgorithm throws
-            Type innerException = typeof(CryptographicException);
             SymmetricSecurityKey key = new FaultingSymmetricSecurityKey(KeyingMaterial.SymmetricSecurityKey_256, new CryptographicException("hi from inner"));
-            SymmetricSignatureProviderTests_Constructor("Constructor:   - SecurityKey.GetKeyedHashAlgorithm throws", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10532", innerException));
+            SymmetricSignatureProviderTests_Constructor("Constructor:   - SecurityKey.GetKeyedHashAlgorithm throws", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10532", typeof(CryptographicException)));
 
             // Key returns null KeyedHash
             key = new FaultingSymmetricSecurityKey(KeyingMaterial.SymmetricSecurityKey_256, null);
@@ -383,7 +381,6 @@ namespace System.IdentityModel.Test
             KeyedHashAlgorithm keyedHashAlgorithm = KeyingMaterial.SymmetricSecurityKey_256.GetKeyedHashAlgorithm(SecurityAlgorithms.HmacSha256Signature);
             key = new FaultingSymmetricSecurityKey(KeyingMaterial.SymmetricSecurityKey_256, null, null, keyedHashAlgorithm, null);
             SymmetricSignatureProviderTests_Constructor("Constructor:   - key returns null bytes to pass to _keyedHashKey", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10534", typeof(NullReferenceException)));
-
         }
 
         private void SymmetricSignatureProviderTests_Constructor(string testcase, SymmetricSecurityKey key, string algorithm, ExpectedException expectedException)

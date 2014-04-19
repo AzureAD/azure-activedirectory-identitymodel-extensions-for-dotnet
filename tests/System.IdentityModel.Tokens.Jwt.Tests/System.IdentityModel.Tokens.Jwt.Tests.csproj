@@ -34,6 +34,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -60,12 +69,20 @@
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>ExpectedException.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IdentityComparer.cs">
+      <Link>IdentityComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\KeyingMaterial.cs">
+      <Link>KeyingMaterial.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\TestUtilities.cs">
+      <Link>TestUtilities.cs</Link>
+    </Compile>
     <Compile Include="ClaimSets.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="CreateAndValidateTokens.cs" />
     <Compile Include="Defaults.cs" />
     <Compile Include="ExtensibilityTests.cs" />
-    <Compile Include="IdentityComparer.cs" />
     <Compile Include="JwtConfigTests.cs" />
     <Compile Include="JwtDerivedTestTypes.cs" />
     <Compile Include="JwtPayloadTest.cs" />
@@ -73,7 +90,6 @@
     <Compile Include="JwtSecurityTokenRequirementTests.cs" />
     <Compile Include="JwtSecurityTokenTests.cs" />
     <Compile Include="JwtTestUtilities.cs" />
-    <Compile Include="KeyingMaterial.cs" />
     <Compile Include="NamedKeyIssuerTokenResolverConfigTest.cs" />
     <Compile Include="NamedKeyTests.cs" />
     <Compile Include="NamedKeySecurityKeyIdentifierClauseTests.cs" />
@@ -94,12 +110,6 @@
     <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\JwtConfigurationStrings.cs">
       <Link>jwtConfigurationStrings.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\DateTimeUtil.cs">
-      <Link>DateTimeUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\EpochTime.cs">
-      <Link>EpochTime.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\System.IdentityModel.Tokens.Jwt\WSSecurity10Constants.cs">
       <Link>WSSecurity10Constants.cs</Link>
     </Compile>
@@ -112,6 +122,9 @@
       <Project>{BA7803C7-0585-4EEE-8672-F6E18E12E3E8}</Project>
       <Name>System.IdentityModel.Tokens.Jwt</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="35MSSharedLib1024.snk" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

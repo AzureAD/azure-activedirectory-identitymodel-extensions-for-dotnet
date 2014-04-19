@@ -20,7 +20,6 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Reflection;
-using System.Web;
 
 namespace Microsoft.IdentityModel.Test
 {

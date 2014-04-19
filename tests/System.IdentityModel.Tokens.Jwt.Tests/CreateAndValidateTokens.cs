@@ -16,9 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Globalization;
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
