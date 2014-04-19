@@ -34,6 +34,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj">
       <Project>{BA7803C7-0585-4EEE-8672-F6E18E12E3E8}</Project>
@@ -75,10 +84,15 @@
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>ExpectedException.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\KeyingMaterial.cs">
+      <Link>KeyingMaterial.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\TestUtilities.cs">
+      <Link>TestUtilities.cs</Link>
+    </Compile>
     <Compile Include="AuthenticationProtocolMessageTests.cs" />
     <Compile Include="DerivedTypes.cs" />
     <Compile Include="IdentityUtilities.cs" />
-    <Compile Include="KeyingMaterial.cs" />
     <Compile Include="MessageComparer.cs" />
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
@@ -87,9 +101,11 @@
     <Compile Include="Saml2SecurityTokenHandlerTests.cs" />
     <Compile Include="SamlSecurityTokenHandlerTests.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensionsTests.cs" />
-    <Compile Include="TestUtilities.cs" />
     <Compile Include="WsFederationConstantsTests.cs" />
     <Compile Include="WsFederationMessageTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="35MSSharedLib1024.snk" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

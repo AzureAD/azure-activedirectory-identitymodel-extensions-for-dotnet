@@ -16,11 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.IdentityModel.Test;
 
 namespace System.IdentityModel.Test
 {

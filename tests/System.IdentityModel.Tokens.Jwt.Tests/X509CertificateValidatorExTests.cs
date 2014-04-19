@@ -17,6 +17,9 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
+using System.ServiceModel.Security;
 
 namespace System.IdentityModel.Test
 {
@@ -49,6 +52,10 @@ namespace System.IdentityModel.Test
         [Description("Tests: Constructor")]
         public void X509CertificateValidatorEx_Constructor()
         {
+            X509CertificateValidatorEx validator = new X509CertificateValidatorEx(X509CertificateValidationMode.None, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
+            validator = new X509CertificateValidatorEx(X509CertificateValidationMode.PeerTrust, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
+            validator = new X509CertificateValidatorEx(X509CertificateValidationMode.ChainTrust, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
+            validator = new X509CertificateValidatorEx(X509CertificateValidationMode.PeerOrChainTrust, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
         }
 
         [TestMethod]

@@ -85,5 +85,46 @@ namespace Microsoft.IdentityModel.Test
 
         // Small Key
         public static BinarySecretSecurityToken BinarayToken56BitKey        = new BinarySecretSecurityToken( 56 );
+
+        public static IEnumerable<SecurityToken> AsymmetricTokens
+        {
+            get
+            {
+                yield return X509Token_1024;
+                yield return X509Token_2048;
+                yield return X509Token_Public_2048;
+                yield return RsaToken_2048;
+            }
+        }
+        public static SecurityTokenResolver AsymmetricSecurityTokenResolver
+        {
+            get
+            {
+                List<SecurityToken> tokens = new List<SecurityToken>(AsymmetricTokens);
+                return SecurityTokenResolver.CreateDefaultSecurityTokenResolver(tokens.AsReadOnly(), true);
+            }
+        }
+
+        public static IssuerNameRegistry AsymmetricIssuerNameRegistry
+        {
+            get
+            {
+                ConfigurationBasedIssuerNameRegistry cbinr = new ConfigurationBasedIssuerNameRegistry();
+                foreach (SecurityToken token in AsymmetricTokens)
+                {
+                    X509SecurityToken x509Token = token as X509SecurityToken;
+                    if (x509Token != null)
+                    {
+                        if (!cbinr.ConfiguredTrustedIssuers.ContainsKey(x509Token.Certificate.GetCertHashString()))
+                        {
+                            cbinr.AddTrustedIssuer(x509Token.Certificate.GetCertHashString(), x509Token.Certificate.Subject);
+                        }
+                    }
+                }
+
+                return cbinr;
+            }
+        }
+
     }
 }

@@ -16,9 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.IdentityModel.Test;
-
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
@@ -28,7 +27,6 @@ using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel.Security;
-
 using Attributes = System.IdentityModel.Tokens.JwtConfigurationStrings.Attributes;
 using AttributeValues = System.IdentityModel.Tokens.JwtConfigurationStrings.AttributeValues;
 using CertMode = System.ServiceModel.Security.X509CertificateValidationMode;

@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Configuration;
@@ -24,7 +25,6 @@ using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
-
 using IssuerNameRegistry = System.IdentityModel.Tokens.IssuerNameRegistry;
 
 namespace System.IdentityModel.Test

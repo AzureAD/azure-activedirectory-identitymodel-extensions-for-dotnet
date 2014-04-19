@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IdentityModel.Protocols.WSTrust;

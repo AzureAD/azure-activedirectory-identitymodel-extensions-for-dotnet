@@ -17,14 +17,11 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
-using System.Reflection;
 using System.Security.Claims;
-using System.Text;
 using System.Xml;
 
 namespace System.IdentityModel.Test
@@ -117,72 +114,5 @@ namespace System.IdentityModel.Test
             return string.Empty;
         }
 
-        /// <summary>
-        /// Calls all public instance and static properties on an object
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="testcase">contains info about the current test case</param>
-        public static void CallAllPublicInstanceAndStaticPropertyGets( object obj, string testcase )
-        {
-            if ( obj == null )
-            {
-                Console.WriteLine( string.Format( "Entering: '{0}', obj is null, have to return.  Is the Testcase: '{1}' right?", MethodBase.GetCurrentMethod(), testcase ?? "testcase is null" ) );
-                return;
-            }
-
-            Type type = obj.GetType();
-            Console.WriteLine( string.Format( "Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, MethodBase.GetCurrentMethod() ) );
-
-            // call get all public static properties of MyClass type
-
-            PropertyInfo[] propertyInfos = type.GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static );
-
-            // Touch each public property
-            foreach ( PropertyInfo propertyInfo in propertyInfos )
-            {
-                try
-                {
-                    if ( propertyInfo.GetMethod != null )
-                    {
-                        object retval = propertyInfo.GetValue( obj, null );
-                    }
-                }
-                catch ( Exception ex )
-                {
-                    Assert.Fail( string.Format( "Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex ) );
-                }
-            }
-        }
-
-        public static string SerializeAsSingleCommaDelimitedString( IEnumerable<string> strings )
-        {
-            if ( null == strings )
-            {
-                return "null";
-            }
-
-            StringBuilder sb = new StringBuilder();
-            bool first = true;
-            foreach ( string str in strings )
-            {
-
-                if ( first )
-                {
-                    sb.AppendFormat( "{0}", str ?? "null" );
-                    first = false;
-                }
-                else
-                {
-                    sb.AppendFormat( ", {0}", str ?? "null" );
-                }
-            }
-
-            if ( first )
-            {
-                return "empty";
-            }
-
-            return sb.ToString();
-        }
     }
 }
