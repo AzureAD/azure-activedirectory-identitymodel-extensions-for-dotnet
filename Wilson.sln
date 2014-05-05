@@ -8,6 +8,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Protocol.Extensions", "src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocol.Extensions.csproj", "{1070AA57-ABCD-44DB-B212-B90880DBD261}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.IdentityModel.Tokens.Jwt.Tests", "tests\System.IdentityModel.Tokens.Jwt.Tests\System.IdentityModel.Tokens.Jwt.Tests.csproj", "{FC7B5C26-A1B7-463C-A53F-F4577C92701D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{520A570E-D3E4-4429-97E2-CB824380C12B} = {520A570E-D3E4-4429-97E2-CB824380C12B}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.csproj", "{520A570E-D3E4-4429-97E2-CB824380C12B}"
 EndProject

@@ -124,6 +124,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocol.Extensions.csproj">
+      <Project>{1070AA57-ABCD-44DB-B212-B90880DBD261}</Project>
+      <Name>Microsoft.IdentityModel.Protocol.Extensions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="35MSSharedLib1024.snk" />
   </ItemGroup>
   <Choose>

@@ -82,6 +82,12 @@ namespace Microsoft.IdentityModel.Test
 
         public void ProcessException(Exception exception)
         {
+            // no need to check unit test asertions.
+            if (typeof(Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException) == exception.GetType())
+            {
+                throw exception;
+            }
+
             if (TypeExpected == null)
             {
                 Assert.IsNull(exception, "Did NOT expect exception, caught: '" + exception + "'");

@@ -224,7 +224,13 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
         /// when validating a token.
         /// </summary>
-        public Func<JwtSecurityToken, string, string> NameClaimTypeDelegate { get; set; }
+        public Func<JwtSecurityToken, string, string> GetNameClaimType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called to obtain the RoleClaimType to use when creating a ClaimsIdentity
+        /// when validating a token.
+        /// </summary>
+        public Func<JwtSecurityToken, string, string> GetRoleClaimType { get; set; }
 
         /// <summary>
         /// Returns 'true' which indicates this instance can validate a <see cref="JwtSecurityToken"/>.
@@ -1410,16 +1416,28 @@ namespace System.IdentityModel.Tokens
             }
 
             string nameClaimType = null;
-            if (NameClaimTypeDelegate != null)
+            if (GetNameClaimType != null)
             {
-                nameClaimType = NameClaimTypeDelegate(jwt, issuer);
+                nameClaimType = GetNameClaimType(jwt, issuer);
             }
+
             if (string.IsNullOrWhiteSpace(nameClaimType))
             {
                 nameClaimType = this.NameClaimType;
             }
 
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationTypes.Federation, nameClaimType, this.RoleClaimType);
+            string roleClaimType = null;
+            if (GetRoleClaimType != null)
+            {
+                roleClaimType = GetRoleClaimType(jwt, issuer);
+            }
+
+            if (string.IsNullOrWhiteSpace(roleClaimType))
+            {
+                roleClaimType = this.RoleClaimType;
+            }
+
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationTypes.Federation, nameClaimType, roleClaimType);
             if (saveBootstrapContext)
             {
                 if (jwt.RawData != null)

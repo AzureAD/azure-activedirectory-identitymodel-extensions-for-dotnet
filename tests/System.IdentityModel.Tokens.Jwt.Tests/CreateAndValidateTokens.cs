@@ -34,6 +34,9 @@ namespace System.IdentityModel.Test
     [TestClass]
     public class CreateAndValidateTokens
     {
+        private static string _roleClaimTypeForDelegate = "RoleClaimTypeForDelegate";
+        private static string _nameClaimTypeForDelegate = "NameClaimTypeForDelegate";
+
         [ClassInitialize]
         public static void ClassSetup( TestContext testContext )
         {
@@ -207,6 +210,95 @@ namespace System.IdentityModel.Test
             JavaScriptSerializer js = new JavaScriptSerializer();
             string jsString = js.Serialize( Entity.Default );
             Assert.IsFalse(jsString != jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
+        }
+
+        private static string NameClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
+        {
+            return _nameClaimTypeForDelegate;
+        }
+
+        private static string RoleClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
+        {
+            return _roleClaimTypeForDelegate;
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "A0DF768E-5073-49E7-90C9-ED97BDCF4B9F")]
+        [Description("Tests Name and Role claim delegates")]
+        public void NameAndRoleClaimDelegates()
+        {
+            string delegateSetRole = "delegateSetRole";
+            string handlerSetRole = "handlerSetRole";
+            string defaultRole = "defaultRole";
+            string delegateSetName = "delegateSetName";
+            string handlerSetName = "handlerSetName";
+            string defaultName = "defaultName";
+            string handlerRoleClaimType = "handlerRoleClaimType";
+            string handlerNameClaimType = "handlerNameClaimType";
+
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+            TokenValidationParameters validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningToken = KeyingMaterial.X509Token_2048,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+            };
+
+            ClaimsIdentity subject = 
+                new ClaimsIdentity(
+                    new List<Claim> 
+                    {   new Claim(_nameClaimTypeForDelegate, delegateSetName), 
+                        new Claim(handlerNameClaimType, handlerSetName), 
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, defaultName), 
+                        new Claim(_roleClaimTypeForDelegate, delegateSetRole),
+                        new Claim(handlerRoleClaimType, handlerSetRole), 
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole), 
+                    });
+
+            JwtSecurityToken jwt = handler.CreateToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;
+
+            // Delegates should override any other settings
+            handler.GetNameClaimType = NameClaimTypeDelegate;
+            handler.GetRoleClaimType = RoleClaimTypeDelegate;
+            handler.NameClaimType = handlerNameClaimType;
+            handler.RoleClaimType = handlerRoleClaimType;
+
+            ClaimsPrincipal principal = handler.ValidateToken(jwt.RawData, validationParameters);
+            CheckNamesAndRole(new string[] { delegateSetName, defaultName, handlerSetName }, new string[] { delegateSetRole, defaultRole, handlerSetRole }, principal, _nameClaimTypeForDelegate, _roleClaimTypeForDelegate); 
+
+            // Directly setting values should override defaults
+            handler.GetNameClaimType = null;
+            handler.GetRoleClaimType = null;
+            principal = handler.ValidateToken(jwt.RawData, validationParameters);
+            CheckNamesAndRole(new string[] { handlerSetName, defaultName, delegateSetName }, new string[] { handlerSetRole, defaultRole, delegateSetRole }, principal, handlerNameClaimType, handlerRoleClaimType); 
+
+            handler.NameClaimType = null;
+            handler.RoleClaimType = null;
+            principal = handler.ValidateToken(jwt.RawData, validationParameters);
+            CheckNamesAndRole(new string[] { defaultName, handlerSetName, delegateSetName }, new string[] { defaultRole, handlerSetRole, delegateSetRole }, principal); 
+        }
+
+        /// <summary>
+        /// First string is expected, others are not.
+        /// </summary>
+        /// <param name="names"></param>
+        /// <param name="roles"></param>
+        private void CheckNamesAndRole(string[] names, string[] roles, ClaimsPrincipal principal, string expectedNameClaimType = ClaimsIdentity.DefaultNameClaimType, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
+        {
+            ClaimsIdentity identity = principal.Identity as ClaimsIdentity;
+            Assert.AreEqual(identity.NameClaimType, expectedNameClaimType);
+            Assert.AreEqual(identity.RoleClaimType, expectedRoleClaimType);
+            Assert.IsTrue(principal.IsInRole(roles[0]));
+            for (int i = 1; i < roles.Length; i++)
+            {
+                Assert.IsFalse(principal.IsInRole(roles[i]));
+            }
+
+            Assert.AreEqual(identity.Name, names[0]);
+            for (int i = 1; i < names.Length; i++)
+            {
+                Assert.AreNotEqual(identity.Name, names[i]);
+            }
         }
     }
 }

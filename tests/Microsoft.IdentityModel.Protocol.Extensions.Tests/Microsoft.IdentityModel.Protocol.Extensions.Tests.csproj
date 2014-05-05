@@ -84,8 +84,14 @@
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>ExpectedException.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IdentityComparer.cs">
+      <Link>IdentityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\KeyingMaterial.cs">
       <Link>KeyingMaterial.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\SharedData.cs">
+      <Link>SharedData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TestUtilities.cs">
       <Link>TestUtilities.cs</Link>
@@ -93,6 +99,8 @@
     <Compile Include="AuthenticationProtocolMessageTests.cs" />
     <Compile Include="DerivedTypes.cs" />
     <Compile Include="IdentityUtilities.cs" />
+    <Compile Include="JsonWebKeysTests.cs" />
+    <Compile Include="JsonWebKeyTests.cs" />
     <Compile Include="MessageComparer.cs" />
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
@@ -106,6 +114,25 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="35MSSharedLib1024.snk" />
+    <None Include="JsonWebKeysBadBase64DataFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="JsonWebKeysBadX509DataFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="JsonWebKeysSingleX509DataFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="JsonWebKeysFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenIdConnectMetadataBadX509DataFile.json" />
+    <None Include="OpenIdConnectMetadataFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenIdConnectMetadataJsonWebKeysBadUriFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

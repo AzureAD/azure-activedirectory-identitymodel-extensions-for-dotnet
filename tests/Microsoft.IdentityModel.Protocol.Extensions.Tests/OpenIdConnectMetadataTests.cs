@@ -19,6 +19,9 @@
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Test;
+using System.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -50,7 +53,48 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Constructors")]
         public void OpenIdConnectMetadata_Constructors()
         {
-            OpenIdConnectMetadata metadata = new OpenIdConnectMetadata();
+            RunOpenIdConnectMetadataTest((string)null, new OpenIdConnectMetadata(), ExpectedException.NoExceptionExpected);
+            RunOpenIdConnectMetadataTest((IDictionary<string, object>)null, new OpenIdConnectMetadata(), ExpectedException.NoExceptionExpected);
+            RunOpenIdConnectMetadataTest(SharedData.OpenIdConnectMetadataString, SharedData.OpenIdConnectMetatdata1, ExpectedException.NoExceptionExpected);
+        }
+
+        private OpenIdConnectMetadata RunOpenIdConnectMetadataTest(object obj, OpenIdConnectMetadata compareTo, ExpectedException expectedException, bool asString = true)
+        {
+            OpenIdConnectMetadata openIdConnectMetadata = null;
+            try
+            {
+                if (obj is string)
+                {
+                    openIdConnectMetadata = new OpenIdConnectMetadata(obj as string);
+                }
+                else if (obj is IDictionary<string, object>)
+                {
+                    openIdConnectMetadata = new OpenIdConnectMetadata(obj as IDictionary<string, object>);
+                }
+                else
+                {
+                    if (asString)
+                    {
+                        openIdConnectMetadata = new OpenIdConnectMetadata(obj as string);
+                    }
+                    else
+                    {
+                        openIdConnectMetadata = new OpenIdConnectMetadata(obj as IDictionary<string, object>);
+                    }
+                }
+                expectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+
+            if (compareTo != null)
+            {
+                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectMetadata, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+            }
+
+            return openIdConnectMetadata;
         }
 
         [TestMethod]
@@ -72,13 +116,22 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: GetSets")]
         public void OpenIdConnectMetadata_GetSets()
         {
+            OpenIdConnectMetadata metadata = new OpenIdConnectMetadata();
+            TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(metadata, "OpenIdConnectMetadata_GetSets");
+
+            List<string> methods = new List<string> { "Authorization_Endpoint", "End_Session_Endpoint", "Issuer", "Jwks_Uri", "Token_Endpoint" };
+            foreach(string method in methods)
+            {
+                TestUtilities.GetSet(metadata, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
+            }
+
             string authorization_Endpoint = Guid.NewGuid().ToString();
             string end_Session_Endpoint = Guid.NewGuid().ToString();
             string issuer = Guid.NewGuid().ToString();
             string jwks_Uri = Guid.NewGuid().ToString();
             string token_Endpoint = Guid.NewGuid().ToString();
 
-            OpenIdConnectMetadata metadata = new OpenIdConnectMetadata()
+            metadata = new OpenIdConnectMetadata()
             {
                 Authorization_Endpoint = authorization_Endpoint,
                 End_Session_Endpoint = end_Session_Endpoint,
@@ -87,26 +140,16 @@ namespace Microsoft.IdentityModel.Test
                 Token_Endpoint = token_Endpoint,
             };
 
-            Assert.AreEqual(metadata.Authorization_Endpoint, authorization_Endpoint);
-            Assert.AreEqual(metadata.End_Session_Endpoint, end_Session_Endpoint);
-            Assert.AreEqual(metadata.Issuer, issuer);
-            Assert.AreEqual(metadata.Jwks_Uri, jwks_Uri);
-            Assert.AreEqual(metadata.Token_Endpoint, token_Endpoint);
-            Assert.IsNotNull(metadata.SigningTokens);
-
-            metadata = new OpenIdConnectMetadata();
-            metadata.Authorization_Endpoint = authorization_Endpoint;
-            metadata.End_Session_Endpoint = end_Session_Endpoint;
-            metadata.Issuer = issuer;
-            metadata.Jwks_Uri = jwks_Uri;
-            metadata.Token_Endpoint = token_Endpoint;
+            List<SecurityToken> signingTokens = new List<SecurityToken>{KeyingMaterial.X509Token_1024, KeyingMaterial.X509Token_Public_2048};
+            metadata.SigningTokens.Add(KeyingMaterial.X509Token_1024);
+            metadata.SigningTokens.Add(KeyingMaterial.X509Token_Public_2048);
 
             Assert.AreEqual(metadata.Authorization_Endpoint, authorization_Endpoint);
             Assert.AreEqual(metadata.End_Session_Endpoint, end_Session_Endpoint);
             Assert.AreEqual(metadata.Issuer, issuer);
             Assert.AreEqual(metadata.Jwks_Uri, jwks_Uri);
             Assert.AreEqual(metadata.Token_Endpoint, token_Endpoint);
-            Assert.IsNotNull(metadata.SigningTokens);
+            Assert.IsTrue(IdentityComparer.AreEqual(metadata.SigningTokens, signingTokens));
         }
 
         [TestMethod]

@@ -1,14 +1,28 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Extensions;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.IO;
+using System.Net;
 using System.Net.Http;
-using System.Runtime.Serialization.Json;
 using System.Security.Cryptography.X509Certificates;
-using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -20,14 +34,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Obtains <see cref="OpenIdConnectMetadata"/> from an endpoint.
         /// </summary>
-        /// <param name="metadataEndpoint"> the endpoint to query.</param>
-        /// <param name="httpClient">the <see cref="HttpClient"/> to use to make the call.</param>
-        /// <returns></returns>
-        public static OpenIdConnectMetadata GetMetatadata(string metadataEndpoint, HttpClient httpClient)
+        /// <param name="metadataUrl"> a pointer to the metadata. Can refer to a file or a absolute uri.</param>
+        /// <param name="httpClient">the <see cref="HttpClient"/> to use obtain the metadata.</param>
+        /// <returns>A populated <see cref="OpenIdConnectMetadata"/>.</returns>
+        /// <exception cref="ArgumentNullException"> if 'metadataUrl' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'httpclient' is null.</exception>
+        public static OpenIdConnectMetadata GetMetadata(string metadataUrl, HttpClient httpClient)
         {
-            if (metadataEndpoint == null)
+            if (string.IsNullOrWhiteSpace(metadataUrl))
             {
-                throw new ArgumentNullException("metadataEndpoint");
+                throw new ArgumentNullException("metadataUrl");
             }
 
             if (httpClient == null)
@@ -35,43 +51,65 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("httpClient");
             }
 
-            HttpResponseMessage metadataResponse = httpClient.GetAsync(metadataEndpoint).Result;
+            HttpResponseMessage metadataResponse = httpClient.GetAsync(metadataUrl).Result;
             metadataResponse.EnsureSuccessStatusCode();
-            Stream stream = metadataResponse.Content.ReadAsStreamAsync().Result;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(OpenIdConnectMetadata));
-            OpenIdConnectMetadata openIdConnectMetadata = serializer.ReadObject(stream) as OpenIdConnectMetadata;
-            
-            if (!string.IsNullOrEmpty(openIdConnectMetadata.Jwks_Uri))
+            return GetMetadata(metadataResponse.Content.ReadAsStreamAsync().Result);
+        }
+
+        /// <summary>
+        /// Obtains <see cref="OpenIdConnectMetadata"/> from an endpoint.
+        /// </summary>
+        /// <param name="metadataUrl"> a pointer to the metadata. Can refer to a file or a absolute uri.</param>
+        /// <returns>A populated <see cref="OpenIdConnectMetadata"/>.</returns>
+        /// <exception cref="ArgumentNullException"> if 'metadataUrl' is null or whitespace.</exception>
+        public static OpenIdConnectMetadata GetMetadata(string metadataUrl)
+        {
+            if (string.IsNullOrWhiteSpace(metadataUrl))
             {
-                metadataResponse = httpClient.GetAsync(openIdConnectMetadata.Jwks_Uri).Result;
-                metadataResponse.EnsureSuccessStatusCode();
-                string str = metadataResponse.Content.ReadAsStringAsync().Result;
-                JavaScriptSerializer jss = new JavaScriptSerializer();
-                Dictionary<string, object> jsonKey = jss.Deserialize<Dictionary<string, object>>(str);
-                object obj = null;
-                if (jsonKey.TryGetValue(JsonWebKeysValueNames.Keys, out obj ))
+                throw new ArgumentNullException("metadataUrl");
+            }
+
+            using (Stream stream = OpenStream(metadataUrl))
+            {
+                return GetMetadata(stream);
+            }
+        }
+
+        /// <summary>
+        /// Returns a populated <see cref="OpenIdConnectMetadata"/> instance by reading the stream.
+        /// </summary>
+        /// <param name="stream"> a JSON formated stream conforming to OpenIdConnect discovery: http://openid.net/specs/openid-connect-discovery-1_0.html </param>
+        /// <returns><see cref="OpenIdConnectMetadata"/></returns>
+        /// <exception cref="ArgumentNullException"> if 'stream' is null.</exception>
+        public static OpenIdConnectMetadata GetMetadata(Stream stream)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
+            OpenIdConnectMetadata openIdConnectMetadata = null;
+            using (StreamReader streamReader = new StreamReader(stream))
+            {
+                openIdConnectMetadata = new OpenIdConnectMetadata(streamReader.ReadToEnd());
+                if (!string.IsNullOrEmpty(openIdConnectMetadata.Jwks_Uri))
                 {
-                    var collection = obj as ArrayList;
-                    if (collection != null)
+                    JsonWebKeys jsonWebKeys = null;
+                    using (Stream keyStream = OpenStream(openIdConnectMetadata.Jwks_Uri))
                     {
-                        foreach(object entry in collection)
+                        using (StreamReader keyStreamReader = new StreamReader(keyStream))
                         {
-                            Dictionary<string, object> objectEntry = entry as Dictionary<string, object>;
-                            if (objectEntry.ContainsKey(JsonWebKeysValueNames.X5c))
+                            jsonWebKeys = new JsonWebKeys(keyStreamReader.ReadToEnd());
+                            foreach (JsonWebKey webKey in jsonWebKeys.Keys)
                             {
-                                var x509DataCollection = objectEntry[JsonWebKeysValueNames.X5c] as ArrayList;
-                                if (x509DataCollection != null)
+                                // Add chaining
+                                if (webKey.X5c.Count == 1)
                                 {
-                                    foreach (object x509DataObject in x509DataCollection)
-                                    {
-                                        string x509Data = x509DataObject as string;
-                                        if (x509Data != null)
-                                        {
-                                            X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(x509Data));
-                                            openIdConnectMetadata.SigningTokens.Add(new X509SecurityToken(cert));
-                                        }
-                                    }                                
+                                    X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+                                    openIdConnectMetadata.SigningTokens.Add(new X509SecurityToken(cert));
                                 }
+
+                                openIdConnectMetadata.JsonWebKeys.Add(webKey);
                             }
                         }
                     }
@@ -79,6 +117,28 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             return openIdConnectMetadata;
+        }
+
+        private static Stream OpenStream(string metadataUrl)
+        {
+            Stream stream;
+            if (File.Exists(metadataUrl))
+            {
+                stream = new FileStream(metadataUrl, FileMode.Open);
+            }
+            else
+            {
+                if (!Uri.IsWellFormedUriString(metadataUrl, UriKind.Absolute))
+                {
+                    throw new ArgumentException(ErrorMessages.IDX10220 + "'" + metadataUrl + "'.");
+                }
+
+                WebRequest webRequest = WebRequest.Create(metadataUrl);
+                WebResponse webResponse = webRequest.GetResponse();
+                stream = webResponse.GetResponseStream();
+            }
+
+            return stream;
         }
     }
 }

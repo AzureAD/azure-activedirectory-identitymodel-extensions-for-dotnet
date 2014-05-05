@@ -9,14 +9,17 @@ namespace Microsoft.IdentityModel.Protocols
     public static class JsonWebKeysValueNames
     {
         #pragma warning disable 1591
-        public static readonly string Keys = "keys";
-        public static readonly string Kty = "kty";
-        public static readonly string Use = "use";
-        public static readonly string Kid = "Kid";
-        public static readonly string X5t = "x5t";
-        public static readonly string X5c = "x5c";
-        public static readonly string E   = "e";
-        public static readonly string N   = "n";
+        public const string Alg = "alg";
+        public const string E = "e";
+        public const string Key_Ops = "key_ops";
+        public const string Keys = "keys";
+        public const string Kid = "kid";
+        public const string Kty = "kty";
+        public const string N = "n";
+        public const string Use = "use";
+        public const string X5c = "x5c";
+        public const string X5t = "x5t";
+        public const string X5u = "x5u";
         #pragma warning restore 1591
     }
 
@@ -126,7 +129,7 @@ namespace Microsoft.IdentityModel.Protocols
 
 
     /// <summary>
-    /// Response types for OpenIdConnect.
+    /// Response modes for OpenIdConnect.
     /// </summary>
     public static class OpenIdConnectResponseModes
     {

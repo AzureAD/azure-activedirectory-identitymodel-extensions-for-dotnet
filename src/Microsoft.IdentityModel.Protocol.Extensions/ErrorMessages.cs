@@ -56,6 +56,7 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX10217 = "IDX10217: Token lifetime is invalid because 'NotOnOrAfter' is after the current time: '{0}', ClockSkew (InSeconds): '{1}', notbefore: '{2}'";
         public const string IDX10218 = "IDX10218: OneTimeUse is not supported";
         public const string IDX10219 = "IDX10219: ProxyRestriction is not supported";
+        public const string IDX10220 = "IDX10220: Jwks_Uri must be an absolute uri. Was: ";
 #pragma warning restore 1591
     }
 }

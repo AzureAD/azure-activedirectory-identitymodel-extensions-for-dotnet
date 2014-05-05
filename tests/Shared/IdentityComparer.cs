@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Protocols;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IdentityModel.Tokens;
@@ -51,7 +52,6 @@ namespace System.IdentityModel.Test
                     }
                 }
             }
-
 
             return numMatched == dictionary1.Count;
         }
@@ -504,7 +504,24 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        public static bool AreEqual( string string1, string string2 )
+        public static bool AreEqual(IList<string> strings1, IList<string> strings2, StringComparison stringComparison = StringComparison.Ordinal)
+        {
+            List<string> strings = new List<string>(strings2);
+            foreach(string str in strings1)
+            {
+                for(int i = 0; i< strings.Count; i++)
+                {
+                    if(string.Equals(str, strings[i], stringComparison))
+                    {
+                        strings.RemoveAt(i);
+                    }
+                }
+            }
+
+            return strings.Count == 0;
+        }
+
+        public static bool AreEqual(string string1, string string2, StringComparison stringComparison = StringComparison.Ordinal)
         {
             if ( string1 == null && string2 == null )
             {
@@ -516,7 +533,7 @@ namespace System.IdentityModel.Test
                 return false;
             }
 
-            return string.Equals( string1, string2, StringComparison.Ordinal );
+            return string.Equals(string1, string2, stringComparison);
         }
 
         public static bool AreEqual( JwtHeader header1, JwtHeader header2 )
@@ -557,6 +574,217 @@ namespace System.IdentityModel.Test
             }
 
             if ( !IdentityComparer.AreEqual( payload1.Claims, payload2.Claims ) )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool AreEqual(ICollection<SecurityToken> tokenCollection1, ICollection<SecurityToken> tokenCollection2)
+        {
+            if (tokenCollection1 == null && tokenCollection2 == null)
+            {
+                return true;
+            }
+
+            if (tokenCollection1 == null || tokenCollection2 == null)
+            {
+                return false;
+            }
+
+            if (object.ReferenceEquals(tokenCollection1, tokenCollection2))
+            {
+                return true;
+            }
+
+            if (tokenCollection1.Count != tokenCollection2.Count)
+            {
+                return false;
+            }
+
+            List<X509SecurityToken> tokens1 = new List<X509SecurityToken>();
+            foreach (var token in tokenCollection1)
+            {
+                if (token is X509SecurityToken)
+                {
+                    tokens1.Add(token as X509SecurityToken);
+                }
+            }
+
+            List<X509SecurityToken> tokens2 = new List<X509SecurityToken>();
+            foreach (var token in tokenCollection2)
+            {
+                if (token is X509SecurityToken)
+                {
+                    tokens2.Add(token as X509SecurityToken);
+                }
+            }
+
+            foreach (var token in tokens1)
+            {
+                for (int i = 0; i < tokens2.Count; i++)
+                {
+                    if (token.Certificate.Thumbprint == tokens2[i].Certificate.Thumbprint)
+                    {
+                        tokens2.Remove(tokens2[i]);
+                    }
+                }
+            }
+
+            return (tokens2.Count == 0);
+        }
+
+        public static bool AreEqual(OpenIdConnectMetadata metadata1, OpenIdConnectMetadata metadata2)
+        {
+            if (metadata1 == null && metadata2 == null)
+            {
+                return true;
+            }
+
+            if (metadata1 == null || metadata2 == null)
+            {
+                return false;
+            }
+
+            if (object.ReferenceEquals(metadata1, metadata2))
+            {
+                return true;
+            }
+
+            if (!IdentityComparer.AreEqual(metadata1.Authorization_Endpoint, metadata2.Authorization_Endpoint))
+            {
+                return false;
+            }
+
+            if (!IdentityComparer.AreEqual(metadata1.Check_Session_Iframe, metadata2.Check_Session_Iframe))
+            {
+                return false;
+            }
+
+            if (!IdentityComparer.AreEqual(metadata1.End_Session_Endpoint, metadata2.End_Session_Endpoint))
+            {
+                return false;
+            }
+
+            if (!IdentityComparer.AreEqual(metadata1.Issuer, metadata2.Issuer))
+            {
+                return false;
+            }
+
+            if (!IdentityComparer.AreEqual(metadata1.Jwks_Uri, metadata2.Jwks_Uri))
+            {
+                return false;
+            }
+
+            if (!AreEqual(metadata1.SigningTokens, metadata2.SigningTokens))
+            {
+                return false;
+            }
+
+            if (!IdentityComparer.AreEqual(metadata1.Token_Endpoint, metadata2.Token_Endpoint))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool AreEqual( JsonWebKeys jsonWebkeys1, JsonWebKeys jsonWebkeys2)
+        {
+            if (jsonWebkeys1 == null && jsonWebkeys2 == null)
+            {
+                return true;
+            }
+
+            if (null == jsonWebkeys1 || null == jsonWebkeys2)
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkeys1.Keys, jsonWebkeys2.Keys))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool AreEqual(IList<JsonWebKey> jsonWebkeys1, IList<JsonWebKey> jsonWebkeys2)
+        {
+            if (jsonWebkeys1 == null && jsonWebkeys2 == null)
+            {
+                return true;
+            }
+
+            if (null == jsonWebkeys1 || null == jsonWebkeys2)
+            {
+                return false;
+            }
+
+            List<JsonWebKey> jsonWebKeys = new List<JsonWebKey>(jsonWebkeys2);
+            foreach(JsonWebKey webKey in jsonWebkeys1)
+            {
+                for( int i=0; i<jsonWebKeys.Count;i++)
+                {
+                    if(AreEqual(jsonWebKeys[i], webKey))
+                    {
+                        jsonWebKeys.RemoveAt(i);
+                    }
+                }
+            }
+
+            return jsonWebKeys.Count == 0;
+        }
+
+        public static bool AreEqual(JsonWebKey jsonWebkey1, JsonWebKey jsonWebkey2)
+        {
+            if (jsonWebkey1 == null && jsonWebkey2 == null)
+            {
+                return true;
+            }
+
+            if (null == jsonWebkey1 || null == jsonWebkey2)
+            {
+                return false;
+            }
+
+            if(!AreEqual(jsonWebkey1.Alg, jsonWebkey2.Alg))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.Key_Ops, jsonWebkey2.Key_Ops))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.Kid, jsonWebkey2.Kid))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.Kty, jsonWebkey2.Kty))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.Use, jsonWebkey2.Use))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.X5c, jsonWebkey2.X5c))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.X5t, jsonWebkey2.X5t))
+            {
+                return false;
+            }
+
+            if (!AreEqual(jsonWebkey1.X5u, jsonWebkey2.X5u))
             {
                 return false;
             }
