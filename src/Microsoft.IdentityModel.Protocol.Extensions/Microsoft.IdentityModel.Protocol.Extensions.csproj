@@ -76,6 +76,8 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IssuerKeyRetriever.cs" />
     <Compile Include="IssuerValidator.cs" />
+    <Compile Include="JsonWebKey.cs" />
+    <Compile Include="JsonWebKeys.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
     <Compile Include="OpenIdConnectMetadata.cs" />
@@ -93,6 +95,7 @@
     <None Include="Microsoft.IdentityModel.Protocol.Extensions.nuspec">
       <SubType>Designer</SubType>
     </None>
+    <None Include="OpenIdConnectMetadataBadBase64DataFile.json" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />

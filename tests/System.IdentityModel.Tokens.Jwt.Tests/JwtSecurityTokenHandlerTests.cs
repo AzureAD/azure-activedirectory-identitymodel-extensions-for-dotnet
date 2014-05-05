@@ -279,11 +279,6 @@ namespace System.IdentityModel.Test
             Assert.IsFalse(actor.BootstrapContext != null, "actor.BootstrapContext != null");
 
             SerializeAndDeserialize(identity);
-
-            handler.NameClaimTypeDelegate = NameClaimTypeDelegate;
-            ClaimsPrincipal cpActor = handler.ValidateToken(jwtFromClaimsIdentityWithActor.RawData, validationParameters);
-            Assert.IsTrue((cpActor.Identity as ClaimsIdentity).NameClaimType == ClaimTypes.DateOfBirth);
-
             handler.ValidateToken(jwtFromClaimsIdentityWithActor, validationParameters);
 
             // sign actor with different ket
@@ -328,11 +323,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-        private static string NameClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
-        {
-            return ClaimTypes.DateOfBirth;
-        }
-
         private void SerializeAndDeserialize( ClaimsIdentity identity )
         {
             // ensure that deserialized picks up bootstrap actor etc.
@@ -346,7 +336,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "63193E6B-CF8A-4EA5-B9E0-EF4760B5CEEB")]
-        [Description("Claim Type Mapping - Inbound and Outbound")]
+        [Description("Test serialization of bootstrap context")]
         public void JwtSecurityTokenHandler_BootstrapContextSerialize()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -566,6 +556,7 @@ namespace System.IdentityModel.Test
                 Assert.IsFalse(firstClaim == null, "Claim firstClaim = identity.FindFirst( claimType ), firstClaim == null. claim.Type: " + claim.Type + " claimType: " + claimType);
             }
         }
+
 
         [TestMethod]
         [TestProperty("TestCaseID", "2CADC17D-D1F4-4A20-B54A-44FE37445348")]

@@ -30,6 +30,31 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public static class TestUtilities
     {
+
+        /// <summary>
+        /// Set a named property on an object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="property"></param>
+        /// <param name="propertyValue"></param>
+        public static void SetProperty(object obj, string property, object propertyValue)
+        {
+            Type type = obj.GetType();
+            PropertyInfo propertyInfo = type.GetProperty(property);
+
+            Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
+
+            object retval = propertyInfo.GetValue(obj);
+            if (propertyInfo.CanWrite)
+            {
+                propertyInfo.SetValue(obj, propertyValue);
+            }
+            else
+            {
+                Assert.Fail("property 'set' is not found: " + property + ", type: " + type.ToString());
+            }
+        }
+
         /// <summary>
         /// Gets and sets a named property on an object. Checks: initial value.
         /// </summary>
@@ -80,7 +105,7 @@ namespace Microsoft.IdentityModel.Test
             {
                 propertyInfo.SetValue(obj, propertyValue);
                 object retval = propertyInfo.GetValue(obj);
-                Assert.IsTrue(propertyValue == retval);
+                Assert.AreEqual(propertyValue, retval);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
