@@ -19,6 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
 
     /// <summary>
@@ -56,6 +57,17 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets a delegate that will be used to retreive <see cref="SecurityKey"/>(s) used for checking signatures.
+        /// </summary>
+        /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
+        /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
+        public Func<string, IEnumerable<SecurityKey>> IssuerSigningKeyRetriever
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that are to be used for validating signed tokens. 
         /// </summary>
         public IEnumerable<SecurityKey> IssuerSigningKeys
@@ -73,6 +85,7 @@ namespace System.IdentityModel.Tokens
             set;
         }
 
+        // TODO - remove this method.
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{SecurityToken}"/> that are to be used for validating signed tokens. 
         /// </summary>
@@ -92,32 +105,9 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets a value indicating if there are keys available for checking signatures.
+        /// Gets or sets a delegate that will be used to validate the lifetime of the token
         /// </summary>
-        public bool AreIssuerSigningKeysAvailable
-        {
-            get
-            {
-                return IssuerSigningKey != null || IssuerSigningKeys != null || IssuerSigningToken != null || IssuerSigningTokens != null;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a delegate that will be used to retreive <see cref="SecurityKey"/>(s) used for checking signatures.
-        /// </summary>
-        /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
-        /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
-        public Func<string, IEnumerable<SecurityKey>> IssuerSigningKeyRetriever
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="JwtSecurityToken.Actor"/> should be validated.
-        /// </summary>
-        [DefaultValue(false)]
-        public bool ValidateActor
+        public Func<string, SecurityToken, bool> LifetimeValidator
         {
             get;
             set;
@@ -128,6 +118,16 @@ namespace System.IdentityModel.Tokens
         /// <remarks>The SecurityTokenValidator will use this value to save the orginal string that was validated.</remarks>
         [DefaultValue(false)]
         public bool SaveSigninToken
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="JwtSecurityToken.Actor"/> should be validated.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool ValidateActor
         {
             get;
             set;
@@ -161,8 +161,9 @@ namespace System.IdentityModel.Tokens
             get;
             set;
         }
+
         /// <summary>
-        /// Gets or sets a <see cref="IEnumerable{String}"/> that contains valid audiences that will be used during token validation.
+        /// Gets or sets the <see cref="ICollection{String}"/> that contains valid audiences that will be used during token validation.
         /// </summary>
         public IEnumerable<string> ValidAudiences
         {
@@ -180,7 +181,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a <see cref="IEnumerable{String}"/> that contains valid issuers that will be used during token validation.
+        /// Gets or sets the <see cref="ICollection{String}"/> that contains valid issuers that will be used during token validation.
         /// </summary>
         public IEnumerable<string> ValidIssuers
         {

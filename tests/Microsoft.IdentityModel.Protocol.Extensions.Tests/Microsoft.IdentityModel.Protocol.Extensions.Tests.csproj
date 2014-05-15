@@ -87,6 +87,9 @@
     <Compile Include="..\Shared\IdentityComparer.cs">
       <Link>IdentityComparer.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IdentityUtilities.cs">
+      <Link>IdentityUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\KeyingMaterial.cs">
       <Link>KeyingMaterial.cs</Link>
     </Compile>
@@ -97,8 +100,8 @@
       <Link>TestUtilities.cs</Link>
     </Compile>
     <Compile Include="AuthenticationProtocolMessageTests.cs" />
+    <Compile Include="CrossTokenTests.cs" />
     <Compile Include="DerivedTypes.cs" />
-    <Compile Include="IdentityUtilities.cs" />
     <Compile Include="JsonWebKeysTests.cs" />
     <Compile Include="JsonWebKeyTests.cs" />
     <Compile Include="MessageComparer.cs" />

@@ -1,4 +1,20 @@
-﻿﻿﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
 
 using System;
 using System.Reflection;
@@ -9,9 +25,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Protocol.Extensions")]
 [assembly: AssemblyDescription("Contains classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
+[assembly: AssemblyCompany("Microsoft Open Technologies")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Protocol.Extensions")]
-[assembly: AssemblyCopyright("\x00a9 Microsoft Corporation All rights reserved.")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Open Technologies. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]

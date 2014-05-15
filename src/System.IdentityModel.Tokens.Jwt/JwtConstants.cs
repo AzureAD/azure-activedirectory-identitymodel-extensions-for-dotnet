@@ -116,7 +116,7 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Actor = "actort";
+            public const string Actort = "actort";
 
             /// <summary>
             /// Claim short name.
@@ -131,7 +131,7 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string C_Hash = "c_hash";
+            public const string CHash = "c_hash";
 
             /// <summary>
             /// Claim short name.
@@ -141,7 +141,7 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string ExpirationTime = "exp";
+            public const string Exp = "exp";
 
             /// <summary>
             /// Claim short name.
@@ -161,17 +161,17 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string IssuedAt = "iat";
+            public const string Iat = "iat";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Issuer = "iss";
+            public const string Iss = "iss";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string JwtId = "jti";
+            public const string Jti = "jti";
 
             /// <summary>
             /// Claim short name.
@@ -186,22 +186,22 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string NotBefore = "nbf";
+            public const string Nbf = "nbf";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Principal = "prn";
+            public const string Prn = "prn";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Subject = "sub";
+            public const string Sub = "sub";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Type = "typ";
+            public const string Typ = "typ";
 
             /// <summary>
             /// Claim short name.
@@ -223,47 +223,47 @@ namespace System.IdentityModel.Tokens
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Algorithm                 = "alg";
+            public const string Alg = "alg";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string ContentType               = "cty";
+            public const string Cty = "cty";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string KeyId                     = "kid";
+            public const string Kid = "kid";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string JsonSetUrl                = "jku";
+            public const string Jku = "jku";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string JsonWebKey                = "jwk";
+            public const string Jwk = "jwk";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string Type                      = "typ";
+            public const string Typ = "typ";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string X509CertificateChain      = "x5c";
+            public const string X5c = "x5c";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string X509CertificateThumbprint = "x5t";
+            public const string X5t = "x5t";
 
             /// <summary>
             /// Claim short name.
             /// </summary>
-            public const string X509Url                   = "x5u";
+            public const string X5u = "x5u";
         }
     }
 }

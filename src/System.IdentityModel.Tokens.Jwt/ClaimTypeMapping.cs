@@ -34,6 +34,7 @@ namespace System.IdentityModel.Tokens
         // value    is the short claim type
         private static Dictionary<string, string> shortToLongClaimTypeMapping = null;
         private static IDictionary<string, string> longToShortClaimTypeMapping = null;
+        private static HashSet<string> inboundClaimFilter = null;
 
         /// <summary>
         /// Initializes static members of the <see cref="ClaimTypeMapping"/> class. 
@@ -42,14 +43,14 @@ namespace System.IdentityModel.Tokens
         {
             shortToLongClaimTypeMapping = new Dictionary<string, string>
             {
-                { ReservedClaims.Actor, ClaimTypes.Actor },
+                { ReservedClaims.Actort, ClaimTypes.Actor },
                 { ReservedClaims.Birthdate, ClaimTypes.DateOfBirth },
                 { ReservedClaims.Email, ClaimTypes.Email },
                 { ReservedClaims.FamilyName, ClaimTypes.Surname },
                 { ReservedClaims.Gender, ClaimTypes.Gender },
                 { ReservedClaims.GivenName, ClaimTypes.GivenName },
                 { ReservedClaims.NameId, ClaimTypes.NameIdentifier },
-                { ReservedClaims.Subject, ClaimTypes.NameIdentifier },
+                { ReservedClaims.Sub, ClaimTypes.NameIdentifier },
                 { ReservedClaims.Website, ClaimTypes.Webpage },
                 { ReservedClaims.UniqueName, ClaimTypes.Name },
                 { "oid", "http://schemas.microsoft.com/identity/claims/objectidentifier" },
@@ -125,6 +126,15 @@ namespace System.IdentityModel.Tokens
                     longToShortClaimTypeMapping.Add(kv.Value, kv.Key);
                 }
             }
+
+            inboundClaimFilter = new HashSet<string>()
+            {
+                "aud",
+                "exp",
+                "iat",
+                "iss",
+                "nbf",
+            };
         }
 
         /// <summary>
@@ -146,6 +156,14 @@ namespace System.IdentityModel.Tokens
             get
             {
                 return longToShortClaimTypeMapping;
+            }
+        }
+
+        public static ISet<string> InboundClaimFilter
+        {
+            get
+            {
+                return inboundClaimFilter;
             }
         }
     }

@@ -17,39 +17,45 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Security.Claims;
-using System.Xml;
+using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens;
+using System.Web.Script.Serialization;
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// ISecurityTokenValidator
+    /// Contains WsFederation metadata that can be populated from a xml string.
     /// </summary>
-    public interface ISecurityTokenValidator
+    public class WsFederationMetadata
     {
-        /// <summary>
-        /// Gets or sets the authentication type to use when creating the claims identity
-        /// </summary>
-        string AuthenticationType { get; set; }
+        private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
 
         /// <summary>
-        /// Returns true if the securityToken can be read, false otherwise.
+        /// Initializes an new instance of <see cref="WsFederationMetadata"/>.
         /// </summary>
-        bool CanReadToken(string securityToken);
+        public WsFederationMetadata()
+        {           
+        }
 
         /// <summary>
-        /// Gets or sets the clock skew to apply when validating times
+        /// Gets or sets the token issuer.
         /// </summary>
-        Int32 ClockSkewInSeconds { get; set; }
+        public string Issuer { get; set; }
 
         /// <summary>
-        /// Gets and sets the maximum size in bytes, that a will be processed.
+        /// Gets the <see cref="ICollection[SecurityKey]"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
-        Int32 MaximumTokenSizeInBytes { get; set; }
-        
+        public ICollection<SecurityKey> SigningKeys
+        {
+            get
+            {
+                return _signingKeys;
+            }
+        }
+
         /// <summary>
-        /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>
+        /// Gets or sets the Gets or sets the passive token endpoint.
         /// </summary>
-        ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters);        
+        public string TokenEndpoint { get; set; }
     }
 }

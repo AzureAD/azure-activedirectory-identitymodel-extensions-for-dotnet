@@ -23,15 +23,59 @@ using System.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Extensions
 {
+    // TODO - for SAML 1 and 2 tokens, we don't want to create a collection, so when finished this 
+    // new class will resolve the token without creating a collection of securityTokens which results in creating new keys
+    // from certs, keys may be linked to hardware and should not be recreated.
+    internal class IssuerTokenResolver : SecurityTokenResolver
+    {
+        protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
+        {
+            key = null;
+            if (keyIdentifierClause.CanCreateKey)
+            {
+                key = keyIdentifierClause.CreateKey();
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
+        {
+            token = null;
+            return false;
+        }
+    }
 
     /// <summary>
     /// 
     /// </summary>
     internal static class IssuerKeyRetriever
     {
+        /// <summary>
+        /// Used to create signing tokens when reading SamlTokens (1&2) as reading requires a token to validate signature.
+        /// </summary>
+        /// <param name="securityToken"></param>
+        /// <param name="validationParameters"></param>
+        /// <returns></returns>
         public static SecurityTokenResolver CreateIssuerTokenResolver(string securityToken, TokenValidationParameters validationParameters)
         {
             List<SecurityToken> signingTokens = new List<SecurityToken>();
+            if (validationParameters.IssuerSigningToken != null)
+            {
+                signingTokens.Add(validationParameters.IssuerSigningToken);
+            }
+
+            if (validationParameters.IssuerSigningTokens != null)
+            {
+                signingTokens.AddRange(validationParameters.IssuerSigningTokens);
+            }
+
             // TODO: we need to stick with keys as they may be derived.
             List<SecurityKey> namedKeys = new List<SecurityKey>();
             foreach (SecurityKey securityKey in RetrieveIssuerSigningKeys(securityToken, validationParameters))
@@ -60,20 +104,23 @@ namespace Microsoft.IdentityModel.Extensions
                 signingTokens.Add(new NamedKeySecurityToken("unknown", namedKeys));
             }
 
+            //return new IssuerTokenResolver();
+
             return SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true);
         }
+
         public static IEnumerable<SecurityKey> RetrieveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters.IssuerSigningKeyRetriever != null)
-            {
-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))
-                {
-                    yield return securityKey;
-                }
-            }
-
             if (validationParameters != null)
             {
+                if (validationParameters.IssuerSigningKeyRetriever != null)
+                {
+                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))
+                    {
+                        yield return securityKey;
+                    }
+                }
+
                 if (validationParameters.IssuerSigningKey != null)
                 {
                     yield return validationParameters.IssuerSigningKey;
@@ -89,17 +136,9 @@ namespace Microsoft.IdentityModel.Extensions
 
                 if (validationParameters.IssuerSigningToken != null && validationParameters.IssuerSigningToken.SecurityKeys != null)
                 {
-                    X509SecurityToken x509SecurityToken = validationParameters.IssuerSigningToken as X509SecurityToken;
-                    if (x509SecurityToken != null)
+                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
                     {
-                        yield return new X509SecurityKey(x509SecurityToken.Certificate);
-                    }
-                    else
-                    {
-                        foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
-                        {
-                            yield return securityKey;
-                        }
+                        yield return securityKey;
                     }
                 }
 
@@ -107,19 +146,11 @@ namespace Microsoft.IdentityModel.Extensions
                 {
                     foreach (SecurityToken token in validationParameters.IssuerSigningTokens)
                     {
-                        X509SecurityToken x509SecurityToken = token as X509SecurityToken;
-                        if (x509SecurityToken != null)
+                        if (token.SecurityKeys != null)
                         {
-                            yield return new X509SecurityKey(x509SecurityToken.Certificate);
-                        }
-                        else
-                        {
-                            if (token.SecurityKeys != null)
+                            foreach (SecurityKey securityKey in token.SecurityKeys)
                             {
-                                foreach (SecurityKey securityKey in token.SecurityKeys)
-                                {
-                                    yield return securityKey;
-                                }
+                                yield return securityKey;
                             }
                         }
                     }

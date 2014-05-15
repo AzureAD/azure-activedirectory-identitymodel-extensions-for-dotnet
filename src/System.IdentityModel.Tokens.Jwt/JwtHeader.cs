@@ -66,7 +66,7 @@ namespace System.IdentityModel.Tokens
         public JwtHeader(SigningCredentials signingCredentials = null)
             : base(StringComparer.Ordinal)
         {
-            this.Add(JwtConstants.ReservedHeaderParameters.Type, JwtConstants.HeaderType);
+            this.Add(JwtConstants.ReservedHeaderParameters.Typ, JwtConstants.HeaderType);
 
             if (signingCredentials != null)
             {
@@ -78,7 +78,7 @@ namespace System.IdentityModel.Tokens
                     algorithm = JwtSecurityTokenHandler.OutboundAlgorithmMap[algorithm];
                 }
 
-                this.Add(JwtConstants.ReservedHeaderParameters.Algorithm, algorithm);
+                this.Add(JwtConstants.ReservedHeaderParameters.Alg, algorithm);
                 if (signingCredentials.SigningKeyIdentifier != null)
                 {
                     foreach (SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier)
@@ -94,12 +94,12 @@ namespace System.IdentityModel.Tokens
                 X509SigningCredentials x509SigningCredentials = signingCredentials as X509SigningCredentials;
                 if (x509SigningCredentials != null && x509SigningCredentials.Certificate != null)
                 {
-                    this.Add(JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint, Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash()));
+                    this.Add(JwtConstants.ReservedHeaderParameters.X5t, Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash()));
                 }
             }
             else
             {
-                this.Add(JwtConstants.ReservedHeaderParameters.Algorithm, JwtConstants.Algorithms.NONE);
+                this.Add(JwtConstants.ReservedHeaderParameters.Alg, JwtConstants.Algorithms.NONE);
             }
         }
 
@@ -107,12 +107,12 @@ namespace System.IdentityModel.Tokens
         /// Gets the signature algorithm that was used to create the signature.
         /// </summary>
         /// <remarks>If the signature algorithm is not found, null is returned.</remarks>
-        public string SignatureAlgorithm
+        public string Alg
         {
             get
             {
                 string algorithm = null;
-                this.TryGetValue(JwtConstants.ReservedHeaderParameters.Algorithm, out algorithm);
+                this.TryGetValue(JwtConstants.ReservedHeaderParameters.Alg, out algorithm);
                 return algorithm;
             }
         }
@@ -148,7 +148,7 @@ namespace System.IdentityModel.Tokens
                 SecurityKeyIdentifier ski = new SecurityKeyIdentifier();
                 string keyIdentifier = null;
 
-                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint, out keyIdentifier))
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X5t, out keyIdentifier))
                 {
                     try
                     {
@@ -161,33 +161,33 @@ namespace System.IdentityModel.Tokens
                             throw;
                         }
 
-                        throw new FormatException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10118, JwtConstants.ReservedHeaderParameters.X509CertificateThumbprint), ex);
+                        throw new FormatException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10118, JwtConstants.ReservedHeaderParameters.X5t), ex);
                     }
                 }
 
-                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.JsonSetUrl, out keyIdentifier))
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.Jku, out keyIdentifier))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.JsonSetUrl, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.Jku, keyIdentifier));
                 }
 
-                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.JsonWebKey, out keyIdentifier))
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.Jwk, out keyIdentifier))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.JsonWebKey, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.Jwk, keyIdentifier));
                 }
 
-                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X509Url, out keyIdentifier))
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X5u, out keyIdentifier))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.X509Url, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.X5u, keyIdentifier));
                 }
 
-                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X509CertificateChain, out keyIdentifier))
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.X5c, out keyIdentifier))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.X509CertificateChain, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.X5c, keyIdentifier));
                 }
 
-                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.KeyId, out keyIdentifier))
+                if (this.TryGetValue(JwtConstants.ReservedHeaderParameters.Kid, out keyIdentifier))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.KeyId, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtConstants.ReservedHeaderParameters.Kid, keyIdentifier));
                 }
 
                 return ski;
