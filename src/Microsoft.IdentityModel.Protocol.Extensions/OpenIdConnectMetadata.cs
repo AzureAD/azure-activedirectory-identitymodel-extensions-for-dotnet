@@ -29,8 +29,12 @@ namespace Microsoft.IdentityModel.Protocols
     public class OpenIdConnectMetadata
     {
         private static JavaScriptSerializer _javaScriptSerializer;
-        private Collection<SecurityToken> _signingTokens = new Collection<SecurityToken>();
+
         private Collection<JsonWebKey> _jsonWebKeys = new Collection<JsonWebKey>();
+        private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
+        private Collection<string> _responseTypesSupported = new Collection<string>();
+        private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
+        private Collection<string> _subjectTypesSupported = new Collection<string>();
 
         static OpenIdConnectMetadata()
         {
@@ -76,30 +80,30 @@ namespace Microsoft.IdentityModel.Protocols
 
             object obj = null;
             string str = null;
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.Authorization_Endpoint, out obj))
+            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.AuthorizationEndpoint, out obj))
             {
                 str = obj as string;
                 if (str != null)
                 {
-                    Authorization_Endpoint = str;
+                    AuthorizationEndpoint = str;
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.Check_Session_Iframe, out obj))
+            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.CheckSessionIframe, out obj))
             {
-                str = dictionary[OpenIdConnectMetadataNames.Check_Session_Iframe] as string;
+                str = dictionary[OpenIdConnectMetadataNames.CheckSessionIframe] as string;
                 if (str != null)
                 {
-                    Check_Session_Iframe = str;
+                    CheckSessionIframe = str;
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.End_Session_Endpoint, out obj))
+            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.EndSessionEndpoint, out obj))
             {
                 str = obj as string;
                 if (str != null)
                 {
-                    End_Session_Endpoint = str;
+                    EndSessionEndpoint = str;
                 }
             }
 
@@ -112,21 +116,21 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.Jwks_Uri, out obj))
+            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.JwksUri, out obj))
             {
                 str = obj as string;
                 if (str != null)
                 {
-                    Jwks_Uri = str;
+                    JwksUri = str;
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.Token_Endpoint, out obj))
+            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.TokenEndpoint, out obj))
             {
                 str = obj as string;
                 if (str != null)
                 {
-                    Token_Endpoint = str;
+                    TokenEndpoint = str;
                 }
             }
         }
@@ -134,17 +138,28 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the authorization endpoint.
         /// </summary>       
-        public string Authorization_Endpoint { get; set; }
+        public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets the check_session_iframe.
         /// </summary>
-        public string Check_Session_Iframe { get; set; }
+        public string CheckSessionIframe { get; set; }
 
         /// <summary>
         /// Gets or sets the end session endpoint.
         /// </summary>
-        public string End_Session_Endpoint { get; set; }
+        public string EndSessionEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets the collection of 'id_token_signing_alg_values_supported'.
+        /// </summary>
+        public ICollection<string> IdTokenSigningAlgValuesSupported 
+        { 
+            get 
+            {
+                return _idTokenSigningAlgValuesSupported; 
+            } 
+        }
 
         /// <summary>
         /// Gets or sets the token issuer.
@@ -154,7 +169,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the token issuer.
         /// </summary>
-        public string Jwks_Uri{ get; set; }
+        public string JwksUri{ get; set; }
 
         /// <summary>
         /// Gets the JsonWebKeys
@@ -168,19 +183,47 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets the collection of Signing tokens.
+        /// Gets the collection of 'response_types_supported'.
         /// </summary>
-        public ICollection<SecurityToken> SigningTokens 
+        public ICollection<string> ResponseTypesSupported 
         { 
             get 
             {
-                return _signingTokens; 
+                return _subjectTypesSupported; 
             } 
         }
 
         /// <summary>
-        /// Gets or sets the token endpoint.
+        /// Gets the <see cref="ICollection[SecurityKey]"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
-        public string Token_Endpoint { get; set; }
+        public ICollection<SecurityKey> SigningKeys
+        {
+            get
+            {
+                return _signingKeys;
+            }
+        }
+
+        /// <summary>
+        /// Gets the collection of 'subject_types_supported'.
+        /// </summary>
+        public ICollection<string> SubjectTypesSupported
+        {
+            get
+            {
+                return _responseTypesSupported;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the 'token_endpoint'.
+        /// </summary>
+        public string TokenEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the 'user_info_endpoint'.
+        /// </summary>
+        public string UserInfoEndpoint { get; set; }
+
     }
 }

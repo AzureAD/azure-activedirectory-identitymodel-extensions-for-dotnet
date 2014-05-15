@@ -144,7 +144,7 @@ namespace System.IdentityModel.Test
             Assert.IsTrue( IssuerTokenResolver.DefaultStoreLocation == StoreLocation.LocalMachine );
 
             // Should find key
-            SecurityKey key = KeyingMaterial.SymmetricSecurityKey_256;
+            SecurityKey key = KeyingMaterial.DefaultSymmetricSecurityKey_256;
             NamedKeySecurityKeyIdentifierClause clause = new NamedKeySecurityKeyIdentifierClause( "LiveId", "key" );
 
             Assert.IsTrue( resolver.TryResolveSecurityKey( clause, out key ) );

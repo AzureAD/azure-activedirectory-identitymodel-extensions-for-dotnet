@@ -18,6 +18,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -30,7 +31,7 @@ namespace Microsoft.IdentityModel.Protocols
         private static JavaScriptSerializer _javaScriptSerializer;
 
         // kept private to hide that a List is used public member returns IList.
-        private List<JsonWebKey> _keys = new List<JsonWebKey>();
+        private IList<JsonWebKey> _keys = new List<JsonWebKey>();
 
         static JsonWebKeys()
         {
@@ -88,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets the list of 'keys' (Keys).
+        /// Gets the <see cref="IList{JsonWebKey}"/>.
         /// </summary>       
         public IList<JsonWebKey> Keys
         {

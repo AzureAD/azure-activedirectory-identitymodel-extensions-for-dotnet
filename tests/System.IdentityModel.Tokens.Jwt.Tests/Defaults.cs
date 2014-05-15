@@ -61,7 +61,7 @@ namespace System.IdentityModel.Test
         {
             try
             {
-                AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider( KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, false );
+                AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider( KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, false );
             }
             catch ( Exception )
             {
@@ -70,7 +70,7 @@ namespace System.IdentityModel.Test
 
             try
             {
-                AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider( KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, true );
+                AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider( KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, true );
             }
             catch ( Exception )
             {
@@ -86,11 +86,11 @@ namespace System.IdentityModel.Test
             JwtHeader jwtHeader = new JwtHeader();
             Assert.IsFalse( jwtHeader.ContainsValue( JwtConstants.HeaderType ) , "jwtHeader.ContainsValue( JwtConstants.HeaderType )" );
 
-            Assert.IsFalse( jwtHeader.ContainsValue( JwtConstants.ReservedHeaderParameters.Type ) , "jwtHeader.ContainsValue( JwtConstants.ReservedHeaderParameters.Type )" );
+            Assert.IsFalse( jwtHeader.ContainsValue( JwtConstants.ReservedHeaderParameters.Typ ) , "jwtHeader.ContainsValue( JwtConstants.ReservedHeaderParameters.Type )" );
 
-            Assert.IsFalse( jwtHeader.ContainsKey( JwtConstants.ReservedHeaderParameters.Algorithm ) , "!jwtHeader.ContainsKey( JwtConstants.ReservedHeaderParameters.Algorithm )" );
+            Assert.IsFalse( jwtHeader.ContainsKey( JwtConstants.ReservedHeaderParameters.Alg ) , "!jwtHeader.ContainsKey( JwtConstants.ReservedHeaderParameters.Algorithm )" );
 
-            Assert.IsFalse( jwtHeader.SignatureAlgorithm != null , "jwtHeader.SignatureAlgorithm == null" );
+            Assert.IsFalse( jwtHeader.Alg != null , "jwtHeader.SignatureAlgorithm == null" );
 
             Assert.IsFalse( jwtHeader.SigningCredentials != null , "jwtHeader.SigningCredentials != null" );
 
@@ -119,19 +119,19 @@ namespace System.IdentityModel.Test
                 break;
             }
 
-            Assert.IsFalse( jwtPayload.Actor != null , "jwtPayload.Actor != null" );
+            Assert.IsFalse( jwtPayload.Actort != null , "jwtPayload.Actort != null" );
 
-            Assert.IsFalse( jwtPayload.Audience != null , "jwtPayload.Audience != null" );
+            Assert.IsFalse( jwtPayload.Aud != null , "jwtPayload.Audience != null" );
 
-            Assert.IsFalse( jwtPayload.Expiration != null , "jwtPayload.Expiration != null" );
+            Assert.IsFalse( jwtPayload.Exp != null , "jwtPayload.Exp != null" );
 
-            Assert.IsFalse( jwtPayload.Id != null , "jwtPayload.Id != null" );
+            Assert.IsFalse( jwtPayload.Jti != null , "jwtPayload.Id != null" );
 
-            Assert.IsFalse( jwtPayload.IssuedAt != null , "jwtPayload.IssuedAt != null" );
+            Assert.IsFalse( jwtPayload.Iat != null , "jwtPayload.Iat != null" );
 
-            Assert.IsFalse( jwtPayload.Issuer != null , "jwtPayload.Issuer != null" );
+            Assert.IsFalse( jwtPayload.Iss != null , "jwtPayload.Iss != null" );
 
-            Assert.IsFalse( jwtPayload.Subject != null , "jwtPayload.Subject != null" );
+            Assert.IsFalse( jwtPayload.Sub != null , "jwtPayload.Sub != null" );
 
             Assert.IsFalse( jwtPayload.ValidFrom != DateTime.MinValue , "jwtPayload.ValidFrom != DateTime.MinValue" );
 
@@ -158,7 +158,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse( jwt.Audience != null , "jwt.Audience != null" );
 
-            Assert.IsFalse( jwt.Expiration != null , "jwt.Expiration != null" );
+            //Assert.IsFalse( jwt.Expiration != null , "jwt.Expiration != null" );
 
             Assert.IsFalse( jwt.Id != null , "jwt.Id != null" );
 

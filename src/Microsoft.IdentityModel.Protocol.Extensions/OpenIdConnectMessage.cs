@@ -87,6 +87,7 @@ namespace Microsoft.IdentityModel.Protocols
         public string CreateIdTokenUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -97,6 +98,7 @@ namespace Microsoft.IdentityModel.Protocols
         public string CreateLogoutUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            openIdConnectMessage.RequestType = OpenIdConnectRequestType.LogoutRequest;
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -109,64 +111,64 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets 'access_Token'.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707", Justification = "Follows protocol names")]
-        public string Access_Token
+        public string AccessToken
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Access_Token); }
-            set { SetParameter(OpenIdConnectParameterNames.Access_Token, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.AccessToken); }
+            set { SetParameter(OpenIdConnectParameterNames.AccessToken, value); }
         }
 
         /// <summary>
         /// Gets or sets 'acr_values'.
         /// </summary>
-        public string Acr_Values 
+        public string AcrValues 
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Acr_Values); }
-            set { SetParameter(OpenIdConnectParameterNames.Acr_Values, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.AcrValues); }
+            set { SetParameter(OpenIdConnectParameterNames.AcrValues, value); }
         }
 
         /// <summary>
         /// Gets or sets 'claims_Locales'.
         /// </summary>
-        public string Claims_Locales
+        public string ClaimsLocales
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Claims_Locales); }
-            set { SetParameter(OpenIdConnectParameterNames.Claims_Locales, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ClaimsLocales); }
+            set { SetParameter(OpenIdConnectParameterNames.ClaimsLocales, value); }
         }
 
         /// <summary>
         /// Gets or sets 'client_assertion'.
         /// </summary>
-        public string Client_Assertion
+        public string ClientAssertion
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Client_Assertion); }
-            set { SetParameter(OpenIdConnectParameterNames.Client_Assertion, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ClientAssertion); }
+            set { SetParameter(OpenIdConnectParameterNames.ClientAssertion, value); }
         }
 
         /// <summary>
         /// Gets or sets 'client_assertion_type'.
         /// </summary>
-        public string Client_Assertion_Type
+        public string ClientAssertionType
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Client_Assertion_Type); }
-            set { SetParameter(OpenIdConnectParameterNames.Client_Assertion_Type, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ClientAssertionType); }
+            set { SetParameter(OpenIdConnectParameterNames.ClientAssertionType, value); }
         }
 
         /// <summary>
         /// Gets or sets 'client_id'.
         /// </summary>
-        public string Client_Id
+        public string ClientId
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Client_Id); }
-            set { SetParameter(OpenIdConnectParameterNames.Client_Id, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ClientId); }
+            set { SetParameter(OpenIdConnectParameterNames.ClientId, value); }
         }
 
         /// <summary>
         /// Gets or sets 'client_secret'.
         /// </summary>
-        public string Client_Secret
+        public string ClientSecret
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Client_Secret); }
-            set { SetParameter(OpenIdConnectParameterNames.Client_Secret, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ClientSecret); }
+            set { SetParameter(OpenIdConnectParameterNames.ClientSecret, value); }
         }
 
         /// <summary>
@@ -190,10 +192,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'domain_hint'.
         /// </summary>
-        public string Domain_Hint
+        public string DomainHint
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Domain_Hint); }
-            set { SetParameter(OpenIdConnectParameterNames.Domain_Hint, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.DomainHint); }
+            set { SetParameter(OpenIdConnectParameterNames.DomainHint, value); }
         }
 
         /// <summary>
@@ -208,64 +210,64 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'error_description'.
         /// </summary>
-        public string Error_Description
+        public string ErrorDescription
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Error_Description); }
-            set { SetParameter(OpenIdConnectParameterNames.Error_Description, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ErrorDescription); }
+            set { SetParameter(OpenIdConnectParameterNames.ErrorDescription, value); }
         }
 
         /// <summary>
         /// Gets or sets 'error_uri'.
         /// </summary>
-        public string Error_Uri
+        public string ErrorUri
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Error_Uri); }
-            set { SetParameter(OpenIdConnectParameterNames.Error_Uri, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ErrorUri); }
+            set { SetParameter(OpenIdConnectParameterNames.ErrorUri, value); }
         }
 
         /// <summary>
         /// Gets or sets 'expires_in'.
         /// </summary>
-        public string Expires_In
+        public string ExpiresIn
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Expires_In); }
-            set { SetParameter(OpenIdConnectParameterNames.Expires_In, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ExpiresIn); }
+            set { SetParameter(OpenIdConnectParameterNames.ExpiresIn, value); }
         }
 
         /// <summary>
         /// Gets or sets 'grant_type'.
         /// </summary>
-        public string Grant_Type
+        public string GrantType
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Grant_Type); }
-            set { SetParameter(OpenIdConnectParameterNames.Grant_Type, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.GrantType); }
+            set { SetParameter(OpenIdConnectParameterNames.GrantType, value); }
         }
 
         /// <summary>
         /// Gets or sets 'id_token'.
         /// </summary>
-        public string Id_Token
+        public string IdToken
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Id_Token); }
-            set { SetParameter(OpenIdConnectParameterNames.Id_Token, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.IdToken); }
+            set { SetParameter(OpenIdConnectParameterNames.IdToken, value); }
         }
 
         /// <summary>
         /// Gets or sets 'id_token_hint'.
         /// </summary>
-        public string Id_Token_Hint
+        public string IdTokenHint
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Id_Token_Hint); }
-            set { SetParameter(OpenIdConnectParameterNames.Id_Token_Hint, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.IdTokenHint); }
+            set { SetParameter(OpenIdConnectParameterNames.IdTokenHint, value); }
         }
 
         /// <summary>
         /// Gets or sets 'identity_provider'.
         /// </summary>
-        public string Identity_Provider
+        public string IdentityProvider
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Identity_Provider); }
-            set { SetParameter(OpenIdConnectParameterNames.Identity_Provider, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.IdentityProvider); }
+            set { SetParameter(OpenIdConnectParameterNames.IdentityProvider, value); }
         }
 
         /// <summary>
@@ -281,19 +283,19 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets 'login_hint'.
         /// </summary>
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707")]  
-        public string Login_Hint
+        public string LoginHint
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Login_Hint); }
-            set { SetParameter(OpenIdConnectParameterNames.Login_Hint, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.LoginHint); }
+            set { SetParameter(OpenIdConnectParameterNames.LoginHint, value); }
         }
 
         /// <summary>
         /// Gets or sets 'max_age'.
         /// </summary>
-        public string Max_Age
+        public string MaxAge
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Max_Age); }
-            set { SetParameter(OpenIdConnectParameterNames.Max_Age, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.MaxAge); }
+            set { SetParameter(OpenIdConnectParameterNames.MaxAge, value); }
         }
 
         /// <summary>
@@ -317,10 +319,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'post_logout_redirect_uri'.
         /// </summary>
-        public string Post_Logout_Redirect_Uri
+        public string PostLogoutRedirectUri
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Post_Logout_Redirect_Uri); }
-            set { SetParameter(OpenIdConnectParameterNames.Post_Logout_Redirect_Uri, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.PostLogoutRedirectUri); }
+            set { SetParameter(OpenIdConnectParameterNames.PostLogoutRedirectUri, value); }
         }
 
         /// <summary>
@@ -335,37 +337,47 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'redirect_uri'.
         /// </summary>
-        public string Redirect_Uri
+        public string RedirectUri
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Redirect_Uri); }
-            set { SetParameter(OpenIdConnectParameterNames.Redirect_Uri, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.RedirectUri); }
+            set { SetParameter(OpenIdConnectParameterNames.RedirectUri, value); }
+        }
+
+        /// <summary>
+        /// Gets or set the request type for this message
+        /// </summary>
+        /// <remarks>This is helpful when sending differnt messages through a common routine, when extra parameters need to be set or checked.</remarks>
+        public OpenIdConnectRequestType RequestType
+        {
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets 'request_uri'.
         /// </summary>
-        public string Request_Uri
+        public string RequestUri
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Request_Uri); }
-            set { SetParameter(OpenIdConnectParameterNames.Request_Uri, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.RequestUri); }
+            set { SetParameter(OpenIdConnectParameterNames.RequestUri, value); }
         }
 
         /// <summary>
         /// Gets or sets 'response_mode'.
         /// </summary>
-        public string Response_Mode
+        public string ResponseMode
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Response_Mode); }
-            set { SetParameter(OpenIdConnectParameterNames.Response_Mode, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ResponseMode); }
+            set { SetParameter(OpenIdConnectParameterNames.ResponseMode, value); }
         }
 
         /// <summary>
         /// Gets or sets 'response_type'.
         /// </summary>
-        public string Response_Type
+        public string ResponseType
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Response_Type); }
-            set { SetParameter(OpenIdConnectParameterNames.Response_Type, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.ResponseType); }
+            set { SetParameter(OpenIdConnectParameterNames.ResponseType, value); }
         }
 
         /// <summary>
@@ -389,10 +401,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'session_state'.
         /// </summary>
-        public string Session_State
+        public string SessionState
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Session_State); }
-            set { SetParameter(OpenIdConnectParameterNames.Session_State, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.SessionState); }
+            set { SetParameter(OpenIdConnectParameterNames.SessionState, value); }
         }
 
         /// <summary>
@@ -407,10 +419,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'target_link_uri'.
         /// </summary>
-        public string Target_Link_Uri
+        public string TargetLinkUri
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Target_Link_Uri); }
-            set { SetParameter(OpenIdConnectParameterNames.Target_Link_Uri, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.TargetLinkUri); }
+            set { SetParameter(OpenIdConnectParameterNames.TargetLinkUri, value); }
         }
 
         /// <summary>
@@ -430,28 +442,28 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets 'token_type'.
         /// </summary>
-        public string Token_Type
+        public string TokenType
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Token_Type); }
-            set { SetParameter(OpenIdConnectParameterNames.Token_Type, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.TokenType); }
+            set { SetParameter(OpenIdConnectParameterNames.TokenType, value); }
         }
 
         /// <summary>
         /// Gets or sets 'ui_locales'.
         /// </summary>
-        public string Ui_Locales
+        public string UiLocales
         {
-            get { return GetParameter(OpenIdConnectParameterNames.Ui_Locales); }
-            set { SetParameter(OpenIdConnectParameterNames.Ui_Locales, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.UiLocales); }
+            set { SetParameter(OpenIdConnectParameterNames.UiLocales, value); }
         }
 
         /// <summary>
         /// Gets or sets 'user_id'.
         /// </summary>
-        public string User_Id
+        public string UserId
         {
-            get { return GetParameter(OpenIdConnectParameterNames.User_Id); }
-            set { SetParameter(OpenIdConnectParameterNames.User_Id, value); }
+            get { return GetParameter(OpenIdConnectParameterNames.UserId); }
+            set { SetParameter(OpenIdConnectParameterNames.UserId, value); }
         }
         
         /// <summary>

@@ -38,7 +38,7 @@ namespace System.IdentityModel.Test
     {
         public ExpectedJwtSecurityTokenRequirement
         (
-            uint? tokenSize = null, Int32? clock = null, uint? life = null, X509CertificateValidator cert = null, string name = JwtConstants.ReservedClaims.Subject, string role = null, X509RevocationMode? revMode = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null, ExpectedException expectedException = null,
+            uint? tokenSize = null, Int32? clock = null, uint? life = null, X509CertificateValidator cert = null, string name = JwtConstants.ReservedClaims.Sub, string role = null, X509RevocationMode? revMode = null, X509CertificateValidationMode? certMode = null, StoreLocation? storeLoc = null, ExpectedException expectedException = null,
             string handler = JwtSecurityTokenHandlerType, string requirement = Elements.JwtSecurityTokenRequirement,
             string attributeEx1 = "", string attributeEx2 = "", string attributeEx3 = "", string attributeEx4 = "",
             string elementEx1 = comment, string elementEx2 = comment, string elementEx3 = comment, string elementEx4 = comment, string elementEx5 = comment, string elementEx6 = comment,

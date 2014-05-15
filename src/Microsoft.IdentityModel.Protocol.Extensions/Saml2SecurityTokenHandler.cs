@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
@@ -35,6 +36,12 @@ namespace Microsoft.IdentityModel.Extensions
         /// <remarks>2 MB (mega bytes).</remarks>
         public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 1024 * 2; // 2meg.
 
+        public Saml2SecurityTokenHandler()
+        {
+            RequireSignedTokens = true;
+            RequireExpirationTime = true;
+        }
+
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
         /// </summary>
@@ -57,22 +64,14 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
-        /// Determines if the string is a well formed Saml2 token (see http://docs.oasis-open.org/security/saml/Post2.0/saml-session-token/v1.0/csd01/saml-session-token-v1.0-csd01.html)
+        /// Indicates whether the current token string can be read as a token 
+        /// of the type handled by this instance.
         /// </summary>
-        /// <param name="securityToken">string that should represent a valid Saml2 Token.</param>
-        /// <returns>
-        /// <para>'true' if the string starts with an xml element that conforms to the spec above.</para>
-        /// <para>'false' if token.Length * 2 >  <see cref="MaximumTokenSizeInBytes"/>.</para>
-        /// </returns>
-        /// <exception cref="ArgumentNullException">'securityToken' is null.</exception>
-        public override bool CanReadToken(string securityToken)
+        /// <param name="securityToken">The token string thats needs to be read.</param>
+        /// <returns>'True' if the ReadToken method can parse the token string.</returns>
+        public virtual bool CanReadToken(string securityToken)
         {
-            if (securityToken == null)
-            {
-                throw new ArgumentNullException("securityToken");
-            }
-
-            if (securityToken.Length > MaximumTokenSizeInBytes )
+            if (string.IsNullOrWhiteSpace(securityToken) || securityToken.Length > MaximumTokenSizeInBytes)
             {
                 return false;
             }
@@ -81,7 +80,14 @@ namespace Microsoft.IdentityModel.Extensions
             {
                 using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                 {
-                    reader.MoveToContent();
+                    try
+                    {
+                        reader.MoveToContent();
+                    }
+                    catch(XmlException)
+                    {
+                        return false;
+                    }
                     return CanReadToken(reader);
                 }
             }
@@ -116,7 +122,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// <param name="samlToken">The Saml2SecurityToken.</param>
         /// <param name="validationParameters"> contains parameters for validating the token.</param>
         /// <returns>An IClaimIdentity.</returns>
-        protected virtual ClaimsIdentity CreateClaims(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
+        private ClaimsIdentity CreateClaims(string issuer, Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
             {
@@ -129,18 +135,7 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            if (assertion.Issuer == null)
-            {
-                throw new ArgumentException(ErrorMessages.IDX10210);
-            }            
-
-            string issuer = assertion.Issuer.Value;
-            if (string.IsNullOrEmpty(issuer))
-            {
-                throw new SecurityTokenException(ErrorMessages.IDX10203);
-            }
-
-            issuer = ValidateIssuer(issuer, validationParameters, samlToken);
+            // TODO - GA: custom NameClaimType, RoleClaimType for Saml 1 Also.
             ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, SamlSecurityTokenRequirement.NameClaimType, SamlSecurityTokenRequirement.RoleClaimType);
             this.ProcessSamlSubject(assertion.Subject, identity, issuer);
             this.ProcessStatement(assertion.Statements, identity, issuer);
@@ -148,16 +143,21 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
-        /// Produces a <see cref="IEnumerable{SecurityKey}"/> to use when validating the signature of the jwt.
+        /// Gets or sets a value indicating whether if the 'expiration' value in a <see cref="Saml2SecurityToken"/> is required.
         /// </summary>
-        /// <param name="securityToken">A security token that needs to have its signture validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> instance that has references to multiple <see cref="SecurityKey"/>.</param>
-        /// <returns>Returns a <see cref="IEnumerable{SecurityKey}"/> of the keys to use for signature validation.</returns>
-        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        public virtual IEnumerable<SecurityKey> RetrieveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
-        {
-            return IssuerKeyRetriever.RetrieveIssuerSigningKeys(securityToken, validationParameters);
-        }
+        /// <remarks>If 'true' then:
+        /// <para>A <see cref="Saml2SecurityToken"/> will be considered invalid if it does not contain an 'expiration' value.</para>
+        [DefaultValue(true)]
+        public bool RequireExpirationTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a <see cref="Saml2SecurityToken"/> can be valid if not signed.
+        /// </summary>
+        /// <remarks>If true then:
+        /// <para>A <see cref="Saml2SecurityToken"/> will be considered invalid if it does not contain a 'signature'.</para>
+        /// </remarks>
+        [DefaultValue(true)]
+        public bool RequireSignedTokens { get; set; }
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
@@ -187,15 +187,15 @@ namespace Microsoft.IdentityModel.Extensions
         /// </summary>
         /// <param name="securityToken">A Saml2 token.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
-        /// <exception cref="ArgumentNullException">'securityToken' is null.</exception>
+        /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml2 token.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204")]
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters)
         {
-            if (securityToken == null)
+            if (string.IsNullOrWhiteSpace(securityToken))
             {
                 throw new ArgumentNullException("securityToken");
             }
@@ -210,6 +210,7 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
 
+            // Calling System.IdentityModel.Tokens.SamlSecurityTokenHandler requires Configuration and IssuerTokenResolver be set.
             Configuration = new SecurityTokenHandlerConfiguration
             {
                 IssuerTokenResolver = IssuerKeyRetriever.CreateIssuerTokenResolver(securityToken, validationParameters),
@@ -225,7 +226,7 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            if (samlToken.IssuerToken == null)
+            if (samlToken.IssuerToken == null && RequireSignedTokens)
             {
                 throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
             }
@@ -235,12 +236,13 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            ValidateConditions(samlToken.Assertion.Conditions, validationParameters);
+            // 
+            ValidateLifetime(samlToken.Assertion.Conditions, validationParameters);
 
             Saml2SubjectConfirmation subjectConfirmation = samlToken.Assertion.Subject.SubjectConfirmations[0];
             if (subjectConfirmation.SubjectConfirmationData != null)
             {
-                // TODO handle confirmation data and ensure exceptions are the same as jwt security token handler
+                // TODO GA-  handle confirmation data and ensure exceptions are the same as jwt security token handler
                 ValidateConfirmationData(subjectConfirmation.SubjectConfirmationData);
             }
 
@@ -249,7 +251,9 @@ namespace Microsoft.IdentityModel.Extensions
                 ValidateAudience(samlToken.Assertion.Conditions, validationParameters, samlToken);
             }
 
-            ClaimsIdentity claimsIdentity = CreateClaims(samlToken, validationParameters);
+            string issuer = ValidateIssuer(samlToken.Assertion.Issuer == null ? null : samlToken.Assertion.Issuer.Value, validationParameters, samlToken);
+
+            ClaimsIdentity claimsIdentity = CreateClaims(issuer, samlToken, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
                 claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
@@ -286,11 +290,13 @@ namespace Microsoft.IdentityModel.Extensions
         /// </summary>
         /// <param name="conditions">SAML 2.0 condition to be validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> contain details controling validation.</param>
-        protected virtual void ValidateConditions(Saml2Conditions conditions, TokenValidationParameters validationParameters)
+        protected virtual void ValidateLifetime(Saml2Conditions conditions, TokenValidationParameters validationParameters)
         {
             if (conditions != null)
             {
                 DateTime now = DateTime.UtcNow;
+                
+                // TODO - GA add check for RequiedExpirationTime
 
                 if (conditions.NotBefore != null && conditions.NotBefore.HasValue
                     && DateTimeUtil.Add(now, TimeSpan.FromSeconds(ClockSkewInSeconds)) < conditions.NotBefore.Value.ToUniversalTime())
@@ -323,7 +329,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// <param name="validationParameters">parameters to define valid.</param>
         /// <param name="securityToken">the <see cref="SecurityToken"/> that is being validated.</param>
         /// <returns></returns>
-        public virtual string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
+        protected virtual string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
         {
             return IssuerValidator.Validate(issuer, validationParameters, securityToken);
         }

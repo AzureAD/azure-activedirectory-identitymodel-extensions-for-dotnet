@@ -103,12 +103,12 @@ namespace Microsoft.IdentityModel.Test
         public void OpenIdConnectMetadata_Defaults()
         {
             OpenIdConnectMetadata metadata = new OpenIdConnectMetadata();
-            Assert.IsNull(metadata.Authorization_Endpoint);
-            Assert.IsNull(metadata.End_Session_Endpoint);
+            Assert.IsNull(metadata.AuthorizationEndpoint);
+            Assert.IsNull(metadata.EndSessionEndpoint);
             Assert.IsNull(metadata.Issuer);
-            Assert.IsNull(metadata.Jwks_Uri);
-            Assert.IsNull(metadata.Token_Endpoint);
-            Assert.IsNotNull(metadata.SigningTokens);
+            Assert.IsNull(metadata.JwksUri);
+            Assert.IsNull(metadata.TokenEndpoint);
+            Assert.IsNotNull(metadata.SigningKeys);
         }
 
         [TestMethod]
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectMetadata metadata = new OpenIdConnectMetadata();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(metadata, "OpenIdConnectMetadata_GetSets");
 
-            List<string> methods = new List<string> { "Authorization_Endpoint", "End_Session_Endpoint", "Issuer", "Jwks_Uri", "Token_Endpoint" };
+            List<string> methods = new List<string> { "AuthorizationEndpoint", "EndSessionEndpoint", "Issuer", "JwksUri", "TokenEndpoint", "UserInfoEndpoint" };
             foreach(string method in methods)
             {
                 TestUtilities.GetSet(metadata, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
@@ -133,23 +133,23 @@ namespace Microsoft.IdentityModel.Test
 
             metadata = new OpenIdConnectMetadata()
             {
-                Authorization_Endpoint = authorization_Endpoint,
-                End_Session_Endpoint = end_Session_Endpoint,
+                AuthorizationEndpoint = authorization_Endpoint,
+                EndSessionEndpoint = end_Session_Endpoint,
                 Issuer = issuer,
-                Jwks_Uri = jwks_Uri,
-                Token_Endpoint = token_Endpoint,
+                JwksUri = jwks_Uri,
+                TokenEndpoint = token_Endpoint,
             };
 
-            List<SecurityToken> signingTokens = new List<SecurityToken>{KeyingMaterial.X509Token_1024, KeyingMaterial.X509Token_Public_2048};
-            metadata.SigningTokens.Add(KeyingMaterial.X509Token_1024);
-            metadata.SigningTokens.Add(KeyingMaterial.X509Token_Public_2048);
+            List<SecurityKey> securityKeys = new List<SecurityKey> { new X509SecurityKey(KeyingMaterial.Cert_1024), new X509SecurityKey(KeyingMaterial.DefaultCert_2048) };
+            metadata.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.Cert_1024));
+            metadata.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.DefaultCert_2048));
 
-            Assert.AreEqual(metadata.Authorization_Endpoint, authorization_Endpoint);
-            Assert.AreEqual(metadata.End_Session_Endpoint, end_Session_Endpoint);
+            Assert.AreEqual(metadata.AuthorizationEndpoint, authorization_Endpoint);
+            Assert.AreEqual(metadata.EndSessionEndpoint, end_Session_Endpoint);
             Assert.AreEqual(metadata.Issuer, issuer);
-            Assert.AreEqual(metadata.Jwks_Uri, jwks_Uri);
-            Assert.AreEqual(metadata.Token_Endpoint, token_Endpoint);
-            Assert.IsTrue(IdentityComparer.AreEqual(metadata.SigningTokens, signingTokens));
+            Assert.AreEqual(metadata.JwksUri, jwks_Uri);
+            Assert.AreEqual(metadata.TokenEndpoint, token_Endpoint);
+            Assert.IsTrue(IdentityComparer.AreEqual(metadata.SigningKeys, securityKeys));
         }
 
         [TestMethod]

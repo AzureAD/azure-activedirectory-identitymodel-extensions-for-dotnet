@@ -18,7 +18,6 @@
 
 using Microsoft.IdentityModel.Protocols;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 
@@ -56,7 +55,7 @@ namespace System.IdentityModel.Test
             return numMatched == dictionary1.Count;
         }
 
-        public static bool AreEqual(Claim claim1, Claim claim2, bool ignoreSubject = true)
+        public static bool AreEqual(Claim claim1, Claim claim2, bool ignoreSubject = true, bool ignoreProperties = false)
         {
 
             if (claim1 == null && claim2 == null)
@@ -74,8 +73,8 @@ namespace System.IdentityModel.Test
             if (claim1.OriginalIssuer != claim2.OriginalIssuer)
                 return false;
 
-            if (!IdentityComparer.AreEqual(claim1.Properties, claim2.Properties))
-                return false;
+            if (!ignoreProperties && !IdentityComparer.AreEqual(claim1.Properties, claim2.Properties))
+                    return false;
 
             if (claim1.Value != claim2.Value)
                 return false;
@@ -83,56 +82,13 @@ namespace System.IdentityModel.Test
             if (claim1.ValueType != claim2.ValueType)
                 return false;
 
-            if (!ignoreSubject)
-                if (!IdentityComparer.AreEqual(claim1.Subject, claim2.Subject))
+            if (!ignoreSubject && !IdentityComparer.AreEqual(claim1.Subject, claim2.Subject))
                     return false;
 
             return true;
         }
 
-        public static bool AreEqual( ReadOnlyCollection<Claim> claims1, ReadOnlyCollection<Claim> claims2 )
-        {
-
-            if (claims1 == null && claims2 == null)
-                return true;
-
-            if (claims1 == null || claims2 == null)
-                return false;
-
-            if (claims1.Count != claims2.Count)
-                return false;
-
-            bool[] claims2Matched = new bool[claims2.Count];
-            for (int b = 0; b < claims2.Count; b++)
-                claims2Matched[b] = false;
-
-            for (int i = 0; i < claims1.Count; i++)
-            {
-                bool matched = false;
-                for (int j = 0; j < claims2.Count; j++)
-                {
-                    if (IdentityComparer.AreEqual(claims1[i], claims2[j]))
-                    {
-                        if (!claims2Matched[j])
-                        {
-                            matched = true;
-                        }
-                        else
-                        {
-                            claims2Matched[j] = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!matched)
-                    return false;
-            }
-
-            return true;
-        }
-
-        public static bool AreEqual(IEnumerable<Claim> claims1, IEnumerable<Claim> claims2)
+        public static bool AreEqual(IEnumerable<Claim> claims1, IEnumerable<Claim> claims2, bool ignoreSubject = true, bool ignoreProperties = false)
         {
             if (claims1 == null && claims2 == null)
                 return true;
@@ -140,110 +96,27 @@ namespace System.IdentityModel.Test
             if (claims1 == null || claims2 == null)
                 return false;
 
-            List<Claim> claims1Claims = new List<Claim>();
-            List<Claim> claims1ClaimsMatched = new List<Claim>();
-            List<Claim> claims2Claims = new List<Claim>();
-
-            List<bool> claims2Matched = new List<bool>();
-
-            foreach (Claim c in claims1)
+            int numMatched = 0;
+            int numToMatch = 0;
+            List<Claim> claims2Claims = new List<Claim>(claims2);
+            foreach (Claim claim in claims1)
             {
-                claims1Claims.Add(c);
-            }
-
-            foreach (Claim c in claims2)
-            {
-                claims2Matched.Add(false);
-                claims2Claims.Add(c);
-            }
-
-            if (claims1Claims.Count != claims2Claims.Count)
-                return false;
-
-            int numDups = 0;
-            Claim c1 = null;
-            Claim c2 = null;
-
-            for (int i = 0; i < claims1Claims.Count; i++)
-            {
-                bool matched = false;
-
-                c1 = claims1Claims[i];
-
-                for (int j = 0; j < claims2Claims.Count; j++)
+                numToMatch++;
+                for (int i = 0; i < claims2Claims.Count; i++)
                 {
-                    c2 = claims2Claims[j];
-
-                    if (IdentityComparer.AreEqual(c1, c2))
+                    if (AreEqual(claim, claims2Claims[i], ignoreSubject, ignoreProperties))
                     {
-                        // claim can only match once.
-                        if (!claims2Matched[j])
-                        {
-                            matched = true;
-                            claims2Matched[j] = true;
-                            claims1ClaimsMatched.Add(c1);
-                            break;
-                        }
-                        else
-                        {
-                            numDups++;
-                        }
+                        numMatched++;
+                        claims2Claims.RemoveAt(i);
+                        break;
                     }
                 }
-
-                if (!matched)
-                    return false;
             }
 
-            foreach (bool found in claims2Matched)
-                if (!found)
-                    return false;
-
-            return true;
+            return claims2Claims.Count == 0 && numToMatch == numMatched;
         }
 
-        public static bool AreEqual(ReadOnlyCollection<ClaimsIdentity> identityCollection1, ReadOnlyCollection<ClaimsIdentity> identityCollection2)
-        {
-            if (identityCollection1 == null && identityCollection2 == null)
-                return true;
-
-            if (identityCollection1 == null || identityCollection2 == null)
-                return false;
-
-            if (identityCollection1.Count != identityCollection2.Count)
-                return false;
-
-            bool[] collections2Matched = new bool[identityCollection2.Count];
-            for (int b = 0; b < identityCollection2.Count; b++)
-                collections2Matched[b] = false;
-
-            for (int i = 0; i < identityCollection1.Count; i++)
-            {
-                bool matched = false;
-                for (int j = 0; j < identityCollection2.Count; j++)
-                {
-                    if (IdentityComparer.AreEqual(identityCollection1[i], identityCollection2[j]))
-                    {
-                        if (!collections2Matched[j])
-                        {
-                            matched = true;
-                            collections2Matched[j] = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!matched)
-                    return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Streamlined to only check type. These test are really only interested in comparing jwts.
-        /// </summary>
-        public static bool AreEqual(ClaimsPrincipal principal1, ClaimsPrincipal principal2, bool ignoreType = false)
+        public static bool AreEqual(ClaimsPrincipal principal1, ClaimsPrincipal principal2, bool ignoreType = false, bool ignoreSubject = true, bool ignoreProperties = false)
         {
             if (principal1 == null && principal2 == null)
                 return true;
@@ -257,7 +130,24 @@ namespace System.IdentityModel.Test
                     return false;
             }
 
-            return true;
+            int numMatched = 0;
+            int numToMatch = 0;
+            List<ClaimsIdentity> identities2 = new List<ClaimsIdentity>(principal2.Identities);
+            foreach(ClaimsIdentity identity in principal1.Identities)
+            {
+                numToMatch++;
+                for( int i = 0; i < identities2.Count; i++)
+                {
+                    if(AreEqual(identity, identities2[i], ignoreType, ignoreSubject, ignoreProperties))
+                    {
+                        numMatched++;
+                        identities2.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            return identities2.Count == 0 && numToMatch == numMatched;
         }
 
         public static bool AreEqual(BootstrapContext bc1, BootstrapContext bc2)
@@ -307,7 +197,7 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        public static bool AreEqual(ClaimsIdentity ci1, ClaimsIdentity ci2, bool ignoreType = false)
+        public static bool AreEqual(ClaimsIdentity ci1, ClaimsIdentity ci2, bool ignoreType = false, bool ignoreSubject = true, bool ignoreProperties = false)
         {
             if (ci1 == null && ci2 == null)
                 return true;
@@ -330,7 +220,7 @@ namespace System.IdentityModel.Test
             //if (!IdentityComparer45.AreEqual(ci1.BootstrapContext as ISerializable, ci2.BootstrapContext as ISerializable))
             //    return false;
 
-            if (!IdentityComparer.AreEqual(ci1.Claims, ci2.Claims))
+            if (!IdentityComparer.AreEqual(ci1.Claims, ci2.Claims, ignoreSubject, ignoreProperties))
                 return false;
 
             if (ci1.IsAuthenticated != ci2.IsAuthenticated)
@@ -347,7 +237,6 @@ namespace System.IdentityModel.Test
 
             if (StringComparer.OrdinalIgnoreCase.Compare(ci1.RoleClaimType, ci2.RoleClaimType) != 0)
                 return false;
-
 
             return true;
         }
@@ -506,19 +395,23 @@ namespace System.IdentityModel.Test
 
         public static bool AreEqual(IList<string> strings1, IList<string> strings2, StringComparison stringComparison = StringComparison.Ordinal)
         {
+            int numMatched = 0;
+            int numToMatch = 0;
             List<string> strings = new List<string>(strings2);
             foreach(string str in strings1)
             {
+                numToMatch++;
                 for(int i = 0; i< strings.Count; i++)
                 {
                     if(string.Equals(str, strings[i], stringComparison))
                     {
+                        numMatched++;
                         strings.RemoveAt(i);
                     }
                 }
             }
 
-            return strings.Count == 0;
+            return strings.Count == 0 && numMatched == numToMatch;
         }
 
         public static bool AreEqual(string string1, string string2, StringComparison stringComparison = StringComparison.Ordinal)
@@ -581,58 +474,58 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        public static bool AreEqual(ICollection<SecurityToken> tokenCollection1, ICollection<SecurityToken> tokenCollection2)
+        public static bool AreEqual(ICollection<SecurityKey> securityKeys1, ICollection<SecurityKey> securityKeys2)
         {
-            if (tokenCollection1 == null && tokenCollection2 == null)
+            if (securityKeys1 == null && securityKeys2 == null)
             {
                 return true;
             }
 
-            if (tokenCollection1 == null || tokenCollection2 == null)
+            if (securityKeys1 == null || securityKeys2 == null)
             {
                 return false;
             }
 
-            if (object.ReferenceEquals(tokenCollection1, tokenCollection2))
+            if (object.ReferenceEquals(securityKeys1, securityKeys2))
             {
                 return true;
             }
 
-            if (tokenCollection1.Count != tokenCollection2.Count)
+            if (securityKeys1.Count != securityKeys2.Count)
             {
                 return false;
             }
 
-            List<X509SecurityToken> tokens1 = new List<X509SecurityToken>();
-            foreach (var token in tokenCollection1)
+            List<X509SecurityKey> keys1 = new List<X509SecurityKey>();
+            foreach (var key in securityKeys1)
             {
-                if (token is X509SecurityToken)
+                if (key is X509SecurityKey)
                 {
-                    tokens1.Add(token as X509SecurityToken);
+                    keys1.Add(key as X509SecurityKey);
                 }
             }
 
-            List<X509SecurityToken> tokens2 = new List<X509SecurityToken>();
-            foreach (var token in tokenCollection2)
+            List<X509SecurityKey> keys2 = new List<X509SecurityKey>();
+            foreach (var key in securityKeys2)
             {
-                if (token is X509SecurityToken)
+                if (key is X509SecurityKey)
                 {
-                    tokens2.Add(token as X509SecurityToken);
+                    keys2.Add(key as X509SecurityKey);
                 }
             }
 
-            foreach (var token in tokens1)
+            foreach (var key in keys1)
             {
-                for (int i = 0; i < tokens2.Count; i++)
+                for (int i = 0; i < keys2.Count; i++)
                 {
-                    if (token.Certificate.Thumbprint == tokens2[i].Certificate.Thumbprint)
+                    if (key.Certificate.Thumbprint == keys2[i].Certificate.Thumbprint)
                     {
-                        tokens2.Remove(tokens2[i]);
+                        keys2.RemoveAt(i);
                     }
                 }
             }
 
-            return (tokens2.Count == 0);
+            return (keys2.Count == 0);
         }
 
         public static bool AreEqual(OpenIdConnectMetadata metadata1, OpenIdConnectMetadata metadata2)
@@ -652,17 +545,17 @@ namespace System.IdentityModel.Test
                 return true;
             }
 
-            if (!IdentityComparer.AreEqual(metadata1.Authorization_Endpoint, metadata2.Authorization_Endpoint))
+            if (!IdentityComparer.AreEqual(metadata1.AuthorizationEndpoint, metadata2.AuthorizationEndpoint))
             {
                 return false;
             }
 
-            if (!IdentityComparer.AreEqual(metadata1.Check_Session_Iframe, metadata2.Check_Session_Iframe))
+            if (!IdentityComparer.AreEqual(metadata1.CheckSessionIframe, metadata2.CheckSessionIframe))
             {
                 return false;
             }
 
-            if (!IdentityComparer.AreEqual(metadata1.End_Session_Endpoint, metadata2.End_Session_Endpoint))
+            if (!IdentityComparer.AreEqual(metadata1.EndSessionEndpoint, metadata2.EndSessionEndpoint))
             {
                 return false;
             }
@@ -672,17 +565,17 @@ namespace System.IdentityModel.Test
                 return false;
             }
 
-            if (!IdentityComparer.AreEqual(metadata1.Jwks_Uri, metadata2.Jwks_Uri))
+            if (!IdentityComparer.AreEqual(metadata1.JwksUri, metadata2.JwksUri))
             {
                 return false;
             }
 
-            if (!AreEqual(metadata1.SigningTokens, metadata2.SigningTokens))
+            if (!AreEqual(metadata1.SigningKeys, metadata2.SigningKeys))
             {
                 return false;
             }
 
-            if (!IdentityComparer.AreEqual(metadata1.Token_Endpoint, metadata2.Token_Endpoint))
+            if (!IdentityComparer.AreEqual(metadata1.TokenEndpoint, metadata2.TokenEndpoint))
             {
                 return false;
             }
@@ -754,7 +647,7 @@ namespace System.IdentityModel.Test
                 return false;
             }
 
-            if (!AreEqual(jsonWebkey1.Key_Ops, jsonWebkey2.Key_Ops))
+            if (!AreEqual(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps))
             {
                 return false;
             }

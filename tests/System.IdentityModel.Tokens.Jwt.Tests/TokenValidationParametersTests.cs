@@ -60,8 +60,8 @@ namespace System.IdentityModel.Test
         [Description( "Tests: Publics" )]
         public void TokenValidationParameters_Publics()
         {
-            SecurityKey issuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256;
-            List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.SymmetricSecurityKey_256 };        
+            SecurityKey issuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256;
+            List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256 };        
             string validAudience = "ValidAudience";
             List<string> validAudiences = new List<string>() { validAudience };
             string validIssuer = "ValidIssuer";
@@ -70,7 +70,6 @@ namespace System.IdentityModel.Test
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
             {               
                 IssuerSigningKey = issuerSigningKey,
-                IssuerSigningKeys = issuerSigningKeys,
                 SaveSigninToken = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -81,7 +80,6 @@ namespace System.IdentityModel.Test
             };
 
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKeys, issuerSigningKeys));
             Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
             Assert.IsFalse(tokenValidationParameters.ValidateAudience);
             Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
@@ -91,7 +89,6 @@ namespace System.IdentityModel.Test
 
             tokenValidationParameters = new TokenValidationParameters();
             tokenValidationParameters.IssuerSigningKey = issuerSigningKey;
-            tokenValidationParameters.IssuerSigningKeys = issuerSigningKeys;
             tokenValidationParameters.SaveSigninToken = true;
             tokenValidationParameters.ValidateAudience = false;
             tokenValidationParameters.ValidateIssuer = false;
@@ -101,7 +98,6 @@ namespace System.IdentityModel.Test
             tokenValidationParameters.ValidIssuers = validIssuers;
 
             Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKeys, issuerSigningKeys));
             Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
             Assert.IsFalse(tokenValidationParameters.ValidateAudience);
             Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
@@ -117,14 +113,15 @@ namespace System.IdentityModel.Test
         {
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
             Assert.IsTrue(tokenValidationParameters.IssuerSigningKey == null, "Expecting default: validationParameters.IssuerSigningKey == null.");
-            Assert.IsTrue(tokenValidationParameters.IssuerSigningKeys == null, "Expecting default: validationParameters.IssuerSigningKeys == null.");            
+            Assert.IsTrue(tokenValidationParameters.IssuerSigningKeys != null, "Expecting default: validationParameters.IssuerSigningKeys != null.");
+            Assert.IsTrue(tokenValidationParameters.IssuerSigningTokens != null, "Expecting default: validationParameters.IssuerSigningTokens != null.");
             Assert.IsFalse(tokenValidationParameters.SaveSigninToken, "Expecting default: validationParameters.SaveSigninToken by default to be false");
             Assert.IsTrue(tokenValidationParameters.ValidateAudience, "Expecting default: validationParameters.ValidateAudience by default to be true");
             Assert.IsTrue(tokenValidationParameters.ValidateIssuer, "Expecting default: validationParameters.ValidateIssuer by default to be true");
             Assert.IsTrue(tokenValidationParameters.ValidAudience == null, "Expecting default: validationParameters.ValidAudience == null.");
-            Assert.IsTrue(tokenValidationParameters.ValidAudiences == null, "Expecting default: validationParameters.ValidAudience == null.");
+            Assert.IsNotNull(tokenValidationParameters.ValidAudiences, "Expecting default: validationParameters.ValidAudience != null.");
             Assert.IsTrue(tokenValidationParameters.ValidIssuer == null, "Expecting default: validationParameters.ValidAudience == null.");
-            Assert.IsTrue(tokenValidationParameters.ValidAudiences == null, "Expecting default: validationParameters.ValidAudience == null.");
+            Assert.IsNotNull(tokenValidationParameters.ValidAudiences, "Expecting default: validationParameters.ValidAudience != null.");
         }
     }
 }

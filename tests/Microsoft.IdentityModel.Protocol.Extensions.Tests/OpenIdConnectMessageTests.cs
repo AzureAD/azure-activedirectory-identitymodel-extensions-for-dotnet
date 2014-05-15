@@ -77,25 +77,25 @@ namespace Microsoft.IdentityModel.Test
         {
             OpenIdConnectMessage openIdConnectRequest = new OpenIdConnectMessage();
 
-            Assert.IsNull(openIdConnectRequest.Acr_Values);
-            Assert.IsNull(openIdConnectRequest.Client_Assertion);
-            Assert.IsNull(openIdConnectRequest.Client_Assertion_Type);
-            Assert.IsNull(openIdConnectRequest.Claims_Locales);
-            Assert.IsNull(openIdConnectRequest.Client_Id);
-            Assert.IsNull(openIdConnectRequest.Client_Secret);
+            Assert.IsNull(openIdConnectRequest.AcrValues);
+            Assert.IsNull(openIdConnectRequest.ClientAssertion);
+            Assert.IsNull(openIdConnectRequest.ClientAssertionType);
+            Assert.IsNull(openIdConnectRequest.ClaimsLocales);
+            Assert.IsNull(openIdConnectRequest.ClientId);
+            Assert.IsNull(openIdConnectRequest.ClientSecret);
             Assert.IsNull(openIdConnectRequest.Code);
             Assert.IsNull(openIdConnectRequest.Display);
-            Assert.IsNull(openIdConnectRequest.Id_Token_Hint);
-            Assert.IsNull(openIdConnectRequest.Login_Hint);
-            Assert.IsNull(openIdConnectRequest.Max_Age);
+            Assert.IsNull(openIdConnectRequest.IdTokenHint);
+            Assert.IsNull(openIdConnectRequest.LoginHint);
+            Assert.IsNull(openIdConnectRequest.MaxAge);
             Assert.IsNull(openIdConnectRequest.Nonce);
             Assert.IsNull(openIdConnectRequest.Prompt);
-            Assert.IsNull(openIdConnectRequest.Redirect_Uri);
-            Assert.IsNull(openIdConnectRequest.Response_Mode);
-            Assert.IsNull(openIdConnectRequest.Response_Type);
+            Assert.IsNull(openIdConnectRequest.RedirectUri);
+            Assert.IsNull(openIdConnectRequest.ResponseMode);
+            Assert.IsNull(openIdConnectRequest.ResponseType);
             Assert.IsNull(openIdConnectRequest.Scope);
             Assert.IsNull(openIdConnectRequest.State);
-            Assert.IsNull(openIdConnectRequest.Ui_Locales);
+            Assert.IsNull(openIdConnectRequest.UiLocales);
         }
 
         [TestMethod]
@@ -137,36 +137,36 @@ namespace Microsoft.IdentityModel.Test
 
             // IssuerAdderss and Redirect_uri
             openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
-            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            openIdConnectRequest.RedirectUri = redirect_uri;
             queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString = 
                 issuerAddress +
                 "?" +
-                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) + 
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.RedirectUri) + 
                 "=" +
                 HttpUtility.UrlEncode(redirect_uri);
             Assert.AreEqual(expectedQueryString, queryString);
 
             // IssuerAdderss empty just Redirect_uri
             openIdConnectRequest = new OpenIdConnectMessage();
-            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            openIdConnectRequest.RedirectUri = redirect_uri;
             queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString =
                 "?" +
-                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.RedirectUri) +
                 "=" +
                 HttpUtility.UrlEncode(redirect_uri);
             Assert.AreEqual(expectedQueryString, queryString);
 
             // IssuerAdderss, Redirect_uri, Response
             openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
-            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            openIdConnectRequest.RedirectUri = redirect_uri;
             openIdConnectRequest.Resource = resource;
             queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString =
                 issuerAddress +
                 "?" +
-                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.RedirectUri) +
                 "=" +
                 HttpUtility.UrlEncode(redirect_uri) +
                 "&" +
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Test
             // IssuerAdderss, Redirect_uri, Response, customParam
             openIdConnectRequest = new OpenIdConnectMessage(issuerAddress);
             openIdConnectRequest.Parameters.Add(customParameterName, customParameterValue);
-            openIdConnectRequest.Redirect_Uri = redirect_uri;
+            openIdConnectRequest.RedirectUri = redirect_uri;
             openIdConnectRequest.Resource = resource;
             queryString = openIdConnectRequest.BuildRedirectUrl();
             expectedQueryString =
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Test
                 "=" +
                 HttpUtility.UrlEncode(customParameterValue) +
                 "&" +
-                HttpUtility.UrlEncode(OpenIdConnectParameterNames.Redirect_Uri) +
+                HttpUtility.UrlEncode(OpenIdConnectParameterNames.RedirectUri) +
                 "=" +
                 HttpUtility.UrlEncode(redirect_uri) +
                 "&" +
