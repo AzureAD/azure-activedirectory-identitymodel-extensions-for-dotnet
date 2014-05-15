@@ -1437,7 +1437,7 @@ namespace System.IdentityModel.Tokens
                 roleClaimType = this.RoleClaimType;
             }
 
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationTypes.Federation, nameClaimType, roleClaimType);
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, nameClaimType, roleClaimType);
             if (saveBootstrapContext)
             {
                 if (jwt.RawData != null)
