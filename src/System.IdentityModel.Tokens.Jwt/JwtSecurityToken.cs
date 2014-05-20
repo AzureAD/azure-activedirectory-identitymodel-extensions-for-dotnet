@@ -176,15 +176,6 @@ namespace System.IdentityModel.Tokens
             get { return this.payload.Encode(); }
         }
 
-        ///// <summary>
-        ///// Gets the 'value' of the 'expiration' claim { aud, 'exp' }.
-        ///// </summary>
-        ///// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        //public int? Expiration
-        //{
-        //    get { return this.payload.Expiration; }
-        //}
-
         /// <summary>
         /// Gets the <see cref="JwtHeader"/> associated with this instance.
         /// </summary>
@@ -201,15 +192,6 @@ namespace System.IdentityModel.Tokens
         {
             get { return this.payload.Jti; }
         }
-
-        ///// <summary>
-        ///// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
-        ///// </summary>
-        ///// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        //public int? IssuedAt
-        //{
-        //    get { return this.payload.IssuedAt; }
-        //}
 
         /// <summary>
         /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.

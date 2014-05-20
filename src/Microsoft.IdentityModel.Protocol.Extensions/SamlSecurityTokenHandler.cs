@@ -177,16 +177,19 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
-        /// Validates the <see cref="SamlConditions"/> for expiration. Audience is checked seperately.
+        /// Validates the <see cref="SamlSecurityToken"/> for expiration.
         /// </summary>
-        /// <param name="conditions">SAML condition to be validated.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> to validate lifefime.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> contain details controling validation.</param>
-        protected virtual void ValidateLifetime(SamlConditions conditions, TokenValidationParameters validationParameters)
-        {
-            if (conditions != null)
+        /// <exception cref="ArgumentNullException">if 'securityToken' is null.</exception>
+        protected virtual void ValidateLifetime(SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {            
+            if (securityToken == null)
             {
-                DateTime now = DateTime.UtcNow;
+                throw new ArgumentNullException("securityToken");
             }
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
