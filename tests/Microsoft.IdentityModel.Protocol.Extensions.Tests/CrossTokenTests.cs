@@ -97,6 +97,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Validates Signatures")]
         public void CrossToken_ValidateSignature()
         {
+            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
         [TestMethod]
@@ -104,6 +105,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Validate Audience")]
         public void CrossToken_ValidateAudience()
         {
+            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
         [TestMethod]
@@ -111,6 +113,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Validate Issuer")]
         public void CrossToken_ValidateIssuer()
         {
+            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
         [TestMethod]
@@ -118,6 +121,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: ValidateLifetime")]
         public void CrossToken_ValidateLifetime()
         {
+            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
     }
 }

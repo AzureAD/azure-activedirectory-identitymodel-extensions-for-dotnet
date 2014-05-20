@@ -57,6 +57,14 @@ namespace Microsoft.IdentityModel.Extensions
     /// </summary>
     internal static class IssuerKeyRetriever
     {
+
+        // 
+        // TODO - this method is not complete
+        // It needs to be dynamic, ie: do not create a list of tokens from TokenValidationParameters.IssuerSigningtokens, IssuerSigningKeys, IssuerSigningKeyRetriever for keys.
+        // the class above is being developed to handle matching SecurityKeys and handling dynamic key matching.
+        // 
+        // Consider it a stop-gap solution that handles the 60% case and allows early adopters to experiment and with samples.
+
         /// <summary>
         /// Used to create signing tokens when reading SamlTokens (1&2) as reading requires a token to validate signature.
         /// </summary>
@@ -65,6 +73,8 @@ namespace Microsoft.IdentityModel.Extensions
         /// <returns></returns>
         public static SecurityTokenResolver CreateIssuerTokenResolver(string securityToken, TokenValidationParameters validationParameters)
         {
+
+            // X509SecurityKey (s)
             List<SecurityToken> signingTokens = new List<SecurityToken>();
             if (validationParameters.IssuerSigningToken != null)
             {
@@ -76,7 +86,6 @@ namespace Microsoft.IdentityModel.Extensions
                 signingTokens.AddRange(validationParameters.IssuerSigningTokens);
             }
 
-            // TODO: we need to stick with keys as they may be derived.
             List<SecurityKey> namedKeys = new List<SecurityKey>();
             foreach (SecurityKey securityKey in RetrieveIssuerSigningKeys(securityToken, validationParameters))
             {
@@ -90,7 +99,8 @@ namespace Microsoft.IdentityModel.Extensions
                     X509AsymmetricSecurityKey x509AsymmetricSecurityKey = securityKey as X509AsymmetricSecurityKey;
                     if (x509AsymmetricSecurityKey != null)
                     {
-                        //signingTokens.Add(new X509SecurityToken())
+                        // TODO finish up IssuerTokenResolver so it can be returned instead of creating a 'copied' list of tokens.
+                        // signingTokens.Add(new X509SecurityToken())
                     }
                     else
                     {
@@ -104,7 +114,8 @@ namespace Microsoft.IdentityModel.Extensions
                 signingTokens.Add(new NamedKeySecurityToken("unknown", namedKeys));
             }
 
-            //return new IssuerTokenResolver();
+            // TODO - finish up IssuerTokenResolver so it can be returned instead of creating a 'copied' list of tokens.
+            // return new IssuerTokenResolver();
 
             return SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true);
         }

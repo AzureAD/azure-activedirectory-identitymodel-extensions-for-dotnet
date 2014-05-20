@@ -974,6 +974,10 @@ namespace System.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
         /// <exception cref="ArgumentNullException"> thrown if 'securityToken is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException"> thrown if 'validationParameters is null.</exception>
+        /// <exception cref="SecurityTokenValidationException"> thrown if a signature is not found and <see cref="RequireSignedTokens"/> is true.</exception>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException"> thrown if the 'securityToken' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
+        /// This can indicate that a key refresh is required.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException"> thrown if after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'securityToken' does not have a key identifier.</exception>
         /// <returns><see cref="JwtSecurityToken"/> that has the signature validated if securityToken was signed and <see cref="RequireSignedTokens"/> is true.</returns>
         /// <remarks><para>If the 'securityToken' is signed, the signature is validated even if <see cref="RequireSignedTokens"/> is false.</para>
         /// <para>If the 'securityToken' signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'securityToken'.</para></remarks>
@@ -989,11 +993,6 @@ namespace System.IdentityModel.Tokens
             string[] parts = securityToken.Split('.');
             byte[] encodedBytes = Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]);
             byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(parts[2]);
-
-            if (encodedBytes == null)
-            {
-                throw new ArgumentNullException("encodedBytes");
-            }
 
             if (signatureBytes == null)
             {
@@ -1521,44 +1520,6 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Uses IssuerTokenResolver to obtain signing tokens for a jwt.
-        /// </summary>
-        /// <param name="jwt">The <see cref="JwtSecurityToken"/> to resolve tokens.</param>
-        /// <returns><see cref="IList{SecurityToken}"/> containing all resolved tokens. The list can be empty.</returns>
-        /// <exception cref="ArgumentNullException">'jwt' is null.</exception>
-        protected virtual IList<SecurityToken> GetSigningTokens(JwtSecurityToken jwt)
-        {
-            if (jwt == null)
-            {
-                throw new ArgumentNullException("jwt");
-            }
-
-            List<SecurityToken> signingTokens = new List<SecurityToken>();
-            if (this.Configuration == null || this.Configuration.IssuerTokenResolver == null)
-            {
-                return signingTokens;
-            }
-
-            SecurityKeyIdentifier ski = jwt.Header.SigningKeyIdentifier;
-            SecurityToken signingToken = null;
-            NamedKeyIssuerTokenResolver namedKeyResolver = Configuration.IssuerTokenResolver as NamedKeyIssuerTokenResolver;
-
-            // Add a NamedKeyIssuerClause from the 'iss' claim if issuer exists.
-            if (namedKeyResolver != null && jwt.Issuer != null)
-            {
-                ski.Add(new NamedKeySecurityKeyIdentifierClause(jwt.Issuer, JwtConstants.ReservedClaims.Iss));
-            }
-
-            Configuration.IssuerTokenResolver.TryResolveToken(ski, out signingToken);
-            if (signingToken != null)
-            {
-                signingTokens.Add(signingToken);
-            }
-
-            return signingTokens;
-        }
-
-        /// <summary>
         /// Produces a <see cref="IEnumerable{SecurityKey}"/> to use when validating the signature of a securityToken.
         /// </summary>
         /// <param name="securityToken"> the security token that needs to have it's signature validated validated.</param>
@@ -1569,6 +1530,7 @@ namespace System.IdentityModel.Tokens
         {
             if (validationParameters != null)
             {
+                // gets keys from metadata
                 if (validationParameters.IssuerSigningKeyRetriever != null)
                 {
                     foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))

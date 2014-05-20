@@ -18,11 +18,9 @@
 
 using Microsoft.IdentityModel.Extensions;
 using System;
-using System.IdentityModel.Tokens;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -31,6 +29,8 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class WsFederationMetadataRetriever
     {
+        // TODO class is just stubbed as placeholder and discussion.
+
         /// <summary>
         /// Obtains <see cref="WsFederationMetadata"/> from an endpoint.
         /// </summary>
