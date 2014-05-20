@@ -53,7 +53,7 @@ namespace System.IdentityModel.Tokens
         {
             if (null != issuer)
             {
-                this.Add(JwtConstants.ReservedClaims.Issuer, issuer);
+                this.Add(JwtConstants.ReservedClaims.Iss, issuer);
             }
 
             if (null != audience)
@@ -65,12 +65,12 @@ namespace System.IdentityModel.Tokens
             {
                 if (lifetime.Created.HasValue)
                 {
-                    this.Add(JwtConstants.ReservedClaims.NotBefore, EpochTime.GetIntDate(lifetime.Created.Value));
+                    this.Add(JwtConstants.ReservedClaims.Nbf, EpochTime.GetIntDate(lifetime.Created.Value));
                 }
 
                 if (lifetime.Expires.HasValue)
                 {
-                    this.Add(JwtConstants.ReservedClaims.ExpirationTime, EpochTime.GetIntDate(lifetime.Expires.Value));
+                    this.Add(JwtConstants.ReservedClaims.Exp, EpochTime.GetIntDate(lifetime.Expires.Value));
                 }
             }
 
@@ -84,11 +84,11 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'actor' claim { actort, 'value' }.
         /// </summary>
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks>
-        public string Actor
+        public string Actort
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Actor);
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Actort);
             }
         }
 
@@ -96,7 +96,7 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'audience' claim { aud, 'value' }.
         /// </summary>
         /// <remarks>If the 'audience' claim is not found, null is returned.</remarks>
-        public string Audience
+        public string Aud
         {
             get { return this.GetStandardClaim(JwtConstants.ReservedClaims.Audience); }
         }
@@ -105,11 +105,11 @@ namespace System.IdentityModel.Tokens
         /// Gets 'value' of the 'c_hash' claim { c_hash, 'value' }.
         /// </summary>
         /// <remarks>If the 'c_hash' claim is not found, null is returned.</remarks>
-        public string C_Hash
+        public string CHash
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.C_Hash);
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.CHash);
             }
         }
         
@@ -117,20 +117,21 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'expiration' claim { exp, 'value' }.
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? Expiration
+        //public int? Expiration
+        public int? Exp
         {
-            get { return this.GetIntClaim(JwtConstants.ReservedClaims.ExpirationTime); }
+            get { return this.GetIntClaim(JwtConstants.ReservedClaims.Exp); }
         }
 
         /// <summary>
         /// Gets the 'value' of the 'JWT ID' claim { jti, 'value' }.
         /// </summary>
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
-        public string Id
+        public string Jti
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.JwtId);
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Jti);
             }
         }
 
@@ -138,20 +139,21 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
         /// </summary>
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        public int? IssuedAt
+        //public int? IssuedAt
+        public int? Iat
         {
-            get { return this.GetIntClaim(JwtConstants.ReservedClaims.IssuedAt); }
+            get { return this.GetIntClaim(JwtConstants.ReservedClaims.Iss); }
         }
 
         /// <summary>
         /// Gets 'value' of the 'issuer' claim { iss, 'value' }.
         /// </summary>
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
-        public string Issuer
+        public string Iss
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Issuer);
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Iss);
             }
         }
 
@@ -171,11 +173,11 @@ namespace System.IdentityModel.Tokens
         /// Gets "value" of the 'subject' claim { sub, 'value' }.
         /// </summary>
         /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
-        public string Subject
+        public string Sub
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Subject);
+                return this.GetStandardClaim(JwtConstants.ReservedClaims.Sub);
             }
         }
 
@@ -183,11 +185,11 @@ namespace System.IdentityModel.Tokens
         /// Gets 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public DateTime ValidFrom
+        internal DateTime ValidFrom
         {
             get
             {
-                return this.GetDateTime(JwtConstants.ReservedClaims.NotBefore);
+                return this.GetDateTime(JwtConstants.ReservedClaims.Nbf);
             }
         }
 
@@ -195,11 +197,11 @@ namespace System.IdentityModel.Tokens
         /// Gets 'value' of the 'expiration' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public DateTime ValidTo
+        internal DateTime ValidTo
         {
             get
             {
-                return this.GetDateTime(JwtConstants.ReservedClaims.ExpirationTime);
+                return this.GetDateTime(JwtConstants.ReservedClaims.Exp);
             }
         }
 
@@ -207,13 +209,13 @@ namespace System.IdentityModel.Tokens
         /// Gets a <see cref="IEnumerable{Claim}"/><see cref="Claim"/> for each JSON { name, value }.
         /// </summary>
         /// <remarks>Each <see cref="Claim"/>(s) returned will have the <see cref="Claim.Type"/> translated according to the mapping found in <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/>. Adding and removing to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/> will affect the value of the <see cref="Claim.Type"/>.
-        /// <para><see cref="Claim.Issuer"/> and <see cref="Claim.OriginalIssuer"/> will be set to the value of <see cref="Issuer"/> ( <see cref="string.Empty"/> if null).</para></remarks>
+        /// <para><see cref="Claim.Issuer"/> and <see cref="Claim.OriginalIssuer"/> will be set to the value of <see cref="Iss"/> ( <see cref="string.Empty"/> if null).</para></remarks>
         public virtual IEnumerable<Claim> Claims
         {
             get
             {
                 List<Claim> claims = new List<Claim>();
-                string issuer = this.Issuer ?? ClaimsIdentity.DefaultIssuer;
+                string issuer = this.Iss ?? ClaimsIdentity.DefaultIssuer;
 
                 foreach (KeyValuePair<string, object> keyValuePair in this)
                 {

@@ -46,7 +46,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'jwtEncodedString' contains only whitespace.</exception>
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
         /// <remarks>
-        /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(SecurityToken)"/>
+        /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters)"/>
         /// </remarks>>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1642:ConstructorSummaryDocumentationMustBeginWithStandardText", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public JwtSecurityToken(string jwtEncodedString)
@@ -139,7 +139,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return this.payload.Actor; }
+            get { return this.payload.Actort; }
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'audience' claim is not found, null is returned.</remarks>
         public string Audience
         {
-            get { return this.payload.Audience; }
+            get { return this.payload.Aud; }
         }
 
         /// <summary>
@@ -177,15 +177,6 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'expiration' claim { aud, 'exp' }.
-        /// </summary>
-        /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? Expiration
-        {
-            get { return this.payload.Expiration; }
-        }
-
-        /// <summary>
         /// Gets the <see cref="JwtHeader"/> associated with this instance.
         /// </summary>
         public JwtHeader Header
@@ -199,16 +190,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
         public override string Id
         {
-            get { return this.payload.Id; }
-        }
-
-        /// <summary>
-        /// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        public int? IssuedAt
-        {
-            get { return this.payload.IssuedAt; }
+            get { return this.payload.Jti; }
         }
 
         /// <summary>
@@ -217,7 +199,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public string Issuer
         {
-            get { return this.payload.Issuer; }
+            get { return this.payload.Iss; }
         }
 
         /// <summary>
@@ -261,7 +243,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>if there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
-            get { return this.header.SignatureAlgorithm; }
+            get { return this.header.Alg; }
         }
 
         /// <summary>
@@ -300,7 +282,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.payload.Subject;
+                return this.payload.Sub;
             }
         }
 
@@ -349,7 +331,7 @@ namespace System.IdentityModel.Tokens
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
                 string type = null;
-                if (this.header.TryGetValue(JwtConstants.ReservedHeaderParameters.Type, out type))
+                if (this.header.TryGetValue(JwtConstants.ReservedHeaderParameters.Typ, out type))
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {

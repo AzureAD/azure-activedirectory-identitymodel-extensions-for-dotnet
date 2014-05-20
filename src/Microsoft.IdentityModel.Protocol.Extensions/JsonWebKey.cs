@@ -18,6 +18,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -31,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         // kept private to hide that a List is used.
         // public member returns an IList.
-        private List<string> _certificateClauses = new List<string>();
+        private IList<string> _certificateClauses = new List<string>();
 
         static JsonWebKey()
         {
@@ -83,12 +84,12 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.Key_Ops, out obj))
+                if (dictionary.TryGetValue(JsonWebKeysValueNames.KeyOps, out obj))
                 {
                     str = obj as string;
                     if (str != null)
                     {
-                        Key_Ops = str;
+                        KeyOps = str;
                     }
                 }
 
@@ -167,7 +168,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the 'key_ops' (Key Operations).
         /// </summary>
-        public string Key_Ops { get; set; }
+        public string KeyOps { get; set; }
 
         /// <summary>
         /// Gets or sets the 'kid' (Key ID).

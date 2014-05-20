@@ -1,40 +1,23 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
 
 namespace Microsoft.IdentityModel.Protocols
 {
-
-    /// <summary>
-    /// Constant names for Json Web Key Values
-    /// </summary>
-    public static class JsonWebKeysValueNames
-    {
-        #pragma warning disable 1591
-        public const string Alg = "alg";
-        public const string E = "e";
-        public const string Key_Ops = "key_ops";
-        public const string Keys = "keys";
-        public const string Kid = "kid";
-        public const string Kty = "kty";
-        public const string N = "n";
-        public const string Use = "use";
-        public const string X5c = "x5c";
-        public const string X5t = "x5t";
-        public const string X5u = "x5u";
-        #pragma warning restore 1591
-    }
-
-    /// <summary>
-    /// Specific scope values that are interesting to OpenID Connect.  See http://openid.net/specs/openid-connect-messages-1_0.html#scopes
-    /// </summary>
-    public static class OpenIdConnectScopes
-    {
-        #pragma warning disable 1591
-        public static readonly string OpenId = "openid";
-        public static readonly string OpenId_Profile = "openid profile";
-        public static readonly string User_Impersonation = "user_impersonation";
-        #pragma warning restore 1591
-    }
-
     /// <summary>
     /// Well known endpoints for AzureActiveDirectory
     /// </summary>
@@ -48,23 +31,44 @@ namespace Microsoft.IdentityModel.Protocols
     }
 
     /// <summary>
-    /// 
+    /// Names for Json Web Key Values
+    /// </summary>
+    public static class JsonWebKeysValueNames
+    {
+        #pragma warning disable 1591
+        public const string Alg = "alg";
+        public const string Exponent = "e";
+        public const string KeyOps = "key_ops";
+        public const string Keys = "keys";
+        public const string Kid = "kid";
+        public const string Kty = "kty";
+        public const string Modulus = "n";
+        public const string Use = "use";
+        public const string X5c = "x5c";
+        public const string X5t = "x5t";
+        public const string X5u = "x5u";
+        #pragma warning restore 1591
+    }
+    
+    /// <summary>
+    /// Metadata names for OpenIdConnect
     /// </summary>
     public static class OpenIdConnectMetadataNames
     {
         #pragma warning disable 1591
-        public const string Authorization_Endpoint = "authorization_endpoint";
-        public const string Check_Session_Iframe = "check_session_iframe";
-        public const string End_Session_Endpoint = "end_session_endpoint";
-        public const string Id_Token_Signing_Alg_Balues_Supported = "id_token_signing_alg_values_supported";
-        public const string Jwks_Uri = "jwks_uri";
+        public const string AuthorizationEndpoint = "authorization_endpoint";
+        public const string CheckSessionIframe = "check_session_iframe";
+        public const string EndSessionEndpoint = "end_session_endpoint";
+        public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
+        public const string JwksUri = "jwks_uri";
         public const string Issuer = "issuer";
-        public const string Microsoft_Multi_Refresh_Token = "microsoft_multi_refresh_token";
-        public const string Response_Modes_Supported = "response_modes_supported";
-        public const string Response_Types_Supported = "response_types_supported";
-        public const string Subject_Types_Supported = "subject_types_supported";
-        public const string Token_Endpoint = "token_endpoint";
-        public const string Token_Endpoint_Auth_Methods_Supported = "token_endpoint";
+        public const string MicrosoftMultiRefreshToken = "microsoft_multi_refresh_token";
+        public const string ResponseModesSupported = "response_modes_supported";
+        public const string ResponseTypesSupported = "response_types_supported";
+        public const string SubjectTypesSupported = "subject_types_supported";
+        public const string TokenEndpoint = "token_endpoint";
+        public const string TokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported";
+        public const string UserInfoEndpoint = "user_info_endpoint";
         #pragma warning restore 1591
     }
 
@@ -74,59 +78,58 @@ namespace Microsoft.IdentityModel.Protocols
     public static class OpenIdConnectParameterNames
     {
         #pragma warning disable 1591
-        public const string Access_Token = "access_token"; 
-        public const string Acr_Values = "acr_values";
-        public const string Claims_Locales = "claims_locales";
-        public const string Client_Assertion = "client_assertion";
-        public const string Client_Assertion_Type = "client_assertion_type";
-        public const string Client_Id = "client_id";
-        public const string Client_Secret = "client_secret";
+        public const string AccessToken = "access_token";
+        public const string AcrValues = "acr_values";
+        public const string ClaimsLocales = "claims_locales";
+        public const string ClientAssertion = "client_assertion";
+        public const string ClientAssertionType = "client_assertion_type";
+        public const string ClientId = "client_id";
+        public const string ClientSecret = "client_secret";
         public const string Code = "code";
         public const string Display = "display";
-        public const string Domain_Hint = "domain_hint";
+        public const string DomainHint = "domain_hint";
         public const string Error = "error";
-        public const string Error_Description = "error_description";
-        public const string Error_Uri = "error_uri";
-        public const string Expires_In = "expires_in";
-        public const string Grant_Type = "grant_type";
+        public const string ErrorDescription = "error_description";
+        public const string ErrorUri = "error_uri";
+        public const string ExpiresIn = "expires_in";
+        public const string GrantType = "grant_type";
         public const string Iss = "iss";
-        public const string Id_Token = "id_token";
-        public const string Id_Token_Hint = "id_token_hint";
-        public const string Identity_Provider = "identity_provider";
-        public const string Login_Hint = "login_hint";
-        public const string Max_Age = "max_age";
+        public const string IdToken = "id_token";
+        public const string IdTokenHint = "id_token_hint";
+        public const string IdentityProvider = "identity_provider";
+        public const string LoginHint = "login_hint";
+        public const string MaxAge = "max_age";
         public const string Nonce = "nonce";
         public const string Password = "password";
-        public const string Post_Logout_Redirect_Uri = "post_logout_redirect_uri";
+        public const string PostLogoutRedirectUri = "post_logout_redirect_uri";
         public const string Prompt = "prompt";
-        public const string Redirect_Uri = "redirect_uri";
-        public const string Request_Uri = "request_uri";
-        public const string Resource = "resource";        
-        public const string Response_Mode = "response_mode";        
-        public const string Response_Type = "response_type";       
+        public const string RedirectUri = "redirect_uri";
+        public const string RequestUri = "request_uri";
+        public const string Resource = "resource";
+        public const string ResponseMode = "response_mode";
+        public const string ResponseType = "response_type";
         public const string Scope = "scope";
-        public const string Session_State = "session_state";
+        public const string SessionState = "session_state";
         public const string State = "state";
-        public const string Target_Link_Uri = "target_link_uri";
+        public const string TargetLinkUri = "target_link_uri";
         public const string Token = "token";
-        public const string Token_Type = "token_type";
-        public const string Ui_Locales = "ui_locales";
-        public const string User_Id = "user_id";
+        public const string TokenType = "token_type";
+        public const string UiLocales = "ui_locales";
+        public const string UserId = "user_id";
         public const string Username = "username";
         #pragma warning restore 1591
     }
 
     /// <summary>
-    /// Response types for OpenIdConnect.
+    /// RequestTypes for OpenIdConnect.
     /// </summary>
-    public static class OpenIdConnectResponseTypes
+    /// <remarks>Can be used to determine the message type.</remarks>
+    public enum OpenIdConnectRequestType
     {
-        #pragma warning disable 1591
-        public const string Code_Id_Token = "code id_token";
-        public const string Id_Token = "id_token";
-        #pragma warning restore 1591
+        AuthenticationRequest,
+        LogoutRequest,
+        TokenRequest,
     }
-
 
     /// <summary>
     /// Response modes for OpenIdConnect.
@@ -140,4 +143,26 @@ namespace Microsoft.IdentityModel.Protocols
         #pragma warning restore 1591
     }
 
+    /// <summary>
+    /// Response types for OpenIdConnect.
+    /// </summary>
+    public static class OpenIdConnectResponseTypes
+    {
+        #pragma warning disable 1591
+        public const string CodeIdToken = "code id_token";
+        public const string IdToken = "id_token";
+        #pragma warning restore 1591
+    }
+
+    /// <summary>
+    /// Specific scope values that are interesting to OpenID Connect.  See http://openid.net/specs/openid-connect-messages-1_0.html#scopes
+    /// </summary>
+    public static class OpenIdConnectScopes
+    {
+        #pragma warning disable 1591
+        public const string OpenId = "openid";
+        public const string OpenIdProfile = "openid profile";
+        public const string UserImpersonation = "user_impersonation";
+        #pragma warning restore 1591
+    }
 }

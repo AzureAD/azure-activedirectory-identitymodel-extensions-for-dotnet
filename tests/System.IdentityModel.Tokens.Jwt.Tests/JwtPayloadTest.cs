@@ -62,7 +62,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse(EpochTime.DateTime(time.Value) != jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
 
-            int? expirationTime = jwtPayload.Expiration;
+            int? expirationTime = jwtPayload.Exp;
             Assert.IsTrue(expirationTime == time, "expirationTime != time");
         }
     }

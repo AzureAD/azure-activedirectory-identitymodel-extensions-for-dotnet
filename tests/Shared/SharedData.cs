@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Test
                 new JsonWebKey
                 {
                     Alg = "SHA256",
-                    Key_Ops = "signing",
+                    KeyOps = "signing",
                     Kid = "NGTFvdK-fythEuLwjpwAJOM9n-A",
                     Kty = "RSA",
                     X5t = "NGTFvdK-fythEuLwjpwAJOM9n-A",
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Test
                 new JsonWebKey
                 {
                     Alg = null,
-                    Key_Ops = null,
+                    KeyOps = null,
                     Kid = "kriMPdmBvx68skT8-mPAB3BseeA",
                     Kty = "RSA",
                     X5t = "kriMPdmBvx68skT8-mPAB3BseeA",
@@ -90,12 +90,12 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectMetatdata1 = 
                 new OpenIdConnectMetadata()
                 {
-                    Authorization_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
-                    Check_Session_Iframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
-                    End_Session_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
+                    AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
+                    CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
+                    EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
                     Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/",
-                    Jwks_Uri = "JsonWebKeysFile.json",
-                    Token_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
+                    JwksUri = "JsonWebKeysFile.json",
+                    TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
                 };
 
             X509CertificateJsonWebKey1 = new X509Certificate2(Convert.FromBase64String("MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng"));
@@ -104,29 +104,29 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectMetatdataWithKeys1 =
                 new OpenIdConnectMetadata()
                 {
-                    Authorization_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
-                    Check_Session_Iframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
-                    End_Session_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
+                    AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
+                    CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
+                    EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
                     Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/",
-                    Jwks_Uri = "JsonWebKeysFile.json",
-                    Token_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
+                    JwksUri = "JsonWebKeysFile.json",
+                    TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
                 };
 
-            OpenIdConnectMetatdataWithKeys1.SigningTokens.Add(new X509SecurityToken(X509CertificateJsonWebKey1));
-            OpenIdConnectMetatdataWithKeys1.SigningTokens.Add(new X509SecurityToken(X509CertificateJsonWebKey2));
+            OpenIdConnectMetatdataWithKeys1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey1));
+            OpenIdConnectMetatdataWithKeys1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey2));
 
             OpenIdConnectMetadataSingleX509Data1 = 
                 new OpenIdConnectMetadata()
                 {
-                    Authorization_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
-                    Check_Session_Iframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
-                    End_Session_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
+                    AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
+                    CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
+                    EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
                     Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/",
-                    Jwks_Uri = "JsonWebKeysSingleX509DataFile.json",
-                    Token_Endpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
+                    JwksUri = "JsonWebKeysSingleX509DataFile.json",
+                    TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
             };
 
-            OpenIdConnectMetadataSingleX509Data1.SigningTokens.Add(new X509SecurityToken(X509CertificateJsonWebKey1));
+            OpenIdConnectMetadataSingleX509Data1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey1));
 
         }
 

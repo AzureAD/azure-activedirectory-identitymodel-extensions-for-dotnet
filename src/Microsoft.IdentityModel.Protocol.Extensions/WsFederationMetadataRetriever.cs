@@ -18,28 +18,28 @@
 
 using Microsoft.IdentityModel.Extensions;
 using System;
-using System.IdentityModel.Tokens;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Helper for parsing OpenidConnect metadata.
+    /// Helper for parsing WsFederation metadata.
     /// </summary>
-    public static class OpenIdConnectMetadataRetriever
+    public static class WsFederationMetadataRetriever
     {
+        // TODO class is just stubbed as placeholder and discussion.
+
         /// <summary>
-        /// Obtains <see cref="OpenIdConnectMetadata"/> from an endpoint.
+        /// Obtains <see cref="WsFederationMetadata"/> from an endpoint.
         /// </summary>
         /// <param name="metadataUrl"> a pointer to the metadata. Can refer to a file or a absolute uri.</param>
         /// <param name="httpClient">the <see cref="HttpClient"/> to use obtain the metadata.</param>
-        /// <returns>A populated <see cref="OpenIdConnectMetadata"/>.</returns>
+        /// <returns>A populated <see cref="WsFederationMetadata"/>.</returns>
         /// <exception cref="ArgumentNullException"> if 'metadataUrl' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">if 'httpclient' is null.</exception>
-        public static OpenIdConnectMetadata GetMetadata(string metadataUrl, HttpClient httpClient)
+        public static WsFederationMetadata GetMetadata(string metadataUrl, HttpClient httpClient)
         {
             if (string.IsNullOrWhiteSpace(metadataUrl))
             {
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="metadataUrl"> a pointer to the metadata. Can refer to a file or a absolute uri.</param>
         /// <returns>A populated <see cref="OpenIdConnectMetadata"/>.</returns>
         /// <exception cref="ArgumentNullException"> if 'metadataUrl' is null or whitespace.</exception>
-        public static OpenIdConnectMetadata GetMetadata(string metadataUrl)
+        public static WsFederationMetadata GetMetadata(string metadataUrl)
         {
             if (string.IsNullOrWhiteSpace(metadataUrl))
             {
@@ -81,42 +81,9 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="stream"> a JSON formated stream conforming to OpenIdConnect discovery: http://openid.net/specs/openid-connect-discovery-1_0.html </param>
         /// <returns><see cref="OpenIdConnectMetadata"/></returns>
         /// <exception cref="ArgumentNullException"> if 'stream' is null.</exception>
-        public static OpenIdConnectMetadata GetMetadata(Stream stream)
+        public static WsFederationMetadata GetMetadata(Stream stream)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException("stream");
-            }
-
-            OpenIdConnectMetadata openIdConnectMetadata = null;
-            using (StreamReader streamReader = new StreamReader(stream))
-            {
-                openIdConnectMetadata = new OpenIdConnectMetadata(streamReader.ReadToEnd());
-                if (!string.IsNullOrEmpty(openIdConnectMetadata.JwksUri))
-                {
-                    JsonWebKeys jsonWebKeys = null;
-                    using (Stream keyStream = OpenStream(openIdConnectMetadata.JwksUri))
-                    {
-                        using (StreamReader keyStreamReader = new StreamReader(keyStream))
-                        {
-                            jsonWebKeys = new JsonWebKeys(keyStreamReader.ReadToEnd());
-                            foreach (JsonWebKey webKey in jsonWebKeys.Keys)
-                            {
-                                // Add chaining
-                                if (webKey.X5c.Count == 1)
-                                {
-                                    X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
-                                    openIdConnectMetadata.SigningKeys.Add(new X509SecurityKey(cert));
-                                }
-
-                                openIdConnectMetadata.JsonWebKeys.Add(webKey);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return openIdConnectMetadata;
+            return new WsFederationMetadata();
         }
 
         private static Stream OpenStream(string metadataUrl)

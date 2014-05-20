@@ -86,10 +86,12 @@ namespace Microsoft.IdentityModel.Test
             GetMetadata(new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataBadBase64DataString)), expectedException: new ExpectedException(typeExpected: typeof(FormatException)));
 
             // ensure that each property can be set independently
-            GetAndCheckMetadata("authorization_endpoint", "Authorization_Endpoint");
-            GetAndCheckMetadata("check_session_iframe", "Check_Session_Iframe");
-            GetAndCheckMetadata("end_session_endpoint", "End_Session_Endpoint");
-            GetAndCheckMetadata("token_endpoint", "Token_Endpoint");
+            GetAndCheckMetadata("authorization_endpoint", "AuthorizationEndpoint");
+            GetAndCheckMetadata("check_session_iframe", "CheckSessionIframe");
+            GetAndCheckMetadata("end_session_endpoint", "EndSessionEndpoint");
+            GetAndCheckMetadata("jwks_uri", "JwksUri", SharedData.AADCommonUrl);
+            GetAndCheckMetadata("token_endpoint", "TokenEndpoint");
+            GetAndCheckMetadata("user_info_endpoint", "UserInfoEndpoint");
         }
 
         private OpenIdConnectMetadata GetMetadata(string metadataUrl, HttpClient httpClient, ExpectedException expectedException)

@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Test
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jsonWebKey, "JsonWebKey_GetSets");
-            List<string> methods = new List<string>{"Alg", "Key_Ops", "Kid", "Kty", "X5t", "X5u", "Use"};
+            List<string> methods = new List<string>{"Alg", "KeyOps", "Kid", "Kty", "X5t", "X5u", "Use"};
             foreach(string method in methods)
             {
                 TestUtilities.GetSet(jsonWebKey, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Test
             if (jsonWebKey.Alg != null)
                 return false;
 
-            if (jsonWebKey.Key_Ops != null)
+            if (jsonWebKey.KeyOps != null)
                 return false;
 
             if (jsonWebKey.Kid != null)

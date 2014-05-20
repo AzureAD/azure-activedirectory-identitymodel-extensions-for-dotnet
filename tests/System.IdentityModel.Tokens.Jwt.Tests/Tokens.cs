@@ -63,14 +63,14 @@ namespace System.IdentityModel.Test
                 {
                     Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
                     Claims = ClaimSets.Simple( issuer, originalIssuer),
-                    CompareTo = Create(issuer, originalIssuer, KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2 ),
+                    CompareTo = Create(issuer, originalIssuer, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2 ),
                     ExceptionType = null,
-                    SigningCredentials = KeyingMaterial.X509SigningCreds_2048_RsaSha2_Sha2,
-                    SigningToken = KeyingMaterial.X509Token_2048,
+                    SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                    SigningToken = KeyingMaterial.DefaultX509Token_2048,
                     TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateAudience = false,
-                        IssuerSigningKey = new X509SecurityKey(KeyingMaterial.Cert_2048),
+                        IssuerSigningKey = new X509SecurityKey(KeyingMaterial.DefaultCert_2048),
                         ValidIssuer = issuer,
                     }
                 };
@@ -79,14 +79,14 @@ namespace System.IdentityModel.Test
                 {
                     Case = "ClaimSets.Simple_simpleSigned_Symmetric",
                     Claims = ClaimSets.Simple( issuer, originalIssuer ),
-                    CompareTo = Create( issuer, originalIssuer, KeyingMaterial.SymmetricSigningCreds_256_Sha2 ),
+                    CompareTo = Create( issuer, originalIssuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2 ),
                     ExceptionType = null,
-                    SigningCredentials = KeyingMaterial.SymmetricSigningCreds_256_Sha2,
-                    SigningToken = KeyingMaterial.BinarySecretToken_256,
+                    SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                    SigningToken = KeyingMaterial.DefaultSymmetricSecurityToken_256,
                     TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateAudience = false,
-                        IssuerSigningKey = KeyingMaterial.SymmetricSecurityKey_256,
+                        IssuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
                         ValidIssuer = issuer,
                     }
                 };
@@ -97,7 +97,7 @@ namespace System.IdentityModel.Test
 
     public class JWTWithKeys : JwtSecurityToken
     {
-        static ReadOnlyCollection<SecurityKey> _keys = (new List<SecurityKey> { new InMemorySymmetricSecurityKey( KeyingMaterial.SymmetricKeyBytes_256 ) }).AsReadOnly();
+        static ReadOnlyCollection<SecurityKey> _keys = (new List<SecurityKey> { new InMemorySymmetricSecurityKey( KeyingMaterial.DefaultSymmetricKeyBytes_256 ) }).AsReadOnly();
 
         public JWTWithKeys( string jwtEncodedString )
             : base( jwtEncodedString )

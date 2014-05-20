@@ -72,6 +72,9 @@
     <Compile Include="..\Shared\IdentityComparer.cs">
       <Link>IdentityComparer.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IdentityUtilities.cs">
+      <Link>IdentityUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\KeyingMaterial.cs">
       <Link>KeyingMaterial.cs</Link>
     </Compile>
@@ -98,11 +101,9 @@
     <Compile Include="RemoteDomain.cs" />
     <Compile Include="RemoteDomainManager.cs" />
     <Compile Include="SignatureProviderTests.cs" />
-    <Compile Include="Subjects.cs" />
     <Compile Include="TestContextProvider.cs" />
     <Compile Include="Tokens.cs" />
     <Compile Include="TokenValidationParametersTests.cs" />
-    <Compile Include="ValidateTokenConfigTests.cs" />
     <Compile Include="X509CertificateValidatorExTests.cs" />
     <Compile Include="X509SecurityKeyTests.cs" />
   </ItemGroup>

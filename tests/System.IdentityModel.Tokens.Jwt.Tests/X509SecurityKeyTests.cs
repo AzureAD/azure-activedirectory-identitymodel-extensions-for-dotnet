@@ -64,7 +64,7 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            X509Certificate2 x509Certificate2 = KeyingMaterial.Cert_2048;
+            X509Certificate2 x509Certificate2 = KeyingMaterial.DefaultCert_2048;
             expectedException = ExpectedException.NoExceptionExpected;
             try
             {

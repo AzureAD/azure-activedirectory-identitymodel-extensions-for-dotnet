@@ -90,12 +90,13 @@
     <Compile Include="Utility.cs" />
     <Compile Include="WsFederationConstants.cs" />
     <Compile Include="WsFederationMessage.cs" />
+    <Compile Include="WsFederationMetadata.cs" />
+    <Compile Include="WsFederationMetadataRetriever.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Microsoft.IdentityModel.Protocol.Extensions.nuspec">
       <SubType>Designer</SubType>
     </None>
-    <None Include="OpenIdConnectMetadataBadBase64DataFile.json" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
