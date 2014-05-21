@@ -11,7 +11,7 @@
     <description>This package provides an assembly containing classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols</description>
     <summary>This package provides an assembly containing classes which extend the .NET Framework 4.5 with base constructs from the OpenId Connect and WS-Federation protocols</summary>
     <language>en-US</language>
-    <owners>Microsoft Open Technologies</owners>
+    <owners>Microsoft Open Technologies.</owners>
     <tags>Identity, Claims, OpenIdConnect, WS-Federation</tags>
     <copyright>Copyright (c) Microsoft Open Technologies. All rights reserved.</copyright>
     <dependencies>
