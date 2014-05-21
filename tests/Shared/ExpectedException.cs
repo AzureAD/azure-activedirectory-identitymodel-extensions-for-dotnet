@@ -24,6 +24,7 @@ using System.Configuration;
 using System.Globalization;
 using System.IdentityModel;
 using System.IdentityModel.Tokens;
+using System.IO;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -63,6 +64,11 @@ namespace Microsoft.IdentityModel.Test
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
         {
             return new ExpectedException(typeExpected: typeof(InvalidOperationException), substringExpected: substringExpected, innerTypeExpected: inner);
+        }
+
+        public static ExpectedException IOException(string substringExpected = null, Type inner = null, string contains = null)
+        {
+            return new ExpectedException(typeExpected: typeof(IOException), substringExpected: substringExpected, innerTypeExpected: inner);
         }
 
         public static ExpectedException NoExceptionExpected 

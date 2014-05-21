@@ -24,6 +24,9 @@ using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -50,40 +53,41 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "436c5769-2eba-4ce6-9e6d-eb21862558b1")]
         [Description("Tests: Publics")]
-        public void OpenIdConnectMetadataRetriever_Publics()
+        public async Task OpenIdConnectMetadataRetriever_Publics()
         {
             ExpectedException expectedException = ExpectedException.ArgumentNullException();
-            GetMetadata(metadataUrl: null, httpClient: new HttpClient(), expectedException: expectedException);
-            GetMetadata(metadataUrl: "bob", httpClient: null, expectedException: expectedException);
-            GetMetadata(stream: null, expectedException: expectedException);
-            GetMetadata(metadataUrl: SharedData.AADCommonUrl, httpClient: new HttpClient(), expectedException: ExpectedException.NoExceptionExpected);
-            GetMetadata(metadataUrl: string.Empty, expectedException: ExpectedException.ArgumentNullException());
-            OpenIdConnectMetadata metadata = GetMetadata(metadataUrl: SharedData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
+            await GetMetadataAsync(metadataUrl: null, httpClient: new HttpClient(), expectedException: expectedException);
+            await GetMetadataAsync(metadataUrl: "bob", httpClient: null, expectedException: expectedException);
+            // GetMetadata(document: null, expectedException: expectedException);
+            await GetMetadataAsync(metadataUrl: SharedData.AADCommonUrl, httpClient: new HttpClient(), expectedException: ExpectedException.NoExceptionExpected);
+            await GetMetadataAsync(metadataUrl: string.Empty, expectedException: ExpectedException.ArgumentNullException());
+            OpenIdConnectMetadata metadata = await GetMetadataAsync(SharedData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
             Assert.IsNotNull(metadata);
 
-            metadata = GetMetadata(SharedData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);           
+            metadata = await GetMetadataAsync(SharedData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);           
             Assert.IsTrue(IdentityComparer.AreEqual(metadata, SharedData.OpenIdConnectMetatdataWithKeys1));
-
-            Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataString));            
-            metadata = GetMetadata(stream, expectedException: ExpectedException.NoExceptionExpected);
+            // TODO: Doesn't do the secondary resolve for keys
+            metadata = GetMetadata(SharedData.OpenIdConnectMetadataString, expectedException: ExpectedException.NoExceptionExpected);
             Assert.IsTrue(IdentityComparer.AreEqual(metadata, SharedData.OpenIdConnectMetatdataWithKeys1));
 
             // url is not reachable
-            metadata = GetMetadata(SharedData.BadUri, expectedException: ExpectedException.ArgumentException());
-
+            metadata = await GetMetadataAsync(SharedData.BadUri, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
+            // TODO: Doesn't do the secondary resolve for keys
             // jwt_uri is not reachable
-            metadata = GetMetadata(new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataBadUriKeysString)), expectedException: ExpectedException.ArgumentException());
+            metadata = GetMetadata(SharedData.OpenIdConnectMetadataBadUriKeysString, expectedException: ExpectedException.ArgumentException());
 
             // stream is not well formated
-            metadata = GetMetadata(new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataBadFormatString)), expectedException: new ExpectedException(typeExpected: typeof(ArgumentException)));    
+            metadata = GetMetadata(SharedData.OpenIdConnectMetadataBadFormatString, expectedException: new ExpectedException(typeExpected: typeof(ArgumentException)));    
             
             // jwt_uri points to bad formated JSON
-            metadata = GetMetadata(SharedData.OpenIdConnectMetadataJsonWebKeysBadUriFile, expectedException: new ExpectedException(typeExpected: typeof(ArgumentException)));
+            metadata = await GetMetadataAsync(SharedData.OpenIdConnectMetadataJsonWebKeysBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
 
-            metadata = GetMetadata(new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataSingleX509DataString)), expectedException: ExpectedException.NoExceptionExpected);
+            metadata = GetMetadata(SharedData.OpenIdConnectMetadataSingleX509DataString, expectedException: ExpectedException.NoExceptionExpected);
+            // TODO: Doesn't do the secondary resolve for keys
             Assert.IsTrue(IdentityComparer.AreEqual(metadata, SharedData.OpenIdConnectMetadataSingleX509Data1));
-            GetMetadata(new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataBadX509DataString)), expectedException: new ExpectedException(typeExpected: typeof(CryptographicException)));
-            GetMetadata(new MemoryStream(Encoding.UTF8.GetBytes(SharedData.OpenIdConnectMetadataBadBase64DataString)), expectedException: new ExpectedException(typeExpected: typeof(FormatException)));
+
+            GetMetadata(SharedData.OpenIdConnectMetadataBadX509DataString, expectedException: new ExpectedException(typeExpected: typeof(CryptographicException)));
+            GetMetadata(SharedData.OpenIdConnectMetadataBadBase64DataString, expectedException: new ExpectedException(typeExpected: typeof(FormatException)));
 
             // ensure that each property can be set independently
             GetAndCheckMetadata("authorization_endpoint", "AuthorizationEndpoint");
@@ -94,12 +98,12 @@ namespace Microsoft.IdentityModel.Test
             GetAndCheckMetadata("user_info_endpoint", "UserInfoEndpoint");
         }
 
-        private OpenIdConnectMetadata GetMetadata(string metadataUrl, HttpClient httpClient, ExpectedException expectedException)
+        private async Task<OpenIdConnectMetadata> GetMetadataAsync(string metadataUrl, HttpClient httpClient, ExpectedException expectedException)
         {
             OpenIdConnectMetadata openIdConnectMetadata = null;
             try
             {
-                openIdConnectMetadata = OpenIdConnectMetadataRetriever.GetMetadata(metadataUrl: metadataUrl, httpClient: httpClient);
+                openIdConnectMetadata = await OpenIdConnectMetadataFactory.GetMetadataFromHttpAsync(metadataUrl, httpClient, CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -110,12 +114,12 @@ namespace Microsoft.IdentityModel.Test
             return openIdConnectMetadata;
         }
 
-        private OpenIdConnectMetadata GetMetadata(string metadataUrl, ExpectedException expectedException)
+        private async Task<OpenIdConnectMetadata> GetMetadataAsync(string metadataUrl, ExpectedException expectedException)
         {
             OpenIdConnectMetadata openIdConnectMetadata = null;
             try
             {
-                openIdConnectMetadata = OpenIdConnectMetadataRetriever.GetMetadata(metadataUrl: metadataUrl);
+                openIdConnectMetadata = await OpenIdConnectMetadataFactory.GetMetadataAsync(metadataUrl, CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -126,12 +130,12 @@ namespace Microsoft.IdentityModel.Test
             return openIdConnectMetadata;
         }
 
-        private OpenIdConnectMetadata GetMetadata(Stream stream, ExpectedException expectedException, OpenIdConnectMetadata expectedMetadata = null)
+        private OpenIdConnectMetadata GetMetadata(string document, ExpectedException expectedException, OpenIdConnectMetadata expectedMetadata = null)
         {
             OpenIdConnectMetadata openIdConnectMetadata = null;
             try
             {
-                openIdConnectMetadata = OpenIdConnectMetadataRetriever.GetMetadata(stream: stream);
+                openIdConnectMetadata = new OpenIdConnectMetadata(document);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -158,7 +162,7 @@ namespace Microsoft.IdentityModel.Test
             string jsonString = @"{""" + jsonName + @""":""" + jsonValue + @"""}";
             try
             {
-                OpenIdConnectMetadata openIdConnectMetadata = OpenIdConnectMetadataRetriever.GetMetadata(stream: new MemoryStream(Encoding.UTF8.GetBytes(jsonString)));
+                OpenIdConnectMetadata openIdConnectMetadata = new OpenIdConnectMetadata(jsonString);
                 OpenIdConnectMetadata expectedMetadata = new OpenIdConnectMetadata();
                 TestUtilities.SetProperty(expectedMetadata, propertyName, jsonValue);
                 Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectMetadata, expectedMetadata));

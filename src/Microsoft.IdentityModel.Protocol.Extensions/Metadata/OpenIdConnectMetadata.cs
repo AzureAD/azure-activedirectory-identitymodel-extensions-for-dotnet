@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/>.
         /// </summary>
         public OpenIdConnectMetadata()
-        {           
+        {
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Gets or sets the authorization endpoint.
-        /// </summary>       
+        /// </summary>
         public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
@@ -153,12 +153,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the collection of 'id_token_signing_alg_values_supported'.
         /// </summary>
-        public ICollection<string> IdTokenSigningAlgValuesSupported 
-        { 
-            get 
+        public ICollection<string> IdTokenSigningAlgValuesSupported
+        {
+            get
             {
-                return _idTokenSigningAlgValuesSupported; 
-            } 
+                return _idTokenSigningAlgValuesSupported;
+            }
         }
 
         /// <summary>
@@ -166,9 +166,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public string Issuer { get; set; }
 
-        /// <summary>
-        /// Gets or sets the token issuer.
-        /// </summary>
         public string JwksUri{ get; set; }
 
         /// <summary>
@@ -185,12 +182,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the collection of 'response_types_supported'.
         /// </summary>
-        public ICollection<string> ResponseTypesSupported 
-        { 
-            get 
+        public ICollection<string> ResponseTypesSupported
+        {
+            get
             {
-                return _subjectTypesSupported; 
-            } 
+                return _subjectTypesSupported;
+            }
         }
 
         /// <summary>
