@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Protocols
 {
     public class FileDocumentRetriever : IDocumentRetriever
     {
-        public Task<string> GetDocumentAsync(string address, CancellationToken cancel)
+        public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
             {
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     using (StreamReader reader = new StreamReader(stream))
                     {
-                        return reader.ReadToEndAsync();
+                        return await reader.ReadToEndAsync();
                     }
                 }
             }
