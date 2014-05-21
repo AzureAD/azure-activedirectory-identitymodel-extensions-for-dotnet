@@ -4,7 +4,7 @@
     <title>Identity Protocol Extensions for the Microsoft .NET Framework 4.5</title>
     <id>Microsoft.IdentityModel.Protocol.Extensions</id>
     <version>$version$</version>
-    <authors>Microsoft Open Technologies</authors>
+    <authors>Microsoft Open Technologies.</authors>
     <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_enu.htm</licenseUrl>
     <projectUrl>http://go.microsoft.com/fwlink/?LinkId=272508</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
