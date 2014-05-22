@@ -226,7 +226,7 @@ namespace System.IdentityModel.Test
                 ClaimsIdentity claimsIdentityValidated = claimsPrincipal.Identity as ClaimsIdentity;
                 ClaimsPrincipal actorClaimsPrincipal = tokendHandler.ValidateToken(actor, actorValidationParameters);
                 Assert.IsNotNull(claimsIdentityValidated.Actor);
-                Assert.IsTrue(IdentityComparer.AreEqual(claimsIdentityValidated.Actor, (actorClaimsPrincipal.Identity as ClaimsIdentity)));
+                Assert.IsTrue(IdentityComparer.AreEqual<ClaimsIdentity>(claimsIdentityValidated.Actor, (actorClaimsPrincipal.Identity as ClaimsIdentity)));
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -364,7 +364,7 @@ namespace System.IdentityModel.Test
                             IdentityUtilities.DefaultIssuer)));
 
                 // These should not be translated.            
-                Assert.IsTrue(IdentityComparer.AreEqual(jwt.Claims, inboundShortClaims));
+                Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<Claim>>(jwt.Claims, inboundShortClaims, CompareContext.Default));
 
                 var validationParameters = new TokenValidationParameters
                 {
@@ -883,7 +883,7 @@ namespace System.IdentityModel.Test
             string jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: null) as JwtSecurityToken).RawData; 
             
             // validIssuer null, validIssuers null
-            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "Jwt10311");
+            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "Jwt10317");
             TokenValidationParameters validationParameters = new TokenValidationParameters() { ValidateAudience = false };
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
@@ -984,7 +984,7 @@ namespace System.IdentityModel.Test
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 
             // "TokenValidationParameters.ValidAudience TokenValidationParameters.ValidAudiences both null"
-            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "Jwt10303");
+            ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "Jwt10301");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             CheckVariation(jwt, tokenHandler, validationParameters, ee);
 

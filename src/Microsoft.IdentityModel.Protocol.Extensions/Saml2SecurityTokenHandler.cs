@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// </summary>
         /// <param name="securityToken">The token string thats needs to be read.</param>
         /// <returns>'True' if the ReadToken method can parse the token string.</returns>
-        public virtual bool CanReadToken(string securityToken)
+        public override bool CanReadToken(string securityToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken) || securityToken.Length > MaximumTokenSizeInBytes)
             {

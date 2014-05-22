@@ -28,6 +28,35 @@ namespace System.IdentityModel.Tokens
     public class TokenValidationParameters
     {
         /// <summary>
+        /// Copy constructor for <see cref="TokenValidationParameters"/>.
+        /// </summary>
+        public TokenValidationParameters(TokenValidationParameters other)
+        {
+            if (other == null)
+            {
+                return;
+            }
+
+            AudienceValidator = other.AudienceValidator;
+            IssuerSigningKey = other.IssuerSigningKey;
+            IssuerSigningKeyRetriever = other.IssuerSigningKeyRetriever;
+            IssuerSigningKeys = other.IssuerSigningKeys;
+            IssuerSigningToken = other.IssuerSigningToken;
+            IssuerSigningTokens = other.IssuerSigningTokens;
+            IssuerValidator = other.IssuerValidator;
+            LifetimeValidator = other.LifetimeValidator;
+            SaveSigninToken = other.SaveSigninToken;
+            TokenReplayCache = other.TokenReplayCache;
+            ValidateActor = other.ValidateActor;
+            ValidateAudience = other.ValidateAudience;
+            ValidateIssuer = other.ValidateIssuer;
+            ValidAudience = other.ValidAudience;
+            ValidAudiences = other.ValidAudiences;
+            ValidIssuer = other.ValidIssuer;
+            ValidIssuers = other.ValidIssuers;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TokenValidationParameters"/> class.
         /// </summary>        
         public TokenValidationParameters()
@@ -119,6 +148,17 @@ namespace System.IdentityModel.Tokens
         [DefaultValue(false)]
         public bool SaveSigninToken
         {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or set the <see cref="IExpirableNonceCache"/> that will be checked to ensure that a token in not replayed.
+        /// </summary>
+        public IExpirableNonceCache TokenReplayCache
+        {
+            // TODO - just added member without any testing to get
+            // idea of how it fits
             get;
             set;
         }

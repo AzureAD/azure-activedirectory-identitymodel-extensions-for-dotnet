@@ -67,12 +67,12 @@ namespace Microsoft.IdentityModel.Test
             ClaimsPrincipal saml2Principal = ValidateToken(samlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, samlHandler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal samlPrincipal = ValidateToken(saml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, saml2Handler, ExpectedException.NoExceptionExpected);
 
-            Assert.IsTrue(IdentityComparer.AreEqual(samlPrincipal, saml2Principal));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(samlPrincipal, saml2Principal, new CompareContext { IgnoreSubject = true }));
 
             // false = ignore type of objects, we expect all objects in the principal to be of same type (no derived types)
             // true = ignore subject, claims have a backpointer to their ClaimsIdentity.  Most of the time this will be different as we are comparing two different ClaimsIdentities.
             // true = ignore properties of claims, any mapped claims short to long for JWT's will have a property that represents the short type.
-            Assert.IsTrue(IdentityComparer.AreEqual(jwtPrincipal, saml2Principal, false, true, true));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(jwtPrincipal, saml2Principal, new CompareContext{IgnoreType = false, IgnoreSubject = true, IgnoreProperties=true}));
         }
 
         private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)
