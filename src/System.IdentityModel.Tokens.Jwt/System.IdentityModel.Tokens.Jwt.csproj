@@ -66,6 +66,7 @@
     <Compile Include="DiagnosticUtility.cs" />
     <Compile Include="EpochTime.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IExpirableNonceCache.cs" />
     <Compile Include="ISecurityTokenValidator.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="JwtConfigurationStrings.cs" />

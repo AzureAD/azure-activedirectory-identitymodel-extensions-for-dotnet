@@ -44,12 +44,12 @@ namespace Microsoft.IdentityModel.Extensions
 
             if (audiences == null)
             {
-                throw new AudienceUriValidationFailedException(ErrorMessages.IDX10215);
+                throw new SecurityTokenInvalidAudienceException(ErrorMessages.IDX10215);
             }
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
-                throw new ArgumentException(ErrorMessages.IDX10208);
+                throw new SecurityTokenInvalidAudienceException(ErrorMessages.IDX10208);
             }
 
             foreach (string audience in audiences)

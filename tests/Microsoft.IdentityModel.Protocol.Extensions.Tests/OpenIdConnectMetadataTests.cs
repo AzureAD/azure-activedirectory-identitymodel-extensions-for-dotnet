@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.AreEqual(metadata.Issuer, issuer);
             Assert.AreEqual(metadata.JwksUri, jwks_Uri);
             Assert.AreEqual(metadata.TokenEndpoint, token_Endpoint);
-            Assert.IsTrue(IdentityComparer.AreEqual(metadata.SigningKeys, securityKeys));
+            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(metadata.SigningKeys, securityKeys));
         }
 
         [TestMethod]

@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (compareTo != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(jsonWebKeys, compareTo), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                Assert.IsTrue(IdentityComparer.AreEqual<JsonWebKeys>(jsonWebKeys, compareTo, CompareContext.Default), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
 
             return jsonWebKeys;

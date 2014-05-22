@@ -61,15 +61,28 @@ namespace System.IdentityModel.Test
         public void TokenValidationParameters_Publics()
         {
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256;
-            List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256 };        
+            List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256, KeyingMaterial.SymmetricSecurityKey2_256};
+            List<SecurityKey> issuerSigningKeysDup = new List<SecurityKey>() { new InMemorySymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256), new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256) };
+
             string validAudience = "ValidAudience";
             List<string> validAudiences = new List<string>() { validAudience };
             string validIssuer = "ValidIssuer";
             List<string> validIssuers = new List<string>() { validIssuer };
+            Func<string, SecurityToken, bool> audValidatorTrue = (str, token) => { return true; };
+            Func<string, SecurityToken, bool> audValidatorTrue2 = (str, token) => { return true; };
+            Func<string, SecurityToken, bool> issValidatorTrue = (str, token) => { return true; };
+            Func<string, SecurityToken, bool> issValidatorTrue2 = (str, token) => { return true; };
+            Func<string, SecurityToken, bool> lifetimeValidatorTrue = (str, token) => { return true; };
+            Func<string, SecurityToken, bool> lifetimeValidatorTrue2 = (str, token) => { return true; };
 
-            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
+            TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {               
+                AudienceValidator = audValidatorTrue,
                 IssuerSigningKey = issuerSigningKey,
+                IssuerSigningKeyRetriever = (str) => { return issuerSigningKeys; },
+                IssuerSigningKeys = issuerSigningKeys,
+                IssuerValidator = issValidatorTrue,
+                LifetimeValidator = lifetimeValidatorTrue,
                 SaveSigninToken = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -79,31 +92,34 @@ namespace System.IdentityModel.Test
                 ValidIssuers = validIssuers,
             };
 
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
-            Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
-            Assert.IsFalse(tokenValidationParameters.ValidateAudience);
-            Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudience, validAudience));
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudiences, validAudiences));
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
+            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.IssuerSigningKey, issuerSigningKey));
+            Assert.IsTrue(validationParametersInline.SaveSigninToken);
+            Assert.IsFalse(validationParametersInline.ValidateAudience);
+            Assert.IsFalse(validationParametersInline.ValidateIssuer);
+            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidAudience, validAudience));
+            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidAudiences, validAudiences));
+            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
 
-            tokenValidationParameters = new TokenValidationParameters();
-            tokenValidationParameters.IssuerSigningKey = issuerSigningKey;
-            tokenValidationParameters.SaveSigninToken = true;
-            tokenValidationParameters.ValidateAudience = false;
-            tokenValidationParameters.ValidateIssuer = false;
-            tokenValidationParameters.ValidAudience = validAudience;
-            tokenValidationParameters.ValidAudiences = validAudiences;
-            tokenValidationParameters.ValidIssuer = validIssuer;
-            tokenValidationParameters.ValidIssuers = validIssuers;
+            TokenValidationParameters validationParametersSets = new TokenValidationParameters();
+            validationParametersSets.AudienceValidator = audValidatorTrue2;
+            validationParametersSets.IssuerSigningKey = new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
+            validationParametersSets.IssuerSigningKeyRetriever = (str) => { return issuerSigningKeysDup; };
+            validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
+            validationParametersSets.IssuerValidator = issValidatorTrue2;
+            validationParametersSets.LifetimeValidator = lifetimeValidatorTrue2;
+            validationParametersSets.SaveSigninToken = true;
+            validationParametersSets.ValidateAudience = false;
+            validationParametersSets.ValidateIssuer = false;
+            validationParametersSets.ValidAudience = validAudience;
+            validationParametersSets.ValidAudiences = validAudiences;
+            validationParametersSets.ValidIssuer = validIssuer;
+            validationParametersSets.ValidIssuers = validIssuers;
 
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.IssuerSigningKey, issuerSigningKey));
-            Assert.IsTrue(tokenValidationParameters.SaveSigninToken);
-            Assert.IsFalse(tokenValidationParameters.ValidateAudience);
-            Assert.IsFalse(tokenValidationParameters.ValidateIssuer);
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudience, validAudience));
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidAudiences, validAudiences));
-            Assert.IsTrue(object.ReferenceEquals(tokenValidationParameters.ValidIssuer, validIssuer));
+            Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(validationParametersInline, validationParametersSets));
+
+            var tokenValidationParametersCopyConst = new TokenValidationParameters(validationParametersInline);
+            Assert.IsTrue(IdentityComparer.AreEqual(tokenValidationParametersCopyConst, validationParametersInline));
+            Assert.IsTrue(tokenValidationParametersCopyConst.AudienceValidator("bob", JwtTestTokens.Simple()));
         }
 
         [TestMethod]
@@ -112,16 +128,22 @@ namespace System.IdentityModel.Test
         public void TokenValidationParameters_Defaults()
         {
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
-            Assert.IsTrue(tokenValidationParameters.IssuerSigningKey == null, "Expecting default: validationParameters.IssuerSigningKey == null.");
-            Assert.IsTrue(tokenValidationParameters.IssuerSigningKeys != null, "Expecting default: validationParameters.IssuerSigningKeys != null.");
-            Assert.IsTrue(tokenValidationParameters.IssuerSigningTokens != null, "Expecting default: validationParameters.IssuerSigningTokens != null.");
-            Assert.IsFalse(tokenValidationParameters.SaveSigninToken, "Expecting default: validationParameters.SaveSigninToken by default to be false");
-            Assert.IsTrue(tokenValidationParameters.ValidateAudience, "Expecting default: validationParameters.ValidateAudience by default to be true");
-            Assert.IsTrue(tokenValidationParameters.ValidateIssuer, "Expecting default: validationParameters.ValidateIssuer by default to be true");
-            Assert.IsTrue(tokenValidationParameters.ValidAudience == null, "Expecting default: validationParameters.ValidAudience == null.");
-            Assert.IsNotNull(tokenValidationParameters.ValidAudiences, "Expecting default: validationParameters.ValidAudience != null.");
-            Assert.IsTrue(tokenValidationParameters.ValidIssuer == null, "Expecting default: validationParameters.ValidAudience == null.");
-            Assert.IsNotNull(tokenValidationParameters.ValidAudiences, "Expecting default: validationParameters.ValidAudience != null.");
+            Assert.IsNull(tokenValidationParameters.AudienceValidator);
+            Assert.IsNull(tokenValidationParameters.LifetimeValidator);
+            Assert.IsNull(tokenValidationParameters.IssuerSigningKey);
+            Assert.IsNull(tokenValidationParameters.IssuerSigningKeys);
+            Assert.IsNull(tokenValidationParameters.IssuerSigningTokens);
+            Assert.IsNull(tokenValidationParameters.IssuerSigningTokens);
+            Assert.IsNull(tokenValidationParameters.IssuerSigningKeyRetriever);
+            Assert.IsNull(tokenValidationParameters.IssuerValidator);
+            Assert.IsFalse(tokenValidationParameters.SaveSigninToken);
+            Assert.IsFalse(tokenValidationParameters.ValidateActor);
+            Assert.IsTrue(tokenValidationParameters.ValidateAudience);
+            Assert.IsTrue(tokenValidationParameters.ValidateIssuer);
+            Assert.IsNull(tokenValidationParameters.ValidAudience);
+            Assert.IsNull(tokenValidationParameters.ValidAudiences);
+            Assert.IsNull(tokenValidationParameters.ValidIssuer);
+            Assert.IsNull(tokenValidationParameters.ValidIssuers);
         }
     }
 }
