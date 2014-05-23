@@ -94,8 +94,8 @@ namespace System.IdentityModel.Test
                 return AreEqual<JsonWebKey>(t1 as JsonWebKey, t2 as JsonWebKey, context, AreJsonWebKeysEqual);
             else if (t1 is JsonWebKeys)
                 return AreEqual<JsonWebKeys>(t1 as JsonWebKeys, t2 as JsonWebKeys, context, AreJsonWebKeyKeysEqual);
-            else if (t1 is OpenIdConnectMetadata)
-                return AreEqual<OpenIdConnectMetadata>(t1 as OpenIdConnectMetadata, t2 as OpenIdConnectMetadata, context, AreOpenIdConnectMetadataEqual);
+            else if (t1 is OpenIdConnectConfiguration)
+                return AreEqual<OpenIdConnectConfiguration>(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context, AreOpenIdConnectMetadataEqual);
             if (t1 is IEnumerable<Claim>)
                 return AreEnumsEqual<Claim>(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context, AreClaimsEqual);
             else if (t1 is IEnumerable<string>)
@@ -418,7 +418,7 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        private static bool AreOpenIdConnectMetadataEqual(OpenIdConnectMetadata metadata1, OpenIdConnectMetadata metadata2, CompareContext context)
+        private static bool AreOpenIdConnectMetadataEqual(OpenIdConnectConfiguration metadata1, OpenIdConnectConfiguration metadata2, CompareContext context)
         {
             if (!string.Equals(metadata1.AuthorizationEndpoint, metadata2.AuthorizationEndpoint, context.StringComparison))
                 return false;

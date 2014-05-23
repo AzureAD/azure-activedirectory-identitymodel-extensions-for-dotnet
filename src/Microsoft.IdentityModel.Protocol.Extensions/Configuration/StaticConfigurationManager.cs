@@ -16,24 +16,33 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public interface IMetadataManager<T>
+    public class StaticConfigurationManager<T> : IConfigurationManager<T>
     {
-        /// <summary>
-        /// Retrieve the current metadata, refreshing and/or caching as needed.
-        /// This should throw if the metadata cannot be retrieved, instead of returning null.
-        /// </summary>
-        /// <param name="cancel"></param>
-        /// <returns></returns>
-        Task<T> GetMetadataAsync(CancellationToken cancel);
+        private T _configuration;
 
-        /// <summary>
-        /// Indicate that the metadata may be stale (as indicated by failing to process incoming tokens).
-        /// </summary>
-        void RequestRefresh();
+        public StaticConfigurationManager(T configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
+            _configuration = configuration;
+        }
+
+        public Task<T> GetConfigurationAsync(CancellationToken cancel)
+        {
+            return Task.FromResult(_configuration);
+        }
+
+        public void RequestRefresh()
+        {
+            // TODO: throw new NotSupportedException()?
+        }
     }
 }
