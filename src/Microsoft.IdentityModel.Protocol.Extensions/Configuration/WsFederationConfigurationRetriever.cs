@@ -22,6 +22,7 @@ using System.IdentityModel.Metadata;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel.Security;
 using System.Threading;
@@ -30,11 +31,21 @@ using System.Xml;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public class WsFederationMetadataReader : IMetadataReader<WsFederationMetadata>
+    public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
     {
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
 
-        public async Task<WsFederationMetadata> ReadMetadataAysnc(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
+        {
+            return new WsFederationConfigurationRetriever().GetConfigurationAysnc(new GenericDocumentRetriever(), address, cancel);
+        }
+
+        public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
+        {
+            return new WsFederationConfigurationRetriever().GetConfigurationAysnc(new HttpDocumentRetriever(httpClient), address, cancel);
+        }
+
+        public async Task<WsFederationConfiguration> GetConfigurationAysnc(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             if (retriever == null)
             {
@@ -44,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 throw new ArgumentNullException("address");
             }
-            WsFederationMetadata metadata = new WsFederationMetadata();
+            WsFederationConfiguration configuration = new WsFederationConfiguration();
 
             string document = await retriever.GetDocumentAsync(address, cancel);
 
@@ -57,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (!string.IsNullOrWhiteSpace(entityDescriptor.EntityId.Id))
                 {
-                    metadata.Issuer = entityDescriptor.EntityId.Id;
+                    configuration.Issuer = entityDescriptor.EntityId.Id;
                 }
 
                 SecurityTokenServiceDescriptor stsd = entityDescriptor.RoleDescriptors.OfType<SecurityTokenServiceDescriptor>().First();
@@ -66,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols
                     throw new InvalidOperationException("Missing descriptor"/*Resources.Exception_MissingDescriptor*/);
                 }
 
-                metadata.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
+                configuration.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
 
                 IEnumerable<X509RawDataKeyIdentifierClause> x509DataClauses =
                     stsd.Keys.Where(key => key.KeyInfo != null
@@ -75,11 +86,11 @@ namespace Microsoft.IdentityModel.Protocols
 
                 foreach (var key in x509DataClauses.Select(token => new X509SecurityKey(new X509Certificate2(token.GetX509RawData()))))
                 {
-                    metadata.SigningKeys.Add(key);
+                    configuration.SigningKeys.Add(key);
                 }
             }
 
-            return metadata;
+            return configuration;
         }
     }
 }

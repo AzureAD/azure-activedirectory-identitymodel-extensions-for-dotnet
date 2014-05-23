@@ -53,33 +53,33 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Constructors")]
         public void OpenIdConnectMetadata_Constructors()
         {
-            RunOpenIdConnectMetadataTest((string)null, new OpenIdConnectMetadata(), ExpectedException.NoExceptionExpected);
-            RunOpenIdConnectMetadataTest((IDictionary<string, object>)null, new OpenIdConnectMetadata(), ExpectedException.NoExceptionExpected);
+            RunOpenIdConnectMetadataTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected);
+            RunOpenIdConnectMetadataTest((IDictionary<string, object>)null, new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected);
             RunOpenIdConnectMetadataTest(SharedData.OpenIdConnectMetadataString, SharedData.OpenIdConnectMetatdata1, ExpectedException.NoExceptionExpected);
         }
 
-        private OpenIdConnectMetadata RunOpenIdConnectMetadataTest(object obj, OpenIdConnectMetadata compareTo, ExpectedException expectedException, bool asString = true)
+        private OpenIdConnectConfiguration RunOpenIdConnectMetadataTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)
         {
-            OpenIdConnectMetadata openIdConnectMetadata = null;
+            OpenIdConnectConfiguration openIdConnectMetadata = null;
             try
             {
                 if (obj is string)
                 {
-                    openIdConnectMetadata = new OpenIdConnectMetadata(obj as string);
+                    openIdConnectMetadata = new OpenIdConnectConfiguration(obj as string);
                 }
                 else if (obj is IDictionary<string, object>)
                 {
-                    openIdConnectMetadata = new OpenIdConnectMetadata(obj as IDictionary<string, object>);
+                    openIdConnectMetadata = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
                 }
                 else
                 {
                     if (asString)
                     {
-                        openIdConnectMetadata = new OpenIdConnectMetadata(obj as string);
+                        openIdConnectMetadata = new OpenIdConnectConfiguration(obj as string);
                     }
                     else
                     {
-                        openIdConnectMetadata = new OpenIdConnectMetadata(obj as IDictionary<string, object>);
+                        openIdConnectMetadata = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
                     }
                 }
                 expectedException.ProcessNoException();
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Defaults")]
         public void OpenIdConnectMetadata_Defaults()
         {
-            OpenIdConnectMetadata metadata = new OpenIdConnectMetadata();
+            OpenIdConnectConfiguration metadata = new OpenIdConnectConfiguration();
             Assert.IsNull(metadata.AuthorizationEndpoint);
             Assert.IsNull(metadata.EndSessionEndpoint);
             Assert.IsNull(metadata.Issuer);
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: GetSets")]
         public void OpenIdConnectMetadata_GetSets()
         {
-            OpenIdConnectMetadata metadata = new OpenIdConnectMetadata();
+            OpenIdConnectConfiguration metadata = new OpenIdConnectConfiguration();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(metadata, "OpenIdConnectMetadata_GetSets");
 
             List<string> methods = new List<string> { "AuthorizationEndpoint", "EndSessionEndpoint", "Issuer", "JwksUri", "TokenEndpoint", "UserInfoEndpoint" };
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Test
             string jwks_Uri = Guid.NewGuid().ToString();
             string token_Endpoint = Guid.NewGuid().ToString();
 
-            metadata = new OpenIdConnectMetadata()
+            metadata = new OpenIdConnectConfiguration()
             {
                 AuthorizationEndpoint = authorization_Endpoint,
                 EndSessionEndpoint = end_Session_Endpoint,

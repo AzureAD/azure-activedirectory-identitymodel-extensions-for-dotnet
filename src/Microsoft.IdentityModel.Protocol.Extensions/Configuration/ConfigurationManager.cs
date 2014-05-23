@@ -18,12 +18,13 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public class RefreshingMetadataManager<T> : IMetadataManager<T>
+    public class ConfigurationManager<T> : IConfigurationManager<T>
     {
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(5, 0, 0, 0);
         public static readonly TimeSpan DefaultDelayBetweenRefreshAttempts = new TimeSpan(0, 0, 0, 30);
@@ -38,15 +39,25 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly SemaphoreSlim _refreshLock;
         private readonly string _metadataAddress;
         private readonly IDocumentRetriever _retriever;
-        private readonly IMetadataReader<T> _reader;
-        private T _currentMetadata;
+        private readonly IConfigurationRetriever<T> _reader;
+        private T _currentConfiguration;
 
-        public RefreshingMetadataManager(string metadataAddress, IDocumentRetriever retriever)
-            : this(metadataAddress, retriever, GetMetadataReader())
+        public ConfigurationManager(string metadataAddress)
+            : this(metadataAddress, new GenericDocumentRetriever())
         {
         }
 
-        public RefreshingMetadataManager(string metadataAddress, IDocumentRetriever retriever, IMetadataReader<T> reader)
+        public ConfigurationManager(string metadataAddress, HttpClient httpClient)
+            : this(metadataAddress, new HttpDocumentRetriever(httpClient))
+        {
+        }
+
+        public ConfigurationManager(string metadataAddress, IDocumentRetriever retriever)
+            : this(metadataAddress, retriever, GetConfigurationReader())
+        {
+        }
+
+        public ConfigurationManager(string metadataAddress, IDocumentRetriever retriever, IConfigurationRetriever<T> reader)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
@@ -98,20 +109,20 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private static IMetadataReader<T> GetMetadataReader()
+        private static IConfigurationRetriever<T> GetConfigurationReader()
         {
-            if (typeof(T).Equals(typeof(WsFederationMetadata)))
+            if (typeof(T).Equals(typeof(WsFederationConfiguration)))
             {
-                return (IMetadataReader<T>)new WsFederationMetadataReader();
+                return (IConfigurationRetriever<T>)new WsFederationConfigurationRetriever();
             }
-            if (typeof(T).Equals(typeof(OpenIdConnectMetadata)))
+            if (typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
             {
-                return (IMetadataReader<T>)new OpenIdConnectMetadataReader();
+                return (IConfigurationRetriever<T>)new OpenIdConnectConfigurationRetriever();
             }
             throw new NotImplementedException(typeof(T).FullName);
         }
 
-        public async Task<T> GetMetadataAsync(CancellationToken cancel)
+        public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             await _refreshLock.WaitAsync(cancel);
             try
@@ -122,8 +133,8 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     try
                     {
-                        _currentMetadata = await _reader.ReadMetadataAysnc(_retriever, _metadataAddress, cancel);
-                        Contract.Assert(_currentMetadata != null);
+                        _currentConfiguration = await _reader.GetConfigurationAysnc(_retriever, _metadataAddress, cancel);
+                        Contract.Assert(_currentConfiguration != null);
                         _lastRefresh = now;
                         _syncAfter = now + _automaticRefreshInterval;
                     }
@@ -135,12 +146,12 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (_currentMetadata == null)
+                if (_currentConfiguration == null)
                 {
-                    throw new Exception("Metadata unavailable", retrieveEx);
+                    throw new Exception("Configuration unavailable", retrieveEx);
                 }
                 // Stale metadata is better than no metadata
-                return _currentMetadata;
+                return _currentConfiguration;
             }
             finally
             {

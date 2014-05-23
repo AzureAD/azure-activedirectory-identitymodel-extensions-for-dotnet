@@ -26,14 +26,14 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Contains WsFederation metadata that can be populated from a xml string.
     /// </summary>
-    public class WsFederationMetadata
+    public class WsFederationConfiguration
     {
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
 
         /// <summary>
-        /// Initializes an new instance of <see cref="WsFederationMetadata"/>.
+        /// Initializes an new instance of <see cref="WsFederationConfiguration"/>.
         /// </summary>
-        public WsFederationMetadata()
+        public WsFederationConfiguration()
         {           
         }
 

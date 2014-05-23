@@ -24,9 +24,9 @@ using System.Web.Script.Serialization;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Contains OpenIdConnect metadata that can be populated from a json string.
+    /// Contains OpenIdConnect configuration that can be populated from a json string.
     /// </summary>
-    public class OpenIdConnectMetadata
+    public class OpenIdConnectConfiguration
     {
         private static JavaScriptSerializer _javaScriptSerializer;
 
@@ -36,23 +36,23 @@ namespace Microsoft.IdentityModel.Protocols
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
         private Collection<string> _subjectTypesSupported = new Collection<string>();
 
-        static OpenIdConnectMetadata()
+        static OpenIdConnectConfiguration()
         {
             _javaScriptSerializer = new JavaScriptSerializer();
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/>.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/>.
         /// </summary>
-        public OpenIdConnectMetadata()
+        public OpenIdConnectConfiguration()
         {
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/> from a json string.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing the metadata</param>
-        public OpenIdConnectMetadata(string json)
+        public OpenIdConnectConfiguration(string json)
         {
             if(string.IsNullOrWhiteSpace(json))
             {
@@ -63,10 +63,10 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/> from an <see cref="IDictionary[string, object]"/> string.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from an <see cref="IDictionary[string, object]"/> string.
         /// </summary>
         /// <param name="dictionary">a <see cref="IDictionary[string, object]"/>jscontaining the metadata</param>
-        public OpenIdConnectMetadata(IDictionary<string, object> dictionary)
+        public OpenIdConnectConfiguration(IDictionary<string, object> dictionary)
         {
             SetFromDictionary(dictionary);
         }

@@ -71,27 +71,24 @@
   <ItemGroup>
     <Compile Include="AudienceValidator.cs" />
     <Compile Include="AuthenticationProtocolMessage.cs" />
-    <Compile Include="Metadata\ConstantMetadataManager.cs" />
+    <Compile Include="Configuration\StaticConfigurationManager.cs" />
     <Compile Include="DateTimeUtil.cs" />
     <Compile Include="ErrorMessages.cs" />
-    <Compile Include="Metadata\FileDocumentRetriever.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Metadata\HttpDocumentRetriever.cs" />
-    <Compile Include="Metadata\IDocumentRetriever.cs" />
-    <Compile Include="Metadata\IMetadataManager.cs" />
-    <Compile Include="Metadata\IMetadataReader.cs" />
+    <Compile Include="Configuration\HttpDocumentRetriever.cs" />
+    <Compile Include="Configuration\IDocumentRetriever.cs" />
+    <Compile Include="Configuration\IConfigurationManager.cs" />
+    <Compile Include="Configuration\IConfigurationRetriever.cs" />
     <Compile Include="IssuerKeyRetriever.cs" />
     <Compile Include="IssuerValidator.cs" />
     <Compile Include="JsonWebKey.cs" />
     <Compile Include="JsonWebKeys.cs" />
-    <Compile Include="Metadata\WsFederationMetadataFactory.cs" />
-    <Compile Include="Metadata\RefreshingMetadataManager.cs" />
-    <Compile Include="Metadata\OpenIdConnectMetadataReader.cs" />
-    <Compile Include="Metadata\WebClientDocumentRetriever.cs" />
+    <Compile Include="Configuration\ConfigurationManager.cs" />
+    <Compile Include="Configuration\OpenIdConnectConfigurationRetriever.cs" />
+    <Compile Include="Configuration\GenericDocumentRetriever.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
-    <Compile Include="Metadata\OpenIdConnectMetadata.cs" />
-    <Compile Include="Metadata\OpenIdConnectMetadataFactory.cs" />
+    <Compile Include="Configuration\OpenIdConnectConfiguration.cs" />
     <Compile Include="OpenIdConnectProtocolException.cs" />
     <Compile Include="OpenIdConnectProtocolInvalidCHashException.cs" />
     <Compile Include="OpenIdConnectProtocolInvalidNonceException.cs" />
@@ -103,8 +100,8 @@
     <Compile Include="Utility.cs" />
     <Compile Include="WsFederationConstants.cs" />
     <Compile Include="WsFederationMessage.cs" />
-    <Compile Include="Metadata\WsFederationMetadata.cs" />
-    <Compile Include="Metadata\WsFederationMetadataReader.cs" />
+    <Compile Include="Configuration\WsFederationConfiguration.cs" />
+    <Compile Include="Configuration\WsFederationConfigurationRetriever.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Microsoft.IdentityModel.Protocol.Extensions.nuspec">

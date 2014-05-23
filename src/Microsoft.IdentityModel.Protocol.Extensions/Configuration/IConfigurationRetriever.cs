@@ -21,8 +21,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public interface IMetadataReader<T>
+    public interface IConfigurationRetriever<T>
     {
-        Task<T> ReadMetadataAysnc(IDocumentRetriever retriever, string address, CancellationToken cancel);
+        Task<T> GetConfigurationAysnc(IDocumentRetriever retriever, string address, CancellationToken cancel);
     }
 }

@@ -107,7 +107,7 @@
     <Compile Include="MessageComparer.cs" />
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
-    <Compile Include="OpenIdConnectMetadataReaderTests.cs" />
+    <Compile Include="OpenIdConnectConfigurationRetrieverTests.cs" />
     <Compile Include="OpenIdConnectMetadataTests.cs" />
     <Compile Include="Saml2SecurityTokenHandlerTests.cs" />
     <Compile Include="SamlSecurityTokenHandlerTests.cs" />

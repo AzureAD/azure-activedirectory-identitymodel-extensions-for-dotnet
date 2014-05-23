@@ -18,12 +18,14 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public class FileDocumentRetriever : IDocumentRetriever
+    // Works for c:\, file://, http://, ftp://, etc.
+    public class GenericDocumentRetriever : IDocumentRetriever
     {
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
@@ -33,11 +35,11 @@ namespace Microsoft.IdentityModel.Protocols
             }
             try
             {
-                using (FileStream stream = File.OpenRead(address))
+                using (WebClient client = new WebClient())
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelAsync()))
                     {
-                        return await reader.ReadToEndAsync();
+                        return await client.DownloadStringTaskAsync(address);
                     }
                 }
             }
