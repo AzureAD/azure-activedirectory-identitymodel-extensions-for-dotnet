@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Test
                 jsonWebKey.X5c.Add(method);
             }
 
-            Assert.IsTrue(IdentityComparer.AreEqual(jsonWebKey.X5c, methods));
+            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, CompareContext.Default));
         }
 
         [TestMethod]

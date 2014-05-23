@@ -32,6 +32,23 @@ namespace Microsoft.IdentityModel.Test
     {
 
         /// <summary>
+        /// Gets a named property on an object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="property"></param>
+        /// <param name="propertyValue"></param>
+        public static object GetProperty(object obj, string property)
+        {
+            Type type = obj.GetType();
+            PropertyInfo propertyInfo = type.GetProperty(property);
+
+            Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
+
+            return propertyInfo.GetValue(obj);
+        }
+
+
+        /// <summary>
         /// Set a named property on an object
         /// </summary>
         /// <param name="obj"></param>

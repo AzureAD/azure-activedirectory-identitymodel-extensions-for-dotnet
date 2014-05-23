@@ -60,7 +60,7 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string jwt = handler.WriteToken(new JwtSecurityToken("", ""));
             JwtSecurityToken token = new JwtSecurityToken(jwt);
-            Assert.IsTrue(IdentityComparer.AreEqual(token, new JwtSecurityToken("", ""), false));
+            Assert.IsTrue(IdentityComparer.AreEqual<JwtSecurityToken>(token, new JwtSecurityToken("", "")));
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultSymmetricTokenValidationParameters);
 
-            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), true, true));
+            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), new CompareContext { IgnoreProperties = true, IgnoreSubject = true }));
         }
 
         [TestMethod]

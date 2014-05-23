@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Test
             expectedException = ExpectedException.SecurityTokenInvalidIssuerException( substringExpected: "IDX10211");
             ValidateIssuer(null, new TokenValidationParameters(), samlSecurityTokenHandler, expectedException);
 
-            expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205");
+            expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10204");
             ValidateIssuer("bob", new TokenValidationParameters { }, samlSecurityTokenHandler, expectedException);
 
             expectedException = ExpectedException.NoExceptionExpected;
@@ -273,8 +273,9 @@ namespace Microsoft.IdentityModel.Test
             expectedException = ExpectedException.NoExceptionExpected;
             ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
+            // no valid audiences
             tokenValidationParameters.ValidateAudience = true;
-            expectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214");
+            expectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208");
             ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;

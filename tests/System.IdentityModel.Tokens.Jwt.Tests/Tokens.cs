@@ -40,9 +40,12 @@ namespace System.IdentityModel.Test
 
     public static class JwtTestTokens
     {
-        public static JwtSecurityToken Simple( string issuer, string originalIssuer )
+        public static JwtSecurityToken Simple( string issuer = null, string originalIssuer = null )
         {
-            return new JwtSecurityToken( issuer, "http://www.contoso.com", ClaimSets.Simple( issuer, originalIssuer ) );
+            string iss = issuer ?? IdentityUtilities.DefaultIssuer;
+            string originalIss = originalIssuer ?? IdentityUtilities.DefaultOriginalIssuer;
+
+            return new JwtSecurityToken( issuer, "http://www.contoso.com", ClaimSets.Simple( iss, originalIss ) );
         }
 
         public static JwtSecurityToken Create( string issuer, string originalIssuer, SigningCredentials signingCredentials )
