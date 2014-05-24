@@ -165,6 +165,32 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
+        /// Reads a SAML 1.1 token from the specified string.
+        /// </summary>
+        /// <param name="tokenString">The raw token</param>
+        /// <returns>An instance of System.IdentityModel.Tokens.SamlSecurityToken</returns>
+        public override SecurityToken ReadToken(string tokenString)
+        {
+            if (string.IsNullOrWhiteSpace(tokenString))
+            {
+                throw new ArgumentNullException("tokenString");
+            }
+
+            if (tokenString.Length > MaximumTokenSizeInBytes)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, tokenString.Length, MaximumTokenSizeInBytes));
+            }
+
+            using (StringReader sr = new StringReader(tokenString))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    return ReadToken(reader);
+                }
+            }
+        }
+
+        /// <summary>
         /// Determines if an issuer is valid.
         /// </summary>
         /// <param name="issuer">the issuer to validate</param>
@@ -225,14 +251,7 @@ namespace Microsoft.IdentityModel.Extensions
                 MaxClockSkew = TimeSpan.FromSeconds(ClockSkewInSeconds),
             };
 
-            SamlSecurityToken samlToken;
-            using (StringReader sr = new StringReader(securityToken))
-            {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    samlToken = ReadToken(reader) as SamlSecurityToken;
-                }
-            }
+            SamlSecurityToken samlToken = ReadToken(securityToken) as SamlSecurityToken;
 
             if (samlToken.Assertion.SigningToken == null)
             {
