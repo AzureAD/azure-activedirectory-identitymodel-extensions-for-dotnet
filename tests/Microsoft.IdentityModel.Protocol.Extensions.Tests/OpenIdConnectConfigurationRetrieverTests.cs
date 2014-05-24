@@ -20,6 +20,7 @@ using System;
 using System.IdentityModel.Test;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -111,8 +112,7 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                OpenIdConnectConfigurationRetriever reader = new OpenIdConnectConfigurationRetriever();
-                openIdConnectConfiguration = await reader.GetConfigurationAysnc(new HttpDocumentRetriever(), uri, CancellationToken.None);
+                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(uri, new HttpClient(), CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -154,8 +154,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                OpenIdConnectConfigurationRetriever reader = new OpenIdConnectConfigurationRetriever();
-                openIdConnectConfiguration = await reader.GetConfigurationAysnc(new TestDocumentRetriever(primaryDocument, secondaryDocument), "primary", CancellationToken.None);
+                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(
+                    new TestDocumentRetriever(primaryDocument, secondaryDocument), "primary", CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -176,8 +176,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                OpenIdConnectConfigurationRetriever reader = new OpenIdConnectConfigurationRetriever();
-                openIdConnectConfiguration = await reader.GetConfigurationAysnc(new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), "primary", CancellationToken.None);
+                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(
+                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), "primary", CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)

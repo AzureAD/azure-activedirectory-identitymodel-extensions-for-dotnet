@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public class HttpDocumentRetriever : IDocumentRetriever
+    internal class HttpDocumentRetriever : IDocumentRetriever
     {
         private readonly HttpClient _httpClient;
 

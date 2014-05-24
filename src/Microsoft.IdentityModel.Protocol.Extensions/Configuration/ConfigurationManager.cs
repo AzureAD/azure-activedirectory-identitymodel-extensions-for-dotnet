@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly string _metadataAddress;
-        private readonly IDocumentRetriever _retriever;
-        private readonly IConfigurationRetriever<T> _reader;
+        private readonly IDocumentRetriever _docRetriever;
+        private readonly IConfigurationRetriever<T> _configRetriever;
         private T _currentConfiguration;
 
         public ConfigurationManager(string metadataAddress)
@@ -52,28 +52,20 @@ namespace Microsoft.IdentityModel.Protocols
         {
         }
 
-        public ConfigurationManager(string metadataAddress, IDocumentRetriever retriever)
-            : this(metadataAddress, retriever, GetConfigurationReader())
-        {
-        }
-
-        public ConfigurationManager(string metadataAddress, IDocumentRetriever retriever, IConfigurationRetriever<T> reader)
+        public ConfigurationManager(string metadataAddress, IDocumentRetriever docRetriever)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
                 throw new ArgumentNullException("metadataAddress");
             }
-            if (retriever == null)
+            if (docRetriever == null)
             {
                 throw new ArgumentNullException("retriever");
             }
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+
             _metadataAddress = metadataAddress;
-            _retriever = retriever;
-            _reader = reader;
+            _docRetriever = docRetriever;
+            _configRetriever = GetConfigurationRetriever();
             _refreshLock = new SemaphoreSlim(1);
         }
 
@@ -109,7 +101,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private static IConfigurationRetriever<T> GetConfigurationReader()
+        private static IConfigurationRetriever<T> GetConfigurationRetriever()
         {
             if (typeof(T).Equals(typeof(WsFederationConfiguration)))
             {
@@ -124,16 +116,21 @@ namespace Microsoft.IdentityModel.Protocols
 
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            if (_currentConfiguration != null && _syncAfter >= now)
+            {
+                return _currentConfiguration;
+            }
+
             await _refreshLock.WaitAsync(cancel);
             try
             {
-                DateTimeOffset now = DateTimeOffset.UtcNow;
                 Exception retrieveEx = null;
                 if (_syncAfter < now)
                 {
                     try
                     {
-                        _currentConfiguration = await _reader.GetConfigurationAysnc(_retriever, _metadataAddress, cancel);
+                        _currentConfiguration = await _configRetriever.GetConfigurationAsync(_docRetriever, _metadataAddress, cancel);
                         Contract.Assert(_currentConfiguration != null);
                         _lastRefresh = now;
                         _syncAfter = now + _automaticRefreshInterval;
