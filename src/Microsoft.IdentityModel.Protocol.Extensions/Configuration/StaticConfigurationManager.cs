@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 throw new ArgumentNullException("configuration");
             }
+
             _configuration = configuration;
         }
 

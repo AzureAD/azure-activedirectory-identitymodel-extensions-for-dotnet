@@ -37,15 +37,21 @@ namespace Microsoft.IdentityModel.Protocols
 
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return new WsFederationConfigurationRetriever().GetConfigurationAysnc(new GenericDocumentRetriever(), address, cancel);
+            return GetAsync(new GenericDocumentRetriever(), address, cancel);
         }
 
         public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
-            return new WsFederationConfigurationRetriever().GetConfigurationAysnc(new HttpDocumentRetriever(httpClient), address, cancel);
+            return GetAsync(new HttpDocumentRetriever(httpClient), address, cancel);
         }
 
-        public async Task<WsFederationConfiguration> GetConfigurationAysnc(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        // Internal
+        Task<WsFederationConfiguration> IConfigurationRetriever<WsFederationConfiguration>.GetConfigurationAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        {
+            return GetAsync(retriever, address, cancel);
+        }
+
+        public static async Task<WsFederationConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             if (retriever == null)
             {

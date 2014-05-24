@@ -29,15 +29,21 @@ namespace Microsoft.IdentityModel.Protocols
     {
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return new OpenIdConnectConfigurationRetriever().GetConfigurationAysnc(new GenericDocumentRetriever(), address, cancel);
+            return GetAsync(new GenericDocumentRetriever(), address, cancel);
         }
 
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
-            return new OpenIdConnectConfigurationRetriever().GetConfigurationAysnc(new HttpDocumentRetriever(httpClient), address, cancel);
+            return GetAsync(new HttpDocumentRetriever(httpClient), address, cancel);
         }
 
-        public async Task<OpenIdConnectConfiguration> GetConfigurationAysnc(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        // Internal
+        Task<OpenIdConnectConfiguration> IConfigurationRetriever<OpenIdConnectConfiguration>.GetConfigurationAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        {
+            return GetAsync(retriever, address, cancel);
+        }
+
+        public static async Task<OpenIdConnectConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             if (retriever == null)
             {
