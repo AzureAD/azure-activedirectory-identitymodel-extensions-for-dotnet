@@ -183,7 +183,33 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
-        /// Reads and validates a well fromed Saml2 token.
+        /// Reads a SAML 2.0 token from the specified string.
+        /// </summary>
+        /// <param name="tokenString">The raw token</param>
+        /// <returns>An instance of System.IdentityModel.Tokens.Saml2SecurityToken.</returns>
+        public override SecurityToken ReadToken(string tokenString)
+        {
+            if (string.IsNullOrWhiteSpace(tokenString))
+            {
+                throw new ArgumentNullException("tokenString");
+            }
+
+            if (tokenString.Length > MaximumTokenSizeInBytes)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, tokenString.Length, MaximumTokenSizeInBytes));
+            }
+
+            using (StringReader sr = new StringReader(tokenString))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    return ReadToken(reader);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reads and validates a well formed Saml2 token.
         /// </summary>
         /// <param name="securityToken">A Saml2 token.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
@@ -217,14 +243,7 @@ namespace Microsoft.IdentityModel.Extensions
                 MaxClockSkew = TimeSpan.FromSeconds(ClockSkewInSeconds),
             };
 
-            Saml2SecurityToken samlToken;
-            using (StringReader sr = new StringReader(securityToken))
-            {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    samlToken = ReadToken(reader) as Saml2SecurityToken;
-                }
-            }
+            Saml2SecurityToken samlToken = ReadToken(securityToken) as Saml2SecurityToken;
 
             if (samlToken.IssuerToken == null && RequireSignedTokens)
             {
