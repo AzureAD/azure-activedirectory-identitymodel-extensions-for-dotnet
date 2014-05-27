@@ -130,7 +130,9 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     try
                     {
-                        _currentConfiguration = await _configRetriever.GetConfigurationAsync(_docRetriever, _metadataAddress, cancel);
+                        // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
+                        // The transport should have it's own timeouts, etc..
+                        _currentConfiguration = await _configRetriever.GetConfigurationAsync(_docRetriever, _metadataAddress, CancellationToken.None);
                         Contract.Assert(_currentConfiguration != null);
                         _lastRefresh = now;
                         _syncAfter = now + _automaticRefreshInterval;
