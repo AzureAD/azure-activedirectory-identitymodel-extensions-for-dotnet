@@ -85,14 +85,20 @@ namespace Microsoft.IdentityModel.Protocols
 
                 configuration.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
 
-                IEnumerable<X509RawDataKeyIdentifierClause> x509DataClauses =
-                    stsd.Keys.Where(key => key.KeyInfo != null
-                        && (key.Use == KeyType.Signing || key.Use == KeyType.Unspecified))
-                            .Select(key => key.KeyInfo.OfType<X509RawDataKeyIdentifierClause>().First());
-
-                foreach (var key in x509DataClauses.Select(token => new X509SecurityKey(new X509Certificate2(token.GetX509RawData()))))
+                foreach (KeyDescriptor keyDescriptor in stsd.Keys)
                 {
-                    configuration.SigningKeys.Add(key);
+                    if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
+                    {
+                        foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
+                        {
+                            X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
+                            if (x509Clause != null)
+                            {
+                                var key =  new X509SecurityKey(new X509Certificate2(x509Clause.GetX509RawData()));
+                                configuration.SigningKeys.Add(key);
+                            }
+                        }
+                    }
                 }
             }
 
