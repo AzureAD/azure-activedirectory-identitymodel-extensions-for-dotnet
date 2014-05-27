@@ -50,6 +50,6 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>
         /// </summary>
-        ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters);        
+        ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken);
     }
 }

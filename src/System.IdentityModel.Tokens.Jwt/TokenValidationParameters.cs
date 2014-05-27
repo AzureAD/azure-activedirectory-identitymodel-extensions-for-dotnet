@@ -21,6 +21,7 @@ namespace System.IdentityModel.Tokens
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.IdentityModel.Selectors;
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
@@ -30,11 +31,11 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
         /// </summary>
-        public TokenValidationParameters(TokenValidationParameters other)
+        protected TokenValidationParameters(TokenValidationParameters other)
         {
             if (other == null)
             {
-                return;
+                throw new ArgumentNullException("other");
             }
 
             AudienceValidator = other.AudienceValidator;
@@ -68,9 +69,19 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
+        /// </summary>
+        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object</returns>
+        /// <remarks>This is a shallow Clone.</remarks>
+        public virtual TokenValidationParameters Clone()
+        {
+            return new TokenValidationParameters(this);
+        }
+
+        /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience of the token
         /// </summary>
-        public Func<string, SecurityToken, bool> AudienceValidator
+        public Func<IEnumerable<string>, SecurityToken, bool> AudienceValidator
         {
             get;
             set;
@@ -143,6 +154,18 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
+        /// when validating a token.
+        /// </summary>
+        public Func<SecurityToken, string, string> NameClaimType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called to obtain the RoleClaimType to use when creating a ClaimsIdentity
+        /// when validating a token.
+        /// </summary>
+        public Func<SecurityToken, string, string> RoleClaimType { get; set; }
+
+        /// <summary>
         /// Gets or sets a boolean to control if the original token is saved when a session is created.       /// </summary>
         /// <remarks>The SecurityTokenValidator will use this value to save the orginal string that was validated.</remarks>
         [DefaultValue(false)]
@@ -192,6 +215,16 @@ namespace System.IdentityModel.Tokens
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets a boolean that controls validation of the <see cref="SecurityKey"/> that signed the 'securityToken' when signed with a X509Certificate. 
+        /// </summary>
+        public bool ValidateIssuerCertificate
+        {
+            get;
+            set;
+        }
+
 
         /// <summary>
         /// Gets or sets a string that represents a valid audience that will be used during token validation.

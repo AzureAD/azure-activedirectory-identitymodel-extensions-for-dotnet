@@ -57,6 +57,23 @@ namespace Microsoft.IdentityModel.Extensions
         public const string IDX10218 = "IDX10218: OneTimeUse is not supported";
         public const string IDX10219 = "IDX10219: ProxyRestriction is not supported";
         public const string IDX10220 = "IDX10220: Jwks_Uri must be an absolute uri. Was: ";
-#pragma warning restore 1591
+        public const string IDX10221 = "IDX10221: Unable to create claims from securityToken, 'issuer' is null or empty.";
+
+        // protocol messages
+        public const string IDX10300 = "IDX10300: A claim of type: '{0}', representing the nonce was not found in the jwt: '{1}'.";
+        public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token: '{0}', did not match the expected nonce: '{1}'.";
+        public const string IDX10302 = "IDX10302: The 'c_hash' claim was not a JSON string but multivalued, jwt: '{0}'.";
+        public const string IDX10303 = "IDX10303: The 'c_hash' claim was null or an empty string, jwt: '{0}'.";
+        public const string IDX10304 = "IDX10304: The c_hash: '{0}' did not validate with the code: '{1}', algorithm: '{2}', jwt: '{3}'.";
+        public const string IDX10305 = "IDX10305: The 'nonce' found in the jwt token: '{0}',  did not match the expected nonce: '{1}', hwt: '{3}'.";
+        public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a hashAlgorithm, jwt: '{1}'. See inner exception for details.";
+        public const string IDX10307 = "IDX10307: The algorithm: '{0}' specified in the jwt header resulted in a hashAlgorithm that was null,  jwt: '{1}'.";
+        public const string IDX10308 = "IDX10308: The 'c_hash' claim was not found in the jwt: '{0}'.";
+
+        // NotSupported Exceptions
+        public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
+        public const string IDX11001 = "IDX11001: This method is not supported to validate a 'samltoken' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
+
+        #pragma warning restore 1591
     }
 }

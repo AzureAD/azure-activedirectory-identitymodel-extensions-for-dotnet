@@ -68,6 +68,7 @@ namespace System.IdentityModel.Test
         [Description("Serialize / Deserialize in different ways.")]
         public void RoundTripTokens()
         {
+            SecurityToken validatedToken;
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             handler.CertificateValidator = X509CertificateValidator.None;
 
@@ -76,7 +77,7 @@ namespace System.IdentityModel.Test
                 Console.WriteLine("Validating streaming from JwtSecurityToken and TokenValidationParameters is same for Case: '" + jwtParams.Case);
 
                 string jwt = handler.WriteToken(jwtParams.CompareTo);
-                ClaimsPrincipal principal = handler.ValidateToken(jwt, jwtParams.TokenValidationParameters);
+                ClaimsPrincipal principal = handler.ValidateToken(jwt, jwtParams.TokenValidationParameters, out validatedToken);
 
                 // create from security descriptor
                 SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
@@ -110,6 +111,7 @@ namespace System.IdentityModel.Test
         [Description("These Jwts are created with duplicate claims. This test ensure that multiple claims are roundtripped")]
         public void DuplicateClaims()
         {
+            SecurityToken validatedToken;
             string encodedJwt = IdentityUtilities.CreateJwtToken(
                 new SecurityTokenDescriptor
                 { 
@@ -120,7 +122,7 @@ namespace System.IdentityModel.Test
                 });
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultSymmetricTokenValidationParameters);
+            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultSymmetricTokenValidationParameters, out validatedToken);
 
             Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), new CompareContext { IgnoreProperties = true, IgnoreSubject = true }));
         }
@@ -144,7 +146,8 @@ namespace System.IdentityModel.Test
                 ValidIssuer = issuer,
             };
 
-            var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters);
+            SecurityToken validatedToken;
+            var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
             Assert.IsFalse(jsonClaim == null, "Did not find Jsonclaims. Looking for claim of type: '" + typeof(Entity).ToString() + "'");
 
@@ -160,6 +163,7 @@ namespace System.IdentityModel.Test
         {
             string issuer = "http://www.GotJWT.com";
             string audience = "http://www.contoso.com";
+            SecurityToken validatedToken;
 
             JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)));
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
@@ -172,7 +176,7 @@ namespace System.IdentityModel.Test
                 ValidIssuer = issuer,
             };
 
-            var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters);
+            var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
             Assert.IsFalse(jsonClaim == null, string.Format(CultureInfo.InvariantCulture, "Did not find Jsonclaims. Looking for claim of type: '{0}'", typeof(Entity).ToString()));
 
@@ -181,12 +185,12 @@ namespace System.IdentityModel.Test
             Assert.IsFalse(jsString != jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
         }
 
-        private static string NameClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
+        private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)
         {
             return _nameClaimTypeForDelegate;
         }
 
-        private static string RoleClaimTypeDelegate(JwtSecurityToken jwt, string issuer)
+        private static string RoleClaimTypeDelegate(SecurityToken jwt, string issuer)
         {
             return _roleClaimTypeForDelegate;
         }
@@ -227,23 +231,24 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwt = handler.CreateToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;
 
             // Delegates should override any other settings
-            handler.GetNameClaimType = NameClaimTypeDelegate;
-            handler.GetRoleClaimType = RoleClaimTypeDelegate;
+            validationParameters.NameClaimType = NameClaimTypeDelegate;
+            validationParameters.RoleClaimType = RoleClaimTypeDelegate;
             handler.NameClaimType = handlerNameClaimType;
             handler.RoleClaimType = handlerRoleClaimType;
 
-            ClaimsPrincipal principal = handler.ValidateToken(jwt.RawData, validationParameters);
+            SecurityToken validatedToken;
+            ClaimsPrincipal principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             CheckNamesAndRole(new string[] { delegateSetName, defaultName, handlerSetName }, new string[] { delegateSetRole, defaultRole, handlerSetRole }, principal, _nameClaimTypeForDelegate, _roleClaimTypeForDelegate);
 
             // Directly setting values should override defaults
-            handler.GetNameClaimType = null;
-            handler.GetRoleClaimType = null;
-            principal = handler.ValidateToken(jwt.RawData, validationParameters);
+            validationParameters.NameClaimType = null;
+            validationParameters.RoleClaimType = null;
+            principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             CheckNamesAndRole(new string[] { handlerSetName, defaultName, delegateSetName }, new string[] { handlerSetRole, defaultRole, delegateSetRole }, principal, handlerNameClaimType, handlerRoleClaimType);
 
             handler.NameClaimType = null;
             handler.RoleClaimType = null;
-            principal = handler.ValidateToken(jwt.RawData, validationParameters);
+            principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             CheckNamesAndRole(new string[] { defaultName, handlerSetName, delegateSetName }, new string[] { defaultRole, handlerSetRole, delegateSetRole }, principal);
         }
 

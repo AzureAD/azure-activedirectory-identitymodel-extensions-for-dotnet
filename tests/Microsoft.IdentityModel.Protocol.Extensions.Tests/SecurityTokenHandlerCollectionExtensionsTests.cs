@@ -124,7 +124,8 @@ namespace Microsoft.IdentityModel.Test
         {
             try
             {
-                tokenHandlers.ValidateToken(securityToken, validationParameters);
+                SecurityToken validatedToken;
+                tokenHandlers.ValidateToken(securityToken, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)

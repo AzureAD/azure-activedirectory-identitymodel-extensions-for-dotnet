@@ -68,8 +68,8 @@ namespace System.IdentityModel.Test
             List<string> validAudiences = new List<string>() { validAudience };
             string validIssuer = "ValidIssuer";
             List<string> validIssuers = new List<string>() { validIssuer };
-            Func<string, SecurityToken, bool> audValidatorTrue = (str, token) => { return true; };
-            Func<string, SecurityToken, bool> audValidatorTrue2 = (str, token) => { return true; };
+            Func<IEnumerable<string>, SecurityToken, bool> audValidatorTrue = (str, token) => { return true; };
+            Func<IEnumerable<string>, SecurityToken, bool> audValidatorTrue2 = (str, token) => { return true; };
             Func<string, SecurityToken, bool> issValidatorTrue = (str, token) => { return true; };
             Func<string, SecurityToken, bool> issValidatorTrue2 = (str, token) => { return true; };
             Func<string, SecurityToken, bool> lifetimeValidatorTrue = (str, token) => { return true; };
@@ -117,9 +117,15 @@ namespace System.IdentityModel.Test
 
             Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(validationParametersInline, validationParametersSets));
 
-            var tokenValidationParametersCopyConst = new TokenValidationParameters(validationParametersInline);
-            Assert.IsTrue(IdentityComparer.AreEqual(tokenValidationParametersCopyConst, validationParametersInline));
-            Assert.IsTrue(tokenValidationParametersCopyConst.AudienceValidator("bob", JwtTestTokens.Simple()));
+            var tokenValidationParametersCloned = validationParametersInline.Clone();
+            Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(tokenValidationParametersCloned, validationParametersInline));
+            Assert.IsTrue(tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple()));
+
+            string id = Guid.NewGuid().ToString();
+            DerivedTokenValidationParameters derivedValidationParameters = new DerivedTokenValidationParameters(id, validationParametersInline);
+            DerivedTokenValidationParameters derivedValidationParametersCloned = derivedValidationParameters.Clone() as DerivedTokenValidationParameters;
+            Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(derivedValidationParameters, derivedValidationParametersCloned));
+            Assert.AreEqual(derivedValidationParameters.InternalString, derivedValidationParametersCloned.InternalString);
         }
 
         [TestMethod]
@@ -144,6 +150,28 @@ namespace System.IdentityModel.Test
             Assert.IsNull(tokenValidationParameters.ValidAudiences);
             Assert.IsNull(tokenValidationParameters.ValidIssuer);
             Assert.IsNull(tokenValidationParameters.ValidIssuers);
+        }
+
+        class DerivedTokenValidationParameters : TokenValidationParameters
+        {
+            string _internalString;
+            public DerivedTokenValidationParameters(string internalString, TokenValidationParameters validationParameters)
+                : base(validationParameters)
+            {
+                _internalString = internalString;
+            }
+
+            protected DerivedTokenValidationParameters(DerivedTokenValidationParameters other)
+                : base(other)
+            {
+                _internalString = other._internalString;
+            }
+
+            public string InternalString{ get {return _internalString; }}
+            public override TokenValidationParameters Clone()
+            {
+                return new DerivedTokenValidationParameters(this);
+            }
         }
     }
 }

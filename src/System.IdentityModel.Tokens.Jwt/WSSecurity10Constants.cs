@@ -24,7 +24,7 @@ namespace System.IdentityModel.Tokens
     /// Defines constants needed from WS-Security 1.0.
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
-    internal static class WSSecurity10Constants
+    internal static class WSSecurityConstantsInternal
     {
 #pragma warning disable 1591
         public const string Namespace           = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";

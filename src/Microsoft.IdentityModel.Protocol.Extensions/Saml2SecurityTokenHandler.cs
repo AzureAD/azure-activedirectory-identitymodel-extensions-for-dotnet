@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Security.Claims;
@@ -84,7 +83,7 @@ namespace Microsoft.IdentityModel.Extensions
                     {
                         reader.MoveToContent();
                     }
-                    catch(XmlException)
+                    catch (XmlException)
                     {
                         return false;
                     }
@@ -117,16 +116,21 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
-        /// Creates claims from a Saml2 token.
+        /// Creates a <see cref="ClaimsIdentity"/> from the Saml2 token.
         /// </summary>
         /// <param name="samlToken">The Saml2SecurityToken.</param>
         /// <param name="validationParameters"> contains parameters for validating the token.</param>
         /// <returns>An IClaimIdentity.</returns>
-        private ClaimsIdentity CreateClaims(string issuer, Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
+        protected virtual ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
             {
                 throw new ArgumentNullException("samlToken");
+            }
+
+            if (string.IsNullOrWhiteSpace(issuer))
+            {
+                throw new ArgumentException(ErrorMessages.IDX10221);
             }
 
             Saml2Assertion assertion = samlToken.Assertion;
@@ -135,29 +139,57 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            // TODO - GA: custom NameClaimType, RoleClaimType for Saml 1 Also.
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, SamlSecurityTokenRequirement.NameClaimType, SamlSecurityTokenRequirement.RoleClaimType);
+            string nameClaimType = null;
+            if (validationParameters.NameClaimType != null)
+            {
+                nameClaimType = validationParameters.NameClaimType(samlToken, issuer);
+            }
+
+            if (string.IsNullOrWhiteSpace(nameClaimType))
+            {
+                nameClaimType = this.NameClaimType;
+            }
+
+            string roleClaimType = null;
+            if (validationParameters.RoleClaimType != null)
+            {
+                roleClaimType = validationParameters.RoleClaimType(samlToken, issuer);
+            }
+
+            if (string.IsNullOrWhiteSpace(roleClaimType))
+            {
+                roleClaimType = this.RoleClaimType;
+            }
+
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, nameClaimType, roleClaimType);
             this.ProcessSamlSubject(assertion.Subject, identity, issuer);
             this.ProcessStatement(assertion.Statements, identity, issuer);
             return identity;
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether if the 'expiration' value in a <see cref="Saml2SecurityToken"/> is required.
+        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>. 
         /// </summary>
-        /// <remarks>If 'true' then:
-        /// <para>A <see cref="Saml2SecurityToken"/> will be considered invalid if it does not contain an 'expiration' value.</para>
-        [DefaultValue(true)]
-        public bool RequireExpirationTime { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether a <see cref="Saml2SecurityToken"/> can be valid if not signed.
-        /// </summary>
-        /// <remarks>If true then:
-        /// <para>A <see cref="Saml2SecurityToken"/> will be considered invalid if it does not contain a 'signature'.</para>
+        /// <remarks>
+        /// Controls the value <see cref="ClaimsIdentity.Name"/> property will return. It will return the first <see cref="Claim.Value"/> where the <see cref="Claim.Type"/> equals <see cref="NameClaimType"/>.
         /// </remarks>
-        [DefaultValue(true)]
-        public bool RequireSignedTokens { get; set; }
+        public string NameClaimType
+        {
+            get
+            {
+                if (SamlSecurityTokenRequirement.NameClaimType != null)
+                {
+                    return SamlSecurityTokenRequirement.NameClaimType;
+                }
+
+                return ClaimsIdentity.DefaultNameClaimType;
+            }
+
+            set
+            {
+                SamlSecurityTokenRequirement.NameClaimType = value;
+            }
+        }
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
@@ -183,17 +215,69 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether if the 'expiration' value in a <see cref="Saml2SecurityToken"/> is required.
+        /// </summary>
+        /// <remarks>If 'true' then:
+        /// <para>A <see cref="Saml2SecurityToken"/> will be considered invalid if it does not contain an 'expiration' value.</para>
+        [DefaultValue(true)]
+        public bool RequireExpirationTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a <see cref="Saml2SecurityToken"/> can be valid if not signed.
+        /// </summary>
+        /// <remarks>If true then:
+        /// <para>A <see cref="Saml2SecurityToken"/> will be considered invalid if it does not contain a 'signature'.</para>
+        /// </remarks>
+        [DefaultValue(true)]
+        public bool RequireSignedTokens { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>Controls the <see cref="Claim"/>(s) returned from <see cref="ClaimsPrincipal.IsInRole( string )"/>.</para>
+        /// <para>Each <see cref="Claim"/> returned will have a <see cref="Claim.Type"/> equal to <see cref="RoleClaimType"/>.</para>
+        /// </remarks>
+        public string RoleClaimType
+        {
+            get
+            {
+                if (SamlSecurityTokenRequirement.RoleClaimType != null)
+                {
+                    return SamlSecurityTokenRequirement.RoleClaimType;
+                }
+
+                return ClaimsIdentity.DefaultRoleClaimType;
+            }
+
+            set
+            {
+                SamlSecurityTokenRequirement.RoleClaimType = value;
+            }
+        }
+
+        /// <summary>
+        /// Obsolete method, use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.
+        /// </summary>
+        /// <exception cref="NotSupportedException"> use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.</exception>
+        public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
+        {
+            throw new NotSupportedException(ErrorMessages.IDX11000);
+        }
+
+        /// <summary>
         /// Reads and validates a well fromed Saml2 token.
         /// </summary>
         /// <param name="securityToken">A Saml2 token.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
+        /// <param name="validatedToken">The <see cref="SamlSecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="ArgumentException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml2 token.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204")]
-        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters)
+        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
             {
@@ -253,12 +337,13 @@ namespace Microsoft.IdentityModel.Extensions
 
             string issuer = ValidateIssuer(samlToken.Assertion.Issuer == null ? null : samlToken.Assertion.Issuer.Value, validationParameters, samlToken);
 
-            ClaimsIdentity claimsIdentity = CreateClaims(issuer, samlToken, validationParameters);
+            ClaimsIdentity claimsIdentity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
                 claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
             }
 
+            validatedToken = samlToken;
             return new ClaimsPrincipal(claimsIdentity);
         }
 
@@ -295,7 +380,7 @@ namespace Microsoft.IdentityModel.Extensions
             if (conditions != null)
             {
                 DateTime now = DateTime.UtcNow;
-                
+
                 // TODO - GA add check for RequiedExpirationTime
 
                 if (conditions.NotBefore != null && conditions.NotBefore.HasValue
@@ -333,6 +418,5 @@ namespace Microsoft.IdentityModel.Extensions
         {
             return IssuerValidator.Validate(issuer, validationParameters, securityToken);
         }
-
     }
 }

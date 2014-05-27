@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Security.Claims;
@@ -34,7 +33,6 @@ namespace Microsoft.IdentityModel.Extensions
         /// </summary>
         /// <remarks>2 MB (mega bytes).</remarks>
         public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 1024 * 2; // 2meg.
-
 
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
@@ -117,28 +115,72 @@ namespace Microsoft.IdentityModel.Extensions
         /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
         /// <param name="validationParameters"> contains parameters for validating the token.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
-        private ClaimsIdentity CreateClaims(SamlSecurityToken samlToken, TokenValidationParameters validationParameters)
+        protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
             {
                 throw new ArgumentNullException("samlToken");
             }
 
-            SamlAssertion assertion = samlToken.Assertion;
-            if (assertion == null)
+            if (string.IsNullOrWhiteSpace(issuer))
+            {
+                throw new ArgumentException(ErrorMessages.IDX10221);
+            }
+
+            if (samlToken.Assertion == null)
             {
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            if (string.IsNullOrEmpty(assertion.Issuer))
+            string nameClaimType = null;
+            if (validationParameters.NameClaimType != null)
             {
-                throw new SecurityTokenException(ErrorMessages.IDX10203);
+                nameClaimType = validationParameters.NameClaimType(samlToken, issuer);
             }
 
-            string issuer = ValidateIssuer(assertion.Issuer, validationParameters, samlToken);
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, SamlSecurityTokenRequirement.NameClaimType, SamlSecurityTokenRequirement.RoleClaimType);
-            this.ProcessStatement(assertion.Statements, identity, issuer);
+            if (string.IsNullOrWhiteSpace(nameClaimType))
+            {
+                nameClaimType = this.NameClaimType;
+            }
+
+            string roleClaimType = null;
+            if (validationParameters.RoleClaimType != null)
+            {
+                roleClaimType = validationParameters.RoleClaimType(samlToken, issuer);
+            }
+
+            if (string.IsNullOrWhiteSpace(roleClaimType))
+            {
+                roleClaimType = this.RoleClaimType;
+            }
+
+            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, nameClaimType, roleClaimType);
+            this.ProcessStatement(samlToken.Assertion.Statements, identity, issuer);
             return identity;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>. 
+        /// </summary>
+        /// <remarks>
+        /// Controls the value <see cref="ClaimsIdentity.Name"/> property will return. It will return the first <see cref="Claim.Value"/> where the <see cref="Claim.Type"/> equals <see cref="NameClaimType"/>.
+        /// </remarks>
+        public string NameClaimType
+        {
+            get
+            {
+                if (SamlSecurityTokenRequirement.NameClaimType != null)
+                {
+                    return SamlSecurityTokenRequirement.NameClaimType;
+                }
+
+                return ClaimsIdentity.DefaultNameClaimType;
+            }
+
+            set
+            {
+                SamlSecurityTokenRequirement.NameClaimType = value;
+            }
         }
 
         /// <summary>
@@ -161,6 +203,31 @@ namespace Microsoft.IdentityModel.Extensions
                 }
 
                 _maximumTokenSizeInBytes = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>Controls the <see cref="Claim"/>(s) returned from <see cref="ClaimsPrincipal.IsInRole( string )"/>.</para>
+        /// <para>Each <see cref="Claim"/> returned will have a <see cref="Claim.Type"/> equal to <see cref="RoleClaimType"/>.</para>
+        /// </remarks>
+        public string RoleClaimType
+        {
+            get
+            {
+                if (SamlSecurityTokenRequirement.RoleClaimType != null)
+                {
+                    return SamlSecurityTokenRequirement.RoleClaimType;
+                }
+
+                return ClaimsIdentity.DefaultRoleClaimType;
+            }
+
+            set
+            {
+                SamlSecurityTokenRequirement.RoleClaimType = value;
             }
         }
 
@@ -193,15 +260,25 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
+        /// Obsolete method, use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.
+        /// </summary>
+        /// <exception cref="NotSupportedException"> use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.</exception>
+        public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
+        {
+            throw new NotSupportedException(ErrorMessages.IDX11001);
+        }
+
+        /// <summary>
         /// Reads and validates a well formed <see cref="SamlSecurityToken"/>.
         /// </summary>
         /// <param name="securityToken">A string containing a well formed token.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
+        /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml token.</returns>
-        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters)
+        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
             {
@@ -252,12 +329,15 @@ namespace Microsoft.IdentityModel.Extensions
                 ValidateAudience(samlToken.Assertion.Conditions, validationParameters, samlToken);
             }
 
-            ClaimsIdentity claimsIdentity = CreateClaims(samlToken, validationParameters);
+            string issuer = ValidateIssuer(samlToken.Assertion.Issuer, validationParameters, samlToken);
+            ClaimsIdentity claimsIdentity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
 
             if (validationParameters.SaveSigninToken)
             {
                 claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
             }
+
+            validatedToken = samlToken;
 
             return new ClaimsPrincipal(claimsIdentity);
         }
