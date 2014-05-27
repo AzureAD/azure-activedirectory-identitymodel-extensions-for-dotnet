@@ -24,9 +24,9 @@ using System.Web.Script.Serialization;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Contains OpenIdConnect metadata that can be populated from a json string.
+    /// Contains OpenIdConnect configuration that can be populated from a json string.
     /// </summary>
-    public class OpenIdConnectMetadata
+    public class OpenIdConnectConfiguration
     {
         private static JavaScriptSerializer _javaScriptSerializer;
 
@@ -36,23 +36,23 @@ namespace Microsoft.IdentityModel.Protocols
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
         private Collection<string> _subjectTypesSupported = new Collection<string>();
 
-        static OpenIdConnectMetadata()
+        static OpenIdConnectConfiguration()
         {
             _javaScriptSerializer = new JavaScriptSerializer();
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/>.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/>.
         /// </summary>
-        public OpenIdConnectMetadata()
-        {           
+        public OpenIdConnectConfiguration()
+        {
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/> from a json string.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing the metadata</param>
-        public OpenIdConnectMetadata(string json)
+        public OpenIdConnectConfiguration(string json)
         {
             if(string.IsNullOrWhiteSpace(json))
             {
@@ -63,10 +63,10 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectMetadata"/> from an <see cref="IDictionary[string, object]"/> string.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from an <see cref="IDictionary[string, object]"/> string.
         /// </summary>
         /// <param name="dictionary">a <see cref="IDictionary[string, object]"/>jscontaining the metadata</param>
-        public OpenIdConnectMetadata(IDictionary<string, object> dictionary)
+        public OpenIdConnectConfiguration(IDictionary<string, object> dictionary)
         {
             SetFromDictionary(dictionary);
         }
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Gets or sets the authorization endpoint.
-        /// </summary>       
+        /// </summary>
         public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
@@ -153,12 +153,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the collection of 'id_token_signing_alg_values_supported'.
         /// </summary>
-        public ICollection<string> IdTokenSigningAlgValuesSupported 
-        { 
-            get 
+        public ICollection<string> IdTokenSigningAlgValuesSupported
+        {
+            get
             {
-                return _idTokenSigningAlgValuesSupported; 
-            } 
+                return _idTokenSigningAlgValuesSupported;
+            }
         }
 
         /// <summary>
@@ -166,9 +166,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public string Issuer { get; set; }
 
-        /// <summary>
-        /// Gets or sets the token issuer.
-        /// </summary>
         public string JwksUri{ get; set; }
 
         /// <summary>
@@ -185,12 +182,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the collection of 'response_types_supported'.
         /// </summary>
-        public ICollection<string> ResponseTypesSupported 
-        { 
-            get 
+        public ICollection<string> ResponseTypesSupported
+        {
+            get
             {
-                return _subjectTypesSupported; 
-            } 
+                return _subjectTypesSupported;
+            }
         }
 
         /// <summary>
