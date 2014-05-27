@@ -88,7 +88,8 @@ namespace System.IdentityModel.Test
         {
             try
             {
-                handler.ValidateToken(jwt, validationParameters);
+                SecurityToken validatedToken;
+                handler.ValidateToken(jwt, validationParameters, out validatedToken);
                 Assert.IsNotNull(handler.Jwt as DerivedJwtSecurityToken);
                 Assert.IsTrue(handler.ReadTokenCalled);
                 Assert.IsTrue(handler.ValidateAudienceCalled);
@@ -200,7 +201,8 @@ namespace System.IdentityModel.Test
         {
             try
             {
-                handler.ValidateToken(jwt, validationParameters);
+                SecurityToken validatedToken;
+                handler.ValidateToken(jwt, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)

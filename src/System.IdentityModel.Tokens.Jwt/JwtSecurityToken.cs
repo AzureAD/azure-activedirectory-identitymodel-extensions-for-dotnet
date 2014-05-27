@@ -46,7 +46,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'jwtEncodedString' contains only whitespace.</exception>
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
         /// <remarks>
-        /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters)"/>
+        /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>
         /// </remarks>>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1642:ConstructorSummaryDocumentationMustBeginWithStandardText", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public JwtSecurityToken(string jwtEncodedString)

@@ -211,19 +211,19 @@ namespace System.IdentityModel.Tokens
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10600, JwtConfigurationStrings.Attributes.Name, element.OuterXml));
             }
 
-            attributeNode = element.Attributes.GetNamedItem(WSSecurity10Constants.Attributes.EncodingType);
+            attributeNode = element.Attributes.GetNamedItem(WSSecurityConstantsInternal.Attributes.EncodingType);
             if (attributeNode == null)
             {
-                attributeNode = element.Attributes.GetNamedItem(WSSecurity10Constants.Attributes.EncodingTypeLower);
+                attributeNode = element.Attributes.GetNamedItem(WSSecurityConstantsInternal.Attributes.EncodingTypeLower);
             }
 
             if (attributeNode != null)
             {
-                if (!StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurity10Constants.Base64BinaryLower)
-                && !StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurity10Constants.Base64EncodingType)
-                && !StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurity10Constants.Base64Binary))
+                if (!StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurityConstantsInternal.Base64BinaryLower)
+                && !StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurityConstantsInternal.Base64EncodingType)
+                && !StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurityConstantsInternal.Base64Binary))
                 {
-                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10105, WSSecurity10Constants.Base64BinaryLower, WSSecurity10Constants.Base64Binary, WSSecurity10Constants.Base64EncodingType, attributeNode.Value, element.OuterXml));
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10105, WSSecurityConstantsInternal.Base64BinaryLower, WSSecurityConstantsInternal.Base64Binary, WSSecurityConstantsInternal.Base64EncodingType, attributeNode.Value, element.OuterXml));
                 }
             }
 

@@ -43,11 +43,11 @@ namespace System.IdentityModel.Test
             get
             {
                 string bst = string.Format( _templateWithEncoding,
-                                            WSSecurity10Constants.Elements.BinarySecurityToken,
-                                            WSSecurityUtilityConstants.Namespace,
-                                            WSSecurity10Constants.Namespace,
+                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                            WSSecurityConstantsInternal.Namespace,
+                                            WSSecurityConstantsInternal.Namespace,
                                             JwtConstants.TokenType,
-                                            WSSecurity10Constants.Base64EncodingType,
+                                            WSSecurityConstantsInternal.Base64EncodingType,
                                             EncodedJwts.Asymmetric_LocalSts );
 
                 XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
@@ -61,11 +61,11 @@ namespace System.IdentityModel.Test
             get
             {
                 string bst = string.Format( _templateWithEncoding,
-                                            WSSecurity10Constants.Elements.BinarySecurityToken,
-                                            WSSecurityUtilityConstants.Namespace,
-                                            WSSecurity10Constants.Namespace,
+                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                            WSSecurityConstantsInternal.Namespace,
+                                            WSSecurityConstantsInternal.Namespace,
                                             JwtConstants.TokenTypeAlt,
-                                            WSSecurity10Constants.Base64EncodingType,
+                                            WSSecurityConstantsInternal.Base64EncodingType,
                                             EncodedJwts.Asymmetric_LocalSts );
 
                 XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
@@ -79,9 +79,9 @@ namespace System.IdentityModel.Test
             get
             {
                 string bst = string.Format( _templateWithoutEncoding,
-                                            WSSecurity10Constants.Elements.BinarySecurityToken,
-                                            WSSecurityUtilityConstants.Namespace,
-                                            WSSecurity10Constants.Namespace,
+                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                            WSSecurityConstantsInternal.Namespace,
+                                            WSSecurityConstantsInternal.Namespace,
                                             JwtConstants.TokenType,
                                             EncodedJwts.Asymmetric_LocalSts );
 
@@ -96,9 +96,9 @@ namespace System.IdentityModel.Test
             get
             {
                 string bst = string.Format( _templateWithEncoding,
-                                            WSSecurity10Constants.Elements.BinarySecurityToken,
-                                            WSSecurityUtilityConstants.Namespace,
-                                            WSSecurity10Constants.Namespace,
+                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                            WSSecurityConstantsInternal.Namespace,
+                                            WSSecurityConstantsInternal.Namespace,
                                             JwtConstants.TokenType,
                                             "BadEncoding",
                                             EncodedJwts.Asymmetric_LocalSts );
@@ -114,9 +114,9 @@ namespace System.IdentityModel.Test
             get
             {
                 string bst = string.Format( _templateWithoutEncoding,
-                                            WSSecurity10Constants.Elements.BinarySecurityToken,
-                                            WSSecurityUtilityConstants.Namespace,
-                                            WSSecurity10Constants.Namespace,
+                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                            WSSecurityConstantsInternal.Namespace,
+                                            WSSecurityConstantsInternal.Namespace,
                                             "JwtConstants.TokenTypeShort",
                                             EncodedJwts.Asymmetric_LocalSts );
 
@@ -131,9 +131,9 @@ namespace System.IdentityModel.Test
             get
             {
                 string bst = string.Format( _templateWithoutns,
-                                            WSSecurity10Constants.Elements.BinarySecurityToken,
+                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
                                             JwtConstants.TokenType,
-                                            WSSecurity10Constants.Base64EncodingType,
+                                            WSSecurityConstantsInternal.Base64EncodingType,
                                             EncodedJwts.Asymmetric_LocalSts );
 
                 XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
@@ -222,9 +222,10 @@ namespace System.IdentityModel.Test
             ClaimsPrincipal claimsPrincipal = null;
             try
             {
-                claimsPrincipal = tokendHandler.ValidateToken(secutityToken, validationParameters);
+                SecurityToken validatedToken;
+                claimsPrincipal = tokendHandler.ValidateToken(secutityToken, validationParameters, out validatedToken);
                 ClaimsIdentity claimsIdentityValidated = claimsPrincipal.Identity as ClaimsIdentity;
-                ClaimsPrincipal actorClaimsPrincipal = tokendHandler.ValidateToken(actor, actorValidationParameters);
+                ClaimsPrincipal actorClaimsPrincipal = tokendHandler.ValidateToken(actor, actorValidationParameters, out validatedToken);
                 Assert.IsNotNull(claimsIdentityValidated.Actor);
                 Assert.IsTrue(IdentityComparer.AreEqual<ClaimsIdentity>(claimsIdentityValidated.Actor, (actorClaimsPrincipal.Identity as ClaimsIdentity)));
                 expectedException.ProcessNoException();
@@ -424,8 +425,9 @@ namespace System.IdentityModel.Test
         private void ValidateClaimMapping(JwtSecurityToken jwt, JwtSecurityTokenHandler handler, TokenValidationParameters validationParameters, IEnumerable<Claim> expectedClaims, string identityName, string variation)
         {
             Console.WriteLine("ValidateClaimMapping: variation: " + variation);
+            SecurityToken validatedToken;
 
-            ClaimsPrincipal cp = handler.ValidateToken(jwt.RawData, validationParameters);
+            ClaimsPrincipal cp = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             ClaimsIdentity identity = cp.Identity as ClaimsIdentity;
 
             Assert.IsFalse(expectedClaims != null && !IdentityComparer.AreEqual(identity.Claims, expectedClaims), "identity.Claims != expectedClaims");
@@ -467,7 +469,7 @@ namespace System.IdentityModel.Test
         public void JwtSecurityTokenHandler_Publics()
         {
             string methodToCall = _testContextProvider.GetValue<string>("Method");
-
+            SecurityToken validatedToken;
             foreach (JwtSecurityTokenTestVariation variation in PublicMethodVariations())
             {
                 Console.WriteLine("Variation: " + variation.Name);
@@ -514,11 +516,11 @@ namespace System.IdentityModel.Test
                     }
                     else if (variation.Name.StartsWith("ValidateToken_String_TVP"))
                     {
-                        variation.JwtSecurityTokenHandler.ValidateToken(variation.EncodedString, variation.TokenValidationParameters);
+                        variation.JwtSecurityTokenHandler.ValidateToken(variation.EncodedString, variation.TokenValidationParameters, out validatedToken);
                     }
                     else if (variation.Name.StartsWith("ValidateToken_Jwt_TVP"))
                     {
-                        variation.JwtSecurityTokenHandler.ValidateToken(variation.JwtSecurityToken.RawData, variation.TokenValidationParameters);
+                        variation.JwtSecurityTokenHandler.ValidateToken(variation.JwtSecurityToken.RawData, variation.TokenValidationParameters, out validatedToken);
                     }
                     else if (variation.Name.StartsWith("WriteToken_XmlWriter"))
                     {
@@ -662,7 +664,8 @@ namespace System.IdentityModel.Test
             ClaimsPrincipal retVal = null;
             try
             {
-                retVal = tokenHandler.ValidateToken(securityToken, validationParameters);
+                SecurityToken validatedToken;
+                retVal = tokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -739,19 +742,20 @@ namespace System.IdentityModel.Test
         [Description("JWTSecurityTokenHandler - tests that the bootstrap context is saved and is as expected")]
         public void JwtSecurityTokenHandler_BootstrapTokenTests()
         {
+            SecurityToken validatedToken;
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             TokenValidationParameters validationParameters = IdentityUtilities.DefaultSymmetricTokenValidationParameters;
             validationParameters.SaveSigninToken = false;
             string jwt = IdentityUtilities.DefaultSymmetricJwt;
-            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters);
+            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
             BootstrapContext context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapContext;
             Assert.IsNull(context);
 
-            validationParameters.SaveSigninToken = true;
-            claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters);
+            validationParameters.SaveSigninToken = true;            
+            claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
             context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapContext;
             Assert.IsNotNull(context);
-            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.Token, validationParameters)));
+            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.Token, validationParameters, out validatedToken)));
         }
 
 
@@ -1023,7 +1027,8 @@ namespace System.IdentityModel.Test
         {
             try
             {
-                tokenHandler.ValidateToken(jwt, validationParameters);
+                SecurityToken validatedToken;
+                tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)

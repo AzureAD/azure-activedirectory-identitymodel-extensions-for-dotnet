@@ -131,5 +131,8 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10616 = "Jwt10616: Element: '{0}' is duplicated. Each element can only occur once.\nelement.OuterXml: '{1}'.";
         internal const string Jwt10617 = "Jwt10617: Attribute: '{0}' is duplicated. Each attribute can only occur once.\nelement.OuterXml: '{1}'.";
         internal const string Jwt10619 = "Jwt10619: Specifying the: '{0}' attribute requires that the '{1}' attribute is set to: '{2}'.  It was set to: '{3}'. The runtime cannot determine if the '{4}' to be created, should be a standard one OR custom of type '{5}'.\nelement.OuterXml: '{6}'.";
+
+
+        public const string Jwt11000 = "Jwt11000: This method is not supported to validate a 'jwt' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
     }
 }

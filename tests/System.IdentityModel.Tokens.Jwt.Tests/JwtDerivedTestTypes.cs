@@ -141,9 +141,9 @@ namespace System.IdentityModel.Test
             return Jwt;
         }
 
-        public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters)
+        public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
-            return base.ValidateToken(securityToken, validationParameters);
+            return base.ValidateToken(securityToken, validationParameters, out validatedToken);
         }
     }
 

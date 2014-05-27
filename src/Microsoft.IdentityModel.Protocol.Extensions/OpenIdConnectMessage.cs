@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -27,6 +28,80 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
+        private static string _defaultResponseMode;
+        private static string _defaultResponseType;
+        private static string _defaultScope;
+
+        /// <summary>
+        /// Gets or sets the default ResponseMode to use when creating a url
+        /// </summary>
+        public static string DefaultResponseMode
+        {
+            get
+            {
+                return _defaultResponseMode;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException("DefaultResponseMode");
+                }
+
+                _defaultResponseMode = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the default 'response_type' to use when creating a url
+        /// </summary>
+        public static string DefaultResponseType
+        {
+            get
+            {
+                return _defaultResponseType;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException("DefaultResponseType");
+                }
+
+                _defaultResponseType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the default 'scope' to use when creating a url
+        /// </summary>
+        public static string DefaultScope
+        {
+            get
+            {
+                return _defaultScope;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException("DefaultScope");
+                }
+
+                _defaultScope = value;
+            }
+        }
+
+        static OpenIdConnectMessage()
+        {
+            _defaultResponseMode = OpenIdConnectResponseModes.FormPost;
+            _defaultResponseType = OpenIdConnectResponseTypes.CodeIdToken;
+            _defaultScope = OpenIdConnectScopes.OpenIdProfile;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
@@ -40,24 +115,42 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
-        /// <param name="openIdConnectMessage"> an <see cref="OpenIdConnectMessage"/> to copy.</param>        
-        public OpenIdConnectMessage(OpenIdConnectMessage openIdConnectMessage)
+        /// <param name="other"> an <see cref="OpenIdConnectMessage"/> to copy.</param>
+        /// <exception cref="ArgumentNullException"> if 'other' is null.</exception>
+        protected OpenIdConnectMessage(OpenIdConnectMessage other)
         {
-            if (openIdConnectMessage == null)
+            if (other == null)
             {
-                return;
+                throw new ArgumentNullException("other");
             }
 
-            foreach (KeyValuePair<string, string> keyValue in openIdConnectMessage.Parameters)
+            foreach (KeyValuePair<string, string> keyValue in other.Parameters)
             {
                 SetParameter(keyValue.Key, keyValue.Value);
             }
 
-            IssuerAddress = openIdConnectMessage.IssuerAddress;
+            IssuerAddress = other.IssuerAddress;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="nameValueCollection">Collection of key value pairs.</param>
+        public OpenIdConnectMessage(NameValueCollection nameValueCollection)
+        {
+            if (nameValueCollection == null)
+            {
+                return;
+            }
+
+            foreach (var key in nameValueCollection.AllKeys)
+            {
+                SetParameter(key, nameValueCollection[key]);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
         /// <param name="parameters">Enumeration of key value pairs.</param>        
         public OpenIdConnectMessage(IEnumerable<KeyValuePair<string, string[]>> parameters)
@@ -81,13 +174,28 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Returns a new instance of <see cref="OpenIdConnectMessage"/> with values copied from this object.
+        /// </summary>
+        /// <returns>A new <see cref="OpenIdConnectMessage"/> object copied from this object</returns>
+        /// <remarks>This is a shallow Clone.</remarks>
+        public virtual OpenIdConnectMessage Clone()
+        {
+            return new OpenIdConnectMessage(this);
+        }
+
+        /// <summary>
         /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
         public string CreateIdTokenUrl()
         {
-            OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            OpenIdConnectMessage openIdConnectMessage = Clone();
+            openIdConnectMessage.Nonce = Guid.NewGuid().ToString();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
+            openIdConnectMessage.ResponseMode = DefaultResponseMode;
+            openIdConnectMessage.ResponseType = DefaultResponseType;
+            openIdConnectMessage.Scope = DefaultScope;
+
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -97,7 +205,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>The uri to use for a redirect.</returns>
         public string CreateLogoutUrl()
         {
-            OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage(this);
+            OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.LogoutRequest;
             return openIdConnectMessage.BuildRedirectUrl();
         }

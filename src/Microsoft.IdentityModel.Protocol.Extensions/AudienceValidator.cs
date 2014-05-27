@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Extensions
 
                 if (validationParameters.AudienceValidator != null)
                 {
-                    if (validationParameters.AudienceValidator(audience, securityToken))
+                    if (validationParameters.AudienceValidator(audiences, securityToken))
                     {
                             return;
                     }

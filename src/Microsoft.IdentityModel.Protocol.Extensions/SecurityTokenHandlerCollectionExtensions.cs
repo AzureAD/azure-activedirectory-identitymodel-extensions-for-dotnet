@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> that represents the identity created when validating the token.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720")]
-        public static ClaimsPrincipal ValidateToken(this SecurityTokenHandlerCollection tokenHandlers, string securityToken, TokenValidationParameters validationParameters)
+        public static ClaimsPrincipal ValidateToken(this SecurityTokenHandlerCollection tokenHandlers, string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (tokenHandlers == null)
             {
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Extensions
                 if (securityTokenValidator != null && securityTokenValidator.CanReadToken(securityToken))
                 {
                     iSecurityTokenValidatorFound = true;
-                    return securityTokenValidator.ValidateToken(securityToken, validationParameters);
+                    return securityTokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
                 }
             }
 

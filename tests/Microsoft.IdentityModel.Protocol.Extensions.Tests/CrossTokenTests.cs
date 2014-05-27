@@ -80,7 +80,8 @@ namespace Microsoft.IdentityModel.Test
             ClaimsPrincipal princiapl = null;
             try
             {
-                princiapl = tokenValidator.ValidateToken(securityToken, validationParameters);
+                SecurityToken validatedToken;
+                princiapl = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)

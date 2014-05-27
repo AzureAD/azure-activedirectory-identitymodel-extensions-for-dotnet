@@ -31,6 +31,15 @@ namespace Microsoft.IdentityModel.Protocols
     }
 
     /// <summary>
+    /// Well known names for OpenIdConnetcDiscovery
+    /// </summary>
+
+    public static class OpenIdConnectDiscovery
+    {
+        public const string WellKnown = ".well-known/openid-configuration";
+    }
+
+    /// <summary>
     /// Names for Json Web Key Values
     /// </summary>
     public static class JsonWebKeysValueNames
@@ -49,7 +58,8 @@ namespace Microsoft.IdentityModel.Protocols
         public const string X5u = "x5u";
         #pragma warning restore 1591
     }
-    
+
+//            public const string Discovery = ".well-known/openid-configuration";
     /// <summary>
     /// Metadata names for OpenIdConnect
     /// </summary>

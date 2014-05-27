@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Extensions
 {
@@ -47,6 +48,17 @@ namespace Microsoft.IdentityModel.Extensions
 
         protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
         {
+
+            foreach (var keyIdentifierClause in keyIdentifier)
+            {
+                X509RawDataKeyIdentifierClause clause = keyIdentifierClause as X509RawDataKeyIdentifierClause;
+                if (clause != null)
+                {
+                    token = new X509SecurityToken(new X509Certificate2(clause.GetX509RawData()));
+                    return true;
+                }
+            }
+
             token = null;
             return false;
         }
@@ -115,7 +127,7 @@ namespace Microsoft.IdentityModel.Extensions
             }
 
             // TODO - finish up IssuerTokenResolver so it can be returned instead of creating a 'copied' list of tokens.
-            // return new IssuerTokenResolver();
+            //return new IssuerTokenResolver();
 
             return SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true);
         }

@@ -325,7 +325,8 @@ namespace Microsoft.IdentityModel.Test
             ClaimsPrincipal princiapl = null;
             try
             {
-                princiapl = samlSecurityTokenHandler.ValidateToken(securityToken, validationParameters);
+                SecurityToken validatedToken;
+                princiapl = samlSecurityTokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
