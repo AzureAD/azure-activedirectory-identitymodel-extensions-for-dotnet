@@ -69,7 +69,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10316 = "Jwt10316: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\njwt: '{2}'";
         internal const string Jwt10317 = "Jwt10317: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
         internal const string Jwt10318 = "Jwt10318: Issuer validation failed. Configuration.IssuerNameRegistry.GetIssuerName returned a null or empty string. jwt.Issuer: '{0}'";
-        internal const string Jwt10319 = "Jwt10319: Issuer validation failed. jwt.Issuer is null or whitespace.";
+        internal const string Jwt10319 = "Jwt10319: Issuer validation failed. issuer is null or whitespace.";
         internal const string Jwt10320 = "Jwt10320: Unable to validate signature, JwtHeader specifies: [ alg, '{0}' ] as the signature algorithm, it should specify a valid signature algorithm.\njwt: '{1}'.";        
         internal const string Jwt10322 = "Jwt10322: Lifetime validation failed. The token is missing the 'exp' (Expiration Time) claim.\njwt: '{0}'.";
         internal const string Jwt10323 = "Jwt10323: MaximumTokenSize must be greater than zero. value: '{0}'";
@@ -79,7 +79,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10331 = "Jwt10331: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
         internal const string Jwt10332 = "Jwt10332: Audience validation failed. jwt.Audience: '{0}'.";
         internal const string Jwt10333 = "Jwt10333: Unable to create claims from jwt, 'issuer' is null or empty.\njwt: '{0}'.";
-        internal const string Jwt10334 = "Jwt10334: Signature validation failed. No keys were available for checking the signature.\njwt: '{0}'";
+        internal const string Jwt10334 = "Jwt10334: Signature validation failed. Unable to resolve keyidentifier found in securityToken: '{0}', \njwt: '{1}'.";
 
         internal const string NoNonNullKeysFound = "No non-null SecurityKeys were found";
         internal const string NoSecurityKeysTried = "No SecurityKeys were available to check signature";

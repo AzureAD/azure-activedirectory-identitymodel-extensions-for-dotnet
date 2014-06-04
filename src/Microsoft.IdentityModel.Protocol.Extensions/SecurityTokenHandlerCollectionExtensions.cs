@@ -1,10 +1,29 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
+
+using SamlHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+using Saml2Handler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Extensions
 {
@@ -72,6 +91,7 @@ namespace Microsoft.IdentityModel.Extensions
         {
             return GetDefaultHandlers(null);
         }
+
         /// <summary>
         /// Gets the default <see cref="SecurityTokenHandlerCollection"/> supported by this runtime.
         /// </summary>
@@ -79,24 +99,12 @@ namespace Microsoft.IdentityModel.Extensions
         /// <returns>A collection of <see cref="SecurityTokenHandler"/></returns>
         public static SecurityTokenHandlerCollection GetDefaultHandlers(string authenticationType)
         {
-            if (string.IsNullOrWhiteSpace(authenticationType))
+            return new SecurityTokenHandlerCollection
             {
-                return new SecurityTokenHandlerCollection
-                {
-                    new JwtSecurityTokenHandler{ AuthenticationType = AuthenticationTypes.Federation},
-                    new SamlSecurityTokenHandler{ AuthenticationType = AuthenticationTypes.Federation},
-                    new Saml2SecurityTokenHandler{ AuthenticationType = AuthenticationTypes.Federation},
-                };
-            }
-            else
-            {
-                return new SecurityTokenHandlerCollection
-                {
-                    new JwtSecurityTokenHandler{ AuthenticationType = authenticationType},
-                    new SamlSecurityTokenHandler{ AuthenticationType = authenticationType},
-                    new Saml2SecurityTokenHandler{ AuthenticationType = authenticationType},
-                };
-            }
+                new JwtSecurityTokenHandler(),
+                new Saml2Handler(),
+                new SamlHandler(),
+            };
         }
     }
 }

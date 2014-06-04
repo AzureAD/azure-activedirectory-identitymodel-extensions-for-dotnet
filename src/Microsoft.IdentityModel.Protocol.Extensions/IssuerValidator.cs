@@ -27,29 +27,16 @@ namespace Microsoft.IdentityModel.Extensions
     /// </summary>
     internal static class IssuerValidator
     {
-        public static string Validate(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
+        public static string Validate(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
             {
                 throw new ArgumentNullException("validationParameters");
             }
 
-            if (validationParameters.IssuerValidator != null)
-            {
-                if (validationParameters.IssuerValidator(issuer, securityToken))
-                {
-                    return issuer;
-                }
-            }
-
             if (string.IsNullOrWhiteSpace(issuer))
             {
                 throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211));
-            }
-
-            if (!validationParameters.ValidateIssuer)
-            {
-                return issuer;
             }
 
             // Throw if all possible places to validate against are null or empty

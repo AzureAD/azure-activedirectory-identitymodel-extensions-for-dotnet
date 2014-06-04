@@ -203,31 +203,20 @@ namespace System.IdentityModel.Test
             Assert.IsFalse( !handler.CanValidateToken , "!handler.CanValidateToken" );
 
             Assert.IsFalse( !handler.CanWriteToken , "!handler.CanWriteToken" );
-
-            Assert.IsFalse( handler.DefaultTokenLifetimeInMinutes != 600 , "handler.DefaultTokenLifetimeInMinutes != 600" );
-
-            Assert.IsFalse( handler.JwtSecurityTokenRequirement == null , "handler.JwtSecurityTokenRequirement == null" );
-
-            Assert.IsFalse( handler.NameClaimType != ClaimsIdentity.DefaultNameClaimType , "handler.NameClaimType != ClaimsIdentity.DefaultNameClaimType" );
-
-            Assert.IsFalse( TimeSpan.FromSeconds(handler.ClockSkewInSeconds) != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew , string.Format(CultureInfo.InvariantCulture, "handler.ClockSkewInSeconds: '{0}' != SecurityTokenHandlerConfiguration.DefaultMaxClockSkew: '{1}'", TimeSpan.FromSeconds(handler.ClockSkewInSeconds), SecurityTokenHandlerConfiguration.DefaultMaxClockSkew));
-
-            Assert.IsFalse( handler.MaximumTokenSizeInBytes != 2 * 1024 * 1024 , "handler.MaxTokenSizeInBytes != 2 * 1024 * 1024" );
-            
-            Assert.IsFalse( handler.RoleClaimType != ClaimsIdentity.DefaultRoleClaimType , "handler.RoleClaimType != ClaimsIdentity.DefaultRoleClaimType" );
-            
-            Assert.IsFalse( !handler.RequireExpirationTime , "!handler.RequireExpirationTime" );
-            
-            Assert.IsFalse( !handler.RequireSignedTokens , "!handler.RequireSignedTokens" );
-            
+                                  
             Assert.IsFalse( handler.SignatureProviderFactory == null , "handler.SignatureProviderFactory == null" );
             
             Assert.IsFalse( handler.TokenType != typeof(JwtSecurityToken) , "handler.TokenType != typeof(JwtSecurityToken)" );
-            
-            Assert.IsFalse( handler.CreateSecurityTokenReference(new JwtSecurityToken(), false ) != null , "handler.CreateSecurityTokenReference(new JwtSecurityToken(), false ) != nul" );
-            
-            Assert.IsFalse( handler.CreateSecurityTokenReference(new JwtSecurityToken(), true ) != null , "handler.CreateSecurityTokenReference(new JwtSecurityToken(), true ) != null " );
 
+            try
+            {
+                handler.CreateSecurityTokenReference(new JwtSecurityToken(), false);
+            }
+            catch(NotSupportedException)
+            {
+
+            }
+            
             string[] tokenIdentifiers = handler.GetTokenTypeIdentifiers();
 
             Assert.IsFalse( tokenIdentifiers.Length != 2  , "tokenIdentifiers.Length != 2 " );
@@ -239,14 +228,6 @@ namespace System.IdentityModel.Test
             Assert.IsFalse( !Uri.TryCreate( tokenIdentifiers[0], UriKind.Absolute, out result ) , "tokenIdentifiers[0] must be able to create an UriKind.Absolute" );
 
             Assert.IsFalse( tokenIdentifiers[1] != JwtConstants.TokenType  , "tokenIdentifiers[1] != JwtConstants.TokenType" );
-
-            Assert.IsFalse( handler.CertificateValidator == null , "handler.CertificateValidator == null" );
-
-            Type type = handler.CertificateValidator.GetType();
-
-            FieldInfo fi = type.GetField( "validator", BindingFlags.NonPublic | BindingFlags.Instance );
-            X509CertificateValidator validator = (X509CertificateValidator)fi.GetValue( handler.CertificateValidator );
-            Assert.IsFalse( validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() , "validator.GetType() != X509CertificateValidator.PeerOrChainTrust.GetType() " );
         }
     }
 }

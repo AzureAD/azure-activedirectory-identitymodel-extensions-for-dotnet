@@ -164,8 +164,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), innerTypeExpected: typeof(InvalidOperationException),
-                substringExpected: "Jwt10316:");
+            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException( substringExpected: "Jwt10334:", innerTypeExpected: typeof(InvalidOperationException));
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, expectedException);
 
             // inbound is mapped to Rsa256

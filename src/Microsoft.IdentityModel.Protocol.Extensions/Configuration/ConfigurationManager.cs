@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// How often should an automatic metadata refresh be attempted
+        /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
         /// </summary>
         public TimeSpan AutomaticRefreshInterval
         {

@@ -18,16 +18,40 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Globalization;
     using System.IdentityModel.Selectors;
+    using System.Security.Claims;
+
+    //public delegate void AudienceValidator (IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters);
+    
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
     public class TokenValidationParameters
     {
+        private TimeSpan _clockSkew = DefaultClockSkew;
+        private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
+        private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
+        private X509CertificateValidator _certificateValidator;
+        private string _authenticationType = AuthenticationTypes.Federation;
+
+        /// <summary>
+        /// Default for the clock skew.
+        /// </summary>
+        /// <remarks>300 seconds (5 minutes).</remarks>
+        public static TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300); // 5 min.
+
+        /// <summary>
+        /// Default for the maximm token size.
+        /// </summary>
+        /// <remarks>2 MB (mega bytes).</remarks>
+        public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 1024 * 2; // 2meg.
+
+
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
         /// </summary>
@@ -42,10 +66,12 @@ namespace System.IdentityModel.Tokens
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyRetriever = other.IssuerSigningKeyRetriever;
             IssuerSigningKeys = other.IssuerSigningKeys;
+            IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerSigningToken = other.IssuerSigningToken;
             IssuerSigningTokens = other.IssuerSigningTokens;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            RequireExpirationTime = other.RequireExpirationTime;
             SaveSigninToken = other.SaveSigninToken;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
@@ -62,10 +88,13 @@ namespace System.IdentityModel.Tokens
         /// </summary>        
         public TokenValidationParameters()
         {
+            RequireExpirationTime = true;
+            RequireSignedTokens = true;
             SaveSigninToken = false;
             ValidateAudience = true;
-            ValidateIssuer = true;
             ValidateActor = false;
+            ValidateIssuer = true;
+            ValidateLifetime = true;
         }
 
         /// <summary>
@@ -78,10 +107,80 @@ namespace System.IdentityModel.Tokens
             return new TokenValidationParameters(this);
         }
 
+
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the audience of the token
+        /// Gets or sets a delegate that will be used to validate the audience of the tokens
         /// </summary>
-        public Func<IEnumerable<string>, SecurityToken, bool> AudienceValidator
+        public Action<IEnumerable<string>, SecurityToken, TokenValidationParameters> AudienceValidator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"> if 'value' is null or whitespace.</exception>
+        public string AuthenticationType
+        {
+            get
+            {
+                return _authenticationType;
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException("AuthenticationType");
+                }
+
+                _authenticationType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the clock skew to apply when validating times
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"> if 'value' is less than 0.</exception>
+        [DefaultValue(300)]
+        public TimeSpan ClockSkew
+        {
+            get
+            {
+                return _clockSkew;
+            }
+
+            set
+            {
+                if (value < TimeSpan.Zero)
+                {
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10100, value));
+                }
+
+                _clockSkew = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
+        /// </summary>
+        public X509CertificateValidator CertificateValidator
+        {
+            get
+            {
+                return _certificateValidator;
+            }
+
+            set
+            {
+                _certificateValidator = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
+        /// </summary>
+        public Action<SecurityKey> IssuerSigningKeyValidator
         {
             get;
             set;
@@ -125,7 +224,6 @@ namespace System.IdentityModel.Tokens
             set;
         }
 
-        // TODO - remove this method.
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{SecurityToken}"/> that are to be used for validating signed tokens. 
         /// </summary>
@@ -136,9 +234,9 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the issuer of the token
+        /// Gets or sets a delegate that will be used to validate the issuer of the token. The delegate returns the issuer to use.
         /// </summary>
-        public Func<string, SecurityToken, bool> IssuerValidator
+        public Func<string, SecurityToken, TokenValidationParameters, string> IssuerValidator
         {
             get;
             set;
@@ -147,23 +245,84 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the lifetime of the token
         /// </summary>
-        public Func<string, SecurityToken, bool> LifetimeValidator
+        public Action<DateTime?, DateTime?, SecurityToken, TokenValidationParameters> LifetimeValidator
         {
             get;
             set;
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>. 
+        /// </summary>
+        /// <remarks>
+        /// Controls the value <see cref="ClaimsIdentity.Name"/> returns. It will return the first <see cref="Claim.Value"/> where the <see cref="Claim.Type"/> equals <see cref="NameClaimType"/>.
+        /// </remarks>
+        public string NameClaimType
+        {
+            get
+            {
+                return _nameClaimType;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException(ErrorMessages.IDX10102);
+                }
+
+                _nameClaimType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>Controls the <see cref="Claim"/>(s) returned from <see cref="ClaimsPrincipal.IsInRole( string )"/>.</para>
+        /// <para>Each <see cref="Claim"/> returned will have a <see cref="Claim.Type"/> equal to <see cref="RoleClaimType"/>.</para>
+        /// </remarks>
+        public string RoleClaimType
+        {
+            get
+            {
+                return _roleClaimType;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException(ErrorMessages.IDX10103);
+                }
+
+                _roleClaimType = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
         /// when validating a token.
         /// </summary>
-        public Func<SecurityToken, string, string> NameClaimType { get; set; }
+        public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether tokens must have an 'expiration' value.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool RequireExpirationTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a <see cref="SecurityToken"/> can be valid if not signed.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool RequireSignedTokens { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to obtain the RoleClaimType to use when creating a ClaimsIdentity
         /// when validating a token.
         /// </summary>
-        public Func<SecurityToken, string, string> RoleClaimType { get; set; }
+        public Func<SecurityToken, string, string> RoleClaimTypeRetriever { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the original token is saved when a session is created.       /// </summary>
@@ -217,14 +376,24 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a boolean that controls validation of the <see cref="SecurityKey"/> that signed the 'securityToken' when signed with a X509Certificate. 
-        /// </summary>
-        public bool ValidateIssuerCertificate
+        /// Gets or sets a boolean to control if the lifetime will be validated during token validation.
+        /// </summary>                
+        [DefaultValue(true)]
+        public bool ValidateLifetime
         {
             get;
             set;
         }
 
+
+        /// <summary>
+        /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the 'securityToken' is called. 
+        /// </summary>
+        public bool ValidateIssuerSigningKey
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or sets a string that represents a valid audience that will be used during token validation.

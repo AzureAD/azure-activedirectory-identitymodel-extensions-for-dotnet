@@ -70,7 +70,7 @@ namespace System.IdentityModel.Test
         {
             SecurityToken validatedToken;
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            handler.CertificateValidator = X509CertificateValidator.None;
+            //handler.CertificateValidator = X509CertificateValidator.None;
 
             foreach (CreateAndValidateParams jwtParams in JwtTestTokens.All)
             {
@@ -99,7 +99,6 @@ namespace System.IdentityModel.Test
                 ms.Seek(0, SeekOrigin.Begin);
                 XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
                 reader.Read();
-                handler.CertificateValidator = X509CertificateValidator.None;
                 token = handler.ReadToken(reader) as JwtSecurityToken;
                 ms.Close();
                 IdentityComparer.AreEqual(token, jwtParams.CompareTo);
@@ -137,11 +136,11 @@ namespace System.IdentityModel.Test
 
             JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)));
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            jwtHandler.RequireSignedTokens = false;
             string encodedJwt = jwtHandler.WriteToken(jwt);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
             TokenValidationParameters validationParameters = new TokenValidationParameters()
             {
+                RequireSignedTokens = false,
                 ValidateAudience = false,
                 ValidIssuer = issuer,
             };
@@ -167,11 +166,11 @@ namespace System.IdentityModel.Test
 
             JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)));
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            jwtHandler.RequireSignedTokens = false;
             string encodedJwt = jwtHandler.WriteToken(jwt);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
             TokenValidationParameters validationParameters = new TokenValidationParameters()
             {
+                RequireSignedTokens = false,
                 ValidateAudience = false,
                 ValidIssuer = issuer,
             };
@@ -200,19 +199,21 @@ namespace System.IdentityModel.Test
         [Description("Tests Name and Role claim delegates")]
         public void NameAndRoleClaimDelegates()
         {
-            string delegateSetRole = "delegateSetRole";
-            string handlerSetRole = "handlerSetRole";
-            string defaultRole = "defaultRole";
-            string delegateSetName = "delegateSetName";
-            string handlerSetName = "handlerSetName";
             string defaultName = "defaultName";
-            string handlerRoleClaimType = "handlerRoleClaimType";
-            string handlerNameClaimType = "handlerNameClaimType";
+            string defaultRole = "defaultRole";
+            string delegateName = "delegateName";
+            string delegateRole = "delegateRole";
+            string validationParameterName = "validationParameterName";
+            string validationParameterRole = "validationParameterRole";
+            string validationParametersNameClaimType = "validationParametersNameClaimType";
+            string validationParametersRoleClaimType = "validationParametersRoleClaimType";
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             TokenValidationParameters validationParameters = new TokenValidationParameters
             {
                 IssuerSigningToken = KeyingMaterial.DefaultX509Token_2048,
+                NameClaimType = validationParametersNameClaimType,
+                RoleClaimType = validationParametersRoleClaimType,
                 ValidateAudience = false,
                 ValidateIssuer = false,
             };
@@ -220,36 +221,40 @@ namespace System.IdentityModel.Test
             ClaimsIdentity subject =
                 new ClaimsIdentity(
                     new List<Claim> 
-                    {   new Claim(_nameClaimTypeForDelegate, delegateSetName), 
-                        new Claim(handlerNameClaimType, handlerSetName), 
+                    {   new Claim(_nameClaimTypeForDelegate, delegateName), 
+                        new Claim(validationParametersNameClaimType, validationParameterName), 
                         new Claim(ClaimsIdentity.DefaultNameClaimType, defaultName), 
-                        new Claim(_roleClaimTypeForDelegate, delegateSetRole),
-                        new Claim(handlerRoleClaimType, handlerSetRole), 
+                        new Claim(_roleClaimTypeForDelegate, delegateRole),
+                        new Claim(validationParametersRoleClaimType, validationParameterRole), 
                         new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole), 
                     });
 
             JwtSecurityToken jwt = handler.CreateToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;
 
             // Delegates should override any other settings
-            validationParameters.NameClaimType = NameClaimTypeDelegate;
-            validationParameters.RoleClaimType = RoleClaimTypeDelegate;
-            handler.NameClaimType = handlerNameClaimType;
-            handler.RoleClaimType = handlerRoleClaimType;
+            validationParameters.NameClaimTypeRetriever = NameClaimTypeDelegate;
+            validationParameters.RoleClaimTypeRetriever = RoleClaimTypeDelegate;
 
             SecurityToken validatedToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
-            CheckNamesAndRole(new string[] { delegateSetName, defaultName, handlerSetName }, new string[] { delegateSetRole, defaultRole, handlerSetRole }, principal, _nameClaimTypeForDelegate, _roleClaimTypeForDelegate);
+            CheckNamesAndRole(new string[] { delegateName, defaultName, validationParameterName }, new string[] { delegateRole, defaultRole, validationParameterRole }, principal, _nameClaimTypeForDelegate, _roleClaimTypeForDelegate);
 
-            // Directly setting values should override defaults
-            validationParameters.NameClaimType = null;
-            validationParameters.RoleClaimType = null;
+            // Set delegates to null will use TVP values
+            validationParameters.NameClaimTypeRetriever = null;
+            validationParameters.RoleClaimTypeRetriever = null;
             principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
-            CheckNamesAndRole(new string[] { handlerSetName, defaultName, delegateSetName }, new string[] { handlerSetRole, defaultRole, delegateSetRole }, principal, handlerNameClaimType, handlerRoleClaimType);
+            CheckNamesAndRole(new string[] { validationParameterName, defaultName, delegateName }, new string[] { validationParameterRole, defaultRole, delegateRole }, principal, validationParametersNameClaimType, validationParametersRoleClaimType);
 
-            handler.NameClaimType = null;
-            handler.RoleClaimType = null;
+            // check for defaults
+            validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningToken = KeyingMaterial.DefaultX509Token_2048,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+            };
+
             principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
-            CheckNamesAndRole(new string[] { defaultName, handlerSetName, delegateSetName }, new string[] { defaultRole, handlerSetRole, delegateSetRole }, principal);
+            CheckNamesAndRole(new string[] { defaultName, validationParameterName, delegateName }, new string[] { defaultRole, validationParameterRole, delegateRole }, principal);
         }
 
         /// <summary>

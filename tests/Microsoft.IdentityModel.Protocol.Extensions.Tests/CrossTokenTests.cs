@@ -21,8 +21,11 @@ using System;
 using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-using Saml2SecurityTokenHandler = Microsoft.IdentityModel.Extensions.Saml2SecurityTokenHandler;
-using SamlSecurityTokenHandler = Microsoft.IdentityModel.Extensions.SamlSecurityTokenHandler;
+
+using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+using SMSamlTokenHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
+using SMSaml2TokenHandler = System.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -55,24 +58,36 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Validates tokens")]
         public void CrossToken_ValidateToken()
         {
-            string jwtToken = IdentityUtilities.DefaultAsymmetricJwt;
-            string saml2Token = IdentityUtilities.CreateSaml2Token();
-            string samlToken = IdentityUtilities.CreateSamlToken();
-
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            Saml2SecurityTokenHandler saml2Handler = new Saml2SecurityTokenHandler();
-            SamlSecurityTokenHandler samlHandler = new SamlSecurityTokenHandler();
+            IMSaml2TokenHandler imSaml2Handler = new IMSaml2TokenHandler();
+            IMSamlTokenHandler imSamlHandler = new IMSamlTokenHandler();
+            SMSaml2TokenHandler smSaml2Handler = new SMSaml2TokenHandler();
+            SMSamlTokenHandler smSamlHandler = new SMSamlTokenHandler();
+
+            string jwtToken = IdentityUtilities.CreateJwtToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, jwtHandler);
+
+            // saml tokens created using Microsoft.IdentityModel.Extensions
+            string imSaml2Token = IdentityUtilities.CreateSaml2Token(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, imSaml2Handler);
+            string imSamlToken = IdentityUtilities.CreateSamlToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, imSamlHandler);
+
+            // saml tokens created using System.IdentityModel.Tokens
+            string smSaml2Token = IdentityUtilities.CreateSaml2Token(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, smSaml2Handler);
+            string smSamlToken = IdentityUtilities.CreateSamlToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, smSamlHandler);
 
             ClaimsPrincipal jwtPrincipal = ValidateToken(jwtToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, jwtHandler, ExpectedException.NoExceptionExpected);
-            ClaimsPrincipal saml2Principal = ValidateToken(samlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, samlHandler, ExpectedException.NoExceptionExpected);
-            ClaimsPrincipal samlPrincipal = ValidateToken(saml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, saml2Handler, ExpectedException.NoExceptionExpected);
+            ClaimsPrincipal imSaml2Principal = ValidateToken(imSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
+            ClaimsPrincipal imSamlPrincipal = ValidateToken(imSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSamlHandler, ExpectedException.NoExceptionExpected);
+            ClaimsPrincipal smSaml2Principal = ValidateToken(smSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
+            ClaimsPrincipal smSamlPrincipal = ValidateToken(smSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSamlHandler, ExpectedException.NoExceptionExpected);
 
-            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(samlPrincipal, saml2Principal, new CompareContext { IgnoreSubject = true }));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(imSamlPrincipal,  imSaml2Principal, new CompareContext { IgnoreSubject = true }));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSamlPrincipal,  imSaml2Principal, new CompareContext { IgnoreSubject = true }));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSaml2Principal, imSaml2Principal, new CompareContext { IgnoreSubject = true }));
 
             // false = ignore type of objects, we expect all objects in the principal to be of same type (no derived types)
             // true = ignore subject, claims have a backpointer to their ClaimsIdentity.  Most of the time this will be different as we are comparing two different ClaimsIdentities.
             // true = ignore properties of claims, any mapped claims short to long for JWT's will have a property that represents the short type.
-            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(jwtPrincipal, saml2Principal, new CompareContext{IgnoreType = false, IgnoreSubject = true, IgnoreProperties=true}));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(jwtPrincipal, imSaml2Principal, new CompareContext{IgnoreType = false, IgnoreSubject = true, IgnoreProperties=true}));
         }
 
         private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)

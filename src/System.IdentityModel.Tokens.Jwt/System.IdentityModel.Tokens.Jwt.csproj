@@ -58,11 +58,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\common\DateTimeUtil.cs">
+      <Link>DateTimeUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\common\ErrorMessages.cs">
+      <Link>ErrorMessages.cs</Link>
+    </Compile>
+    <Compile Include="..\common\Utility.cs">
+      <Link>Utility.cs</Link>
+    </Compile>
     <Compile Include="AsymmetricSignatureProvider.cs" />
     <Compile Include="Base64UrlEncoder.cs" />
     <Compile Include="ClaimTypeMapping.cs" />
-    <Compile Include="ConfigurationStrings.cs" />
-    <Compile Include="DateTimeUtil.cs" />
     <Compile Include="DiagnosticUtility.cs" />
     <Compile Include="EpochTime.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -76,7 +83,6 @@
     <Compile Include="JwtPayLoad.cs" />
     <Compile Include="JwtSecurityToken.cs" />
     <Compile Include="JwtSecurityTokenHandler.cs" />
-    <Compile Include="JwtSecurityTokenRequirement.cs" />
     <Compile Include="NamedKeyIssuerTokenResolver.cs" />
     <Compile Include="NamedKeySecurityKeyIdentifierClause.cs" />
     <Compile Include="NamedKeySecurityToken.cs" />
@@ -85,19 +91,19 @@
     <Compile Include="SecurityTokenInvalidIssuerException.cs" />
     <Compile Include="SecurityTokenInvalidLifetimeException.cs" />
     <Compile Include="SecurityTokenInvalidSignatureException.cs" />
+    <Compile Include="SecurityTokenNoExpirationException.cs" />
     <Compile Include="SecurityTokenSignatureKeyNotFoundException.cs" />
     <Compile Include="SignatureProvider.cs" />
     <Compile Include="SignatureProviderFactory.cs" />
     <Compile Include="SymmetricSignatureProvider.cs" />
     <Compile Include="TextStrings.cs" />
     <Compile Include="TokenValidationParameters.cs" />
-    <Compile Include="Utility.cs" />
+    <Compile Include="Validators.cs" />
     <Compile Include="WifExtensionsErrors.cs" />
     <Compile Include="WSSecurity10Constants.cs" />
     <Compile Include="WSSecurityUtilityConstants.cs" />
     <Compile Include="X509CertificateValidatorEx.cs" />
     <Compile Include="X509SecurityKey.cs" />
-    <Compile Include="XmlUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\build\35MSSharedLib1024.snk">

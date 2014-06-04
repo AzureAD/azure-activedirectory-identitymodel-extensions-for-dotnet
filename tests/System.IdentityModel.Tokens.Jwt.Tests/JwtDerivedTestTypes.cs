@@ -56,7 +56,7 @@ namespace System.IdentityModel.Test
         public bool ValidateLifetimeCalled { get; set; }
         public bool ValidateIssuerCalled { get; set; }
         public bool ValidateSignatureCalled { get; set; }
-        public bool ValidateSigningTokenCalled { get; set; }
+        public bool ValidateSigningKeyCalled { get; set; }
         public string Guid { get; set; }
 
         private void Init()
@@ -65,7 +65,7 @@ namespace System.IdentityModel.Test
             ValidateLifetimeCalled = false;
             ValidateIssuerCalled = false;
             ValidateSignatureCalled = false;
-            ValidateSigningTokenCalled = false;
+            ValidateSigningKeyCalled = false;
         }
     }
 
@@ -100,36 +100,36 @@ namespace System.IdentityModel.Test
             return new DerivedJwtSecurityToken(jwtEncodedString);
         }
 
-        protected override void ValidateAudience(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override void ValidateAudience(IEnumerable<string> audiences, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             Assert.IsNotNull(derivedJwt);
             ValidateAudienceCalled = true;
-            base.ValidateAudience(jwt, validationParameters);
+            base.ValidateAudience(audiences, jwt, validationParameters);
         }
 
-        protected override string ValidateIssuer(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override string ValidateIssuer(string issuer, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             Assert.IsNotNull(derivedJwt);
             ValidateIssuerCalled = true;
-            return base.ValidateIssuer(jwt, validationParameters);
+            return base.ValidateIssuer(issuer, jwt, validationParameters);
         }
 
-        protected override void ValidateIssuerSecurityKey(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
+            DerivedJwtSecurityToken derivedJwt = securityToken as DerivedJwtSecurityToken;
             Assert.IsNotNull(derivedJwt);
             ValidateIssuerSigningKeyCalled = true;
-            base.ValidateIssuerSecurityKey(jwt, validationParameters);
+            base.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
         }
 
-        protected override void ValidateLifetime(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             Assert.IsNotNull(derivedJwt);
             ValidateLifetimeCalled = true;
-            base.ValidateLifetime(jwt, validationParameters);
+            base.ValidateLifetime(notBefore, expires, jwt, validationParameters);
         }
 
         protected override JwtSecurityToken ValidateSignature(string securityToken, TokenValidationParameters validationParameters)
@@ -151,22 +151,22 @@ namespace System.IdentityModel.Test
     {
         public void ValidateAudiencePublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            base.ValidateAudience(jwt, validationParameters);
+            base.ValidateAudience(new string[]{jwt.Issuer}, jwt, validationParameters);
         }
 
         public string ValidateIssuerPublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            return base.ValidateIssuer(jwt, validationParameters);
+            return base.ValidateIssuer(jwt.Issuer, jwt, validationParameters);
         }
 
         public void ValidateLifetimePublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            base.ValidateLifetime(jwt, validationParameters);
+            base.ValidateLifetime(DateTime.UtcNow, DateTime.UtcNow, jwt, validationParameters);
         }
 
-        public void ValidateSigningTokenPublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        public void ValidateSigningTokenPublic(SecurityKey securityKey, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            base.ValidateIssuerSecurityKey(jwt, validationParameters);
+            base.ValidateIssuerSecurityKey(securityKey, jwt, validationParameters);
         }
     }
 
