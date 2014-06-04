@@ -83,14 +83,15 @@
     </Compile>
     <Compile Include="ClaimSets.cs" />
     <Compile Include="CreateAndValidateTokens.cs" />
-    <Compile Include="Defaults.cs" />
     <Compile Include="ExtensibilityTests.cs" />
     <Compile Include="JwtDerivedTestTypes.cs" />
+    <Compile Include="JwtHeaderTests.cs" />
     <Compile Include="JwtPayloadTest.cs" />
     <Compile Include="JwtSecurityTokenHandlerTests.cs" />
     <Compile Include="JwtSecurityTokenTests.cs" />
     <Compile Include="JwtTestUtilities.cs" />
-    <Compile Include="NamedKeyTests.cs" />
+    <Compile Include="NamedKeyIssuerTokenResolverTests.cs" />
+    <Compile Include="NamedKeySecurityTokenTests.cs" />
     <Compile Include="NamedKeySecurityKeyIdentifierClauseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="References.cs" />

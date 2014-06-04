@@ -113,6 +113,13 @@ namespace System.IdentityModel.Test
         [Description("Tests: Publics")]
         public void NamedKeySecurityKeyIdentifierClause_Publics()
         {
+            //        new NameKeyParametersVariation
+            //{
+            //    TestCase = "MatchesName",
+            //    TestAction =
+            //        () => (new NamedKeySecurityKeyIdentifierClause("bob", null)).Matches(null)
+            //},
+
             NamedKeySecurityKeyIdentifierClause namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", "keyidentifier");
             Assert.IsTrue("name" == namedKeySecurityKeyIdentifierClause.Name);
             Assert.IsTrue("keyidentifier" == namedKeySecurityKeyIdentifierClause.KeyIdentifier);

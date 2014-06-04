@@ -65,6 +65,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10223 = "IDX10223: Lifetime validation failed. The token is expired.\nValidTo: '{0}'\nCurrent time: '{1}'.";
         public const string IDX10224 = "IDX10224: Lifetime validation failed. The token NotBefore: '{0}'is after Expires: '{1}'.";
         public const string IDX10225 = "IDX10225: Lifetime validation failed. The token is missing an Expiration Time.\nTokentype: '{0}'.";
+        public const string IDX10226 = "IDX10226: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
 
 
         // protocol messages
@@ -91,5 +92,7 @@ namespace Microsoft.IdentityModel
         public const string IDX11006 = "IDX11006: This method is not supported to read a 'saml2token' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
         public const string IDX11007 = "IDX11007: This method is not supported to read a 'samltoken' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
         #pragma warning restore 1591
+
+
     }
 }

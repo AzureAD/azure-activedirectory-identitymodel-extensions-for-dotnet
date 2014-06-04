@@ -21,17 +21,13 @@ namespace System.IdentityModel.Tokens
     using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
-    using System.Configuration;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IdentityModel.Protocols.WSTrust;
-    using System.IdentityModel.Selectors;
     using System.Security.Claims;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Xml;
-    using Elements = System.IdentityModel.Tokens.JwtConfigurationStrings.Elements;
 
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-07.

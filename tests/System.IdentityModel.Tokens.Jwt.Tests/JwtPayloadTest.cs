@@ -17,7 +17,10 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.IdentityModel.Claims;
 using System.IdentityModel.Tokens;
+using Claim = System.Security.Claims.Claim;
 
 namespace System.IdentityModel.Test
 {
@@ -47,6 +50,35 @@ namespace System.IdentityModel.Test
         public void Initialize()
         {
             _testContextProvider = new TestContextProvider( TestContext );
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "0B55BD6C-40F7-4C82-A0B7-D0B799EA3289")]
+        [Description("Ensures that JwtPayload defaults are as expected")]
+        public void JwtPayload_Defaults()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+
+            Assert.IsFalse(jwtPayload.Comparer.GetType() != StringComparer.Ordinal.GetType(), "jwtPayload.Comparer.GetType() != StringComparer.Ordinal.GetType()");
+
+            List<Claim> claims = jwtPayload.Claims as List<Claim>;
+            Assert.IsFalse(claims == null, "claims as List<Claim> == null");
+
+            foreach (Claim c in jwtPayload.Claims)
+            {
+                Assert.Fail("claims.Count != 0");
+                break;
+            }
+
+            Assert.IsFalse(jwtPayload.Actort != null, "jwtPayload.Actort != null");
+            Assert.IsFalse(jwtPayload.Aud != null, "jwtPayload.Audience != null");
+            Assert.IsFalse(jwtPayload.Exp != null, "jwtPayload.Exp != null");
+            Assert.IsFalse(jwtPayload.Jti != null, "jwtPayload.Id != null");
+            Assert.IsFalse(jwtPayload.Iat != null, "jwtPayload.Iat != null");
+            Assert.IsFalse(jwtPayload.Iss != null, "jwtPayload.Iss != null");
+            Assert.IsFalse(jwtPayload.Sub != null, "jwtPayload.Sub != null");
+            Assert.IsFalse(jwtPayload.ValidFrom != DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
+            Assert.IsFalse(jwtPayload.ValidTo != DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
         [TestMethod]
