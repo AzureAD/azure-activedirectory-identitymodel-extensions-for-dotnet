@@ -60,11 +60,11 @@ namespace System.IdentityModel.Test
             Assert.IsFalse(jwtHeader.ContainsValue(JwtConstants.HeaderType), "jwtHeader.ContainsValue( JwtConstants.HeaderType )");
             Assert.IsFalse(jwtHeader.ContainsValue(JwtConstants.ReservedHeaderParameters.Typ), "jwtHeader.ContainsValue( JwtConstans.ReservedHeaderParameters.Type )");
             Assert.IsFalse(jwtHeader.ContainsKey(JwtConstants.ReservedHeaderParameters.Alg), "!jwtHeader.ContainsKey( JwtConstants.ReservedHeaderParameters.Algorithm )");
-            Assert.IsFalse(jwtHeader.Alg != null, "jwtHeader.SignatureAlgorithm == null");
-            Assert.IsFalse(jwtHeader.SigningCredentials != null, "jwtHeader.SigningCredentials != null");
-            Assert.IsFalse(jwtHeader.SigningKeyIdentifier == null, "jwtHeader.SigningKeyIdentifier == null");
-            Assert.IsFalse(jwtHeader.SigningKeyIdentifier.Count != 0, "jwtHeader.SigningKeyIdentifier.Count !== 0");
-            Assert.IsFalse(jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
+            Assert.IsNull(jwtHeader.Alg, "jwtHeader.SignatureAlgorithm == null");
+            Assert.IsNull(jwtHeader.SigningCredentials, "jwtHeader.SigningCredentials != null");
+            Assert.IsNotNull(jwtHeader.SigningKeyIdentifier, "jwtHeader.SigningKeyIdentifier == null");
+            Assert.AreEqual(jwtHeader.SigningKeyIdentifier.Count, 0, "jwtHeader.SigningKeyIdentifier.Count !== 0");
+            Assert.AreEqual(jwtHeader.Comparer.GetType(), StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
         [TestMethod]

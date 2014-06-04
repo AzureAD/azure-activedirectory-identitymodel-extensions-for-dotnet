@@ -88,7 +88,7 @@ namespace System.IdentityModel.Test
                 tokenDescriptor.AppliesToAddress = jwtParams.CompareTo.Audience;
 
                 JwtSecurityToken token = handler.CreateToken(tokenDescriptor) as JwtSecurityToken;
-                Assert.IsFalse(!IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
+                Assert.IsTrue(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
 
                 // write as xml
                 MemoryStream ms = new MemoryStream();
@@ -148,11 +148,11 @@ namespace System.IdentityModel.Test
             SecurityToken validatedToken;
             var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
-            Assert.IsFalse(jsonClaim == null, "Did not find Jsonclaims. Looking for claim of type: '" + typeof(Entity).ToString() + "'");
+            Assert.IsNotNull(jsonClaim, "Did not find Jsonclaims. Looking for claim of type: '" + typeof(Entity).ToString() + "'");
 
             JavaScriptSerializer js = new JavaScriptSerializer();
             string jsString = js.Serialize(Entity.Default);
-            Assert.IsFalse(jsString != jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
+            Assert.AreEqual(jsString, jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
         }
 
         [TestMethod]
@@ -177,11 +177,11 @@ namespace System.IdentityModel.Test
 
             var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
-            Assert.IsFalse(jsonClaim == null, string.Format(CultureInfo.InvariantCulture, "Did not find Jsonclaims. Looking for claim of type: '{0}'", typeof(Entity).ToString()));
+            Assert.IsNotNull(jsonClaim, string.Format(CultureInfo.InvariantCulture, "Did not find Jsonclaims. Looking for claim of type: '{0}'", typeof(Entity).ToString()));
 
             JavaScriptSerializer js = new JavaScriptSerializer();
             string jsString = js.Serialize(Entity.Default);
-            Assert.IsFalse(jsString != jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
+            Assert.AreEqual(jsString, jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
         }
 
         private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)

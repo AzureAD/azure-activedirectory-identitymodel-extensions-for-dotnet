@@ -121,10 +121,12 @@ namespace System.IdentityModel.Tokens
             longToShortClaimTypeMapping = new Dictionary<string, string>();
             foreach (KeyValuePair<string, string> kv in shortToLongClaimTypeMapping)
             {
-                if (!longToShortClaimTypeMapping.ContainsKey(kv.Value))
+                if (longToShortClaimTypeMapping.ContainsKey(kv.Value))
                 {
-                    longToShortClaimTypeMapping.Add(kv.Value, kv.Key);
+                    continue;
                 }
+
+                longToShortClaimTypeMapping.Add(kv.Value, kv.Key);
             }
 
             inboundClaimFilter = new HashSet<string>()

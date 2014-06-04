@@ -178,10 +178,10 @@ namespace System.IdentityModel.Test
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
-            Assert.IsFalse(!handler.CanValidateToken, "!handler.CanValidateToken");
-            Assert.IsFalse(!handler.CanWriteToken, "!handler.CanWriteToken");
-            Assert.IsFalse(handler.SignatureProviderFactory == null, "handler.SignatureProviderFactory == null");
-            Assert.IsFalse(handler.TokenType != typeof(JwtSecurityToken), "handler.TokenType != typeof(JwtSecurityToken)");
+            Assert.IsTrue(handler.CanValidateToken, "!handler.CanValidateToken");
+            Assert.IsTrue(handler.CanWriteToken, "!handler.CanWriteToken");
+            Assert.IsNotNull(handler.SignatureProviderFactory, "handler.SignatureProviderFactory == null");
+            Assert.AreEqual(handler.TokenType, typeof(JwtSecurityToken), "handler.TokenType != typeof(JwtSecurityToken)");
 
             try
             {
@@ -193,13 +193,13 @@ namespace System.IdentityModel.Test
             }
 
             string[] tokenIdentifiers = handler.GetTokenTypeIdentifiers();
-            Assert.IsFalse(tokenIdentifiers.Length != 2, "tokenIdentifiers.Length != 2 ");
+            Assert.AreEqual(tokenIdentifiers.Length, 2, "tokenIdentifiers.Length != 2 ");
             // this seemly simple order will break WebSSO if the first type is not an absolute URI
-            Assert.IsFalse(tokenIdentifiers[0] != JwtConstants.TokenTypeAlt, "tokenIdentifiers[0] != JwtConstants.TokenTypeAlt ");
+            Assert.AreEqual(tokenIdentifiers[0], JwtConstants.TokenTypeAlt, "tokenIdentifiers[0] != JwtConstants.TokenTypeAlt ");
 
             Uri result = null;
-            Assert.IsFalse(!Uri.TryCreate(tokenIdentifiers[0], UriKind.Absolute, out result), "tokenIdentifiers[0] must be able to create an UriKind.Absolute");
-            Assert.IsFalse(tokenIdentifiers[1] != JwtConstants.TokenType, "tokenIdentifiers[1] != JwtConstants.TokenType");
+            Assert.IsTrue(Uri.TryCreate(tokenIdentifiers[0], UriKind.Absolute, out result), "tokenIdentifiers[0] must be able to create an UriKind.Absolute");
+            Assert.AreEqual(tokenIdentifiers[1], JwtConstants.TokenType, "tokenIdentifiers[1] != JwtConstants.TokenType");
         }
 
         [TestMethod]
@@ -292,8 +292,8 @@ namespace System.IdentityModel.Test
 
                 foreach (var kv in aadStrings)
                 {
-                    Assert.IsFalse(!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
-                    Assert.IsFalse(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] != kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
+                    Assert.IsTrue(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
+                    Assert.AreEqual(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key], kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
                 }
 
                 List<KeyValuePair<string, string>> adfsStrings = new List<KeyValuePair<string, string>>();
@@ -365,22 +365,17 @@ namespace System.IdentityModel.Test
 
                 foreach (var kv in adfsStrings)
                 {
-                    Assert.IsFalse(!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
-                    Assert.IsFalse(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] != kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
+                    Assert.IsTrue(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
+                    Assert.AreEqual(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key], kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
                 }
 
                 var handler = new JwtSecurityTokenHandler();
 
-                // CreateToken will all 'aud' and 'sub' claims.
-                IEnumerable<Claim> inboundShortClaims =
-                    ClaimSets.AllInboundShortClaimTypes(
+                List<Claim> expectedInboundClaimsMapped = new List<Claim>(
+                    ClaimSets.ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(
                             IdentityUtilities.DefaultIssuer,
-                            IdentityUtilities.DefaultIssuer,
-                            new List<Claim>
-                        { 
-                            new Claim("iss", IdentityUtilities.DefaultIssuer, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
-                            new Claim("aud", IdentityUtilities.DefaultAudience, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
-                        });
+                            IdentityUtilities.DefaultIssuer
+                            ));
 
                 var jwt = handler.CreateToken(
                     issuer: IdentityUtilities.DefaultIssuer,
@@ -390,9 +385,12 @@ namespace System.IdentityModel.Test
                             IdentityUtilities.DefaultIssuer,
                             IdentityUtilities.DefaultIssuer)));
 
-                // These should not be translated.            
-                // TODO fix this statement
-                //Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<Claim>>(jwt.Claims, inboundShortClaims, CompareContext.Default));
+                List<Claim> expectedInboundClaimsUnMapped = new List<Claim>(
+                        ClaimSets.AllInboundShortClaimTypes(
+                            IdentityUtilities.DefaultIssuer,
+                            IdentityUtilities.DefaultIssuer
+                          ));
+
 
                 var validationParameters = new TokenValidationParameters
                 {
@@ -402,11 +400,12 @@ namespace System.IdentityModel.Test
                     ValidateIssuer = false,
                 };
 
+
                 // ValidateToken will map claims according to the InboundClaimTypeMap
-                RunClaimMappingVariation(jwt, handler, validationParameters, null, null, "Jwt with all ShortClaimTypes, InboundClaimTypeMap default");
+                RunClaimMappingVariation(jwt: jwt, tokenHandler: handler, validationParameters: validationParameters, expectedClaims: expectedInboundClaimsMapped, identityName: ClaimTypes.Name);
 
                 JwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
-                RunClaimMappingVariation(jwt, handler, validationParameters, null, null, "Jwt with all ShortClaimTypes, InboundClaimTypeMap.Clear()");
+                RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedInboundClaimsUnMapped, identityName: null);
 
                 // test that setting the NameClaimType override works.
                 List<Claim> claims = new List<Claim>()
@@ -449,16 +448,15 @@ namespace System.IdentityModel.Test
             }
         }
 
-        private void RunClaimMappingVariation(JwtSecurityToken jwt, JwtSecurityTokenHandler handler, TokenValidationParameters validationParameters, IEnumerable<Claim> expectedClaims, string identityName, string variation)
+        private void RunClaimMappingVariation(JwtSecurityToken jwt, JwtSecurityTokenHandler tokenHandler, TokenValidationParameters validationParameters, IEnumerable<Claim> expectedClaims, string identityName)
         {
-            Console.WriteLine("ValidateClaimMapping: variation: " + variation);
             SecurityToken validatedToken;
 
-            ClaimsPrincipal cp = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
+            ClaimsPrincipal cp = tokenHandler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             ClaimsIdentity identity = cp.Identity as ClaimsIdentity;
 
-            Assert.IsFalse(expectedClaims != null && !IdentityComparer.AreEqual(identity.Claims, expectedClaims), "identity.Claims != expectedClaims");
-            Assert.IsFalse(identityName != null && identity.Name != identityName, "identity.Name != identityName");
+            Assert.IsTrue(IdentityComparer.AreEqual(identity.Claims, expectedClaims), "identity.Claims != expectedClaims");
+            Assert.AreEqual(identity.Name, identityName);
 
             // This checks that all claims that should have been mapped.
             foreach (Claim claim in identity.Claims)
@@ -466,7 +464,7 @@ namespace System.IdentityModel.Test
                 // if it was mapped, make sure the shortname is found in the mapping and equals the claim.Type
                 if (claim.Properties.ContainsKey(JwtSecurityTokenHandler.ShortClaimTypeProperty))
                 {
-                    Assert.IsFalse(!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty]), "!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty] ): " + claim.Type);
+                    Assert.IsTrue(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty]), "!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty] ): " + claim.Type);
                 }
                 // there was no short property.
                 Assert.IsFalse(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(claim.Type), "JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Type ), wasn't mapped claim.Type: " + claim.Type);
@@ -484,7 +482,7 @@ namespace System.IdentityModel.Test
                 if (!JwtSecurityTokenHandler.InboundClaimFilter.Contains(claim.Type))
                 {
                     Claim firstClaim = identity.FindFirst(claimType);
-                    Assert.IsFalse(firstClaim == null, "Claim firstClaim = identity.FindFirst( claimType ), firstClaim == null. claim.Type: " + claim.Type + " claimType: " + claimType);
+                    Assert.IsNotNull(firstClaim, "Claim firstClaim = identity.FindFirst( claimType ), firstClaim == null. claim.Type: " + claim.Type + " claimType: " + claimType);
                 }
             }
         }
