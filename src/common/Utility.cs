@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel
+namespace Microsoft.IdentityModel
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
@@ -25,6 +25,9 @@ namespace System.IdentityModel
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     internal static class Utility
     {
+        public const string Empty = "empty";
+        public const string Null = "null";
+
         /// <summary>
         /// Serializes the list of strings into string as follows:
         /// 'str1','str2','str3' ...
@@ -40,7 +43,7 @@ namespace System.IdentityModel
         {
             if (null == strings)
             {
-                return TextStrings.Null;
+                return Utility.Null;
             }
 
             StringBuilder sb = new StringBuilder();
@@ -49,18 +52,18 @@ namespace System.IdentityModel
             {
                 if (first)
                 {
-                    sb.AppendFormat("{0}", str ?? TextStrings.Null);
+                    sb.AppendFormat("{0}", str ?? Utility.Null);
                     first = false;
                 }
                 else
                 {
-                    sb.AppendFormat(", {0}", str ?? TextStrings.Null);
+                    sb.AppendFormat(", {0}", str ?? Utility.Null);
                 }
             }
 
             if (first)
             {
-                return TextStrings.Empty;
+                return Utility.Empty;
             }
 
             return sb.ToString();

@@ -16,15 +16,21 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
+using System.Xml;
+
+using SMSamlTokenHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
+using SMSaml2TokenHandler = System.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+
 namespace Microsoft.IdentityModel.Test
 {
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.IdentityModel.Tokens;
-    using System.Security.Claims;
-    using System.Text;
-    using System.Xml;
-
     /// <summary>
     /// Main purpose of this code is to serve up Identities
     /// ClaimPrincipal
@@ -38,6 +44,7 @@ namespace Microsoft.IdentityModel.Test
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }
         public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2; } }
         public static SecurityToken DefaultAsymmetricSigningToken { get { return KeyingMaterial.DefaultAsymmetricX509Token_2048; ; } }
+
         public static IEnumerable<Claim> DefaultClaims 
         { 
             get 
@@ -105,6 +112,12 @@ namespace Microsoft.IdentityModel.Test
         public static SecurityToken NotDefaultSigningToken = KeyingMaterial.DefaultX509Token_2048;
 
         public const string DefaultAuthenticationType = "Federation";
+
+        static IdentityUtilities()
+        {
+
+        }
+
         public static string DefaultAsymmetricJwt
         {
             get { return DefaultJwt(DefaultAsymmetricSecurityTokenDescriptor); }
@@ -139,6 +152,7 @@ namespace Microsoft.IdentityModel.Test
                 SigningCredentials = signingCredentials,
                 Subject = DefaultClaimsIdentity,
                 TokenIssuerName = DefaultIssuer,
+                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
             };
         }
 
@@ -156,34 +170,53 @@ namespace Microsoft.IdentityModel.Test
         {                    
             return new TokenValidationParameters
             {
+                AuthenticationType = IdentityUtilities.DefaultAuthenticationType,
+                IssuerSigningToken = securityToken,
                 ValidAudience = DefaultAudience,
                 ValidIssuer = DefaultIssuer,
-                IssuerSigningToken = securityToken,
             };
         }
         
-        public static string CreateJwtToken(SecurityTokenDescriptor securityTokenDescriptor)
+        public static string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
         {
-           JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-           SecurityToken jwtToken = jwtHandler.CreateToken(securityTokenDescriptor);
-           return jwtHandler.WriteToken(jwtToken);
+            return CreateJwtToken(tokenDescriptor, new JwtSecurityTokenHandler());
+        }
+
+        public static string CreateJwtToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
         }
 
         public static string CreateSaml2Token()
         {
             return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
         }
+
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor)
         {
-            Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            Saml2SecurityToken samlSecurityToken = samlSecurityTokenHandler.CreateToken(securityTokenDescriptor) as Saml2SecurityToken;
-            StringBuilder sb = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(sb);
-            samlSecurityTokenHandler.WriteToken(writer, samlSecurityToken);
-            writer.Flush();
-            writer.Close();
-            return sb.ToString();
+            return CreateSaml2Token(securityTokenDescriptor, new IMSaml2TokenHandler());
         }
+
+        public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return CreateToken(securityTokenDescriptor, tokenHandler);
+        }
+
+        public static SamlSecurityToken CreateSamlSecurityToken()
+        {
+            return CreateSamlSecurityToken(DefaultAsymmetricSecurityTokenDescriptor, new IMSamlTokenHandler());
+        }
+
+        public static SamlSecurityToken CreateSamlSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return CreateSecurityToken(securityTokenDescriptor, tokenHandler) as SamlSecurityToken;
+        }
+
+        public static SecurityToken CreateSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return tokenHandler.CreateToken(securityTokenDescriptor);
+        }
+
         public static string CreateSamlToken()
         {
             return CreateSamlToken(DefaultAsymmetricSecurityTokenDescriptor);
@@ -191,14 +224,53 @@ namespace Microsoft.IdentityModel.Test
 
         public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor)
         {
-            SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
-            SamlSecurityToken samlSecurityToken = samlSecurityTokenHandler.CreateToken(securityTokenDescriptor) as SamlSecurityToken;
+            return CreateToken(securityTokenDescriptor, new IMSamlTokenHandler());
+        }
+
+        public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return CreateToken(securityTokenDescriptor, tokenHandler);
+        }
+
+        public static string CreateToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            SecurityToken securityToken = tokenHandler.CreateToken(securityTokenDescriptor);
             StringBuilder sb = new StringBuilder();
             XmlWriter writer = XmlWriter.Create(sb);
-            samlSecurityTokenHandler.WriteToken(writer, samlSecurityToken);
+            tokenHandler.WriteToken(writer, securityToken);
             writer.Flush();
             writer.Close();
             return sb.ToString();
+        }
+
+        public static void AudienceValidatorDoesNotThrow(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return;
+        }
+
+        public static void AudienceValidatorThrows(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidAudienceException("AudienceValidatorThrows");
+        }
+
+        public static string IssuerValidatorEcho(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return issuer;
+        }
+
+        public static string IssuerValidatorThrows(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidIssuerException("IssuerValidatorThrows");
+        }
+
+        public static void LifetimeValidatorDoesNotThrow(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return;
+        }
+
+        public static void LifetimeValidatorThrows(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
         }
     }
 }

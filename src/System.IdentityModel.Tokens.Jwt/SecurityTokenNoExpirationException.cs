@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,49 +16,49 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace System.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when an OpenIdConnect protocol handler encounters an invalid chash.
+    /// This exception is thrown when 'lifetime' of a token was not valid.
     /// </summary>
     [Serializable]
-    public class OpenIdConnectProtocolInvalidCHashException : OpenIdConnectProtocolException
+    public class SecurityTokenNoExpirationException : SecurityTokenValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolInvalidCHashException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
         /// </summary>
-        public OpenIdConnectProtocolInvalidCHashException()
+        public SecurityTokenNoExpirationException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolInvalidCHashException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public OpenIdConnectProtocolInvalidCHashException(String message)
+        public SecurityTokenNoExpirationException(String message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolInvalidCHashException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public OpenIdConnectProtocolInvalidCHashException(String message, Exception innerException)
+        public SecurityTokenNoExpirationException(String message, Exception innerException)
             : base(message, innerException)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolInvalidCHashException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected OpenIdConnectProtocolInvalidCHashException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenNoExpirationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

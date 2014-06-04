@@ -68,21 +68,15 @@ namespace System.IdentityModel.Test
             List<string> validAudiences = new List<string>() { validAudience };
             string validIssuer = "ValidIssuer";
             List<string> validIssuers = new List<string>() { validIssuer };
-            Func<IEnumerable<string>, SecurityToken, bool> audValidatorTrue = (str, token) => { return true; };
-            Func<IEnumerable<string>, SecurityToken, bool> audValidatorTrue2 = (str, token) => { return true; };
-            Func<string, SecurityToken, bool> issValidatorTrue = (str, token) => { return true; };
-            Func<string, SecurityToken, bool> issValidatorTrue2 = (str, token) => { return true; };
-            Func<string, SecurityToken, bool> lifetimeValidatorTrue = (str, token) => { return true; };
-            Func<string, SecurityToken, bool> lifetimeValidatorTrue2 = (str, token) => { return true; };
 
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
-            {               
-                AudienceValidator = audValidatorTrue,
+            {
+                AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow,
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeyRetriever = (str) => { return issuerSigningKeys; },
                 IssuerSigningKeys = issuerSigningKeys,
-                IssuerValidator = issValidatorTrue,
-                LifetimeValidator = lifetimeValidatorTrue,
+                IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
+                LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow,
                 SaveSigninToken = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -101,12 +95,12 @@ namespace System.IdentityModel.Test
             Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
-            validationParametersSets.AudienceValidator = audValidatorTrue2;
+            validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow;
             validationParametersSets.IssuerSigningKey = new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
             validationParametersSets.IssuerSigningKeyRetriever = (str) => { return issuerSigningKeysDup; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
-            validationParametersSets.IssuerValidator = issValidatorTrue2;
-            validationParametersSets.LifetimeValidator = lifetimeValidatorTrue2;
+            validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
+            validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow;
             validationParametersSets.SaveSigninToken = true;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
@@ -119,7 +113,7 @@ namespace System.IdentityModel.Test
 
             var tokenValidationParametersCloned = validationParametersInline.Clone();
             Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(tokenValidationParametersCloned, validationParametersInline));
-            Assert.IsTrue(tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple()));
+            //tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple();
 
             string id = Guid.NewGuid().ToString();
             DerivedTokenValidationParameters derivedValidationParameters = new DerivedTokenValidationParameters(id, validationParametersInline);

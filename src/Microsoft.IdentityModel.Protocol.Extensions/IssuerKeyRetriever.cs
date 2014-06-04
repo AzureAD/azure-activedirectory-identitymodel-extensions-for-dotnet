@@ -22,7 +22,7 @@ using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Microsoft.IdentityModel.Extensions
+namespace Microsoft.IdentityModel.Tokens
 {
     // TODO - for SAML 1 and 2 tokens, we don't want to create a collection, so when finished this 
     // new class will resolve the token without creating a collection of securityTokens which results in creating new keys
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Extensions
             }
 
             List<SecurityKey> namedKeys = new List<SecurityKey>();
-            foreach (SecurityKey securityKey in RetrieveIssuerSigningKeys(securityToken, validationParameters))
+            foreach (SecurityKey securityKey in RetrieveIssuerSigningKeys(string.Empty, validationParameters))
             {
                 X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
                 if (x509SecurityKey != null)

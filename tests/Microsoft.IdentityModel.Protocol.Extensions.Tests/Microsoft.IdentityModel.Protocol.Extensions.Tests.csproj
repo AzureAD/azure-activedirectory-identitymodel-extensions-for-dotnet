@@ -100,18 +100,24 @@
       <Link>TestUtilities.cs</Link>
     </Compile>
     <Compile Include="AuthenticationProtocolMessageTests.cs" />
+    <Compile Include="ConfigurationManagerTests.cs" />
     <Compile Include="CrossTokenTests.cs" />
     <Compile Include="DerivedTypes.cs" />
+    <Compile Include="GenericDocumentRetrieverTests.cs" />
+    <Compile Include="HttpDocumentRetrieverTests.cs" />
     <Compile Include="JsonWebKeysTests.cs" />
     <Compile Include="JsonWebKeyTests.cs" />
     <Compile Include="MessageComparer.cs" />
+    <Compile Include="OpenIdConnectConfigurationTests.cs" />
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
     <Compile Include="OpenIdConnectConfigurationRetrieverTests.cs" />
-    <Compile Include="OpenIdConnectMetadataTests.cs" />
     <Compile Include="Saml2SecurityTokenHandlerTests.cs" />
     <Compile Include="SamlSecurityTokenHandlerTests.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensionsTests.cs" />
+    <Compile Include="StaticConfigurationManagerTests.cs" />
+    <Compile Include="WsFederationConfigurationRetrieverTests.cs" />
+    <Compile Include="WsFederationConfigurationTests.cs" />
     <Compile Include="WsFederationConstantsTests.cs" />
     <Compile Include="WsFederationMessageTests.cs" />
   </ItemGroup>

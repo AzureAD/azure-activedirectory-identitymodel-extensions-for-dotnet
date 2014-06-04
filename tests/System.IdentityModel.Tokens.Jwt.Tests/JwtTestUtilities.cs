@@ -65,7 +65,6 @@ namespace System.IdentityModel.Test
         public string Issuer { get; set; }
         public JwtSecurityTokenHandler JwtSecurityTokenHandler { get { return _jwtHandler; } set { _jwtHandler = value; } }
         public JwtSecurityToken JwtSecurityToken { get; set; }
-        public JwtSecurityTokenRequirementTests JwtSecurityTokenRequirement { get; set; }
         public Lifetime Lifetime { get; set; }
         public string Name { get; set; }
         public string NameClaimType { get; set; }

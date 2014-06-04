@@ -142,7 +142,7 @@ namespace System.IdentityModel.Tokens
         //public int? IssuedAt
         public int? Iat
         {
-            get { return this.GetIntClaim(JwtConstants.ReservedClaims.Iss); }
+            get { return this.GetIntClaim(JwtConstants.ReservedClaims.Iat); }
         }
 
         /// <summary>

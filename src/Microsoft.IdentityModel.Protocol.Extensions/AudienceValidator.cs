@@ -30,21 +30,16 @@ namespace Microsoft.IdentityModel.Extensions
     /// </summary>
     internal class AudienceValidator
     {
-        public static void Validate(IEnumerable<string> audiences, TokenValidationParameters validationParameters, SecurityToken securityToken)
+        public static void Validate(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
+            if (audiences == null)
+            {
+                throw new ArgumentNullException("audiences");
+            }
+
             if (validationParameters == null)
             {
                 throw new ArgumentNullException("validationParameters");
-            }
-
-            if (!validationParameters.ValidateAudience)
-            {
-                return;
-            }
-
-            if (audiences == null)
-            {
-                throw new SecurityTokenInvalidAudienceException(ErrorMessages.IDX10215);
             }
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
@@ -52,17 +47,9 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new SecurityTokenInvalidAudienceException(ErrorMessages.IDX10208);
             }
 
+
             foreach (string audience in audiences)
             {
-
-                if (validationParameters.AudienceValidator != null)
-                {
-                    if (validationParameters.AudienceValidator(audiences, securityToken))
-                    {
-                            return;
-                    }
-                }
-
                 if (string.IsNullOrWhiteSpace(audience))
                 {
                     continue;

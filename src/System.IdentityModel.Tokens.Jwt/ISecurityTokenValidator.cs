@@ -28,25 +28,15 @@ namespace System.IdentityModel.Tokens
     public interface ISecurityTokenValidator
     {
         /// <summary>
-        /// Gets or sets the authentication type to use when creating the claims identity
-        /// </summary>
-        string AuthenticationType { get; set; }
-
-        /// <summary>
         /// Returns true if the securityToken can be read, false otherwise.
         /// </summary>
         bool CanReadToken(string securityToken);
 
         /// <summary>
-        /// Gets or sets the clock skew to apply when validating times
-        /// </summary>
-        Int32 ClockSkewInSeconds { get; set; }
-
-        /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
-        Int32 MaximumTokenSizeInBytes { get; set; }
-        
+        Int32 MaximumTokenSizeInBytes {get;set;}
+
         /// <summary>
         /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>
         /// </summary>

@@ -24,6 +24,9 @@ using System.IdentityModel;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 
+using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
@@ -66,7 +69,6 @@ namespace Microsoft.IdentityModel.Test
             {
                 ISecurityTokenValidator tokenValidator = tokenHandler as ISecurityTokenValidator;
                 Assert.IsNotNull(tokenValidator, "tokenHandler is not ISecurityTokenHandler, is" + tokenHandler.GetType().ToString());
-                Assert.AreEqual(tokenValidator.AuthenticationType, AuthenticationTypes.Federation);
             }
 
             securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers(typeof(ISecurityTokenValidator).ToString());
@@ -74,7 +76,6 @@ namespace Microsoft.IdentityModel.Test
             {
                 ISecurityTokenValidator tokenValidator = tokenHandler as ISecurityTokenValidator;
                 Assert.IsNotNull(tokenValidator, "tokenHandler is not ISecurityTokenHandler, is" + tokenHandler.GetType().ToString());             
-                Assert.AreEqual(tokenValidator.AuthenticationType, (typeof(ISecurityTokenValidator).ToString()));
             }
         }
 
@@ -110,11 +111,11 @@ namespace Microsoft.IdentityModel.Test
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
 
             securityTokenValidators.Clear();
-            securityTokenValidators.Add(new Microsoft.IdentityModel.Extensions.SamlSecurityTokenHandler());
+            securityTokenValidators.Add(new IMSamlTokenHandler());
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, ExpectedException.SignatureVerificationFailedException(substringExpected: "ID4037:"));
             ValidateToken(defaultSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);
             ValidateToken(defaultSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, securityTokenValidators, ExpectedException.SecurityTokenValidationException(substringExpected: "IDX10201:"));
-            securityTokenValidators.Add(new Microsoft.IdentityModel.Extensions.Saml2SecurityTokenHandler());
+            securityTokenValidators.Add(new IMSaml2TokenHandler());
             securityTokenValidators.Add(new System.IdentityModel.Tokens.JwtSecurityTokenHandler());
             ValidateToken(defaultSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);
             ValidateToken(defaultJwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);

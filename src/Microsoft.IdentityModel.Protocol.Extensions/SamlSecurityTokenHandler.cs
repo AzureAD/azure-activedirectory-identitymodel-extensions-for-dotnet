@@ -1,4 +1,20 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -7,60 +23,58 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Security.Claims;
+using System.Text;
 using System.Xml;
+using SamlHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
-namespace Microsoft.IdentityModel.Extensions
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator, 
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///     
-    public class SamlSecurityTokenHandler : System.IdentityModel.Tokens.SamlSecurityTokenHandler, ISecurityTokenValidator
+    public class SamlSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
-        private string _authenticationType = AuthenticationTypes.Federation;
-        private Int32 _clockSkewInSeconds = SamlSecurityTokenHandler.DefaultClockSkewInSeconds;
-        private Int32 _maximumTokenSizeInBytes = SamlSecurityTokenHandler.DefaultMaximumTokenSizeInBytes;
+        internal const string SamlTokenProfile11 = "urn:oasis:names:tc:SAML:1.0:assertion";
+        internal const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
 
-        /// <summary>
-        /// Default for the clock skew.
-        /// </summary>
-        /// <remarks>300 seconds (5 minutes).</remarks>
-        public const Int32 DefaultClockSkewInSeconds = 300; // 5 min.
+        private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+        private static string[] _tokenTypeIdentifiers = new string[] { SamlTokenProfile11, OasisWssSamlTokenProfile11 };
 
-        /// <summary>
-        /// Default for the maximm token size.
-        /// </summary>
-        /// <remarks>2 MB (mega bytes).</remarks>
-        public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 1024 * 2; // 2meg.
+        // never set any properties on the handler.
+        private static SMSamlHandlerPrivate _smSamlHandlerPrivateNeverSetAnyProperties = new SMSamlHandlerPrivate();
 
-        /// <summary>
-        /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/> during token validation.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"> if 'value' is null or whitespace.</exception>
-        public string AuthenticationType
-        {
-            get
-            {
-                return _authenticationType;
-            }
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentNullException("AuthenticationType");
-                }
-
-                _authenticationType = value;
-            }
+        public SamlSecurityTokenHandler()
+        {        
         }
 
         /// <summary>
-        /// Indicates whether the current token string can be read as a token 
-        /// of the type handled by this instance.
+        /// Gets a value indicating whether this handler supports validation of tokens 
+        /// handled by this instance.
+        /// </summary>v
+        /// <returns>'True' if the instance is capable of SecurityToken
+        /// validation.</returns>
+        public override bool CanValidateToken
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the class provides serialization functionality to serialize token handled 
+        /// by this instance.
         /// </summary>
-        /// <param name="securityToken">The token string thats needs to be read.</param>
-        /// <returns>'True' if the ReadToken method can parse the token string.</returns>
+        /// <returns>true if the WriteToken method can serialize this token.</returns>
+        public override bool CanWriteToken
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Reads the string as XML and looks for the an element <see cref="SamlConstants.Assertion"/> with namespace <see cref="SamlConstants.Saml11Namespace"/>. 
+        /// </summary>
+        /// <param name="securityToken">The securitytoken.</param>
+        /// <returns><see cref="XmlDictionaryReader.IsStartElemenet"/> (<see cref="SamlConstants.Assertion"/>, <see cref="SamlConstants.Saml11Namespace"/>).</returns>
         public override bool CanReadToken(string securityToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken) || securityToken.Length > MaximumTokenSizeInBytes)
@@ -76,36 +90,12 @@ namespace Microsoft.IdentityModel.Extensions
                     {
                         reader.MoveToContent();
                     }
-                    catch(XmlException)
+                    catch (XmlException)
                     {
                         return false;
                     }
-
-                    return base.CanReadToken(reader);
+                    return reader.IsStartElement(SamlConstants.Assertion, SamlConstants.Saml11Namespace);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Gets and sets the maximum size in bytes, that a will be processed.
-        /// </summary>
-        /// <remarks>This does not set limits when reading tokens using a <see cref="XmlReader"/>. Use xml quotas on the <see cref="XmlReader"/> for those limits.</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public Int32 ClockSkewInSeconds
-        {
-            get
-            {
-                return _clockSkewInSeconds;
-            }
-
-            set
-            {
-                if (value < 1)
-                {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10100, value.ToString(CultureInfo.InvariantCulture)));
-                }
-
-                _clockSkewInSeconds = value;
             }
         }
 
@@ -133,60 +123,90 @@ namespace Microsoft.IdentityModel.Extensions
             }
 
             string nameClaimType = null;
-            if (validationParameters.NameClaimType != null)
+            if (validationParameters.NameClaimTypeRetriever != null)
             {
-                nameClaimType = validationParameters.NameClaimType(samlToken, issuer);
+                nameClaimType = validationParameters.NameClaimTypeRetriever(samlToken, issuer);
             }
-
-            if (string.IsNullOrWhiteSpace(nameClaimType))
+            else
             {
-                nameClaimType = this.NameClaimType;
+                nameClaimType = validationParameters.NameClaimType;
             }
 
             string roleClaimType = null;
-            if (validationParameters.RoleClaimType != null)
+            if (validationParameters.NameClaimTypeRetriever != null)
             {
-                roleClaimType = validationParameters.RoleClaimType(samlToken, issuer);
+                roleClaimType = validationParameters.NameClaimTypeRetriever(samlToken, issuer);
+            }
+            else if (string.IsNullOrWhiteSpace(roleClaimType))
+            {
+                roleClaimType = validationParameters.RoleClaimType;
             }
 
-            if (string.IsNullOrWhiteSpace(roleClaimType))
-            {
-                roleClaimType = this.RoleClaimType;
-            }
+            // TODO - check that nameClaimType || roleClaimType is not null.
+            ClaimsIdentity identity = new ClaimsIdentity(validationParameters.AuthenticationType, nameClaimType, roleClaimType);
 
-            ClaimsIdentity identity = new ClaimsIdentity(AuthenticationType, nameClaimType, roleClaimType);
-            this.ProcessStatement(samlToken.Assertion.Statements, identity, issuer);
+            _smSamlHandlerPrivateNeverSetAnyProperties.ProcessStatmentPublic(samlToken.Assertion.Statements, identity, issuer);
             return identity;
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>. 
+        /// Creates a <see cref="SecurityToken"/> based on a information contained in the <see cref="SecurityTokenDescriptor"/>.
         /// </summary>
-        /// <remarks>
-        /// Controls the value <see cref="ClaimsIdentity.Name"/> property will return. It will return the first <see cref="Claim.Value"/> where the <see cref="Claim.Type"/> equals <see cref="NameClaimType"/>.
-        /// </remarks>
-        public string NameClaimType
+        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
+        /// <returns>A <see cref="SecurityToken"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if 'tokenDescriptor' is null.</exception>
+        public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
-            get
+            if (null == tokenDescriptor)
             {
-                if (SamlSecurityTokenRequirement.NameClaimType != null)
-                {
-                    return SamlSecurityTokenRequirement.NameClaimType;
-                }
-
-                return ClaimsIdentity.DefaultNameClaimType;
+                throw new ArgumentNullException("tokenDescriptor");
             }
 
-            set
+            return _smSamlHandlerPrivateNeverSetAnyProperties.CreateToken(tokenDescriptor);
+        }
+
+        /// <summary>
+        /// Creates the security token reference when the token is not attached to the message.
+        /// </summary>
+        /// <param name="token">The saml token.</param>
+        /// <param name="attached">Boolean that indicates if a attached or unattached
+        /// reference needs to be created.</param>
+        /// <returns>A <see cref="SamlAssertionKeyIdentifierClause"/>.</returns>
+        public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
+        {
+            if (null == token)
             {
-                SamlSecurityTokenRequirement.NameClaimType = value;
+                throw new ArgumentNullException("token");
             }
+
+            return token.CreateKeyIdentifierClause<SamlAssertionKeyIdentifierClause>();
+        }
+
+        public override string[] GetTokenTypeIdentifiers()
+        {
+            return _tokenTypeIdentifiers;
+        }
+
+        /// <summary>
+        /// Not supported, use <see cref="TokenValidationParameters"/> when processing tokens.
+        /// </summary>
+        /// <exception cref="NotSupportedException"> use <see cref="TokenValidationParameters"/>. when processing tokens.</exception>
+        public override void LoadCustomConfiguration(XmlNodeList nodelist)
+        {
+            throw new NotSupportedException(ErrorMessages.IDX11004);
+        }
+
+        /// <summary>
+        /// Gets the token type supported by this handler.
+        /// </summary>
+        public override Type TokenType
+        {
+            get { return typeof(SamlSecurityToken); }
         }
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
-        /// <remarks>This does not set limits when reading tokens using a <see cref="XmlReader"/>. Use xml quotas on the <see cref="XmlReader"/> for those limits.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
         public Int32 MaximumTokenSizeInBytes
         {
@@ -207,56 +227,40 @@ namespace Microsoft.IdentityModel.Extensions
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="string"/> passed to <see cref="ClaimsIdentity(string, string, string)"/>.
+        /// Obsolete method, use <see cref="ReadToken(string, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <remarks>
-        /// <para>Controls the <see cref="Claim"/>(s) returned from <see cref="ClaimsPrincipal.IsInRole( string )"/>.</para>
-        /// <para>Each <see cref="Claim"/> returned will have a <see cref="Claim.Type"/> equal to <see cref="RoleClaimType"/>.</para>
-        /// </remarks>
-        public string RoleClaimType
+        /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(string, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
+        public override SecurityToken ReadToken(string reader)
         {
-            get
+            throw new NotSupportedException(ErrorMessages.IDX11007);
+        }
+
+        /// <summary>
+        /// Obsolete method, use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
+        public override SecurityToken ReadToken(XmlReader reader)
+        {
+            throw new NotSupportedException(ErrorMessages.IDX11003);
+        }
+
+
+        /// <summary>
+        /// Reads a SAML 11 token from the XmlReader.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="SamlSecurityToken"/> element.</param>
+        /// <param name="validationParameters">Contains data and information needed for reading the token.</param>
+        /// <returns>An instance of a <see cref="SamlSecurityToken"/>.</returns>
+        public virtual SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
+        {
+            return (new SamlHandler()
             {
-                if (SamlSecurityTokenRequirement.RoleClaimType != null)
+                Configuration = new SecurityTokenHandlerConfiguration
                 {
-                    return SamlSecurityTokenRequirement.RoleClaimType;
+                    IssuerTokenResolver = IssuerKeyRetriever.CreateIssuerTokenResolver(string.Empty, validationParameters),
+                    MaxClockSkew = validationParameters.ClockSkew,
                 }
-
-                return ClaimsIdentity.DefaultRoleClaimType;
-            }
-
-            set
-            {
-                SamlSecurityTokenRequirement.RoleClaimType = value;
-            }
-        }
-
-        /// <summary>
-        /// Determines if an issuer is valid.
-        /// </summary>
-        /// <param name="issuer">the issuer to validate</param>
-        /// <param name="validationParameters">parameters to define valid.</param>
-        /// <param name="securityToken">the <see cref="SecurityToken"/> that is being validated.</param>
-        /// <returns></returns>
-        protected virtual string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, SecurityToken securityToken)
-        {
-            return IssuerValidator.Validate(issuer, validationParameters, securityToken);
-        }
-
-        /// <summary>
-        /// Validates the <see cref="SamlSecurityToken"/> for expiration.
-        /// </summary>
-        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> to validate lifefime.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> contain details controling validation.</param>
-        /// <exception cref="ArgumentNullException">if 'securityToken' is null.</exception>
-        protected virtual void ValidateLifetime(SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {            
-            if (securityToken == null)
-            {
-                throw new ArgumentNullException("securityToken");
-            }
-
-            throw new NotImplementedException();
+            }).ReadToken(reader);
         }
 
         /// <summary>
@@ -299,7 +303,7 @@ namespace Microsoft.IdentityModel.Extensions
             Configuration = new SecurityTokenHandlerConfiguration
             {
                 IssuerTokenResolver = IssuerKeyRetriever.CreateIssuerTokenResolver(securityToken, validationParameters),
-                MaxClockSkew = TimeSpan.FromSeconds(ClockSkewInSeconds),
+                MaxClockSkew = validationParameters.ClockSkew,
             };
 
             SamlSecurityToken samlToken;
@@ -307,13 +311,8 @@ namespace Microsoft.IdentityModel.Extensions
             {
                 using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                 {
-                    samlToken = ReadToken(reader) as SamlSecurityToken;
+                    samlToken = ReadToken(reader, validationParameters) as SamlSecurityToken;
                 }
-            }
-
-            if (samlToken.Assertion.SigningToken == null)
-            {
-                throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
             }
 
             if (samlToken.Assertion == null)
@@ -321,44 +320,36 @@ namespace Microsoft.IdentityModel.Extensions
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            // TODO handle confirmation data and ensure exceptions are the same as jwt security token handler
-            ValidateConditions(samlToken.Assertion.Conditions, false);
-
-            if (validationParameters.ValidateAudience)
+            if (samlToken.Assertion.SigningToken == null && validationParameters.RequireSignedTokens)
             {
-                ValidateAudience(samlToken.Assertion.Conditions, validationParameters, samlToken);
+                throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
             }
 
-            string issuer = ValidateIssuer(samlToken.Assertion.Issuer, validationParameters, samlToken);
-            ClaimsIdentity claimsIdentity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
-
-            if (validationParameters.SaveSigninToken)
+            DateTime? notBefore = null;
+            DateTime? expires = null;
+            if (samlToken.Assertion.Conditions != null)
             {
-                claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
+                notBefore = samlToken.Assertion.Conditions.NotBefore;
+                expires = samlToken.Assertion.Conditions.NotOnOrAfter;
             }
 
-            validatedToken = samlToken;
+            if (validationParameters.LifetimeValidator != null)
+            {
+                validationParameters.LifetimeValidator(expires, notBefore, samlToken, validationParameters);
+            }
+            else
+            {
+                ValidateLifetime(expires, notBefore, samlToken, validationParameters);
+            }
 
-            return new ClaimsPrincipal(claimsIdentity);
-        }
-
-        /// <summary>
-        /// Determines if the audience of a <see cref="SamlSecurityToken"/> is valid.
-        /// </summary>
-        /// <param name="conditions">the <see cref="SamlConditions"/> containing the audiences</param>
-        /// <param name="validationParameters">parameters to define valid.</param>
-        /// <param name="samlToken">the <see cref="SamlSecurityToken"/> that is being validated.</param>
-        protected virtual void ValidateAudience(SamlConditions conditions, TokenValidationParameters validationParameters, SamlSecurityToken samlToken)
-        {
             List<string> audiences = new List<string>();
-            if (conditions != null)
+            if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.Conditions != null)
             {
-                foreach (SamlCondition condition in conditions.Conditions)
+                foreach (SamlCondition condition in samlToken.Assertion.Conditions.Conditions)
                 {
                     SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
                     if (null == audienceRestriction)
                     {
-                        // Skip other conditions
                         continue;
                     }
 
@@ -369,7 +360,157 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            AudienceValidator.Validate(audiences, validationParameters, samlToken);
+            if (validationParameters.AudienceValidator != null)
+            {
+                validationParameters.AudienceValidator(audiences, samlToken, validationParameters);
+            }
+            else
+            {
+                ValidateAudience(audiences, samlToken, validationParameters);
+            }
+
+            string issuer = null;
+            issuer = samlToken.Assertion.Issuer == null ? null : samlToken.Assertion.Issuer;
+            if (validationParameters.IssuerValidator != null)
+            {
+                issuer = validationParameters.IssuerValidator(issuer, samlToken, validationParameters);
+            }
+            else
+            {
+                issuer = ValidateIssuer( issuer, samlToken, validationParameters);
+            }
+
+            if (string.IsNullOrWhiteSpace(issuer))
+            {
+                throw new SecurityTokenInvalidIssuerException(ErrorMessages.IDX10203);
+            }
+
+            if (samlToken.Assertion.SigningToken != null)
+            {
+                ValidateIssuerSecurityKey(samlToken.Assertion.SigningToken.SecurityKeys[0], samlToken, validationParameters);
+            }
+
+            ClaimsIdentity claimsIdentity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
+            if (validationParameters.SaveSigninToken)
+            {
+                claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
+            }
+
+            validatedToken = samlToken;
+            return new ClaimsPrincipal(claimsIdentity);
+        }
+
+        /// <summary>
+        /// Determines if the audiences found in a <see cref="SamlSecurityToken"/> are valid.
+        /// </summary>
+        /// <param name="audiences">The audiences found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateAudience(audiences, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Determines if an issuer found in a <see cref="SamlSecurityToken"/> is valid.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>The issuer to use when creating the <see cref="Claim"/>(s) in the <see cref="ClaimsIdentity"/>.</returns>
+        /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
+        protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Validates the lifetime of a <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="expires">The 'expiration' time found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="notBefore">The 'notBefore' time found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
+        protected virtual void ValidateLifetime(DateTime? expires, DateTime? notBefore, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateLifetime(expires, notBefore, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Validates the <see cref="SecurityToken.SigningKey"/> is an expected value.
+        /// </summary>
+        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> to validate.</param>
+        /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
+        protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Serializes to <see cref="SamlSecurityToken"/> to a string.
+        /// </summary>
+        /// <param name="token">A <see cref="SamlSecurityToken"/>.</param>
+        public override string WriteToken(SecurityToken token)
+        {
+            if (token == null)
+            {
+                throw new ArgumentNullException("token");
+            }
+
+            SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
+            if (samlSecurityToken == null)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
+            }
+
+
+            using (StringWriter stringWriter = new StringWriter(new StringBuilder()))
+            {
+                using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
+                {
+                    _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, token);
+                    stringWriter.Flush();
+                    stringWriter.Close();
+                    return stringWriter.ToString();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Serializes to XML a token of the type handled by this instance.
+        /// </summary>
+        /// <param name="writer">The XML writer.</param>
+        /// <param name="token">A token of type TokenType.</param>
+        public override void WriteToken(XmlWriter writer, SecurityToken token)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException("writer");
+            }
+
+            if (token == null)
+            {
+                throw new ArgumentNullException("token");
+            }
+
+            SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
+            if (samlSecurityToken == null)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
+            }
+
+            _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(writer, token);
+        }
+
+        private class SMSamlHandlerPrivate : SamlHandler
+        {
+            public void ProcessStatmentPublic(IList<SamlStatement> statements, ClaimsIdentity subject, string issuer)
+            {
+                base.ProcessStatement(statements, subject, issuer);
+            }
         }
     }
 }
