@@ -18,9 +18,11 @@
 
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Reflection;
+using Claim = System.Security.Claims.Claim;
 
 namespace System.IdentityModel.Test
 {
@@ -46,6 +48,43 @@ namespace System.IdentityModel.Test
         public void Initialize()
         {
             _testContextProvider = new TestContextProvider( TestContext );
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "EEA6CD8E-DC65-485E-9EC9-9037AC3382A4")]
+        [Description("Ensures that JwtSecurityToken defaults are as expected")]
+        public void JwtSecurityToken_Defaults()
+        {
+            JwtSecurityToken jwt = new JwtSecurityToken();
+
+            List<Claim> claims = jwt.Claims as List<Claim>;
+            Assert.IsFalse(claims == null, "claims as List<Claim> == null");
+
+            foreach (Claim c in jwt.Claims)
+            {
+                Assert.Fail("claims.Count != 0");
+                break;
+            }
+
+            Assert.IsFalse(jwt.Actor != null, "jwt.Actor != null");
+            Assert.IsFalse(jwt.Audience != null, "jwt.Audience != null");
+            //Assert.IsFalse( jwt.Expiration != null , "jwt.Expiration != null" );
+            Assert.IsFalse(jwt.Id != null, "jwt.Id != null");
+            Assert.IsFalse(jwt.Issuer != null, "jwt.Issuer != null");
+            Assert.IsFalse(jwt.SecurityKeys == null, "jwt.SecurityKeys == null");
+            Assert.IsFalse(jwt.SignatureAlgorithm == null, "jwt.SignatureAlgorithm == null");
+            Assert.IsFalse(!string.Equals(jwt.SignatureAlgorithm, "none", StringComparison.Ordinal), "jwt.SignatureAlgorithm != none");
+            Assert.IsFalse(jwt.SigningCredentials != null, "jwt.SigningCredentials != null");
+            Assert.IsFalse(jwt.SigningKey != null, "jwt.SigningKey != null");
+            Assert.IsFalse(jwt.SigningToken != null, "jwt.SigningToken != null");
+            Assert.IsFalse(jwt.Subject != null, "jwt.Subject != null");
+            Assert.IsFalse(jwt.ValidFrom != DateTime.MinValue, "jwt.ValidFrom != DateTime.MinValue");
+            Assert.IsFalse(jwt.ValidTo != DateTime.MinValue, "jwt.ValidTo != DateTime.MinValue");
+            Assert.IsFalse(jwt.RawData != null, "jwt.RawData != null");
+            Assert.IsFalse(jwt.Header == null, "jwt.Header == null");
+            Assert.IsFalse(jwt.Payload == null, "jwt.Payload == null");
+            Assert.IsFalse(jwt.EncodedHeader == null, "jwt.EncodedHeader == null");
+            Assert.IsFalse(jwt.EncodedPayload == null, "jwt.EncodedPayload == null");
         }
 
         [TestMethod]
@@ -262,7 +301,7 @@ namespace System.IdentityModel.Test
         [TestProperty( "DisciplineOwner", "Dev" )]
         [TestProperty( "Feature", "ACS/AAL" )]
         [TestProperty( "Framework", "TAEF" )]
-        public void JWTSecurityToken_DifferentConstructorsSameJWT()
+        public void JwtSecurityToken_DifferentConstructorsSameJWT()
         {
             string issuer = "JWTSecurityToken_DifferentConstructorsSameJWT";
             new JwtSecurityTokenTestVariation

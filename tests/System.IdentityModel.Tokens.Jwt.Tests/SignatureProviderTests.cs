@@ -62,7 +62,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "4A9C4A2E-C50F-4A57-A85B-2D6D4F14ADF1")]
         [Description("Tests for SignatureProviderFactory")]
-        public void SignatureProviderFactoryTests()
+        public void SignatureProviderFactory_Tests()
         {
             SignatureProviderFactory factory = new SignatureProviderFactory();
 
@@ -155,36 +155,36 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "F7B5A336-BF04-4589-9F8E-36451E1E3B7F")]
         [Description("AsymmetricSignatureProvider Constructor")]
-        public void AsymmetricSignatureProvider_ConstructorTests()
+        public void AsymmetricSignatureProvider_Constructor()
         {
             AsymmetricSecurityKey privateKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey;
             AsymmetricSecurityKey publicKey = KeyingMaterial.DefaultX509SigningCreds_Public_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey;
             string sha2SignatureAlgorithm = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm;
 
             // no errors
-            AsymmetricConstructor_Test("Signing:  - Creates with no errors", privateKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
-            AsymmetricConstructor_Test("Verifying: - Creates with no errors (Private Key)", privateKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
-            AsymmetricConstructor_Test("Verifying: - Creates with no errors (Public Key)", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Signing:  - Creates with no errors", privateKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Verifying: - Creates with no errors (Private Key)", privateKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Verifying: - Creates with no errors (Public Key)", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
 
             // null, empty algorithm digest
-            AsymmetricConstructor_Test("Signing:   - NUll key", null, sha2SignatureAlgorithm, expectedException: ExpectedException.ArgumentNullException());
-            AsymmetricConstructor_Test("Signing:   - SignatureAlorithm == null", privateKey, null, expectedException: ExpectedException.ArgumentNullException());
-            AsymmetricConstructor_Test("Signing:   - SignatureAlorithm == whitespace", privateKey, "    ", expectedException: ExpectedException.ArgumentException("WIF10002"));
+            AsymmetricConstructorVariation("Signing:   - NUll key", null, sha2SignatureAlgorithm, expectedException: ExpectedException.ArgumentNullException());
+            AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == null", privateKey, null, expectedException: ExpectedException.ArgumentNullException());
+            AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == whitespace", privateKey, "    ", expectedException: ExpectedException.ArgumentException("WIF10002"));
 
             // Private keys missing
-            AsymmetricConstructor_Test("Signing:   - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.InvalidOperationException(inner: typeof(NotSupportedException)));
-            AsymmetricConstructor_Test("Verifying: - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Signing:   - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.InvalidOperationException(inner: typeof(NotSupportedException)));
+            AsymmetricConstructorVariation("Verifying: - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
 
             // _formatter not created
-            AsymmetricConstructor_Test("Signing:   - key cannot create _formatter", KeyingMaterial.AsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "Jwt10518", inner: typeof(NotSupportedException)));
+            AsymmetricConstructorVariation("Signing:   - key cannot create _formatter", KeyingMaterial.AsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "Jwt10518", inner: typeof(NotSupportedException)));
 
             // _deformatter not created
-            AsymmetricConstructor_Test("Verifying: - key cannot create _deformatter", KeyingMaterial.DefaultAsymmetricKey_Public_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "Jwt10518", inner: typeof(NotSupportedException)));
+            AsymmetricConstructorVariation("Verifying: - key cannot create _deformatter", KeyingMaterial.DefaultAsymmetricKey_Public_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "Jwt10518", inner: typeof(NotSupportedException)));
 
             Console.WriteLine("Test missing: key.GetHashAlgorithmForSignature( signingCredentials.SignatureAlgorithm );"); //TODO: Should this be fixed?
         }
 
-        private void AsymmetricConstructor_Test(string testcase, AsymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
+        private void AsymmetricConstructorVariation(string testcase, AsymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
         {
 
             Console.WriteLine(string.Format("Testcase: '{0}'", testcase));
@@ -242,6 +242,30 @@ namespace System.IdentityModel.Test
             catch (Exception ex)
             {
                 Assert.Fail(string.Format("AsymmetricSignatureProvider.Dispose called twice, caught exception: '{0}'", ex));
+            }
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "FC949834-617F-4C57-8643-C30F160E309D")]
+        [Description("Ensures that AsymmetricSignatureProvider defaults are as expected")]
+        public void AsymmetricSignatureProvider_Defaults()
+        {
+            try
+            {
+                AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, false);
+            }
+            catch (Exception)
+            {
+                Assert.Fail("AsymmetricSignatureProvider creation should not throw");
+            }
+
+            try
+            {
+                AsymmetricSignatureProvider asymmetricSignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm, true);
+            }
+            catch (Exception)
+            {
+                Assert.Fail("AsymmetricSignatureProvider creation should not throw");
             }
         }
 
@@ -321,69 +345,47 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "89AF7B31-7707-4E60-AC32-363C9CA78363")]
-        [Description("Parameter checking for AsymmetricSignatureProvider..Sign and .Verify")]
-        public void AsymmetricSignatureProvider_Sign_Verify_ParameterChecking()
+        [Description("AsymmetricSignatureProvider Tests")]
+        public void AsymmetricSignatureProvider_Publics()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm);
-            Provider_Sign_Verify_ParameterChecking("Sign - null 'input'", provider, null, null, ExpectedException.ArgumentNullException());
-            Provider_Sign_Verify_ParameterChecking("Sign - zero bytes 'input'", provider, new byte[0], null, ExpectedException.ArgumentException("Jwt10524"));
-            Provider_Sign_Verify_ParameterChecking("Sign - _formatter will be null since provider wasn't created with willBeUsedForSigning == true", provider, new byte[1], null, ExpectedException.InvalidOperationException("Jwt10520"));
+            SignatureProvider_SignVariation(provider, null, null, ExpectedException.ArgumentNullException());
+            SignatureProvider_SignVariation(provider, new byte[0], null, ExpectedException.ArgumentException("Jwt10524"));
+            SignatureProvider_SignVariation(provider, new byte[1], null, ExpectedException.InvalidOperationException("Jwt10520"));
 
-            Provider_Sign_Verify_ParameterChecking("Verify - null 'input'", provider, null, null, ExpectedException.ArgumentNullException());
-            Provider_Sign_Verify_ParameterChecking("Verify - null 'signature'", provider, new byte[1], null, ExpectedException.ArgumentNullException());
-            Provider_Sign_Verify_ParameterChecking("Verify - 'input' zero bytes", provider, new byte[0], new byte[1], ExpectedException.ArgumentException("Jwt10525"));
-            Provider_Sign_Verify_ParameterChecking("Verify - 'signature' zero bytes", provider, new byte[1], new byte[0], ExpectedException.ArgumentException("Jwt10526"));
-        }
-
-        private void Provider_Sign_Verify_ParameterChecking(string testcase, SignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedExpected)
-        {
-            Console.WriteLine(string.Format("Testcase: '{0}'", testcase));
-            try
-            {
-                if (testcase.StartsWith("Sign"))
-                {
-                    provider.Sign(bytes);
-                }
-                else
-                {
-                    provider.Verify(bytes, signature);
-                }
-
-                expectedExpected.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                expectedExpected.ProcessException(ex);
-            }
+            SignatureProvider_VerifyVariation(provider, null, null, ExpectedException.ArgumentNullException());
+            SignatureProvider_VerifyVariation(provider, new byte[1], null, ExpectedException.ArgumentNullException());
+            SignatureProvider_VerifyVariation(provider, new byte[0], new byte[1], ExpectedException.ArgumentException("Jwt10525"));
+            SignatureProvider_VerifyVariation(provider, new byte[1], new byte[0], ExpectedException.ArgumentException("Jwt10526"));
         }
 
         [TestMethod]
         [TestProperty("TestCaseID", "F59BC1A3-C2D7-43F6-99FC-D25E57D1B99C")]
         [Description("Tests for SymmetricSignatureProvider Constructor")]
-        public void SymmetricSignatureProviderTests_Constructor()
+        public void SymmetricSignatureProvider_ConstructorTests()
         {
             // no errors
-            SymmetricSignatureProviderTests_Constructor("Creates with no errors", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.NoExceptionExpected);
+            SymmetricSignatureProvider_ConstructorVariation("Creates with no errors", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.NoExceptionExpected);
 
             // null, empty algorithm digest
-            SymmetricSignatureProviderTests_Constructor("Constructor:   - NUll key", null, SecurityAlgorithms.HmacSha256Signature, ExpectedException.ArgumentNullException());
-            SymmetricSignatureProviderTests_Constructor("Constructor:   - algorithm == string.Empty", KeyingMaterial.DefaultSymmetricSecurityKey_256, string.Empty, ExpectedException.ArgumentException());
+            SymmetricSignatureProvider_ConstructorVariation("Constructor:   - NUll key", null, SecurityAlgorithms.HmacSha256Signature, ExpectedException.ArgumentNullException());
+            SymmetricSignatureProvider_ConstructorVariation("Constructor:   - algorithm == string.Empty", KeyingMaterial.DefaultSymmetricSecurityKey_256, string.Empty, ExpectedException.ArgumentException());
 
             // GetKeyedHashAlgorithm throws
             SymmetricSecurityKey key = new FaultingSymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, new CryptographicException("hi from inner"));
-            SymmetricSignatureProviderTests_Constructor("Constructor:   - SecurityKey.GetKeyedHashAlgorithm throws", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10532", typeof(CryptographicException)));
+            SymmetricSignatureProvider_ConstructorVariation("Constructor:   - SecurityKey.GetKeyedHashAlgorithm throws", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10532", typeof(CryptographicException)));
 
             // Key returns null KeyedHash
             key = new FaultingSymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, null);
-            SymmetricSignatureProviderTests_Constructor("Constructor:   - SecurityKey returns null KeyedHashAlgorithm", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10533"));
+            SymmetricSignatureProvider_ConstructorVariation("Constructor:   - SecurityKey returns null KeyedHashAlgorithm", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10533"));
 
             //_keyedHash.Key = _key.GetSymmetricKey() is null;            
             KeyedHashAlgorithm keyedHashAlgorithm = KeyingMaterial.DefaultSymmetricSecurityKey_256.GetKeyedHashAlgorithm(SecurityAlgorithms.HmacSha256Signature);
             key = new FaultingSymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, null, null, keyedHashAlgorithm, null);
-            SymmetricSignatureProviderTests_Constructor("Constructor:   - key returns null bytes to pass to _keyedHashKey", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10534", typeof(NullReferenceException)));
+            SymmetricSignatureProvider_ConstructorVariation("Constructor:   - key returns null bytes to pass to _keyedHashKey", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("Jwt10534", typeof(NullReferenceException)));
         }
 
-        private void SymmetricSignatureProviderTests_Constructor(string testcase, SymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
+        private void SymmetricSignatureProvider_ConstructorVariation(string testcase, SymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
         {
             Console.WriteLine(string.Format("Testcase: '{0}'", testcase));
 
@@ -410,38 +412,43 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "E4E5F329-12D8-431A-A971-21F86299DBB1")]
         [Description("Parameter checking for SymmetricSignatureProvider.Sign and .Verify")]
-        public void SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking()
+        public void SymmetricSignatureProvider_Publics()
         {
             SymmetricSignatureProvider provider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.SigningKey as SymmetricSecurityKey, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.SignatureAlgorithm);
 
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Sign - null input", provider, null, null, ExpectedException.ArgumentNullException());
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Sign - 0 bytes", provider, new byte[0], null, ExpectedException.ArgumentException("Jwt10524"));
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Sign - 1 byte", provider, new byte[1], null, ExpectedException.NoExceptionExpected);
+            SignatureProvider_SignVariation(provider, null, null, ExpectedException.ArgumentNullException());
+            SignatureProvider_SignVariation(provider, new byte[0], null, ExpectedException.ArgumentException("Jwt10524:"));
+            SignatureProvider_SignVariation(provider, new byte[1], null, ExpectedException.NoExceptionExpected);
 
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Verify - null input", provider, null, null, ExpectedException.ArgumentNullException());
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Verify - null signature", provider, new byte[0], null, ExpectedException.ArgumentNullException());
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Verify - 0 bytes input", provider, new byte[0], new byte[0], ExpectedException.ArgumentException("Jwt10525"));
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Verify - 0 bytes signature", provider, new byte[1], new byte[0], ExpectedException.ArgumentException("Jwt10526"));
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Verify - 1 byte", provider, new byte[1], new byte[1], ExpectedException.NoExceptionExpected);
+            SignatureProvider_VerifyVariation(provider, null, null, ExpectedException.ArgumentNullException());
+            SignatureProvider_VerifyVariation(provider, new byte[0], null, ExpectedException.ArgumentNullException());
+            SignatureProvider_VerifyVariation(provider, new byte[0], new byte[0], ExpectedException.ArgumentException("Jwt10525:"));
+            SignatureProvider_VerifyVariation(provider, new byte[1], new byte[0], ExpectedException.ArgumentException("Jwt10526:"));
+            SignatureProvider_VerifyVariation(provider, new byte[1], new byte[1], ExpectedException.NoExceptionExpected);
 
             provider.Dispose();
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Sign - dispose", provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
-            SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking("Verify - dispose", provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
+            SignatureProvider_SignVariation(provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
+            SignatureProvider_VerifyVariation(provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
         }
 
-        private void SymmetricSignatureProviderTests_Sign_Verify_ParameterChecking(string testcase, SymmetricSignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedException)
+        private void SignatureProvider_VerifyVariation(SignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedException)
         {
-            Console.WriteLine(string.Format("Testcase: '{0}'", testcase));
             try
             {
-                if (testcase.StartsWith("Sign"))
-                {
-                    provider.Sign(bytes);
-                }
-                else
-                {
-                    provider.Verify(bytes, signature);
-                }
+                provider.Verify(bytes, signature);
+                expectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+        }
+
+        private void SignatureProvider_SignVariation(SignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedException)
+        {
+            try
+            {
+                provider.Sign(bytes);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)

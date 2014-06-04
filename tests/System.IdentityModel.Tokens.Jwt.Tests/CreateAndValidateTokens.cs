@@ -55,7 +55,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "0FA94A41-B904-46C9-B9F1-BF0AEC23045A")]
         [Description("Create EMPTY JwtToken")]
-        public void EmptyToken()
+        public void CreateAndValidateTokens_EmptyToken()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string jwt = handler.WriteToken(new JwtSecurityToken("", ""));
@@ -66,7 +66,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "8058D994-9600-455D-8B6C-753DE2E26529")]
         [Description("Serialize / Deserialize in different ways.")]
-        public void RoundTripTokens()
+        public void CreateAndValidateTokens_RoundTripTokens()
         {
             SecurityToken validatedToken;
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -108,7 +108,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "DD27BA83-2621-4DF9-A863-C436A9F73BB9")]
         [Description("These Jwts are created with duplicate claims. This test ensure that multiple claims are roundtripped")]
-        public void DuplicateClaims()
+        public void CreateAndValidateTokens_DuplicateClaims()
         {
             SecurityToken validatedToken;
             string encodedJwt = IdentityUtilities.CreateJwtToken(
@@ -129,7 +129,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "FC7354C3-140B-4036-862A-BAFEA948D262")]
         [Description("This test ensures that a Json serialized object, when added as the value of a claim, can be recognized and reconstituted.")]
-        public void JsonClaims()
+        public void CreateAndValidateTokens_JsonClaims()
         {
             string issuer = "http://www.GotJWT.com";
             string audience = "http://www.contoso.com";
@@ -158,7 +158,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "F443747C-5AA1-406D-B0FE-53152CA92DA3")]
         [Description("These test ensures that the SubClaim is used the identity, when ClaimsIdentity.Name is called.")]
-        public void SubClaim()
+        public void CreateAndValidateTokens_SubClaim()
         {
             string issuer = "http://www.GotJWT.com";
             string audience = "http://www.contoso.com";
@@ -197,7 +197,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "A0DF768E-5073-49E7-90C9-ED97BDCF4B9F")]
         [Description("Tests Name and Role claim delegates")]
-        public void NameAndRoleClaimDelegates()
+        public void CreateAndValidateTokens_NameAndRoleClaimDelegates()
         {
             string defaultName = "defaultName";
             string defaultRole = "defaultRole";
