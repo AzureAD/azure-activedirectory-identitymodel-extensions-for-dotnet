@@ -59,26 +59,26 @@ namespace System.IdentityModel.Test
         {
             JwtPayload jwtPayload = new JwtPayload();
 
-            Assert.IsFalse(jwtPayload.Comparer.GetType() != StringComparer.Ordinal.GetType(), "jwtPayload.Comparer.GetType() != StringComparer.Ordinal.GetType()");
+            Assert.AreEqual(jwtPayload.Comparer.GetType(), StringComparer.Ordinal.GetType(), "jwtPayload.Comparer.GetType() != StringComparer.Ordinal.GetType()");
 
             List<Claim> claims = jwtPayload.Claims as List<Claim>;
-            Assert.IsFalse(claims == null, "claims as List<Claim> == null");
+            Assert.IsNotNull(claims, "claims as List<Claim> == null");
 
             foreach (Claim c in jwtPayload.Claims)
             {
-                Assert.Fail("claims.Count != 0");
+                Assert.Fail("claims should be null");
                 break;
             }
 
-            Assert.IsFalse(jwtPayload.Actort != null, "jwtPayload.Actort != null");
-            Assert.IsFalse(jwtPayload.Aud != null, "jwtPayload.Audience != null");
-            Assert.IsFalse(jwtPayload.Exp != null, "jwtPayload.Exp != null");
-            Assert.IsFalse(jwtPayload.Jti != null, "jwtPayload.Id != null");
-            Assert.IsFalse(jwtPayload.Iat != null, "jwtPayload.Iat != null");
-            Assert.IsFalse(jwtPayload.Iss != null, "jwtPayload.Iss != null");
-            Assert.IsFalse(jwtPayload.Sub != null, "jwtPayload.Sub != null");
-            Assert.IsFalse(jwtPayload.ValidFrom != DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
-            Assert.IsFalse(jwtPayload.ValidTo != DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
+            Assert.IsNull(jwtPayload.Actort, "jwtPayload.Actort != null");
+            Assert.IsNull(jwtPayload.Aud, "jwtPayload.Audience != null");
+            Assert.IsNull(jwtPayload.Exp, "jwtPayload.Exp != null");
+            Assert.IsNull(jwtPayload.Jti, "jwtPayload.Id != null");
+            Assert.IsNull(jwtPayload.Iat, "jwtPayload.Iat != null");
+            Assert.IsNull(jwtPayload.Iss, "jwtPayload.Iss != null");
+            Assert.IsNull(jwtPayload.Sub, "jwtPayload.Sub != null");
+            Assert.AreEqual(jwtPayload.ValidFrom, DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
+            Assert.AreEqual(jwtPayload.ValidTo, DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
         [TestMethod]
@@ -92,10 +92,10 @@ namespace System.IdentityModel.Test
             DateTime payloadTime = EpochTime.DateTime( time.Value );
             DateTime payloadValidTo = jwtPayload.ValidTo;
 
-            Assert.IsFalse(EpochTime.DateTime(time.Value) != jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
+            Assert.AreEqual(EpochTime.DateTime(time.Value), jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
 
             int? expirationTime = jwtPayload.Exp;
-            Assert.IsTrue(expirationTime == time, "expirationTime != time");
+            Assert.AreEqual(expirationTime, time, "expirationTime != time");
         }
     }
 }

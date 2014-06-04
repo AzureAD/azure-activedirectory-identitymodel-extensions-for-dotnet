@@ -139,6 +139,24 @@ namespace System.IdentityModel.Test
             }
         }
 
+        public static IEnumerable<Claim> ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
+        {
+            foreach (KeyValuePair<string, string> pair in JwtSecurityTokenHandler.InboundClaimTypeMap)
+            {
+                Claim claim = new Claim(pair.Value, pair.Value, ClaimValueTypes.String, issuer, originalIssuer);
+                claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, pair.Key));
+                yield return claim;
+            }
+
+            if (extraClaims != null)
+            {
+                foreach (Claim c in extraClaims)
+                {
+                    yield return c;
+                }
+            }
+        }
+
         /// <summary>
         /// Returns an enumeration containing duplicate claims. Used to test dups.
         /// </summary>

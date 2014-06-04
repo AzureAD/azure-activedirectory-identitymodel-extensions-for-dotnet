@@ -285,7 +285,7 @@ namespace System.IdentityModel.Test
             }
             catch (Exception ex)
             {
-                Assert.IsFalse(ex.GetType() != typeof(InvalidOperationException), "ex.GetType() != typeof( InvalidOperationException )");
+                Assert.AreEqual(ex.GetType(), typeof(InvalidOperationException));
             }
 
             // asymmetric
@@ -296,7 +296,7 @@ namespace System.IdentityModel.Test
                 byte[] bytesin = new byte[1024];
                 r.NextBytes(bytesin);
                 byte[] signature = provider.Sign(bytesin);
-                Assert.IsFalse(!provider.Verify(bytesin, signature), string.Format("AsymmetricSignatureProvider did not verify"));
+                Assert.IsTrue(provider.Verify(bytesin, signature));
             }
             catch (Exception)
             {

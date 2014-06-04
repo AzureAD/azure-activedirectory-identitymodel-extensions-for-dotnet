@@ -58,7 +58,7 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwt = new JwtSecurityToken();
 
             List<Claim> claims = jwt.Claims as List<Claim>;
-            Assert.IsFalse(claims == null, "claims as List<Claim> == null");
+            Assert.IsNotNull(claims);
 
             foreach (Claim c in jwt.Claims)
             {
@@ -66,25 +66,24 @@ namespace System.IdentityModel.Test
                 break;
             }
 
-            Assert.IsFalse(jwt.Actor != null, "jwt.Actor != null");
-            Assert.IsFalse(jwt.Audience != null, "jwt.Audience != null");
-            //Assert.IsFalse( jwt.Expiration != null , "jwt.Expiration != null" );
-            Assert.IsFalse(jwt.Id != null, "jwt.Id != null");
-            Assert.IsFalse(jwt.Issuer != null, "jwt.Issuer != null");
-            Assert.IsFalse(jwt.SecurityKeys == null, "jwt.SecurityKeys == null");
-            Assert.IsFalse(jwt.SignatureAlgorithm == null, "jwt.SignatureAlgorithm == null");
-            Assert.IsFalse(!string.Equals(jwt.SignatureAlgorithm, "none", StringComparison.Ordinal), "jwt.SignatureAlgorithm != none");
-            Assert.IsFalse(jwt.SigningCredentials != null, "jwt.SigningCredentials != null");
-            Assert.IsFalse(jwt.SigningKey != null, "jwt.SigningKey != null");
-            Assert.IsFalse(jwt.SigningToken != null, "jwt.SigningToken != null");
-            Assert.IsFalse(jwt.Subject != null, "jwt.Subject != null");
-            Assert.IsFalse(jwt.ValidFrom != DateTime.MinValue, "jwt.ValidFrom != DateTime.MinValue");
-            Assert.IsFalse(jwt.ValidTo != DateTime.MinValue, "jwt.ValidTo != DateTime.MinValue");
-            Assert.IsFalse(jwt.RawData != null, "jwt.RawData != null");
-            Assert.IsFalse(jwt.Header == null, "jwt.Header == null");
-            Assert.IsFalse(jwt.Payload == null, "jwt.Payload == null");
-            Assert.IsFalse(jwt.EncodedHeader == null, "jwt.EncodedHeader == null");
-            Assert.IsFalse(jwt.EncodedPayload == null, "jwt.EncodedPayload == null");
+            Assert.IsNull(jwt.Actor);
+            Assert.IsNull(jwt.Audience);
+            Assert.IsNull(jwt.Id);
+            Assert.IsNull(jwt.Issuer);
+            Assert.IsNotNull(jwt.SecurityKeys);
+            Assert.IsNotNull(jwt.SignatureAlgorithm);
+            Assert.AreEqual(jwt.SignatureAlgorithm, "none");
+            Assert.IsNull(jwt.SigningCredentials);
+            Assert.IsNull(jwt.SigningKey);
+            Assert.IsNull(jwt.SigningToken);
+            Assert.IsNull(jwt.Subject);
+            Assert.AreEqual(jwt.ValidFrom, DateTime.MinValue);
+            Assert.AreEqual(jwt.ValidTo, DateTime.MinValue);
+            Assert.IsNull(jwt.RawData);
+            Assert.IsNotNull(jwt.Header);
+            Assert.IsNotNull(jwt.Payload);
+            Assert.IsNotNull(jwt.EncodedHeader);
+            Assert.IsNotNull(jwt.EncodedPayload);
         }
 
         [TestMethod]
@@ -283,7 +282,7 @@ namespace System.IdentityModel.Test
 
                 if ( null != variation.ExpectedJwtSecurityToken )
                 {
-                    Assert.IsFalse( !IdentityComparer.AreEqual( variation.ExpectedJwtSecurityToken, jwt ) , string.Format( "Testcase: {0}.  JWTSecurityTokens are not equal.", variation.Name ) );
+                    Assert.IsTrue(IdentityComparer.AreEqual( variation.ExpectedJwtSecurityToken, jwt ));
                 }
             }
             catch ( Exception ex )

@@ -649,7 +649,7 @@ namespace System.IdentityModel.Tokens
 
             if (!(token is JwtSecurityToken))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10200, GetType(), typeof(JwtSecurityToken), token.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10226, GetType(), typeof(JwtSecurityToken), token.GetType()));
             }
 
             byte[] rawData = Encoding.UTF8.GetBytes(this.WriteToken(token));

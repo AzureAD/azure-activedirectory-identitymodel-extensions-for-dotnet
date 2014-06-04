@@ -55,7 +55,7 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D")]
-        [Description("Extensibility tests for SecurityKeyIdentifier for JWT key identifiers")]
+        [Description("Extensibility tests for JwtSecurityTokenHandler")]
         public void JwtSecurityTokenHandler_Extensibility()
         {
             DerivedJwtSecurityTokenHandler handler = new DerivedJwtSecurityTokenHandler()
@@ -107,8 +107,8 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D")]
-        [Description("Extensibility tests for SecurityKeyIdentifier for JWT key identifiers")]
-        public void JwtSecurityKeyIdentifyier_Extensibility()
+        [Description("Extensibility tests for NamedKeySecurityKeyIdentifierClause")]
+        public void NamedKeySecurityKeyIdentifierClause_Extensibility()
         {
             string clauseName = "kid";
             string keyId = Issuers.GotJwt;
@@ -118,43 +118,27 @@ namespace System.IdentityModel.Test
             SigningCredentials signingCredentials = new SigningCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256Digest, keyIdentifier);
             JwtHeader jwtHeader = new JwtHeader(signingCredentials);
             SecurityKeyIdentifier ski = jwtHeader.SigningKeyIdentifier;
-            Assert.IsFalse(ski.Count != 1, "ski.Count != 1 ");
+            Assert.AreEqual(ski.Count, 1, "ski.Count != 1 ");
 
             NamedKeySecurityKeyIdentifierClause clauseOut = ski.Find<NamedKeySecurityKeyIdentifierClause>();
-            Assert.IsFalse(clauseOut == null, "NamedKeySecurityKeyIdentifierClause not found");
-            Assert.IsFalse(clauseOut.Name != clauseName, "clauseOut.Id != clauseId");
-            Assert.IsFalse(clauseOut.KeyIdentifier != keyId, "clauseOut.KeyIdentifier != keyId");
+            Assert.IsNotNull(clauseOut, "NamedKeySecurityKeyIdentifierClause not found");
+            Assert.AreEqual(clauseOut.Name, clauseName, "clauseOut.Id != clauseId");
+            Assert.AreEqual(clauseOut.KeyIdentifier, keyId, "clauseOut.KeyIdentifier != keyId");
 
             NamedKeySecurityToken NamedKeySecurityToken = new NamedKeySecurityToken(clauseName, new SecurityKey[] { KeyingMaterial.DefaultSymmetricSecurityKey_256 });
-            Assert.IsFalse(!NamedKeySecurityToken.MatchesKeyIdentifierClause(clause), "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
+            Assert.IsTrue(NamedKeySecurityToken.MatchesKeyIdentifierClause(clause), "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
 
             List<SecurityKey> list = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256 };
             Dictionary<string, IList<SecurityKey>> keys = new Dictionary<string, IList<SecurityKey>>() { { "kid", list }, };
             NamedKeyIssuerTokenResolver nkitr = new NamedKeyIssuerTokenResolver(keys: keys);
             SecurityKey sk = nkitr.ResolveSecurityKey(clause);
-            Assert.IsFalse(sk == null, "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
-
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "E9A1AB3E-6AAE-4AC4-9DD4-1DDA5FAC70CF")]
-        [Description("Extensibility tests for JwtSecurityTokenHandler")]
-        public void JwtSecurityTokenHandlerExtensibility()
-        {
-            // TODO: Review and fix.  Log.Warning( "Test not completed" );
-            RunProtectedNullChecks();
-        }
-
-        private void RunProtectedNullChecks()
-        {
-            PublicJwtSecurityTokenHandler tokenHandler = new PublicJwtSecurityTokenHandler();
-
+            Assert.IsNotNull(sk, "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
         }
 
         [TestMethod]
         [TestProperty("TestCaseID", "C4FC2FC1-5AB0-4A73-A620-59D1FBF92D7A")]
         [Description("Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
-        public void AsymmetricSignatureProvider_Extensibility_AlgorithmMapping()
+        public void AsymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string newAlgorithmValue = "bobsYourUncle";
@@ -176,7 +160,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "A8068888-87D8-49D6-919F-CDF9AAC26F57")]
         [Description("Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
-        public void SymmetricSignatureProvider_Extensibility_AlgorithmMapping()
+        public void SymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string newAlgorithmValue = "bobsYourUncle";
@@ -184,7 +168,6 @@ namespace System.IdentityModel.Test
             string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, newAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
             JwtSecurityToken jwt = handler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2) as JwtSecurityToken;
             ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
-
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
             ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), innerTypeExpected: typeof(InvalidOperationException), substringExpected: "Jwt10316:" );

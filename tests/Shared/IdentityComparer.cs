@@ -58,21 +58,32 @@ namespace System.IdentityModel.Test
             int numToMatch = 0;
             int numMatched = 0;
 
-            List<T> ts = new List<T>(t2);
+            List<T> toMatch = new List<T>(t2);
+            
+            // helps debugging to see what didn't match
+            List<T> notMatched = new List<T>();
             foreach (var t in t1)
             {
                 numToMatch++;
-                for (int i = 0; i < ts.Count; i++)
+                bool matched = false;
+                for (int i = 0; i < toMatch.Count; i++)
                 {
-                    if (areEqual(t, ts[i], context))
+                    if (areEqual(t, toMatch[i], context))
                     {
                         numMatched++;
-                        ts.RemoveAt(i);
+                        matched = true;
+                        toMatch.RemoveAt(i);
+                        break;
                     }
+                }
+
+                if (!matched)
+                {
+                    notMatched.Add(t);
                 }
             }
 
-            return (ts.Count == 0 && numMatched == numToMatch);
+            return (toMatch.Count == 0 && numMatched == numToMatch && notMatched.Count == 0);
         }
 
         public static bool AreEqual<T>(T t1, T t2)
@@ -146,28 +157,30 @@ namespace System.IdentityModel.Test
 
         private static bool AreClaimsEqual(Claim claim1, Claim claim2, CompareContext context)
         {
+            Dictionary<string, object> matchingFailures = new Dictionary<string, object>();
+
             if (claim1.Type != claim2.Type)
-                return false;
+                matchingFailures.Add("Type", new KeyValuePair<string, string>(claim1.Type, claim2.Type));
 
             if (claim1.Issuer != claim2.Issuer)
-                return false;
+                matchingFailures.Add("Issuer", new KeyValuePair<string, string>(claim1.Issuer, claim2.Issuer));
 
             if (claim1.OriginalIssuer != claim2.OriginalIssuer)
-                return false;
+                matchingFailures.Add("Issuer", new KeyValuePair<string, string>(claim1.OriginalIssuer, claim2.OriginalIssuer));
 
             if (!context.IgnoreProperties && !AreEqual<IDictionary<string, string>>(claim1.Properties, claim2.Properties, context, AreDictionariesEqual))
-                return false;
+                matchingFailures.Add("Properties", new KeyValuePair<IDictionary<string,string>, IDictionary<string, string>>(claim1.Properties, claim2.Properties));
 
             if (claim1.Value != claim2.Value)
-                return false;
+                matchingFailures.Add("Value", new KeyValuePair<string, string>(claim1.Value, claim2.Value));
 
             if (claim1.ValueType != claim2.ValueType)
-                return false;
+                matchingFailures.Add("ValueType", new KeyValuePair<string, string>(claim1.ValueType, claim2.ValueType));
 
             if (!context.IgnoreSubject && !AreEqual<ClaimsIdentity>(claim1.Subject, claim2.Subject, context, AreClaimsIdentitiesEqual))
-                return false;
+                matchingFailures.Add("Subject", new KeyValuePair<ClaimsIdentity, ClaimsIdentity>(claim1.Subject, claim2.Subject));
 
-            return true;
+            return matchingFailures.Count == 0;
         }
 
         private static bool AreClaimsPrincipalsEqual(ClaimsPrincipal principal1, ClaimsPrincipal principal2, CompareContext context)

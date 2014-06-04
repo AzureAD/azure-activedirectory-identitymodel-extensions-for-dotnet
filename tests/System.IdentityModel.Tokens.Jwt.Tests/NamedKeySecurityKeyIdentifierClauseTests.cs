@@ -19,6 +19,7 @@
 
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
 
