@@ -211,9 +211,9 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets or sets the value for the AuthorizeEndpoint
+        /// Gets or sets the value for the AuthorizationEndpoint
         /// </summary>
-        public string AuthorizeEndpoint { get; set; }
+        public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets 'access_Token'.

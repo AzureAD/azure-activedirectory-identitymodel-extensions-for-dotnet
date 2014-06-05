@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             get
             {
-                return _subjectTypesSupported;
+                return _responseTypesSupported;
             }
         }
 
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             get
             {
-                return _responseTypesSupported;
+                return _subjectTypesSupported;
             }
         }
 
