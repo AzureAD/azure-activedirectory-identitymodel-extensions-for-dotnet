@@ -89,16 +89,6 @@ namespace Microsoft.IdentityModel.Extensions
         /// <returns>A collection of <see cref="SecurityTokenHandler"/></returns>
         public static SecurityTokenHandlerCollection GetDefaultHandlers()
         {
-            return GetDefaultHandlers(null);
-        }
-
-        /// <summary>
-        /// Gets the default <see cref="SecurityTokenHandlerCollection"/> supported by this runtime.
-        /// </summary>
-        /// <param name="authenticationType"> Each <see cref="SecurityTokenHandler"/> will create each <see cref="ClaimsIdentity"/> with this authenticationType.</param>
-        /// <returns>A collection of <see cref="SecurityTokenHandler"/></returns>
-        public static SecurityTokenHandlerCollection GetDefaultHandlers(string authenticationType)
-        {
             return new SecurityTokenHandlerCollection
             {
                 new JwtSecurityTokenHandler(),
