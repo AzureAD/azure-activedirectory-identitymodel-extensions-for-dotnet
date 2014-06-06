@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Test
                 Assert.IsNotNull(tokenValidator, "tokenHandler is not ISecurityTokenHandler, is" + tokenHandler.GetType().ToString());
             }
 
-            securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers(typeof(ISecurityTokenValidator).ToString());
+            securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
             foreach (var tokenHandler in securityTokenValidators)
             {
                 ISecurityTokenValidator tokenValidator = tokenHandler as ISecurityTokenValidator;
