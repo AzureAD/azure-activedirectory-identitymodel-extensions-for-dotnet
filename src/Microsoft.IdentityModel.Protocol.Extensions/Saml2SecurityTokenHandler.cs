@@ -148,28 +148,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            string nameClaimType = null;
-            if (validationParameters.NameClaimTypeRetriever != null)
-            {
-                nameClaimType = validationParameters.NameClaimTypeRetriever(samlToken, issuer);
-            }
-
-            if (string.IsNullOrWhiteSpace(nameClaimType))
-            {
-                nameClaimType = validationParameters.NameClaimType;
-            }
-
-            string roleClaimType = null;
-            if (validationParameters.RoleClaimTypeRetriever != null)
-            {
-                roleClaimType = validationParameters.RoleClaimTypeRetriever(samlToken, issuer);
-            }
-            else
-            {
-                roleClaimType = validationParameters.RoleClaimType;
-            }
-            // TODO - check that nameClaimType || roleClaimType is not null.
-            ClaimsIdentity identity = new ClaimsIdentity(validationParameters.AuthenticationType, nameClaimType, roleClaimType);
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
             _smSaml2HandlerPrivateNeverSetAnyProperties.ProcessSamlSubjectPublic(samlToken.Assertion.Subject, identity, issuer);
             _smSaml2HandlerPrivateNeverSetAnyProperties.ProcessStatmentPublic(samlToken.Assertion.Statements, identity, issuer);
             return identity;
@@ -331,13 +310,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.LifetimeValidator != null)
             {
-                validationParameters.LifetimeValidator(expires, notBefore, samlToken, validationParameters);
+                validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
             }
             else
             {
-                ValidateLifetime(expires, notBefore, samlToken, validationParameters);
+                ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
             }
 
+            // TODO
             // need to validate   ValidateConfirmationData(subjectConfirmation.SubjectConfirmationData);
 
             List<string> audiences = new List<string>();
@@ -416,14 +396,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Validates the lifetime of a <see cref="Saml2SecurityToken"/>.
         /// </summary>
-        /// <param name="expires">The 'expiration' time found in the <see cref="Saml2SecurityToken"/>.</param>
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="Saml2SecurityToken"/>.</param>
+        /// <param name="expires">The 'expiration' time found in the <see cref="Saml2SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
-        protected virtual void ValidateLifetime(DateTime? expires, DateTime? notBefore, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateLifetime(expires, notBefore, securityToken, validationParameters);
+            Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
         }
 
         /// <summary>

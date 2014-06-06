@@ -122,29 +122,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentException(ErrorMessages.IDX10202);
             }
 
-            string nameClaimType = null;
-            if (validationParameters.NameClaimTypeRetriever != null)
-            {
-                nameClaimType = validationParameters.NameClaimTypeRetriever(samlToken, issuer);
-            }
-            else
-            {
-                nameClaimType = validationParameters.NameClaimType;
-            }
-
-            string roleClaimType = null;
-            if (validationParameters.NameClaimTypeRetriever != null)
-            {
-                roleClaimType = validationParameters.NameClaimTypeRetriever(samlToken, issuer);
-            }
-            else if (string.IsNullOrWhiteSpace(roleClaimType))
-            {
-                roleClaimType = validationParameters.RoleClaimType;
-            }
-
-            // TODO - check that nameClaimType || roleClaimType is not null.
-            ClaimsIdentity identity = new ClaimsIdentity(validationParameters.AuthenticationType, nameClaimType, roleClaimType);
-
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
             _smSamlHandlerPrivateNeverSetAnyProperties.ProcessStatmentPublic(samlToken.Assertion.Statements, identity, issuer);
             return identity;
         }
@@ -335,11 +313,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.LifetimeValidator != null)
             {
-                validationParameters.LifetimeValidator(expires, notBefore, samlToken, validationParameters);
+                validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
             }
             else
             {
-                ValidateLifetime(expires, notBefore, samlToken, validationParameters);
+                ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
             }
 
             List<string> audiences = new List<string>();
@@ -428,14 +406,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Validates the lifetime of a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="expires">The 'expiration' time found in the <see cref="SamlSecurityToken"/>.</param>
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="expires">The 'expiration' time found in the <see cref="SamlSecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
-        protected virtual void ValidateLifetime(DateTime? expires, DateTime? notBefore, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateLifetime(expires, notBefore, securityToken, validationParameters);
+            Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
         }
 
         /// <summary>

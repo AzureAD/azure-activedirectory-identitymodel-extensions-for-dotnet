@@ -127,8 +127,11 @@ namespace System.IdentityModel.Test
         [Description("Tests: Defaults")]
         public void TokenValidationParameters_Defaults()
         {
+            // TODO - test is not comprehensive.
+
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
             Assert.IsNull(tokenValidationParameters.AudienceValidator);
+            Assert.IsNull(tokenValidationParameters.AuthenticationType);
             Assert.IsNull(tokenValidationParameters.LifetimeValidator);
             Assert.IsNull(tokenValidationParameters.IssuerSigningKey);
             Assert.IsNull(tokenValidationParameters.IssuerSigningKeys);

@@ -25,19 +25,47 @@ namespace System.IdentityModel.Tokens
     using System.IdentityModel.Selectors;
     using System.Security.Claims;
 
-    //public delegate void AudienceValidator (IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters);
-    
+    /// <summary>
+    /// Definition for AudienceValidator.
+    /// </summary>
+    /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    public delegate void AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for IssuerValidator.
+    /// </summary>
+    /// <param name="issuer">The issuer to validate</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
+    public delegate string IssuerValidator(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for LifetimeValidator.
+    /// </summary>
+    /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
+    /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    public delegate void LifetimeValidator(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
     public class TokenValidationParameters
     {
+        private string _authenticationType;
+        private X509CertificateValidator _certificateValidator;
         private TimeSpan _clockSkew = DefaultClockSkew;
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
-        private X509CertificateValidator _certificateValidator;
-        private string _authenticationType = AuthenticationTypes.Federation;
+
+        /// <summary>
+        /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
+        /// </summary>
+        public readonly string DefaultAuthenticationType = AuthenticationTypes.Federation;
 
         /// <summary>
         /// Default for the clock skew.
@@ -63,6 +91,9 @@ namespace System.IdentityModel.Tokens
             }
 
             AudienceValidator = other.AudienceValidator;
+            _authenticationType = other._authenticationType;
+            CertificateValidator = other.CertificateValidator;
+            ClockSkew = other.ClockSkew;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyRetriever = other.IssuerSigningKeyRetriever;
             IssuerSigningKeys = other.IssuerSigningKeys;
@@ -71,12 +102,19 @@ namespace System.IdentityModel.Tokens
             IssuerSigningTokens = other.IssuerSigningTokens;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            NameClaimType = other.NameClaimType;
+            NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             RequireExpirationTime = other.RequireExpirationTime;
+            RequireSignedTokens = other.RequireSignedTokens;
+            RoleClaimType = other.RoleClaimType;
+            RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
             ValidateIssuer = other.ValidateIssuer;
+            ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
+            ValidateLifetime = other.ValidateLifetime;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences;
             ValidIssuer = other.ValidIssuer;
@@ -91,27 +129,17 @@ namespace System.IdentityModel.Tokens
             RequireExpirationTime = true;
             RequireSignedTokens = true;
             SaveSigninToken = false;
-            ValidateAudience = true;
             ValidateActor = false;
+            ValidateAudience = true;
             ValidateIssuer = true;
+            ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
         }
 
         /// <summary>
-        /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
-        /// </summary>
-        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object</returns>
-        /// <remarks>This is a shallow Clone.</remarks>
-        public virtual TokenValidationParameters Clone()
-        {
-            return new TokenValidationParameters(this);
-        }
-
-
-        /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience of the tokens
         /// </summary>
-        public Action<IEnumerable<string>, SecurityToken, TokenValidationParameters> AudienceValidator
+        public AudienceValidator AudienceValidator
         {
             get;
             set;
@@ -139,6 +167,22 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
+        /// </summary>
+        public X509CertificateValidator CertificateValidator
+        {
+            get
+            {
+                return _certificateValidator;
+            }
+
+            set
+            {
+                _certificateValidator = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the clock skew to apply when validating times
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException"> if 'value' is less than 0.</exception>
@@ -162,19 +206,45 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
+        /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
         /// </summary>
-        public X509CertificateValidator CertificateValidator
+        /// <returns>A new <see cref="TokenValidationParameters"/> object copied from this object</returns>
+        /// <remarks>This is a shallow Clone.</remarks>
+        public virtual TokenValidationParameters Clone()
         {
-            get
+            return new TokenValidationParameters(this);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> using:
+        /// <para><see cref="AuthenticationType"/></para>
+        /// <para>'NameClaimType' is calculated: If NameClaimTypeRetriever call that else use NameClaimType. If the result is a null or empty string, use <see cref="ClaimsIdentity.DefaultNameClaimType"/></para>.
+        /// <para>'RoleClaimType' is calculated: If RoleClaimTypeRetriever call that else use RoleClaimType. If the result is a null or empty string, use <see cref="ClaimsIdentity.DefaultRoleClaimType"/></para>.
+        /// </summary>
+        /// <returns>A <see cref="ClaimsIdentity"/> with Authentication, NameClaimType and RoleClaimType set.</returns>
+        public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer)
+        {
+            string nameClaimType = null;
+            if (NameClaimTypeRetriever != null)
             {
-                return _certificateValidator;
+                nameClaimType = NameClaimTypeRetriever(securityToken, issuer);
+            }
+            else
+            {
+                nameClaimType = NameClaimType;
             }
 
-            set
+            string roleClaimType = null;
+            if (RoleClaimTypeRetriever != null)
             {
-                _certificateValidator = value;
+                roleClaimType = RoleClaimTypeRetriever(securityToken, issuer);
             }
+            else
+            {
+                roleClaimType = RoleClaimType;
+            }
+
+            return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 
         /// <summary>
@@ -236,7 +306,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token. The delegate returns the issuer to use.
         /// </summary>
-        public Func<string, SecurityToken, TokenValidationParameters, string> IssuerValidator
+        public IssuerValidator IssuerValidator
         {
             get;
             set;
@@ -245,7 +315,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the lifetime of the token
         /// </summary>
-        public Action<DateTime?, DateTime?, SecurityToken, TokenValidationParameters> LifetimeValidator
+        public LifetimeValidator LifetimeValidator
         {
             get;
             set;

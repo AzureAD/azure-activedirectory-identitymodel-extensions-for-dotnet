@@ -126,7 +126,7 @@ namespace System.IdentityModel.Test
         {
             try
             {
-                Validators.ValidateLifetime(expires, notBefore, securityToken, validationParameters);
+                Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
                 ee.ProcessNoException();
             }
             catch (Exception ex)

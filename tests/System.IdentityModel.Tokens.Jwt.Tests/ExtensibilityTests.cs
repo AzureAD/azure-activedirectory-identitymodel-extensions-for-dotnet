@@ -68,7 +68,7 @@ namespace System.IdentityModel.Test
                     claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
                     signingCredentials: KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(10),
-                    notbefore: DateTime.UtcNow
+                    notBefore: DateTime.UtcNow
                 );
 
             string encodedJwt = handler.WriteToken(jwt);

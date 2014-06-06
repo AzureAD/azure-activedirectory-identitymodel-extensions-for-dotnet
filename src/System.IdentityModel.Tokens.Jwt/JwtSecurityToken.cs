@@ -126,20 +126,20 @@ namespace System.IdentityModel.Tokens
         /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
         /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
         /// <param name="expires">if expires.HasValue a { exp, 'value' } claim is added.</param>
-        /// <param name="notbefore">if notbefore.HasValue a { nbf, 'value' } claim is added.</param>
+        /// <param name="notBefore">if notbefore.HasValue a { nbf, 'value' } claim is added.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be used to sign the <see cref="JwtSecurityToken"/>. See <see cref="JwtHeader(SigningCredentials)"/> for details pertaining to the Header Parameter(s).</param>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
-        public JwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? notbefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null)
+        public JwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null)
         {
-            if (expires.HasValue && notbefore.HasValue)
+            if (expires.HasValue && notBefore.HasValue)
             {
-                if (notbefore >= expires)
+                if (notBefore >= expires)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notbefore.Value));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value));
                 }
             }
 
-            this.payload = new JwtPayload(issuer, audience, claims, notbefore, expires);
+            this.payload = new JwtPayload(issuer: issuer, audience: audience, claims: claims, notBefore: notBefore, expires: expires);
             this.header = new JwtHeader(signingCredentials);
         }
 

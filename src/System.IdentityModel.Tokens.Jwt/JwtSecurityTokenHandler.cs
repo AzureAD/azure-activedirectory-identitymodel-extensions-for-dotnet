@@ -420,7 +420,7 @@ namespace System.IdentityModel.Tokens
             DateTime? notbefore = tokenDescriptor.Lifetime == null ? null : tokenDescriptor.Lifetime.Created;
             DateTime? expires = tokenDescriptor.Lifetime == null ? null : tokenDescriptor.Lifetime.Expires;
 
-            return this.CreateToken(issuer: tokenDescriptor.TokenIssuerName, audience: tokenDescriptor.AppliesToAddress, subject: tokenDescriptor.Subject, notbefore: notbefore, expires: expires, signingCredentials: tokenDescriptor.SigningCredentials);
+            return this.CreateToken(issuer: tokenDescriptor.TokenIssuerName, audience: tokenDescriptor.AppliesToAddress, subject: tokenDescriptor.Subject, notBefore: notbefore, expires: expires, signingCredentials: tokenDescriptor.SigningCredentials);
         }
  
         /// <summary>
@@ -430,7 +430,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="issuer">the issuer of the token.</param>
         /// <param name="audience">the audience for this token.</param>
         /// <param name="subject">the source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notbefore">the notbefore time for this token.</param> 
+        /// <param name="notBefore">the notbefore time for this token.</param> 
         /// <param name="expires">the expiration time for this token.</param>
         /// <param name="signingCredentials">contains cryptographic material for generating a signature.</param>
         /// <param name="signatureProvider">optional <see cref="SignatureProvider"/>.</param>
@@ -439,25 +439,26 @@ namespace System.IdentityModel.Tokens
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para></remarks>       
         /// <para>If signautureProvider is not null, then it will be used to create the signature and <see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning( SecurityKey, string )"/> will not be called.</para>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
-        public virtual JwtSecurityToken CreateToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notbefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null, SignatureProvider signatureProvider = null)
+        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
+        public virtual JwtSecurityToken CreateToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null, SignatureProvider signatureProvider = null)
         {
-            if (expires.HasValue && notbefore.HasValue)
+            if (expires.HasValue && notBefore.HasValue)
             {
-                if (notbefore >= expires)
+                if (notBefore >= expires)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value,  notbefore.Value));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value,  notBefore.Value));
                 }
             }
 
             // if not set, use defaults
-            if (!expires.HasValue && !notbefore.HasValue)
+            if (!expires.HasValue && !notBefore.HasValue)
             {
-                expires = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
-                notbefore = DateTime.UtcNow;
+                DateTime now = DateTime.UtcNow;
+                expires = now + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
+                notBefore = now;
             }
 
-            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notbefore, expires);
+            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires);
             JwtHeader header = new JwtHeader(signingCredentials);
 
             if (subject != null && subject.Actor != null)
@@ -628,11 +629,11 @@ namespace System.IdentityModel.Tokens
 
             if (validationParameters.LifetimeValidator != null)
             {
-                validationParameters.LifetimeValidator(expires, notBefore, jwt, validationParameters);
+                validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
             }
             else
             {
-                this.ValidateLifetime(expires, notBefore, jwt, validationParameters);
+                ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
             }
 
             if (validationParameters.AudienceValidator != null)
@@ -667,7 +668,21 @@ namespace System.IdentityModel.Tokens
             }
 
             validatedToken = jwt;
-            return new ClaimsPrincipal(this.CreateClaimsIdentity(jwt, issuer, validationParameters));
+
+            ClaimsIdentity identity = this.CreateClaimsIdentity(jwt, issuer, validationParameters);
+            if (validationParameters.SaveSigninToken)
+            {
+                if (jwt.RawData != null)
+                {
+                    identity.BootstrapContext = new BootstrapContext(jwt.RawData);
+                }
+                else
+                {
+                    identity.BootstrapContext = new BootstrapContext(this.WriteToken(jwt));
+                }
+            }
+
+            return new ClaimsPrincipal(identity);
         }
 
         /// <summary>
@@ -1009,40 +1024,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10333, jwt.ToString()));
             }
 
-            string nameClaimType = null;
-            if (validationParameters.NameClaimTypeRetriever != null)
-            {
-                nameClaimType = validationParameters.NameClaimTypeRetriever(jwt, issuer);
-            }
-            else
-            {
-                nameClaimType = validationParameters.NameClaimType;
-            }
-
-            string roleClaimType = null;
-            if (validationParameters.RoleClaimTypeRetriever != null)
-            {
-                roleClaimType = validationParameters.RoleClaimTypeRetriever(jwt, issuer);
-            }
-            else
-            {
-                roleClaimType = validationParameters.RoleClaimType;
-            }
-
-            // TODO - check that nameClaimType || roleClaimType is not null.
-            ClaimsIdentity identity = new ClaimsIdentity(validationParameters.AuthenticationType, nameClaimType, roleClaimType);
-            if (validationParameters.SaveSigninToken)
-            {
-                if (jwt.RawData != null)
-                {
-                    identity.BootstrapContext = new BootstrapContext(jwt.RawData);
-                }
-                else
-                {
-                    identity.BootstrapContext = new BootstrapContext(this.WriteToken(jwt));
-                }
-            }
-
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
             foreach (Claim jwtClaim in jwt.Claims)
             {
                 if (InboundClaimFilter.Contains(jwtClaim.Type))
@@ -1170,14 +1152,14 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Validates the lifetime of a <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <param name="expires">The <see cref="DateTime"/> value of the 'exp' claim if it exists in the 'jwt'.</param>
         /// <param name="notBefore">The <see cref="DateTime"/> value of the 'nbf' claim if it exists in the 'jwt'.</param>
+        /// <param name="expires">The <see cref="DateTime"/> value of the 'exp' claim if it exists in the 'jwt'.</param>
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
-        protected virtual void ValidateLifetime(DateTime? expires, DateTime? notBefore, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateLifetime(expires, notBefore, securityToken, validationParameters);
+            Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
         }
 
         /// <summary>
