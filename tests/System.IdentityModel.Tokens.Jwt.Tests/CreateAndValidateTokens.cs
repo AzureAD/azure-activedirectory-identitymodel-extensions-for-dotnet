@@ -21,10 +21,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Protocols.WSTrust;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
-using System.Reflection;
 using System.Security.Claims;
 using System.Web.Script.Serialization;
 using System.Xml;
@@ -85,7 +83,14 @@ namespace System.IdentityModel.Test
                 tokenDescriptor.Lifetime = new Lifetime(jwtParams.CompareTo.ValidFrom, jwtParams.CompareTo.ValidTo);
                 tokenDescriptor.Subject = new ClaimsIdentity(jwtParams.Claims);
                 tokenDescriptor.TokenIssuerName = jwtParams.CompareTo.Issuer;
-                tokenDescriptor.AppliesToAddress = jwtParams.CompareTo.Audience;
+                foreach(string str in jwtParams.CompareTo.Audiences)
+                {
+                    if (!string.IsNullOrWhiteSpace(str))
+                    {
+                        tokenDescriptor.AppliesToAddress = str;
+                    }
+                }
+
 
                 JwtSecurityToken token = handler.CreateToken(tokenDescriptor) as JwtSecurityToken;
                 Assert.IsTrue(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
@@ -134,7 +139,7 @@ namespace System.IdentityModel.Test
             string issuer = "http://www.GotJWT.com";
             string audience = "http://www.contoso.com";
 
-            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)));
+            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), expires: DateTime.UtcNow + TimeSpan.FromHours(1), notbefore: DateTime.UtcNow );
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
             string encodedJwt = jwtHandler.WriteToken(jwt);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
@@ -164,16 +169,24 @@ namespace System.IdentityModel.Test
             string audience = "http://www.contoso.com";
             SecurityToken validatedToken;
 
-            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)));
+            JwtSecurityToken jwt = 
+                new JwtSecurityToken(
+                    issuer: issuer, 
+                    audience: audience, 
+                    claims: ClaimSets.JsonClaims(issuer, issuer), 
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(1), 
+                    notbefore: DateTime.UtcNow);
+
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
             string encodedJwt = jwtHandler.WriteToken(jwt);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
-            TokenValidationParameters validationParameters = new TokenValidationParameters()
-            {
-                RequireSignedTokens = false,
-                ValidateAudience = false,
-                ValidIssuer = issuer,
-            };
+            TokenValidationParameters validationParameters = 
+                new TokenValidationParameters()
+                {
+                    RequireSignedTokens = false,
+                    ValidateAudience = false,
+                    ValidIssuer = issuer,
+                };
 
             var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());

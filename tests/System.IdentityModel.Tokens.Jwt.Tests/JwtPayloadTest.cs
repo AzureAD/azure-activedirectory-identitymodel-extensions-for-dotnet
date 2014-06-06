@@ -16,9 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IdentityModel.Claims;
 using System.IdentityModel.Tokens;
 using Claim = System.Security.Claims.Claim;
 
@@ -66,12 +66,15 @@ namespace System.IdentityModel.Test
 
             foreach (Claim c in jwtPayload.Claims)
             {
-                Assert.Fail("claims should be null");
-                break;
+                Assert.Fail("jwtPayload.Claims should be empty");
             }
 
             Assert.IsNull(jwtPayload.Actort, "jwtPayload.Actort != null");
-            Assert.IsNull(jwtPayload.Aud, "jwtPayload.Audience != null");
+            foreach(string audience in jwtPayload.Aud)
+            {
+                Assert.Fail("jwtPayload.Audience should be empty!= null");
+            }
+
             Assert.IsNull(jwtPayload.Exp, "jwtPayload.Exp != null");
             Assert.IsNull(jwtPayload.Jti, "jwtPayload.Id != null");
             Assert.IsNull(jwtPayload.Iat, "jwtPayload.Iat != null");
@@ -79,6 +82,22 @@ namespace System.IdentityModel.Test
             Assert.IsNull(jwtPayload.Sub, "jwtPayload.Sub != null");
             Assert.AreEqual(jwtPayload.ValidFrom, DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
             Assert.AreEqual(jwtPayload.ValidTo, DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
+        }
+
+        [TestMethod]
+        [TestProperty( "TestCaseID", "4D8369F1-8846-41C2-89C9-3827955032A6" )]
+        [Description( "Test claims as objects" )]
+        public void JwtPalyoad_Claims()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+            // multiple audiences
+
+            jwtPayload.Add(JwtConstants.ReservedClaims.Audience, IdentityUtilities.DefaultAudiences);
+            string encodedPayload = jwtPayload.Encode();
+            JwtPayload newjwtPayload = Base64UrlEncoder.Decode(encodedPayload).DeserializeJwtPayload();
+
+            Assert.IsTrue(IdentityComparer.AreEqual(jwtPayload, newjwtPayload));
+
         }
 
         [TestMethod]

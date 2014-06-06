@@ -19,13 +19,11 @@
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IdentityModel.Configuration;
-using System.IdentityModel.Protocols.WSTrust;
+using System.Collections.ObjectModel;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using IssuerNameRegistry = System.IdentityModel.Tokens.IssuerNameRegistry;
 
 namespace System.IdentityModel.Test
 {
@@ -46,8 +44,8 @@ namespace System.IdentityModel.Test
             Init();
         }
 
-        public DerivedJwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, Lifetime lifetime = null, SigningCredentials signingCredentials = null)
-            : base(issuer, audience, claims, lifetime, signingCredentials)
+        public DerivedJwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? expires = null, DateTime? notbefore = null, SigningCredentials signingCredentials = null)
+            : base(issuer, audience, claims, expires, notbefore, signingCredentials)
         {
             Init();
         }
@@ -568,4 +566,27 @@ namespace System.IdentityModel.Test
             return null;
         }
     }
+
+    public class JWTWithKeys : JwtSecurityToken
+    {
+        static ReadOnlyCollection<SecurityKey> _keys = (new List<SecurityKey> { new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256) }).AsReadOnly();
+
+        public JWTWithKeys(string jwtEncodedString)
+            : base(jwtEncodedString)
+        {
+        }
+
+        public JWTWithKeys(string issuer, string audience, IEnumerable<Claim> claims, DateTime? expires, DateTime? notbefore)
+            : base(issuer, audience, claims, expires, notbefore)
+        { }
+
+        public override ReadOnlyCollection<SecurityKey> SecurityKeys
+        {
+            get
+            {
+                return _keys;
+            }
+        }
+    }
+
 }

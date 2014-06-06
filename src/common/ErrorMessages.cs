@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
         public const string IDX10102 = "IDX10102: NameClaimType cannot be null or whitespace.";
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
+        public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
 
         // messages pertaining to validation 10200 - 10299
         public const string IDX10200 = "IDX10200: Support for ValidateToken(string, TokenValidationParameters) requires a handler to implement ISecurityTokenValidator, none of the SecurityTokenHandlers did.";
@@ -63,7 +64,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10221 = "IDX10221: Unable to create claims from securityToken, 'issuer' is null or empty.";
         public const string IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid.\nValidFrom: '{0}'\nCurrent time: '{1}'.";
         public const string IDX10223 = "IDX10223: Lifetime validation failed. The token is expired.\nValidTo: '{0}'\nCurrent time: '{1}'.";
-        public const string IDX10224 = "IDX10224: Lifetime validation failed. The token NotBefore: '{0}'is after Expires: '{1}'.";
+        public const string IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore: '{0}' is after Expires: '{1}'.";
         public const string IDX10225 = "IDX10225: Lifetime validation failed. The token is missing an Expiration Time.\nTokentype: '{0}'.";
         public const string IDX10226 = "IDX10226: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
 
@@ -81,6 +82,7 @@ namespace Microsoft.IdentityModel
 
         // SecurityTokenHandler messages
         public const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
+        public const string IDX10401 = "IDX10401: Expires: '{0}' must be after NotBefore: '{1}'.";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";

@@ -23,7 +23,6 @@ namespace System.IdentityModel.Tokens
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
-    using System.IdentityModel.Protocols.WSTrust;
     using System.Security.Claims;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -59,7 +58,10 @@ namespace System.IdentityModel.Tokens
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
-        private int DefaultTokenLifetimeInMinutes = 60;
+        /// <summary>
+        /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
+        /// </summary>
+        public readonly Int32 DefaultTokenLifetimeInMinutes = 60;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenHandler"/> class.
@@ -231,6 +233,28 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets and sets the token lifetime in minutes.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
+        public Int32 TokenLifetimeInMinutes
+        {
+            get
+            {
+                return _maximumTokenSizeInBytes;
+            }
+
+            set
+            {
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10104, value.ToString(CultureInfo.InvariantCulture)));
+                }
+
+                _maximumTokenSizeInBytes = value;
+            }
+        }
+
+        /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
@@ -393,17 +417,21 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("tokenDescriptor");
             }
 
-            return this.CreateToken(tokenDescriptor.TokenIssuerName, tokenDescriptor.AppliesToAddress, tokenDescriptor.Subject, tokenDescriptor.Lifetime, tokenDescriptor.SigningCredentials);
-        }
+            DateTime? notbefore = tokenDescriptor.Lifetime == null ? null : tokenDescriptor.Lifetime.Created;
+            DateTime? expires = tokenDescriptor.Lifetime == null ? null : tokenDescriptor.Lifetime.Expires;
 
+            return this.CreateToken(issuer: tokenDescriptor.TokenIssuerName, audience: tokenDescriptor.AppliesToAddress, subject: tokenDescriptor.Subject, notbefore: notbefore, expires: expires, signingCredentials: tokenDescriptor.SigningCredentials);
+        }
+ 
         /// <summary>
         /// Uses the <see cref="JwtSecurityToken(JwtHeader, JwtPayload, string )"/> constructor, first creating the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>.
         /// <para>If <see cref="SigningCredentials"/> is not null, <see cref="JwtSecurityToken.RawData"/> will be signed.</para>
         /// </summary>
         /// <param name="issuer">the issuer of the token.</param>
-        /// <param name="audience">the expected audience for this token</param>
+        /// <param name="audience">the audience for this token.</param>
         /// <param name="subject">the source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="lifetime">the creation and expiration times for this token.</param>
+        /// <param name="notbefore">the notbefore time for this token.</param> 
+        /// <param name="expires">the expiration time for this token.</param>
         /// <param name="signingCredentials">contains cryptographic material for generating a signature.</param>
         /// <param name="signatureProvider">optional <see cref="SignatureProvider"/>.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
@@ -411,9 +439,25 @@ namespace System.IdentityModel.Tokens
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para></remarks>       
         /// <para>If signautureProvider is not null, then it will be used to create the signature and <see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning( SecurityKey, string )"/> will not be called.</para>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        public virtual JwtSecurityToken CreateToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, Lifetime lifetime = null, SigningCredentials signingCredentials = null, SignatureProvider signatureProvider = null)
+        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
+        public virtual JwtSecurityToken CreateToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notbefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null, SignatureProvider signatureProvider = null)
         {
-            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, lifetime ?? new Lifetime(new DateTime?(DateTime.UtcNow), new DateTime?(DateTime.UtcNow + TimeSpan.FromMinutes(DefaultTokenLifetimeInMinutes))));
+            if (expires.HasValue && notbefore.HasValue)
+            {
+                if (notbefore >= expires)
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value,  notbefore.Value));
+                }
+            }
+
+            // if not set, use defaults
+            if (!expires.HasValue && !notbefore.HasValue)
+            {
+                expires = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
+                notbefore = DateTime.UtcNow;
+            }
+
+            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notbefore, expires);
             JwtHeader header = new JwtHeader(signingCredentials);
 
             if (subject != null && subject.Actor != null)
@@ -423,7 +467,7 @@ namespace System.IdentityModel.Tokens
 
             string signature = string.Empty;
             string signingInput = string.Concat(header.Encode(), ".", payload.Encode());
-            if( signatureProvider != null)
+            if (signatureProvider != null)
             {
                 signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
             }
@@ -577,7 +621,7 @@ namespace System.IdentityModel.Tokens
             }
 
             DateTime? expires = null;
-            if ( jwt.Payload.TryGetValue(JwtConstants.ReservedClaims.Exp, out obj))
+            if (jwt.Payload.TryGetValue(JwtConstants.ReservedClaims.Exp, out obj))
             {
                 expires = new DateTime?(jwt.ValidTo);
             }
@@ -593,11 +637,11 @@ namespace System.IdentityModel.Tokens
 
             if (validationParameters.AudienceValidator != null)
             {
-                validationParameters.AudienceValidator(new string[] { jwt.Audience }, jwt, validationParameters);
+                validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters);
             }
             else
             {
-                this.ValidateAudience(new string[] { jwt.Audience }, jwt, validationParameters);
+                this.ValidateAudience(jwt.Audiences, jwt, validationParameters);
             }
 
             string issuer = jwt.Issuer;
@@ -830,7 +874,7 @@ namespace System.IdentityModel.Tokens
                             {
                                 throw;
                             }
-                            
+
                             if (firstException == null)
                             {
                                 firstException = ex;
@@ -841,7 +885,7 @@ namespace System.IdentityModel.Tokens
                         }
                     }
                 }
-  
+
                 if (!matched)
                 {
                     keysThatDidNotMatchJwtSecurityKeyIdentifier.Add(securityKey);
@@ -894,7 +938,7 @@ namespace System.IdentityModel.Tokens
             if (keysThatMatchedJwtSecurityKeyIdentifier.Count > 0 || keysThatDidNotMatchJwtSecurityKeyIdentifier.Count > 0)
             {
                 keysAttempted = string.Empty;
-                foreach(SecurityKey securityKey in keysThatMatchedJwtSecurityKeyIdentifier)
+                foreach (SecurityKey securityKey in keysThatMatchedJwtSecurityKeyIdentifier)
                 {
                     keysAttempted += CreateKeyString(securityKey) + Environment.NewLine;
                 }
@@ -940,7 +984,7 @@ namespace System.IdentityModel.Tokens
             {
                 return "null";
             }
-            else 
+            else
             {
                 return securityKey.ToString();
             }

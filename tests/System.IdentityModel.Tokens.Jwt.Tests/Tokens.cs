@@ -18,9 +18,6 @@
 
 using Microsoft.IdentityModel.Test;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IdentityModel.Protocols.WSTrust;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 
@@ -40,19 +37,19 @@ namespace System.IdentityModel.Test
 
     public static class JwtTestTokens
     {
-        public static JwtSecurityToken Simple( string issuer = null, string originalIssuer = null )
+        public static JwtSecurityToken Simple(string issuer = null, string originalIssuer = null)
         {
             string iss = issuer ?? IdentityUtilities.DefaultIssuer;
             string originalIss = originalIssuer ?? IdentityUtilities.DefaultOriginalIssuer;
 
-            return new JwtSecurityToken( issuer, "http://www.contoso.com", ClaimSets.Simple( iss, originalIss ) );
+            return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
         }
 
-        public static JwtSecurityToken Create( string issuer, string originalIssuer, SigningCredentials signingCredentials )
+        public static JwtSecurityToken Create(string issuer, string originalIssuer, SigningCredentials signingCredentials)
         {
-            JwtPayload payload = new JwtPayload( issuer, "urn:uri", ClaimSets.Simple( issuer, originalIssuer ), new Lifetime( DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours( 10 ) ));
-            JwtHeader header = new JwtHeader( signingCredentials );
-            return new JwtSecurityToken( header, payload, header.Encode() + "." + payload.Encode() + "." );
+            JwtPayload payload = new JwtPayload(issuer, "urn:uri", ClaimSets.Simple(issuer, originalIssuer), DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(10));
+            JwtHeader header = new JwtHeader(signingCredentials);
+            return new JwtSecurityToken(header, payload, header.Encode() + "." + payload.Encode() + ".");
         }
 
         public static IEnumerable<CreateAndValidateParams> All
@@ -65,8 +62,8 @@ namespace System.IdentityModel.Test
                 yield return new CreateAndValidateParams
                 {
                     Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
-                    Claims = ClaimSets.Simple( issuer, originalIssuer),
-                    CompareTo = Create(issuer, originalIssuer, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2 ),
+                    Claims = ClaimSets.Simple(issuer, originalIssuer),
+                    CompareTo = Create(issuer, originalIssuer, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2),
                     ExceptionType = null,
                     SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                     SigningToken = KeyingMaterial.DefaultX509Token_2048,
@@ -81,8 +78,8 @@ namespace System.IdentityModel.Test
                 yield return new CreateAndValidateParams
                 {
                     Case = "ClaimSets.Simple_simpleSigned_Symmetric",
-                    Claims = ClaimSets.Simple( issuer, originalIssuer ),
-                    CompareTo = Create( issuer, originalIssuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2 ),
+                    Claims = ClaimSets.Simple(issuer, originalIssuer),
+                    CompareTo = Create(issuer, originalIssuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
                     ExceptionType = null,
                     SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                     SigningToken = KeyingMaterial.DefaultSymmetricSecurityToken_256,
@@ -96,28 +93,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-    }
-
-    public class JWTWithKeys : JwtSecurityToken
-    {
-        static ReadOnlyCollection<SecurityKey> _keys = (new List<SecurityKey> { new InMemorySymmetricSecurityKey( KeyingMaterial.DefaultSymmetricKeyBytes_256 ) }).AsReadOnly();
-
-        public JWTWithKeys( string jwtEncodedString )
-            : base( jwtEncodedString )
-        {
-        }
-
-        public JWTWithKeys( string issuer, string audience, IEnumerable<Claim> claims, DateTime validFrom, DateTime validTo )
-            : base( issuer: issuer, audience: audience, claims: claims, signingCredentials: null, lifetime: new Lifetime( validFrom, validTo ) )
-        {}
-
-        public override ReadOnlyCollection<SecurityKey> SecurityKeys
-        {
-            get
-            {
-                return _keys;
-            }
-        }
     }
 
 }

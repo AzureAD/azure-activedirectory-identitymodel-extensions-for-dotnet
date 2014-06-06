@@ -19,7 +19,6 @@
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Reflection;
 using Claim = System.Security.Claims.Claim;
@@ -67,7 +66,11 @@ namespace System.IdentityModel.Test
             }
 
             Assert.IsNull(jwt.Actor);
-            Assert.IsNull(jwt.Audience);
+            Assert.IsNotNull(jwt.Audiences);
+            foreach (string aud in jwt.Audiences)
+            {
+                Assert.Fail("jwt.Audiences should be empty");
+            }
             Assert.IsNull(jwt.Id);
             Assert.IsNull(jwt.Issuer);
             Assert.IsNotNull(jwt.SecurityKeys);
@@ -224,37 +227,37 @@ namespace System.IdentityModel.Test
 
             RunConstructionTest(
                 new JwtSecurityTokenTestVariation
-                { 
-                    Name = "ValidFrom > ValidTo, .Net datetime",
-                    ValidFrom = DateTime.UtcNow + TimeSpan.FromHours(1),
-                    ValidTo   = DateTime.UtcNow,
-                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "ID2000" ),
+                {
+                    Name = "NotBefore > Expires, .Net datetime",
+                    NotBefore = DateTime.UtcNow + TimeSpan.FromHours(1),
+                    Expires   = DateTime.UtcNow,
+                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "IDX10401" ),
                 });
 
             RunConstructionTest(
                 new JwtSecurityTokenTestVariation
-                { 
-                    Name = "ValidFrom > ValidTo, UnixEpoch - 1 ms",
-                    ValidTo = EpochTime.UnixEpoch - TimeSpan.FromMilliseconds(1), 
-                    ValidFrom = DateTime.UtcNow, 
-                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "ID2000" ),
+                {
+                    Name = "NotBefore > Expires, UnixEpoch - 1 ms",
+                    NotBefore = DateTime.UtcNow,
+                    Expires = EpochTime.UnixEpoch - TimeSpan.FromMilliseconds(1),
+                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "IDX10401" ),
                 });
 
             RunConstructionTest(
                 new JwtSecurityTokenTestVariation
-                { 
-                    Name = "ValidFrom > ValidTo, UnixEpoch - 1 s",
-                    ValidTo = EpochTime.UnixEpoch - TimeSpan.FromSeconds(1), 
-                    ValidFrom = DateTime.UtcNow, 
-                    ExpectedException = ExpectedException.ArgumentException( substringExpected: "ID2000" ),
+                {
+                    Name = "NotBefore > Expires, UnixEpoch - 1 s",
+                    NotBefore = DateTime.UtcNow,
+                    Expires = EpochTime.UnixEpoch - TimeSpan.FromSeconds(1), 
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
                 });
 
             RunConstructionTest(
                 new JwtSecurityTokenTestVariation
-                { 
-                    Name = "ValidFrom == DateItime.MinValue",
-                    ValidFrom = DateTime.MinValue, 
-                    ValidTo = DateTime.UtcNow, 
+                {
+                    Name = "NotBefore == DateItime.MinValue",
+                    NotBefore = DateTime.MinValue, 
+                    Expires = DateTime.UtcNow, 
                 });
             }
 
@@ -263,8 +266,7 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwt = null;
             try
             {
-                //jwt = new JWTSecurityToken( issuer: param.Issuer, audience: param.Audience, claims: param.Claims, signingCredentials: param.SigningCredentials, lifetime: param.Lifetime, actor: param.Actor);
-                jwt = new JwtSecurityToken( variation.Issuer, variation.Audience, variation.Claims, new Lifetime( variation.ValidFrom, variation.ValidTo ) );
+                jwt = new JwtSecurityToken(issuer: variation.Issuer, audience: variation.Audience, claims: variation.Claims, signingCredentials: variation.SigningCredentials, notbefore: variation.NotBefore, expires: variation.Expires);
                 variation.ExpectedException.ProcessNoException();
             }
             catch ( Exception ex )

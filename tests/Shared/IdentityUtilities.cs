@@ -18,16 +18,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
-
-using SMSamlTokenHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
-using SMSaml2TokenHandler = System.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -42,6 +38,8 @@ namespace Microsoft.IdentityModel.Test
     public class IdentityUtilities
     {
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }
+        public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
+
         public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2; } }
         public static SecurityToken DefaultAsymmetricSigningToken { get { return KeyingMaterial.DefaultAsymmetricX509Token_2048; ; } }
 
@@ -115,7 +113,6 @@ namespace Microsoft.IdentityModel.Test
 
         static IdentityUtilities()
         {
-
         }
 
         public static string DefaultAsymmetricJwt

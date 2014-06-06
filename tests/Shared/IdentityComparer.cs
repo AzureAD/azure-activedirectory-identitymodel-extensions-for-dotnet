@@ -113,6 +113,8 @@ namespace System.IdentityModel.Test
                 return AreEnumsEqual<string>(t1 as IEnumerable<string>, t2 as IEnumerable<string>, context, AreStringsEqual);
             else if (t1 is IEnumerable<SecurityKey>)
                 return AreEnumsEqual<SecurityKey>(t1 as IEnumerable<SecurityKey>, t2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
+            else if (t1 is JwtPayload)
+                return AreEqual<JwtPayload>(t1 as JwtPayload, t2 as JwtPayload, context, AreJwtPayloadsEqual);
 
             throw new InvalidOperationException("type not known");
         }
@@ -270,7 +272,7 @@ namespace System.IdentityModel.Test
             if (!string.Equals(jwt1.Actor, jwt2.Actor, compareContext.StringComparison))
                 return false;
 
-            if (!string.Equals(jwt1.Audience, jwt2.Audience, compareContext.StringComparison))
+            if (!AreEnumsEqual<string>(jwt1.Audiences, jwt2.Audiences, compareContext, AreStringsEqual))
                 return false;
 
             if (!string.Equals(jwt1.Id, jwt2.Id, compareContext.StringComparison))

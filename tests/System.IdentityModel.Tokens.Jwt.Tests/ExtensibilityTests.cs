@@ -19,10 +19,7 @@
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
-using System.Security.Claims;
 
 namespace System.IdentityModel.Test
 {
@@ -70,7 +67,8 @@ namespace System.IdentityModel.Test
                     audience: Audiences.AuthFactors,
                     claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
                     signingCredentials: KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                    lifetime: new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(10))
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(10),
+                    notbefore: DateTime.UtcNow
                 );
 
             string encodedJwt = handler.WriteToken(jwt);
@@ -148,7 +146,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException( substringExpected: "Jwt10334:", innerTypeExpected: typeof(InvalidOperationException));
+            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "Jwt10334:", innerTypeExpected: typeof(InvalidOperationException));
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, expectedException);
 
             // inbound is mapped to Rsa256
@@ -170,7 +168,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), innerTypeExpected: typeof(InvalidOperationException), substringExpected: "Jwt10316:" );
+            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), innerTypeExpected: typeof(InvalidOperationException), substringExpected: "Jwt10316:");
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, expectedException);
 
             // inbound is mapped Hmac
