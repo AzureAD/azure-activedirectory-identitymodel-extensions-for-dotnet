@@ -18,7 +18,6 @@
 
 using Microsoft.IdentityModel.Test;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -35,15 +34,15 @@ namespace System.IdentityModel.Test
     public class JwtSecurityTokenTestVariation
     {
         // it is helpful to have these as a defaults
-        DateTime _validFrom;
-        DateTime _validTo;        
+        DateTime _notbefore;
+        DateTime _expires;        
         JwtSecurityTokenHandler _jwtHandler;
         ExpectedException _expectedException;
 
         public JwtSecurityTokenTestVariation() 
         {
-            _validFrom = DateTime.UtcNow;
-            _validTo = DateTime.UtcNow + TimeSpan.FromHours( 1 );
+            _notbefore = DateTime.UtcNow;
+            _expires = DateTime.UtcNow + TimeSpan.FromHours( 1 );
             _jwtHandler = new JwtSecurityTokenHandler();
             _expectedException = ExpectedException.NoExceptionExpected;
         }
@@ -65,7 +64,6 @@ namespace System.IdentityModel.Test
         public string Issuer { get; set; }
         public JwtSecurityTokenHandler JwtSecurityTokenHandler { get { return _jwtHandler; } set { _jwtHandler = value; } }
         public JwtSecurityToken JwtSecurityToken { get; set; }
-        public Lifetime Lifetime { get; set; }
         public string Name { get; set; }
         public string NameClaimType { get; set; }
         public TimeSpan MaxClockSkew { get; set; }
@@ -85,8 +83,8 @@ namespace System.IdentityModel.Test
         public string[] TokenTypeIdentifiers { get; set; }
         public TokenValidationParameters TokenValidationParameters { get; set; }
         public byte[] UnsignedBytes { get; set; }
-        public DateTime ValidFrom { get { return _validFrom; } set { _validFrom = value; } }
-        public DateTime ValidTo { get { return _validTo; } set { _validTo = value; } }
+        public DateTime NotBefore { get { return _notbefore; } set { _notbefore = value; } }
+        public DateTime Expires { get { return _expires; } set { _expires = value; } }
         public XmlNodeList XmlNodeList { get; set; }
         public XmlReader XmlReader { get; set; }
         public XmlWriter XmlWriter { get; set; }
