@@ -266,7 +266,14 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwt = null;
             try
             {
-                jwt = new JwtSecurityToken(issuer: variation.Issuer, audience: variation.Audience, claims: variation.Claims, signingCredentials: variation.SigningCredentials, notbefore: variation.NotBefore, expires: variation.Expires);
+                jwt = new JwtSecurityToken(
+                    issuer: variation.Issuer,
+                    audience: variation.Audience,
+                    claims: variation.Claims,
+                    signingCredentials: variation.SigningCredentials,
+                    notBefore: variation.NotBefore,
+                    expires: variation.Expires);
+
                 variation.ExpectedException.ProcessNoException();
             }
             catch ( Exception ex )

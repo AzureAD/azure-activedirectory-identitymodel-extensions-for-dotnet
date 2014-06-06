@@ -46,19 +46,19 @@ namespace System.IdentityModel.Tokens
         /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
         /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
         /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
-        /// <param name="notbefore">notbefore.HasValue a { nbf, 'value' } is added.</param>
+        /// <param name="notBefore">notbefore.HasValue a { nbf, 'value' } is added.</param>
         /// <param name="expires">expires.HasValue a { exp, 'value' } claim is added.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
         /// <para>If a 'nbf' or 'exp' claim exists in the 'claims' it will be replaced with the 'notbefore' and 'expires' if they are not null.</para></remarks>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
-        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notbefore, DateTime? expires)
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
             : base(StringComparer.Ordinal)
         {
-            if (expires.HasValue && notbefore.HasValue)
+            if (expires.HasValue && notBefore.HasValue)
             {
-                if (notbefore >= expires)
+                if (notBefore >= expires)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notbefore.Value));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value));
                 }
             }
 
@@ -82,14 +82,14 @@ namespace System.IdentityModel.Tokens
                 this.Add(JwtConstants.ReservedClaims.Exp, EpochTime.GetIntDate(expires.Value.ToUniversalTime()));
             }
 
-            if (notbefore.HasValue)
+            if (notBefore.HasValue)
             {
                 if (this.ContainsKey(JwtConstants.ReservedClaims.Nbf))
                 {
                     this.Remove(JwtConstants.ReservedClaims.Nbf);
                 }
 
-                this.Add(JwtConstants.ReservedClaims.Nbf, EpochTime.GetIntDate(notbefore.Value.ToUniversalTime()));
+                this.Add(JwtConstants.ReservedClaims.Nbf, EpochTime.GetIntDate(notBefore.Value.ToUniversalTime()));
             }
         }
 

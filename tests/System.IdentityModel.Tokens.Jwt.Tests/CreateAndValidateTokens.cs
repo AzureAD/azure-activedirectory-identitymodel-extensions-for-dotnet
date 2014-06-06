@@ -139,7 +139,7 @@ namespace System.IdentityModel.Test
             string issuer = "http://www.GotJWT.com";
             string audience = "http://www.contoso.com";
 
-            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), expires: DateTime.UtcNow + TimeSpan.FromHours(1), notbefore: DateTime.UtcNow );
+            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), expires: DateTime.UtcNow + TimeSpan.FromHours(1), notBefore: DateTime.UtcNow );
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
             string encodedJwt = jwtHandler.WriteToken(jwt);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
@@ -175,7 +175,7 @@ namespace System.IdentityModel.Test
                     audience: audience, 
                     claims: ClaimSets.JsonClaims(issuer, issuer), 
                     expires: DateTime.UtcNow + TimeSpan.FromHours(1), 
-                    notbefore: DateTime.UtcNow);
+                    notBefore: DateTime.UtcNow);
 
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
             string encodedJwt = jwtHandler.WriteToken(jwt);

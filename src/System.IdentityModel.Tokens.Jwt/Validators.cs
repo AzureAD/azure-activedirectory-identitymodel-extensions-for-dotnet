@@ -150,8 +150,8 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Validates the lifetime of a <see cref="SecurityToken"/>.
         /// </summary>
-        /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
+        /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <exception cref="ArgumentNullException"> if 'vaidationParameters' is null.</exception>
@@ -160,7 +160,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="SecurityTokenNotYetValidException"> if 'notBefore' is &gt; DateTime.UtcNow.</exception>
         /// <exception cref="SecurityTokenExpiredException"> if 'expires' is &lt; DateTime.UtcNow.</exception>
         /// <remarks>All time comparisons apply <see cref="TokenValidationParameters.ClockSkew"/>.</remarks>
-        public static void ValidateLifetime(DateTime? expires, DateTime? notBefore, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        public static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
             {

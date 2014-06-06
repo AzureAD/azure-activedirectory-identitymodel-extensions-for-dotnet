@@ -546,46 +546,104 @@ namespace System.IdentityModel.Test
 
         private static bool AreTokenValidationParametersEqual(TokenValidationParameters validationParameters1, TokenValidationParameters validationParameters2, CompareContext compareContext)
         {
-            //if (!AreEqual<Func<IEnumerable<string>, SecurityToken, TokenValidationParameters>>(validationParameters1.AudienceValidator, validationParameters2.AudienceValidator, compareContext, AreAudValidatorsEqual))
-            //    return false;
+            HashSet<string> matchingFailures = new HashSet<string>();
 
-            //if (!AreEqual<Func<string, SecurityToken, bool>>(validationParameters1.IssuerValidator, validationParameters2.IssuerValidator, compareContext, AreIssValidatorsEqual))
-            //    return false;
+            if ((validationParameters1.AudienceValidator == null && validationParameters2.AudienceValidator != null) || (validationParameters1.AudienceValidator != null && validationParameters2.AudienceValidator == null))
+                matchingFailures.Add("AudienceValidator");
 
-            //if (!AreEqual<Func<SecurityToken, bool>>(validationParameters1.LifetimeValidator, validationParameters2.LifetimeValidator, compareContext, AreLifetimeValidatorsEqual))
-            //    return false;
+            if (validationParameters1.AuthenticationType != validationParameters2.AuthenticationType)
+                matchingFailures.Add("AuthenticationType");
 
-            if (!AreEqual<Func<string, IEnumerable<SecurityKey>>>(validationParameters1.IssuerSigningKeyRetriever, validationParameters2.IssuerSigningKeyRetriever, compareContext, AreKeyRetrieversEqual))
-                return false;
+            if ((validationParameters1.CertificateValidator == null && validationParameters2.CertificateValidator != null) || (validationParameters1.CertificateValidator != null && validationParameters2.CertificateValidator == null))
+                matchingFailures.Add("CertificateValidator");
+
+            if (validationParameters1.CertificateValidator != null)
+            { 
+                if (validationParameters1.CertificateValidator.GetType() != validationParameters2.CertificateValidator.GetType())
+                    matchingFailures.Add("CertificateValidatorType");
+            }
+            if (validationParameters1.ClockSkew != validationParameters2.ClockSkew)
+                matchingFailures.Add("ClockSkew");
+
+            if (validationParameters1.ClockSkew != validationParameters2.ClockSkew)
+                matchingFailures.Add("ClockSkew");
 
             if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKey, validationParameters2.IssuerSigningKey, compareContext, AreSecurityKeysEqual))
-                return false;
+                matchingFailures.Add("IssuerSigningKey");
+
+            if (!AreEqual<Func<string, IEnumerable<SecurityKey>>>(validationParameters1.IssuerSigningKeyRetriever, validationParameters2.IssuerSigningKeyRetriever, compareContext, AreKeyRetrieversEqual))
+                matchingFailures.Add("IssuerSigningKeyRetriever");
 
             if (!AreEnumsEqual<SecurityKey>(validationParameters1.IssuerSigningKeys, validationParameters2.IssuerSigningKeys, compareContext, AreSecurityKeysEqual))
-                return false;
+                matchingFailures.Add("IssuerSigningKeys");
+
+            if ((validationParameters1.IssuerSigningKeyValidator == null && validationParameters2.IssuerSigningKeyValidator != null) || (validationParameters1.IssuerSigningKeyValidator != null && validationParameters2.IssuerSigningKeyValidator == null))
+                matchingFailures.Add("IssuerSigningKeyValidator");
+
+            if (!AreEqual<SecurityToken>(validationParameters1.IssuerSigningToken, validationParameters2.IssuerSigningToken, compareContext, AreSecurityTokensEqual))
+                matchingFailures.Add("IssuerSigningKey");
+
+            if (!AreEnumsEqual<SecurityToken>(validationParameters1.IssuerSigningTokens, validationParameters2.IssuerSigningTokens, compareContext, AreSecurityTokensEqual))
+                matchingFailures.Add("IssuerSigningTokens");
+
+            if ((validationParameters1.IssuerValidator == null && validationParameters2.IssuerValidator != null) || (validationParameters1.IssuerValidator != null && validationParameters2.IssuerValidator == null))
+                matchingFailures.Add("IssuerValidator");
+
+            if ((validationParameters1.LifetimeValidator == null && validationParameters2.LifetimeValidator != null) || (validationParameters1.LifetimeValidator != null && validationParameters2.LifetimeValidator == null))
+                matchingFailures.Add("LifetimeValidator");
+
+            if (validationParameters1.NameClaimType != validationParameters2.NameClaimType)
+                matchingFailures.Add("NameClaimType");
+
+            if ((validationParameters1.NameClaimTypeRetriever == null && validationParameters2.NameClaimTypeRetriever != null) || (validationParameters1.NameClaimTypeRetriever != null && validationParameters2.NameClaimTypeRetriever == null))
+                matchingFailures.Add("NameClaimTypeRetriever");
+
+            if (validationParameters1.RequireSignedTokens != validationParameters2.RequireSignedTokens)
+                matchingFailures.Add("RequireSignedTokens");
+
+            if (validationParameters1.RequireExpirationTime != validationParameters2.RequireExpirationTime)
+                matchingFailures.Add("RequireExpirationTime");
+
+            if (validationParameters1.RoleClaimType != validationParameters2.RoleClaimType)
+                matchingFailures.Add("RoleClaimType");
+
+            if ((validationParameters1.RoleClaimTypeRetriever == null && validationParameters2.RoleClaimTypeRetriever != null) || (validationParameters1.RoleClaimTypeRetriever != null && validationParameters2.RoleClaimTypeRetriever == null))
+                matchingFailures.Add("RoleClaimTypeRetriever");
 
             if (validationParameters1.SaveSigninToken != validationParameters2.SaveSigninToken)
-                return false;
+                matchingFailures.Add("SaveSigninToken");
+
+            if ((validationParameters1.TokenReplayCache == null && validationParameters2.TokenReplayCache != null) || (validationParameters1.TokenReplayCache != null && validationParameters2.TokenReplayCache == null))
+                matchingFailures.Add("TokenReplayCache");
+
+            if (validationParameters1.ValidateActor != validationParameters2.ValidateActor)
+                matchingFailures.Add("ValidateActor");
 
             if (validationParameters1.ValidateAudience != validationParameters2.ValidateAudience)
-                return false;
+                matchingFailures.Add("ValidateAudience");
 
             if (validationParameters1.ValidateIssuer != validationParameters2.ValidateIssuer)
-                return false;
+                matchingFailures.Add("ValidateIssuer");
+
+            if (validationParameters1.ValidateIssuerSigningKey != validationParameters2.ValidateIssuerSigningKey)
+                matchingFailures.Add("ValidateIssuerSigningKey");
+
+            if (validationParameters1.ValidateLifetime != validationParameters2.ValidateLifetime)
+                matchingFailures.Add("ValidateLifetime");
 
             if (!String.Equals(validationParameters1.ValidAudience, validationParameters2.ValidAudience, StringComparison.Ordinal))
-                return false;
+                matchingFailures.Add("ValidAudience");
 
             if (!AreEnumsEqual<string>(validationParameters1.ValidAudiences, validationParameters2.ValidAudiences, new CompareContext { StringComparison = System.StringComparison.Ordinal }, AreStringsEqual))
-                return false;
+                matchingFailures.Add("ValidAudiences");
 
             if (!String.Equals(validationParameters1.ValidIssuer, validationParameters2.ValidIssuer, StringComparison.Ordinal))
-                return false;
+                matchingFailures.Add("ValidIssuer");
 
             if (!AreEnumsEqual<string>(validationParameters1.ValidIssuers, validationParameters2.ValidIssuers, CompareContext.Default, AreStringsEqual))
-                return false;
+                matchingFailures.Add("ValidIssuers");
 
-            return true;
+            return matchingFailures.Count == 0;
         }
     }
 }
