@@ -341,7 +341,7 @@ namespace System.IdentityModel.Tokens
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
                 string type = null;
-                if (this.header.TryGetValue(JwtConstants.ReservedHeaderParameters.Typ, out type))
+                if (this.header.TryGetValue(JwtHeaderParameterNames.Typ, out type))
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {

@@ -35,19 +35,19 @@ namespace System.IdentityModel.Test
     {
         public static string ActorIssuer = "http://www.GotJwt.com/Actor";
 
-        static Claim _actor             = new Claim( JwtConstants.ReservedClaims.Actort, JwtTestTokens.Simple( ActorIssuer, ActorIssuer ).ToString() );
-        static Claim _audience          = new Claim( JwtConstants.ReservedClaims.Audience, "audienceClaimSets.Value" );
-        static Claim _badHeaderType     = new Claim( JwtConstants.ReservedHeaderParameters.Typ, "BADDTYPE" );
-        static Claim _expBadDateFormat  = new Claim( JwtConstants.ReservedClaims.Exp, "BADDATEFORMAT" );
-        static Claim _issuedAt          = new Claim( JwtConstants.ReservedClaims.Iat, "issuedatClaimSets.Value" );
-        static Claim _issuer            = new Claim( JwtConstants.ReservedClaims.Iss,   "issuerClaimSets.Value" );
-        static Claim _jwtId             = new Claim( JwtConstants.ReservedClaims.Jti, "jwtIdClaimSets.Value" );
-        static Claim _nbfBadDateFormat  = new Claim( JwtConstants.ReservedClaims.Nbf, "BADDATEFORMAT" );
-        static Claim _notAfter          = new Claim( JwtConstants.ReservedClaims.Exp, EpochTime.GetIntDate( DateTime.UtcNow + TimeSpan.FromHours( 1 ) ).ToString() );
-        static Claim _notBefore         = new Claim( JwtConstants.ReservedClaims.Nbf, EpochTime.GetIntDate(DateTime.UtcNow).ToString() );
-        static Claim _principal         = new Claim( JwtConstants.ReservedClaims.Prn, "princlipalClaimSets.Value" );
-        static Claim _sub               = new Claim( JwtConstants.ReservedClaims.Sub, "Subject.Value" );
-        static Claim _type              = new Claim( JwtConstants.ReservedClaims.Typ, "Type.Value" );
+        static Claim _actor             = new Claim( JwtRegisteredClaimNames.Actort, JwtTestTokens.Simple( ActorIssuer, ActorIssuer ).ToString() );
+        static Claim _audience          = new Claim( JwtRegisteredClaimNames.Aud, "audClaimSets.Value" );
+        static Claim _badHeaderType     = new Claim( JwtHeaderParameterNames.Typ, "BADDTYPE" );
+        static Claim _expBadDateFormat  = new Claim( JwtRegisteredClaimNames.Exp, "BADDATEFORMAT" );
+        static Claim _issuedAt          = new Claim( JwtRegisteredClaimNames.Iat, "issuedatClaimSets.Value" );
+        static Claim _issuer            = new Claim( JwtRegisteredClaimNames.Iss,   "issuerClaimSets.Value" );
+        static Claim _jwtId             = new Claim( JwtRegisteredClaimNames.Jti, "jwtIdClaimSets.Value" );
+        static Claim _nbfBadDateFormat  = new Claim( JwtRegisteredClaimNames.Nbf, "BADDATEFORMAT" );
+        static Claim _notAfter          = new Claim( JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate( DateTime.UtcNow + TimeSpan.FromHours( 1 ) ).ToString() );
+        static Claim _notBefore         = new Claim( JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.UtcNow).ToString() );
+        static Claim _principal         = new Claim( JwtRegisteredClaimNames.Prn, "princlipalClaimSets.Value" );
+        static Claim _sub               = new Claim( JwtRegisteredClaimNames.Sub, "Subject.Value" );
+        static Claim _type              = new Claim( JwtRegisteredClaimNames.Typ, "Type.Value" );
         
         public static IEnumerable<Claim> AllReserved
         {
@@ -249,18 +249,18 @@ namespace System.IdentityModel.Test
 
             if ( lifetime != null )
             {
-                yield return new Claim( JwtConstants.ReservedClaims.Nbf, EpochTime.GetIntDate(lifetime.Created.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-                yield return new Claim( JwtConstants.ReservedClaims.Exp, EpochTime.GetIntDate( lifetime.Expires.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
+                yield return new Claim( JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(lifetime.Created.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
+                yield return new Claim( JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate( lifetime.Expires.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
             }
 
             if ( audience != null )
             {
-                yield return new Claim( JwtConstants.ReservedClaims.Audience, audience, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
+                yield return new Claim( JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
             }
 
             if ( issuer != null )
             {
-                yield return new Claim( JwtConstants.ReservedClaims.Iss, issuer, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
+                yield return new Claim( JwtRegisteredClaimNames.Iss, issuer, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
             }
         }
 

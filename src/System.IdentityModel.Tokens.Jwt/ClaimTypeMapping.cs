@@ -21,7 +21,6 @@ namespace System.IdentityModel.Tokens
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Security.Claims;
-    using ReservedClaims = System.IdentityModel.Tokens.JwtConstants.ReservedClaims;
     
     /// <summary>
     /// Defines the inbound and outbound mapping for claim claim types from jwt to .net claim 
@@ -43,16 +42,16 @@ namespace System.IdentityModel.Tokens
         {
             shortToLongClaimTypeMapping = new Dictionary<string, string>
             {
-                { ReservedClaims.Actort, ClaimTypes.Actor },
-                { ReservedClaims.Birthdate, ClaimTypes.DateOfBirth },
-                { ReservedClaims.Email, ClaimTypes.Email },
-                { ReservedClaims.FamilyName, ClaimTypes.Surname },
-                { ReservedClaims.Gender, ClaimTypes.Gender },
-                { ReservedClaims.GivenName, ClaimTypes.GivenName },
-                { ReservedClaims.NameId, ClaimTypes.NameIdentifier },
-                { ReservedClaims.Sub, ClaimTypes.NameIdentifier },
-                { ReservedClaims.Website, ClaimTypes.Webpage },
-                { ReservedClaims.UniqueName, ClaimTypes.Name },
+                { JwtRegisteredClaimNames.Actort, ClaimTypes.Actor },
+                { JwtRegisteredClaimNames.Birthdate, ClaimTypes.DateOfBirth },
+                { JwtRegisteredClaimNames.Email, ClaimTypes.Email },
+                { JwtRegisteredClaimNames.FamilyName, ClaimTypes.Surname },
+                { JwtRegisteredClaimNames.Gender, ClaimTypes.Gender },
+                { JwtRegisteredClaimNames.GivenName, ClaimTypes.GivenName },
+                { JwtRegisteredClaimNames.NameId, ClaimTypes.NameIdentifier },
+                { JwtRegisteredClaimNames.Sub, ClaimTypes.NameIdentifier },
+                { JwtRegisteredClaimNames.Website, ClaimTypes.Webpage },
+                { JwtRegisteredClaimNames.UniqueName, ClaimTypes.Name },
                 { "oid", "http://schemas.microsoft.com/identity/claims/objectidentifier" },
                 { "scp", "http://schemas.microsoft.com/identity/claims/scope" },
                 { "tid", "http://schemas.microsoft.com/identity/claims/tenantid" },           
