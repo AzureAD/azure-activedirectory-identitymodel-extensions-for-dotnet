@@ -16,15 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -71,12 +68,12 @@ namespace Microsoft.IdentityModel.Protocols
             // For instance, if the alg is RS256, hash the access_token value with SHA-256, then take the left-most 128 bits and base64url encode them.
 
             HashAlgorithm hashAlgorithm = null;
-            if (!jwt.Payload.ContainsKey(JwtConstants.ReservedClaims.CHash))
+            if (!jwt.Payload.ContainsKey(JwtRegisteredClaimNames.CHash))
             {
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, JwtConstants.ReservedClaims.CHash, jwt.RawData ?? string.Empty));
+                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, JwtRegisteredClaimNames.CHash, jwt.RawData ?? string.Empty));
             }
 
-            string c_hashInToken = jwt.Payload[JwtConstants.ReservedClaims.CHash] as string;
+            string c_hashInToken = jwt.Payload[JwtRegisteredClaimNames.CHash] as string;
             if (c_hashInToken == null)
             {                
                 throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10302, jwt.RawData ?? string.Empty));
@@ -88,9 +85,9 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             string algorithm = string.Empty;
-            if (!jwt.Header.TryGetValue(JwtConstants.ReservedHeaderParameters.Alg, out algorithm))
+            if (!jwt.Header.TryGetValue(JwtHeaderParameterNames.Alg, out algorithm))
             {
-                algorithm = JwtConstants.Algorithms.RSA_SHA256;
+                algorithm = JwtAlgorithms.RSA_SHA256;
             }
 
 
@@ -152,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols
             string nonceFoundInJwt = jwt.Payload.Nonce;
             if (nonceFoundInJwt == null || string.IsNullOrWhiteSpace(nonceFoundInJwt))
             {
-                string message = string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10300, JwtConstants.ReservedClaims.Nonce, jwt.RawData ?? string.Empty);
+                string message = string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10300, JwtRegisteredClaimNames.Nonce, jwt.RawData ?? string.Empty);
                 throw new OpenIdConnectProtocolInvalidNonceException(message);
             }
 
