@@ -92,7 +92,7 @@ namespace System.IdentityModel.Test
             JwtPayload jwtPayload = new JwtPayload();
             // multiple audiences
 
-            jwtPayload.Add(JwtConstants.ReservedClaims.Audience, IdentityUtilities.DefaultAudiences);
+            jwtPayload.Add(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudiences);
             string encodedPayload = jwtPayload.Encode();
             JwtPayload newjwtPayload = Base64UrlEncoder.Decode(encodedPayload).DeserializeJwtPayload();
 

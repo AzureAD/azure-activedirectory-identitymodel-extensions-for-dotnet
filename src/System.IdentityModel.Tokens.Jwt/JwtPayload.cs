@@ -63,10 +63,10 @@ namespace System.IdentityModel.Tokens
             }
 
             if (!string.IsNullOrWhiteSpace(issuer))
-                this.Add(JwtConstants.ReservedClaims.Iss, issuer);
+                this.Add(JwtRegisteredClaimNames.Iss, issuer);
 
             if (!string.IsNullOrWhiteSpace(audience))
-                this.Add(JwtConstants.ReservedClaims.Audience, audience);
+                this.Add(JwtRegisteredClaimNames.Aud, audience);
 
             if (claims != null)
                 this.AddClaims(claims);
@@ -74,22 +74,22 @@ namespace System.IdentityModel.Tokens
             // if claims had an exp or nbf claim they will be overridden
             if (expires.HasValue)
             { 
-                if (this.ContainsKey(JwtConstants.ReservedClaims.Exp))
+                if (this.ContainsKey(JwtRegisteredClaimNames.Exp))
                 {
-                    this.Remove(JwtConstants.ReservedClaims.Exp);
+                    this.Remove(JwtRegisteredClaimNames.Exp);
                 }
 
-                this.Add(JwtConstants.ReservedClaims.Exp, EpochTime.GetIntDate(expires.Value.ToUniversalTime()));
+                this.Add(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expires.Value.ToUniversalTime()));
             }
 
             if (notBefore.HasValue)
             {
-                if (this.ContainsKey(JwtConstants.ReservedClaims.Nbf))
+                if (this.ContainsKey(JwtRegisteredClaimNames.Nbf))
                 {
-                    this.Remove(JwtConstants.ReservedClaims.Nbf);
+                    this.Remove(JwtRegisteredClaimNames.Nbf);
                 }
 
-                this.Add(JwtConstants.ReservedClaims.Nbf, EpochTime.GetIntDate(notBefore.Value.ToUniversalTime()));
+                this.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(notBefore.Value.ToUniversalTime()));
             }
         }
 
@@ -101,18 +101,9 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Actort);
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Actort);
             }
         }
-
-        ///// <summary>
-        ///// Gets the 'value' of the 'audience' claim { aud, 'value' }.
-        ///// </summary>
-        ///// <remarks>If the 'audience' claim is not found, null is returned.</remarks>
-        //public string Aud
-        //{
-        //    get { return this.GetStandardClaim(JwtConstants.ReservedClaims.Audience); }
-        //}
 
         /// <summary>
         /// Gets the 'value' of the 'audience' claim { aud, 'value' } as a list of strings.
@@ -123,7 +114,7 @@ namespace System.IdentityModel.Tokens
             get
             {
                 object value = null;
-                if (this.TryGetValue(JwtConstants.ReservedClaims.Audience, out value))
+                if (this.TryGetValue(JwtRegisteredClaimNames.Aud, out value))
                 {
                     IList<string> audiences = value as IList<string>;
                     if (audiences != null)
@@ -152,7 +143,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.CHash);
+                return this.GetStandardClaim(JwtRegisteredClaimNames.CHash);
             }
         }
         
@@ -163,7 +154,7 @@ namespace System.IdentityModel.Tokens
         //public int? Expiration
         public int? Exp
         {
-            get { return this.GetIntClaim(JwtConstants.ReservedClaims.Exp); }
+            get { return this.GetIntClaim(JwtRegisteredClaimNames.Exp); }
         }
 
         /// <summary>
@@ -174,7 +165,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Jti);
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Jti);
             }
         }
 
@@ -185,7 +176,7 @@ namespace System.IdentityModel.Tokens
         //public int? IssuedAt
         public int? Iat
         {
-            get { return this.GetIntClaim(JwtConstants.ReservedClaims.Iat); }
+            get { return this.GetIntClaim(JwtRegisteredClaimNames.Iat); }
         }
 
         /// <summary>
@@ -196,7 +187,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Iss);
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Iss);
             }
         }
 
@@ -208,7 +199,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Nonce);
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Nonce);
             }
         }
         
@@ -220,7 +211,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetStandardClaim(JwtConstants.ReservedClaims.Sub);
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Sub);
             }
         }
 
@@ -232,7 +223,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetDateTime(JwtConstants.ReservedClaims.Nbf);
+                return this.GetDateTime(JwtRegisteredClaimNames.Nbf);
             }
         }
 
@@ -244,7 +235,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return this.GetDateTime(JwtConstants.ReservedClaims.Exp);
+                return this.GetDateTime(JwtRegisteredClaimNames.Exp);
             }
         }
 

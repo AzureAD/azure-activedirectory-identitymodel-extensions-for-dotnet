@@ -40,14 +40,14 @@ namespace System.IdentityModel.Tokens
 
         private static IDictionary<string, string> outboundAlgorithmMap = new Dictionary<string, string>() 
                                                                             { 
-                                                                                { SecurityAlgorithms.RsaSha256Signature, JwtConstants.Algorithms.RSA_SHA256 }, 
-                                                                                { SecurityAlgorithms.HmacSha256Signature, JwtConstants.Algorithms.HMAC_SHA256 },
+                                                                                { SecurityAlgorithms.RsaSha256Signature, JwtAlgorithms.RSA_SHA256 }, 
+                                                                                { SecurityAlgorithms.HmacSha256Signature, JwtAlgorithms.HMAC_SHA256 },
                                                                             };
 
         private static IDictionary<string, string> inboundAlgorithmMap = new Dictionary<string, string>() 
                                                                             { 
-                                                                                { JwtConstants.Algorithms.RSA_SHA256, SecurityAlgorithms.RsaSha256Signature }, 
-                                                                                { JwtConstants.Algorithms.HMAC_SHA256, SecurityAlgorithms.HmacSha256Signature },
+                                                                                { JwtAlgorithms.RSA_SHA256, SecurityAlgorithms.RsaSha256Signature }, 
+                                                                                { JwtAlgorithms.HMAC_SHA256, SecurityAlgorithms.HmacSha256Signature },
                                                                             };
 
         private static IDictionary<string, string> inboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
@@ -463,7 +463,7 @@ namespace System.IdentityModel.Tokens
 
             if (subject != null && subject.Actor != null)
             {
-                payload.AddClaim(new Claim(JwtConstants.ReservedClaims.Actort, this.CreateActorValue(subject.Actor)));
+                payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
             }
 
             string signature = string.Empty;
@@ -616,13 +616,13 @@ namespace System.IdentityModel.Tokens
 
             object obj = null;
             DateTime? notBefore = null;
-            if (jwt.Payload.TryGetValue(JwtConstants.ReservedClaims.Nbf, out obj))
+            if (jwt.Payload.TryGetValue(JwtRegisteredClaimNames.Nbf, out obj))
             {
                 notBefore = new DateTime?(jwt.ValidFrom);
             }
 
             DateTime? expires = null;
-            if (jwt.Payload.TryGetValue(JwtConstants.ReservedClaims.Exp, out obj))
+            if (jwt.Payload.TryGetValue(JwtRegisteredClaimNames.Exp, out obj))
             {
                 expires = new DateTime?(jwt.ValidTo);
             }
@@ -1048,7 +1048,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (identity.Actor != null)
                     {
-                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10401, JwtConstants.ReservedClaims.Actort, jwtClaim.Value));
+                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10401, JwtRegisteredClaimNames.Actort, jwtClaim.Value));
                     }
 
                     if (this.CanReadToken(jwtClaim.Value))

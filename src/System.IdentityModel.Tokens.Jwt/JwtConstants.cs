@@ -50,218 +50,218 @@ namespace System.IdentityModel.Tokens
         /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
         /// </summary>
         public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+    }
+
+    /// <summary>
+    /// List of algorithms see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+    /// </summary>
+    public struct JwtAlgorithms
+    {
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string ECDSA_SHA256    = "ES256";
 
         /// <summary>
-        /// List of algorithms see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
         /// </summary>
-        public struct Algorithms
-        {
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string ECDSA_SHA256    = "ES256";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string ECDSA_SHA384    = "ES384";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string ECDSA_SHA512    = "ES512";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string HMAC_SHA256     = "HS256";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string HMAC_SHA384     = "HS384";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string HMAC_SHA512     = "HS512";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string NONE            = "none";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string RSA_SHA256      = "RS256";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string RSA_SHA384      = "RS384";
-
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
-            /// </summary>
-            public const string RSA_SHA512      = "RS512";
-        }
+        public const string ECDSA_SHA384    = "ES384";
 
         /// <summary>
-        /// List of reserved claims see:http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
         /// </summary>
-        public struct ReservedClaims
-        {
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Actort = "actort";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Audience = "aud";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Birthdate = "birthdate";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string CHash = "c_hash";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Email = "email";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Exp = "exp";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Gender = "gender";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string FamilyName = "family_name";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string GivenName = "given_name";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Iat = "iat";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Iss = "iss";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Jti = "jti";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string NameId = "nameid";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Nonce = "nonce";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Nbf = "nbf";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Prn = "prn";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Sub = "sub";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Typ = "typ";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string UniqueName = "unique_name";
-
-            /// <summary>
-            /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
-            /// </summary>
-            public const string Website = "website";
-        }
+        public const string ECDSA_SHA512    = "ES512";
 
         /// <summary>
-        /// List of reserved header parameters see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5.
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
         /// </summary>
-        public struct ReservedHeaderParameters
-        {
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string Alg = "alg";
+        public const string HMAC_SHA256     = "HS256";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string Cty = "cty";
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string HMAC_SHA384     = "HS384";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string Kid = "kid";
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string HMAC_SHA512     = "HS512";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string Jku = "jku";
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string NONE            = "none";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string Jwk = "jwk";
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string RSA_SHA256      = "RS256";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string Typ = "typ";
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string RSA_SHA384      = "RS384";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string X5c = "x5c";
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// </summary>
+        public const string RSA_SHA512      = "RS512";
+    }
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string X5t = "x5t";
+    /// <summary>
+    /// List of header parameter names see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5.
+    /// </summary>
+    public struct JwtHeaderParameterNames
+    {
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string Alg = "alg";
 
-            /// <summary>
-            /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
-            /// </summary>
-            public const string X5u = "x5u";
-        }
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string Cty = "cty";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string Kid = "kid";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string Jku = "jku";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string Jwk = "jwk";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string Typ = "typ";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string X5c = "x5c";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string X5t = "x5t";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// </summary>
+        public const string X5u = "x5u";
+    }
+    
+    /// <summary>
+    /// List of reserved claims see:http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+    /// </summary>
+    public struct JwtRegisteredClaimNames
+    {
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Actort = "actort";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Aud = "aud";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Birthdate = "birthdate";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string CHash = "c_hash";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Email = "email";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Exp = "exp";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Gender = "gender";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string FamilyName = "family_name";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string GivenName = "given_name";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Iat = "iat";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Iss = "iss";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Jti = "jti";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string NameId = "nameid";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Nonce = "nonce";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Nbf = "nbf";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Prn = "prn";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Sub = "sub";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Typ = "typ";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string UniqueName = "unique_name";
+
+        /// <summary>
+        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// </summary>
+        public const string Website = "website";
     }
 }

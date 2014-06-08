@@ -27,7 +27,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
-using ReservedClaims = System.IdentityModel.Tokens.JwtConstants.ReservedClaims;
 
 namespace System.IdentityModel.Test
 {
@@ -412,33 +411,33 @@ namespace System.IdentityModel.Test
                 {
                     new Claim( ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
                     new Claim( ClaimTypes.Spn,       "spn", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ReservedClaims.Sub,   "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ReservedClaims.Prn,   "Principal1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ReservedClaims.Sub,   "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ReservedClaims.Prn,   "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ReservedClaims.Sub,   "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Sub,   "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Prn,   "Principal1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Sub,   "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Prn,   "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Sub,   "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
                 };
 
                 jwt = new JwtSecurityToken(issuer: Issuers.GotJwt, audience: Audiences.AuthFactors, claims: claims);
                 JwtSecurityTokenHandler.InboundClaimTypeMap = new Dictionary<string, string>()
                 {
-                    { ReservedClaims.Email,     "Mapped_" + ReservedClaims.Email },
-                    { ReservedClaims.GivenName, "Mapped_" + ReservedClaims.GivenName },
-                    { ReservedClaims.Prn,       "Mapped_" + ReservedClaims.Prn },
-                    { ReservedClaims.Sub,       "Mapped_" + ReservedClaims.Sub },
+                    { JwtRegisteredClaimNames.Email,     "Mapped_" + JwtRegisteredClaimNames.Email },
+                    { JwtRegisteredClaimNames.GivenName, "Mapped_" + JwtRegisteredClaimNames.GivenName },
+                    { JwtRegisteredClaimNames.Prn,       "Mapped_" + JwtRegisteredClaimNames.Prn },
+                    { JwtRegisteredClaimNames.Sub,       "Mapped_" + JwtRegisteredClaimNames.Sub },
                 };
 
                 List<Claim> expectedClaims = new List<Claim>()
                 {
-                    new Claim( ReservedClaims.Iss, Issuers.GotJwt, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ReservedClaims.Audience, Audiences.AuthFactors, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + ReservedClaims.Email, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Iss, Issuers.GotJwt, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( JwtRegisteredClaimNames.Aud, Audiences.AuthFactors, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
                     new Claim( ClaimTypes.Spn,   "spn", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + ReservedClaims.Sub, "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + ReservedClaims.Prn, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + ReservedClaims.Sub, "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + ReservedClaims.Prn, "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + ReservedClaims.Sub, "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Prn, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Prn, "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Sub, "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
                 };
             }
             finally
