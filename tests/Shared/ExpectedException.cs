@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Test
             }
 
 #if _Verbose
-            Console.WriteLine("Exception displayed to user:\n\n '{ +" + exception + "'}");
+            Console.WriteLine(Environment.NewLine + "Exception displayed to user: " + Environment.NewLine + Environment.NewLine + exception);
 #endif
         }
 
