@@ -68,7 +68,6 @@ namespace Microsoft.IdentityModel
         public const string IDX10225 = "IDX10225: Lifetime validation failed. The token is missing an Expiration Time.\nTokentype: '{0}'.";
         public const string IDX10226 = "IDX10226: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
 
-
         // protocol messages
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', representing the nonce was not found in the jwt: '{1}'.";
         public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token: '{0}', did not match the expected nonce: '{1}'.";
@@ -76,13 +75,19 @@ namespace Microsoft.IdentityModel
         public const string IDX10303 = "IDX10303: The 'c_hash' claim was null or an empty string, jwt: '{0}'.";
         public const string IDX10304 = "IDX10304: The c_hash: '{0}' did not validate with the code: '{1}', algorithm: '{2}', jwt: '{3}'.";
         public const string IDX10305 = "IDX10305: The 'nonce' found in the jwt token: '{0}',  did not match the expected nonce: '{1}', hwt: '{3}'.";
-        public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a hashAlgorithm, jwt: '{1}'. See inner exception for details.";
+        public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a hashAlgorithm, jwt: '{1}'. See inner exception for details.\nPossible solution is to ensure that the algorithm specified in the 'JwtHeader' is understood by .Net. You can make additions to the OpenIdConnectProtocolValidationParameters.AlgorithmMap to map algorithms from the 'Jwt' space to .Net. In .Net you can also make use of 'CryptoConfig' to map algorithms.";
         public const string IDX10307 = "IDX10307: The algorithm: '{0}' specified in the jwt header resulted in a hashAlgorithm that was null,  jwt: '{1}'.";
         public const string IDX10308 = "IDX10308: The 'c_hash' claim was not found in the jwt: '{0}'.";
-
+        public const string IDX10309 = "IDX10309: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
+        public const string IDX10310 = "IDX10310: OpenIdConnectProtocol requires the jwt token to have a  valid 'aud' claim. The jwt 'aud' did not contain any values, jwt: '{0}'.";
+ 
         // SecurityTokenHandler messages
         public const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         public const string IDX10401 = "IDX10401: Expires: '{0}' must be after NotBefore: '{1}'.";
+
+
+        // utility errors
+        public const string IDX10600 = "IDX10600: Unable to decode: '{0}' as Base64url encoded string.";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";

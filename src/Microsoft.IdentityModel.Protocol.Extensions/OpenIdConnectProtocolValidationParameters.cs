@@ -6,9 +6,9 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,16 +24,16 @@ using System.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
+    /// A set of parameters that are used to define validation requirements. Used by a <see cref="OpenIdConnectProtocolValidator"/> when validating a <see cref="JwtSecurityToken"/>
+    /// to enusre it compliant with  http://openid.net/specs/openid-connect-core-1_0.html#IDToken </remarks>.
     /// </summary>
-    /// <remarks>These parameters are based from: http://openid.net/specs/openid-connect-core-1_0.html#IDToken </remarks>
-    public class OpenIdConnectValidationParameters
+    public class OpenIdConnectProtocolValidationParameters
     {
-        private List<string> requiredClaims = new List<string> { JwtRegisteredClaimNames.Aud, JwtRegisteredClaimNames.Exp, JwtRegisteredClaimNames.Iat, JwtRegisteredClaimNames.Iss, JwtRegisteredClaimNames.Sub };
         private string _responseType;
-        /// <summary>
-        /// Creates an instance of <see cref="OpenIdConnectValidationParameters"/> with defaults:
+        private IDictionary<string, string> _algorithmMap = new Dictionary<string, string>();
 
+        /// <summary>
+        /// Creates an instance of <see cref="OpenIdConnectProtocolValidationParameters"/> with defaults:
         /// RequireAcr: false
         /// RequireAmr: false
         /// RequireAuthTime: false
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// RequireNonce: true
         /// ResponseType = <see cref="OpenIdConnectMessage.DefaultResponseType"/>
         /// </summary>
-        public OpenIdConnectValidationParameters()
+        public OpenIdConnectProtocolValidationParameters()
         {
             RequireAcr = false;
             RequireAmr = false;
@@ -51,7 +51,37 @@ namespace Microsoft.IdentityModel.Protocols
             ResponseType = OpenIdConnectMessage.DefaultResponseType;
         }
 
-        public string AuthorizationCode { }
+        /// <summary>
+        /// Gets or sets the algoritm mapping between Jwt and .Net
+        /// </summary>
+        /// <param name="algorithmMap">a <see cref="IDictionary[string,string]"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26 to .Net.</param>
+        /// <exception cref="ArgumentNullException">if 'AlgorithmMap' is null.</exception>
+        public IDictionary<string, string> AlgorithmMap 
+        {
+            get
+            {
+                return _algorithmMap;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("AlgorithmMap");
+                }
+                _algorithmMap = value;
+            }
+        }
+        
+
+        /// <summary>
+        /// Gets or sets the 'authorizationcode'.
+        /// </summary>
+        public string AuthorizationCode { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the 'nonce'
+        /// </summary>
+        [DefaultValue((string)null)]
         public string Nonce { get; set; }
 
         /// <summary>
@@ -94,6 +124,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 return _responseType;
             }
+            
             set
             {
                 if (string.IsNullOrWhiteSpace(value))

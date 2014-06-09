@@ -18,12 +18,14 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
+    using Microsoft.IdentityModel;
     using System.Globalization;
     using System.Text;
 
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
-    internal static class Base64UrlEncoder
+    /// <summary>
+    /// Encodes and Decodes strings as Base64Url encoding.
+    /// </summary>
+    public static class Base64UrlEncoder
     {
         private static char base64PadCharacter = '=';
         private static string doubleBase64PadCharacter = string.Format(CultureInfo.InvariantCulture, "{0}{0}", base64PadCharacter);
@@ -51,18 +53,40 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// See above.
+        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation that is encoded with base-64-url digits. Parameters specify
+        /// the subset as an offset in the input array, and the number of elements in the array to convert.
         /// </summary>
-        /// <param name="arg">bytes to encode.</param>
-        /// <returns>Base64Url encoding of the bytes.</returns>
-        public static string Encode(byte[] arg)
+        /// <param name="inArray">An array of 8-bit unsigned integers.</param>
+        /// <param name="length">An offset in inArray.</param>
+        /// <param name="offset">The number of elements of inArray to convert.</param>
+        /// <returns>The string representation in base 64 url encodingof length elements of inArray, starting at position offset.</returns>
+        /// <exception cref="ArgumentNullException">'inArray' is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
+        public static string Encode(byte[] inArray, int offset, int length)
         {
-            if (null == arg)
+            string s = Convert.ToBase64String(inArray, offset, length);
+            s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
+            s = s.Replace(base64Character62, base64UrlCharacter62);  // 62nd char of encoding
+            s = s.Replace(base64Character63, _base64UrlCharacter63);  // 63rd char of encoding
+            return s;
+        }
+
+        /// <summary>
+        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation that is encoded with base-64-url digits. Parameters specify
+        /// the subset as an offset in the input array, and the number of elements in the array to convert.
+        /// </summary>
+        /// <param name="inArray">An array of 8-bit unsigned integers.</param>
+        /// <returns>The string representation in base 64 url encodingof length elements of inArray, starting at position offset.</returns>
+        /// <exception cref="ArgumentNullException">'inArray' is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
+        public static string Encode(byte[] inArray)
+        {
+            if (inArray==null)
             {
-                throw new ArgumentNullException("arg");
+                throw new ArgumentNullException("inArray");
             }
 
-            string s = Convert.ToBase64String(arg);
+            string s = Convert.ToBase64String(inArray, 0, inArray.Length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
             s = s.Replace(base64Character62, base64UrlCharacter62);  // 62nd char of encoding
             s = s.Replace(base64Character63, _base64UrlCharacter63);  // 63rd char of encoding
@@ -71,8 +95,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns the decoded bytes.
-        /// </summary>
+        ///  Converts the specified string, which encodes binary data as base-64-url digits, to an equivalent 8-bit unsigned integer array.</summary>
         /// <param name="str">base64Url encoded string.</param>
         /// <returns>UTF8 bytes.</returns>
         public static byte[] DecodeBytes(string str)
@@ -103,7 +126,7 @@ namespace System.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10114, str));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10600, str));
             }
 
             return Convert.FromBase64String(str);

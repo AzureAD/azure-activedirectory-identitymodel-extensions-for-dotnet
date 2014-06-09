@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "E3499C32-5062-4F89-A209-3024613EB73B")]
         [Description("Tests: GetSets")]
-        public void OpenIdConnectRequest_GetSets()
+        public void OpenIdConnectMessage_GetSets()
         {
             OpenIdConnectMessage openIdConnectRequest = new OpenIdConnectMessage();
             Type type = typeof(OpenIdConnectParameterNames);
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "38024A53-CF6A-48C4-8AF3-E9C97E2B86FC")]
         [Description( "Tests: Publics" )]
-        public void OpenIdConnectRequest_Publics()
+        public void OpenIdConnectMessage_Publics()
         {
             string issuerAddress = "http://gotJwt.onmicrosoft.com";
             string redirect_uri = "http://gotJwt.onmicrosoft.com/signedIn";
