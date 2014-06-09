@@ -73,7 +73,6 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Publics")]
         public void OpenIdConnectProtocolValidator_Publics()
         {
-            OpenIdConnectProtocolValidator validator = new OpenIdConnectProtocolValidator();
             ClaimsIdentity identity = new ClaimsIdentity();
         }
 
@@ -86,7 +85,6 @@ namespace Microsoft.IdentityModel.Test
             ValidateNonce(jwt: IdentityUtilities.CreateJwtSecurityToken(),  nonce: null, ee: ExpectedException.ArgumentNullException());
             ValidateNonce(jwt: IdentityUtilities.CreateJwtSecurityToken(), nonce: OpenIdConnectProtocolValidator.GenerateNonce(), ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException)));
 
-            OpenIdConnectProtocolValidator validator = new OpenIdConnectProtocolValidator();
             ClaimsIdentity identity = new ClaimsIdentity();
         }
 
