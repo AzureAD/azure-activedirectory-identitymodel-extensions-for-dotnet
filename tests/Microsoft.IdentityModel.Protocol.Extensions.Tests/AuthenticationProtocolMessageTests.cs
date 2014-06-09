@@ -20,7 +20,6 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -83,10 +82,10 @@ namespace Microsoft.IdentityModel.Test
 
             foreach(string property in properties)
             {
-                TestUtilities.GetSet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: property));
-                TestUtilities.GetSet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected);
-                TestUtilities.GetSet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected);
-                TestUtilities.GetSet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: property));
+                TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected);
             }
         }
 

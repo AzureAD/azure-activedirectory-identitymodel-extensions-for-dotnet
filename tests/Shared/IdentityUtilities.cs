@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
@@ -37,143 +38,20 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class IdentityUtilities
     {
-        public static string DefaultAudience { get { return "http://relyingparty.com"; } }
-        public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
-
-        public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2; } }
-        public static SecurityToken DefaultAsymmetricSigningToken { get { return KeyingMaterial.DefaultAsymmetricX509Token_2048; ; } }
-
-        public static IEnumerable<Claim> DefaultClaims 
-        { 
-            get 
-            {
-                return new List<Claim>()
-                {
-                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                };
-            }
-        }
-        
-        public static ClaimsIdentity DefaultClaimsIdentity 
-        { 
-            get 
-            {
-                return new ClaimsIdentity(DefaultClaims, DefaultAuthenticationType); 
-            }
-        }
-
-        public static ClaimsPrincipal DefaultClaimsPrincipal 
-        { 
-            get 
-            { 
-                return new ClaimsPrincipal(DefaultClaimsIdentity); 
-            } 
-        }
-
-        public const string DefaultIssuer = "http://gotjwt.com";
-        public const string DefaultOriginalIssuer = "http://gotjwt.com/Original";
-
-        public static SigningCredentials DefaultSymmetricSigningCredentials { get { return KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2; } }
-        public static SecurityToken DefaultSymmetricSigningToken { get { return KeyingMaterial.DefaultSymmetricSecurityToken_256; ; } }
-
-        public const string NotDefaultAudience = "http://notrelyingparty.com";
-        public static IEnumerable<Claim> NotDefaultClaims
+        /// <summary>
+        /// Computes the CHash per 
+        /// </summary>
+        /// <param name="authorizationCode"></param>
+        /// <param name="algorithm"></param>
+        /// <returns></returns>
+        public static string CreateCHash(string authorizationCode, string algorithm)
         {
-            get
-            {
-                return new List<Claim>()
-                {
-                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                };
-            }
+            HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algorithm);
+            byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(authorizationCode));
+            return Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
         }
 
-        public static ClaimsIdentity NotDefaultClaimsIdentity
-        {
-            get
-            {
-                return new ClaimsIdentity(NotDefaultClaims); 
-            }
-        }
 
-        public const string NotDefaultIssuer = "http://notgotjwt.com";
-        public const string NotDefaultOriginalIssuer = "http://notgotjwt.com/Original";
-        public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
-        public static SecurityToken NotDefaultSigningToken = KeyingMaterial.DefaultX509Token_2048;
-
-        public const string DefaultAuthenticationType = "Federation";
-
-        static IdentityUtilities()
-        {
-        }
-
-        public static string DefaultAsymmetricJwt
-        {
-            get { return DefaultJwt(DefaultAsymmetricSecurityTokenDescriptor); }
-        }
-
-        public static string DefaultSymmetricJwt
-        {
-            get { return DefaultJwt(DefaultSymmetricSecurityTokenDescriptor); }
-        }
-
-        public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
-        {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
-        }
-
-        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor 
-        { 
-            get {return DefaultSecurityTokenDescriptor( DefaultAsymmetricSigningCredentials );}
-        }
-
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor
-        {
-            get { return DefaultSecurityTokenDescriptor( DefaultSymmetricSigningCredentials ); }
-        }
-
-        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
-        {
-            return new SecurityTokenDescriptor
-            {
-                AppliesToAddress = DefaultAudience,
-                SigningCredentials = signingCredentials,
-                Subject = DefaultClaimsIdentity,
-                TokenIssuerName = DefaultIssuer,
-                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
-            };
-        }
-
-        public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningToken); }
-        }
-
-        public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningToken); }
-        }
-
-        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityToken securityToken)
-        {                    
-            return new TokenValidationParameters
-            {
-                AuthenticationType = IdentityUtilities.DefaultAuthenticationType,
-                IssuerSigningToken = securityToken,
-                ValidAudience = DefaultAudience,
-                ValidIssuer = DefaultIssuer,
-            };
-        }
-        
         public static string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
         {
             return CreateJwtToken(tokenDescriptor, new JwtSecurityTokenHandler());
@@ -182,6 +60,16 @@ namespace Microsoft.IdentityModel.Test
         public static string CreateJwtToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
         {
             return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
+        }
+
+        public static JwtSecurityToken CreateJwtSecurityToken()
+        {
+            return CreateJwtSecurityToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor) as JwtSecurityToken;
+        }
+
+        public static JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
+        {
+            return (new JwtSecurityTokenHandler()).CreateToken(tokenDescriptor) as JwtSecurityToken;
         }
 
         public static string CreateSaml2Token()
@@ -240,6 +128,138 @@ namespace Microsoft.IdentityModel.Test
             return sb.ToString();
         }
 
+        public const string DefaultAuthenticationType = "Federation";
+
+        public static string DefaultAudience { get { return "http://relyingparty.com"; } }
+        public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
+
+        public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2; } }
+        public static SecurityToken DefaultAsymmetricSigningToken { get { return KeyingMaterial.DefaultAsymmetricX509Token_2048; ; } }
+
+        public static IEnumerable<Claim> DefaultClaims 
+        { 
+            get 
+            {
+                return new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
+                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
+                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
+                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
+                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
+                };
+            }
+        }
+        
+        public static ClaimsIdentity DefaultClaimsIdentity 
+        { 
+            get 
+            {
+                return new ClaimsIdentity(DefaultClaims, DefaultAuthenticationType); 
+            }
+        }
+
+        public static ClaimsPrincipal DefaultClaimsPrincipal 
+        { 
+            get 
+            { 
+                return new ClaimsPrincipal(DefaultClaimsIdentity); 
+            } 
+        }
+
+        public const string DefaultIssuer = "http://gotjwt.com";
+        public const string DefaultOriginalIssuer = "http://gotjwt.com/Original";
+
+        public static SigningCredentials DefaultSymmetricSigningCredentials { get { return KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2; } }
+        public static SecurityToken DefaultSymmetricSigningToken { get { return KeyingMaterial.DefaultSymmetricSecurityToken_256; ; } }
+        public static string DefaultAsymmetricJwt
+        {
+            get { return DefaultJwt(DefaultAsymmetricSecurityTokenDescriptor); }
+        }
+
+        public static string DefaultSymmetricJwt
+        {
+            get { return DefaultJwt(DefaultSymmetricSecurityTokenDescriptor); }
+        }
+
+        public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
+        {
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
+        }
+
+        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor
+        {
+            get { return DefaultSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials); }
+        }
+
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor
+        {
+            get { return DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials); }
+        }
+
+        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                AppliesToAddress = DefaultAudience,
+                SigningCredentials = signingCredentials,
+                Subject = DefaultClaimsIdentity,
+                TokenIssuerName = DefaultIssuer,
+                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
+            };
+        }
+
+        public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
+        {
+            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningToken); }
+        }
+
+        public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
+        {
+            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningToken); }
+        }
+
+        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityToken securityToken)
+        {
+            return new TokenValidationParameters
+            {
+                AuthenticationType = DefaultAuthenticationType,
+                IssuerSigningToken = securityToken,
+                ValidAudience = DefaultAudience,
+                ValidIssuer = DefaultIssuer,
+            };
+        }
+
+        public const string NotDefaultAudience = "http://notrelyingparty.com";
+        public static IEnumerable<Claim> NotDefaultClaims
+        {
+            get
+            {
+                return new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
+                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
+                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
+                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
+                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
+                };
+            }
+        }
+
+        public static ClaimsIdentity NotDefaultClaimsIdentity
+        {
+            get
+            {
+                return new ClaimsIdentity(NotDefaultClaims); 
+            }
+        }
+
+        public const string NotDefaultIssuer = "http://notgotjwt.com";
+        public const string NotDefaultOriginalIssuer = "http://notgotjwt.com/Original";
+        public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
+        public static SecurityToken NotDefaultSigningToken = KeyingMaterial.DefaultX509Token_2048;
+        
         public static void AudienceValidatorDoesNotThrow(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
             return;

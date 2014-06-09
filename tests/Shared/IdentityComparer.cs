@@ -95,26 +95,30 @@ namespace System.IdentityModel.Test
         {
             if (t1 is TokenValidationParameters)
                 return AreEqual<TokenValidationParameters>(t1 as TokenValidationParameters, t2 as TokenValidationParameters, context, AreTokenValidationParametersEqual);
-            else if (t1 is JwtSecurityToken)
-                return AreEqual<JwtSecurityToken>(t1 as JwtSecurityToken, t2 as JwtSecurityToken, context, AreJwtSecurityTokensEqual);
             else if (t1 is ClaimsIdentity)
                 return AreEqual<ClaimsIdentity>(t1 as ClaimsIdentity, t2 as ClaimsIdentity, context, AreClaimsIdentitiesEqual);
             else if (t1 is ClaimsPrincipal)
                 return AreEqual<ClaimsPrincipal>(t1 as ClaimsPrincipal, t2 as ClaimsPrincipal, context, AreClaimsPrincipalsEqual);
+            else if (t1 is IDictionary<string, string>)
+                return AreEqual<Dictionary<string, string>>(t1 as Dictionary<string, string>, t2 as Dictionary<string, string>, context, AreDictionariesEqual);
             else if (t1 is JsonWebKey)
                 return AreEqual<JsonWebKey>(t1 as JsonWebKey, t2 as JsonWebKey, context, AreJsonWebKeysEqual);
             else if (t1 is JsonWebKeys)
                 return AreEqual<JsonWebKeys>(t1 as JsonWebKeys, t2 as JsonWebKeys, context, AreJsonWebKeyKeysEqual);
-            else if (t1 is OpenIdConnectConfiguration)
-                return AreEqual<OpenIdConnectConfiguration>(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context, AreOpenIdConnectMetadataEqual);
-            if (t1 is IEnumerable<Claim>)
-                return AreEnumsEqual<Claim>(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context, AreClaimsEqual);
-            else if (t1 is IEnumerable<string>)
-                return AreEnumsEqual<string>(t1 as IEnumerable<string>, t2 as IEnumerable<string>, context, AreStringsEqual);
-            else if (t1 is IEnumerable<SecurityKey>)
-                return AreEnumsEqual<SecurityKey>(t1 as IEnumerable<SecurityKey>, t2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
             else if (t1 is JwtPayload)
                 return AreEqual<JwtPayload>(t1 as JwtPayload, t2 as JwtPayload, context, AreJwtPayloadsEqual);
+            else if (t1 is JwtSecurityToken)
+                return AreEqual<JwtSecurityToken>(t1 as JwtSecurityToken, t2 as JwtSecurityToken, context, AreJwtSecurityTokensEqual);
+            else if (t1 is OpenIdConnectConfiguration)
+                return AreEqual<OpenIdConnectConfiguration>(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context, AreOpenIdConnectMetadataEqual);
+            else if (t1 is OpenIdConnectProtocolValidationParameters)
+                return AreEqual<OpenIdConnectProtocolValidationParameters>(t1 as OpenIdConnectProtocolValidationParameters, t2 as OpenIdConnectProtocolValidationParameters, context, AreOpenIdConnectValidationParametersEqual);                
+            else if (t1 is IEnumerable<Claim>)
+                return AreEnumsEqual<Claim>(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context, AreClaimsEqual);
+            else if (t1 is IEnumerable<SecurityKey>)
+                return AreEnumsEqual<SecurityKey>(t1 as IEnumerable<SecurityKey>, t2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
+            else if (t1 is IEnumerable<string>)
+                return AreEnumsEqual<string>(t1 as IEnumerable<string>, t2 as IEnumerable<string>, context, AreStringsEqual);
 
             throw new InvalidOperationException("type not known");
         }
@@ -257,6 +261,30 @@ namespace System.IdentityModel.Test
 
             return true;
         }
+        public static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
+        {
+            if (header1.Count != header2.Count)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool AreJwtPayloadsEqual(JwtPayload payload1, JwtPayload payload2, CompareContext context)
+        {
+            if (payload1.Count != payload2.Count)
+            {
+                return false;
+            }
+
+            if (!AreEnumsEqual<Claim>(payload1.Claims, payload2.Claims, context, AreClaimsEqual))
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         private static bool AreJwtSecurityTokensEqual(JwtSecurityToken jwt1, JwtSecurityToken jwt2, CompareContext compareContext)
         {
@@ -301,6 +329,10 @@ namespace System.IdentityModel.Test
 
             return true;
         }
+        private static bool AreOpenIdConnectValidationParametersEqual(OpenIdConnectProtocolValidationParameters ski1, OpenIdConnectProtocolValidationParameters ski2, CompareContext context)
+        {
+            return true;
+        }
 
         private static bool AreSecurityKeyIdentifiersEqual(SecurityKeyIdentifier ski1, SecurityKeyIdentifier ski2, CompareContext context)
         {
@@ -341,31 +373,6 @@ namespace System.IdentityModel.Test
 
             if (!AreEqual<SecurityKeyIdentifier>(cred1.SigningKeyIdentifier, cred2.SigningKeyIdentifier, context, AreSecurityKeyIdentifiersEqual))
                 return false;
-
-            return true;
-        }
-
-        public static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
-        {
-            if (header1.Count != header2.Count)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool AreJwtPayloadsEqual(JwtPayload payload1, JwtPayload payload2, CompareContext context)
-        {
-            if (payload1.Count != payload2.Count)
-            {
-                return false;
-            }
-
-            if (!AreEnumsEqual<Claim>(payload1.Claims, payload2.Claims, context, AreClaimsEqual))
-            {
-                return false;
-            }
 
             return true;
         }

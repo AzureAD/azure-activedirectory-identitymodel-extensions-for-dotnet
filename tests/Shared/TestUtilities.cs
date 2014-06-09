@@ -24,13 +24,24 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Test
 {
+    public class GetSetContext
+    {
+        private List<string> _errors = new List<string>();
+        private List<KeyValuePair<string, List<object>>> _propertyNamesAndSetGetValues;
+
+        public List<string> Errors { get { return _errors; } }
+
+        public List<KeyValuePair<string, List<object>>> PropertyNamesAndSetGetValue { get { return _propertyNamesAndSetGetValues; } set { _propertyNamesAndSetGetValues = value; } }
+
+        public object Object { get; set; }
+    }
+
     /// <summary>
     /// Mixed bag of funtionality:
     ///     Generically calling Properties
     /// </summary>
     public static class TestUtilities
     {
-
         /// <summary>
         /// Gets a named property on an object
         /// </summary>
@@ -101,13 +112,13 @@ namespace Microsoft.IdentityModel.Test
         }
 
         /// <summary>
-        /// Gets and sets a named property on an object.
+        /// Sets a property, then checks it, checking for an expected exception.
         /// </summary>
-        /// <param name="obj">object that has 'get' and 'set'.</param>
+        /// <param name="obj">object that has a 'setter'.</param>
         /// <param name="property">the name of the property.</param>
         /// <param name="propertyValue">value to set on the property.</param>
         /// <param name="expectedException">checks that exception is correct.</param>
-        public static void GetSet(object obj, string property, object propertyValue, ExpectedException expectedException)
+        public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException)
         {
             Assert.IsNotNull(obj, "'obj' can not be null");
             Assert.IsFalse(string.IsNullOrWhiteSpace(property), "'property' can not be null or whitespace");
@@ -129,6 +140,64 @@ namespace Microsoft.IdentityModel.Test
             {
                 // pass inner exception
                 expectedException.ProcessException(exception.InnerException);
+            }
+        }
+
+        /// <summary>
+        /// Checks initial value, sets and then checks value. Works with multiple properties.
+        /// </summary>
+        /// <param name="context"> <see cref="GetSetContext"/>, drives the test.</param>
+        public static void GetSet(GetSetContext context)
+        {
+            Type type = context.Object.GetType();
+
+            foreach (KeyValuePair<string, List<object>> propertyKV in context.PropertyNamesAndSetGetValue)
+            {
+                PropertyInfo propertyInfo = type.GetProperty(propertyKV.Key);
+                try
+                {
+                    if (propertyInfo.GetMethod != null)
+                    {
+                        object initialValue = propertyInfo.GetValue(context.Object, null);
+                        if ((initialValue == null && propertyKV.Value[0] != null))
+                        {
+                            context.Errors.Add(propertyKV.Key + ": initial value == null && expected != null, expect initial value: " + propertyKV.Value[0].ToString());
+                        }
+                        else if (initialValue != null && propertyKV.Value[0] == null)
+                        {
+                            context.Errors.Add(propertyKV.Key + ": initial value != null && expected == null, initial value: " + initialValue.ToString());
+                        }
+                        else if (initialValue != null && !initialValue.Equals(propertyKV.Value[0]))
+                        {
+                            context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + initialValue.ToString() + ", was: " + propertyKV.Value[0].ToString());
+                        }
+                    }
+
+                    if (propertyInfo.SetMethod != null)
+                    {
+                        for (int i = 1; i < propertyKV.Value.Count; i++)
+                        {
+                            propertyInfo.SetValue(context.Object, propertyKV.Value[i]);
+                            object getVal = propertyInfo.GetValue(context.Object, null);
+                            if ((getVal == null && propertyKV.Value[i] != null))
+                            {
+                                context.Errors.Add(propertyKV.Key + "( " + i.ToString() + "), Get returned null, set was: " + propertyKV.Value[i].ToString());
+                            }
+                            else if (getVal != null && propertyKV.Value[i] == null)
+                            {
+                                context.Errors.Add(propertyKV.Key + "( " + i.ToString() + "), Get not null, set was null, get was: " + getVal);
+                            }
+                            else if (getVal != null && !getVal.Equals(propertyKV.Value[i]))
+                            {
+                                context.Errors.Add(propertyKV.Key + "( " + i.ToString() + ") Set did not equal get: " + propertyKV.Value[i].ToString() + ", " + getVal + ".");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    context.Errors.Add(ex.ToString());
+                }
             }
         }
 
@@ -168,6 +237,8 @@ namespace Microsoft.IdentityModel.Test
                 }
             }
         }
+
+
 
         public static string SerializeAsSingleCommaDelimitedString(IEnumerable<string> strings)
         {

@@ -37,7 +37,6 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10111 = "Jwt10111: timespan, must be greater than or equal to TimeSpan.Zero, was: '{0}'.";
         internal const string Jwt10112 = "Jwt10112: Jwt header type specified, must be '{0}' or '{1}'.  Type received: '{2}'.";
         internal const string Jwt10113 = "Jwt10113: Unable to decode the '{0}': '{1}' as Base64url encoded string. jwtEncodedString: '{2}'.";
-        internal const string Jwt10114 = "Jwt10114: Unable to decode: '{0}' as Base64url encoded string.";
         internal const string Jwt10115 = "Jwt10115: DefaultTokenLifetimeInMinutes cannot be less than 1.";
         internal const string Jwt10116 = "Jwt10116: MaximumTokenSizeInBytes cannot be less than 1.";
         internal const string Jwt10117 = "Jwt10117: Cannot set inner IssuerTokenResolver to self.";
