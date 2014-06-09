@@ -59,14 +59,9 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("validationParameters");
             }
 
-            if (jwt.Payload.Aud == null)
-            {
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud, jwt));
-            }
-
             if (jwt.Payload.Aud.Count == 0)
             {
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10310, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud, jwt));
             }
 
             if (!jwt.Payload.Exp.HasValue)
@@ -128,18 +123,18 @@ namespace Microsoft.IdentityModel.Protocols
             HashAlgorithm hashAlgorithm = null;
             if (!jwt.Payload.ContainsKey(JwtRegisteredClaimNames.CHash))
             {
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, JwtRegisteredClaimNames.CHash, jwt.RawData ?? string.Empty));
+                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt));
             }
 
             string c_hashInToken = jwt.Payload[JwtRegisteredClaimNames.CHash] as string;
             if (c_hashInToken == null)
             {                
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10302, jwt.RawData ?? string.Empty));
+                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10302, jwt));
             }
 
             if (string.IsNullOrWhiteSpace(c_hashInToken))
             {                
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10303, jwt.RawData ?? string.Empty));
+                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10303, jwt));
             }
 
             string algorithm = string.Empty;
@@ -161,19 +156,19 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch (Exception ex)
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt.RawData ?? string.Empty), ex);
+                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), ex);
                 }
 
                 if (hashAlgorithm == null)
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt.RawData ?? string.Empty));
+                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt));
                 }
 
                 byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(authorizationCode));
                 string hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
                 if (!StringComparer.Ordinal.Equals(c_hashInToken, hashString))
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, c_hashInToken, authorizationCode, algorithm, jwt.RawData ?? string.Empty));
+                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, c_hashInToken, authorizationCode, algorithm, jwt));
                 }
             }
             finally
@@ -210,14 +205,12 @@ namespace Microsoft.IdentityModel.Protocols
             string nonceFoundInJwt = jwt.Payload.Nonce;
             if (nonceFoundInJwt == null || string.IsNullOrWhiteSpace(nonceFoundInJwt))
             {
-                string message = string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10300, JwtRegisteredClaimNames.Nonce, jwt.RawData ?? string.Empty);
-                throw new OpenIdConnectProtocolInvalidNonceException(message);
+                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10300, JwtRegisteredClaimNames.Nonce, jwt.ToString()));
             }
 
             if (!(StringComparer.Ordinal.Equals(nonceFoundInJwt, nonce)))
             {
-                string message = string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, nonce);
-                throw new OpenIdConnectProtocolInvalidNonceException(message);
+                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, nonce, jwt.ToString()));
             }
         }
     }

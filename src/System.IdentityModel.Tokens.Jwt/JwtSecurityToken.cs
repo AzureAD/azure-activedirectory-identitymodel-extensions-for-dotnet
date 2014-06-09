@@ -320,7 +320,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this.header.SerializeToJson(), this.payload.SerializeToJson());
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}\nRawData: {2}", this.header.SerializeToJson(), this.payload.SerializeToJson(), rawData ?? "Empty");
         }
 
         /// <summary>
