@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Configuration;
     using System.Diagnostics.CodeAnalysis;
@@ -101,7 +102,7 @@ namespace System.IdentityModel.Tokens
 
                 if (object.ReferenceEquals(this, value))
                 {
-                    throw new ArgumentException(JwtErrors.Jwt10117);
+                    throw new ArgumentException(ErrorMessages.IDX10704);
                 }
 
                 this.issuerTokenResolver = value;
@@ -190,25 +191,25 @@ namespace System.IdentityModel.Tokens
             XmlNode attributeNode = element.Attributes.GetNamedItem(JwtConfigurationStrings.Attributes.SymmetricKey);
             if (attributeNode == null)
             {
-                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10106, element.OuterXml));
+                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX13000, element.OuterXml));
             }
 
             key = attributeNode.Value;
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10600, JwtConfigurationStrings.Attributes.SymmetricKey, element.OuterXml));
+                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX13002, JwtConfigurationStrings.Attributes.SymmetricKey, element.OuterXml));
             }
 
             attributeNode = element.Attributes.GetNamedItem(JwtConfigurationStrings.Attributes.Name);
             if (attributeNode == null)
             {
-                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10107, element.OuterXml));
+                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX13001, element.OuterXml));
             }
 
             name = attributeNode.Value;
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10600, JwtConfigurationStrings.Attributes.Name, element.OuterXml));
+                throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX13002, JwtConfigurationStrings.Attributes.Name, element.OuterXml));
             }
 
             attributeNode = element.Attributes.GetNamedItem(WSSecurityConstantsInternal.Attributes.EncodingType);
@@ -223,7 +224,7 @@ namespace System.IdentityModel.Tokens
                 && !StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurityConstantsInternal.Base64EncodingType)
                 && !StringComparer.Ordinal.Equals(attributeNode.Value, WSSecurityConstantsInternal.Base64Binary))
                 {
-                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10105, WSSecurityConstantsInternal.Base64BinaryLower, WSSecurityConstantsInternal.Base64Binary, WSSecurityConstantsInternal.Base64EncodingType, attributeNode.Value, element.OuterXml));
+                    throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX13003, WSSecurityConstantsInternal.Base64BinaryLower, WSSecurityConstantsInternal.Base64Binary, WSSecurityConstantsInternal.Base64EncodingType, attributeNode.Value, element.OuterXml));
                 }
             }
 

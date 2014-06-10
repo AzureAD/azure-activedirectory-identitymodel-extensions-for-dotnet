@@ -102,7 +102,7 @@ namespace System.IdentityModel.Test
             { 
                 Name = "EncodedString: InvalidPayloadFormat",
                 EncodedString = EncodedJwts.InvalidPayload,
-                ExpectedException = ExpectedException.ArgumentException( substringExpected: "Jwt10113", inner: typeof(FormatException) ),
+                ExpectedException = ExpectedException.ArgumentException( substringExpected: "IDX10703:", inner: typeof(FormatException) ),
             });                
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 
@@ -120,41 +120,41 @@ namespace System.IdentityModel.Test
             { 
                 Name = "EncodedString: single character: '1'", 
                 EncodedString = "1",
-                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10400"),
+                ExpectedException = ExpectedException.ArgumentException( substringExpected:"IDX10709:"),
             });
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 
                 Name = "EncodedString: two parts each a single character: '1.2'", 
-                EncodedString = "1.2", 
-                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10400"),
+                EncodedString = "1.2",
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
             });
 
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 
                 Name = "EncodedString: header is not encoded properly: '123'", 
-                EncodedString = string.Format( "{0}.{1}.{2}", "123", tokenParts[1], tokenParts[2] ), 
-                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10113", inner: typeof(ArgumentException)),
+                EncodedString = string.Format( "{0}.{1}.{2}", "123", tokenParts[1], tokenParts[2] ),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(ArgumentException)),
             });
 
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 
                 Name = "EncodedString: header is not encoded properly: '123=='", 
                 EncodedString = string.Format( "{0}.{1}.{2}", "123==", tokenParts[1], tokenParts[2] ),
-                ExpectedException = ExpectedException.ArgumentException( substringExpected:"Jwt10400"),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709"),
             });
 
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 
                 Name = "EncodedString: payload is not encoded correctly: '123'", 
                 EncodedString = string.Format( "{1}.{0}.{2}", "123", tokenParts[0], tokenParts[2] ),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "Jwt10113", inner: typeof(ArgumentException)),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(ArgumentException)),
             });                                
 
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 
                 Name = "EncodedString: payload is not encoded properly: '123=='", 
                 EncodedString = string.Format( "{1}.{0}.{2}", "123==", tokenParts[0], tokenParts[2] ),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "Jwt10400"),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
             });
 
             RunEncodedTest( new JwtSecurityTokenTestVariation

@@ -63,7 +63,7 @@ namespace System.IdentityModel.Tokens
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
             }
 
             this.Decode(jwtEncodedString);
@@ -104,13 +104,13 @@ namespace System.IdentityModel.Tokens
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
             }
 
             string[] tokenParts = jwtEncodedString.Split('.');
             if (tokenParts.Length != 3)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
             }
 
             this.header = header;
@@ -332,7 +332,7 @@ namespace System.IdentityModel.Tokens
             string[] tokenParts = jwtEncodedString.Split('.');
             if (tokenParts.Length != 3)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10400, "jwtEncodedString", jwtEncodedString));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
             }
 
             try
@@ -345,7 +345,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {
-                        throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10112, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type));
+                        throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type));
                     }
                 }
             }
@@ -356,7 +356,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "header", tokenParts[0], jwtEncodedString), ex);
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), ex);
             }
 
             try
@@ -370,7 +370,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10113, "payload", tokenParts[1], jwtEncodedString), ex);
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), ex);
             }
 
             this.rawData = jwtEncodedString;

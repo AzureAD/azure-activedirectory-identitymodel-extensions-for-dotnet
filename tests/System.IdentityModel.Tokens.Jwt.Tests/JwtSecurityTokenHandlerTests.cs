@@ -575,11 +575,11 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
             JwtSecurityToken jwt = RunReadXmlVariation(null, tokenHandler, ExpectedException.ArgumentNullException());
-            jwt = RunReadXmlVariation(XmlReaderVariation.WithWrongEncodingType, tokenHandler, ExpectedException.ArgumentException(substringExpected: "Jwt10203"));
+            jwt = RunReadXmlVariation(XmlReaderVariation.WithWrongEncodingType, tokenHandler, ExpectedException.ArgumentException(substringExpected: "IDX10707:"));
 
             jwt = RunReadStringVariation(null, tokenHandler, ExpectedException.ArgumentNullException());
-            jwt = RunReadStringVariation(EncodedJwts.Asymmetric_LocalSts, new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 }, ExpectedException.ArgumentException(substringExpected: "Jwt10206"));
-            jwt = RunReadStringVariation("SignedEncodedJwts.Asymmetric_LocalSts", tokenHandler, ExpectedException.ArgumentException(substringExpected: "Jwt10204"));
+            jwt = RunReadStringVariation(EncodedJwts.Asymmetric_LocalSts, new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 }, ExpectedException.ArgumentException(substringExpected: "IDX10209:"));
+            jwt = RunReadStringVariation("SignedEncodedJwts.Asymmetric_LocalSts", tokenHandler, ExpectedException.ArgumentException(substringExpected: "IDX10708"));
             jwt = RunReadStringVariation(EncodedJwts.Asymmetric_LocalSts, tokenHandler, ExpectedException.NoExceptionExpected);
         }
 
@@ -623,8 +623,8 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             
             RunValidateTokenVariation(null, new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentNullException());
-            RunValidateTokenVariation(EncodedJwts.Asymmetric_LocalSts, new TokenValidationParameters(), new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 }, ExpectedException.ArgumentException(substringExpected: "Jwt10206"));
-            RunValidateTokenVariation("ValidateToken_String_Only_IllFormed", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentException(substringExpected:"Jwt10204"));
+            RunValidateTokenVariation(EncodedJwts.Asymmetric_LocalSts, new TokenValidationParameters(), new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 }, ExpectedException.ArgumentException(substringExpected: "IDX10209:"));
+            RunValidateTokenVariation("ValidateToken_String_Only_IllFormed", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentException(substringExpected:"IDX10708:"));
             RunValidateTokenVariation("     ", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentNullException());
             RunValidateTokenVariation(EncodedJwts.Asymmetric_LocalSts, null, tokenHandler, ExpectedException.ArgumentNullException());
         }
@@ -687,7 +687,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsFalse(handler.CanReadToken("1"), string.Format("Expected JWTSecurityTokenHandler.CanReadToken to be false"));
 
-            expectedException = ExpectedException.ArgumentException(substringExpected: "Jwt10204");
+            expectedException = ExpectedException.ArgumentException(substringExpected: "IDX10708:");
             try
             {
                 handler.ReadToken("1");

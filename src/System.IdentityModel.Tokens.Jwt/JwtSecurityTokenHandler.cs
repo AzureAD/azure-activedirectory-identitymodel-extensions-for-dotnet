@@ -222,7 +222,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10000, "value"));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "value"));
                 }
 
                 shortClaimTypeProperty = value;
@@ -535,7 +535,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(
                     string.Format(
                             CultureInfo.InvariantCulture,
-                            JwtErrors.Jwt10203,
+                            ErrorMessages.IDX10707,
                             GetType().ToString(),
                             reader.ReadOuterXml(),
                             WSSecurityConstantsInternal.Elements.BinarySecurityToken,
@@ -577,12 +577,12 @@ namespace System.IdentityModel.Tokens
 
             if (token.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10206, token.Length, this.MaximumTokenSizeInBytes));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, token.Length, this.MaximumTokenSizeInBytes));
             }
 
             if (!this.CanReadToken(token))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10204, GetType(), token));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType(), token));
             }
 
             return new JwtSecurityToken(token);
@@ -594,7 +594,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="NotSupportedException"> use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.</exception>
         public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
         {
-            throw new NotSupportedException(JwtErrors.Jwt11000);
+            throw new NotSupportedException(ErrorMessages.IDX11008);
         }
 
         /// <summary>
@@ -622,7 +622,7 @@ namespace System.IdentityModel.Tokens
 
             if (token.Length > MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10206, token.Length, MaximumTokenSizeInBytes));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, token.Length, MaximumTokenSizeInBytes));
             }
 
             JwtSecurityToken jwt = this.ValidateSignature(token, validationParameters);
@@ -758,7 +758,7 @@ namespace System.IdentityModel.Tokens
             JwtSecurityToken jwt = token as JwtSecurityToken;
             if (jwt == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10200, GetType(), typeof(JwtSecurityToken), token.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()));
             }
 
             string signature = string.Empty;
@@ -800,7 +800,7 @@ namespace System.IdentityModel.Tokens
                 provider = SignatureProviderFactory.CreateForSigning(key, algorithm);
                 if (provider == null)
                 {
-                    throw new InvalidProgramException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10331, SignatureProviderFactory.GetType(), typeof(SignatureProvider), key == null ? "<null>" : key.GetType().ToString(), algorithm == null ? "<null>" : algorithm));
+                    throw new InvalidProgramException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10635, SignatureProviderFactory.GetType(), typeof(SignatureProvider), key == null ? "<null>" : key.GetType().ToString(), algorithm == null ? "<null>" : algorithm));
                 }
 
                 byte[] bytes = provider.Sign(Encoding.UTF8.GetBytes(inputString));
@@ -815,7 +815,7 @@ namespace System.IdentityModel.Tokens
             SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10314, key == null ? TextStrings.Null : key.ToString(), algorithm == null ? TextStrings.Null : algorithm));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10636, key == null ? TextStrings.Null : key.ToString(), algorithm == null ? TextStrings.Null : algorithm));
             }
 
             return signatureProvider.Verify(encodedBytes, signature);
@@ -1007,7 +1007,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10333, jwt.ToString()));
+                throw new ArgumentException(ErrorMessages.IDX10221);
             }
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
@@ -1034,7 +1034,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (identity.Actor != null)
                     {
-                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10401, JwtRegisteredClaimNames.Actort, jwtClaim.Value));
+                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10710, JwtRegisteredClaimNames.Actort, jwtClaim.Value));
                     }
 
                     if (this.CanReadToken(jwtClaim.Value))

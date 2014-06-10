@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
@@ -161,7 +162,7 @@ namespace System.IdentityModel.Tokens
                             throw;
                         }
 
-                        throw new FormatException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10118, JwtHeaderParameterNames.X5t), ex);
+                        throw new FormatException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10705, JwtHeaderParameterNames.X5t), ex);
                     }
                 }
 

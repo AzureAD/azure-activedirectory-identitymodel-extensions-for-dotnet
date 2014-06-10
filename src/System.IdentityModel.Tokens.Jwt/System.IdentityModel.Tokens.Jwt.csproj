@@ -78,7 +78,6 @@
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="JwtConfigurationStrings.cs" />
     <Compile Include="JwtConstants.cs" />
-    <Compile Include="JwtErrors.cs" />
     <Compile Include="JwtHeader.cs" />
     <Compile Include="JwtPayLoad.cs" />
     <Compile Include="JwtSecurityToken.cs" />
