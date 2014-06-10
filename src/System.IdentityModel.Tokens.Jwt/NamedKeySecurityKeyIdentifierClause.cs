@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
 
@@ -67,12 +68,12 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, name));
             }
 
             if (string.IsNullOrWhiteSpace(keyIdentifier))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, keyIdentifier));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, keyIdentifier));
             }
 
             this.name = name;
