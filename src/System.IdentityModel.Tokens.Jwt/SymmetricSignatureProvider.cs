@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Runtime.CompilerServices;
@@ -60,12 +61,12 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(algorithm))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm"));
             }
 
             if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
             {
-                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10503, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits));
+                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits));
             }
 
             try
@@ -79,12 +80,12 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10532, algorithm, key, ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10632, algorithm, key, ex), ex);
             }
 
             if (this.keyedHash == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10533, algorithm, key));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10633, algorithm, key));
             }
 
             try
@@ -98,7 +99,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10534, algorithm, key, ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10634, algorithm, key, ex), ex);
             }
         }
 
@@ -120,7 +121,7 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(JwtErrors.Jwt10524);
+                throw new ArgumentException(ErrorMessages.IDX10624);
             }
 
             if (this.disposed)
@@ -130,7 +131,7 @@ namespace System.IdentityModel.Tokens
 
             if (this.keyedHash == null)
             {
-                throw new InvalidOperationException(JwtErrors.Jwt10523);
+                throw new InvalidOperationException(ErrorMessages.IDX10623);
             }
 
             return this.keyedHash.ComputeHash(input);
@@ -162,12 +163,12 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(JwtErrors.Jwt10525);
+                throw new ArgumentException(ErrorMessages.IDX10625);
             }
 
             if (signature.Length == 0)
             {
-                throw new ArgumentException(JwtErrors.Jwt10526);
+                throw new ArgumentException(ErrorMessages.IDX10626);
             }
 
             if (this.disposed)
@@ -177,7 +178,7 @@ namespace System.IdentityModel.Tokens
 
             if (this.keyedHash == null)
             {
-                throw new InvalidOperationException(JwtErrors.Jwt10523);
+                throw new InvalidOperationException(ErrorMessages.IDX10623);
             }
 
             return AreEqual(signature, this.keyedHash.ComputeHash(input));

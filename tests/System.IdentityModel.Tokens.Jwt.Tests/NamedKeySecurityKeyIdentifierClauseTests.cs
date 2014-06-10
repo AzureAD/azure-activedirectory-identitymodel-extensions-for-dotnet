@@ -77,7 +77,7 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "WIF10000");
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "IDX10000:");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause(name: "     ", keyIdentifier: "keyIdentifier");
@@ -88,7 +88,7 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "WIF10000");
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "IDX10000:");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", "     ");

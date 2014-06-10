@@ -239,7 +239,7 @@ namespace System.IdentityModel.Test
                      subject: claimsIdentity,
                      signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials);
 
-            claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorSymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.SecurityTokenInvalidSignatureException(innerTypeExpected: typeof(InvalidOperationException)));
+            claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorSymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.SignatureVerificationFailedException(innerTypeExpected: typeof(InvalidOperationException)));
 
             // Will succeed be validation is off
             validationParameters.ValidateActor = false;
@@ -723,7 +723,7 @@ namespace System.IdentityModel.Test
         {
             // "Security Key Identifier not found",
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            ExpectedException expectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "Jwt10315:");
+            ExpectedException expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10503:");
             TokenValidationParameters validationParameters = SignatureValidationParameters(signingToken: KeyingMaterial.X509Token_LocalSts);
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, expectedException);
 
@@ -748,12 +748,12 @@ namespace System.IdentityModel.Test
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts"), tokenHandler, validationParameters, expectedException);
 
             // "Signature missing, just two parts",
-            expectedException = ExpectedException.SecurityTokenValidationException("Jwt10312:");
+            expectedException = ExpectedException.SecurityTokenValidationException("IDX10504:");
             validationParameters = SignatureValidationParameters(signingToken: KeyingMaterial.DefaultX509Token_2048 );
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1"), tokenHandler, validationParameters, expectedException);
 
             // "SigningToken and SigningTokens both null",
-            expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), substringExpected:"Jwt10315:");
+            expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10503:");
             validationParameters = SignatureValidationParameters();
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, expectedException);
 
@@ -763,7 +763,7 @@ namespace System.IdentityModel.Test
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, expectedException);
 
             // "SigningToken no keys",
-            expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), substringExpected:"Jwt10315:");
+            expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10503:");
             validationParameters = SignatureValidationParameters( signingToken: new UserNameSecurityToken( "username", "password" ) );
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"), tokenHandler, validationParameters, expectedException);
 
@@ -781,13 +781,12 @@ namespace System.IdentityModel.Test
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, expectedException);
 
             // "BinaryKey 56Bits",
-            expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), innerTypeExpected: typeof(ArgumentOutOfRangeException), substringExpected:"Jwt10503:");
+            expectedException = ExpectedException.SignatureVerificationFailedException( innerTypeExpected: typeof(ArgumentOutOfRangeException), substringExpected: "IDX10503:");
             validationParameters = SignatureValidationParameters(signingToken: KeyingMaterial.BinarayToken56BitKey);
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, expectedException);
         }
 
         private static TokenValidationParameters SignatureValidationParameters(
-            Func<string, IEnumerable<SecurityKey>> issuerSigningKeyRetriever = null,
             SecurityKey signingKey = null,
             IEnumerable<SecurityKey> signingKeys = null,
             SecurityToken signingToken = null, 
@@ -795,7 +794,6 @@ namespace System.IdentityModel.Test
         {
             return new TokenValidationParameters()
             {
-                IssuerSigningKeyRetriever = issuerSigningKeyRetriever,
                 IssuerSigningToken = signingToken,
                 IssuerSigningKeys = signingKeys,
                 IssuerSigningTokens = signingTokens,

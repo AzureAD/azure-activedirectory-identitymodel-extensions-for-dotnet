@@ -61,10 +61,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets a value indicating whether the class provides serialization functionality to serialize token handled 
+        /// Gets a value indicating whether the class provides serialization functionality to serialize securityToken handled 
         /// by this instance.
         /// </summary>
-        /// <returns>true if the WriteToken method can serialize this token.</returns>
+        /// <returns>true if the WriteToken method can serialize this securityToken.</returns>
         public override bool CanWriteToken
         {
             get { return true; }
@@ -100,10 +100,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates claims from a Saml token.
+        /// Creates claims from a Saml securityToken.
         /// </summary>
         /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
-        /// <param name="validationParameters"> contains parameters for validating the token.</param>
+        /// <param name="validationParameters"> contains parameters for validating the securityToken.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
@@ -144,9 +144,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates the security token reference when the token is not attached to the message.
+        /// Creates the security securityToken reference when the securityToken is not attached to the message.
         /// </summary>
-        /// <param name="token">The saml token.</param>
+        /// <param name="securityToken">The saml securityToken.</param>
         /// <param name="attached">Boolean that indicates if a attached or unattached
         /// reference needs to be created.</param>
         /// <returns>A <see cref="SamlAssertionKeyIdentifierClause"/>.</returns>
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the token type supported by this handler.
+        /// Gets the securityToken type supported by this handler.
         /// </summary>
         public override Type TokenType
         {
@@ -224,10 +224,10 @@ namespace Microsoft.IdentityModel.Tokens
 
 
         /// <summary>
-        /// Reads a SAML 11 token from the XmlReader.
+        /// Reads a SAML 11 securityToken from the XmlReader.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="SamlSecurityToken"/> element.</param>
-        /// <param name="validationParameters">Contains data and information needed for reading the token.</param>
+        /// <param name="validationParameters">Contains data and information needed for reading the securityToken.</param>
         /// <returns>An instance of a <see cref="SamlSecurityToken"/>.</returns>
         public virtual SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
@@ -253,13 +253,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Reads and validates a well formed <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="securityToken">A string containing a well formed token.</param>
+        /// <param name="securityToken">A string containing a well formed securityToken.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
         /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
-        /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml token.</returns>
+        /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
@@ -430,18 +430,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Serializes to <see cref="SamlSecurityToken"/> to a string.
         /// </summary>
-        /// <param name="token">A <see cref="SamlSecurityToken"/>.</param>
-        public override string WriteToken(SecurityToken token)
+        /// <param name="securityToken">A <see cref="SamlSecurityToken"/>.</param>
+        public override string WriteToken(SecurityToken securityToken)
         {
-            if (token == null)
+            if (securityToken == null)
             {
-                throw new ArgumentNullException("token");
+                throw new ArgumentNullException("securityToken");
             }
 
-            SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
+            SamlSecurityToken samlSecurityToken = securityToken as SamlSecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), securityToken.GetType()));
             }
 
 
@@ -449,7 +449,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
                 {
-                    _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, token);
+                    _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, securityToken);
                     stringWriter.Flush();
                     stringWriter.Close();
                     return stringWriter.ToString();
@@ -458,10 +458,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Serializes to XML a token of the type handled by this instance.
+        /// Serializes to XML a securityToken of the type handled by this instance.
         /// </summary>
         /// <param name="writer">The XML writer.</param>
-        /// <param name="token">A token of type TokenType.</param>
+        /// <param name="securityToken">A securityToken of type TokenType.</param>
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)

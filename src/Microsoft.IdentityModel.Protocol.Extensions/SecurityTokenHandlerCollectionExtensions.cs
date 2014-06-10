@@ -28,22 +28,22 @@ using Saml2Handler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 namespace Microsoft.IdentityModel.Extensions
 {
     /// <summary>
-    /// Extensions to <see cref="SecurityTokenHandler"/> that provide support for validating a security token
+    /// Extensions to <see cref="SecurityTokenHandler"/> that provide support for validating a security securityToken
     /// passed as a string and using <see cref="TokenValidationParameters"/>.
     /// </summary>
     public static class SecurityTokenHandlerCollectionExtensions
     {
         /// <summary>
-        /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>
+        /// Validates a securityToken passed as a string using <see cref="TokenValidationParameters"/>
         /// </summary>
         /// <param name="tokenHandlers"><see cref="SecurityTokenHandlerCollection"/> uses extensions for <see cref="SecurityTokenHandler"/>(s) that can 
         /// validate from a string.</param>
-        /// <param name="securityToken">token to validate.</param>
+        /// <param name="securityToken">securityToken to validate.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contain necessary validation coordinates.</param>
         /// <exception cref="ArgumentNullException">'tokenHandlers' is null.</exception>
         /// <exception cref="ArgumentNullException">'securityToken' is null.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <returns>A <see cref="ClaimsPrincipal"/> that represents the identity created when validating the token.</returns>
+        /// <returns>A <see cref="ClaimsPrincipal"/> that represents the identity created when validating the securityToken.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720")]
         public static ClaimsPrincipal ValidateToken(this SecurityTokenHandlerCollection tokenHandlers, string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {

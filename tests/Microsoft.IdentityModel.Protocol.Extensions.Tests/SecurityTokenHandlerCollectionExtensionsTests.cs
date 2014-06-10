@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Test
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
 
             securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
-            expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "ID4037");
+            expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "ID4037:");
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
 
             securityTokenValidators.Clear();

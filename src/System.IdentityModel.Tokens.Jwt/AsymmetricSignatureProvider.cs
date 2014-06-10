@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Security.Cryptography;
@@ -103,20 +104,20 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(algorithm))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "algorithm"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm"));
             }
 
             if (willCreateSignatures)
             {
                 if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning)
                 {
-                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10531, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning));
+                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10631, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning));
                 }
             }
 
             if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying)
             {
-                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10530, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
+                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10630, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
             this.key = key;
@@ -131,12 +132,12 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10518, algorithm, this.key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10618, algorithm, this.key.ToString(), ex), ex);
             }
 
             if (this.hash == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10511, algorithm, this.key.ToString()));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10611, algorithm, this.key.ToString()));
             }
 
             if (willCreateSignatures)
@@ -153,12 +154,12 @@ namespace System.IdentityModel.Tokens
                         throw;
                     }
 
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10514, algorithm, this.key.ToString(), ex), ex);
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10614, algorithm, this.key.ToString(), ex), ex);
                 }
 
                 if (this.formatter == null)
                 {
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10515, algorithm, this.key.ToString()));
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10615, algorithm, this.key.ToString()));
                 }
             }
 
@@ -174,12 +175,12 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10516, algorithm, this.key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10616, algorithm, this.key.ToString(), ex), ex);
             }
 
             if (this.deformatter == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10517, algorithm, this.key.ToString()));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10617, algorithm, this.key.ToString()));
             }
         }
 
@@ -202,7 +203,7 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(JwtErrors.Jwt10524);
+                throw new ArgumentException(ErrorMessages.IDX10624);
             }
 
             if (this.disposed)
@@ -212,12 +213,12 @@ namespace System.IdentityModel.Tokens
 
             if (this.formatter == null)
             {
-                throw new InvalidOperationException(JwtErrors.Jwt10520);
+                throw new InvalidOperationException(ErrorMessages.IDX10620);
             }
 
             if (this.hash == null)
             {
-                throw new InvalidOperationException(JwtErrors.Jwt10521);
+                throw new InvalidOperationException(ErrorMessages.IDX10621);
             }
 
             return this.formatter.CreateSignature(this.hash.ComputeHash(input));
@@ -250,12 +251,12 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(JwtErrors.Jwt10525);
+                throw new ArgumentException(ErrorMessages.IDX10625);
             }
 
             if (signature.Length == 0)
             {
-                throw new ArgumentException(JwtErrors.Jwt10526);
+                throw new ArgumentException(ErrorMessages.IDX10626);
             }
 
             if (this.disposed)
@@ -265,12 +266,12 @@ namespace System.IdentityModel.Tokens
 
             if (this.deformatter == null)
             {
-                throw new InvalidOperationException(JwtErrors.Jwt10529);
+                throw new InvalidOperationException(ErrorMessages.IDX10629);
             }
 
             if (this.hash == null)
             {
-                throw new InvalidOperationException(JwtErrors.Jwt10521);
+                throw new InvalidOperationException(ErrorMessages.IDX10621);
             }
 
             return this.deformatter.VerifySignature(this.hash.ComputeHash(input), signature);

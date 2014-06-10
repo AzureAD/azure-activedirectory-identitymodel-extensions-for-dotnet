@@ -62,10 +62,7 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10308 = "Jwt10308: Can only validate tokens of type: '{0}'. Was passed token of type: '{1}'.";
         internal const string Jwt10309 = "Jwt10309: Unable to validate signature.  Both validationParamters.SigningToken and validationParameters.SigningTokens are null. There is no key available to check the signature.";
         internal const string Jwt10311 = "Jwt10311: Unable to validate issuer, validationParameters.ValidIssuer: '{0}' or validationParameters.ValidIssuers: '{1}' did not match Jwt.Issuer: '{2}'. Comparison is: Equals ";
-        internal const string Jwt10312 = "Jwt10312: Unable to validate signature, jwt does not have a signature: '{0}'";
         internal const string Jwt10314 = "Jwt10314: SignatureProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
-        internal const string Jwt10315 = "Jwt10315: Signature validation failed. Keys tried: '{0}'.\njwt: '{1}'";
-        internal const string Jwt10316 = "Jwt10316: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\njwt: '{2}'";
         internal const string Jwt10317 = "Jwt10317: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
         internal const string Jwt10318 = "Jwt10318: Issuer validation failed. Configuration.IssuerNameRegistry.GetIssuerName returned a null or empty string. jwt.Issuer: '{0}'";
         internal const string Jwt10319 = "Jwt10319: Issuer validation failed. issuer is null or whitespace.";
@@ -78,11 +75,6 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10331 = "Jwt10331: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
         internal const string Jwt10332 = "Jwt10332: Audience validation failed. jwt.Audience: '{0}'.";
         internal const string Jwt10333 = "Jwt10333: Unable to create claims from jwt, 'issuer' is null or empty.\njwt: '{0}'.";
-        internal const string Jwt10334 = "Jwt10334: Signature validation failed. Unable to resolve keyidentifier found in securityToken: '{0}', \njwt: '{1}'.";
-
-        internal const string NoNonNullKeysFound = "No non-null SecurityKeys were found";
-        internal const string NoSecurityKeysTried = "No SecurityKeys were available to check signature";
-        internal const string KeysTried          = "{0}";
 
         // JwtSecurityToken errors 10400 - 10499
         internal const string Jwt10400 = "Jwt10400: '{0}' is not well formed: '{1}'. The string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
@@ -90,29 +82,6 @@ namespace System.IdentityModel.Tokens
         internal const string Jwt10403 = "Jwt10403: Invalid dates. validFrom: '{0}' > validTo: {1}.";
 
         // CryptoErrors 10500 - 10599
-        internal const string Jwt10500 = "Jwt10500: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type: '{4}'.";
-        internal const string Jwt10503 = "Jwt10503: The '{0}' cannot have less than: '{1}' bits.";
-        internal const string Jwt10511 = "Jwt10511: AsymmetricSecurityKey.GetHashAlgorithmForSignature( '{0}' ) returned null.\nKey: '{1}'\nSignatureAlgorithm: '{0}'";
-        internal const string Jwt10513 = "Jwt10513: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than: '{0}'.";
-        internal const string Jwt10514 = "Jwt10514: AsymmetricSecurityKey.GetSignatureFormater( '{0}' ) threw an exception.\nKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException:'{2}'.\nIf you only need to verify signatures the parameter 'willBeUseForSigning' should be false if the private key is not be available.";
-        internal const string Jwt10515 = "Jwt10515: AsymmetricSecurityKey.GetSignatureFormater( '{0}' ) returned null.\nKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.";
-        internal const string Jwt10516 = "Jwt10516: AsymmetricSecurityKey.GetSignatureDeformatter( '{0}' ) threw an exception.\nKey: '{1}'\nSignatureAlgorithm: '{0}, check to make sure the SignatureAlgorithm is supported.'\nException:'{2}'.";
-        internal const string Jwt10517 = "Jwt10517: AsymmetricSecurityKey.GetSignatureDeFormater( '{0}' ) returned null.\nKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.";
-        internal const string Jwt10518 = "Jwt10518: AsymmetricSecurityKey.GetHashAlgorithmForSignature( '{0}' ) threw an exception.\nAsymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
-        internal const string Jwt10520 = "Jwt10520: The AsymmetricSignatureFormatter is null, cannot sign data.  Was this AsymmetricSignatureProvider constructor called specifying setting parameter: 'willCreateSignatures' == 'true'?.";
-        internal const string Jwt10521 = "Jwt10521: This AsymmetricSignatureProvider has a minimum key size requirement of: '{0}', the AsymmetricSecurityKey in has a KeySize of: '{1}'.";
-        internal const string Jwt10523 = "Jwt10523: The KeyedHashAlgorithm is null, cannot sign data.";
-        internal const string Jwt10524 = "Jwt10524: Cannot sign 'input' byte array has length 0.";
-        internal const string Jwt10525 = "Jwt10525: Cannot verify signature 'input' byte array has length 0.";
-        internal const string Jwt10526 = "Jwt10526: Cannot verify signature 'signature' byte array has length 0.";
-        internal const string Jwt10527 = "Jwt10527: Cannot set the MinimumAsymmetricKeySizeInBitsForVerifying to less than: '{0}'.";
-        internal const string Jwt10528 = "Jwt10528: Cannot set the MinimumSymmetricKeySizeInBits to less than: '{0}'.";
-        internal const string Jwt10529 = "Jwt10529: The AsymmetricSignatureDeformatter is null, cannot sign data. If a derived AsymmetricSignatureProvider is being used, make sure to call the base constructor.";
-        internal const string Jwt10530 = "Jwt10530: The '{0}' for signing cannot be smaller than '{1}' bits.";
-        internal const string Jwt10531 = "Jwt10531: The '{0}' for verifying cannot be smaller than '{1}' bits.";
-        internal const string Jwt10532 = "Jwt10532: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) threw an exception.\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
-        internal const string Jwt10533 = "Jwt10533: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) returned null.\n\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.";
-        internal const string Jwt10534 = "Jwt10534: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw.\n\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}' check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
 
         // JwtSecurityTokenHandler configuration errors 10600 - 10699
         internal const string Jwt10600 = "Jwt10600: Attribute: '{0}' is null or whitespace.\nelement.OuterXml: '{1}'.";
