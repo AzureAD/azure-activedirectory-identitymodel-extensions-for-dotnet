@@ -160,9 +160,9 @@ namespace Microsoft.IdentityModel.Test
             return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
 
-        public static ExpectedException SecurityTokenInvalidSignatureException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SignatureVerificationFailedException(string substringExpected = null, Type innerTypeExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SignatureVerificationFailedException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
         public static ExpectedException SecurityTokenNoExpirationException(string substringExpected = null, Type innerTypeExpected = null)
         {
@@ -183,12 +183,6 @@ namespace Microsoft.IdentityModel.Test
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenValidationException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
-
-
-        public static ExpectedException SignatureVerificationFailedException(string substringExpected = null, Type innerTypeExpected = null)
-        {
-            return new ExpectedException(typeExpected: typeof(SignatureVerificationFailedException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
-        }                
 
         public string SubstringExpected { get; set; }
 

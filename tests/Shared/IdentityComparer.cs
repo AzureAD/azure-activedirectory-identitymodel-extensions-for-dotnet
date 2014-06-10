@@ -578,8 +578,8 @@ namespace System.IdentityModel.Test
             if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKey, validationParameters2.IssuerSigningKey, compareContext, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKey");
 
-            if (!AreEqual<Func<string, IEnumerable<SecurityKey>>>(validationParameters1.IssuerSigningKeyRetriever, validationParameters2.IssuerSigningKeyRetriever, compareContext, AreKeyRetrieversEqual))
-                matchingFailures.Add("IssuerSigningKeyRetriever");
+            //if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKeyResolver, validationParameters2.IssuerSigningKeyResolver, compareContext, AreSecurityKeysEqual))
+            //    matchingFailures.Add("IssuerSigningKeyRetriever");
 
             if (!AreEnumsEqual<SecurityKey>(validationParameters1.IssuerSigningKeys, validationParameters2.IssuerSigningKeys, compareContext, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKeys");

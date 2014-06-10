@@ -34,6 +34,16 @@ namespace System.IdentityModel.Tokens
     public delegate void AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for IssuerSigningKeyRetriever. When validating signatures, this method will return key to use.
+    /// </summary>
+    /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
+    /// <param name="securityToken">the <SecurityToken> that is being validated. It may be null.</SecurityToken></param>
+    /// <param name="keyIdentifier">the <see cref="SecurityKeyIdentifier"/> found in the token. It may be null.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns></returns>
+    public delegate SecurityKey IssuerSigningKeyResolver(string token, SecurityToken securityToken, SecurityKeyIdentifier keyIdentifier, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Definition for IssuerValidator.
     /// </summary>
     /// <param name="issuer">The issuer to validate</param>
@@ -95,7 +105,7 @@ namespace System.IdentityModel.Tokens
             CertificateValidator = other.CertificateValidator;
             ClockSkew = other.ClockSkew;
             IssuerSigningKey = other.IssuerSigningKey;
-            IssuerSigningKeyRetriever = other.IssuerSigningKeyRetriever;
+            IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerSigningToken = other.IssuerSigningToken;
@@ -270,7 +280,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Each <see cref="SecurityKey"/> will be used to check the signature. Returning multiple key can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier. 
         /// This can occur when the issuer has multiple keys available. This sometimes occurs during key rollover.</remarks>
-        public Func<string, IEnumerable<SecurityKey>> IssuerSigningKeyRetriever
+        public IssuerSigningKeyResolver IssuerSigningKeyResolver
         {
             get;
             set;
@@ -457,7 +467,7 @@ namespace System.IdentityModel.Tokens
 
 
         /// <summary>
-        /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the 'securityToken' is called. 
+        /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
         /// </summary>
         public bool ValidateIssuerSigningKey
         {

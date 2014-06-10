@@ -16,29 +16,52 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    // TODO - for SAML 1 and 2 tokens, we don't want to create a collection, so when finished this 
-    // new class will resolve the token without creating a collection of securityTokens which results in creating new keys
-    // from certs, keys may be linked to hardware and should not be recreated.
-    internal class IssuerTokenResolver : SecurityTokenResolver
+    /// <summary>
+    /// Resolves securitykeys
+    /// </summary>
+    public class SecurityKeyResolver : SecurityTokenResolver
     {
-        protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
+        private delegate bool CertMatcher(X509Certificate2 cert);
+
+        private static FieldInfo _certFieldInfo;
+        private static Type _x509AsymmKeyType;
+
+        private string _securityToken;
+        private TokenValidationParameters _validationParameters;
+
+        static SecurityKeyResolver()
         {
-            key = null;
-            if (keyIdentifierClause.CanCreateKey)
+            _x509AsymmKeyType = typeof(X509AsymmetricSecurityKey);
+            _certFieldInfo = _x509AsymmKeyType.GetField("certificate", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+        /// <summary>
+        /// Creates a new instance of <see cref="SecurityKeyResolver"/>
+        /// </summary>
+        /// <param name="securityKeysToMatch"> enumeration of keys to match.</param>
+        public SecurityKeyResolver(string securityToken, TokenValidationParameters validationParameters)
+        {
+            _securityToken = securityToken;
+
+            if (validationParameters == null)
             {
-                key = keyIdentifierClause.CreateKey();
-                return true;
+                throw new ArgumentNullException("validationParameters");
             }
 
-            return false;
+            _validationParameters = validationParameters;
+        }
+
+        protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
+        {
+            SecurityToken token = null;
+            return ResolvesToSigningToken(keyIdentifierClause, out key, out token);
         }
 
         protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
@@ -48,18 +71,136 @@ namespace Microsoft.IdentityModel.Tokens
 
         protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
         {
-
+            token = null;
             foreach (var keyIdentifierClause in keyIdentifier)
             {
-                X509RawDataKeyIdentifierClause clause = keyIdentifierClause as X509RawDataKeyIdentifierClause;
-                if (clause != null)
+                SecurityKey key = null;
+                if (ResolvesToSigningToken(keyIdentifierClause, out key, out token))
                 {
-                    token = new X509SecurityToken(new X509Certificate2(clause.GetX509RawData()));
                     return true;
                 }
             }
 
+            return false;
+        }
+
+        private bool Matches(SecurityKeyIdentifierClause keyIdentifierClause, SecurityKey key, CertMatcher certMatcher, out SecurityToken token)
+        {
             token = null;
+            if (certMatcher != null)
+            {
+                X509SecurityKey x509Key = key as X509SecurityKey;
+                if (x509Key != null)
+                {
+                    if (certMatcher(x509Key.Certificate))
+                    {
+                        token = new X509SecurityToken(x509Key.Certificate);
+                        return true;
+                    }
+                }
+                else
+                {
+                    X509AsymmetricSecurityKey x509AsymmKey = key as X509AsymmetricSecurityKey;
+                    if (x509AsymmKey != null)
+                    {
+                        X509Certificate2 cert = _certFieldInfo.GetValue(x509AsymmKey) as X509Certificate2;
+                        if (cert != null && certMatcher(cert))
+                        {
+                            token = new X509SecurityToken(cert);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool ResolvesToSigningToken(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key, out SecurityToken token)
+        {
+            token = null;
+            key = null;
+            CertMatcher certMatcher = null;
+
+            // for SAML tokens the highest probability are certs, with RawData first
+            X509RawDataKeyIdentifierClause rawCertKeyIdentifierClause = keyIdentifierClause as X509RawDataKeyIdentifierClause;
+            if (rawCertKeyIdentifierClause != null)
+            {
+                certMatcher = rawCertKeyIdentifierClause.Matches;
+            }
+            else
+            {
+                X509SubjectKeyIdentifierClause subjectKeyIdentifierClause = keyIdentifierClause as X509SubjectKeyIdentifierClause;
+                if (subjectKeyIdentifierClause != null)
+                {
+                    certMatcher = subjectKeyIdentifierClause.Matches;
+                }
+                else
+                {
+                    X509ThumbprintKeyIdentifierClause thumbprintKeyIdentifierClause = keyIdentifierClause as X509ThumbprintKeyIdentifierClause;
+                    if (thumbprintKeyIdentifierClause != null)
+                    {
+                        certMatcher = thumbprintKeyIdentifierClause.Matches;
+                    }
+                    else
+                    {
+                        X509IssuerSerialKeyIdentifierClause issuerKeyIdentifierClause = keyIdentifierClause as X509IssuerSerialKeyIdentifierClause;
+                        if (issuerKeyIdentifierClause != null)
+                        {
+                            certMatcher = issuerKeyIdentifierClause.Matches;
+                        }
+                    }
+                }
+            }
+
+            if (_validationParameters.IssuerSigningKeyResolver != null)
+            {
+                key = _validationParameters.IssuerSigningKeyResolver(token: _securityToken, securityToken: null, keyIdentifier: new SecurityKeyIdentifier(keyIdentifierClause), validationParameters: _validationParameters);
+                return true;
+            }
+
+            if (_validationParameters.IssuerSigningKey != null)
+            {
+                if (Matches(keyIdentifierClause, _validationParameters.IssuerSigningKey, certMatcher, out token))
+                {
+                    key = _validationParameters.IssuerSigningKey;
+                    return true;
+                }
+            }
+
+            if (_validationParameters.IssuerSigningKeys != null)
+            {
+                foreach (SecurityKey securityKey in _validationParameters.IssuerSigningKeys)
+                if (Matches(keyIdentifierClause, securityKey, certMatcher, out token))
+                {
+                    key = securityKey;
+                    return true;
+                }
+            }
+
+            if (_validationParameters.IssuerSigningToken != null)
+            {
+                if (_validationParameters.IssuerSigningToken.MatchesKeyIdentifierClause(keyIdentifierClause))
+                {
+                    token = _validationParameters.IssuerSigningToken;
+                    key = token.SecurityKeys[0];
+                    return true;
+                }
+            }
+
+            if (_validationParameters.IssuerSigningTokens != null)
+            {
+                foreach (SecurityToken issuerToken in _validationParameters.IssuerSigningTokens)
+                {
+                    if (_validationParameters.IssuerSigningToken.MatchesKeyIdentifierClause(keyIdentifierClause))
+                    {
+                        token = issuerToken;
+                        key = token.SecurityKeys[0];
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
     }
@@ -69,116 +210,15 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal static class IssuerKeyRetriever
     {
-
-        // 
-        // TODO - this method is not complete
-        // It needs to be dynamic, ie: do not create a list of tokens from TokenValidationParameters.IssuerSigningtokens, IssuerSigningKeys, IssuerSigningKeyRetriever for keys.
-        // the class above is being developed to handle matching SecurityKeys and handling dynamic key matching.
-        // 
-        // Consider it a stop-gap solution that handles the 60% case and allows early adopters to experiment and with samples.
-
         /// <summary>
-        /// Used to create signing tokens when reading SamlTokens (1&2) as reading requires a token to validate signature.
+        /// Used to create signing tokens when reading SamlTokens (1&2) as reading requires a securityToken to validate signature.
         /// </summary>
         /// <param name="securityToken"></param>
         /// <param name="validationParameters"></param>
         /// <returns></returns>
         public static SecurityTokenResolver CreateIssuerTokenResolver(string securityToken, TokenValidationParameters validationParameters)
         {
-
-            // X509SecurityKey (s)
-            List<SecurityToken> signingTokens = new List<SecurityToken>();
-            if (validationParameters.IssuerSigningToken != null)
-            {
-                signingTokens.Add(validationParameters.IssuerSigningToken);
-            }
-
-            if (validationParameters.IssuerSigningTokens != null)
-            {
-                signingTokens.AddRange(validationParameters.IssuerSigningTokens);
-            }
-
-            List<SecurityKey> namedKeys = new List<SecurityKey>();
-            foreach (SecurityKey securityKey in RetrieveIssuerSigningKeys(string.Empty, validationParameters))
-            {
-                X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
-                if (x509SecurityKey != null)
-                {
-                    signingTokens.Add(new X509SecurityToken(x509SecurityKey.Certificate));
-                }
-                else
-                {
-                    X509AsymmetricSecurityKey x509AsymmetricSecurityKey = securityKey as X509AsymmetricSecurityKey;
-                    if (x509AsymmetricSecurityKey != null)
-                    {
-                        // TODO finish up IssuerTokenResolver so it can be returned instead of creating a 'copied' list of tokens.
-                        // signingTokens.Add(new X509SecurityToken())
-                    }
-                    else
-                    {
-                        namedKeys.Add(securityKey);
-                    }
-                }
-            }
-
-            if (namedKeys.Count > 0)
-            {
-                signingTokens.Add(new NamedKeySecurityToken("unknown", namedKeys));
-            }
-
-            // TODO - finish up IssuerTokenResolver so it can be returned instead of creating a 'copied' list of tokens.
-            //return new IssuerTokenResolver();
-
-            return SecurityTokenResolver.CreateDefaultSecurityTokenResolver(signingTokens.AsReadOnly(), true);
-        }
-
-        public static IEnumerable<SecurityKey> RetrieveIssuerSigningKeys(string securityToken, TokenValidationParameters validationParameters)
-        {
-            if (validationParameters != null)
-            {
-                if (validationParameters.IssuerSigningKeyRetriever != null)
-                {
-                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeyRetriever(securityToken))
-                    {
-                        yield return securityKey;
-                    }
-                }
-
-                if (validationParameters.IssuerSigningKey != null)
-                {
-                    yield return validationParameters.IssuerSigningKey;
-                }
-
-                if (validationParameters.IssuerSigningKeys != null)
-                {
-                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
-                    {
-                        yield return securityKey;
-                    }
-                }
-
-                if (validationParameters.IssuerSigningToken != null && validationParameters.IssuerSigningToken.SecurityKeys != null)
-                {
-                    foreach (SecurityKey securityKey in validationParameters.IssuerSigningToken.SecurityKeys)
-                    {
-                        yield return securityKey;
-                    }
-                }
-
-                if (validationParameters.IssuerSigningTokens != null)
-                {
-                    foreach (SecurityToken token in validationParameters.IssuerSigningTokens)
-                    {
-                        if (token.SecurityKeys != null)
-                        {
-                            foreach (SecurityKey securityKey in token.SecurityKeys)
-                            {
-                                yield return securityKey;
-                            }
-                        }
-                    }
-                }
-            }
+            return new SecurityKeyResolver(securityToken, validationParameters);
         }
     }
 }

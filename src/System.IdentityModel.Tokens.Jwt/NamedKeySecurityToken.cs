@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
@@ -65,7 +66,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10000, name));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, name));
             }
 
             this.securityKeys = new List<SecurityKey>(keys);

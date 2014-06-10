@@ -114,7 +114,7 @@ namespace System.IdentityModel.Test
             { 
                 Name = "EncodedString: string.Empty", 
                 EncodedString = string.Empty, 
-                ExpectedException = ExpectedException.ArgumentException(substringExpected:"WIF10002"),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected:"IDX10002:"),
             });
             RunEncodedTest( new JwtSecurityTokenTestVariation
             { 

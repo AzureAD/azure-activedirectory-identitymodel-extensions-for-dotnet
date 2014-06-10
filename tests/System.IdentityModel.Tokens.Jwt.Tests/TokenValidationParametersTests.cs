@@ -61,19 +61,32 @@ namespace System.IdentityModel.Test
         public void TokenValidationParameters_Publics()
         {
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256;
-            List<SecurityKey> issuerSigningKeys = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256, KeyingMaterial.SymmetricSecurityKey2_256};
-            List<SecurityKey> issuerSigningKeysDup = new List<SecurityKey>() { new InMemorySymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256), new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256) };
+            SecurityKey issuerSigningKey2 = KeyingMaterial.SymmetricSecurityKey2_256;
+
+            List<SecurityKey> issuerSigningKeys =
+                new List<SecurityKey>
+                {
+                    KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    KeyingMaterial.SymmetricSecurityKey2_256
+                };
+
+            List<SecurityKey> issuerSigningKeysDup =
+                new List<SecurityKey>
+                {
+                    new InMemorySymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256),
+                    new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+                };
 
             string validAudience = "ValidAudience";
-            List<string> validAudiences = new List<string>() { validAudience };
+            List<string> validAudiences = new List<string>{ validAudience };
             string validIssuer = "ValidIssuer";
-            List<string> validIssuers = new List<string>() { validIssuer };
+            List<string> validIssuers = new List<string>{ validIssuer };
 
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {
                 AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow,
                 IssuerSigningKey = issuerSigningKey,
-                IssuerSigningKeyRetriever = (str) => { return issuerSigningKeys; },
+                IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, validationParameters) => { return issuerSigningKey; },
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
                 LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow,
@@ -97,7 +110,7 @@ namespace System.IdentityModel.Test
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow;
             validationParametersSets.IssuerSigningKey = new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
-            validationParametersSets.IssuerSigningKeyRetriever = (str) => { return issuerSigningKeysDup; };
+            validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, validationParameters) => { return issuerSigningKey2; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
             validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow;
@@ -137,7 +150,7 @@ namespace System.IdentityModel.Test
             Assert.IsNull(tokenValidationParameters.IssuerSigningKeys);
             Assert.IsNull(tokenValidationParameters.IssuerSigningTokens);
             Assert.IsNull(tokenValidationParameters.IssuerSigningTokens);
-            Assert.IsNull(tokenValidationParameters.IssuerSigningKeyRetriever);
+            Assert.IsNull(tokenValidationParameters.IssuerSigningKeyResolver);
             Assert.IsNull(tokenValidationParameters.IssuerValidator);
             Assert.IsFalse(tokenValidationParameters.SaveSigninToken);
             Assert.IsFalse(tokenValidationParameters.ValidateActor);

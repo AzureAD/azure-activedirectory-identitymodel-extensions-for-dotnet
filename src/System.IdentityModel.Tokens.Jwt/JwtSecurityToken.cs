@@ -58,7 +58,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "jwtEncodedString"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "jwtEncodedString"));
             }
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
@@ -99,7 +99,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, WifExtensionsErrors.WIF10002, "jwtEncodedString"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10102, "jwtEncodedString"));
             }
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))

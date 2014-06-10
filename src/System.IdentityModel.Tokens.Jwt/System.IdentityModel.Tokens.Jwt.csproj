@@ -90,7 +90,6 @@
     <Compile Include="SecurityTokenInvalidAudienceException.cs" />
     <Compile Include="SecurityTokenInvalidIssuerException.cs" />
     <Compile Include="SecurityTokenInvalidLifetimeException.cs" />
-    <Compile Include="SecurityTokenInvalidSignatureException.cs" />
     <Compile Include="SecurityTokenNoExpirationException.cs" />
     <Compile Include="SecurityTokenSignatureKeyNotFoundException.cs" />
     <Compile Include="SignatureProvider.cs" />
@@ -99,7 +98,6 @@
     <Compile Include="TextStrings.cs" />
     <Compile Include="TokenValidationParameters.cs" />
     <Compile Include="Validators.cs" />
-    <Compile Include="WifExtensionsErrors.cs" />
     <Compile Include="WSSecurity10Constants.cs" />
     <Compile Include="WSSecurityUtilityConstants.cs" />
     <Compile Include="X509CertificateValidatorEx.cs" />

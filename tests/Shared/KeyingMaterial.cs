@@ -70,10 +70,10 @@ namespace Microsoft.IdentityModel.Test
         // used in negative cases
         public static string SymmetricKeyEncoded2_256                     ="VbbbbmlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] SymmetricKeyBytes2_256                       = Convert.FromBase64String( SymmetricKeyEncoded2_256 );
-        public static SymmetricSecurityKey SymmetricSecurityKey2_256               = new InMemorySymmetricSecurityKey( SymmetricKeyBytes2_256 );
+        public static SymmetricSecurityKey SymmetricSecurityKey2_256      = new InMemorySymmetricSecurityKey( SymmetricKeyBytes2_256 );
         public static BinarySecretSecurityToken  BinarySecretToken2_256   = new BinarySecretSecurityToken( SymmetricKeyBytes2_256 );
 
-        // RSA token
+        // RSA securityToken
         public static RsaSecurityToken RsaToken_2048 = new RsaSecurityToken( AsymmetricKey_2048.GetAsymmetricAlgorithm( SecurityAlgorithms.RsaSha256Signature, false ) as RSA );
         public static RsaSecurityKey AsymmetricKey_Rsa_2048 = RsaToken_2048.SecurityKeys[0] as RsaSecurityKey;
         public static SigningCredentials RSASigningCreds_2048  = new SigningCredentials( AsymmetricKey_Rsa_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );

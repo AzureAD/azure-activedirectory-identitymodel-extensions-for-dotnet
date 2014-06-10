@@ -28,7 +28,7 @@ namespace System.IdentityModel.Tokens
     public interface ISecurityTokenValidator
     {
         /// <summary>
-        /// Returns true if the securityToken can be read, false otherwise.
+        /// Returns true if the token can be read, false otherwise.
         /// </summary>
         bool CanReadToken(string securityToken);
 

@@ -146,7 +146,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "Jwt10334:", innerTypeExpected: typeof(InvalidOperationException));
+            ExpectedException expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10502:", innerTypeExpected: typeof(InvalidOperationException));
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, expectedException);
 
             // inbound is mapped to Rsa256
@@ -168,7 +168,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSignatureException), innerTypeExpected: typeof(InvalidOperationException), substringExpected: "Jwt10316:");
+            ExpectedException expectedException = ExpectedException.SignatureVerificationFailedException(innerTypeExpected: typeof(InvalidOperationException), substringExpected: "IDX10503:");
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, expectedException);
 
             // inbound is mapped Hmac
