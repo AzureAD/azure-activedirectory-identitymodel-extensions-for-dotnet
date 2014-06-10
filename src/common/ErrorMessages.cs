@@ -31,10 +31,6 @@ namespace Microsoft.IdentityModel
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty string.";
         public const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty string.";
         public const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
-        internal const string WIF10000 = "WIF10000: The parameter '{0}' cannot be a 'null' or an empty string.";
-        internal const string WIF10001 = "WIF10001: The property value '{0}' cannot be a 'null' or an empty string.";
-        internal const string WIF10002 = "WIF10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
-
 
         // messages pertaining to setting protperties, configuration 
         public const string IDX10100 = "IDX10100: ClockSkew must be greater than TimeSpan.Zero. value: '{0}'";
@@ -50,11 +46,9 @@ namespace Microsoft.IdentityModel
         public const string IDX10203 = "IDX10203: Unable to create ClaimsIdentity. Issuer is null or whitespace.";
         public const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
         public const string IDX10205 = "IDX10205: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}'.";
-
-        //public const string IDX10206 = "IDX10206: Unable to validate issuer, 'token' type was not a: '{0}', was a: '{1}'";
         public const string IDX10207 = "IDX10207: Unable to validate audience, o audiences to .";
         public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null.";
-        public const string IDX10209 = "IDX10209: 'tokenString' has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
+        public const string IDX10209 = "IDX10209: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
         public const string IDX10210 = "IDX10210: SamlToken.Assertion.Issuer is null, can not create an identity.";
         public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace";
         public const string IDX10212 = "IDX10212: {0} can only validate tokens of type {1}.";
@@ -122,9 +116,22 @@ namespace Microsoft.IdentityModel
         public const string IDX10632 = "IDX10632: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) threw an exception.\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
         public const string IDX10633 = "IDX10633: SymmetricSecurityKey.GetKeyedHashAlgorithm( '{0}' ) returned null.\n\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}', check to make sure the SignatureAlgorithm is supported.";
         public const string IDX10634 = "IDX10634: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw.\n\nSymmetricSecurityKey: '{1}'\nSignatureAlgorithm: '{0}' check to make sure the SignatureAlgorithm is supported.\nException: '{2}'.";
+        public const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
+        public const string IDX10636 = "IDX10636: SignatureProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
+        public const string IDX10637 = "IDX10637: the 'validationMode' is not supported '{0}'.  Supported values are: 'ChainTrust, PeerTrust, PeerOrChainTrust, None'.";
 
-        // utility errors
-        public const string IDX10700 = "IDX10700: Unable to decode: '{0}' as Base64url encoded string.";
+        // JWT specific errors
+        public const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.\nInnerException: '{2}'.";
+        public const string IDX10701 = "IDX10701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range. \nInnerException: '{2}'.";
+        public const string IDX10702 = "IDX10702: Jwt header type specified, must be '{0}' or '{1}'.  Type received: '{2}'.";
+        public const string IDX10703 = "IDX10703: Unable to decode the '{0}': '{1}' as Base64url encoded string. jwtEncodedString: '{2}'.";
+        public const string IDX10704 = "IDX10704: Cannot set inner IssuerTokenResolver to self.";
+        public const string IDX10705 = "IDX10705: The SigningKeyIdentifier was of type: '{0}' and was expected to be encoded as a Base64UrlEncoded string. See inner exception for more details.";
+        public const string IDX10706 = "IDX10706: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
+        public const string IDX10707 = "IDX10707: '{0}' cannot read this xml: '{1}'. The reader needs to be positioned at an element: '{2}', within the namespace: '{3}', with an attribute: '{4}' equal to one of the following: '{5}', '{6}'.";
+        public const string IDX10708 = "IDX10708: '{0}' cannot read this string: '{1}'.\nThe string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
+        public const string IDX10709 = "IDX10709: '{0}' is not well formed: '{1}'. The string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
+        public const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
@@ -135,6 +142,17 @@ namespace Microsoft.IdentityModel
         public const string IDX11005 = "IDX11005: Creating a SecurityKeyIdentifierClause is not supported.";
         public const string IDX11006 = "IDX11006: This method is not supported to read a 'saml2token' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
         public const string IDX11007 = "IDX11007: This method is not supported to read a 'samltoken' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
+        public const string IDX11008 = "IDX11008: This method is not supported to validate a 'jwt' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
+
+        // Loading from web.config
+        public const string IDX13000 = "IDX13000: A NamedKey must specify the 'symmetricKey' attribute. XML received: '{0}'.";
+        public const string IDX13001 = "IDX13001: A NamedKey must specify the 'name' attribute. XML received: '{0}'.";
+        public const string IDX13002 = "IDX13002: Attribute: '{0}' is null or whitespace.\nelement.OuterXml: '{1}'.";
+        public const string IDX13003 = "IDX13003: EncodingType attribute must be one of: '{0}', '{1}', '{2}'. Encodingtype found: '{3}' XML : '{4}'.";
+
+        // utility errors
+        public const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";
+
         #pragma warning restore 1591
 
 

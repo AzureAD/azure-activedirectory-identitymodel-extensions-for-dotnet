@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IdentityModel.Selectors;
@@ -87,7 +88,7 @@ namespace System.IdentityModel.Tokens
                     }
 
                 default:
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10614, this.certificateValidationMode));
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10637, this.certificateValidationMode));
             }
         }
 

@@ -518,12 +518,12 @@ namespace System.IdentityModel.Tokens
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10100, key, dateValue ?? "<null>", ex));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10700, key, dateValue ?? "<null>", ex));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, JwtErrors.Jwt10101, key, dateValue ?? "<null>", ex));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10701, key, dateValue ?? "<null>", ex));
                 }
 
                 throw;
