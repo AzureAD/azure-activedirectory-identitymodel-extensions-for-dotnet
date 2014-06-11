@@ -19,9 +19,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-using System.Xml;
 using Saml2SecurityTokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
@@ -84,7 +84,6 @@ namespace Microsoft.IdentityModel.Test
             //CanReadToken();
             ValidateAudience();
             ValidateIssuer();
-            ValidateToken();
         }
 
         private void CanReadToken()
@@ -202,24 +201,42 @@ namespace Microsoft.IdentityModel.Test
             return returnVal;
         }
 
-        private void ValidateToken()
+        [TestMethod]
+        [TestProperty("TestCaseID", "142ADF8F-F8A8-4E89-A795-53BFB39C660F")]
+        [Description("Tests: ValidateToken")]
+        public void ValidateToken()
         {
             // parameter validation
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            ExpectedException expectedException = ExpectedException.ArgumentNullException(substringExpected: "name: securityToken");
-            ValidateToken(securityToken: null, validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
 
-            expectedException = ExpectedException.ArgumentNullException(substringExpected: "name: validationParameters");
-            ValidateToken(securityToken: "s", validationParameters: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            ValidateToken(securityToken: null, validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.ArgumentNullException(substringExpected: "name: securityToken"));
+            ValidateToken(securityToken: "s", validationParameters: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.ArgumentNullException(substringExpected: "name: validationParameters"));
 
-            expectedException = ExpectedException.ArgumentException(substringExpected: "IDX10209");
             samlSecurityTokenHandler.MaximumTokenSizeInBytes = 1;
-            ValidateToken(securityToken: "ss", validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            ValidateToken(securityToken: "ss", validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.ArgumentException(substringExpected: "IDX10209"));
 
             samlSecurityTokenHandler.MaximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
             string samlToken = IdentityUtilities.CreateSaml2Token();
-            expectedException = ExpectedException.NoExceptionExpected;
-            ValidateToken(samlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, samlSecurityTokenHandler, expectedException);
+            ValidateToken(samlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, samlSecurityTokenHandler, ExpectedException.NoExceptionExpected);
+
+            // EncryptedAssertion
+            SecurityTokenDescriptor tokenDescriptor =
+                new SecurityTokenDescriptor
+                {
+                    AppliesToAddress = IdentityUtilities.DefaultAudience,
+                    EncryptingCredentials = new EncryptedKeyEncryptingCredentials(KeyingMaterial.DefaultAsymmetricCert_2048),
+                    Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    SigningCredentials = KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2,
+                    Subject = IdentityUtilities.DefaultClaimsIdentity,
+                    TokenIssuerName = IdentityUtilities.DefaultIssuer,
+                };
+
+            samlToken = IdentityUtilities.CreateSaml2Token(tokenDescriptor);
+            ValidateToken(samlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, samlSecurityTokenHandler, new ExpectedException(typeExpected: typeof(EncryptedTokenDecryptionFailedException), substringExpected: "ID4022"));
+
+            TokenValidationParameters validationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters;
+            validationParameters.ClientDecryptionTokens = new List<SecurityToken>{ KeyingMaterial.DefaultX509Token_2048 }.AsReadOnly();
+            ValidateToken(samlToken, validationParameters, samlSecurityTokenHandler, ExpectedException.NoExceptionExpected);
         }
 
         private void ValidateAudience()

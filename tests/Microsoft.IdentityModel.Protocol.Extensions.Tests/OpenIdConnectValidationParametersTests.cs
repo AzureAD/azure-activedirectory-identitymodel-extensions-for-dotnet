@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Test
             Type type = typeof(OpenIdConnectProtocolValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 9)
-                Assert.Fail("Number of public fields has changed, adjust tests.");
+                Assert.Fail("Number of properties has changed from 9 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
