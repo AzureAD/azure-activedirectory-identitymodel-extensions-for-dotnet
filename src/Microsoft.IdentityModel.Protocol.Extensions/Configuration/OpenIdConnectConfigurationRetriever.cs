@@ -61,17 +61,20 @@ namespace Microsoft.IdentityModel.Protocols
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 doc = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
-                JsonWebKeys jsonWebKeys = new JsonWebKeys(doc);
+                JsonWebKeySet jsonWebKeys = new JsonWebKeySet(doc);
                 foreach (JsonWebKey webKey in jsonWebKeys.Keys)
                 {
-                    // Add chaining
-                    if (webKey.X5c.Count == 1)
+                    if ((string.IsNullOrWhiteSpace(webKey.Use) || (StringComparer.Ordinal.Equals(webKey.Use, JsonWebKeyUseNames.Sig))))
                     {
-                        X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
-                        openIdConnectConfiguration.SigningKeys.Add(new X509SecurityKey(cert));
+                        // Add chaining
+                        if (webKey.X5c.Count == 1)
+                        {
+                            X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+                            openIdConnectConfiguration.SigningKeys.Add(new X509SecurityKey(cert));
+                        }
                     }
 
-                    openIdConnectConfiguration.JsonWebKeys.Add(webKey);
+                    openIdConnectConfiguration.JsonWebKeySet.Keys.Add(webKey);
                 }
             }
 

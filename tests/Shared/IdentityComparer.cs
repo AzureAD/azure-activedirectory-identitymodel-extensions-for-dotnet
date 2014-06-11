@@ -103,8 +103,8 @@ namespace System.IdentityModel.Test
                 return AreEqual<Dictionary<string, string>>(t1 as Dictionary<string, string>, t2 as Dictionary<string, string>, context, AreDictionariesEqual);
             else if (t1 is JsonWebKey)
                 return AreEqual<JsonWebKey>(t1 as JsonWebKey, t2 as JsonWebKey, context, AreJsonWebKeysEqual);
-            else if (t1 is JsonWebKeys)
-                return AreEqual<JsonWebKeys>(t1 as JsonWebKeys, t2 as JsonWebKeys, context, AreJsonWebKeyKeysEqual);
+            else if (t1 is JsonWebKeySet)
+                return AreEqual<JsonWebKeySet>(t1 as JsonWebKeySet, t2 as JsonWebKeySet, context, AreJsonWebKeyKeysEqual);
             else if (t1 is JwtPayload)
                 return AreEqual<JwtPayload>(t1 as JwtPayload, t2 as JwtPayload, context, AreJwtPayloadsEqual);
             else if (t1 is JwtSecurityToken)
@@ -383,7 +383,7 @@ namespace System.IdentityModel.Test
         }
 
 
-        private static bool AreJsonWebKeyKeysEqual(JsonWebKeys jsonWebkeys1, JsonWebKeys jsonWebkeys2, CompareContext compareContext)
+        private static bool AreJsonWebKeyKeysEqual(JsonWebKeySet jsonWebkeys1, JsonWebKeySet jsonWebkeys2, CompareContext compareContext)
         {
             if (!AreEnumsEqual<JsonWebKey>(jsonWebkeys1.Keys, jsonWebkeys2.Keys, compareContext, AreJsonWebKeysEqual))
             {

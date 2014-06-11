@@ -70,9 +70,9 @@ namespace Microsoft.IdentityModel.Test
             JsonWebKeyExpected2.X5c.Add(JsonWebKey_X5c_2);
 
 
-            JsonWebKeysExpected1 = new JsonWebKeys();
-            JsonWebKeysExpected1.Keys.Add(JsonWebKeyExpected1);
-            JsonWebKeysExpected1.Keys.Add(JsonWebKeyExpected2);
+            JsonWebKeySetExpected1 = new JsonWebKeySet();
+            JsonWebKeySetExpected1.Keys.Add(JsonWebKeyExpected1);
+            JsonWebKeySetExpected1.Keys.Add(JsonWebKeyExpected2);
 
             JsonWebKeyExpectedBadX509Data =
                 new JsonWebKey
@@ -259,8 +259,8 @@ namespace Microsoft.IdentityModel.Test
         public static JsonWebKey JsonWebKeyExpected1;
         public static JsonWebKey JsonWebKeyExpected2;
         public static JsonWebKey JsonWebKeyExpectedBadX509Data;
-        public static JsonWebKeys JsonWebKeysExpected1;
-        public static JsonWebKeys JsonWebKeysExpected2;
+        public static JsonWebKeySet JsonWebKeySetExpected1;
+        public static JsonWebKeySet JsonWebKeySetExpected2;
         public static OpenIdConnectConfiguration OpenIdConnectMetatdata1;
         public static OpenIdConnectConfiguration OpenIdConnectMetadataSingleX509Data1;
         public static OpenIdConnectConfiguration OpenIdConnectMetatdataWithKeys1;

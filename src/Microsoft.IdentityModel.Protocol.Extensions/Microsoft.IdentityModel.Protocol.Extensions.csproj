@@ -78,10 +78,10 @@
     <Compile Include="Configuration\IConfigurationRetriever.cs" />
     <Compile Include="IssuerKeyRetriever.cs" />
     <Compile Include="JsonWebKey.cs" />
-    <Compile Include="JsonWebKeys.cs" />
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\OpenIdConnectConfigurationRetriever.cs" />
     <Compile Include="Configuration\GenericDocumentRetriever.cs" />
+    <Compile Include="JsonWebKeySet.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
     <Compile Include="Configuration\OpenIdConnectConfiguration.cs" />
