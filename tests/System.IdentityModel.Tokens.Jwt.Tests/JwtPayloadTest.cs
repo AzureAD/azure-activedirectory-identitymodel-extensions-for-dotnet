@@ -20,6 +20,8 @@ using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
+using System.Reflection;
+using System.Text;
 using Claim = System.Security.Claims.Claim;
 
 namespace System.IdentityModel.Test
@@ -69,19 +71,62 @@ namespace System.IdentityModel.Test
                 Assert.Fail("jwtPayload.Claims should be empty");
             }
 
-            Assert.IsNull(jwtPayload.Actort, "jwtPayload.Actort != null");
+            Assert.IsNotNull(jwtPayload.Aud, "jwtPayload.Aud should not be null");
             foreach(string audience in jwtPayload.Aud)
             {
-                Assert.Fail("jwtPayload.Audience should be empty!= null");
+                Assert.Fail("jwtPayload.Aud should be empty");
             }
 
-            Assert.IsNull(jwtPayload.Exp, "jwtPayload.Exp != null");
-            Assert.IsNull(jwtPayload.Jti, "jwtPayload.Id != null");
-            Assert.IsNull(jwtPayload.Iat, "jwtPayload.Iat != null");
-            Assert.IsNull(jwtPayload.Iss, "jwtPayload.Iss != null");
-            Assert.IsNull(jwtPayload.Sub, "jwtPayload.Sub != null");
             Assert.AreEqual(jwtPayload.ValidFrom, DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
             Assert.AreEqual(jwtPayload.ValidTo, DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "DB01AD64-AB08-4AD6-ACE9-197878AAD9B6")]
+        [Description("Tests: GetSets, covers defaults")]
+        public void JwtPayload_GetSets()
+        {
+            // Aud, Claims, ValidFrom, ValidTo handled in Defaults.
+
+            JwtPayload jwtPayload = new JwtPayload();
+            Type type = typeof(JwtPayload);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 19)
+                Assert.Fail("Number of public fields has changed from 14 to: " + properties.Length + ", adjust tests");
+
+            GetSetContext context =
+                new GetSetContext
+                {
+                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>> 
+                    { 
+                        new KeyValuePair<string, List<object>>("Actort", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Acr", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Amr", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("AuthTime", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Azp", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("CHash", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Exp", new List<object>{(string)null, 1, 0 }),
+                        new KeyValuePair<string, List<object>>("Jti", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Iat", new List<object>{(string)null, 10, 0}),
+                        new KeyValuePair<string, List<object>>("Iss", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Nonce", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Sub", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    },
+                    Object = jwtPayload,
+                };
+            TestUtilities.GetSet(context);
+
+            if (context.Errors.Count != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(Environment.NewLine);
+                foreach (string str in context.Errors)
+                    sb.AppendLine(str);
+
+                Assert.Fail(sb.ToString());
+            }
+
+
         }
 
         [TestMethod]

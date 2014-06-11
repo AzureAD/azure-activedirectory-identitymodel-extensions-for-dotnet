@@ -27,19 +27,19 @@ namespace Microsoft.IdentityModel
     public static class ErrorMessages
     {
         #pragma warning disable 1591
-        // general messages 10000 - 10099
+        // general
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty string.";
         public const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty string.";
         public const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
 
-        // messages pertaining to setting protperties, configuration 
+        // protperties, configuration 
         public const string IDX10100 = "IDX10100: ClockSkew must be greater than TimeSpan.Zero. value: '{0}'";
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
         public const string IDX10102 = "IDX10102: NameClaimType cannot be null or whitespace.";
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
         public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
 
-        // messages pertaining to validation 10200 - 10299
+        // token validation
         public const string IDX10200 = "IDX10200: Support for ValidateToken(string, TokenValidationParameters) requires a handler to implement ISecurityTokenValidator, none of the SecurityTokenHandlers did.";
         public const string IDX10201 = "IDX10201: None of the the SecurityTokenHandlers could read the 'securityToken': '{0}'.";
         public const string IDX10202 = "IDX10202: SamlToken.Assertion is null, can not create an identity.";
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10225 = "IDX10225: Lifetime validation failed. The token is missing an Expiration Time.\nTokentype: '{0}'.";
         public const string IDX10226 = "IDX10226: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
         
-        // protocol messages
+        // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
         public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token: '{0}', did not match the expected nonce: '{1}'.\njwt: '{2}'.";
         public const string IDX10302 = "IDX10302: The 'c_hash' claim was not a JSON string but multivalued, jwt: '{0}'.";
@@ -79,7 +79,13 @@ namespace Microsoft.IdentityModel
         public const string IDX10308 = "IDX10308: The 'c_hash' claim was not found in the jwt: '{0}'.";
         public const string IDX10309 = "IDX10309: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
         public const string IDX10310 = "IDX10310: OpenIdConnectProtocol requires the jwt token to have a  valid 'aud' claim, jwt: '{0}'.";
- 
+        public const string IDX10311 = "IDX10311: validationParameters.RequireNonce is 'true' (default) but validationParameters.Nonce is 'null or whitespace' a nonce cannot be validated. If you don't need to check the nonce, set validationParameters.RequireNonce to 'false' or set the validationParameters.Nonce to a valid nonce.\njwt: '{0}'.";
+        public const string IDX10312 = "IDX10312: validationParameters.RequireAcr is 'true' (default is 'false') but jwt.PayLoad.Acr is 'null or whitespace'.";
+        public const string IDX10313 = "IDX10313: validationParameters.RequireAmr is 'true' (default is 'false') but jwt.PayLoad.Amr is 'null or whitespace'.";
+        public const string IDX10314 = "IDX10314: validationParameters.RequireAuthTime is 'true' (default is 'false') but jwt.PayLoad.AuthTime is 'null or whitespace'.";
+        public const string IDX10315 = "IDX10315: validationParameters.RequireAzp is 'true' (default is 'false') but jwt.PayLoad.Azp is 'null or whitespace'.";
+
+
         // SecurityTokenHandler messages
         public const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         public const string IDX10401 = "IDX10401: Expires: '{0}' must be after NotBefore: '{1}'.";
