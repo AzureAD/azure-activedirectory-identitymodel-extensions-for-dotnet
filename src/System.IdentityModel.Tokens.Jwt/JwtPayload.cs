@@ -20,7 +20,6 @@ namespace System.IdentityModel.Tokens
 {
     using Microsoft.IdentityModel;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
     using System.Security.Claims;
@@ -28,7 +27,6 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Initializes a new instance of <see cref="JwtPayload"/> which contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     public class JwtPayload : Dictionary<string, object>
     {
         /// <summary>
@@ -106,6 +104,41 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets the 'value' of the 'acr' claim { acr, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'acr' claim is not found, null is returned.</remarks>
+        public string Acr
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Acr);
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'amr' claim { amr, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'amr' claim is not found, null is returned.</remarks>
+        public string Amr
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Amr);
+            }
+        }
+        /// <summary>
+        /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'auth_time' claim is not found, null is returned.</remarks>
+        public string AuthTime
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtRegisteredClaimNames.AuthTime);
+            }
+        }
+
+        /// <summary>
         /// Gets the 'value' of the 'audience' claim { aud, 'value' } as a list of strings.
         /// </summary>
         /// <remarks>If the 'audience' claim is not found, an empty enumerable is returned.</remarks>
@@ -132,6 +165,18 @@ namespace System.IdentityModel.Tokens
                 }
 
                 return new List<string>();
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'azp' claim { azp, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'azp' claim is not found, null is returned.</remarks>
+        public string Azp
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtRegisteredClaimNames.Azp);
             }
         }
 

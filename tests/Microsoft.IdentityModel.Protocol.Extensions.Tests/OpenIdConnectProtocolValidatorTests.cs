@@ -83,6 +83,8 @@ namespace Microsoft.IdentityModel.Test
 
             // nonce invalid 
             string validNonce = OpenIdConnectProtocolValidator.GenerateNonce();
+
+            // add the valid 'nonce' but set validationParameters.Nonce to a different 'nonce'.
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
             validationParameters.Nonce = OpenIdConnectProtocolValidator.GenerateNonce();
@@ -119,6 +121,25 @@ namespace Microsoft.IdentityModel.Test
 
             // nonce and authorizationCode valid
             validationParameters.AuthorizationCode = validAuthorizationCode;
+            Validate(jwt: jwtWithSignatureChash, validationParameters: validationParameters, ee: ExpectedException.NoExceptionExpected);
+
+            // validate optional claims
+            validationParameters.RequireAcr = true;
+            Validate(jwt: jwtWithSignatureChash, validationParameters: validationParameters, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10312:"));
+            jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Acr, "acr"));
+
+            validationParameters.RequireAmr = true;
+            Validate(jwt: jwtWithSignatureChash, validationParameters: validationParameters, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10313:"));
+            jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Amr, "amr"));
+
+            validationParameters.RequireAuthTime = true;
+            Validate(jwt: jwtWithSignatureChash, validationParameters: validationParameters, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10314:"));
+            jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.AuthTime, "authTime"));
+
+            validationParameters.RequireAzp = true;
+            Validate(jwt: jwtWithSignatureChash, validationParameters: validationParameters, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10315:"));
+            jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Azp, "azp"));
+
             Validate(jwt: jwtWithSignatureChash, validationParameters: validationParameters, ee: ExpectedException.NoExceptionExpected);
         }
 

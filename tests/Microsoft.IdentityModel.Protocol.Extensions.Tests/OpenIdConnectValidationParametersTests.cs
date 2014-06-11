@@ -88,7 +88,6 @@ namespace Microsoft.IdentityModel.Test
 
                 Assert.Fail(sb.ToString());
             }
-
             
             ExpectedException ee = ExpectedException.ArgumentNullException();
             try
@@ -116,14 +115,6 @@ namespace Microsoft.IdentityModel.Test
 
             validationParameters.AlgorithmMap = JwtSecurityTokenHandler.InboundAlgorithmMap;
             Assert.IsTrue(IdentityComparer.AreEqual(JwtSecurityTokenHandler.InboundAlgorithmMap, validationParameters.AlgorithmMap));
-        }
-
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "4a1f7941-9c73-4a93-a405-03dfea7a19cf")]
-        [Description("Tests: Publics")]
-        public void OpenIdConnectValidationParameters_Publics()
-        {
         }
     }
 }

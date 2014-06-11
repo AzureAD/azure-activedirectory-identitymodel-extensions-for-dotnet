@@ -50,49 +50,48 @@ namespace Microsoft.IdentityModel.Protocols
         public static void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationParameters validationParameters)
         {
             if (jwt == null)
-            {
                 throw new ArgumentNullException("jwt");
-            }
 
             if (validationParameters == null)
-            {
                 throw new ArgumentNullException("validationParameters");
-            }
 
+            // required claims
             if (jwt.Payload.Aud.Count == 0)
-            {
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud, jwt));
-            }
 
             if (!jwt.Payload.Exp.HasValue)
-            {
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp, jwt));
-            }
 
             if (!jwt.Payload.Iat.HasValue)
-            {
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat, jwt));
-            }
 
             if (jwt.Payload.Iss == null)
-            {
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss, jwt));
-            }
 
             if (jwt.Payload.Sub == null)
-            {
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub, jwt));
-            }
+
+            // optional claims
+            if (validationParameters.RequireAcr && string.IsNullOrWhiteSpace(jwt.Payload.Acr))
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, JwtRegisteredClaimNames.Acr, jwt));
+
+            if (validationParameters.RequireAmr && string.IsNullOrWhiteSpace(jwt.Payload.Amr))
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, JwtRegisteredClaimNames.Amr, jwt));
+
+            if (validationParameters.RequireAuthTime && string.IsNullOrWhiteSpace(jwt.Payload.AuthTime))
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, JwtRegisteredClaimNames.AuthTime, jwt));
+
+            if (validationParameters.RequireAzp && string.IsNullOrWhiteSpace(jwt.Payload.Azp))
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, JwtRegisteredClaimNames.Azp, jwt));
+
+            if (validationParameters.RequireNonce && string.IsNullOrWhiteSpace(validationParameters.Nonce))
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311, jwt));
 
             if (!string.IsNullOrWhiteSpace(validationParameters.Nonce))
-            {
                 ValidateNonce(jwt, validationParameters.Nonce);
-            }
 
             if (!string.IsNullOrWhiteSpace(validationParameters.AuthorizationCode))
-            {
                 ValidateCHash(jwt, validationParameters.AuthorizationCode, validationParameters.AlgorithmMap);
-            }
         }
 
         /// <summary>

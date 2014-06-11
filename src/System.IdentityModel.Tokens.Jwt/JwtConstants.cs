@@ -160,7 +160,9 @@ namespace System.IdentityModel.Tokens
     }
     
     /// <summary>
-    /// List of reserved claims see:http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+    /// List of registered claims from different sources
+    /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+    /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
     /// </summary>
     public struct JwtRegisteredClaimNames
     {
@@ -170,9 +172,29 @@ namespace System.IdentityModel.Tokens
         public const string Actort = "actort";
 
         /// <summary>
+        /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
+        /// </summary>
+        public const string Acr = "acr";
+
+        /// <summary>
+        /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
+        /// </summary>
+        public const string Amr = "amr";
+
+        /// <summary>
         /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
         /// </summary>
         public const string Aud = "aud";
+
+        /// <summary>
+        /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
+        /// </summary>
+        public const string AuthTime = "auth_time";
+
+        /// <summary>
+        /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
+        /// </summary>
+        public const string Azp = "azp";
 
         /// <summary>
         /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
