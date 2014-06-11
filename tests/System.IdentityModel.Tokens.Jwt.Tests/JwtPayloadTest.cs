@@ -92,7 +92,7 @@ namespace System.IdentityModel.Test
             Type type = typeof(JwtPayload);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 19)
-                Assert.Fail("Number of public fields has changed from 14 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of properties has changed from 19 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext

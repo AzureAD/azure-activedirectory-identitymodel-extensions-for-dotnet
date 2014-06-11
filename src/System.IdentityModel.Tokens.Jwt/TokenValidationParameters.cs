@@ -20,6 +20,7 @@ namespace System.IdentityModel.Tokens
 {
     using Microsoft.IdentityModel;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Globalization;
     using System.IdentityModel.Selectors;
@@ -68,6 +69,7 @@ namespace System.IdentityModel.Tokens
     {
         private string _authenticationType;
         private X509CertificateValidator _certificateValidator;
+        private ReadOnlyCollection<SecurityToken> _clientDecryptionTokens = new List<SecurityToken>().AsReadOnly();
         private TimeSpan _clockSkew = DefaultClockSkew;
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
@@ -104,6 +106,7 @@ namespace System.IdentityModel.Tokens
             _authenticationType = other._authenticationType;
             CertificateValidator = other.CertificateValidator;
             ClockSkew = other.ClockSkew;
+            ClientDecryptionTokens = other.ClientDecryptionTokens;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
@@ -189,6 +192,25 @@ namespace System.IdentityModel.Tokens
             set
             {
                 _certificateValidator = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ReadOnlyCollection{SecurityToken}"/> that is to be used for decrypting inbound tokens.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public ReadOnlyCollection<SecurityToken> ClientDecryptionTokens
+        {
+            get
+            {
+                return _clientDecryptionTokens;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("ClientDecryptionTokens");
+
+                _clientDecryptionTokens = value;
             }
         }
 

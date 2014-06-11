@@ -19,8 +19,11 @@
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
-using System.Security.Cryptography.X509Certificates;
+using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 
 namespace System.IdentityModel.Test
 {
@@ -60,6 +63,12 @@ namespace System.IdentityModel.Test
         [Description( "Tests: Publics" )]
         public void TokenValidationParameters_Publics()
         {
+            TokenValidationParameters validationParameters = new TokenValidationParameters();
+            Type type = typeof(TokenValidationParameters);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 30)
+                Assert.Fail("Number of properties has changed from 30 to: " + properties.Length + ", adjust tests");
+
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256;
             SecurityKey issuerSigningKey2 = KeyingMaterial.SymmetricSecurityKey2_256;
 
@@ -86,7 +95,7 @@ namespace System.IdentityModel.Test
             {
                 AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow,
                 IssuerSigningKey = issuerSigningKey,
-                IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, validationParameters) => { return issuerSigningKey; },
+                IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey; },
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
                 LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow,
@@ -110,7 +119,7 @@ namespace System.IdentityModel.Test
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow;
             validationParametersSets.IssuerSigningKey = new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
-            validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, validationParameters) => { return issuerSigningKey2; };
+            validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey2; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
             validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow;
@@ -137,29 +146,61 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "5C8D86B6-08C8-416D-995E-FE6856E70999")]
-        [Description("Tests: Defaults")]
-        public void TokenValidationParameters_Defaults()
+        [Description("Tests: GetSets, covers defaults")]
+        public void TokenValidationParameters_GetSets()
         {
-            // TODO - test is not comprehensive.
+            TokenValidationParameters validationParameters = new TokenValidationParameters();
+            Type type = typeof(TokenValidationParameters);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 30)
+                Assert.Fail("Number of public fields has changed from 9 to: " + properties.Length + ", adjust tests");
 
-            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
-            Assert.IsNull(tokenValidationParameters.AudienceValidator);
-            Assert.IsNull(tokenValidationParameters.AuthenticationType);
-            Assert.IsNull(tokenValidationParameters.LifetimeValidator);
-            Assert.IsNull(tokenValidationParameters.IssuerSigningKey);
-            Assert.IsNull(tokenValidationParameters.IssuerSigningKeys);
-            Assert.IsNull(tokenValidationParameters.IssuerSigningTokens);
-            Assert.IsNull(tokenValidationParameters.IssuerSigningTokens);
-            Assert.IsNull(tokenValidationParameters.IssuerSigningKeyResolver);
-            Assert.IsNull(tokenValidationParameters.IssuerValidator);
-            Assert.IsFalse(tokenValidationParameters.SaveSigninToken);
-            Assert.IsFalse(tokenValidationParameters.ValidateActor);
-            Assert.IsTrue(tokenValidationParameters.ValidateAudience);
-            Assert.IsTrue(tokenValidationParameters.ValidateIssuer);
-            Assert.IsNull(tokenValidationParameters.ValidAudience);
-            Assert.IsNull(tokenValidationParameters.ValidAudiences);
-            Assert.IsNull(tokenValidationParameters.ValidIssuer);
-            Assert.IsNull(tokenValidationParameters.ValidIssuers);
+            GetSetContext context =
+                new GetSetContext
+                {
+                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                    {
+                        new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
+                        new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultAsymmetricKey_Public_2048, KeyingMaterial.DefaultSymmetricSecurityKey_256}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultAsymmetricKey_Public_2048, KeyingMaterial.DefaultSymmetricSecurityKey_256}, new List<SecurityKey>()}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningToken", new List<object>{(SecurityToken)null, KeyingMaterial.DefaultSymmetricSecurityToken_256, KeyingMaterial.DefaultAsymmetricX509Token_2048}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningTokens", new List<object>{(IEnumerable<SecurityToken>)null, new List<SecurityToken>{KeyingMaterial.DefaultAsymmetricX509Token_2048, KeyingMaterial.DefaultSymmetricSecurityToken_256}, new List<SecurityToken>()}),
+                        new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("RoleClaimType", new List<object>{ClaimsIdentity.DefaultRoleClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("RequireExpirationTime", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("RequireSignedTokens", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("SaveSigninToken", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("ValidateActor", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("ValidateAudience", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    },
+                    Object = validationParameters,
+                };
+            TestUtilities.GetSet(context);
+
+            if (context.Errors.Count != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(Environment.NewLine);
+                foreach (string str in context.Errors)
+                    sb.AppendLine(str);
+
+                Assert.Fail(sb.ToString());
+            }
+
+            Assert.IsNull(validationParameters.AudienceValidator);
+            Assert.IsNotNull(validationParameters.ClientDecryptionTokens);
+            Assert.AreEqual(validationParameters.ClientDecryptionTokens.Count, 0);
+            Assert.IsNull(validationParameters.LifetimeValidator);
+            Assert.IsNull(validationParameters.IssuerSigningKeyResolver);
+            Assert.IsNull(validationParameters.IssuerValidator);
+            Assert.IsNull(validationParameters.ValidAudiences);
+            Assert.IsNull(validationParameters.ValidIssuers);
+
         }
 
         class DerivedTokenValidationParameters : TokenValidationParameters
