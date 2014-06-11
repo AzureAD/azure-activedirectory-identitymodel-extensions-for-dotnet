@@ -26,30 +26,31 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
-    public class JsonWebKeys
+    /// <remarks>provides support for http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-5 </remarks>
+    public class JsonWebKeySet
     {
         private static JavaScriptSerializer _javaScriptSerializer;
 
         // kept private to hide that a List is used public member returns IList.
-        private IList<JsonWebKey> _keys = new List<JsonWebKey>();
+        private List<JsonWebKey> _keys = new List<JsonWebKey>();
 
-        static JsonWebKeys()
+        static JsonWebKeySet()
         {
             _javaScriptSerializer = new JavaScriptSerializer();
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="JsonWebKeys"/>.
+        /// Initializes an new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
-        public JsonWebKeys()
+        public JsonWebKeySet()
         {
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="JsonWebKeys"/> from a json string.
+        /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing values.</param>
-        public JsonWebKeys(string json)
+        public JsonWebKeySet(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Creates an instance of <see cref="JsonWebKey"/>.
         /// </summary>
-        public JsonWebKeys(IDictionary<string, object> dictionary)
+        public JsonWebKeySet(IDictionary<string, object> dictionary)
         {
             SetFromDictionary(dictionary);
         }
@@ -75,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             object obj = null;
-            if (dictionary.TryGetValue(JsonWebKeysValueNames.Keys, out obj))
+            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
             {
                 ArrayList keys = obj as ArrayList;
                 if (keys != null)

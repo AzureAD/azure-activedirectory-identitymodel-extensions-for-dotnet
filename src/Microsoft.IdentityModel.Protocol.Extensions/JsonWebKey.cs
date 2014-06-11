@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 object obj = null;
                 string str = null;
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.Alg, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.Alg, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.KeyOps, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.KeyOps, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.Kid, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.Kid, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.Kty, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.Kty, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.X5c, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5c, out obj))
                 {
                     ArrayList jclauses = obj as ArrayList;
                     if (jclauses != null)
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.Kid, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.Kid, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.X5u, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5u, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeysValueNames.Use, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.Use, out obj))
                 {
                     str = obj as string;
                     if (str != null)

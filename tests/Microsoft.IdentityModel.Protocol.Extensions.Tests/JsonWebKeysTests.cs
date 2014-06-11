@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Constructors")]
         public void JsonWebKeys_Constructors()
         {
-            JsonWebKeys jsonWebKeys = new JsonWebKeys();
+            JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
             Assert.IsTrue(IsDefaultJsonWebKeys(jsonWebKeys));
 
             // null string, nothing to add
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Test
             // null dictionary, nothing to add
             RunJsonWebsKeyTest((IDictionary<string, object>)null, jsonWebKeys, ExpectedException.NoExceptionExpected, false);
 
-            RunJsonWebsKeyTest(SharedData.JsonWebKeysString1,  SharedData.JsonWebKeysExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebsKeyTest(SharedData.JsonWebKeysString1,  SharedData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
             RunJsonWebsKeyTest(SharedData.JsonWebKeysBadFormatingString, null, ExpectedException.ArgumentException());
         }
 
@@ -73,28 +73,28 @@ namespace Microsoft.IdentityModel.Test
         /// <param name="expectedException"></param>
         /// <param name="asString"> this is useful when passing null for parameter 'is' and 'as' don't contain type info.</param>
         /// <returns></returns>
-        private JsonWebKeys RunJsonWebsKeyTest(object obj, JsonWebKeys compareTo, ExpectedException expectedException, bool asString = true)
+        private JsonWebKeySet RunJsonWebsKeyTest(object obj, JsonWebKeySet compareTo, ExpectedException expectedException, bool asString = true)
         {
-            JsonWebKeys jsonWebKeys = null;
+            JsonWebKeySet jsonWebKeys = null;
             try
             {
                 if (obj is string)
                 {
-                    jsonWebKeys = new JsonWebKeys(obj as string);
+                    jsonWebKeys = new JsonWebKeySet(obj as string);
                 }
                 else if (obj is IDictionary<string, object>)
                 {
-                    jsonWebKeys = new JsonWebKeys(obj as IDictionary<string, object>);
+                    jsonWebKeys = new JsonWebKeySet(obj as IDictionary<string, object>);
                 }
                 else
                 {
                     if (asString)
                     {
-                        jsonWebKeys = new JsonWebKeys(obj as string);
+                        jsonWebKeys = new JsonWebKeySet(obj as string);
                     }
                     else
                     {
-                        jsonWebKeys = new JsonWebKeys(obj as IDictionary<string, object>);
+                        jsonWebKeys = new JsonWebKeySet(obj as IDictionary<string, object>);
                     }
                 }
                 expectedException.ProcessNoException();
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (compareTo != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual<JsonWebKeys>(jsonWebKeys, compareTo, CompareContext.Default), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                Assert.IsTrue(IdentityComparer.AreEqual<JsonWebKeySet>(jsonWebKeys, compareTo, CompareContext.Default), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
 
             return jsonWebKeys;
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Test
         {
         }
 
-        private bool IsDefaultJsonWebKeys(JsonWebKeys jsonWebKeys)
+        private bool IsDefaultJsonWebKeys(JsonWebKeySet jsonWebKeys)
         {
             if (jsonWebKeys.Keys == null)
                 return false;

@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Protocols
     {
         private static JavaScriptSerializer _javaScriptSerializer;
 
-        private Collection<JsonWebKey> _jsonWebKeys = new Collection<JsonWebKey>();
+        private JsonWebKeySet _jsonWebKeySet = new JsonWebKeySet();
         private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
         private Collection<string> _responseTypesSupported = new Collection<string>();
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
@@ -169,13 +169,13 @@ namespace Microsoft.IdentityModel.Protocols
         public string JwksUri{ get; set; }
 
         /// <summary>
-        /// Gets the JsonWebKeys
+        /// Gets the JsonWebKeySet
         /// </summary>
-        public ICollection<JsonWebKey> JsonWebKeys
+        public JsonWebKeySet JsonWebKeySet
         {
             get
             {
-                return _jsonWebKeys;
+                return _jsonWebKeySet;
             }
         }
 

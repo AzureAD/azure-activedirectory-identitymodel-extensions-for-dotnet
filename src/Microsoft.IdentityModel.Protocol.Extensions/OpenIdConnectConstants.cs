@@ -39,10 +39,23 @@ namespace Microsoft.IdentityModel.Protocols
         public const string WellKnown = ".well-known/openid-configuration";
     }
 
+    // http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-4
+
+    /// <summary>
+    /// Constants for JsonWebKeyUse (sec 4.2)
+    /// </summary>
+    public static class JsonWebKeyUseNames
+    {
+        #pragma warning disable 1591
+        public const string Sig = "sig";
+        public const string Enc = "enc";
+        #pragma warning restore 1591
+    }
+
     /// <summary>
     /// Names for Json Web Key Values
     /// </summary>
-    public static class JsonWebKeysValueNames
+    public static class JsonWebKeyParameterNames
     {
         #pragma warning disable 1591
         public const string Alg = "alg";
