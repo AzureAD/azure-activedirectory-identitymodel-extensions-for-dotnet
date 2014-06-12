@@ -45,8 +45,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates a new instance of <see cref="SecurityKeyResolver"/>
         /// </summary>
-        /// <param name="securityKeysToMatch"> enumeration of keys to match.</param>
-        public SecurityKeyResolver(string securityToken, TokenValidationParameters validationParameters)
+        /// <param name="securityToken"> related security token.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        internal SecurityKeyResolver(string securityToken, TokenValidationParameters validationParameters)
         {
             _securityToken = securityToken;
 
@@ -58,17 +59,35 @@ namespace Microsoft.IdentityModel.Tokens
             _validationParameters = validationParameters;
         }
 
+        /// <summary>
+        /// TryResolveSecurityKeyCore
+        /// </summary>
+        /// <param name="keyIdentifierClause">TODO</param>
+        /// <param name="key">TODO</param>
+        /// <returns>TODO</returns>
         protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
         {
             SecurityToken token = null;
             return ResolvesToSigningToken(keyIdentifierClause, out key, out token);
         }
 
+        /// <summary>
+        /// TryResolveTokenCore
+        /// </summary>
+        /// <param name="keyIdentifierClause">TODO</param>
+        /// <param name="token">TODO</param>
+        /// <returns>TODO</returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
         {
             throw new System.NotImplementedException();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyIdentifier"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
         {
             token = null;

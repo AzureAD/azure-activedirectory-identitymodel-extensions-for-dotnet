@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             object obj = null;
             string str = null;
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.AuthorizationEndpoint, out obj))
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.AuthorizationEndpoint, out obj))
             {
                 str = obj as string;
                 if (str != null)
@@ -89,16 +89,16 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.CheckSessionIframe, out obj))
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.CheckSessionIframe, out obj))
             {
-                str = dictionary[OpenIdConnectMetadataNames.CheckSessionIframe] as string;
+                str = dictionary[OpenIdProviderMetadataNames.CheckSessionIframe] as string;
                 if (str != null)
                 {
                     CheckSessionIframe = str;
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.EndSessionEndpoint, out obj))
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.EndSessionEndpoint, out obj))
             {
                 str = obj as string;
                 if (str != null)
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.Issuer, out obj))
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.Issuer, out obj))
             {
                 str = obj as string;
                 if (str != null)
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.JwksUri, out obj))
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.JwksUri, out obj))
             {
                 str = obj as string;
                 if (str != null)
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
-            if (dictionary.TryGetValue(OpenIdConnectMetadataNames.TokenEndpoint, out obj))
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.TokenEndpoint, out obj))
             {
                 str = obj as string;
                 if (str != null)
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets the <see cref="ICollection[SecurityKey]"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
         public ICollection<SecurityKey> SigningKeys
         {

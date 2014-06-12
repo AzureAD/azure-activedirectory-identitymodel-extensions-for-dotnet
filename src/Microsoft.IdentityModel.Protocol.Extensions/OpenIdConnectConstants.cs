@@ -31,28 +31,6 @@ namespace Microsoft.IdentityModel.Protocols
     }
 
     /// <summary>
-    /// Well known names for OpenIdConnetcDiscovery
-    /// </summary>
-
-    public static class OpenIdConnectDiscovery
-    {
-        public const string WellKnown = ".well-known/openid-configuration";
-    }
-
-    // http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-4
-
-    /// <summary>
-    /// Constants for JsonWebKeyUse (sec 4.2)
-    /// </summary>
-    public static class JsonWebKeyUseNames
-    {
-        #pragma warning disable 1591
-        public const string Sig = "sig";
-        public const string Enc = "enc";
-        #pragma warning restore 1591
-    }
-
-    /// <summary>
     /// Names for Json Web Key Values
     /// </summary>
     public static class JsonWebKeyParameterNames
@@ -72,26 +50,15 @@ namespace Microsoft.IdentityModel.Protocols
         #pragma warning restore 1591
     }
 
-//            public const string Discovery = ".well-known/openid-configuration";
     /// <summary>
-    /// Metadata names for OpenIdConnect
+    /// Constants for JsonWebKeyUse (sec 4.2)
+    /// http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-4
     /// </summary>
-    public static class OpenIdConnectMetadataNames
+    public static class JsonWebKeyUseNames
     {
         #pragma warning disable 1591
-        public const string AuthorizationEndpoint = "authorization_endpoint";
-        public const string CheckSessionIframe = "check_session_iframe";
-        public const string EndSessionEndpoint = "end_session_endpoint";
-        public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
-        public const string JwksUri = "jwks_uri";
-        public const string Issuer = "issuer";
-        public const string MicrosoftMultiRefreshToken = "microsoft_multi_refresh_token";
-        public const string ResponseModesSupported = "response_modes_supported";
-        public const string ResponseTypesSupported = "response_types_supported";
-        public const string SubjectTypesSupported = "subject_types_supported";
-        public const string TokenEndpoint = "token_endpoint";
-        public const string TokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported";
-        public const string UserInfoEndpoint = "user_info_endpoint";
+        public const string Sig = "sig";
+        public const string Enc = "enc";
         #pragma warning restore 1591
     }
 
@@ -100,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectParameterNames
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public const string AccessToken = "access_token";
         public const string AcrValues = "acr_values";
         public const string ClaimsLocales = "claims_locales";
@@ -140,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string UiLocales = "ui_locales";
         public const string UserId = "user_id";
         public const string Username = "username";
-        #pragma warning restore 1591
+#pragma warning restore 1591
     }
 
     /// <summary>
@@ -159,11 +126,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectResponseModes
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public const string Query = "query";
         public const string FormPost = "form_post";
         public const string Fragment = "fragment";
-        #pragma warning restore 1591
+#pragma warning restore 1591
     }
 
     /// <summary>
@@ -171,10 +138,10 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectResponseTypes
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public const string CodeIdToken = "code id_token";
         public const string IdToken = "id_token";
-        #pragma warning restore 1591
+#pragma warning restore 1591
     }
 
     /// <summary>
@@ -182,10 +149,35 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectScopes
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public const string OpenId = "openid";
         public const string OpenIdProfile = "openid profile";
         public const string UserImpersonation = "user_impersonation";
+#pragma warning restore 1591
+    }
+
+    /// <summary>
+    /// OpenIdProviderConfiguration Names
+    /// http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata 
+    /// </summary>
+    public static class OpenIdProviderMetadataNames
+    {
+        #pragma warning disable 1591
+
+        public const string AuthorizationEndpoint = "authorization_endpoint";
+        public const string CheckSessionIframe = "check_session_iframe";
+        public const string Discovery = ".well-known/openid-configuration";
+        public const string EndSessionEndpoint = "end_session_endpoint";
+        public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
+        public const string JwksUri = "jwks_uri";
+        public const string Issuer = "issuer";
+        public const string MicrosoftMultiRefreshToken = "microsoft_multi_refresh_token";
+        public const string ResponseModesSupported = "response_modes_supported";
+        public const string ResponseTypesSupported = "response_types_supported";
+        public const string SubjectTypesSupported = "subject_types_supported";
+        public const string TokenEndpoint = "token_endpoint";
+        public const string TokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported";
+        public const string UserInfoEndpoint = "user_info_endpoint";
         #pragma warning restore 1591
     }
 }

@@ -21,6 +21,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// IConfigurationManager
+    /// </summary>
+    /// <typeparam name="T">TODO</typeparam>
     public interface IConfigurationManager<T>
     {
         /// <summary>

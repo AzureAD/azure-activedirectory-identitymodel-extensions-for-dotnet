@@ -22,10 +22,18 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// StaticConfigurationManager
+    /// </summary>
+    /// <typeparam name="T">TODO</typeparam>
     public class StaticConfigurationManager<T> : IConfigurationManager<T>
     {
         private T _configuration;
 
+        /// <summary>
+        /// StaticConfigurationManager
+        /// </summary>
+        /// <param name="configuration">TODO</param>
         public StaticConfigurationManager(T configuration)
         {
             if (configuration == null)
@@ -36,11 +44,20 @@ namespace Microsoft.IdentityModel.Protocols
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// GetConfigurationAsync
+        /// </summary>
+        /// <param name="cancel">TODO</param>
+        /// <returns>TODO</returns>
         public Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             return Task.FromResult(_configuration);
         }
 
+        /// <summary>
+        /// RequestRefresh
+        /// </summary>
+        /// <remarks>TODO</remarks>
         public void RequestRefresh()
         {
             // TODO: throw new NotSupportedException()?

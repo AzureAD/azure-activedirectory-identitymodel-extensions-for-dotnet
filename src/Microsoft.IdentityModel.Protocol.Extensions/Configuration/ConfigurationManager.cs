@@ -24,11 +24,30 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// ConfigurationManager
+    /// </summary>
+    /// <typeparam name="T">TODO</typeparam>
     public class ConfigurationManager<T> : IConfigurationManager<T>
     {
+        /// <summary>
+        /// DefaultAutomaticRefreshInterval - TODO
+        /// </summary>
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(5, 0, 0, 0);
+
+        /// <summary>
+        /// DefaultDelayBetweenRefreshAttempts - TODO
+        /// </summary>
         public static readonly TimeSpan DefaultDelayBetweenRefreshAttempts = new TimeSpan(0, 0, 0, 30);
+
+        /// <summary>
+        /// MinimumAutomaticRefreshInterval - TODO
+        /// </summary>
         public static readonly TimeSpan MinimumAutomaticRefreshInterval = new TimeSpan(0, 0, 10, 0);
+
+        /// <summary>
+        /// AbsoluteMinimumDelayBetweenRefreshAttempts - TODO
+        /// </summary>
         public static readonly TimeSpan AbsoluteMinimumDelayBetweenRefreshAttempts = new TimeSpan(0, 0, 0, 1);
 
         private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval;
@@ -42,16 +61,30 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationRetriever<T> _configRetriever;
         private T _currentConfiguration;
 
+        /// <summary>
+        /// ConfigurationManager
+        /// </summary>
+        /// <param name="metadataAddress">TODO</param>
         public ConfigurationManager(string metadataAddress)
             : this(metadataAddress, new GenericDocumentRetriever())
         {
         }
 
+        /// <summary>
+        /// ConfigurationManager
+        /// </summary>
+        /// <param name="metadataAddress">TODO</param>
+        /// <param name="httpClient">TODO</param>
         public ConfigurationManager(string metadataAddress, HttpClient httpClient)
             : this(metadataAddress, new HttpDocumentRetriever(httpClient))
         {
         }
 
+        /// <summary>
+        /// ConfigurationManager
+        /// </summary>
+        /// <param name="metadataAddress">TODO</param>
+        /// <param name="docRetriever">TODO</param>
         public ConfigurationManager(string metadataAddress, IDocumentRetriever docRetriever)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
@@ -101,6 +134,10 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
+        /// <summary>
+        /// IConfigurationRetriever
+        /// </summary>
+        /// <returns>TODO</returns>
         private static IConfigurationRetriever<T> GetConfigurationRetriever()
         {
             if (typeof(T).Equals(typeof(WsFederationConfiguration)))
@@ -114,6 +151,11 @@ namespace Microsoft.IdentityModel.Protocols
             throw new NotImplementedException(typeof(T).FullName);
         }
 
+        /// <summary>
+        /// GetConfigurationAsync
+        /// </summary>
+        /// <param name="cancel">TODO</param>
+        /// <returns>TODO</returns>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
@@ -158,6 +200,10 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
+        /// <summary>
+        /// RequestRefresh
+        /// </summary>
+        /// <remarks>TODO</remarks>
         public void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
