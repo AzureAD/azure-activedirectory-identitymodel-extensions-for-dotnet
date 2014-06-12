@@ -1221,7 +1221,7 @@ namespace System.IdentityModel.Tokens
                         SecurityToken t = null;
                         if (Matches(keyIdentifierClause, securityKey, certMatcher, out t))
                         {
-                            return validationParameters.IssuerSigningKey;
+                            return securityKey;
                         }
                     }
                 }
