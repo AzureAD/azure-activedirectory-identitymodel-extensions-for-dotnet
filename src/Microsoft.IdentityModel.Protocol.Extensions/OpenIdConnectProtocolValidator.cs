@@ -25,6 +25,9 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// OpenIdConnectProtocolValidator - TODO
+    /// </summary>
     public static class OpenIdConnectProtocolValidator
     {
         private static List<string> requiredClaims = new List<string> { JwtRegisteredClaimNames.Aud, JwtRegisteredClaimNames.Exp, JwtRegisteredClaimNames.Iat, JwtRegisteredClaimNames.Iss, JwtRegisteredClaimNames.Sub };
@@ -57,32 +60,32 @@ namespace Microsoft.IdentityModel.Protocols
 
             // required claims
             if (jwt.Payload.Aud.Count == 0)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), jwt));
 
             if (!jwt.Payload.Exp.HasValue)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), jwt));
 
             if (!jwt.Payload.Iat.HasValue)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), jwt));
 
             if (jwt.Payload.Iss == null)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), jwt));
 
             if (jwt.Payload.Sub == null)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt));
 
             // optional claims
             if (validationParameters.RequireAcr && string.IsNullOrWhiteSpace(jwt.Payload.Acr))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, JwtRegisteredClaimNames.Acr, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, jwt));
 
             if (validationParameters.RequireAmr && string.IsNullOrWhiteSpace(jwt.Payload.Amr))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, JwtRegisteredClaimNames.Amr, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, jwt));
 
             if (validationParameters.RequireAuthTime && string.IsNullOrWhiteSpace(jwt.Payload.AuthTime))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, JwtRegisteredClaimNames.AuthTime, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, jwt));
 
             if (validationParameters.RequireAzp && string.IsNullOrWhiteSpace(jwt.Payload.Azp))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, JwtRegisteredClaimNames.Azp, jwt));
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt));
 
             if (validationParameters.RequireNonce && string.IsNullOrWhiteSpace(validationParameters.Nonce))
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311, jwt));
@@ -99,7 +102,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="jwt">the <see cref="JwtSecurityToken"/> that that should contain a matching 'c_hash' claim.</param>
         /// <param name="authorizationCode">the 'Authorization Code' to validate.</param>
-        /// <param name="algorithmMap">a <see cref="IDictionary[string,string]"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26 to .Net. Can be null.</param>
+        /// <param name="algorithmMap">a <see cref="IDictionary{TKey, TValue}"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26 to .Net. Can be null.</param>
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'authorizationCode' is null or whitespace.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the <see cref="JwtSecurityToken"/> does not contain a 'c_hash' claim.</exception>

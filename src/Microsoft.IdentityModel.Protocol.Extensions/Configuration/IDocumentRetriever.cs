@@ -27,6 +27,12 @@ namespace Microsoft.IdentityModel.Protocols
     /// <remarks>TODO</remarks>
     public interface IDocumentRetriever
     {
+        /// <summary>
+        /// GetDocumentAsync
+        /// </summary>
+        /// <param name="address">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns>TODO</returns>
         Task<string> GetDocumentAsync(string address, CancellationToken cancel);
     }
 }

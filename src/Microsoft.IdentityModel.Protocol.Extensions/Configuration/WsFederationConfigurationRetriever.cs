@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Metadata;
 using System.IdentityModel.Tokens;
 using System.IO;
@@ -31,15 +30,31 @@ using System.Xml;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// WsFederationConfigurationRetriever - TODO
+    /// </summary>
     public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
     {
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
 
+        /// <summary>
+        /// GetAsync - TODO
+        /// </summary>
+        /// <param name="address">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns>TODO</returns>
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
             return GetAsync(new GenericDocumentRetriever(), address, cancel);
         }
 
+        /// <summary>
+        /// GetAsync - TODO
+        /// </summary>
+        /// <param name="address">TODO</param>
+        /// <param name="httpClient">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns>TODO</returns>
         public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
             return GetAsync(new HttpDocumentRetriever(httpClient), address, cancel);
@@ -51,6 +66,13 @@ namespace Microsoft.IdentityModel.Protocols
             return GetAsync(retriever, address, cancel);
         }
 
+        /// <summary>
+        /// GetAsync - TODO
+        /// </summary>
+        /// <param name="retriever">TODO</param>
+        /// <param name="address">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns>TODO</returns>
         public static async Task<WsFederationConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             if (retriever == null)

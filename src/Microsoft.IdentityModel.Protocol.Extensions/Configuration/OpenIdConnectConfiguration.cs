@@ -63,9 +63,9 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from an <see cref="IDictionary[string, object]"/> string.
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from an <see cref="IDictionary{TKey, TValue}"/> string.
         /// </summary>
-        /// <param name="dictionary">a <see cref="IDictionary[string, object]"/>jscontaining the metadata</param>
+        /// <param name="dictionary">a <see cref="IDictionary{TKey, TValue}"/>jscontaining the metadata</param>
         public OpenIdConnectConfiguration(IDictionary<string, object> dictionary)
         {
             SetFromDictionary(dictionary);
@@ -162,10 +162,13 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets or sets the token issuer.
+        /// Gets or sets the 'issuer'.
         /// </summary>
         public string Issuer { get; set; }
 
+        /// <summary>
+        /// Gets or sets the 'jwks_uri'
+        /// </summary>
         public string JwksUri{ get; set; }
 
         /// <summary>
