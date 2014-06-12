@@ -20,7 +20,6 @@ namespace System.IdentityModel.Tokens
 {
     using Microsoft.IdentityModel;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Security.Cryptography.X509Certificates;
 
@@ -29,7 +28,7 @@ namespace System.IdentityModel.Tokens
     /// The member names within the JWT Header are referred to as Header Parameter Names. 
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Serialize not really supported.")]
     public class JwtHeader : Dictionary<string, string>
     {
         private SigningCredentials signingCredentials;
