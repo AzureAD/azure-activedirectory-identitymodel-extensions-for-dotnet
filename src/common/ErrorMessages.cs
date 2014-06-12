@@ -80,10 +80,10 @@ namespace Microsoft.IdentityModel
         public const string IDX10309 = "IDX10309: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
         public const string IDX10310 = "IDX10310: OpenIdConnectProtocol requires the jwt token to have a  valid 'aud' claim, jwt: '{0}'.";
         public const string IDX10311 = "IDX10311: validationParameters.RequireNonce is 'true' (default) but validationParameters.Nonce is 'null or whitespace' a nonce cannot be validated. If you don't need to check the nonce, set validationParameters.RequireNonce to 'false' or set the validationParameters.Nonce to a valid nonce.\njwt: '{0}'.";
-        public const string IDX10312 = "IDX10312: validationParameters.RequireAcr is 'true' (default is 'false') but jwt.PayLoad.Acr is 'null or whitespace'.";
-        public const string IDX10313 = "IDX10313: validationParameters.RequireAmr is 'true' (default is 'false') but jwt.PayLoad.Amr is 'null or whitespace'.";
-        public const string IDX10314 = "IDX10314: validationParameters.RequireAuthTime is 'true' (default is 'false') but jwt.PayLoad.AuthTime is 'null or whitespace'.";
-        public const string IDX10315 = "IDX10315: validationParameters.RequireAzp is 'true' (default is 'false') but jwt.PayLoad.Azp is 'null or whitespace'.";
+        public const string IDX10312 = "IDX10312: validationParameters.RequireAcr is 'true' (default is 'false') but jwt.PayLoad.Acr is 'null or whitespace', jwt: '{0}'.";
+        public const string IDX10313 = "IDX10313: validationParameters.RequireAmr is 'true' (default is 'false') but jwt.PayLoad.Amr is 'null or whitespace', jwt: '{0}'.";
+        public const string IDX10314 = "IDX10314: validationParameters.RequireAuthTime is 'true' (default is 'false') but jwt.PayLoad.AuthTime is 'null or whitespace', jwt: '{0}'.";
+        public const string IDX10315 = "IDX10315: validationParameters.RequireAzp is 'true' (default is 'false') but jwt.PayLoad.Azp is 'null or whitespace', jwt: '{0}'.";
 
 
         // SecurityTokenHandler messages
