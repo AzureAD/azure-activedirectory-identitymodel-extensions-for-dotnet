@@ -72,7 +72,6 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
         
-
         /// <summary>
         /// Gets or sets the 'authorizationcode'.
         /// </summary>
@@ -132,6 +131,5 @@ namespace Microsoft.IdentityModel.Protocols
                 _responseType = value;
             }
         }
-
     }
 }
