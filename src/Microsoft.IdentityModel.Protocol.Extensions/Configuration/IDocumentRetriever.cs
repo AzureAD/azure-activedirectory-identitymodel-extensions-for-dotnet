@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// IDocumentRetriever
+    /// </summary>
+    /// <remarks>TODO</remarks>
     public interface IDocumentRetriever
     {
         Task<string> GetDocumentAsync(string address, CancellationToken cancel);

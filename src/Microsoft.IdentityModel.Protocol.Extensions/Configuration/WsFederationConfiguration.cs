@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IdentityModel.Tokens;
-using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -43,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols
         public string Issuer { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="ICollection[SecurityKey]"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
         public ICollection<SecurityKey> SigningKeys
         {

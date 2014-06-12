@@ -23,6 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public static class SamlConstants
     {
+        #pragma warning disable 1591
         public const string Assertion = "Assertion";
         public const string EncryptedAssertion = "EncryptedAssertion";
         public const int MajorVersionValue = 1;
@@ -30,5 +31,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Prefix = "saml";
         public const string Saml11Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
         public const string Saml2Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
+        #pragma warning restore 1591
     }
 }

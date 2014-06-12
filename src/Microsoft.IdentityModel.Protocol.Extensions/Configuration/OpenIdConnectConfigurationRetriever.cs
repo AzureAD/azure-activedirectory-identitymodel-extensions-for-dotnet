@@ -25,24 +25,47 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// OpenIdConnectConfigurationRetriever - TODO
+    /// </summary>
     public class OpenIdConnectConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
     {
+        /// <summary>
+        /// GetAsync
+        /// </summary>
+        /// <param name="address">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns></returns>
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, CancellationToken cancel)
         {
             return GetAsync(new GenericDocumentRetriever(), address, cancel);
         }
 
+        /// <summary>
+        /// GetAsync
+        /// </summary>
+        /// <param name="address">TODO</param>
+        /// <param name="httpClient">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns></returns>
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
             return GetAsync(new HttpDocumentRetriever(httpClient), address, cancel);
         }
 
-        // Internal
         Task<OpenIdConnectConfiguration> IConfigurationRetriever<OpenIdConnectConfiguration>.GetConfigurationAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             return GetAsync(retriever, address, cancel);
         }
 
+
+        /// <summary>
+        /// GetAsync
+        /// </summary>
+        /// <param name="retriever">TODO</param>
+        /// <param name="address">TODO</param>
+        /// <param name="cancel">TODO</param>
+        /// <returns></returns>
         public static async Task<OpenIdConnectConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             if (retriever == null)
