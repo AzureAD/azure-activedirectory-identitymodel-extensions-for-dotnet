@@ -28,6 +28,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// ConfigurationManager
     /// </summary>
     /// <typeparam name="T">TODO</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : IConfigurationManager<T>
     {
         /// <summary>
