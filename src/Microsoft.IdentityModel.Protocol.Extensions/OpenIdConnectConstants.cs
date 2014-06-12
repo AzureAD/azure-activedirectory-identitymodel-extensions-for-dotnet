@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectParameterNames
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string AccessToken = "access_token";
         public const string AcrValues = "acr_values";
         public const string ClaimsLocales = "claims_locales";
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string UiLocales = "ui_locales";
         public const string UserId = "user_id";
         public const string Username = "username";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -116,9 +116,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// <remarks>Can be used to determine the message type.</remarks>
     public enum OpenIdConnectRequestType
     {
+        #pragma warning disable 1591
         AuthenticationRequest,
         LogoutRequest,
         TokenRequest,
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -126,11 +128,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectResponseModes
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string Query = "query";
         public const string FormPost = "form_post";
         public const string Fragment = "fragment";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -138,10 +140,10 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectResponseTypes
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string CodeIdToken = "code id_token";
         public const string IdToken = "id_token";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -149,11 +151,11 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public static class OpenIdConnectScopes
     {
-#pragma warning disable 1591
+        #pragma warning disable 1591
         public const string OpenId = "openid";
         public const string OpenIdProfile = "openid profile";
         public const string UserImpersonation = "user_impersonation";
-#pragma warning restore 1591
+        #pragma warning restore 1591
     }
 
     /// <summary>
@@ -163,7 +165,6 @@ namespace Microsoft.IdentityModel.Protocols
     public static class OpenIdProviderMetadataNames
     {
         #pragma warning disable 1591
-
         public const string AuthorizationEndpoint = "authorization_endpoint";
         public const string CheckSessionIframe = "check_session_iframe";
         public const string Discovery = ".well-known/openid-configuration";

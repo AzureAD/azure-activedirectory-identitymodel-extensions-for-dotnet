@@ -223,21 +223,4 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    internal static class IssuerKeyRetriever
-    {
-        /// <summary>
-        /// Used to create signing tokens when reading SamlTokens (1&2) as reading requires a securityToken to validate signature.
-        /// </summary>
-        /// <param name="securityToken"></param>
-        /// <param name="validationParameters"></param>
-        /// <returns></returns>
-        public static SecurityTokenResolver CreateIssuerTokenResolver(string securityToken, TokenValidationParameters validationParameters)
-        {
-            return new SecurityKeyResolver(securityToken, validationParameters);
-        }
-    }
 }

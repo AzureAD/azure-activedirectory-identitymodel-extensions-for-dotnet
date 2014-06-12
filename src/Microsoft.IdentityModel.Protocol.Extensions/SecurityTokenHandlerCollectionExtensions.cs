@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Extensions
         /// validate from a string.</param>
         /// <param name="securityToken">securityToken to validate.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contain necessary validation coordinates.</param>
+        /// <param name="validatedToken">a validated <see cref="SecurityToken"/>.</param>
         /// <exception cref="ArgumentNullException">'tokenHandlers' is null.</exception>
         /// <exception cref="ArgumentNullException">'securityToken' is null.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>

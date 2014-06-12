@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
     /// A set of parameters that are used to define validation requirements. Used by a <see cref="OpenIdConnectProtocolValidator"/> when validating a <see cref="JwtSecurityToken"/>
-    /// to enusre it compliant with  http://openid.net/specs/openid-connect-core-1_0.html#IDToken </remarks>.
+    /// to enusre it compliant with  http://openid.net/specs/openid-connect-core-1_0.html#IDToken .
     /// </summary>
     public class OpenIdConnectProtocolValidationParameters
     {
@@ -53,8 +53,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Gets or sets the algoritm mapping between Jwt and .Net
+        /// a <see cref="IDictionary{TKey, TValue}"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26 to .Net.
         /// </summary>
-        /// <param name="algorithmMap">a <see cref="IDictionary[string,string]"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26 to .Net.</param>
         /// <exception cref="ArgumentNullException">if 'AlgorithmMap' is null.</exception>
         public IDictionary<string, string> AlgorithmMap 
         {
@@ -124,7 +124,6 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 return _responseType;
             }
-            
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
