@@ -37,12 +37,12 @@ namespace Microsoft.IdentityModel.Protocols
     {
         #pragma warning disable 1591
         public const string Alg = "alg";
-        public const string Exponent = "e";
+        public const string E = "e";
         public const string KeyOps = "key_ops";
         public const string Keys = "keys";
         public const string Kid = "kid";
         public const string Kty = "kty";
-        public const string Modulus = "n";
+        public const string N = "n";
         public const string Use = "use";
         public const string X5c = "x5c";
         public const string X5t = "x5t";
