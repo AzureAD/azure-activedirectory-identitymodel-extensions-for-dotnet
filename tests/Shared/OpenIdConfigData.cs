@@ -33,9 +33,11 @@ namespace Microsoft.IdentityModel.Test
                 new JsonWebKey
                 {
                     Alg = "SHA256",
+                    E = "AQAB",
                     KeyOps = "signing",
                     Kid = "NGTFvdK-fythEuLwjpwAJOM9n-A",
                     Kty = "RSA",
+                    N = "rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw==",
                     X5t = "NGTFvdK-fythEuLwjpwAJOM9n-A",
                     X5u = "https://jsonkeyurl",
                     Use = "sig",
@@ -61,14 +63,16 @@ namespace Microsoft.IdentityModel.Test
             JsonWebKeyExpected2 = 
                 new JsonWebKey
                 {
-                    Kty = "RSA",
+                    Alg = "SHA256",
+                    E = "AQAB",
                     Kid = "kriMPdmBvx68skT8-mPAB3BseeA",
+                    Kty = "RSA",
+                    N = "kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==",
                     X5t = "kriMPdmBvx68skT8-mPAB3BseeA",
                     Use = "sig",
                 };
 
             JsonWebKeyExpected2.X5c.Add(JsonWebKey_X5c_2);
-
 
             JsonWebKeySetExpected1 = new JsonWebKeySet();
             JsonWebKeySetExpected1.Keys.Add(JsonWebKeyExpected1);
@@ -128,6 +132,30 @@ namespace Microsoft.IdentityModel.Test
 
             OpenIdConnectMetadataSingleX509Data1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey1));
 
+            // interrop
+            GoogleCertsExpected = new JsonWebKeySet();
+            GoogleCertsExpected.Keys.Add(
+                new JsonWebKey
+                {
+                    Alg = "RS256",
+                    E = "AQAB",
+                    Kty = "RSA",
+                    Kid = "ab844f3d4c69feee0de2501b04e1a4c8d78eead1",
+                    N = "AKrMiv5vhYehVKXnSpZZN6lYymUIi+NS97ceYKYClMlNyj2Ln4ErWiOwjwdivG2kZnN0kKCC/XL9E+uEgsZO3ECvvDtgtFhPOR0MiqL7pp/K7d58dbKUWX/cWy8E4bm/Zmwa/g0HDcW6o19+Q85IPYXbY/6Z2oOgA9qDAoGHkjIv",
+                    Use = "sig",
+                });
+
+           GoogleCertsExpected.Keys.Add(
+                new JsonWebKey
+                {
+                    Alg = "RS256",
+                    E = "AQAB",
+                    Kty = "RSA",
+                    Kid = "550326e0aacb4674d22905a1a51a808cfa7463b0",
+                    N = "ANLFuJO6EoKczde+YP3b1yuz2b46D7Rd7CjrbvKrzbjkH29iRFLBagT7nojwdMOPrsV+WLp/C8lfkRT7UJ38lnQh3m4oEy98HdRRMZh5Vtpbotgt4S/ugh5ansJdHSXSBTxk+X1ZnTzMOUH7ZROpxw3NcX/IFl0sshFlTbebPrDj",
+                    Use = "sig",
+                });
+
         }
 
         public static string AADCommonUrl = "https://login.windows.net/common/.well-known/openid-configuration";
@@ -151,7 +179,8 @@ namespace Microsoft.IdentityModel.Test
                                         }";
 
         public static string JsonWebKeyString2 =
-                                            @"{ ""e"":""AQAB"",                                              
+                                            @"{ ""alg"":""SHA256"",
+                                                ""e"":""AQAB"",                                              
                                                 ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
                                                 ""kty"":""RSA"",
                                                 ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",
@@ -271,5 +300,10 @@ namespace Microsoft.IdentityModel.Test
         public static X509Certificate2 X509CertificateJsonWebKey1;
         public static X509Certificate2 X509CertificateJsonWebKey2;
         public static IDictionary<string, object> JsonWebKeyDictionary1;
+
+        // interop
+
+        public static string GoogleCertsFile = "google-certs.json";
+        public static JsonWebKeySet GoogleCertsExpected;
     }
 }

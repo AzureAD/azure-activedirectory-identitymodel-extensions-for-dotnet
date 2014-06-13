@@ -84,6 +84,15 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.E, out obj))
+                {
+                    str = obj as string;
+                    if (str != null)
+                    {
+                        E = str;
+                    }
+                }
+
                 if (dictionary.TryGetValue(JsonWebKeyParameterNames.KeyOps, out obj))
                 {
                     str = obj as string;
@@ -111,6 +120,15 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.N, out obj))
+                {
+                    str = obj as string;
+                    if (str != null)
+                    {
+                        N = str;
+                    }
+                }
+
                 if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5c, out obj))
                 {
                     ArrayList jclauses = obj as ArrayList;
@@ -131,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
 
-                if (dictionary.TryGetValue(JsonWebKeyParameterNames.Kid, out obj))
+                if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5t, out obj))
                 {
                     str = obj as string;
                     if (str != null)
@@ -166,6 +184,11 @@ namespace Microsoft.IdentityModel.Protocols
         public string Alg { get; set; }
 
         /// <summary>
+        /// Gets or sets the E 'e'
+        /// </summary>
+        public string E { get; set; }
+
+        /// <summary>
         /// Gets or sets the 'key_ops' (Key Operations).
         /// </summary>
         public string KeyOps { get; set; }
@@ -179,6 +202,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the 'kty' (Key Type).
         /// </summary>
         public string Kty { get; set; }
+
+        /// <summary>
+        /// Gets or sets the modulus 'n'
+        /// </summary>
+        public string N { get; set; }
 
         /// <summary>
         /// Gets the 'x5c' collection (X.509 Certificate Chain).

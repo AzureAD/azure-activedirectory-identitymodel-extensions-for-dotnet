@@ -21,6 +21,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
+using System.IO;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -67,20 +68,11 @@ namespace Microsoft.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "C6A4AFA6-25A2-44F4-A8FB-83BBEC4DB9A1")]
-        [Description("Tests: Constructors")]
+        [Description("Tests: Interop")]
         public void JsonWebKeySet_Interop()
         {
-            JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
-            Assert.IsTrue(IsDefaultJsonWebKeySet(jsonWebKeys));
-
-            // null string, nothing to add
-            RunJsonWebsKeyTest((string)null, jsonWebKeys, ExpectedException.NoExceptionExpected);
-
-            // null dictionary, nothing to add
-            RunJsonWebsKeyTest((IDictionary<string, object>)null, jsonWebKeys, ExpectedException.NoExceptionExpected, false);
-
-            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetString1, OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
+            string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);
+            RunJsonWebsKeyTest(certsData, OpenIdConfigData.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
         }
 
         /// <summary>
