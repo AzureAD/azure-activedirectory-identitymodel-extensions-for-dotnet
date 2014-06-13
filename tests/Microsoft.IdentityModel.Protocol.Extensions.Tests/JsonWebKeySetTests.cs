@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Test
     /// 
     /// </summary>
     [TestClass]
-    public class JsonWebKeysTests
+    public class JsonWebKeySetTests
     {
         public TestContext TestContext { get; set; }
 
@@ -61,8 +61,8 @@ namespace Microsoft.IdentityModel.Test
             // null dictionary, nothing to add
             RunJsonWebsKeyTest((IDictionary<string, object>)null, jsonWebKeys, ExpectedException.NoExceptionExpected, false);
 
-            RunJsonWebsKeyTest(SharedData.JsonWebKeysString1,  SharedData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebsKeyTest(SharedData.JsonWebKeysBadFormatingString, null, ExpectedException.ArgumentException());
+            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeysString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeysBadFormatingString, null, ExpectedException.ArgumentException());
         }
 
         /// <summary>
