@@ -65,23 +65,23 @@ namespace Microsoft.IdentityModel.Test
             RunJsonWebKeyTest(null, new JsonWebKey(), ExpectedException.NoExceptionExpected, false);
             
             // valid json, JsonWebKey1
-            RunJsonWebKeyTest(SharedData.JsonWebKeyString1, SharedData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyString1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
 
             // valid dictionary, JsonWebKey1
-            RunJsonWebKeyTest(SharedData.JsonWebKeyDictionary1, SharedData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyDictionary1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
 
             // valid json, JsonWebKey2
-            jsonWebKey = RunJsonWebKeyTest(SharedData.JsonWebKeyString2, SharedData.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(!IdentityComparer.AreEqual(jsonWebKey, SharedData.JsonWebKeyExpected1));
+            jsonWebKey = RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyString2, OpenIdConfigData.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected);
+            Assert.IsTrue(!IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1));
 
             // invalid json, JsonWebKeyBadFormatString1
-            RunJsonWebKeyTest(SharedData.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException());
+            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException());
 
             // invalid json, JsonWebKeyBadFormatString2
-            RunJsonWebKeyTest(SharedData.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException());
+            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException());
 
             // invalid json, JsonWebKeyBadx509String1
-            RunJsonWebKeyTest(SharedData.JsonWebKeyBadX509String, SharedData.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadX509String, OpenIdConfigData.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected);
         }
 
         /// <summary>

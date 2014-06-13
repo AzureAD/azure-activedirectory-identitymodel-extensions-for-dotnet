@@ -25,9 +25,9 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Test
 {
-    public class SharedData
+    public class OpenIdConfigData
     {
-        static SharedData()
+        static OpenIdConfigData()
         {
             JsonWebKeyExpected1 =
                 new JsonWebKey

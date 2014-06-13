@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Test
         {
             RunOpenIdConnectMetadataTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected);
             RunOpenIdConnectMetadataTest((IDictionary<string, object>)null, new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected);
-            RunOpenIdConnectMetadataTest(SharedData.OpenIdConnectMetadataString, SharedData.OpenIdConnectMetatdata1, ExpectedException.NoExceptionExpected);
+            RunOpenIdConnectMetadataTest(OpenIdConfigData.OpenIdConnectMetadataString, OpenIdConfigData.OpenIdConnectMetatdata1, ExpectedException.NoExceptionExpected);
         }
 
         private OpenIdConnectConfiguration RunOpenIdConnectMetadataTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)

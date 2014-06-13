@@ -93,8 +93,8 @@
     <Compile Include="..\Shared\KeyingMaterial.cs">
       <Link>KeyingMaterial.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\SharedData.cs">
-      <Link>SharedData.cs</Link>
+    <Compile Include="..\Shared\OpenIdConfigData.cs">
+      <Link>OpenIdConfigData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TestUtilities.cs">
       <Link>TestUtilities.cs</Link>
@@ -105,7 +105,7 @@
     <Compile Include="DerivedTypes.cs" />
     <Compile Include="GenericDocumentRetrieverTests.cs" />
     <Compile Include="HttpDocumentRetrieverTests.cs" />
-    <Compile Include="JsonWebKeysTests.cs" />
+    <Compile Include="JsonWebKeySetTests.cs" />
     <Compile Include="JsonWebKeyTests.cs" />
     <Compile Include="MessageComparer.cs" />
     <Compile Include="OpenIdConnectConfigurationTests.cs" />
@@ -124,7 +124,6 @@
     <Compile Include="WsFederationMessageTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="35MSSharedLib1024.snk" />
     <None Include="JsonWebKeysBadBase64DataFile.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
