@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectMetatdataWithKeys1));
 
             // jwt_uri points to bad formated JSON
-            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeysBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
+            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
         }
 
         [TestMethod]
