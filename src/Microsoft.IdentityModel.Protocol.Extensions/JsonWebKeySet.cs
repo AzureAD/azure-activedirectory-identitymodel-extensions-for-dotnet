@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,11 +51,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing values.</param>
+        /// <exception cref="ArgumentNullException">if 'json' is null or whitespace.</exception>
         public JsonWebKeySet(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                return;
+                throw new ArgumentNullException("json");
             }
 
             SetFromDictionary(_javaScriptSerializer.Deserialize<Dictionary<string, object>>(json));
@@ -63,30 +65,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Creates an instance of <see cref="JsonWebKey"/>.
         /// </summary>
+        /// <param name="dictionary">a dictionary containing a 'Keys' element which is a Dictionary of JsonWebKeys.</param>
+        /// <exception cref="ArgumentNullExceptioni">if 'dictionary' is null.</exception>
         public JsonWebKeySet(IDictionary<string, object> dictionary)
-        {
-            SetFromDictionary(dictionary);
-        }
-
-        private void SetFromDictionary(IDictionary<string, object> dictionary)
         {
             if (dictionary == null)
             {
-                return;
+                throw new ArgumentNullException("dictionary");
             }
 
-            object obj = null;
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
-            {
-                ArrayList keys = obj as ArrayList;
-                if (keys != null)
-                {
-                    foreach (var key in keys)
-                    {
-                        _keys.Add(new JsonWebKey(key as Dictionary<string, object>));
-                    }
-                }
-            }
+            SetFromDictionary(dictionary);
         }
 
         /// <summary>
@@ -99,5 +87,23 @@ namespace Microsoft.IdentityModel.Protocols
                 return _keys;
             }
         }
+
+        private void SetFromDictionary(IDictionary<string, object> dictionary)
+        {
+            object obj = null;
+            if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
+            {
+                throw new ArgumentException(ErrorMessages.IDX10800);
+            }
+
+            ArrayList keys = obj as ArrayList;
+            if (keys != null)
+            {
+                foreach (var key in keys)
+                {
+                    _keys.Add(new JsonWebKey(key as Dictionary<string, object>));
+                }
+            }
+         }
     }
 }

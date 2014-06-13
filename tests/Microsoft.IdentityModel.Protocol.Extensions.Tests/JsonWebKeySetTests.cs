@@ -57,10 +57,10 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsTrue(IsDefaultJsonWebKeySet(jsonWebKeys));
 
             // null string, nothing to add
-            RunJsonWebsKeyTest((string)null, jsonWebKeys, ExpectedException.NoExceptionExpected);
+            RunJsonWebsKeyTest((string)null, null, ExpectedException.ArgumentNullException());
 
             // null dictionary, nothing to add
-            RunJsonWebsKeyTest((IDictionary<string, object>)null, jsonWebKeys, ExpectedException.NoExceptionExpected, false);
+            RunJsonWebsKeyTest((IDictionary<string, object>)null, null, ExpectedException.ArgumentNullException(), false);
 
             RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
             RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());

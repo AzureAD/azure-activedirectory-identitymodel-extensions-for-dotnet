@@ -51,78 +51,81 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "3452b8a7-fae1-4b20-b78b-03f90c39ee81")]
         [Description("Tests: Constructors")]
-        public void OpenIdConnectMetadata_Constructors()
+        public void OpenIdConnectConfiguration_Constructors()
         {
-            RunOpenIdConnectMetadataTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected);
-            RunOpenIdConnectMetadataTest((IDictionary<string, object>)null, new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected);
-            RunOpenIdConnectMetadataTest(OpenIdConfigData.OpenIdConnectMetadataString, OpenIdConfigData.OpenIdConnectMetatdata1, ExpectedException.NoExceptionExpected);
+            RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
+            RunOpenIdConnectConfigurationTest((IDictionary<string, object>)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
+            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetadataString, OpenIdConfigData.OpenIdConnectConfiguration1, ExpectedException.NoExceptionExpected);
         }
 
-        private OpenIdConnectConfiguration RunOpenIdConnectMetadataTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)
+        private OpenIdConnectConfiguration RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)
         {
-            OpenIdConnectConfiguration openIdConnectMetadata = null;
+            bool exceptionHit = false;
+
+            OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
                 if (obj is string)
                 {
-                    openIdConnectMetadata = new OpenIdConnectConfiguration(obj as string);
+                    openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as string);
                 }
                 else if (obj is IDictionary<string, object>)
                 {
-                    openIdConnectMetadata = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
+                    openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
                 }
                 else
                 {
                     if (asString)
                     {
-                        openIdConnectMetadata = new OpenIdConnectConfiguration(obj as string);
+                        openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as string);
                     }
                     else
                     {
-                        openIdConnectMetadata = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
+                        openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
                     }
                 }
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
+                exceptionHit = true;
                 expectedException.ProcessException(ex);
             }
 
-            if (compareTo != null)
+            if (!exceptionHit && compareTo != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectMetadata, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
 
-            return openIdConnectMetadata;
+            return openIdConnectConfiguration;
         }
 
         [TestMethod]
         [TestProperty("TestCaseID", "60d42142-5fbe-4bbc-aefa-9b18de426cbc")]
         [Description("Tests: Defaults")]
-        public void OpenIdConnectMetadata_Defaults()
+        public void OpenIdConnectConfiguration_Defaults()
         {
-            OpenIdConnectConfiguration metadata = new OpenIdConnectConfiguration();
-            Assert.IsNull(metadata.AuthorizationEndpoint);
-            Assert.IsNull(metadata.EndSessionEndpoint);
-            Assert.IsNull(metadata.Issuer);
-            Assert.IsNull(metadata.JwksUri);
-            Assert.IsNull(metadata.TokenEndpoint);
-            Assert.IsNotNull(metadata.SigningKeys);
+            OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
+            Assert.IsNull(configuration.AuthorizationEndpoint);
+            Assert.IsNull(configuration.EndSessionEndpoint);
+            Assert.IsNull(configuration.Issuer);
+            Assert.IsNull(configuration.JwksUri);
+            Assert.IsNull(configuration.TokenEndpoint);
+            Assert.IsNotNull(configuration.SigningKeys);
         }
 
         [TestMethod]
         [TestProperty("TestCaseID", "55312093-0e2d-4ca2-bb20-9bf125856ea3")]
         [Description("Tests: GetSets")]
-        public void OpenIdConnectMetadata_GetSets()
+        public void OpenIdConnectConfiguration_GetSets()
         {
-            OpenIdConnectConfiguration metadata = new OpenIdConnectConfiguration();
-            TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(metadata, "OpenIdConnectMetadata_GetSets");
+            OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
+            TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectMetadata_GetSets");
 
             List<string> methods = new List<string> { "AuthorizationEndpoint", "EndSessionEndpoint", "Issuer", "JwksUri", "TokenEndpoint", "UserInfoEndpoint" };
             foreach(string method in methods)
             {
-                TestUtilities.GetSet(metadata, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
+                TestUtilities.GetSet(configuration, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
             }
 
             string authorization_Endpoint = Guid.NewGuid().ToString();
@@ -131,7 +134,7 @@ namespace Microsoft.IdentityModel.Test
             string jwks_Uri = Guid.NewGuid().ToString();
             string token_Endpoint = Guid.NewGuid().ToString();
 
-            metadata = new OpenIdConnectConfiguration()
+            configuration = new OpenIdConnectConfiguration()
             {
                 AuthorizationEndpoint = authorization_Endpoint,
                 EndSessionEndpoint = end_Session_Endpoint,
@@ -141,22 +144,16 @@ namespace Microsoft.IdentityModel.Test
             };
 
             List<SecurityKey> securityKeys = new List<SecurityKey> { new X509SecurityKey(KeyingMaterial.Cert_1024), new X509SecurityKey(KeyingMaterial.DefaultCert_2048) };
-            metadata.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.Cert_1024));
-            metadata.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.DefaultCert_2048));
+            configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.Cert_1024));
+            configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.DefaultCert_2048));
 
-            Assert.AreEqual(metadata.AuthorizationEndpoint, authorization_Endpoint);
-            Assert.AreEqual(metadata.EndSessionEndpoint, end_Session_Endpoint);
-            Assert.AreEqual(metadata.Issuer, issuer);
-            Assert.AreEqual(metadata.JwksUri, jwks_Uri);
-            Assert.AreEqual(metadata.TokenEndpoint, token_Endpoint);
-            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(metadata.SigningKeys, securityKeys));
+            Assert.AreEqual(configuration.AuthorizationEndpoint, authorization_Endpoint);
+            Assert.AreEqual(configuration.EndSessionEndpoint, end_Session_Endpoint);
+            Assert.AreEqual(configuration.Issuer, issuer);
+            Assert.AreEqual(configuration.JwksUri, jwks_Uri);
+            Assert.AreEqual(configuration.TokenEndpoint, token_Endpoint);
+            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys));
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "43190276-8350-495e-ae4c-50229f0a5dbf")]
-        [Description("Tests: Publics")]
-        public void OpenIdConnectMetadata_Publics()
-        {
-        }
     }
 }

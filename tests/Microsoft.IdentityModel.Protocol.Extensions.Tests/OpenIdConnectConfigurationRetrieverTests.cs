@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Test
         {
             OpenIdConnectConfiguration configuration;
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectMetatdataWithKeys1));
+            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
 
             // jwt_uri points to bad formated JSON
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Test
         {
             OpenIdConnectConfiguration configuration;
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataString, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectMetatdataWithKeys1));
+            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
 
             // jwt_uri is not reachable
             await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadUriKeysString, string.Empty, expectedException: ExpectedException.IOException());
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Test
             await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadFormatString, string.Empty, expectedException: new ExpectedException(typeExpected: typeof(ArgumentException)));
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataSingleX509DataString, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectMetadataSingleX509Data1));
+            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationSingleX509Data1));
 
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadX509DataString, expectedException: new ExpectedException(typeExpected: typeof(CryptographicException)));
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: new ExpectedException(typeExpected: typeof(FormatException)));
