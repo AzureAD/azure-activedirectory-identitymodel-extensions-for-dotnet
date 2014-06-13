@@ -74,13 +74,10 @@ namespace Microsoft.IdentityModel.Protocols
         public static async Task<OpenIdConnectConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
         {
             if (retriever == null)
-            {
                 throw new ArgumentNullException("retriever");
-            }
+
             if (string.IsNullOrWhiteSpace(address))
-            {
                 throw new ArgumentNullException("address");
-            }
 
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             string doc = await retriever.GetDocumentAsync(address, cancel);
@@ -105,15 +102,11 @@ namespace Microsoft.IdentityModel.Protocols
                         // create NamedSecurityToken for Kid's, only RSA keys are supported.
                         if (!string.IsNullOrWhiteSpace(webKey.Kid))
                         {
-                            List<SecurityKey> keys = new List<SecurityKey>();
-
                             if (!string.IsNullOrWhiteSpace(webKey.N) && !string.IsNullOrWhiteSpace(webKey.E))
                             {
                                 RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
                                 rsa.FromXmlString(string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, webKey.N, webKey.E));
-                                
-                                keys.Add(new RsaSecurityKey(rsa));
-                                openIdConnectConfiguration.SigningTokens.Add(new NamedKeySecurityToken(webKey.Kid, keys.AsReadOnly()));
+                                openIdConnectConfiguration.SigningTokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, webKey.Kid, new RsaSecurityKey(rsa)));
                             }
                         }
                     }

@@ -49,8 +49,8 @@ namespace System.IdentityModel.Tokens
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be or were used to sign the <see cref="JwtSecurityToken"/>.</param>
         /// <remarks>
         /// <para>For each <see cref="SecurityKeyIdentifierClause"/> in signingCredentials.SigningKeyIdentifier</para>
-        /// <para>if the clause  is a <see cref="NamedKeySecurityKeyIdentifierClause"/> Header Parameter { clause.Name, clause.KeyIdentifier } will be added.</para>
-        /// <para>For example, if clause.Name == 'kid' and clause.KeyIdentifier == 'SecretKey99'. The JSON object { kid, SecretKey99 } would be added.</para>
+        /// <para>if the clause  is a <see cref="NamedKeySecurityKeyIdentifierClause"/> Header Parameter { clause.Name, clause.Id } will be added.</para>
+        /// <para>For example, if clause.Name == 'kid' and clause.Id == 'SecretKey99'. The JSON object { kid, SecretKey99 } would be added.</para>
         /// <para>In addition, if the <see cref="SigningCredentials"/> is a <see cref="X509SigningCredentials"/> the JSON object { x5t, Base64UrlEncoded( <see cref="X509Certificate.GetCertHashString()"/> } will be added.</para>
         /// <para>This simplifies the common case where a X509Certificate is used.</para>
         /// <para>================= </para>
@@ -86,7 +86,7 @@ namespace System.IdentityModel.Tokens
                         NamedKeySecurityKeyIdentifierClause namedKeyClause = clause as NamedKeySecurityKeyIdentifierClause;
                         if (namedKeyClause != null)
                         {
-                            this.Add(namedKeyClause.Name, namedKeyClause.KeyIdentifier);
+                            this.Add(namedKeyClause.Name, namedKeyClause.Id);
                         }
                     }
                 }

@@ -121,9 +121,9 @@ namespace System.IdentityModel.Test
             NamedKeySecurityKeyIdentifierClause clauseOut = ski.Find<NamedKeySecurityKeyIdentifierClause>();
             Assert.IsNotNull(clauseOut, "NamedKeySecurityKeyIdentifierClause not found");
             Assert.AreEqual(clauseOut.Name, clauseName, "clauseOut.Id != clauseId");
-            Assert.AreEqual(clauseOut.KeyIdentifier, keyId, "clauseOut.KeyIdentifier != keyId");
+            Assert.AreEqual(clauseOut.Id, keyId, "clauseOut.KeyIdentifier != keyId");
 
-            NamedKeySecurityToken NamedKeySecurityToken = new NamedKeySecurityToken(clauseName, new SecurityKey[] { KeyingMaterial.DefaultSymmetricSecurityKey_256 });
+            NamedKeySecurityToken NamedKeySecurityToken = new NamedKeySecurityToken(clauseName, keyId, new SecurityKey[] { KeyingMaterial.DefaultSymmetricSecurityKey_256 });
             Assert.IsTrue(NamedKeySecurityToken.MatchesKeyIdentifierClause(clause), "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
 
             List<SecurityKey> list = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256 };

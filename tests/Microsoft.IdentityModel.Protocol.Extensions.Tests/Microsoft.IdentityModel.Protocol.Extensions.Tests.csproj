@@ -103,6 +103,7 @@
     <Compile Include="ConfigurationManagerTests.cs" />
     <Compile Include="CrossTokenTests.cs" />
     <Compile Include="DerivedTypes.cs" />
+    <Compile Include="End2EndTests.cs" />
     <Compile Include="GenericDocumentRetrieverTests.cs" />
     <Compile Include="HttpDocumentRetrieverTests.cs" />
     <Compile Include="JsonWebKeySetTests.cs" />

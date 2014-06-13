@@ -18,9 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
 
     /// <summary>
     /// A <see cref="SecurityKeyIdentifierClause"/> that can be used to match <see cref="NamedKeySecurityToken"/>.
@@ -29,55 +27,26 @@ namespace System.IdentityModel.Tokens
     public class NamedKeySecurityKeyIdentifierClause : SecurityKeyIdentifierClause
     {
         private const string NameKeySecurityKeyIdentifierClauseType = "NamedKeySecurityKeyIdentifierClause";
-        private string keyIdentifier;
         private string name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NamedKeySecurityKeyIdentifierClause"/> class. The 'name' for matching key identifiers found in the securityToken.
         /// </summary>
-        /// <param name="name">
-        /// Used to identify a named collection of keys.
-        /// </param>
-        /// <param name="keyIdentifier">
-        /// Additional information for matching.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// 'name' is null.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// 'keyIdentifier' is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// string.IsNullOrWhiteSpace( 'name' ) is true.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// string.IsNullOrWhiteSpace( 'keyIdentifier' ) is true.
-        /// </exception>
-        public NamedKeySecurityKeyIdentifierClause(string name, string keyIdentifier)
+        /// <param name="name">Used to identify a named collection of keys.</param>
+        /// <param name="id">Additional information for matching.</param>
+        /// <exception cref="ArgumentNullException">if 'name' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'id' is null or whitespace</exception>
+        public NamedKeySecurityKeyIdentifierClause(string name, string id)
             : base(NameKeySecurityKeyIdentifierClauseType)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException("name");
-            }
-
-            if (keyIdentifier == null)
-            {
-                throw new ArgumentNullException("keyIdentifier");
-            }
-
             if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, name));
-            }
+                throw new ArgumentNullException("name");
 
-            if (string.IsNullOrWhiteSpace(keyIdentifier))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, keyIdentifier));
-            }
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException("id");
 
             this.name = name;
-            this.keyIdentifier = keyIdentifier;
+            this.Id = id;
         }
 
         /// <summary>
@@ -89,21 +58,13 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the key identifier used for matching.
-        /// </summary>
-        public string KeyIdentifier
-        {
-            get { return this.keyIdentifier; }
-        }
-
-        /// <summary>
         /// Determines if a <see cref="SecurityKeyIdentifierClause"/> matches this instance.
         /// </summary>
         /// <param name="keyIdentifierClause">The <see cref="SecurityKeyIdentifierClause"/> to match.</param>
         /// <returns>true if:
         /// <para>&#160;&#160;&#160;&#160;1. keyIdentifierClause is a <see cref="NamedKeySecurityKeyIdentifierClause"/>.</para>
         /// <para>&#160;&#160;&#160;&#160;2. string.Equals( keyIdentifierClause.Name, this.Name, StringComparison.Ordinal).</para>
-        /// <para>&#160;&#160;&#160;&#160;2. string.Equals( keyIdentifierClause.KeyIdentifier, this.KeyIdentifier, StringComparison.Ordinal).</para>
+        /// <para>&#160;&#160;&#160;&#160;2. string.Equals( keyIdentifierClause.Id, this.Id, StringComparison.Ordinal).</para>
         /// <para>Otherwise calls base.Matches( keyIdentifierClause ).</para>
         /// </returns>
         /// <exception cref="ArgumentNullException">'keyIdentifierClause' is null.</exception>
@@ -118,7 +79,7 @@ namespace System.IdentityModel.Tokens
             if (namedKeyIdentifierClause != null)
             {
                 if (string.Equals(namedKeyIdentifierClause.Name, this.Name, StringComparison.Ordinal)
-                && string.Equals(namedKeyIdentifierClause.KeyIdentifier, this.KeyIdentifier, StringComparison.Ordinal))
+                && string.Equals(namedKeyIdentifierClause.Id, this.Id, StringComparison.Ordinal))
                 {
                     return true;
                 }

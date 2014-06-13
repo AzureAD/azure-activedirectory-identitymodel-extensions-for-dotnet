@@ -406,6 +406,9 @@ namespace System.IdentityModel.Test
             if (!string.Equals(configuration1.JwksUri, configuraiton2.JwksUri, context.StringComparison))
                 return false;
 
+            if (!AreEnumsEqual<SecurityToken>(configuration1.SigningTokens, configuraiton2.SigningTokens, context, AreSecurityTokensEqual))
+                return false;
+
             if (!AreEnumsEqual<SecurityKey>(configuration1.SigningKeys, configuraiton2.SigningKeys, context, AreSecurityKeysEqual))
                 return false;
 
@@ -433,7 +436,7 @@ namespace System.IdentityModel.Test
      
         private static bool AreSecurityKeysEqual(SecurityKey securityKey1, SecurityKey securityKey2, CompareContext context)
         {
-            if (!context.IgnoreType && (securityKey1.GetType() != securityKey2.GetType()))
+            if (context.IgnoreType && (securityKey1.GetType() != securityKey2.GetType()))
                 return false;
 
             // Check X509SecurityKey first so we don't have to use reflection to get cert.
@@ -442,9 +445,7 @@ namespace System.IdentityModel.Test
             {
                 X509SecurityKey x509Key2 = securityKey2 as X509SecurityKey;
                 if (x509Key1.Certificate.Thumbprint == x509Key2.Certificate.Thumbprint)
-                {
                     return true;
-                }
 
                 return false;
             }
@@ -453,22 +454,16 @@ namespace System.IdentityModel.Test
             if (x509AsymmKey1 != null)
             {
                 X509AsymmetricSecurityKey x509AsymmKey2 = securityKey2 as X509AsymmetricSecurityKey;
-                X509Certificate2 x509Cert1 = TestUtilities.GetProperty(x509AsymmKey1, "certificate") as X509Certificate2;
-                X509Certificate2 x509Cert2 = TestUtilities.GetProperty(x509AsymmKey2, "certificate") as X509Certificate2;
+                X509Certificate2 x509Cert1 = TestUtilities.GetField(x509AsymmKey1, "certificate") as X509Certificate2;
+                X509Certificate2 x509Cert2 = TestUtilities.GetField(x509AsymmKey2, "certificate") as X509Certificate2;
                 if (x509Cert1 == null && x509Cert2 == null)
-                {
                     return true;
-                }
 
-                if (x509Cert1 != null || x509Cert2 != null)
-                {
+                if (x509Cert1 == null || x509Cert2 == null)
                     return false;
-                }
 
                 if (x509Cert1.Thumbprint != x509Cert2.Thumbprint)
-                {
                     return false;
-                }
             }
 
             SymmetricSecurityKey symKey1 = securityKey1 as SymmetricSecurityKey;
@@ -476,9 +471,7 @@ namespace System.IdentityModel.Test
             {
                 SymmetricSecurityKey symKey2 = securityKey2 as SymmetricSecurityKey;
                 if (!AreBytesEqual(symKey1.GetSymmetricKey(), symKey2.GetSymmetricKey()))
-                {
                     return false;
-                }
             }
 
             RsaSecurityKey rsaKey = securityKey1 as RsaSecurityKey;
@@ -488,9 +481,7 @@ namespace System.IdentityModel.Test
                 RSA rsa2 = ((securityKey2 as RsaSecurityKey).GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
 
                 if (!string.Equals(rsa1.ToXmlString(false), rsa2.ToXmlString(false), StringComparison.Ordinal))
-                {
                     return false;
-                }
             }
 
             return true;
@@ -498,7 +489,7 @@ namespace System.IdentityModel.Test
 
         private static bool AreSecurityTokensEqual(SecurityToken token1, SecurityToken token2, CompareContext context)
         {
-            if (token1.GetType() == token2.GetType())
+            if (token1.GetType() != token2.GetType())
                 return false;
 
             if (!AreEnumsEqual<SecurityKey>(token1.SecurityKeys, token2.SecurityKeys, CompareContext.Default, AreSecurityKeysEqual))

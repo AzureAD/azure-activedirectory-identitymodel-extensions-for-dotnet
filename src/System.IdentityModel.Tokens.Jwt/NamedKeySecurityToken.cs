@@ -30,55 +30,76 @@ namespace System.IdentityModel.Tokens
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class NamedKeySecurityToken : SecurityToken
     {
+        private string id;
         private string name;
         private DateTime validFrom;
         private List<SecurityKey> securityKeys;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="NamedKeySecurityToken"/> class that contains a single <see cref="SecurityKey"/>.
+        /// </summary>
+        /// <param name="name">A name for the <see cref="SecurityKey"/>.</param>
+        /// <param name="id">the identifier for this token.</param>
+        /// <param name="key">A <see cref="SecurityKey"/></param>
+        /// <exception cref="ArgumentNullException">if 'name' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'id' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'key' is null.</exception>
+        public NamedKeySecurityToken(string name, string id, SecurityKey key)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException("name");
+
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException("id");
+
+            if (key == null)
+                throw new ArgumentNullException("key");
+
+            this.id = id;
+            this.name = name;
+            this.securityKeys = new List<SecurityKey>{key};
+            this.validFrom = DateTime.UtcNow;
+
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="NamedKeySecurityToken"/> class that contains a <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey) that can be matched by name.
         /// </summary>
-        /// <param name="name">
-        /// A name for the <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey).
-        /// </param>
-        /// <param name="keys">
-        /// A collection of <see cref="SecurityKey"/>
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// 'name' is null.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// 'keys' is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// string.IsNullOrWhiteSpace( 'name' ) is true.
-        /// </exception>
-        public NamedKeySecurityToken(string name, IEnumerable<SecurityKey> keys)
+        /// <param name="id">the identifier for this token.</param>
+        /// <param name="name">A name for the <see cref="IEnumerable{SecurityKey}"/>(System.IdentityModel.Tokens.SecurityKey).</param>
+        /// <param name="keys">A collection of <see cref="SecurityKey"/></param>
+        /// <exception cref="ArgumentNullException">if 'name' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'id' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'keys' is null.</exception>
+        public NamedKeySecurityToken(string name, string id, IEnumerable<SecurityKey> keys)
         {
-            if (null == name)
-            {
+            if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException("name");
-            }
+
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException("id");
 
             if (keys == null)
-            {
                 throw new ArgumentNullException("keys");
-            }
 
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, name));
-            }
-
-            this.securityKeys = new List<SecurityKey>(keys);
+            this.id = id;
             this.name = name;
+            this.securityKeys = new List<SecurityKey>(keys);
             this.validFrom = DateTime.UtcNow;
         }
 
         /// <summary>
-        /// Gets the id
+        /// Gets the id of the security token.
         /// </summary>
-        /// <remarks>The default this is the 'name' passed to <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/></remarks>
         public override string Id
+        {
+            get { return this.id; }
+        }
+
+        /// <summary>
+        /// Gets the Name of the security token.
+        /// </summary>
+        public virtual string Name
         {
             get { return this.name; }
         }
@@ -86,7 +107,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets the creation time as a <see cref="DateTime"/>.
         /// </summary>
-        /// <remarks>The default is: <see cref="DateTime.UtcNow"/> set in <see cref="NamedKeySecurityToken( string, IEnumerable{SecurityKey} )"/>.</remarks>
+        /// <remarks>The default is: <see cref="DateTime.UtcNow"/>.</remarks>
         public override DateTime ValidFrom
         {
             get { return this.validFrom; }
@@ -121,9 +142,7 @@ namespace System.IdentityModel.Tokens
         public override SecurityKey ResolveKeyIdentifierClause(SecurityKeyIdentifierClause keyIdentifierClause)
         {
             if (keyIdentifierClause == null)
-            {
                 throw new ArgumentNullException("keyIdentifierClause");
-            }
 
             // if name matches, return first non null
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
@@ -164,7 +183,8 @@ namespace System.IdentityModel.Tokens
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
             if (namedKeyIdentifierClause != null)
             {
-                if (string.Equals(namedKeyIdentifierClause.Name, this.name, StringComparison.Ordinal))
+                if (string.Equals(namedKeyIdentifierClause.Id,   this.id, StringComparison.Ordinal)
+                &&  string.Equals(namedKeyIdentifierClause.Name, this.name, StringComparison.Ordinal))
                 {
                     return true;
                 }

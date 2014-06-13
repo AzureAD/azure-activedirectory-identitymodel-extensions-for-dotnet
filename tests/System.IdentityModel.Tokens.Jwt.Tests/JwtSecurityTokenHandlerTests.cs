@@ -776,7 +776,7 @@ namespace System.IdentityModel.Test
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = 
                 SignatureValidationParameters(
-                    signingToken: new NamedKeySecurityToken( "keys", 
+                    signingToken: new NamedKeySecurityToken( "keys", "id",
                         new List<SecurityKey>(){ KeyingMaterial.RsaToken_2048.SecurityKeys[0], KeyingMaterial.DefaultSymmetricSecurityKey_256}));
             RunValiateTokenVariation(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), tokenHandler, validationParameters, expectedException);
 

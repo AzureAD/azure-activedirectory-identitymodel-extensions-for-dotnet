@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Test
                     TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
                 };
 
-            string n = "rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw==";
+            string n = "ns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9w==";
             string e = "AQAB";
             string n2 = "kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==";
             string e2 = "AQAB";
@@ -128,17 +128,15 @@ namespace Microsoft.IdentityModel.Test
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
             string xml = string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, n, e);
             rsa.FromXmlString(xml);
-            RsaSecurityKey rsaKey = new RsaSecurityKey(rsa);
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(rsaKey);
+            OpenIdConnectConfigurationWithKeys1.SigningTokens.Add(new NamedKeySecurityToken("kid", "NGTFvdK-fythEuLwjpwAJOM9n-A", new RsaSecurityKey(rsa)));
 
             rsa = new RSACryptoServiceProvider();
             xml = string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, n2, e2);
             rsa.FromXmlString(xml);
-            rsaKey = new RsaSecurityKey(rsa);
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(rsaKey);
+            OpenIdConnectConfigurationWithKeys1.SigningTokens.Add(new NamedKeySecurityToken("kid", "kriMPdmBvx68skT8-mPAB3BseeA", new RsaSecurityKey(rsa)));
 
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey1));
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey2));
+            OpenIdConnectConfigurationWithKeys1.SigningTokens.Add(new X509SecurityToken(X509CertificateJsonWebKey1));
+            OpenIdConnectConfigurationWithKeys1.SigningTokens.Add(new X509SecurityToken(X509CertificateJsonWebKey2));
 
             OpenIdConnectConfigurationSingleX509Data1 = 
                 new OpenIdConnectConfiguration()
@@ -151,7 +149,7 @@ namespace Microsoft.IdentityModel.Test
                     TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
             };
 
-            OpenIdConnectConfigurationSingleX509Data1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey1));
+            OpenIdConnectConfigurationSingleX509Data1.SigningTokens.Add(new X509SecurityToken(X509CertificateJsonWebKey1));
 
             // interrop
             GoogleCertsExpected = new JsonWebKeySet();

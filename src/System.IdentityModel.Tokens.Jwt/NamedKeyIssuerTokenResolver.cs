@@ -284,12 +284,8 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Finds a named collection of <see cref="SecurityKey"/>(s) that match the <see cref="SecurityKeyIdentifier"/> and returns a <see cref="NamedKeySecurityToken"/> that contains the <see cref="SecurityKey"/>(s).
         /// </summary>
-        /// <param name="keyIdentifier">
-        /// The <see cref="SecurityKeyIdentifier"/> to resolve to a <see cref="SecurityToken"/>
-        /// </param>
-        /// <param name="token">
-        /// The resolved <see cref="SecurityToken"/>.
-        /// </param>
+        /// <param name="keyIdentifier">The <see cref="SecurityKeyIdentifier"/> to resolve to a <see cref="SecurityToken"/></param>
+        /// <param name="token">The resolved <see cref="SecurityToken"/>.</param>
         /// <remarks>
         /// <para>
         /// A <see cref="SecurityKeyIdentifier"/> can contain multiple <see cref="SecurityKeyIdentifierClause"/>(s). This method will return the named collection that matches the first <see cref="SecurityKeyIdentifierClause"/>
@@ -322,7 +318,7 @@ namespace System.IdentityModel.Tokens
                     IList<SecurityKey> resolvedKeys = null;
                     if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out resolvedKeys))
                     {
-                        token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, resolvedKeys);
+                        token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, namedKeyIdentifierClause.Id, resolvedKeys);
                         return true;
                     }
                 }
@@ -339,24 +335,15 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Finds a named collection of <see cref="SecurityKey"/>(s) that match the <see cref="SecurityKeyIdentifierClause"/> and returns a <see cref="NamedKeySecurityToken"/> that contains the <see cref="SecurityKey"/>(s).
         /// </summary>
-        /// <param name="keyIdentifierClause">
-        /// The <see cref="SecurityKeyIdentifier"/> to resolve to a <see cref="SecurityToken"/>
-        /// </param>
-        /// <param name="token">
-        /// The resolved <see cref="SecurityToken"/>.
-        /// </param>
-        /// <remarks>
-        /// If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.
-        /// </remarks>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
+        /// <param name="keyIdentifierClause">The <see cref="SecurityKeyIdentifier"/> to resolve to a <see cref="SecurityToken"/></param>
+        /// <param name="token">The resolved <see cref="SecurityToken"/>.</param>
+        /// <remarks>If there is no match, then <see cref="IssuerTokenResolver"/> and 'base' are called in order.</remarks>
+        /// <returns>true if token was resolved.</returns>
+        /// <exception cref="ArgumentNullException">if 'keyIdentifierClause' is null.</exception>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
         {
             if (keyIdentifierClause == null)
-            {
                 throw new ArgumentNullException("keyIdentifierClause");
-            }
 
             token = null;
             NamedKeySecurityKeyIdentifierClause namedKeyIdentifierClause = keyIdentifierClause as NamedKeySecurityKeyIdentifierClause;
@@ -365,7 +352,7 @@ namespace System.IdentityModel.Tokens
                 IList<SecurityKey> resolvedKeys = null;
                 if (this.keys.TryGetValue(namedKeyIdentifierClause.Name, out resolvedKeys))
                 {
-                    token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, resolvedKeys);
+                    token = new NamedKeySecurityToken(namedKeyIdentifierClause.Name, namedKeyIdentifierClause.Id, resolvedKeys);
                     return true;
                 }
             }
