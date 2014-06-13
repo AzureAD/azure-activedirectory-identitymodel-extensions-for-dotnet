@@ -50,10 +50,10 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "6dc1a5b5-d458-44ba-aa29-50ada648d191")]
         [Description("Tests: Constructors")]
-        public void JsonWebKeys_Constructors()
+        public void JsonWebKeySet_Constructors()
         {
             JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
-            Assert.IsTrue(IsDefaultJsonWebKeys(jsonWebKeys));
+            Assert.IsTrue(IsDefaultJsonWebKeySet(jsonWebKeys));
 
             // null string, nothing to add
             RunJsonWebsKeyTest((string)null, jsonWebKeys, ExpectedException.NoExceptionExpected);
@@ -61,8 +61,26 @@ namespace Microsoft.IdentityModel.Test
             // null dictionary, nothing to add
             RunJsonWebsKeyTest((IDictionary<string, object>)null, jsonWebKeys, ExpectedException.NoExceptionExpected, false);
 
-            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeysString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeysBadFormatingString, null, ExpectedException.ArgumentException());
+            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "C6A4AFA6-25A2-44F4-A8FB-83BBEC4DB9A1")]
+        [Description("Tests: Constructors")]
+        public void JsonWebKeySet_Interop()
+        {
+            JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
+            Assert.IsTrue(IsDefaultJsonWebKeySet(jsonWebKeys));
+
+            // null string, nothing to add
+            RunJsonWebsKeyTest((string)null, jsonWebKeys, ExpectedException.NoExceptionExpected);
+
+            // null dictionary, nothing to add
+            RunJsonWebsKeyTest((IDictionary<string, object>)null, jsonWebKeys, ExpectedException.NoExceptionExpected, false);
+
+            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetString1, OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
         }
 
         /// <summary>
@@ -115,25 +133,25 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "ae4aac50-6410-49c3-8cd1-92d81681e8b9")]
         [Description("Tests: Defaults")]
-        public void JsonWebKeys_Defaults()
+        public void JsonWebKeySet_Defaults()
         {
         }
 
         [TestMethod]
         [TestProperty("TestCaseID", "bffd5933-f161-4fb1-aaae-bb6ad8787972")]
         [Description("Tests: GetSets")]
-        public void JsonWebKeys_GetSets()
+        public void JsonWebKeySet_GetSets()
         {
         }
 
         [TestMethod]
         [TestProperty("TestCaseID", "c8d70600-a3ac-4c88-bd9d-2140481d4cf7")]
         [Description("Tests: Publics")]
-        public void JsonWebKeys_Publics()
+        public void JsonWebKeySet_Publics()
         {
         }
 
-        private bool IsDefaultJsonWebKeys(JsonWebKeySet jsonWebKeys)
+        private bool IsDefaultJsonWebKeySet(JsonWebKeySet jsonWebKeys)
         {
             if (jsonWebKeys.Keys == null)
                 return false;

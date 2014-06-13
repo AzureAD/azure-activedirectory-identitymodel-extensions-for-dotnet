@@ -124,23 +124,34 @@
     <Compile Include="WsFederationMessageTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="JsonWebKeysBadBase64DataFile.json">
+    <None Include="google-certs.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="JsonWebKeysBadX509DataFile.json">
+    <None Include="google-openid-configuration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="JsonWebKeysSingleX509DataFile.json">
+    <None Include="JsonWebKeySet.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="JsonWebKeysFile.json">
+    <None Include="JsonWebKeySetBadBase64Data.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="OpenIdConnectMetadataBadX509DataFile.json" />
-    <None Include="OpenIdConnectMetadataFile.json">
+    <None Include="JsonWebKeySetBadX509Data.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="OpenIdConnectMetadataJsonWebKeysBadUriFile.json">
+    <None Include="JsonWebKeySetSingleX509Data.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenIdConnectMetadata.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenIdConnectMetadataBadBase64Data.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenIdConnectMetadataBadX509Data.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OpenIdConnectMetadataJsonWebKeysBadUri.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
