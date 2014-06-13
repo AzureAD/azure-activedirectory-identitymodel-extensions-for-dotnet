@@ -91,7 +91,6 @@ namespace System.IdentityModel.Tokens
         /// <remarks>2 MB (mega bytes).</remarks>
         public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 1024 * 2; // 2meg.
 
-
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
         /// </summary>
@@ -486,7 +485,6 @@ namespace System.IdentityModel.Tokens
             get;
             set;
         }
-
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.

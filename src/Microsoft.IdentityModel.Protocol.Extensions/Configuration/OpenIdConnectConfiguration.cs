@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IdentityModel.Tokens;
@@ -34,6 +35,7 @@ namespace Microsoft.IdentityModel.Protocols
         private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
         private Collection<string> _responseTypesSupported = new Collection<string>();
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
+        private Collection<SecurityToken> _signingTokens = new Collection<SecurityToken>();
         private Collection<string> _subjectTypesSupported = new Collection<string>();
 
         static OpenIdConnectConfiguration()
@@ -52,11 +54,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing the metadata</param>
+        /// <exception cref="ArgumentNullException">if 'json' is null or whitespace.</exception>
         public OpenIdConnectConfiguration(string json)
         {
             if(string.IsNullOrWhiteSpace(json))
             {
-                return;
+                throw new ArgumentNullException("json");
             }
 
             SetFromDictionary(_javaScriptSerializer.Deserialize<Dictionary<string, object>>(json));
@@ -65,9 +68,15 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from an <see cref="IDictionary{TKey, TValue}"/> string.
         /// </summary>
-        /// <param name="dictionary">a <see cref="IDictionary{TKey, TValue}"/>jscontaining the metadata</param>
+        /// <param name="dictionary">a <see cref="IDictionary{TKey, TValue}"/>json containing the configuration data.</param>
+        /// <exception cref="ArgumentNullException">if 'dictionary' is null.</exception>
         public OpenIdConnectConfiguration(IDictionary<string, object> dictionary)
         {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException("dictionary");
+            }
+
             SetFromDictionary(dictionary);
         }
 
@@ -201,6 +210,17 @@ namespace Microsoft.IdentityModel.Protocols
             get
             {
                 return _signingKeys;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ICollection{SecurityToken}"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// </summary>
+        public ICollection<SecurityToken> SigningTokens
+        {
+            get
+            {
+                return _signingTokens;
             }
         }
 
