@@ -870,25 +870,26 @@ namespace System.IdentityModel.Tokens
                 mappedAlgorithm = InboundAlgorithmMap[mappedAlgorithm];
             }
 
+            SecurityKeyIdentifier ski = jwt.Header.SigningKeyIdentifier;
             // if a securityKeyIdentifier exists, look for match.
-            if (jwt.Header.SigningKeyIdentifier.Count > 0)
+            if (ski.Count > 0)
             {
                 SecurityKey securityKey = null;
 
                 if (validationParameters.IssuerSigningKeyResolver != null)
                 {
-                    securityKey = validationParameters.IssuerSigningKeyResolver(token, jwt, jwt.Header.SigningKeyIdentifier, validationParameters);
+                    securityKey = validationParameters.IssuerSigningKeyResolver(token, jwt, ski, validationParameters);
                     if (securityKey == null)
                     {
-                        throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10505, jwt.Header.SigningKeyIdentifier, jwt.ToString()));
+                        throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10505, ski, jwt.ToString()));
                     }
                 }
                 else
                 {
-                    securityKey = ResolveIssuerSigningKey(token, jwt, jwt.Header.SigningKeyIdentifier, validationParameters);
+                    securityKey = ResolveIssuerSigningKey(token, jwt, ski, validationParameters);
                     if (securityKey == null)
                     {
-                        throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10500, jwt.Header.SigningKeyIdentifier, jwt.ToString()));
+                        throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10500, ski, jwt.ToString()));
                     }
                 }
 
@@ -914,7 +915,7 @@ namespace System.IdentityModel.Tokens
                 StringBuilder keysAttempted = new StringBuilder();
 
                 // Try all keys since there is no keyidentifier
-                foreach (SecurityKey securityKey in GetAllKeys(token, jwt, jwt.Header.SigningKeyIdentifier, validationParameters))
+                foreach (SecurityKey securityKey in GetAllKeys(token, jwt, ski, validationParameters))
                 {
                     try
                     {

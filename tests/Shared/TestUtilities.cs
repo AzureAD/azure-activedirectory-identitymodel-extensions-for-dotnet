@@ -42,6 +42,19 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public static class TestUtilities
     {
+
+        /// <summary>
+        /// Gets a named property on an object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="field"></param>
+        public static object GetField(object obj, string field)
+        {
+            Type type = obj.GetType();
+            FieldInfo fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
+            return  fieldInfo.GetValue(obj);
+        }
+
         /// <summary>
         /// Gets a named property on an object
         /// </summary>
@@ -57,7 +70,6 @@ namespace Microsoft.IdentityModel.Test
 
             return propertyInfo.GetValue(obj);
         }
-
 
         /// <summary>
         /// Set a named property on an object
@@ -237,8 +249,6 @@ namespace Microsoft.IdentityModel.Test
                 }
             }
         }
-
-
 
         public static string SerializeAsSingleCommaDelimitedString(IEnumerable<string> strings)
         {

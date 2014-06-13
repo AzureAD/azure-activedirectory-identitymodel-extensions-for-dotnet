@@ -66,7 +66,7 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "keyIdentifier");
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "id");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", null);
@@ -77,10 +77,10 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "IDX10000:");
+            expectedException = ExpectedException.ArgumentNullException(substringExpected: "name");
             try
             {
-                namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause(name: "     ", keyIdentifier: "keyIdentifier");
+                namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause(name: "     ", id: "id");
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -88,7 +88,7 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            expectedException = new ExpectedException(typeExpected: typeof(ArgumentException), substringExpected: "IDX10000:");
+            expectedException = ExpectedException.ArgumentNullException(substringExpected: "id");
             try
             {
                 namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", "     ");
@@ -123,7 +123,7 @@ namespace System.IdentityModel.Test
 
             NamedKeySecurityKeyIdentifierClause namedKeySecurityKeyIdentifierClause = new NamedKeySecurityKeyIdentifierClause("name", "keyidentifier");
             Assert.IsTrue("name" == namedKeySecurityKeyIdentifierClause.Name);
-            Assert.IsTrue("keyidentifier" == namedKeySecurityKeyIdentifierClause.KeyIdentifier);
+            Assert.IsTrue("keyidentifier" == namedKeySecurityKeyIdentifierClause.Id);
 
             // *** Matches (null)
             ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "keyIdentifierClause");

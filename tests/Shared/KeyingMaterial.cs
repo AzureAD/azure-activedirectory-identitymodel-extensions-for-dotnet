@@ -75,8 +75,11 @@ namespace Microsoft.IdentityModel.Test
 
         // RSA securityToken
         public static RsaSecurityToken RsaToken_2048 = new RsaSecurityToken( AsymmetricKey_2048.GetAsymmetricAlgorithm( SecurityAlgorithms.RsaSha256Signature, false ) as RSA );
-        public static RsaSecurityKey AsymmetricKey_Rsa_2048 = RsaToken_2048.SecurityKeys[0] as RsaSecurityKey;
-        public static SigningCredentials RSASigningCreds_2048  = new SigningCredentials( AsymmetricKey_Rsa_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );
+        public static RsaSecurityToken RsaToken_Private2048 = new RsaSecurityToken(AsymmetricKey_2048.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSA);
+        public static RsaSecurityToken RsaToken_Public_2048 = new RsaSecurityToken(AsymmetricKey_2048.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false) as RSA);
+        public static RsaSecurityKey RsaSecurityKey_2048 = RsaToken_2048.SecurityKeys[0] as RsaSecurityKey;
+        public static RsaSecurityKey RsaSecurityKey_Private2048 = RsaToken_Private2048.SecurityKeys[0] as RsaSecurityKey;
+        public static SigningCredentials RSASigningCreds_2048  = new SigningCredentials( RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );
 
         // These signingCreds have algorithms and hashs that are not supported
         public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha2      = new SigningCredentials( DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );

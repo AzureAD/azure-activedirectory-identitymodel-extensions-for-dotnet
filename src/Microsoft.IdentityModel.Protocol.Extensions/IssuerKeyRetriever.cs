@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="keyIdentifier"></param>
+        /// <param name="id"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
