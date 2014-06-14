@@ -153,7 +153,7 @@ namespace System.IdentityModel.Test
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 30)
-                Assert.Fail("Number of public fields has changed from 9 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of public fields has changed from 30 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
