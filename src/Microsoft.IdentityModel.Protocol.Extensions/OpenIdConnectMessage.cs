@@ -110,7 +110,14 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes an instance of <see cref="AuthenticationProtocolMessage"/> class with a specific issuerAddress.
         /// </summary>
-        public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) {}
+        public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) 
+        {
+            Nonce = OpenIdConnectProtocolValidator.GenerateNonce();
+            RequestType = OpenIdConnectRequestType.AuthenticationRequest;
+            ResponseMode = DefaultResponseMode;
+            ResponseType = DefaultResponseType;
+            Scope = DefaultScope;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
@@ -190,12 +197,6 @@ namespace Microsoft.IdentityModel.Protocols
         public string CreateIdTokenUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
-            openIdConnectMessage.Nonce = Guid.NewGuid().ToString();
-            openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
-            openIdConnectMessage.ResponseMode = DefaultResponseMode;
-            openIdConnectMessage.ResponseType = DefaultResponseType;
-            openIdConnectMessage.Scope = DefaultScope;
-
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
