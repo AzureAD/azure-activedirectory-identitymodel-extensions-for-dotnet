@@ -147,7 +147,9 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (algorithmMap != null)
             {
-                algorithmMap.TryGetValue(algorithm, out algorithm);
+                string alg = string.Empty;
+                if (algorithmMap.TryGetValue(algorithm, out alg))
+                    algorithm = alg;
             }
 
             try

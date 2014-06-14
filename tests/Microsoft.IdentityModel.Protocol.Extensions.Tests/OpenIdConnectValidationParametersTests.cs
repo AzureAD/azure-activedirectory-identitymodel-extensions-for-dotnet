@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Test
             }
 
             Assert.IsNotNull(validationParameters.AlgorithmMap);
-            Assert.AreEqual(validationParameters.AlgorithmMap.Count, 0);
+            Assert.AreEqual(validationParameters.AlgorithmMap.Count, 9);
 
             try
             {

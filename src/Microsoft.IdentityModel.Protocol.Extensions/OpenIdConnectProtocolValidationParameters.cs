@@ -30,7 +30,19 @@ namespace Microsoft.IdentityModel.Protocols
     public class OpenIdConnectProtocolValidationParameters
     {
         private string _responseType;
-        private IDictionary<string, string> _algorithmMap = new Dictionary<string, string>();
+        private IDictionary<string, string> _algorithmMap = 
+            new Dictionary<string, string>
+            {
+                { JwtAlgorithms.ECDSA_SHA256, "SHA256" },
+                { JwtAlgorithms.RSA_SHA256, "SHA256" },
+                { JwtAlgorithms.HMAC_SHA256, "SHA256" },
+                { JwtAlgorithms.ECDSA_SHA384, "SHA384" },
+                { JwtAlgorithms.RSA_SHA384, "SHA384" },
+                { JwtAlgorithms.HMAC_SHA384, "SHA384" },
+                { JwtAlgorithms.ECDSA_SHA512, "SHA512" },
+                { JwtAlgorithms.RSA_SHA512, "SHA512" },
+                { JwtAlgorithms.HMAC_SHA512, "SHA512" },
+          };
 
         /// <summary>
         /// Creates an instance of <see cref="OpenIdConnectProtocolValidationParameters"/> with defaults:
