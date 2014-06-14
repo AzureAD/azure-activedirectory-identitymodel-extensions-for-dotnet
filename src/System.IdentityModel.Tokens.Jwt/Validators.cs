@@ -27,7 +27,7 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// AudienceValidator
     /// </summary>
-    public class Validators
+    public static class Validators
     {
         /// <summary>
         /// Determines if the audiences found in a <see cref="SecurityToken"/> are valid.
