@@ -85,17 +85,6 @@ namespace Microsoft.IdentityModel.Protocols
         }
         
         /// <summary>
-        /// Gets or sets the 'authorizationcode'.
-        /// </summary>
-        public string AuthorizationCode { get; set; }
-        
-        /// <summary>
-        /// Gets or sets the 'nonce'
-        /// </summary>
-        [DefaultValue((string)null)]
-        public string Nonce { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating if an 'acr' claim is required.
         /// </summary>
         [DefaultValue(false)]

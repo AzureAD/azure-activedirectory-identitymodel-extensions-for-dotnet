@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token: '{0}', did not match the expected nonce: '{1}'.\njwt: '{2}'.";
         public const string IDX10302 = "IDX10302: The 'c_hash' claim was not a JSON string but multivalued, jwt: '{0}'.";
         public const string IDX10303 = "IDX10303: The 'c_hash' claim was null or an empty string, jwt: '{0}'.";
-        public const string IDX10304 = "IDX10304: The c_hash: '{0}' in the jwt did not validate with the authorizationCode: '{1}', algorithm: '{2}', jwt: '{3}'. The 'c_hash' should not equal the 'authorizationCode'.";
+        public const string IDX10304 = "IDX10304: The c_hash: '{0}' in the jwt did not validate with the authorizationCode: '{1}', algorithm: '{2}', jwt: '{3}'.";
         public const string IDX10305 = "IDX10305: The 'nonce' found in the jwt token: '{0}',  did not match the expected nonce: '{1}', hwt: '{3}'.";
         public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a .Net hashAlgorithm, jwt: '{1}'. See inner exception for details.\nPossible solution is to ensure that the algorithm specified in the 'JwtHeader' is understood by .Net. You can make additions to the OpenIdConnectProtocolValidationParameters.AlgorithmMap to map algorithms from the 'Jwt' space to .Net. In .Net you can also make use of 'CryptoConfig' to map algorithms.";
         public const string IDX10307 = "IDX10307: The algorithm: '{0}' specified in the jwt header resulted in a hashAlgorithm that was null,  jwt: '{1}'.";

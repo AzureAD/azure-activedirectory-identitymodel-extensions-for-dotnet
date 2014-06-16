@@ -22,8 +22,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-using System.Xml;
-using Saml2SecurityTokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 using SamlSecurityTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
@@ -301,23 +299,6 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
         }
-
-        //private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, SamlSecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
-        //{
-        //    ClaimsPrincipal princiapl = null;
-        //    try
-        //    {
-        //        SecurityToken validatedToken;
-        //        princiapl = samlSecurityTokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
-        //        expectedException.ProcessNoException();
-        //    }
-        //    catch (Exception exception)
-        //    {
-        //        expectedException.ProcessException(exception);
-        //    }
-
-        //    return princiapl;
-        //}
 
         private class PublicSamlSecurityTokenHandler : SamlSecurityTokenHandler
         {

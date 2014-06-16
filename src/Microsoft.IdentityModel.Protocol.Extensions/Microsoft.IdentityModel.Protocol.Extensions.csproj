@@ -88,6 +88,7 @@
     <Compile Include="OpenIdConnectProtocolException.cs" />
     <Compile Include="OpenIdConnectProtocolInvalidCHashException.cs" />
     <Compile Include="OpenIdConnectProtocolInvalidNonceException.cs" />
+    <Compile Include="OpenIdConnectProtocolValidationContext.cs" />
     <Compile Include="OpenIdConnectProtocolValidator.cs" />
     <Compile Include="OpenIdConnectProtocolValidationParameters.cs" />
     <Compile Include="OpenIdConnectProtocolSessionContext.cs" />

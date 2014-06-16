@@ -45,18 +45,18 @@ namespace Microsoft.IdentityModel.Protocols
         /// Validates that a <see cref="JwtSecurityToken"/> is valid as per http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
         /// <param name="jwt">the <see cref="JwtSecurityToken"/>to validate.</param>
-        /// <param name="validationParameters">the <see cref="OpenIdConnectProtocolValidationParameters"/> to use when validating.</param>
+        /// <param name="validationContext">the <see cref="OpenIdConnectProtocolValidationContext"/> to use for validating.</param>
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
         /// <exception cref="OpenIdConnectProtocolException">if the <see cref="JwtSecurityToken"/> is missing any required claims as per: http://openid.net/specs/openid-connect-core-1_0.html#IDToken </exception>
         /// <remarks><see cref="OpenIdConnectProtocolValidationParameters.Nonce"/> and <see cref="OpenIdConnectProtocolValidationParameters.AuthorizationCode"/> will be validated if they are not 'null' or 'whitespace'.</remarks>
-        public static void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationParameters validationParameters)
+        public static void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)
                 throw new ArgumentNullException("jwt");
 
-            if (validationParameters == null)
-                throw new ArgumentNullException("validationParameters");
+            if (validationContext == null)
+                throw new ArgumentNullException("validationContext");
 
             // required claims
             if (jwt.Payload.Aud.Count == 0)
@@ -74,6 +74,8 @@ namespace Microsoft.IdentityModel.Protocols
             if (jwt.Payload.Sub == null)
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt));
 
+            OpenIdConnectProtocolValidationParameters validationParameters = validationContext.OpenIdConnectProtocolValidationParameters;
+
             // optional claims
             if (validationParameters.RequireAcr && string.IsNullOrWhiteSpace(jwt.Payload.Acr))
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, jwt));
@@ -87,14 +89,14 @@ namespace Microsoft.IdentityModel.Protocols
             if (validationParameters.RequireAzp && string.IsNullOrWhiteSpace(jwt.Payload.Azp))
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt));
 
-            if (validationParameters.RequireNonce && string.IsNullOrWhiteSpace(validationParameters.Nonce))
+            if (validationParameters.RequireNonce && string.IsNullOrWhiteSpace(validationContext.Nonce))
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311, jwt));
 
-            if (!string.IsNullOrWhiteSpace(validationParameters.Nonce))
-                ValidateNonce(jwt, validationParameters.Nonce);
+            if (!string.IsNullOrWhiteSpace(validationContext.Nonce))
+                ValidateNonce(jwt, validationContext.Nonce);
 
-            if (!string.IsNullOrWhiteSpace(validationParameters.AuthorizationCode))
-                ValidateCHash(jwt, validationParameters.AuthorizationCode, validationParameters.AlgorithmMap);
+            if (!string.IsNullOrWhiteSpace(validationContext.AuthorizationCode))
+                ValidateCHash(jwt, validationContext.AuthorizationCode, validationParameters.AlgorithmMap);
         }
 
         /// <summary>
