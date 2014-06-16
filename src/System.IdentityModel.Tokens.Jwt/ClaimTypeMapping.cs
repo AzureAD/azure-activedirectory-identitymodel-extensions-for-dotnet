@@ -128,14 +128,7 @@ namespace System.IdentityModel.Tokens
                 longToShortClaimTypeMapping.Add(kv.Value, kv.Key);
             }
 
-            inboundClaimFilter = new HashSet<string>()
-            {
-                "aud",
-                "exp",
-                "iat",
-                "iss",
-                "nbf",
-            };
+            inboundClaimFilter = new HashSet<string>();
         }
 
         /// <summary>

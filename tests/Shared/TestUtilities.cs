@@ -19,7 +19,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Test
@@ -36,12 +38,66 @@ namespace Microsoft.IdentityModel.Test
         public object Object { get; set; }
     }
 
+    public class TokenReplayCache : IExpirableNonceCache
+    {
+
+        public bool OnAddReturnValue { get; set; }
+        
+        public bool OnFindReturnValue { get; set; }
+
+        public bool TryAdd(string nonce, DateTime expiresAt)
+        {
+            return OnAddReturnValue;
+        }
+
+        public bool TryFind(string nonce)
+        {
+            return OnFindReturnValue;
+        }
+    }
+
     /// <summary>
     /// Mixed bag of funtionality:
     ///     Generically calling Properties
     /// </summary>
     public static class TestUtilities
     {
+        /// <summary>
+        /// Calls all public instance and static properties on an object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="testcase">contains info about the current test case</param>
+        public static void CallAllPublicInstanceAndStaticPropertyGets(object obj, string testcase)
+        {
+            if (obj == null)
+            {
+                Console.WriteLine(string.Format("Entering: '{0}', obj is null, have to return.  Is the Testcase: '{1}' right?", MethodBase.GetCurrentMethod(), testcase ?? "testcase is null"));
+                return;
+            }
+
+            Type type = obj.GetType();
+            Console.WriteLine(string.Format("Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, MethodBase.GetCurrentMethod()));
+
+            // call get all public static properties of MyClass type
+
+            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+
+            // Touch each public property
+            foreach (PropertyInfo propertyInfo in propertyInfos)
+            {
+                try
+                {
+                    if (propertyInfo.GetMethod != null)
+                    {
+                        object retval = propertyInfo.GetValue(obj, null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Assert.Fail(string.Format("Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex));
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a named property on an object
@@ -69,90 +125,6 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
 
             return propertyInfo.GetValue(obj);
-        }
-
-        /// <summary>
-        /// Set a named property on an object
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="property"></param>
-        /// <param name="propertyValue"></param>
-        public static void SetProperty(object obj, string property, object propertyValue)
-        {
-            Type type = obj.GetType();
-            PropertyInfo propertyInfo = type.GetProperty(property);
-
-            Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
-
-            object retval = propertyInfo.GetValue(obj);
-            if (propertyInfo.CanWrite)
-            {
-                propertyInfo.SetValue(obj, propertyValue);
-            }
-            else
-            {
-                Assert.Fail("property 'set' is not found: " + property + ", type: " + type.ToString());
-            }
-        }
-
-        /// <summary>
-        /// Gets and sets a named property on an object. Checks: initial value.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="property"></param>
-        /// <param name="initialPropertyValue"></param>
-        /// <param name="setPropertyValue"></param>
-        public static void GetSet(object obj, string property, object initialPropertyValue, object[] setPropertyValues)
-        {
-            Type type = obj.GetType();
-            PropertyInfo propertyInfo = type.GetProperty(property);
-
-            Assert.IsNotNull(propertyInfo, "property get is not found: " + property + ", type: " + type.ToString());
-
-            object retval = propertyInfo.GetValue(obj);
-            Assert.IsTrue(initialPropertyValue == retval);
-
-            if (propertyInfo.CanWrite)
-            {
-                foreach (object propertyValue in setPropertyValues)
-                {
-                    propertyInfo.SetValue(obj, propertyValue);
-                    retval = propertyInfo.GetValue(obj);
-                    Assert.IsTrue(propertyValue == retval);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Sets a property, then checks it, checking for an expected exception.
-        /// </summary>
-        /// <param name="obj">object that has a 'setter'.</param>
-        /// <param name="property">the name of the property.</param>
-        /// <param name="propertyValue">value to set on the property.</param>
-        /// <param name="expectedException">checks that exception is correct.</param>
-        public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException)
-        {
-            Assert.IsNotNull(obj, "'obj' can not be null");
-            Assert.IsFalse(string.IsNullOrWhiteSpace(property), "'property' can not be null or whitespace");
-
-            Type type = obj.GetType();
-            PropertyInfo propertyInfo = type.GetProperty(property);
-
-            Assert.IsNotNull(propertyInfo, "'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
-            Assert.IsTrue(propertyInfo.CanWrite, "can not write to property: '" + property + "', type: '" + type.ToString() + "'");
-
-            try
-            {
-                propertyInfo.SetValue(obj, propertyValue);
-                object retval = propertyInfo.GetValue(obj);
-                Assert.AreEqual(propertyValue, retval);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                // pass inner exception
-                expectedException.ProcessException(exception.InnerException);
-            }
         }
 
         /// <summary>
@@ -214,38 +186,29 @@ namespace Microsoft.IdentityModel.Test
         }
 
         /// <summary>
-        /// Calls all public instance and static properties on an object
+        /// Gets and sets a named property on an object. Checks: initial value.
         /// </summary>
         /// <param name="obj"></param>
-        /// <param name="testcase">contains info about the current test case</param>
-        public static void CallAllPublicInstanceAndStaticPropertyGets(object obj, string testcase)
+        /// <param name="property"></param>
+        /// <param name="initialPropertyValue"></param>
+        /// <param name="setPropertyValue"></param>
+        public static void GetSet(object obj, string property, object initialPropertyValue, object[] setPropertyValues)
         {
-            if (obj == null)
-            {
-                Console.WriteLine(string.Format("Entering: '{0}', obj is null, have to return.  Is the Testcase: '{1}' right?", MethodBase.GetCurrentMethod(), testcase ?? "testcase is null"));
-                return;
-            }
-
             Type type = obj.GetType();
-            Console.WriteLine(string.Format("Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, MethodBase.GetCurrentMethod()));
+            PropertyInfo propertyInfo = type.GetProperty(property);
 
-            // call get all public static properties of MyClass type
+            Assert.IsNotNull(propertyInfo, "property get is not found: " + property + ", type: " + type.ToString());
 
-            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            object retval = propertyInfo.GetValue(obj);
+            Assert.IsTrue(initialPropertyValue == retval);
 
-            // Touch each public property
-            foreach (PropertyInfo propertyInfo in propertyInfos)
+            if (propertyInfo.CanWrite)
             {
-                try
+                foreach (object propertyValue in setPropertyValues)
                 {
-                    if (propertyInfo.GetMethod != null)
-                    {
-                        object retval = propertyInfo.GetValue(obj, null);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail(string.Format("Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex));
+                    propertyInfo.SetValue(obj, propertyValue);
+                    retval = propertyInfo.GetValue(obj);
+                    Assert.IsTrue(propertyValue == retval);
                 }
             }
         }
@@ -278,6 +241,100 @@ namespace Microsoft.IdentityModel.Test
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Sets a property, then checks it, checking for an expected exception.
+        /// </summary>
+        /// <param name="obj">object that has a 'setter'.</param>
+        /// <param name="property">the name of the property.</param>
+        /// <param name="propertyValue">value to set on the property.</param>
+        /// <param name="expectedException">checks that exception is correct.</param>
+        public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException)
+        {
+            Assert.IsNotNull(obj, "'obj' can not be null");
+            Assert.IsFalse(string.IsNullOrWhiteSpace(property), "'property' can not be null or whitespace");
+
+            Type type = obj.GetType();
+            PropertyInfo propertyInfo = type.GetProperty(property);
+
+            Assert.IsNotNull(propertyInfo, "'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
+            Assert.IsTrue(propertyInfo.CanWrite, "can not write to property: '" + property + "', type: '" + type.ToString() + "'");
+
+            try
+            {
+                propertyInfo.SetValue(obj, propertyValue);
+                object retval = propertyInfo.GetValue(obj);
+                Assert.AreEqual(propertyValue, retval);
+                expectedException.ProcessNoException();
+            }
+            catch (Exception exception)
+            {
+                // pass inner exception
+                expectedException.ProcessException(exception.InnerException);
+            }
+        }
+
+        /// <summary>
+        /// Set a named property on an object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="property"></param>
+        /// <param name="propertyValue"></param>
+        public static void SetProperty(object obj, string property, object propertyValue)
+        {
+            Type type = obj.GetType();
+            PropertyInfo propertyInfo = type.GetProperty(property);
+
+            Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
+
+            object retval = propertyInfo.GetValue(obj);
+            if (propertyInfo.CanWrite)
+            {
+                propertyInfo.SetValue(obj, propertyValue);
+            }
+            else
+            {
+                Assert.Fail("property 'set' is not found: " + property + ", type: " + type.ToString());
+            }
+        }
+  
+        public static ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)
+        {
+            ClaimsPrincipal retVal = null;
+            try
+            {
+                SecurityToken validatedToken;
+                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
+                expectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+
+            return retVal;
+        }
+
+        public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
+        {
+            Microsoft.IdentityModel.Test.TokenReplayCache replayCache =
+               new Microsoft.IdentityModel.Test.TokenReplayCache()
+               {
+                   OnAddReturnValue = true,
+                   OnFindReturnValue = false,
+               };
+
+            validationParameters.TokenReplayCache = replayCache;
+            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.NoExceptionExpected);
+
+            replayCache.OnFindReturnValue = true;
+            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.SecurityTokenReplayDetected());
+
+            replayCache.OnFindReturnValue = false;
+            replayCache.OnAddReturnValue = false;
+            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
+
         }
     }
 }

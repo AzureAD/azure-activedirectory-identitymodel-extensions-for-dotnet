@@ -600,19 +600,18 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Reads and validates a token encoded in JSON Compact serialized format.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
-        /// using 'JSON Web Signature' (JWS).</param>
+        /// <param name="securityToken">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed using 'JSON Web Signature' (JWS).</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
-        /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentException">'token.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
-        public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
-            if (string.IsNullOrWhiteSpace(token))
+            if (string.IsNullOrWhiteSpace(securityToken))
             {
-                throw new ArgumentNullException("token");
+                throw new ArgumentNullException("securityToken");
             }
 
             if (validationParameters == null)
@@ -620,12 +619,12 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("validationParameters");
             }
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, token.Length, MaximumTokenSizeInBytes));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
 
-            JwtSecurityToken jwt = this.ValidateSignature(token, validationParameters);
+            JwtSecurityToken jwt = this.ValidateSignature(securityToken, validationParameters);
 
             object obj = null;
             DateTime? notBefore = null;
@@ -639,6 +638,8 @@ namespace System.IdentityModel.Tokens
             {
                 expires = new DateTime?(jwt.ValidTo);
             }
+
+            Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
 
             if (validationParameters.LifetimeValidator != null)
             {

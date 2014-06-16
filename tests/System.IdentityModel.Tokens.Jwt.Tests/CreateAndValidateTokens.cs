@@ -126,9 +126,17 @@ namespace System.IdentityModel.Test
                 });
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("aud");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("exp");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("iat");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("iss");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("nbf");
+
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultSymmetricTokenValidationParameters, out validatedToken);
 
             Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), new CompareContext { IgnoreProperties = true, IgnoreSubject = true }));
+
+            JwtSecurityTokenHandler.InboundClaimFilter.Clear();
         }
 
         [TestMethod]

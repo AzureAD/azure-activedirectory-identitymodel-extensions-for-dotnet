@@ -331,6 +331,8 @@ namespace Microsoft.IdentityModel.Tokens
                 expires = samlToken.Assertion.Conditions.NotOnOrAfter;
             }
 
+            Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
+
             if (validationParameters.LifetimeValidator != null)
             {
                 validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
