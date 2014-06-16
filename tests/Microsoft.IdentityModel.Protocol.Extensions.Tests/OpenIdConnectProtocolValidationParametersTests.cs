@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Test
     /// 
     /// </summary>
     [TestClass]
-    public class OpenIdConnectValidationParametersTests
+    public class OpenIdConnectProtocolValidationParametersTests
     {
         public TestContext TestContext { get; set; }
 
@@ -53,21 +53,19 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "4696852e-94e7-4c2b-a768-ce6e7f16e80d")]
         [Description("Tests: GetSets, test covers defaults")]
-        public void OpenIdConnectValidationParameters_GetSets()
+        public void OpenIdConnectProtocolValidationParameters_GetSets()
         {
             OpenIdConnectProtocolValidationParameters validationParameters = new OpenIdConnectProtocolValidationParameters();
             Type type = typeof(OpenIdConnectProtocolValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 9)
-                Assert.Fail("Number of properties has changed from 9 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 7)
+                Assert.Fail("Number of properties has changed from 7 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>> 
                     { 
-                        new KeyValuePair<string, List<object>>("AuthorizationCode", new List<object>{(string)null, "AuthorizationCode", "AuthorizationCode_AuthorizationCode"}),
-                        new KeyValuePair<string, List<object>>("Nonce", new List<object>{(string)null, "Nonce", "Nonce_Nonce"}),
                         new KeyValuePair<string, List<object>>("RequireAcr", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireAmr", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireAuthTime", new List<object>{false, true, false}),

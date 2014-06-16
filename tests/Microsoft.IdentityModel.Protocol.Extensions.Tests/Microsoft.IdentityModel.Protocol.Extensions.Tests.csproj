@@ -113,8 +113,9 @@
     <Compile Include="OpenIdConnectConstantsTests.cs" />
     <Compile Include="OpenIdConnectMessageTests.cs" />
     <Compile Include="OpenIdConnectConfigurationRetrieverTests.cs" />
+    <Compile Include="OpenIdConnectProtocolValidationContextTests.cs" />
+    <Compile Include="OpenIdConnectProtocolValidationParametersTests.cs" />
     <Compile Include="OpenIdConnectProtocolValidatorTests.cs" />
-    <Compile Include="OpenIdConnectValidationParametersTests.cs" />
     <Compile Include="Saml2SecurityTokenHandlerTests.cs" />
     <Compile Include="SamlSecurityTokenHandlerTests.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensionsTests.cs" />
