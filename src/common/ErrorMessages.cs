@@ -66,7 +66,10 @@ namespace Microsoft.IdentityModel
         public const string IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore: '{0}' is after Expires: '{1}'.";
         public const string IDX10225 = "IDX10225: Lifetime validation failed. The token is missing an Expiration Time.\nTokentype: '{0}'.";
         public const string IDX10226 = "IDX10226: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
-        
+        public const string IDX10227 = "IDX10227: TokenValidationParameters.TokenReplayCache is not null, indicating to check for token replay but the security token has no expiration time: token '{0}'.";
+        public const string IDX10228 = "IDX10228: The securityToken has previously been been validated, securityToken: '{0}'.";
+        public const string IDX10229 = "IDX10229: TokenValidationParameters.TokenReplayCache was unable to add the securityToken: '{0}'.";
+
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
         public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token: '{0}', did not match the expected nonce: '{1}'.\njwt: '{2}'.";

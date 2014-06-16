@@ -17,13 +17,12 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Xml;
-
 using Saml2SecurityTokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 using SamlSecurityTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
@@ -197,25 +196,48 @@ namespace Microsoft.IdentityModel.Test
         private void ValidateToken()
         {
             // parameter validation
-            SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
+            SamlSecurityTokenHandler tokenHandler = new SamlSecurityTokenHandler();
             ExpectedException expectedException = ExpectedException.ArgumentNullException(substringExpected: "name: securityToken");
-            ValidateToken(securityToken: null, validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: null, validationParameters: new TokenValidationParameters(), tokenValidator: tokenHandler, expectedException: expectedException);
 
             expectedException = ExpectedException.ArgumentNullException(substringExpected: "name: validationParameters");
-            ValidateToken(securityToken: "s", validationParameters: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: "s", validationParameters: null, tokenValidator: tokenHandler, expectedException: expectedException);
 
             expectedException = ExpectedException.ArgumentException(substringExpected: "IDX10209");
-            samlSecurityTokenHandler.MaximumTokenSizeInBytes = 1;
-            ValidateToken(securityToken: "ss", validationParameters: new TokenValidationParameters(), samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            tokenHandler.MaximumTokenSizeInBytes = 1;
+            TestUtilities.ValidateToken(securityToken: "ss", validationParameters: new TokenValidationParameters(), tokenValidator: tokenHandler, expectedException: expectedException);
 
-            samlSecurityTokenHandler.MaximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-            string samlString = IdentityUtilities.CreateSamlToken();
+            tokenHandler.MaximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+            string samlToken = IdentityUtilities.CreateSamlToken();
+
+
             ValidateAudience();
+
+            SecurityTokenDescriptor tokenDescriptor =
+                new SecurityTokenDescriptor
+                {
+                    AppliesToAddress = IdentityUtilities.DefaultAudience,
+                    Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    SigningCredentials = KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2,
+                    Subject = IdentityUtilities.DefaultClaimsIdentity,
+                    TokenIssuerName = IdentityUtilities.DefaultIssuer,
+                };
+
+            samlToken = IdentityUtilities.CreateSamlToken(tokenDescriptor);
+            TokenValidationParameters validationParameters =
+                new TokenValidationParameters
+                {
+                    IssuerSigningToken = KeyingMaterial.DefaultAsymmetricX509Token_2048,
+                    ValidAudience = IdentityUtilities.DefaultAudience,
+                    ValidIssuer = IdentityUtilities.DefaultIssuer,
+                };
+
+            TestUtilities.ValidateTokenReplay(samlToken, tokenHandler, validationParameters);
         }
 
         private void ValidateAudience()
         {
-            SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
+            SamlSecurityTokenHandler tokenHandler = new SamlSecurityTokenHandler();
             ExpectedException expectedException;
 
             string samlString = IdentityUtilities.CreateSamlToken();
@@ -230,27 +252,28 @@ namespace Microsoft.IdentityModel.Test
             // Do not validate audience
             tokenValidationParameters.ValidateAudience = false;
             expectedException = ExpectedException.NoExceptionExpected;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+
 
             tokenValidationParameters.ValidateAudience = true;
             expectedException = ExpectedException.SecurityTokenInvalidAudienceException();
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
             tokenValidationParameters.ValidAudience = "John";
             expectedException = ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10214:");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // UriKind.Absolute, no match.
             tokenValidationParameters.ValidateAudience = true;
             tokenValidationParameters.ValidAudience = IdentityUtilities.NotDefaultAudience;
             expectedException = ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10214:");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             expectedException = ExpectedException.NoExceptionExpected;
             tokenValidationParameters.ValidAudience = IdentityUtilities.DefaultAudience;
             tokenValidationParameters.ValidAudiences = null;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // !UriKind.Absolute
             List<string> audiences = new List<string> { "John", "Paul", "George", "Ringo" };
@@ -258,7 +281,7 @@ namespace Microsoft.IdentityModel.Test
             tokenValidationParameters.ValidAudiences = audiences;
             tokenValidationParameters.ValidateAudience = false;
             expectedException = ExpectedException.NoExceptionExpected;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // UriKind.Absolute, no match
             audiences = new List<string> { "http://www.John.com", "http://www.Paul.com", "http://www.George.com", "http://www.Ringo.com", "    " };
@@ -266,35 +289,35 @@ namespace Microsoft.IdentityModel.Test
             tokenValidationParameters.ValidAudiences = audiences;
             tokenValidationParameters.ValidateAudience = false;
             expectedException = ExpectedException.NoExceptionExpected;
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
             expectedException = ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10214");
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             tokenValidationParameters.ValidateAudience = true;
             expectedException = ExpectedException.NoExceptionExpected;
             audiences.Add(IdentityUtilities.DefaultAudience);
-            ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
         }
 
-        private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, SamlSecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
-        {
-            ClaimsPrincipal princiapl = null;
-            try
-            {
-                SecurityToken validatedToken;
-                princiapl = samlSecurityTokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                expectedException.ProcessException(exception);
-            }
+        //private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, SamlSecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
+        //{
+        //    ClaimsPrincipal princiapl = null;
+        //    try
+        //    {
+        //        SecurityToken validatedToken;
+        //        princiapl = samlSecurityTokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
+        //        expectedException.ProcessNoException();
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        expectedException.ProcessException(exception);
+        //    }
 
-            return princiapl;
-        }
+        //    return princiapl;
+        //}
 
         private class PublicSamlSecurityTokenHandler : SamlSecurityTokenHandler
         {

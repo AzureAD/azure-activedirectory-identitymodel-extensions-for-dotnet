@@ -159,11 +159,12 @@ namespace Microsoft.IdentityModel.Test
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
-
+       
         public static ExpectedException SignatureVerificationFailedException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeExpected: typeof(SignatureVerificationFailedException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
+
         public static ExpectedException SecurityTokenNoExpirationException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenNoExpirationException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
@@ -172,6 +173,16 @@ namespace Microsoft.IdentityModel.Test
         public static ExpectedException SecurityTokenNotYetValidException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenNotYetValidException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
+        public static ExpectedException SecurityTokenReplayAddFailed(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(SecurityTokenReplayAddFailedException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
+        public static ExpectedException SecurityTokenReplayDetected(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(SecurityTokenReplayDetectedException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }                
 
         public static ExpectedException SecurityTokenSignatureKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)

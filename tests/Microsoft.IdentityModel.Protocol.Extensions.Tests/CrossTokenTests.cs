@@ -64,6 +64,12 @@ namespace Microsoft.IdentityModel.Test
             SMSaml2TokenHandler smSaml2Handler = new SMSaml2TokenHandler();
             SMSamlTokenHandler smSamlHandler = new SMSamlTokenHandler();
 
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("aud");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("exp");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("iat");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("iss");
+            JwtSecurityTokenHandler.InboundClaimFilter.Add("nbf");
+
             string jwtToken = IdentityUtilities.CreateJwtToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, jwtHandler);
 
             // saml tokens created using Microsoft.IdentityModel.Extensions
@@ -88,6 +94,8 @@ namespace Microsoft.IdentityModel.Test
             // true = ignore subject, claims have a backpointer to their ClaimsIdentity.  Most of the time this will be different as we are comparing two different ClaimsIdentities.
             // true = ignore properties of claims, any mapped claims short to long for JWT's will have a property that represents the short type.
             Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(jwtPrincipal, imSaml2Principal, new CompareContext{IgnoreType = false, IgnoreSubject = true, IgnoreProperties=true}));
+
+            JwtSecurityTokenHandler.InboundClaimFilter.Clear();
         }
 
         private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)

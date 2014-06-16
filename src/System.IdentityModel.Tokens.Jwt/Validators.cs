@@ -148,6 +148,32 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Validates the <see cref="SecurityKey"/> that signed a <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <exception cref="ArgumentNullException"> if 'vaidationParameters' is null.</exception>
+        public static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            if (validationParameters == null)
+            {
+                throw new ArgumentNullException("validationParameters");
+            }
+
+            if (!validationParameters.ValidateIssuerSigningKey)
+            {
+                return;
+            }
+
+            X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
+            if (x509SecurityKey != null)
+            {
+                //validationParameters.CertificateValidator.Validate(x509SecurityKey.Certificate);
+            }
+        }
+
+        /// <summary>
         /// Validates the lifetime of a <see cref="SecurityToken"/>.
         /// </summary>
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
@@ -195,30 +221,36 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Validates the <see cref="SecurityKey"/> that signed a <see cref="SecurityToken"/>.
+        /// Validates if a token has been replayed.
         /// </summary>
-        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+        /// <param name="expirationTime">When does the security token expire.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException"> if 'vaidationParameters' is null.</exception>
-        public static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        /// <exception cref="ArgumentNullException">if 'securityToken' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'validationParameters' is null or whitespace.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException">if <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
+        /// <exception cref="SecurityTokenReplayDetectedException">if the 'securityToken' is found in the cache.</exception>
+        /// <exception cref="SecurityTokenReplayAddFailedException">if the 'securityToken' could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
+        public static void ValidateTokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters)
         {
+            if (string.IsNullOrWhiteSpace(securityToken))
+                throw new ArgumentNullException("securityToken");
+
             if (validationParameters == null)
-            {
                 throw new ArgumentNullException("validationParameters");
-            }
 
-            if (!validationParameters.ValidateIssuerSigningKey)
+            // check if token if replay cache is set, then there must be an expiration time.
+            if (validationParameters.TokenReplayCache != null)
             {
-                return;
-            }
+                if (!expirationTime.HasValue)
+                    throw new SecurityTokenNoExpirationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10227, securityToken));
+        
+                if (validationParameters.TokenReplayCache.TryFind(securityToken))
+                    throw new SecurityTokenReplayDetectedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10228, securityToken));
 
-            X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
-            if (x509SecurityKey != null)
-            {
-                //validationParameters.CertificateValidator.Validate(x509SecurityKey.Certificate);
+                if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
+                    throw new SecurityTokenReplayAddFailedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10229, securityToken));
             }
         }
-
     }
 }

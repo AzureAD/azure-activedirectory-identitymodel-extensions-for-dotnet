@@ -90,6 +90,7 @@
     <Compile Include="SecurityTokenInvalidIssuerException.cs" />
     <Compile Include="SecurityTokenInvalidLifetimeException.cs" />
     <Compile Include="SecurityTokenNoExpirationException.cs" />
+    <Compile Include="SecurityTokenReplayAddFailedException.cs" />
     <Compile Include="SecurityTokenSignatureKeyNotFoundException.cs" />
     <Compile Include="SignatureProvider.cs" />
     <Compile Include="SignatureProviderFactory.cs" />
