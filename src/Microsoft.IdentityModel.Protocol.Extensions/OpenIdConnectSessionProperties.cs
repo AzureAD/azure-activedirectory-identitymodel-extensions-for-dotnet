@@ -26,11 +26,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Property defined for 'check_session_iframe'.
         /// </summary>
-        public const string CheckSessionIFrameProperty = ".checkSessionIFrame";
+        public const string CheckSessionIFrame = ".checkSessionIFrame";
    
         /// <summary>
         /// Property defined for 'session state'
         /// </summary>
-        public const string SessionStateProperty = ".sessionState";
+        public const string SessionState = ".sessionState";
     }
 }
