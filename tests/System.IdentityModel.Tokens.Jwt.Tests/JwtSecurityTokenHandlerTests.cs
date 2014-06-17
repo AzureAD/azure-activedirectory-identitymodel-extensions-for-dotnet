@@ -195,7 +195,7 @@ namespace System.IdentityModel.Test
                      subject: claimsIdentity,
                      signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials);
 
-            // actor will be validated using same validationParameters
+            // actor will be validated using same bootstrapProperties
             validationParameters.ValidateActor = true;
             ClaimsPrincipal claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorAsymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.NoExceptionExpected);
 
@@ -667,14 +667,14 @@ namespace System.IdentityModel.Test
             validationParameters.SaveSigninToken = false;
             string jwt = IdentityUtilities.DefaultSymmetricJwt;
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
-            BootstrapContext context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapContext;
+            BootstrapProperties context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapProperties;
             Assert.IsNull(context);
 
             validationParameters.SaveSigninToken = true;            
             claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
-            context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapContext;
+            context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapProperties;
             Assert.IsNotNull(context);
-            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.Token, validationParameters, out validatedToken)));
+            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.SecurityToken, validationParameters, out validatedToken)));
         }
 
 

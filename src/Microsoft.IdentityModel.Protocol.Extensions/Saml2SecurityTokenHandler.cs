@@ -396,14 +396,18 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidateIssuerSecurityKey(samlToken.IssuerToken.SecurityKeys[0], samlToken, validationParameters);
             }
 
-            ClaimsIdentity claimsIdentity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
+            ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                claimsIdentity.BootstrapContext = new BootstrapContext(securityToken);
+                identity.BootstrapContext =
+                    new BootstrapProperties()
+                    {
+                        SecurityToken = securityToken,
+                    };
             }
 
             validatedToken = samlToken;
-            return new ClaimsPrincipal(claimsIdentity);
+            return new ClaimsPrincipal(identity);
         }
 
         /// <summary>

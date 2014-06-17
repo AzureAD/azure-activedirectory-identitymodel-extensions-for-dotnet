@@ -81,6 +81,7 @@
     <Compile Include="..\Shared\TestUtilities.cs">
       <Link>TestUtilities.cs</Link>
     </Compile>
+    <Compile Include="BootstrapPropertiesTests.cs" />
     <Compile Include="ClaimSets.cs" />
     <Compile Include="CreateAndValidateTokens.cs" />
     <Compile Include="ExtensibilityTests.cs" />
