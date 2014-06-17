@@ -69,7 +69,6 @@
     </Compile>
     <Compile Include="AsymmetricSignatureProvider.cs" />
     <Compile Include="Base64UrlEncoder.cs" />
-    <Compile Include="BootstrapProperties.cs" />
     <Compile Include="ClaimTypeMapping.cs" />
     <Compile Include="DiagnosticUtility.cs" />
     <Compile Include="EpochTime.cs" />

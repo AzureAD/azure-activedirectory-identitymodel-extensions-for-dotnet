@@ -667,14 +667,14 @@ namespace System.IdentityModel.Test
             validationParameters.SaveSigninToken = false;
             string jwt = IdentityUtilities.DefaultSymmetricJwt;
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
-            BootstrapProperties context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapProperties;
+            BootstrapContext context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapContext;
             Assert.IsNull(context);
 
             validationParameters.SaveSigninToken = true;            
             claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
-            context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapProperties;
+            context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as BootstrapContext;
             Assert.IsNotNull(context);
-            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.SecurityToken, validationParameters, out validatedToken)));
+            Assert.IsTrue(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.Token, validationParameters, out validatedToken)));
         }
 
 

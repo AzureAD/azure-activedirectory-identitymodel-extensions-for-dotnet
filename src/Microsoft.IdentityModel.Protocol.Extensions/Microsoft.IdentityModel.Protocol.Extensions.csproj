@@ -82,6 +82,7 @@
     <Compile Include="Configuration\OpenIdConnectConfigurationRetriever.cs" />
     <Compile Include="Configuration\GenericDocumentRetriever.cs" />
     <Compile Include="JsonWebKeySet.cs" />
+    <Compile Include="OpenIdConnectSessionProperties.cs" />
     <Compile Include="OpenIdConnectConstants.cs" />
     <Compile Include="OpenIdConnectMessage.cs" />
     <Compile Include="Configuration\OpenIdConnectConfiguration.cs" />

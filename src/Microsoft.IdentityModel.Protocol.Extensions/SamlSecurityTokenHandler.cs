@@ -383,11 +383,7 @@ namespace Microsoft.IdentityModel.Tokens
             ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                identity.BootstrapContext =
-                    new BootstrapProperties()
-                    {
-                        SecurityToken = securityToken,
-                    };
+                identity.BootstrapContext = new BootstrapContext(securityToken);
             }
 
             validatedToken = samlToken;

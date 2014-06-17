@@ -686,11 +686,7 @@ namespace System.IdentityModel.Tokens
             ClaimsIdentity identity = this.CreateClaimsIdentity(jwt, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                identity.BootstrapContext =
-                    new BootstrapProperties()
-                    {
-                        SecurityToken = securityToken,
-                    };
+                identity.BootstrapContext = new BootstrapContext(securityToken);
             }
 
             return new ClaimsPrincipal(identity);
