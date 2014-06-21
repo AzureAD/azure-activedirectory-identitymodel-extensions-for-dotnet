@@ -92,6 +92,7 @@
     <Compile Include="OpenIdConnectProtocolValidationContext.cs" />
     <Compile Include="OpenIdConnectProtocolValidator.cs" />
     <Compile Include="OpenIdConnectProtocolValidationParameters.cs" />
+    <Compile Include="OpenIdConnectProtocolSessionContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SamlConstants.cs" />
     <Compile Include="Saml2SecurityTokenHandler.cs" />
