@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Test
             ExpectedException expectedException = ExpectedException.NoExceptionExpected;
             ValidateIssuer(null, new TokenValidationParameters { ValidateIssuer = false }, samlSecurityTokenHandler, expectedException);
 
-            expectedException = ExpectedException.ArgumentNullException( substringExpected: "name: validationParameters");
+            expectedException = ExpectedException.ArgumentNullException( substringExpected: "Parameter name: validationParameters");
             ValidateIssuer("bob", null, samlSecurityTokenHandler, expectedException);
 
             expectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10204");

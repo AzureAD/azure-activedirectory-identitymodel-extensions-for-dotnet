@@ -96,10 +96,10 @@ namespace Microsoft.IdentityModel.Test
             string defaultSaml2Token = IdentityUtilities.CreateSaml2Token();
             string defaultJwt = IdentityUtilities.DefaultAsymmetricJwt;
 
-            ExpectedException expectedException = ExpectedException.ArgumentNullException("name: securityToken");
+            ExpectedException expectedException = ExpectedException.ArgumentNullException("Parameter name: securityToken");
             ValidateToken(null, null, securityTokenValidators, expectedException);
 
-            expectedException = ExpectedException.ArgumentNullException("name: validationParameters");
+            expectedException = ExpectedException.ArgumentNullException("Parameter name: validationParameters");
             ValidateToken(defaultSamlToken, null, securityTokenValidators, expectedException);
 
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
