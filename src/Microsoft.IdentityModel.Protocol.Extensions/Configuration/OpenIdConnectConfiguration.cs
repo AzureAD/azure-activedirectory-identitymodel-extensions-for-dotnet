@@ -30,8 +30,6 @@ namespace Microsoft.IdentityModel.Protocols
     public class OpenIdConnectConfiguration
     {
         private static JavaScriptSerializer _javaScriptSerializer;
-
-        private JsonWebKeySet _jsonWebKeySet = new JsonWebKeySet();
         private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
         private Collection<string> _responseTypesSupported = new Collection<string>();
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
@@ -181,15 +179,9 @@ namespace Microsoft.IdentityModel.Protocols
         public string JwksUri{ get; set; }
 
         /// <summary>
-        /// Gets the JsonWebKeySet
+        /// Gets or sets the <see cref="JsonWebKeySet"/>
         /// </summary>
-        public JsonWebKeySet JsonWebKeySet
-        {
-            get
-            {
-                return _jsonWebKeySet;
-            }
-        }
+        public JsonWebKeySet JsonWebKeySet {get; set;}
 
         /// <summary>
         /// Gets the collection of 'response_types_supported'.

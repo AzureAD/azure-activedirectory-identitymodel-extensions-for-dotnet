@@ -20,8 +20,12 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Test;
+using System.IdentityModel.Tokens;
 using System.IO;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -57,13 +61,13 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsTrue(IsDefaultJsonWebKeySet(jsonWebKeys));
 
             // null string, nothing to add
-            RunJsonWebsKeyTest((string)null, null, ExpectedException.ArgumentNullException());
+            RunJsonWebKeySetTest((string)null, null, ExpectedException.ArgumentNullException());
 
             // null dictionary, nothing to add
-            RunJsonWebsKeyTest((IDictionary<string, object>)null, null, ExpectedException.ArgumentNullException(), false);
+            RunJsonWebKeySetTest((IDictionary<string, object>)null, null, ExpectedException.ArgumentNullException(), false);
 
-            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebsKeyTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
+            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
         }
 
         [TestMethod]
@@ -72,7 +76,32 @@ namespace Microsoft.IdentityModel.Test
         public void JsonWebKeySet_Interop()
         {
             string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);
-            RunJsonWebsKeyTest(certsData, OpenIdConfigData.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeySetTest(certsData, OpenIdConfigData.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
+
+            GetSigningTokens(OpenIdConfigData.JsonWebKeySetBadRsaExponentString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+            GetSigningTokens(OpenIdConfigData.JsonWebKeySetBadRsaModulusString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+            GetSigningTokens(OpenIdConfigData.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
+            GetSigningTokens(OpenIdConfigData.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
+            GetSigningTokens(OpenIdConfigData.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
+        }
+
+        private void GetSigningTokens(string webKeySetString, List<SecurityToken> expectedTokens, ExpectedException expectedException)
+        {
+
+            JsonWebKeySet webKeySet = new JsonWebKeySet(webKeySetString);
+            try
+            {
+                IList<SecurityToken> tokens = webKeySet.GetSigningTokens();
+                expectedException.ProcessNoException();
+                if (expectedTokens != null)
+                {
+                    Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<SecurityToken>>(tokens, expectedTokens));
+                }
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
         }
 
         /// <summary>
@@ -83,7 +112,7 @@ namespace Microsoft.IdentityModel.Test
         /// <param name="expectedException"></param>
         /// <param name="asString"> this is useful when passing null for parameter 'is' and 'as' don't contain type info.</param>
         /// <returns></returns>
-        private JsonWebKeySet RunJsonWebsKeyTest(object obj, JsonWebKeySet compareTo, ExpectedException expectedException, bool asString = true)
+        private JsonWebKeySet RunJsonWebKeySetTest(object obj, JsonWebKeySet compareTo, ExpectedException expectedException, bool asString = true)
         {
             JsonWebKeySet jsonWebKeys = null;
             try

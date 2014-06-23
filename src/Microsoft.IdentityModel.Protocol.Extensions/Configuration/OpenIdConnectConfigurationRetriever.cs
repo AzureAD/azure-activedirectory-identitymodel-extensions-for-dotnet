@@ -17,12 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -86,32 +82,10 @@ namespace Microsoft.IdentityModel.Protocols
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 doc = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
-                JsonWebKeySet jsonWebKeys = new JsonWebKeySet(doc);
-
-                foreach (JsonWebKey webKey in jsonWebKeys.Keys)
+                openIdConnectConfiguration.JsonWebKeySet = new JsonWebKeySet(doc);
+                foreach (SecurityToken token in openIdConnectConfiguration.JsonWebKeySet.GetSigningTokens())
                 {
-                    if ((string.IsNullOrWhiteSpace(webKey.Use) || (StringComparer.Ordinal.Equals(webKey.Use, JsonWebKeyUseNames.Sig))))
-                    {
-                        // Add chaining
-                        if (webKey.X5c.Count == 1)
-                        {
-                            X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
-                            openIdConnectConfiguration.SigningTokens.Add(new X509SecurityToken(cert));
-                        }
-
-                        // create NamedSecurityToken for Kid's, only RSA keys are supported.
-                        if (!string.IsNullOrWhiteSpace(webKey.Kid))
-                        {
-                            if (!string.IsNullOrWhiteSpace(webKey.N) && !string.IsNullOrWhiteSpace(webKey.E))
-                            {
-                                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-                                rsa.FromXmlString(string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, webKey.N, webKey.E));
-                                openIdConnectConfiguration.SigningTokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, webKey.Kid, new RsaSecurityKey(rsa)));
-                            }
-                        }
-                    }
-
-                    openIdConnectConfiguration.JsonWebKeySet.Keys.Add(webKey);
+                    openIdConnectConfiguration.SigningTokens.Add(token);
                 }
             }
 

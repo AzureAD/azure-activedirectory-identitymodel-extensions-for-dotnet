@@ -20,6 +20,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IdentityModel.Tokens;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -86,6 +90,86 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 return _keys;
             }
+        }
+
+        /// <summary>
+        /// Gets the Keys translated to <see cref="IList{SecurityToken}"/>.
+        /// </summary>
+        /// <returns>A <see cref="X509SecurityToken"/> for each 'X5c' that is composed from a single certificate. A NamedKeySecurityToken for each raw rsa public key.</returns>
+        public IList<SecurityToken> GetSigningTokens()
+        {
+            List<SecurityToken> tokens = new List<SecurityToken>();
+            for (int i = 0; i < _keys.Count; i++)
+            {
+                JsonWebKey webKey = _keys[i];
+
+                // create NamedSecurityToken for Kid'base64String, only RSA keys are supported.
+                if (!StringComparer.Ordinal.Equals(webKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
+                    continue;
+
+                if ((string.IsNullOrWhiteSpace(webKey.Use) || (StringComparer.Ordinal.Equals(webKey.Use, JsonWebKeyUseNames.Sig))))
+                {
+                    if (webKey.X5c.Count == 1 && !string.IsNullOrWhiteSpace(webKey.X5c[0]))
+                    {
+                        try
+                        {
+                            // Add chaining
+                            X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+                            if (!string.IsNullOrWhiteSpace(webKey.Kid))
+                            {
+                                tokens.Add(new X509SecurityToken(cert, webKey.Kid));
+                            }
+                            else
+                            {
+                                tokens.Add(new X509SecurityToken(cert));
+                            }
+                        }
+                        catch (CryptographicException ex)
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), ex);
+                        }
+                        catch (FormatException fex)
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), fex);
+                        }
+                    }
+
+                    // only support public RSA
+                    if (!string.IsNullOrWhiteSpace(webKey.E) && !string.IsNullOrWhiteSpace(webKey.N))
+                    {
+                        try
+                        {
+                            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                            rsa.ImportParameters(
+                                new RSAParameters
+                                {
+                                    Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
+                                    Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
+                                }
+                            );
+
+                            if (string.IsNullOrWhiteSpace(webKey.Kid))
+                            {
+                                tokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, Guid.NewGuid().ToString(), new RsaSecurityKey(rsa)));
+                            }
+                            else
+                            {
+                                tokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, webKey.Kid, new RsaSecurityKey(rsa)));
+                            }
+                        }
+                        catch (CryptographicException ex)
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), ex);
+                        }
+                        catch (FormatException ex)
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), ex);
+                        }
+                    }
+                }
+            }
+
+            return tokens;
         }
 
         private void SetFromDictionary(IDictionary<string, object> dictionary)
