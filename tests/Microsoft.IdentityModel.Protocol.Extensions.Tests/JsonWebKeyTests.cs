@@ -63,7 +63,10 @@ namespace Microsoft.IdentityModel.Test
 
             // null dictionary, nothing to add
             RunJsonWebKeyTest(null, new JsonWebKey(), ExpectedException.NoExceptionExpected, false);
-            
+
+            // valid json, JsonWebKey1
+            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyFromPing, OpenIdConfigData.JsonWebKeyFromPingExpected1, ExpectedException.NoExceptionExpected);
+
             // valid json, JsonWebKey1
             RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyString1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
 
@@ -82,6 +85,7 @@ namespace Microsoft.IdentityModel.Test
 
             // invalid json, JsonWebKeyBadx509String1
             RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadX509String, OpenIdConfigData.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected);
+
         }
 
         /// <summary>

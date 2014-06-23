@@ -126,7 +126,7 @@ namespace System.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX14700, str));
+                    throw new FormatException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX14700, str));
             }
 
             return Convert.FromBase64String(str);

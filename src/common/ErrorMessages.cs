@@ -142,7 +142,9 @@ namespace Microsoft.IdentityModel
         public const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
 
         // configuration retrieval errors
-        public const string IDX10800 = "IDX10800: JsonWebKey must have a 'Keys' element.";
+        public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
+        public const string IDX10801 = "IDX10801: Unable to create an RSA pulblic key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
+        public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";

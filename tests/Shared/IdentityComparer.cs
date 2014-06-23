@@ -283,31 +283,48 @@ namespace System.IdentityModel.Test
 
         private static bool AreJsonWebKeysEqual(JsonWebKey jsonWebkey1, JsonWebKey jsonWebkey2, CompareContext compareContext)
         {
+            List<string> errors = new List<string>();
             if (!string.Equals(jsonWebkey1.Alg, jsonWebkey2.Alg, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.Alg != jsonWebkey2.Alg: " + jsonWebkey1.Alg ?? "null" + ", " + jsonWebkey2.Alg ?? "null");
+            }
 
             if (!string.Equals(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.KeyOps != jsonWebkey2.KeyOps: " + jsonWebkey1.KeyOps + ", " + jsonWebkey2.KeyOps);
+            }
 
             if (!string.Equals(jsonWebkey1.Kid, jsonWebkey2.Kid, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.Kid != jsonWebkey2.Kid: " + jsonWebkey1.Kid + ", " + jsonWebkey2.Kid);
+            }
 
             if (!string.Equals(jsonWebkey1.Kty, jsonWebkey2.Kty, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.Kty != jsonWebkey2.Kty: " + jsonWebkey1.Kty + ", " + jsonWebkey2.Kty);
+            }
 
             if (!string.Equals(jsonWebkey1.Use, jsonWebkey2.Use, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.Use != jsonWebkey2.Use: " + (jsonWebkey1.Use ?? "null") + ", " + (jsonWebkey2.Use ?? "null"));
+            }
 
             if (!string.Equals(jsonWebkey1.X5t, jsonWebkey2.X5t, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.X5t != jsonWebkey2.X5t" + jsonWebkey1.X5t + ", " + jsonWebkey2.X5t);
+            }
 
             if (!string.Equals(jsonWebkey1.X5u, jsonWebkey2.X5u, compareContext.StringComparison))
-                return false;
+            {
+                errors.Add("jsonWebkey1.X5u != jsonWebkey2.X5u: " + jsonWebkey1.X5u + ", " + jsonWebkey2.X5u);
+            }
 
             if (!AreEnumsEqual<string>(jsonWebkey1.X5c, jsonWebkey2.X5c, compareContext, AreStringsEqual))
-                return false;
+            {
+                errors.Add("jsonWebkey1.X5c != jsonWebkey2.X5c: " + jsonWebkey1.X5c + ", " + jsonWebkey2.X5c);
+            }
 
-            return true;
+            return (errors.Count == 0);
         }
 
         private static bool AreJsonWebKeyKeySetsEqual(JsonWebKeySet jsonWebKeySet1, JsonWebKeySet jsonWebKeySet2, CompareContext compareContext)
