@@ -152,7 +152,10 @@ namespace Microsoft.IdentityModel.Protocols
 
             foreach (var key in nameValueCollection.AllKeys)
             {
-                SetParameter(key, nameValueCollection[key]);
+                if (key != null)
+                {
+                    SetParameter(key, nameValueCollection[key]);
+                }
             }
         }
 
@@ -169,12 +172,15 @@ namespace Microsoft.IdentityModel.Protocols
 
             foreach (KeyValuePair<string, string[]> keyValue in parameters)
             {
-                foreach (string strValue in keyValue.Value)
+                if (keyValue.Value != null)
                 {
-                    if (strValue != null)
+                    foreach (string strValue in keyValue.Value)
                     {
-                        SetParameter(keyValue.Key, strValue);
-                        break;
+                        if (strValue != null && keyValue.Key != null)
+                        {
+                            SetParameter(keyValue.Key, strValue);
+                            break;
+                        }
                     }
                 }
             }

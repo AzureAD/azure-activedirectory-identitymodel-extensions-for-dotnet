@@ -287,6 +287,21 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
+        [TestMethod]
+        [TestProperty("TestCaseID", "TBD")]
+        [Description( "Tests: NULL form parameters" )]
+        public void OpenIdConnectMessage_NullFormParameters()
+        {
+            List<KeyValuePair<string, string[]>> formData = new List<KeyValuePair<string, string[]>>();
+            formData.Add(new KeyValuePair<string, string[]>("key", new string[] { "data" }));
+            formData.Add(new KeyValuePair<string, string[]>("nullData", new string[] { null }));
+            formData.Add(new KeyValuePair<string, string[]>("emptyData", new string[] { string.Empty }));
+            formData.Add(new KeyValuePair<string, string[]>(null, new string[] { null }));
+            formData.Add(new KeyValuePair<string, string[]>(null, null));
+            OpenIdConnectMessage msg = new OpenIdConnectMessage(formData);
+            Assert.IsNotNull(msg);
+        }
+
         private void Report(List<string> errors, string url, string expected)
         {
             if (!string.Equals(url, expected, StringComparison.Ordinal))
