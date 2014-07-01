@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Creates an instance of <see cref="JsonWebKey"/>.
         /// </summary>
         /// <param name="dictionary">a dictionary containing a 'Keys' element which is a Dictionary of JsonWebKeys.</param>
-        /// <exception cref="ArgumentNullExceptioni">if 'dictionary' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'dictionary' is null.</exception>
         public JsonWebKeySet(IDictionary<string, object> dictionary)
         {
             if (dictionary == null)

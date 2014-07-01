@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
         /// <exception cref="OpenIdConnectProtocolException">if the <see cref="JwtSecurityToken"/> is missing any required claims as per: http://openid.net/specs/openid-connect-core-1_0.html#IDToken </exception>
-        /// <remarks><see cref="OpenIdConnectProtocolValidationParameters.Nonce"/> and <see cref="OpenIdConnectProtocolValidationParameters.AuthorizationCode"/> will be validated if they are not 'null' or 'whitespace'.</remarks>
+        /// <remarks><see cref="OpenIdConnectProtocolValidationContext.Nonce"/> and <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> will be validated if they are not 'null' or 'whitespace'.</remarks>
         public static void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)

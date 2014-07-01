@@ -29,7 +29,6 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class OpenIdConnectConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
     {
-        private static string rsaImportTemplate = @"<RSAKeyValue><Modulus>{0}</Modulus><Exponent>{1}</Exponent></RSAKeyValue>";
 
         /// <summary>
         /// GetAsync
