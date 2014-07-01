@@ -15,7 +15,7 @@
     <tags>Identity, Claims, OpenIdConnect, WS-Federation</tags>
     <copyright>Copyright (c) Microsoft Open Technologies. All rights reserved.</copyright>
     <dependencies>
-      <dependency id="System.IdentityModel.Tokens.Jwt" version="4.0.0-beta1" />
+      <dependency id="System.IdentityModel.Tokens.Jwt" version="4.0.0-RC1" />
     </dependencies>
   </metadata>
   <files>
