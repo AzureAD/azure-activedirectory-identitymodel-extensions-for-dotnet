@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// RequireAuthTime: false
         /// RequireAzp: false
         /// RequireNonce: true
+        /// RequireSub: false
         /// ResponseType = <see cref="OpenIdConnectMessage.DefaultResponseType"/>
         /// </summary>
         public OpenIdConnectProtocolValidationParameters()
@@ -60,6 +61,7 @@ namespace Microsoft.IdentityModel.Protocols
             RequireAuthTime = false;
             RequireAzp = false;
             RequireNonce = true;
+            RequireSub = false;
             ResponseType = OpenIdConnectMessage.DefaultResponseType;
         }
 
@@ -113,6 +115,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         [DefaultValue(true)]
         public bool RequireNonce { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating if a 'sub' claim is required.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool RequireSub { get; set; }
 
         /// <summary>
         /// Gets or sets the ResponseType. This is used by <see cref="OpenIdConnectProtocolValidator.Validate"/>
