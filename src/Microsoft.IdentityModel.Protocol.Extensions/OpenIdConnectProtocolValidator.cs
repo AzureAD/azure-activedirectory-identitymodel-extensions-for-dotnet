@@ -71,10 +71,11 @@ namespace Microsoft.IdentityModel.Protocols
             if (jwt.Payload.Iss == null)
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), jwt));
 
-            if (jwt.Payload.Sub == null)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt));
-
             OpenIdConnectProtocolValidationParameters validationParameters = validationContext.OpenIdConnectProtocolValidationParameters;
+
+            // sub is optional in RC2
+            if (validationParameters.RequireSub && (string.IsNullOrWhiteSpace(jwt.Payload.Sub)))
+                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt));
 
             // optional claims
             if (validationParameters.RequireAcr && string.IsNullOrWhiteSpace(jwt.Payload.Acr))
