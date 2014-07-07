@@ -134,7 +134,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentNullException("value");
                 }
 
-                inboundAlgorithmMap = value;
+                outboundAlgorithmMap = value;
             }
         }
 
@@ -686,14 +686,7 @@ namespace System.IdentityModel.Tokens
             ClaimsIdentity identity = this.CreateClaimsIdentity(jwt, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                if (jwt.RawData != null)
-                {
-                    identity.BootstrapContext = new BootstrapContext(jwt.RawData);
-                }
-                else
-                {
-                    identity.BootstrapContext = new BootstrapContext(this.WriteToken(jwt));
-                }
+                identity.BootstrapContext = new BootstrapContext(securityToken);
             }
 
             return new ClaimsPrincipal(identity);
