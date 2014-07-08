@@ -58,8 +58,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectProtocolValidationParameters validationParameters = new OpenIdConnectProtocolValidationParameters();
             Type type = typeof(OpenIdConnectProtocolValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 7)
-                Assert.Fail("Number of properties has changed from 7 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 8)
+                Assert.Fail("Number of properties has changed from 8 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -71,10 +71,12 @@ namespace Microsoft.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("RequireAuthTime", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireAzp", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireNonce", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("RequireSub", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("ResponseType", new List<object>{OpenIdConnectMessage.DefaultResponseType, OpenIdConnectResponseTypes.IdToken, OpenIdConnectResponseTypes.CodeIdToken}),
                     },
                     Object = validationParameters,
                 };
+
             TestUtilities.GetSet(context);
 
             if (context.Errors.Count != 0)

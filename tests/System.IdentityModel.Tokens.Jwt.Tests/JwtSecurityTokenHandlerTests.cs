@@ -195,7 +195,7 @@ namespace System.IdentityModel.Test
                      subject: claimsIdentity,
                      signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials);
 
-            // actor will be validated using same bootstrapProperties
+            // actor will be validated using same validationParameters
             validationParameters.ValidateActor = true;
             ClaimsPrincipal claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorAsymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.NoExceptionExpected);
 

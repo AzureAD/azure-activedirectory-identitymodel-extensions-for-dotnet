@@ -77,18 +77,24 @@ namespace Microsoft.IdentityModel.Test
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
             Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
-            // sub missing
-            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
+            // add iis
+           jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
+           Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10311:"));
 
             // nonce invalid 
             string validNonce = OpenIdConnectProtocolValidator.GenerateNonce();
 
             // add the valid 'nonce' but set validationContext.Nonce to a different 'nonce'.
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
             validationContext.Nonce = OpenIdConnectProtocolValidator.GenerateNonce();
             Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10301:"));
+
+            // sub missing, default not required
+            validationContext.Nonce = validNonce;
+            Validate(jwt: jwt, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
+
+            validationContext.OpenIdConnectProtocolValidationParameters.RequireSub = true;
+            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
             // authorizationCode invalid
             string validAuthorizationCode = OpenIdConnectProtocolValidator.GenerateNonce();
