@@ -60,6 +60,7 @@ namespace Microsoft.IdentityModel.Test
         }
         
         [TestMethod]
+
         public async Task OpenIdConnectConfigurationRetriever_FromFile()
         {
             OpenIdConnectConfiguration configuration;
@@ -71,6 +72,10 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [TestMethod]
+        [DeploymentItem("PingLabsJWKS.json")]
+        [DeploymentItem("JsonWebKeySetSingleX509Data.json")]
+        [DeploymentItem("JsonWebKeySetBadX509Data.json")]
+        [DeploymentItem("JsonWebKeySetBadBase64Data.json")]
         public async Task OpenIdConnectConfigurationRetriever_FromText()
         {
             OpenIdConnectConfiguration configuration;
