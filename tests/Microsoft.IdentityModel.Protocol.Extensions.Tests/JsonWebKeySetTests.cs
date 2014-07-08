@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "C6A4AFA6-25A2-44F4-A8FB-83BBEC4DB9A1")]
         [Description("Tests: Interop")]
+        [DeploymentItem("google-certs.json")]
         public void JsonWebKeySet_Interop()
         {
             string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);

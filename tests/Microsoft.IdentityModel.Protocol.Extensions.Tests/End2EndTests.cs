@@ -51,6 +51,8 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "0226a914-61f6-41af-ba67-21261aeb356b")]
         [Description("Tests: OpenIdConnect")]
+        [DeploymentItem("OpenIdConnectMetadata.json")]
+        [DeploymentItem("JsonWebKeySet.json")]
         public void End2End_OpenIdConnect()
         {
             SigningCredentials rsaSigningCredentials = 
