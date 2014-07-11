@@ -240,7 +240,7 @@ namespace System.IdentityModel.Tokens
                 a2 = b;
             }
 
-            for (int i = 0; i < a.Length; i++)
+            for (int i = 0; i < a1.Length; i++)
             {
                 result |= a1[i] ^ a2[i];
             }
