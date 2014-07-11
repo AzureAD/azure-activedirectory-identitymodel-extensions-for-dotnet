@@ -323,7 +323,20 @@ namespace System.IdentityModel.Test
                 byte[] bytesin = new byte[1024];
                 r.NextBytes(bytesin);
                 byte[] signature = provider.Sign(bytesin);
-                Assert.IsFalse(!provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
+                Assert.IsTrue(provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(string.Format("Unexpected exception received: '{0}'", ex));
+            }
+
+            // symmetric different byte[] sizes
+            try
+            {
+                SymmetricSignatureProvider provider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature);
+                byte[] bytesin = new byte[1024];
+                byte[] signature = new byte[1024];
+                Assert.IsFalse(provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
             }
             catch (Exception ex)
             {

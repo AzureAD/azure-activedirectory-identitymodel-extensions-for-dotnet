@@ -78,6 +78,7 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.GetSet(context);
+
             if (context.Errors.Count != 0)
             {
                 StringBuilder sb = new StringBuilder();
