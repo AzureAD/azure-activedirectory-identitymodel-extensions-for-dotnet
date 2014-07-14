@@ -239,6 +239,15 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             TestUtilities.ValidateTokenReplay(samlToken, tokenHandler, validationParameters);
+            TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+
+            validationParameters.LifetimeValidator =
+                (nb, exp, st, tvp) =>
+                {
+                    return false;
+                };
+            TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
+
         }
 
         private void ValidateAudience()
@@ -304,6 +313,15 @@ namespace Microsoft.IdentityModel.Test
 
             tokenValidationParameters.ValidateAudience = true;
             expectedException = ExpectedException.NoExceptionExpected;
+            audiences.Add(IdentityUtilities.DefaultAudience);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+
+            tokenValidationParameters.AudienceValidator =
+                (aud, token, tvp) =>
+                {
+                    return false;
+                };
+            expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10231:");
             audiences.Add(IdentityUtilities.DefaultAudience);
             TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
         }

@@ -643,7 +643,10 @@ namespace System.IdentityModel.Tokens
 
             if (validationParameters.LifetimeValidator != null)
             {
-                validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
+                if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
+                {
+                    throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, jwt.ToString()));
+                }
             }
             else
             {
@@ -652,7 +655,10 @@ namespace System.IdentityModel.Tokens
 
             if (validationParameters.AudienceValidator != null)
             {
-                validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters);
+                if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
+                {
+                    throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, jwt.ToString()));
+                }
             }
             else
             {

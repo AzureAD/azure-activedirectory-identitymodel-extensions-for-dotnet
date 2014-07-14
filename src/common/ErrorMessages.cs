@@ -69,6 +69,8 @@ namespace Microsoft.IdentityModel
         public const string IDX10227 = "IDX10227: TokenValidationParameters.TokenReplayCache is not null, indicating to check for token replay but the security token has no expiration time: token '{0}'.";
         public const string IDX10228 = "IDX10228: The securityToken has previously been been validated, securityToken: '{0}'.";
         public const string IDX10229 = "IDX10229: TokenValidationParameters.TokenReplayCache was unable to add the securityToken: '{0}'.";
+        public const string IDX10230 = "IDX10230: Lifetime validation failed. Delegate returned false, securitytoken: '{0}'.";
+        public const string IDX10231 = "IDX10231: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
 
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
