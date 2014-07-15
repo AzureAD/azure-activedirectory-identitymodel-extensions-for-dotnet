@@ -38,6 +38,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10102 = "IDX10102: NameClaimType cannot be null or whitespace.";
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
         public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
+        public const string IDX10105 = "IDX10105: NonceLifetime must be greater than zero. value: '{0}'";
 
         // token validation
         public const string IDX10200 = "IDX10200: Support for ValidateToken(string, TokenValidationParameters) requires a handler to implement ISecurityTokenValidator, none of the SecurityTokenHandlers did.";
@@ -72,11 +73,11 @@ namespace Microsoft.IdentityModel
 
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
-        public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token: '{0}', did not match the expected nonce: '{1}'.\njwt: '{2}'.";
-        public const string IDX10302 = "IDX10302: The 'c_hash' claim was not a JSON string but multivalued, jwt: '{0}'.";
+        public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token did not match the expected nonce:\nexpected: '{0}'\nfound in jwt: '{1}'.\njwt: '{2}'.";
+        public const string IDX10302 = "IDX10302: The 'c_hash' claim was not a JSON string, jwt: '{0}'.";
         public const string IDX10303 = "IDX10303: The 'c_hash' claim was null or an empty string, jwt: '{0}'.";
         public const string IDX10304 = "IDX10304: The c_hash: '{0}' in the jwt did not validate with the authorizationCode: '{1}', algorithm: '{2}', jwt: '{3}'.";
-        public const string IDX10305 = "IDX10305: The 'nonce' found in the jwt token: '{0}',  did not match the expected nonce: '{1}', hwt: '{3}'.";
+        public const string IDX10305 = "IDX10305: The 'nonce' found in the jwt token: '{0}',  did not match the expected nonce: '{1}', jwt: '{3}'.";
         public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a .Net hashAlgorithm, jwt: '{1}'. See inner exception for details.\nPossible solution is to ensure that the algorithm specified in the 'JwtHeader' is understood by .Net. You can make additions to the OpenIdConnectProtocolValidationParameters.AlgorithmMap to map algorithms from the 'Jwt' space to .Net. In .Net you can also make use of 'CryptoConfig' to map algorithms.";
         public const string IDX10307 = "IDX10307: The algorithm: '{0}' specified in the jwt header resulted in a hashAlgorithm that was null,  jwt: '{1}'.";
         public const string IDX10308 = "IDX10308: The 'c_hash' claim was not found in the jwt: '{0}'.";
@@ -87,6 +88,11 @@ namespace Microsoft.IdentityModel
         public const string IDX10313 = "IDX10313: validationParameters.RequireAmr is 'true' (default is 'false') but jwt.PayLoad.Amr is 'null or whitespace', jwt: '{0}'.";
         public const string IDX10314 = "IDX10314: validationParameters.RequireAuthTime is 'true' (default is 'false') but jwt.PayLoad.AuthTime is 'null or whitespace', jwt: '{0}'.";
         public const string IDX10315 = "IDX10315: validationParameters.RequireAzp is 'true' (default is 'false') but jwt.PayLoad.Azp is 'null or whitespace', jwt: '{0}'.";
+        public const string IDX10316 = "IDX10316: The 'nonce' has expired: '{0}'. Time from 'nonce': '{1}', Current Time: '{2}'. NonceLifetime is: '{3}'.";
+        public const string IDX10317 = "IDX10317: The 'nonce' did not contain a timestamp: '{0}'.\nFormat expected is: <epochtime>.<noncedata>.";
+        public const string IDX10318 = "IDX10318: The 'nonce' timestamp could not be converted to a positive integer (greater than 0).\ntimestamp: '{0}'\nnonce: '{1}'.";
+        public const string IDX10319 = "IDX10319: The 'nonce' claim contains only whitespace, jwt: '{0}'.";
+        public const string IDX10320 = "IDX10320: The 'nonce' timestamp: '{0}', could not be converted to a DateTime using DateTime.FromBinary({0}).\nThe value must be between: '{1}' and '{2}'.";
 
         // SecurityTokenHandler messages
         public const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";

@@ -125,8 +125,6 @@ namespace System.IdentityModel.Test
 
                 Assert.Fail(sb.ToString());
             }
-
-
         }
 
         [TestMethod]

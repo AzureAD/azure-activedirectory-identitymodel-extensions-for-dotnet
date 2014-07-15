@@ -112,8 +112,6 @@ namespace System.IdentityModel.Test
                 return AreEqual<JwtSecurityToken>(t1 as JwtSecurityToken, t2 as JwtSecurityToken, context, AreJwtSecurityTokensEqual);
             else if (t1 is OpenIdConnectConfiguration)
                 return AreEqual<OpenIdConnectConfiguration>(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context, AreOpenIdConnectConfigurationEqual);
-            else if (t1 is OpenIdConnectProtocolValidationParameters)
-                return AreEqual<OpenIdConnectProtocolValidationParameters>(t1 as OpenIdConnectProtocolValidationParameters, t2 as OpenIdConnectProtocolValidationParameters, context, AreOpenIdConnectValidationParametersEqual);                
             else if (t1 is IEnumerable<Claim>)
                 return AreEnumsEqual<Claim>(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context, AreClaimsEqual);
             else if (t1 is IEnumerable<SecurityKey>)
@@ -435,11 +433,6 @@ namespace System.IdentityModel.Test
             return true;
         }
         
-        private static bool AreOpenIdConnectValidationParametersEqual(OpenIdConnectProtocolValidationParameters ski1, OpenIdConnectProtocolValidationParameters ski2, CompareContext context)
-        {
-            return true;
-        }
-
         private static bool AreSecurityKeyIdentifiersEqual(SecurityKeyIdentifier ski1, SecurityKeyIdentifier ski2, CompareContext context)
         {
             if (ski1.GetType() == ski1.GetType())

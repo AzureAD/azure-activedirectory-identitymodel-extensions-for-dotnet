@@ -21,7 +21,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
+using System.Reflection;
 using System.Security.Claims;
+using System.Text;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -49,55 +52,123 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [TestMethod]
+        [TestProperty("TestCaseID", "CA77926E-BE0E-4483-8A70-F96E5D651D3F")]
+        [Description("Tests: GenerateNonce")]
+        public void OpenIdConnectProtocolValidator_GenerateNonce()
+        {
+            List<string> errors = new List<string>();
+            OpenIdConnectProtocolValidator protocolValidator = new OpenIdConnectProtocolValidator();
+            string nonce = protocolValidator.GenerateNonce();
+            int endOfTimestamp = nonce.IndexOf('.');
+            if (endOfTimestamp == -1)
+            {
+                errors.Add("nonce does not have '.' seperator");
+            }
+            else
+            {
+
+            }
+
+
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "4696852e-94e7-4c2b-a768-ce6e7f16e80d")]
+        [Description("Tests: GetSets, test covers defaults")]
+        public void OpenIdConnectProtocolValidator_GetSets()
+        {
+            OpenIdConnectProtocolValidator validationParameters = new OpenIdConnectProtocolValidator();
+            Type type = typeof(OpenIdConnectProtocolValidator);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 8)
+                Assert.Fail("Number of properties has changed from 8 to: " + properties.Length + ", adjust tests");
+
+            GetSetContext context =
+                new GetSetContext
+                {
+                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                    {
+                        new KeyValuePair<string, List<object>>("NonceLifetime", new List<object>{TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(100)}),
+                        new KeyValuePair<string, List<object>>("RequireAcr", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("RequireAmr", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("RequireAuthTime", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("RequireAzp", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("RequireSub", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("RequireTimeStampInNonce", new List<object>{true, false, true}),
+                    },
+                    Object = validationParameters,
+                };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.ReportErrors("OpenIdConnectProtocolValidator_GetSets()", context.Errors);
+
+            ExpectedException ee = ExpectedException.ArgumentNullException();
+            Assert.IsNotNull(validationParameters.HashAlgorithmMap);
+            Assert.AreEqual(validationParameters.HashAlgorithmMap.Count, 9);
+
+            ee = ExpectedException.ArgumentOutOfRangeException();
+            try
+            {
+                validationParameters.NonceLifetime = TimeSpan.Zero;
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        [TestMethod]
         [TestProperty("TestCaseID", "e905d825-a3ff-4461-a5a4-46d842d0c4ba")]
         [Description("Tests: Validate")]
         public void OpenIdConnectProtocolValidator_Validate()
         {
             JwtSecurityToken jwt =  new JwtSecurityToken();
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
+            OpenIdConnectProtocolValidator protocolValidator = new OpenIdConnectProtocolValidator();
 
             // jwt null
-            Validate(jwt: null, validationContext: null, ee: ExpectedException.ArgumentNullException());
+            Validate(jwt: null, protocolValidator: protocolValidator, validationContext: null, ee: ExpectedException.ArgumentNullException());
 
             // validationContext null
-            Validate(jwt: jwt, validationContext: null, ee: ExpectedException.ArgumentNullException());
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: null, ee: ExpectedException.ArgumentNullException());
 
             // aud missing
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
             // exp missing
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience));
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
             // iat missing
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
             // iss missing
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
             // add iis
-           jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
-           Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10311:"));
+            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
 
             // nonce invalid 
-            string validNonce = OpenIdConnectProtocolValidator.GenerateNonce();
+            string validNonce = protocolValidator.GenerateNonce();
 
             // add the valid 'nonce' but set validationContext.Nonce to a different 'nonce'.
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            validationContext.Nonce = OpenIdConnectProtocolValidator.GenerateNonce();
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10301:"));
+            validationContext.Nonce = protocolValidator.GenerateNonce();
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10301:"));
 
             // sub missing, default not required
             validationContext.Nonce = validNonce;
-            Validate(jwt: jwt, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
 
-            validationContext.OpenIdConnectProtocolValidationParameters.RequireSub = true;
-            Validate(jwt: jwt, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
+            protocolValidator.RequireSub = true;
+            Validate(jwt: jwt, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10309:"));
 
             // authorizationCode invalid
-            string validAuthorizationCode = OpenIdConnectProtocolValidator.GenerateNonce();
+            string validAuthorizationCode = protocolValidator.GenerateNonce();
             string validChash = IdentityUtilities.CreateCHash(validAuthorizationCode, "SHA256");
 
             JwtSecurityToken jwtWithSignatureChash =
@@ -116,44 +187,43 @@ namespace Microsoft.IdentityModel.Test
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 
-            validationContext.OpenIdConnectProtocolValidationParameters.AlgorithmMap = 
-                new Dictionary<string, string>
-                {
-                    {JwtAlgorithms.RSA_SHA256, "SHA256"}
-                };
+            Dictionary<string,string> algmap = new Dictionary<string,string>(protocolValidator.HashAlgorithmMap);
+            protocolValidator.HashAlgorithmMap.Clear();
+            protocolValidator.HashAlgorithmMap.Add(JwtAlgorithms.RSA_SHA256, "SHA256");
+
             validationContext.Nonce = validNonce;
             validationContext.AuthorizationCode = validNonce;
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
 
             // nonce and authorizationCode valid
             validationContext.AuthorizationCode = validAuthorizationCode;
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
 
             // validate optional claims
-            validationContext.OpenIdConnectProtocolValidationParameters.RequireAcr = true;
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10312:"));
+            protocolValidator.RequireAcr = true;
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10312:"));
             jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Acr, "acr"));
 
-            validationContext.OpenIdConnectProtocolValidationParameters.RequireAmr = true;
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10313:"));
+            protocolValidator.RequireAmr = true;
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10313:"));
             jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Amr, "amr"));
 
-            validationContext.OpenIdConnectProtocolValidationParameters.RequireAuthTime = true;
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10314:"));
+            protocolValidator.RequireAuthTime = true;
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10314:"));
             jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.AuthTime, "authTime"));
 
-            validationContext.OpenIdConnectProtocolValidationParameters.RequireAzp = true;
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10315:"));
+            protocolValidator.RequireAzp = true;
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolException), substringExpected: "IDX10315:"));
             jwtWithSignatureChash.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Azp, "azp"));
 
-            Validate(jwt: jwtWithSignatureChash, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
+            Validate(jwt: jwtWithSignatureChash, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
         }
 
-        public void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext, ExpectedException ee)
+        public void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidator protocolValidator, OpenIdConnectProtocolValidationContext validationContext, ExpectedException ee)
         {
             try
             {
-                OpenIdConnectProtocolValidator.Validate(jwt, validationContext);
+                protocolValidator.Validate(jwt, validationContext);
                 ee.ProcessNoException();
             }
             catch (Exception ex)
@@ -167,19 +237,16 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Validation of CHash")]
         public void OpenIdConnectProtocolValidator_CHash()
         {
+            PublicOpenIdConnectProtocolValidator protocolValidator = new PublicOpenIdConnectProtocolValidator();
 
-            string authorizationCode1 = OpenIdConnectProtocolValidator.GenerateNonce();
-            string authorizationCode2 = OpenIdConnectProtocolValidator.GenerateNonce();
+            string authorizationCode1 = protocolValidator.GenerateNonce();
+            string authorizationCode2 = protocolValidator.GenerateNonce();
 
             string chash1 = IdentityUtilities.CreateCHash(authorizationCode1, "SHA256");
             string chash2 = IdentityUtilities.CreateCHash(authorizationCode2, "SHA256");
 
             Dictionary<string, string> emptyDictionary = new Dictionary<string, string>();
-            Dictionary<string, string> mappedDictionary =
-                new Dictionary<string, string>
-                {
-                    {JwtAlgorithms.RSA_SHA256, "SHA256"}
-                };
+            Dictionary<string, string> mappedDictionary = new Dictionary<string, string>(protocolValidator.HashAlgorithmMap);
 
             JwtSecurityToken jwtWithCHash =
                 new JwtSecurityToken
@@ -223,31 +290,34 @@ namespace Microsoft.IdentityModel.Test
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 
+
+            OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
+            validationContext.AuthorizationCode = authorizationCode2;
             // chash is not a string, but array
-            ValidateCHash(jwt: jwtWithSignatureMultipleChashes, authorizationCode: authorizationCode2, algorithmMap: mappedDictionary, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10302:"));
+            ValidateCHash(jwt: jwtWithSignatureMultipleChashes, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10302:"));
 
             // chash doesn't match
-            ValidateCHash(jwt: jwtWithSignatureChash1, authorizationCode: authorizationCode2, algorithmMap: mappedDictionary, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
+            ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
 
             // use algorithm map
-            ValidateCHash(jwt: jwtWithSignatureChash1, authorizationCode: authorizationCode1, algorithmMap: mappedDictionary, ee: ExpectedException.NoExceptionExpected);
+            validationContext.AuthorizationCode = authorizationCode1;
+            ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
 
             // Creation of algorithm failed, need to map.
-            ValidateCHash(jwt: jwtWithSignatureChash1, authorizationCode: authorizationCode1, algorithmMap: null, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10306:"));
+            protocolValidator.SetHashAlgorithmMap(emptyDictionary);
+            ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10306:"));
 
-            ValidateCHash(jwt: null, authorizationCode: null, algorithmMap: null, ee: ExpectedException.ArgumentNullException());
-            ValidateCHash(jwt: jwtWithCHash, authorizationCode: null, algorithmMap: null, ee: ExpectedException.ArgumentNullException());
-            ValidateCHash(jwt: jwtWithoutCHash, authorizationCode: authorizationCode1, algorithmMap: null, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException)));
-            ValidateCHash(jwt: jwtWithEmptyCHash, authorizationCode: authorizationCode1, algorithmMap: null, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10303:"));
-            ValidateCHash(jwt: jwtWithCHash, authorizationCode: authorizationCode1, algorithmMap: null, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException)));
-
+            ValidateCHash(jwt: null, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.ArgumentNullException());
+            ValidateCHash(jwt: jwtWithoutCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException)));
+            ValidateCHash(jwt: jwtWithEmptyCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10303:"));
+            ValidateCHash(jwt: jwtWithCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException)));
         }
 
-        private void ValidateCHash(JwtSecurityToken jwt, string authorizationCode, IDictionary<string, string> algorithmMap, ExpectedException ee)
+        private void ValidateCHash(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext, PublicOpenIdConnectProtocolValidator protocolValidator, ExpectedException ee)
         {
             try
             {
-                OpenIdConnectProtocolValidator.ValidateCHash(jwt, authorizationCode, algorithmMap);
+                protocolValidator.PublicValidateCHash(jwt, validationContext);
                 ee.ProcessNoException();
             }
             catch(Exception ex)
@@ -263,37 +333,91 @@ namespace Microsoft.IdentityModel.Test
         [Description("Tests: Validation of Nonce")]
         public void OpenIdConnectProtocolValidator_ValidateNonce()
         {
-            string nonce1 = OpenIdConnectProtocolValidator.GenerateNonce();
-            string nonce2 = OpenIdConnectProtocolValidator.GenerateNonce();
+            PublicOpenIdConnectProtocolValidator protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectProtocolValidator();
+            string nonceWithTimeStamp = protocolValidatorRequiresTimeStamp.GenerateNonce();
 
-            JwtSecurityToken jwtWithNonce =
-                new JwtSecurityToken
-                (
-                    IdentityUtilities.DefaultIssuer,
-                    IdentityUtilities.DefaultAudience,
-                    new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonce1) }
-                );
+            PublicOpenIdConnectProtocolValidator protocolValidatorDoesNotRequireTimeStamp = 
+                new PublicOpenIdConnectProtocolValidator
+                {
+                    RequireTimeStampInNonce = false,
+                };
 
-            JwtSecurityToken jwtWithoutNonce =
-                new JwtSecurityToken
-                (
-                    IdentityUtilities.DefaultIssuer,
-                    IdentityUtilities.DefaultAudience,
-                    new List<Claim> { new Claim(JwtRegisteredClaimNames.NameId, nonce1) }
-                );
+            string nonceWithoutTimeStamp = protocolValidatorDoesNotRequireTimeStamp.GenerateNonce();
+            string nonceBadTimeStamp = "abc.abc";
+            string nonceTicksTooLarge = Int64.MaxValue.ToString() + "." + nonceWithoutTimeStamp;
+            string nonceTicksTooSmall = Int64.MinValue.ToString() + "." + nonceWithoutTimeStamp;
+            string nonceTicksNegative = ((Int64)(-1)).ToString() + "." + nonceWithoutTimeStamp;
+            string nonceTicksZero = ((Int64)(0)).ToString() + "." + nonceWithoutTimeStamp;
 
-            ValidateNonce(jwt: null, nonce: null, ee: ExpectedException.ArgumentNullException());
-            ValidateNonce(jwt: jwtWithNonce,  nonce: null, ee: ExpectedException.ArgumentNullException());
-            ValidateNonce(jwt: jwtWithNonce, nonce: nonce2, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException)));
-            ValidateNonce(jwt: jwtWithoutNonce, nonce: nonce2, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException)));
-            ValidateNonce(jwt: jwtWithNonce, nonce: nonce1, ee: ExpectedException.NoExceptionExpected);
+            JwtSecurityToken jwtWithNonceWithTimeStamp = new JwtSecurityToken ( claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceWithTimeStamp) });
+            JwtSecurityToken jwtWithNonceWithoutTimeStamp = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceWithoutTimeStamp) });
+            JwtSecurityToken jwtWithNonceWithBadTimeStamp = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceBadTimeStamp) });
+            JwtSecurityToken jwtWithNonceTicksTooLarge = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceTicksTooLarge) });
+            JwtSecurityToken jwtWithNonceTicksTooSmall = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceTicksTooSmall) });
+            JwtSecurityToken jwtWithNonceTicksNegative = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceTicksNegative) });
+            JwtSecurityToken jwtWithNonceZero = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceTicksZero) });
+            JwtSecurityToken jwtWithoutNonce = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.NameId, nonceWithTimeStamp) });
+            JwtSecurityToken jwtWithNonceWhitespace = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, "") });
+
+            OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
+
+            validationContext.Nonce = null;
+            ValidateNonce(jwt: null, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: ExpectedException.ArgumentNullException());
+            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: null, ee: ExpectedException.ArgumentNullException());
+            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: ExpectedException.ArgumentNullException());
+
+            validationContext.Nonce = nonceWithoutTimeStamp;
+            ValidateNonce(jwt: jwtWithoutNonce, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10300:"));
+            ValidateNonce(jwt: jwtWithNonceWhitespace, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10319:"));
+            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException)));
+
+            validationContext.Nonce = nonceWithTimeStamp;
+            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
+
+            // nonce expired
+            validationContext.Nonce = nonceWithTimeStamp;
+            protocolValidatorRequiresTimeStamp.NonceLifetime = TimeSpan.FromMilliseconds(10);
+            Thread.Sleep(100);
+            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException)));
+
+            // nonce missing timestamp, validator requires time stamp
+            // 1. not well formed, no '.'
+            validationContext.Nonce = nonceWithoutTimeStamp;
+            protocolValidatorRequiresTimeStamp.NonceLifetime = TimeSpan.FromMinutes(10);
+            ValidateNonce(jwt: jwtWithNonceWithoutTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10317:"));
+            
+            // 2. timestamp not well formed
+            validationContext.Nonce = nonceBadTimeStamp;
+            ValidateNonce(jwt: jwtWithNonceWithBadTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException( typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), innerTypeExpected: typeof(FormatException), substringExpected: "IDX10318:"));
+
+            // 3. timestamp not required
+            validationContext.Nonce = nonceBadTimeStamp;
+            ValidateNonce(jwt: jwtWithNonceWithBadTimeStamp, protocolValidator: protocolValidatorDoesNotRequireTimeStamp, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
+
+            // 4. ticks max value
+            validationContext.Nonce = nonceTicksTooLarge;
+            ValidateNonce(jwt: jwtWithNonceTicksTooLarge, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), innerTypeExpected: typeof(ArgumentException), substringExpected: "IDX10320:"));
+
+            // 5. ticks min value small
+            validationContext.Nonce = nonceTicksTooSmall;
+            ValidateNonce(jwt: jwtWithNonceTicksTooSmall, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10318:"));
+
+            // 6. ticks negative
+            validationContext.Nonce = nonceTicksNegative;
+            ValidateNonce(jwt: jwtWithNonceTicksNegative, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10318:"));            
+
+            // 7. ticks zero
+            validationContext.Nonce = nonceTicksZero;
+            ValidateNonce(jwt: jwtWithNonceZero, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10318:"));            
+
+            
         }
 
-        private void ValidateNonce(JwtSecurityToken jwt, string nonce, ExpectedException ee)
+        private void ValidateNonce(JwtSecurityToken jwt, PublicOpenIdConnectProtocolValidator protocolValidator, OpenIdConnectProtocolValidationContext validationContext, ExpectedException ee)
         {
             try
             {
-                OpenIdConnectProtocolValidator.ValidateNonce(jwt, nonce);
+                protocolValidator.PublicValidateNonce(jwt, validationContext);
                 ee.ProcessNoException();
             }
             catch(Exception ex)
@@ -301,29 +425,25 @@ namespace Microsoft.IdentityModel.Test
                 ee.ProcessException(ex);
             }
         }
+    }
 
-        private static string GetHashAlgorithm(string algorithm)
+    class PublicOpenIdConnectProtocolValidator : OpenIdConnectProtocolValidator
+    {
+        public void PublicValidateCHash(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext context)
         {
-            switch (algorithm)
-            {
-                case JwtAlgorithms.ECDSA_SHA256:
-                case JwtAlgorithms.RSA_SHA256:
-                case JwtAlgorithms.HMAC_SHA256:
-                    return "SHA256";
+            base.ValidateCHash(jwt, context);
+        }
 
-                case JwtAlgorithms.ECDSA_SHA384:
-                case JwtAlgorithms.RSA_SHA384:
-                case JwtAlgorithms.HMAC_SHA384:
-                    return "SHA384";
+        public void PublicValidateNonce(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext context)
+        {
+            base.ValidateNonce(jwt, context);
+        }
 
-                case JwtAlgorithms.ECDSA_SHA512:
-                case JwtAlgorithms.RSA_SHA512:
-                case JwtAlgorithms.HMAC_SHA512:
-                    return "SHA512";
-
-                default:
-                    return "SHA256";
-            }
+        public void SetHashAlgorithmMap(Dictionary<string, string> hashAlgorithmMap)
+        {
+            HashAlgorithmMap.Clear();
+            foreach (var key in hashAlgorithmMap.Keys)
+                HashAlgorithmMap.Add(key, hashAlgorithmMap[key]);
         }
     }
 }

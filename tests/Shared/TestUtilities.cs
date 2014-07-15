@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Test
                         }
                         else if (initialValue != null && !initialValue.Equals(propertyKV.Value[0]))
                         {
-                            context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + initialValue.ToString() + ", was: " + propertyKV.Value[0].ToString());
+                            context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + propertyKV.Value[0].ToString() + ", was: " + initialValue.ToString());
                         }
                     }
 
@@ -210,6 +210,20 @@ namespace Microsoft.IdentityModel.Test
                     retval = propertyInfo.GetValue(obj);
                     Assert.IsTrue(propertyValue == retval);
                 }
+            }
+        }
+
+        public static void ReportErrors(string testInfo, List<string> errors)
+        {
+            if (errors.Count != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(testInfo);
+                sb.AppendLine(Environment.NewLine);
+                foreach (string str in errors)
+                    sb.AppendLine(str);
+
+                Assert.Fail(sb.ToString());
             }
         }
 
