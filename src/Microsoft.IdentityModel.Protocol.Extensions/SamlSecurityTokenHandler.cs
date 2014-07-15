@@ -325,7 +325,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.LifetimeValidator != null)
             {
-                validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
+                if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
+                {
+                    throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, securityToken));
+                }
             }
             else
             {
@@ -352,7 +355,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.AudienceValidator != null)
             {
-                validationParameters.AudienceValidator(audiences, samlToken, validationParameters);
+                if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
+                {
+                    throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, securityToken));
+                }
             }
             else
             {

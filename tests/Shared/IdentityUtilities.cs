@@ -260,12 +260,12 @@ namespace Microsoft.IdentityModel.Test
         public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SecurityToken NotDefaultSigningToken = KeyingMaterial.DefaultX509Token_2048;
         
-        public static void AudienceValidatorDoesNotThrow(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
+        public static bool AudienceValidatorReturnsTrue(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
-            return;
+            return true;
         }
 
-        public static void AudienceValidatorThrows(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
+        public static bool AudienceValidatorThrows(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
             throw new SecurityTokenInvalidAudienceException("AudienceValidatorThrows");
         }
@@ -280,12 +280,12 @@ namespace Microsoft.IdentityModel.Test
             throw new SecurityTokenInvalidIssuerException("IssuerValidatorThrows");
         }
 
-        public static void LifetimeValidatorDoesNotThrow(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
+        public static bool LifetimeValidatorReturnsTrue(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
         {
-            return;
+            return true;
         }
 
-        public static void LifetimeValidatorThrows(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
+        public static bool LifetimeValidatorThrows(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
         {
             throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
         }

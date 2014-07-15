@@ -208,7 +208,6 @@ namespace Microsoft.IdentityModel.Test
             tokenHandler.MaximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
             string samlToken = IdentityUtilities.CreateSamlToken();
 
-
             ValidateAudience();
 
             SecurityTokenDescriptor tokenDescriptor =
@@ -231,6 +230,14 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.ValidateTokenReplay(samlToken, tokenHandler, validationParameters);
+
+            TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+            validationParameters.LifetimeValidator =
+                (nb, exp, st, tvp) =>
+                {
+                    return false;
+                };
+            TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
         }
 
         private void ValidateAudience()
@@ -298,6 +305,13 @@ namespace Microsoft.IdentityModel.Test
             audiences.Add(IdentityUtilities.DefaultAudience);
             TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
+            tokenValidationParameters.AudienceValidator =
+            (aud, token, tvp) =>
+            {
+                return false;
+            };
+            expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10231:");
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
         }
 
         private class PublicSamlSecurityTokenHandler : SamlSecurityTokenHandler

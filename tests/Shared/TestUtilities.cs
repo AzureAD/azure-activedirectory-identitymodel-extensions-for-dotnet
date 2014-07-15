@@ -332,6 +332,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
         {
+            TokenValidationParameters tvp = validationParameters.Clone();
             Microsoft.IdentityModel.Test.TokenReplayCache replayCache =
                new Microsoft.IdentityModel.Test.TokenReplayCache()
                {
@@ -339,15 +340,15 @@ namespace Microsoft.IdentityModel.Test
                    OnFindReturnValue = false,
                };
 
-            validationParameters.TokenReplayCache = replayCache;
-            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.NoExceptionExpected);
+            tvp.TokenReplayCache = replayCache;
+            TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.NoExceptionExpected);
 
             replayCache.OnFindReturnValue = true;
-            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.SecurityTokenReplayDetected());
+            TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayDetected());
 
             replayCache.OnFindReturnValue = false;
             replayCache.OnAddReturnValue = false;
-            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
+            TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
 
         }
     }

@@ -653,6 +653,14 @@ namespace System.IdentityModel.Test
                 };
 
             TestUtilities.ValidateTokenReplay(securityToken: jwt.RawData, tokenValidator: tokenHandler, validationParameters: validationParameters);
+            TestUtilities.ValidateToken(jwt.RawData, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+            validationParameters.LifetimeValidator =
+                (nb, exp, st, tvp) =>
+                {
+                    return false;
+                };
+            TestUtilities.ValidateToken(jwt.RawData, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
+
             
         }
 
@@ -915,6 +923,15 @@ namespace System.IdentityModel.Test
             ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214");
             jwt = (tokenHandler.CreateToken(issuer: "http://www.GotJwt.com", audience: "http://www.GotJwt.com") as JwtSecurityToken).RawData;
             validationParameters = new TokenValidationParameters() { RequireExpirationTime = false, RequireSignedTokens = false, ValidAudience = "", ValidAudiences = new List<string>() { "     " }, ValidateIssuer = false };
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
+
+            validationParameters.AudienceValidator =
+                (aud, token, tvp) =>
+                {
+                    return false;
+                };
+
+            ee = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10231:");
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
         }
     }    
