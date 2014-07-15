@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Test
                         }
                         else if (initialValue != null && !initialValue.Equals(propertyKV.Value[0]))
                         {
-                            context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + initialValue.ToString() + ", was: " + propertyKV.Value[0].ToString());
+                            context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + propertyKV.Value[0].ToString() + ", was: " + initialValue.ToString());
                         }
                     }
 
@@ -210,6 +210,20 @@ namespace Microsoft.IdentityModel.Test
                     retval = propertyInfo.GetValue(obj);
                     Assert.IsTrue(propertyValue == retval);
                 }
+            }
+        }
+
+        public static void ReportErrors(string testInfo, List<string> errors)
+        {
+            if (errors.Count != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(testInfo);
+                sb.AppendLine(Environment.NewLine);
+                foreach (string str in errors)
+                    sb.AppendLine(str);
+
+                Assert.Fail(sb.ToString());
             }
         }
 
@@ -318,6 +332,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
         {
+            TokenValidationParameters tvp = validationParameters.Clone();
             Microsoft.IdentityModel.Test.TokenReplayCache replayCache =
                new Microsoft.IdentityModel.Test.TokenReplayCache()
                {
@@ -325,15 +340,15 @@ namespace Microsoft.IdentityModel.Test
                    OnFindReturnValue = false,
                };
 
-            validationParameters.TokenReplayCache = replayCache;
-            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.NoExceptionExpected);
+            tvp.TokenReplayCache = replayCache;
+            TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.NoExceptionExpected);
 
             replayCache.OnFindReturnValue = true;
-            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.SecurityTokenReplayDetected());
+            TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayDetected());
 
             replayCache.OnFindReturnValue = false;
             replayCache.OnAddReturnValue = false;
-            TestUtilities.ValidateToken(securityToken, validationParameters, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
+            TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
 
         }
     }

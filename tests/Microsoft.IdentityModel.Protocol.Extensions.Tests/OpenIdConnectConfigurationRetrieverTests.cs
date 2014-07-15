@@ -76,6 +76,7 @@ namespace Microsoft.IdentityModel.Test
         [DeploymentItem("JsonWebKeySetSingleX509Data.json")]
         [DeploymentItem("JsonWebKeySetBadX509Data.json")]
         [DeploymentItem("JsonWebKeySetBadBase64Data.json")]
+        [DeploymentItem("JsonWebKeySet.json")]
         public async Task OpenIdConnectConfigurationRetriever_FromText()
         {
             OpenIdConnectConfiguration configuration;

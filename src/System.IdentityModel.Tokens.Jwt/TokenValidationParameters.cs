@@ -32,7 +32,7 @@ namespace System.IdentityModel.Tokens
     /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    public delegate void AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
+    public delegate bool AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for IssuerSigningKeyRetriever. When validating signatures, this method will return key to use.
@@ -60,7 +60,7 @@ namespace System.IdentityModel.Tokens
     /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    public delegate void LifetimeValidator(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters);
+    public delegate bool LifetimeValidator(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
@@ -440,8 +440,6 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public IExpirableNonceCache TokenReplayCache
         {
-            // TODO - just added member without any testing to get
-            // idea of how it fits
             get;
             set;
         }

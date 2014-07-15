@@ -16,25 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-using System.IdentityModel.Tokens;
-
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// A context that is wsed by a <see cref="OpenIdConnectProtocolValidator"/> when validating a <see cref="JwtSecurityToken"/>
-    /// to enusre it compliant with  http://openid.net/specs/openid-connect-core-1_0.html#IDToken .
+    /// A context that is used by a <see cref="OpenIdConnectProtocolValidator"/> when validating a JwtSecurityToken.
+    /// to ensure it compliant with  http://openid.net/specs/openid-connect-core-1_0.html#IDToken .
     /// </summary>
     public class OpenIdConnectProtocolValidationContext
     {
-        private OpenIdConnectProtocolValidationParameters _protocolValidationParameters;
-
         /// <summary>
-        /// Creates an instance of <see cref="OpenIdConnectProtocolValidationContext"/> with defaults:
+        /// Creates an instance of <see cref="OpenIdConnectProtocolValidationContext"/>
         /// </summary>
         public OpenIdConnectProtocolValidationContext()
         {
-            _protocolValidationParameters = new OpenIdConnectProtocolValidationParameters();
         }
 
         /// <summary>
@@ -46,23 +40,5 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the 'nonce'
         /// </summary>
         public string Nonce { get; set; }
-
-        /// <summary>
-        /// Gets or set the <see cref="OpenIdConnectProtocolValidationParameters"/> to use when protocol validation occurs.
-        /// </summary>
-        public OpenIdConnectProtocolValidationParameters OpenIdConnectProtocolValidationParameters
-        {
-            get
-            {
-                return _protocolValidationParameters;
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("value");
-
-                _protocolValidationParameters = value;
-            }
-        }
     }
 }

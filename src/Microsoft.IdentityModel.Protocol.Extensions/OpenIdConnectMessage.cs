@@ -112,8 +112,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) 
         {
-            Nonce = OpenIdConnectProtocolValidator.GenerateNonce();
-            RequestType = OpenIdConnectRequestType.AuthenticationRequest;
             ResponseMode = DefaultResponseMode;
             ResponseType = DefaultResponseType;
             Scope = DefaultScope;
@@ -136,7 +134,10 @@ namespace Microsoft.IdentityModel.Protocols
                 SetParameter(keyValue.Key, keyValue.Value);
             }
 
+            AuthorizationEndpoint = other.AuthorizationEndpoint;
             IssuerAddress = other.IssuerAddress;
+            RequestType = other.RequestType;
+            TokenEndpoint = other.TokenEndpoint;
         }
 
         /// <summary>

@@ -58,8 +58,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
             Type type = typeof(OpenIdConnectProtocolValidationContext);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 3)
-                Assert.Fail("Number of properties has changed from 3 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 2)
+                Assert.Fail("Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -72,20 +72,7 @@ namespace Microsoft.IdentityModel.Test
                     Object = validationContext,
                 };
             TestUtilities.GetSet(context);
-
-            if (context.Errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Environment.NewLine);
-                foreach(string str in context.Errors)
-                    sb.AppendLine(str);
-
-                Assert.Fail(sb.ToString());
-            }
-
-            Assert.IsNotNull(validationContext.OpenIdConnectProtocolValidationParameters);
-            TestUtilities.SetGet(validationContext, "OpenIdConnectProtocolValidationParameters", (OpenIdConnectProtocolValidationParameters)null, ExpectedException.ArgumentNullException());
-            TestUtilities.SetGet(validationContext, "OpenIdConnectProtocolValidationParameters", new OpenIdConnectProtocolValidationParameters(), ExpectedException.NoExceptionExpected);
+            TestUtilities.ReportErrors("OpenIdConnectProtocolValidationContext_GetSets()", context.Errors);
         }
     }
 }
