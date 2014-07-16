@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Test
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                     {
-                        new KeyValuePair<string, List<object>>("NonceLifetime", new List<object>{TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(100)}),
+                        new KeyValuePair<string, List<object>>("NonceLifetime", new List<object>{TimeSpan.FromMinutes(60), TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(100)}),
                         new KeyValuePair<string, List<object>>("RequireAcr", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireAmr", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireAuthTime", new List<object>{false, true, false}),
@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Test
             Dictionary<string, string> emptyDictionary = new Dictionary<string, string>();
             Dictionary<string, string> mappedDictionary = new Dictionary<string, string>(protocolValidator.HashAlgorithmMap);
 
-            JwtSecurityToken jwtWithCHash =
+            JwtSecurityToken jwtWithCHash1 =
                 new JwtSecurityToken
                 (
                     audience: IdentityUtilities.DefaultAudience,
@@ -261,7 +261,8 @@ namespace Microsoft.IdentityModel.Test
                 (
                     audience: IdentityUtilities.DefaultAudience,
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, string.Empty) },
-                    issuer: IdentityUtilities.DefaultIssuer
+                    issuer: IdentityUtilities.DefaultIssuer,
+                    signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 
             JwtSecurityToken jwtWithoutCHash =
@@ -294,7 +295,7 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
             validationContext.AuthorizationCode = authorizationCode2;
             // chash is not a string, but array
-            ValidateCHash(jwt: jwtWithSignatureMultipleChashes, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10302:"));
+            ValidateCHash(jwt: jwtWithSignatureMultipleChashes, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
 
             // chash doesn't match
             ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
@@ -307,10 +308,11 @@ namespace Microsoft.IdentityModel.Test
             protocolValidator.SetHashAlgorithmMap(emptyDictionary);
             ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10307:"));
 
+            protocolValidator.SetHashAlgorithmMap(mappedDictionary);
             ValidateCHash(jwt: null, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.ArgumentNullException());
             ValidateCHash(jwt: jwtWithoutCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException)));
-            ValidateCHash(jwt: jwtWithEmptyCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10303:"));
-            ValidateCHash(jwt: jwtWithCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException)));
+            ValidateCHash(jwt: jwtWithEmptyCHash, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10304:"));
+            ValidateCHash(jwt: jwtWithCHash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10307:"));
         }
 
         private void ValidateCHash(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext, PublicOpenIdConnectProtocolValidator protocolValidator, ExpectedException ee)
@@ -364,7 +366,9 @@ namespace Microsoft.IdentityModel.Test
             validationContext.Nonce = null;
             ValidateNonce(jwt: null, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: ExpectedException.ArgumentNullException());
             ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: null, ee: ExpectedException.ArgumentNullException());
-            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: ExpectedException.ArgumentNullException());
+
+            // if nonce is null, OpenIdConnectProtocolValidationContext.Nonce == null is valid.
+            ValidateNonce(jwt: jwtWithNonceWithTimeStamp, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
 
             validationContext.Nonce = nonceWithoutTimeStamp;
             ValidateNonce(jwt: jwtWithoutNonce, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10300:"));
@@ -409,8 +413,6 @@ namespace Microsoft.IdentityModel.Test
             // 7. ticks zero
             validationContext.Nonce = nonceTicksZero;
             ValidateNonce(jwt: jwtWithNonceZero, protocolValidator: protocolValidatorRequiresTimeStamp, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidNonceException), substringExpected: "IDX10318:"));            
-
-            
         }
 
         private void ValidateNonce(JwtSecurityToken jwt, PublicOpenIdConnectProtocolValidator protocolValidator, OpenIdConnectProtocolValidationContext validationContext, ExpectedException ee)

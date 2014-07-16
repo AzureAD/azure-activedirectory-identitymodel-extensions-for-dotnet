@@ -50,8 +50,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Default for the how long the nonce is valid.
         /// </summary>
-        /// <remarks>default: 60 seconds.</remarks>
-        public static readonly TimeSpan DefaultNonceLifetime = TimeSpan.FromSeconds(60); // 1 min.
+        /// <remarks>default: 1 hour.</remarks>
+        public static readonly TimeSpan DefaultNonceLifetime = TimeSpan.FromMinutes(60);
 
         /// <summary>
         /// Creates a new instance of <see cref="OpenIdConnectProtocolValidator"/>,
@@ -205,26 +205,21 @@ namespace Microsoft.IdentityModel.Protocols
             if (RequireAzp && string.IsNullOrWhiteSpace(jwt.Payload.Azp))
                 throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt));
 
-            if (!string.IsNullOrWhiteSpace(validationContext.Nonce))
-                ValidateNonce(jwt, validationContext);
-
-            if (!string.IsNullOrWhiteSpace(validationContext.AuthorizationCode))
-                ValidateCHash(jwt, validationContext);
+            ValidateNonce(jwt, validationContext);
+            ValidateCHash(jwt, validationContext);
         }
 
         /// <summary>
-        /// Validates the 'authorizationCode' according to http://openid.net/specs/openid-connect-core-1_0.html section 3.3.2.10
+        /// Validates the 'authorizationCode' according to http://openid.net/specs/openid-connect-core-1_0.html section 3.3.2.10.
         /// </summary>
-        /// <param name="jwt">the <see cref="JwtSecurityToken"/> that that should contain a matching 'c_hash' claim.</param>
+        /// <param name="jwt">a <see cref="JwtSecurityToken"/> with a 'c_hash' claim that must match <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/>. If <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> is null, the check is not made.</param>
         /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains 'c_hash' to validate.</param>
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="ArgumentNullException">if <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> is null or whitespace.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the <see cref="JwtSecurityToken"/> does not contain a 'c_hash' claim.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the 'c_hash' claim is null or whitespace.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the <see cref="JwtSecurityToken"/> 'c_hash' claim does not match <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> as per http://openid.net/specs/openid-connect-core-1_0.html#CodeValidation .</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the hash algorithm defined in <see cref="JwtSecurityHeader"/> (default is JwtAlgorithms.RSA_SHA256) was unable to be created.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the creation of the hash algorithm return a null instance.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the 'c_hash' did not validate as per http://openid.net/specs/openid-connect-core-1_0.html#CodeValidation .</exception>
+        /// <remarks>if <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> is null, then the <see cref="JwtSecurityToken"/> 'c_hash' will not be validated.</remarks>
         protected virtual void ValidateCHash(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)
@@ -237,28 +232,18 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("validationContext");
             }
 
-            if (string.IsNullOrWhiteSpace(validationContext.AuthorizationCode))
+            // this handles the case the code is not expected
+            if (validationContext.AuthorizationCode == null)
             {
-                throw new ArgumentNullException("authorizationCode");
+                return;
             }
 
-            HashAlgorithm hashAlgorithm = null;
             if (!jwt.Payload.ContainsKey(JwtRegisteredClaimNames.CHash))
             {
                 throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt));
             }
 
-            string c_hashInToken = jwt.Payload[JwtRegisteredClaimNames.CHash] as string;
-            if (c_hashInToken == null)
-            {                
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10302, jwt));
-            }
-
-            if (string.IsNullOrWhiteSpace(c_hashInToken))
-            {                
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10303, jwt));
-            }
-
+            HashAlgorithm hashAlgorithm = null;
             string algorithm = string.Empty;
             if (!jwt.Header.TryGetValue(JwtHeaderParameterNames.Alg, out algorithm))
             {
@@ -289,9 +274,9 @@ namespace Microsoft.IdentityModel.Protocols
 
                 byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(validationContext.AuthorizationCode));
                 string hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
-                if (!StringComparer.Ordinal.Equals(c_hashInToken, hashString))
+                if (!StringComparer.Ordinal.Equals(jwt.Payload.CHash, hashString))
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, c_hashInToken, validationContext.AuthorizationCode, algorithm, jwt));
+                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, jwt.Payload.CHash, validationContext.AuthorizationCode, algorithm, jwt));
                 }
             }
             finally
@@ -306,17 +291,18 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Validates that the <see cref="JwtSecurityToken"/> contains the nonce.
         /// </summary>
-        /// <param name="jwt">the <see cref="JwtSecurityToken"/>that must contain the nonce that matches the <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</param>
+        /// <param name="jwt"a <see cref="JwtSecurityToken"/> with a 'nonce' claim that must match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>. If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null, the check is not made.</param>
         /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains 'nonce' to validate.</param>
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="ArgumentNullException">if <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null or whitespace.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if a'nonce' is not found in the <see cref="JwtSecurityToken"/>.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if the 'nonce' found in the <see cref="JwtSecurityToken"/> is null or whitespace.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if the 'nonce' found in the <see cref="JwtSecurityToken"/> doesn't match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and a timestamp is not: found, well formed or negative.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> contains a timestamp that is considered expired.</exception>
-        /// <remarks>The timestamp is only validated if <see cref="RequireTimeStampInNonce"/> is true.</remarks>
+        /// <remarks>The timestamp is only validated if <see cref="RequireTimeStampInNonce"/> is true.
+        /// <para>if <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null, then the <see cref="JwtSecurityToken"/> 'nonce' will not be validated.</para>
+        /// </remarks>
         protected virtual void ValidateNonce(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)
@@ -329,9 +315,9 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("validationContext");
             }
 
-            if (string.IsNullOrWhiteSpace(validationContext.Nonce))
+            if (validationContext.Nonce == null)
             {
-                throw new ArgumentNullException("validationContext.Nonce");
+                return;
             }
 
             string nonceFoundInJwt = jwt.Payload.Nonce;
