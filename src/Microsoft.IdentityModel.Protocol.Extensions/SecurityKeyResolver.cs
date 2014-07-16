@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Resolves securitykeys
     /// </summary>
-    public class SecurityKeyResolver : SecurityTokenResolver
+    internal class SecurityKeyResolver : SecurityTokenResolver
     {
         private delegate bool CertMatcher(X509Certificate2 cert);
 
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="securityToken"> related security token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        internal SecurityKeyResolver(string securityToken, TokenValidationParameters validationParameters)
+        public SecurityKeyResolver(string securityToken, TokenValidationParameters validationParameters)
         {
             _securityToken = securityToken;
 

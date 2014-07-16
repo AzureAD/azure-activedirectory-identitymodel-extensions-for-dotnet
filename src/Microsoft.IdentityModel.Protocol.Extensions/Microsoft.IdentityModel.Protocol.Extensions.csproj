@@ -76,7 +76,6 @@
     <Compile Include="Configuration\IDocumentRetriever.cs" />
     <Compile Include="Configuration\IConfigurationManager.cs" />
     <Compile Include="Configuration\IConfigurationRetriever.cs" />
-    <Compile Include="IssuerKeyRetriever.cs" />
     <Compile Include="JsonWebKey.cs" />
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\OpenIdConnectConfigurationRetriever.cs" />
@@ -95,6 +94,7 @@
     <Compile Include="SamlConstants.cs" />
     <Compile Include="Saml2SecurityTokenHandler.cs" />
     <Compile Include="SamlSecurityTokenHandler.cs" />
+    <Compile Include="SecurityKeyResolver.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensions.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WsFederationConstants.cs" />
