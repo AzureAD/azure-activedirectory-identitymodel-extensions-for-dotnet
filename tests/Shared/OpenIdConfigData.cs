@@ -383,7 +383,6 @@ namespace Microsoft.IdentityModel.Test
                                                                   ""token_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/token.oauth2"",
                                                                   ""revocation_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/revoke_token.oauth2"",
                                                                   ""userinfo_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/idp\/userinfo.openid"",
-                                                                  ""jwks_uri"":""https://connect-interop.pinglabs.org:9031/pf/JWKS"",
                                                                   ""ping_revoked_sris_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/pf-ws\/rest\/sessionMgmt\/revokedSris"",
                                                                   ""ping_end_session_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/idp\/startSLO.ping"",
                                                                   ""scopes_supported"":[""phone"",""address"",""email"",""openid"",""profile""],

@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Protocols
             RequireAmr = false;
             RequireAuthTime = false;
             RequireAzp = false;
+            RequireNonce = true;
             RequireSub = false;
             RequireTimeStampInNonce = true;
         }
@@ -141,6 +142,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         [DefaultValue(false)]
         public bool RequireAzp { get; set; }
+
+        /// <summary>
+        /// Get or sets if a nonce is required.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool RequireNonce { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if a 'sub' claim is required.
@@ -291,18 +298,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Validates that the <see cref="JwtSecurityToken"/> contains the nonce.
         /// </summary>
-        /// <param name="jwt"a <see cref="JwtSecurityToken"/> with a 'nonce' claim that must match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>. If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null, the check is not made.</param>
-        /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains 'nonce' to validate.</param>
+        /// <param name="jwt">a <see cref="JwtSecurityToken"/> with a 'nonce' claim that must match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</param>
+        /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains the 'nonce' to validate.</param>
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if a'nonce' is not found in the <see cref="JwtSecurityToken"/>.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if the 'nonce' found in the <see cref="JwtSecurityToken"/> is null or whitespace.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if a'nonce' is not found in the <see cref="JwtSecurityToken"/> and RequireNonce is true.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null and RequireNonce is true.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if the 'nonce' found in the <see cref="JwtSecurityToken"/> doesn't match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and a timestamp is not: found, well formed or negative.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> contains a timestamp that is considered expired.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and a timestamp is not: found, well formed, negatire or expired.</exception>
         /// <remarks>The timestamp is only validated if <see cref="RequireTimeStampInNonce"/> is true.
-        /// <para>if <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null, then the <see cref="JwtSecurityToken"/> 'nonce' will not be validated.</para>
-        /// </remarks>
+        /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the <see cref="JwtSecurityTokne"/>.</para></remarks>
         protected virtual void ValidateNonce(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)
@@ -315,20 +320,27 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("validationContext");
             }
 
-            if (validationContext.Nonce == null)
+            string nonceFoundInJwt = jwt.Payload.Nonce;
+
+            if (RequireNonce)
+            {
+                if (validationContext.Nonce == null)
+                {
+                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311));
+                }
+
+                if (nonceFoundInJwt == null)
+                {
+                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10322, jwt.ToString()));
+                }
+            }
+            else if ((validationContext.Nonce != null) && (nonceFoundInJwt == null))
+            {
+                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10323, validationContext.Nonce, jwt.ToString()));
+            }
+            else if (validationContext.Nonce == null)
             {
                 return;
-            }
-
-            string nonceFoundInJwt = jwt.Payload.Nonce;
-            if (nonceFoundInJwt == null)
-            {
-                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10300, JwtRegisteredClaimNames.Nonce, jwt.ToString()));
-            }
-
-            if (string.IsNullOrWhiteSpace(nonceFoundInJwt))
-            {
-                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10319, jwt.ToString()));
             }
 
             if (!(StringComparer.Ordinal.Equals(nonceFoundInJwt, validationContext.Nonce)))
