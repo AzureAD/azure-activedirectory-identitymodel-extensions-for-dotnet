@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_validationParameters.IssuerSigningKeyResolver != null)
             {
                 key = _validationParameters.IssuerSigningKeyResolver(token: _securityToken, securityToken: null, keyIdentifier: new SecurityKeyIdentifier(keyIdentifierClause), validationParameters: _validationParameters);
-                return true;
+                return (key != null);
             }
 
             if (_validationParameters.IssuerSigningKey != null)

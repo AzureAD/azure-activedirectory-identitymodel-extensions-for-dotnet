@@ -18,24 +18,24 @@
 
 namespace System.IdentityModel.Tokens
 {
-     /// <summary>
-    /// Interface
+    /// <summary>
+    /// Interface that defines a simple cache for tacking replaying of security tokens.
     /// </summary>
-    public interface IExpirableNonceCache
+    public interface ITokenReplayCache
     {
         /// <summary>
-        /// Try to add nonce
+        /// Try to add a securityToken.
         /// </summary>
-        /// <param name="nonce"></param>
-        /// <param name="expiresAt"></param>
-        /// <returns></returns>
-        bool TryAdd(string nonce, DateTime expiresAt);
+        /// <param name="securityToken">the security token to add.</param>
+        /// <param name="expiresOn">the time when security token expires.</param>
+        /// <returns>true if the security token was successfully added.</returns>
+        bool TryAdd(string securityToken, DateTime expiresOn);
 
         /// <summary>
-        /// Try to find nonce
+        /// Try to find securityToken
         /// </summary>
-        /// <param name="nonce"></param>
-        /// <returns></returns>
-        bool TryFind(string nonce);
+        /// <param name="securityToken">the security token to find.</param>
+        /// <returns>true if the security token is found.</returns>
+        bool TryFind(string securityToken);
     }
 }

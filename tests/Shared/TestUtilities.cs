@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Test
         public object Object { get; set; }
     }
 
-    public class TokenReplayCache : IExpirableNonceCache
+    public class TokenReplayCache : ITokenReplayCache
     {
 
         public bool OnAddReturnValue { get; set; }

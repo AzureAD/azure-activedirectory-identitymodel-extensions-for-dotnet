@@ -436,9 +436,9 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or set the <see cref="IExpirableNonceCache"/> that will be checked to ensure that a token in not replayed.
+        /// Gets or set the <see cref="ITokenReplayCache"/> that will be checked to help in detecting that a token has been 'seen' before.
         /// </summary>
-        public IExpirableNonceCache TokenReplayCache
+        public ITokenReplayCache TokenReplayCache
         {
             get;
             set;
