@@ -60,6 +60,9 @@ namespace System.IdentityModel
         /// <returns>DateTime of specified kind.</returns>
         public static DateTime GetMaxValue(DateTimeKind kind)
         {
+            if (kind == DateTimeKind.Unspecified)
+                return new DateTime(DateTime.MaxValue.Ticks, DateTimeKind.Utc);
+
             return new DateTime(DateTime.MaxValue.Ticks, kind);
         }
 
@@ -70,6 +73,9 @@ namespace System.IdentityModel
         /// <returns>DateTime of specified kind.</returns>
         public static DateTime GetMinValue(DateTimeKind kind)
         {
+            if (kind == DateTimeKind.Unspecified)
+                return new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc);
+
             return new DateTime(DateTime.MinValue.Ticks, kind);
         }
     }

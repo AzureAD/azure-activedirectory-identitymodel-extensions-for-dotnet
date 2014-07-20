@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         /// <summary>
-        /// Gets a named property on an object
+        /// Gets a named field on an object
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="field"></param>
@@ -109,6 +109,18 @@ namespace Microsoft.IdentityModel.Test
             Type type = obj.GetType();
             FieldInfo fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
             return  fieldInfo.GetValue(obj);
+        }
+
+        /// <summary>
+        /// Sets a named field on an object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="field"></param>
+        public static void SetField(object obj, string field, object fieldValue)
+        {
+            Type type = obj.GetType();
+            FieldInfo fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
+            fieldInfo.SetValue(obj, fieldValue);
         }
 
         /// <summary>
@@ -332,7 +344,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
         {
-            TokenValidationParameters tvp = validationParameters.Clone();
+            TokenValidationParameters tvp = validationParameters.Clone() as TokenValidationParameters;
             Microsoft.IdentityModel.Test.TokenReplayCache replayCache =
                new Microsoft.IdentityModel.Test.TokenReplayCache()
                {

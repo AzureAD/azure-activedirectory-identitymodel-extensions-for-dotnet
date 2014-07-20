@@ -74,10 +74,8 @@ namespace Microsoft.IdentityModel.Protocols
             if (string.IsNullOrWhiteSpace(address))
                 throw new ArgumentNullException("address");
 
-            OpenIdConnectConfiguration openIdConnectConfiguration = null;
             string doc = await retriever.GetDocumentAsync(address, cancel);
-
-            openIdConnectConfiguration = new OpenIdConnectConfiguration(doc);
+            OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 doc = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);

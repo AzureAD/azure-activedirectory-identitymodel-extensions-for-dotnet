@@ -159,7 +159,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or set logic to control if a nonce is prefixed with a timestamp.
         /// </summary>
         /// <remarks>if <see cref="RequireTimeStampInNonce"/> is true then:
-        /// <para><see cref="CreateNonce"/> will return a 'nonce' with the Epoch time as the prefix, delimited with a '.'.</para>
+        /// <para><see cref="GenerateNonce"/> will return a 'nonce' with the Epoch time as the prefix, delimited with a '.'.</para>
         /// <para><see cref="ValidateNonce"/> will require that the 'nonce' has a valid time as the prefix.</para>
         /// </remarks>
         [DefaultValue(true)]
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <exception cref="ArgumentNullException">if 'jwt' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the <see cref="JwtSecurityToken"/> 'c_hash' claim does not match <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> as per http://openid.net/specs/openid-connect-core-1_0.html#CodeValidation .</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the hash algorithm defined in <see cref="JwtSecurityHeader"/> (default is JwtAlgorithms.RSA_SHA256) was unable to be created.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the hash algorithm defined in <see cref="JwtHeader"/> (default is JwtAlgorithms.RSA_SHA256) was unable to be created.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the creation of the hash algorithm return a null instance.</exception>
         /// <remarks>if <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> is null, then the <see cref="JwtSecurityToken"/> 'c_hash' will not be validated.</remarks>
         protected virtual void ValidateCHash(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
@@ -307,7 +307,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if the 'nonce' found in the <see cref="JwtSecurityToken"/> doesn't match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and a timestamp is not: found, well formed, negatire or expired.</exception>
         /// <remarks>The timestamp is only validated if <see cref="RequireTimeStampInNonce"/> is true.
-        /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the <see cref="JwtSecurityTokne"/>.</para></remarks>
+        /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the <see cref="JwtSecurityToken"/>.</para></remarks>
         protected virtual void ValidateNonce(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)

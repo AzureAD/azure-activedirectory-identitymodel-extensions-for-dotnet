@@ -39,6 +39,8 @@ namespace Microsoft.IdentityModel
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
         public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
         public const string IDX10105 = "IDX10105: NonceLifetime must be greater than zero. value: '{0}'";
+        public const string IDX10106 = "IDX10106: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'";
+        public const string IDX10107 = "IDX10107: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'";
 
         // token validation
         public const string IDX10200 = "IDX10200: Support for ValidateToken(string, TokenValidationParameters) requires a handler to implement ISecurityTokenValidator, none of the SecurityTokenHandlers did.";
@@ -154,6 +156,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
         public const string IDX10801 = "IDX10801: Unable to create an RSA pulblic key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
         public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
+        public const string IDX10803 = "IDX10803: Unable to create to obtain configuration from: '{0}'.";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
