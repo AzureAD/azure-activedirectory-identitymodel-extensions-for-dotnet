@@ -271,6 +271,26 @@ namespace System.IdentityModel.Test
             yield return new Claim( typeof( Entity ).ToString(), jsString, "JsonClaimType", issuer, orginalIssuer );
         }
 
+        public static IEnumerable<Claim> GroupClaims(string issuer, string originalIssuer)
+        {
+            yield return new Claim("upn", "badams@dushyantgill.net", issuer, originalIssuer);
+            yield return new Claim("family_name", "Adams", issuer, originalIssuer);
+            yield return new Claim("unique_name", "badams@dushyantgill.net", issuer, originalIssuer);
+            yield return new Claim("ver", "1.0", issuer, originalIssuer);
+            yield return new Claim("aud", "0bb44690-eae0-4b2c-b2b1-64ac03098226", issuer, originalIssuer);
+            yield return new Claim("iss", "https://sts.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/", issuer, originalIssuer); 
+            yield return new Claim("groups", "c4324023-3424-4ba6-9320-1ce28431b113", issuer, originalIssuer);
+            yield return new Claim("groups","08953f81-ffd6-44f9-887d-69855355ffbd", issuer, originalIssuer);
+            yield return new Claim("groups", "694a55b2-ec4c-480d-8a7d-26d34ea9225b", issuer, originalIssuer);
+            yield return new Claim("oid", "0c9545d0-a670-4628-8c1f-e90618a3b940", issuer, originalIssuer);
+            yield return new Claim("nonce", "02f9c7ba-1720-4d46-b00f-6731fe2c4d14", issuer, originalIssuer);
+            yield return new Claim("given_name", "Brad", issuer, originalIssuer);
+            yield return new Claim("tid", "5803816d-c4ab-4601-a128-e2576e5d6910", issuer, originalIssuer);
+            yield return new Claim("iat", "1403822988", issuer, originalIssuer);
+            yield return new Claim("amr", "pwd", issuer, originalIssuer);
+            yield return new Claim("sub", "355anlmMo6uvGyabeIqNqBTUJsEPdyijxouLjfmg8G8", issuer, originalIssuer);
+        }
+
         /// <summary>
         /// Uses JwtSecurityTokenHandler.OutboundClaimTypeMap to map claimtype.
         /// </summary>

@@ -66,7 +66,7 @@ namespace System.IdentityModel.Tokens
         public JwtHeader(SigningCredentials signingCredentials = null)
             : base(StringComparer.Ordinal)
         {
-            this.Add(JwtHeaderParameterNames.Typ, JwtConstants.HeaderType);
+            this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
 
             if (signingCredentials != null)
             {
@@ -78,7 +78,7 @@ namespace System.IdentityModel.Tokens
                     algorithm = JwtSecurityTokenHandler.OutboundAlgorithmMap[algorithm];
                 }
 
-                this.Add(JwtHeaderParameterNames.Alg, algorithm);
+                this[JwtHeaderParameterNames.Alg] = algorithm;
                 if (signingCredentials.SigningKeyIdentifier != null)
                 {
                     foreach (SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier)
@@ -86,7 +86,7 @@ namespace System.IdentityModel.Tokens
                         NamedKeySecurityKeyIdentifierClause namedKeyClause = clause as NamedKeySecurityKeyIdentifierClause;
                         if (namedKeyClause != null)
                         {
-                            this.Add(namedKeyClause.Name, namedKeyClause.Id);
+                            this[namedKeyClause.Name] = namedKeyClause.Id;
                         }
                     }
                 }
@@ -94,12 +94,12 @@ namespace System.IdentityModel.Tokens
                 X509SigningCredentials x509SigningCredentials = signingCredentials as X509SigningCredentials;
                 if (x509SigningCredentials != null && x509SigningCredentials.Certificate != null)
                 {
-                    this.Add(JwtHeaderParameterNames.X5t, Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash()));
+                    this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
                 }
             }
             else
             {
-                this.Add(JwtHeaderParameterNames.Alg, JwtAlgorithms.NONE);
+                this[JwtHeaderParameterNames.Alg] = JwtAlgorithms.NONE;
             }
         }
 

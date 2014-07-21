@@ -90,7 +90,7 @@ namespace System.IdentityModel.Test
                 handler.ValidateToken(jwt, validationParameters, out validatedToken);
                 Assert.IsNotNull(handler.Jwt as DerivedJwtSecurityToken);
                 Assert.IsTrue(handler.ReadTokenCalled);
-                Assert.IsTrue(handler.ValidateAudienceCalled);
+                Assert.IsFalse(handler.ValidateAudienceCalled);
                 Assert.IsTrue(handler.ValidateIssuerCalled);
                 Assert.IsTrue(handler.ValidateIssuerSigningKeyCalled);
                 Assert.IsTrue(handler.ValidateLifetimeCalled);

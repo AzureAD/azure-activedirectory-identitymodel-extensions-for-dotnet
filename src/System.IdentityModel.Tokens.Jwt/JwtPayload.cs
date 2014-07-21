@@ -61,34 +61,28 @@ namespace System.IdentityModel.Tokens
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(issuer))
-                this.Add(JwtRegisteredClaimNames.Iss, issuer);
-
-            if (!string.IsNullOrWhiteSpace(audience))
-                this.Add(JwtRegisteredClaimNames.Aud, audience);
-
             if (claims != null)
                 this.AddClaims(claims);
+
+            if (!string.IsNullOrWhiteSpace(issuer))
+            {
+                this[JwtRegisteredClaimNames.Iss] = issuer;
+            }
+
+            if (!string.IsNullOrWhiteSpace(audience))
+            {
+                this[JwtRegisteredClaimNames.Aud] = audience;
+            }
 
             // if claims had an exp or nbf claim they will be overridden
             if (expires.HasValue)
             { 
-                if (this.ContainsKey(JwtRegisteredClaimNames.Exp))
-                {
-                    this.Remove(JwtRegisteredClaimNames.Exp);
-                }
-
-                this.Add(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expires.Value.ToUniversalTime()));
+                this[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(expires.Value.ToUniversalTime());
             }
 
             if (notBefore.HasValue)
             {
-                if (this.ContainsKey(JwtRegisteredClaimNames.Nbf))
-                {
-                    this.Remove(JwtRegisteredClaimNames.Nbf);
-                }
-
-                this.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(notBefore.Value.ToUniversalTime()));
+                this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
             }
         }
 

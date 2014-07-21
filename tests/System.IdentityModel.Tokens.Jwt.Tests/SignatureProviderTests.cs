@@ -176,7 +176,7 @@ namespace System.IdentityModel.Test
             AsymmetricConstructorVariation("Verifying: - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
 
             // _formatter not created
-            AsymmetricConstructorVariation("Signing:   - key cannot create _formatter", KeyingMaterial.AsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "IDX10618", inner: typeof(NotSupportedException)));
+            AsymmetricConstructorVariation("Signing:   - key cannot create _formatter", KeyingMaterial.DefaultAsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "IDX10618", inner: typeof(NotSupportedException)));
 
             // _deformatter not created
             AsymmetricConstructorVariation("Verifying: - key cannot create _deformatter", KeyingMaterial.DefaultAsymmetricKey_Public_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "IDX10618", inner: typeof(NotSupportedException)));
@@ -278,7 +278,7 @@ namespace System.IdentityModel.Test
             try
             {
                 Random r = new Random();
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.AsymmetricKey_2048, SecurityAlgorithms.RsaSha256Signature);
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultAsymmetricKey_2048, SecurityAlgorithms.RsaSha256Signature);
                 byte[] bytesin = new byte[1024];
                 r.NextBytes(bytesin);
                 byte[] signature = provider.Sign(bytesin);
@@ -292,7 +292,7 @@ namespace System.IdentityModel.Test
             try
             {
                 Random r = new Random();
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.AsymmetricKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultAsymmetricKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
                 byte[] bytesin = new byte[1024];
                 r.NextBytes(bytesin);
                 byte[] signature = provider.Sign(bytesin);
@@ -307,7 +307,7 @@ namespace System.IdentityModel.Test
             try
             {
                 Random r = new Random();
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.AsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature");
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultAsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature");
                 Assert.Fail(string.Format("Should have thrown, it is possible that crypto config mapped this."));
             }
             catch (Exception ex)

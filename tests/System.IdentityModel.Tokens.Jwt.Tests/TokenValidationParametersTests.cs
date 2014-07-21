@@ -93,12 +93,12 @@ namespace System.IdentityModel.Test
 
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {
-                AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow,
+                AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue,
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey; },
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
-                LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow,
+                LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue,
                 SaveSigninToken = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -117,12 +117,12 @@ namespace System.IdentityModel.Test
             Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
-            validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorDoesNotThrow;
+            validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
             validationParametersSets.IssuerSigningKey = new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
             validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey2; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
-            validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorDoesNotThrow;
+            validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue;
             validationParametersSets.SaveSigninToken = true;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
@@ -133,7 +133,7 @@ namespace System.IdentityModel.Test
 
             Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(validationParametersInline, validationParametersSets));
 
-            var tokenValidationParametersCloned = validationParametersInline.Clone();
+            TokenValidationParameters tokenValidationParametersCloned = validationParametersInline.Clone() as TokenValidationParameters;
             Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(tokenValidationParametersCloned, validationParametersInline));
             //tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple();
 
@@ -219,6 +219,7 @@ namespace System.IdentityModel.Test
             }
 
             public string InternalString{ get {return _internalString; }}
+
             public override TokenValidationParameters Clone()
             {
                 return new DerivedTokenValidationParameters(this);

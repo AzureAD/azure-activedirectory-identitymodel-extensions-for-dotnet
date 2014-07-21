@@ -28,6 +28,7 @@ namespace System.IdentityModel.Test
 {
     public class CompareContext
     {
+        Dictionary<string,  Dictionary<string, object>> _errors = new Dictionary<string,  Dictionary<string, object>>();
         public CompareContext()
         {
             IgnoreSubject = true;
@@ -36,6 +37,7 @@ namespace System.IdentityModel.Test
 
         public static CompareContext Default = new CompareContext();
 
+        public Dictionary<string, Dictionary<string, object>> Errors { get { return _errors; } }
         public bool ExpectRawData { get; set; }
         public bool IgnoreProperties { get; set; }
         public bool IgnoreSubject { get; set; }
@@ -168,63 +170,90 @@ namespace System.IdentityModel.Test
         private static bool AreClaimsEqual(Claim claim1, Claim claim2, CompareContext context)
         {
             Dictionary<string, object> matchingFailures = new Dictionary<string, object>();
-
             if (claim1.Type != claim2.Type)
+            {
                 matchingFailures.Add("Type", new KeyValuePair<string, string>(claim1.Type, claim2.Type));
+            }
 
             if (claim1.Issuer != claim2.Issuer)
+            {
                 matchingFailures.Add("Issuer", new KeyValuePair<string, string>(claim1.Issuer, claim2.Issuer));
+            }
 
             if (claim1.OriginalIssuer != claim2.OriginalIssuer)
-                matchingFailures.Add("Issuer", new KeyValuePair<string, string>(claim1.OriginalIssuer, claim2.OriginalIssuer));
+            { 
+                matchingFailures.Add("OriginalIssuer", new KeyValuePair<string, string>(claim1.OriginalIssuer, claim2.OriginalIssuer));
+            }
 
             if (!context.IgnoreProperties && !AreEqual<IDictionary<string, string>>(claim1.Properties, claim2.Properties, context, AreDictionariesEqual))
+            {
                 matchingFailures.Add("Properties", new KeyValuePair<IDictionary<string, string>, IDictionary<string, string>>(claim1.Properties, claim2.Properties));
+            }
 
             if (claim1.Value != claim2.Value)
+            {
                 matchingFailures.Add("Value", new KeyValuePair<string, string>(claim1.Value, claim2.Value));
+            }
 
             if (claim1.ValueType != claim2.ValueType)
+            {
                 matchingFailures.Add("ValueType", new KeyValuePair<string, string>(claim1.ValueType, claim2.ValueType));
+            }
 
             if (!context.IgnoreSubject && !AreEqual<ClaimsIdentity>(claim1.Subject, claim2.Subject, context, AreClaimsIdentitiesEqual))
+            {
                 matchingFailures.Add("Subject", new KeyValuePair<ClaimsIdentity, ClaimsIdentity>(claim1.Subject, claim2.Subject));
+            }
 
             return matchingFailures.Count == 0;
         }
 
-        private static bool AreClaimsIdentitiesEqual(ClaimsIdentity ci1, ClaimsIdentity ci2, CompareContext compareContext)
+        private static bool AreClaimsIdentitiesEqual(ClaimsIdentity ci1, ClaimsIdentity ci2, CompareContext context)
         {
-            if (!string.Equals(ci1.AuthenticationType, ci2.AuthenticationType, compareContext.StringComparison))
-                return false;
+            Dictionary<string, object> matchingFailures = new Dictionary<string, object>();
 
-            if (!string.Equals(ci1.Label, ci2.Label, compareContext.StringComparison))
-                return false;
+            if (!string.Equals(ci1.AuthenticationType, ci2.AuthenticationType, context.StringComparison))
+                matchingFailures.Add("AuthenticationType", new KeyValuePair<string, string>(ci1.AuthenticationType, ci2.AuthenticationType));
 
-            if (!string.Equals(ci1.Name, ci2.Name, compareContext.StringComparison))
-                return false;
+            if (!string.Equals(ci1.Label, ci2.Label, context.StringComparison))
+                matchingFailures.Add("Label", new KeyValuePair<string, string>(ci1.Label, ci2.Label));
+
+            if (!string.Equals(ci1.Name, ci2.Name, context.StringComparison))
+                matchingFailures.Add("Name", new KeyValuePair<string, string>(ci1.Name, ci2.Name));
 
             if (!string.Equals(ci1.NameClaimType, ci2.NameClaimType))
-                return false;
+                matchingFailures.Add("NameClaimType", new KeyValuePair<string, string>(ci1.NameClaimType, ci2.NameClaimType));
 
             if (!string.Equals(ci1.RoleClaimType, ci2.RoleClaimType))
-                return false;
+                matchingFailures.Add("RoleClaimType", new KeyValuePair<string, string>(ci1.RoleClaimType, ci2.RoleClaimType));
 
-            if (!AreEnumsEqual<Claim>(ci1.Claims, ci2.Claims, compareContext, AreClaimsEqual))
-                return false;
+            if (!AreEnumsEqual<Claim>(ci1.Claims, ci2.Claims, context, AreClaimsEqual))
+                matchingFailures.Add("Claims", new KeyValuePair<string, string>("ci1.Claims", "ci2.Claims"));
 
             if (ci1.IsAuthenticated != ci2.IsAuthenticated)
-                return false;
+                matchingFailures.Add("IsAuthenticated", new KeyValuePair<bool, bool>(ci1.IsAuthenticated, ci2.IsAuthenticated));
 
-            if (!AreEqual<ClaimsIdentity>(ci1.Actor, ci2.Actor, compareContext, AreClaimsIdentitiesEqual))
-                return false;
+            if (!AreEqual<ClaimsIdentity>(ci1.Actor, ci2.Actor, context, AreClaimsIdentitiesEqual))
+                matchingFailures.Add("Actor", new KeyValuePair<string, string>("ci1.Actor", "ci2.Actor"));
 
-            if (!compareContext.IgnoreType && (ci1.GetType() != ci2.GetType()))
-                return false;
+            if (!context.IgnoreType && (ci1.GetType() != ci2.GetType()))
+                matchingFailures.Add("GetType", new KeyValuePair<string, string>(ci1.GetType().ToString(), ci2.GetType().ToString()));
 
             // || TODO compare bootstrapcontext
 
-            return true;
+            if (matchingFailures.Count != 0)
+            {
+                Dictionary<string, object> findMatchingFailures = null;
+                if (context.Errors.TryGetValue("AreClaimsIdentitiesEqual", out findMatchingFailures))
+                {
+                }
+                else
+                {
+                    context.Errors["AreClaimsIdentitiesEqual"] = matchingFailures;
+                }
+            }
+
+            return matchingFailures.Count == 0;
         }
 
         private static bool AreClaimsPrincipalsEqual(ClaimsPrincipal principal1, ClaimsPrincipal principal2, CompareContext context)
@@ -279,45 +308,45 @@ namespace System.IdentityModel.Test
             return numMatched == dictionary1.Count;
         }
 
-        private static bool AreJsonWebKeysEqual(JsonWebKey jsonWebkey1, JsonWebKey jsonWebkey2, CompareContext compareContext)
+        private static bool AreJsonWebKeysEqual(JsonWebKey jsonWebkey1, JsonWebKey jsonWebkey2, CompareContext context)
         {
             List<string> errors = new List<string>();
-            if (!string.Equals(jsonWebkey1.Alg, jsonWebkey2.Alg, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.Alg, jsonWebkey2.Alg, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.Alg != jsonWebkey2.Alg: " + jsonWebkey1.Alg ?? "null" + ", " + jsonWebkey2.Alg ?? "null");
             }
 
-            if (!string.Equals(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.KeyOps != jsonWebkey2.KeyOps: " + jsonWebkey1.KeyOps + ", " + jsonWebkey2.KeyOps);
             }
 
-            if (!string.Equals(jsonWebkey1.Kid, jsonWebkey2.Kid, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.Kid, jsonWebkey2.Kid, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.Kid != jsonWebkey2.Kid: " + jsonWebkey1.Kid + ", " + jsonWebkey2.Kid);
             }
 
-            if (!string.Equals(jsonWebkey1.Kty, jsonWebkey2.Kty, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.Kty, jsonWebkey2.Kty, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.Kty != jsonWebkey2.Kty: " + jsonWebkey1.Kty + ", " + jsonWebkey2.Kty);
             }
 
-            if (!string.Equals(jsonWebkey1.Use, jsonWebkey2.Use, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.Use, jsonWebkey2.Use, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.Use != jsonWebkey2.Use: " + (jsonWebkey1.Use ?? "null") + ", " + (jsonWebkey2.Use ?? "null"));
             }
 
-            if (!string.Equals(jsonWebkey1.X5t, jsonWebkey2.X5t, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.X5t, jsonWebkey2.X5t, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.X5t != jsonWebkey2.X5t" + jsonWebkey1.X5t + ", " + jsonWebkey2.X5t);
             }
 
-            if (!string.Equals(jsonWebkey1.X5u, jsonWebkey2.X5u, compareContext.StringComparison))
+            if (!string.Equals(jsonWebkey1.X5u, jsonWebkey2.X5u, context.StringComparison))
             {
                 errors.Add("jsonWebkey1.X5u != jsonWebkey2.X5u: " + jsonWebkey1.X5u + ", " + jsonWebkey2.X5u);
             }
 
-            if (!AreEnumsEqual<string>(jsonWebkey1.X5c, jsonWebkey2.X5c, compareContext, AreStringsEqual))
+            if (!AreEnumsEqual<string>(jsonWebkey1.X5c, jsonWebkey2.X5c, context, AreStringsEqual))
             {
                 errors.Add("jsonWebkey1.X5c != jsonWebkey2.X5c: " + jsonWebkey1.X5c + ", " + jsonWebkey2.X5c);
             }
@@ -325,9 +354,9 @@ namespace System.IdentityModel.Test
             return (errors.Count == 0);
         }
 
-        private static bool AreJsonWebKeyKeySetsEqual(JsonWebKeySet jsonWebKeySet1, JsonWebKeySet jsonWebKeySet2, CompareContext compareContext)
+        private static bool AreJsonWebKeyKeySetsEqual(JsonWebKeySet jsonWebKeySet1, JsonWebKeySet jsonWebKeySet2, CompareContext context)
         {
-            if (!AreEnumsEqual<JsonWebKey>(jsonWebKeySet1.Keys, jsonWebKeySet2.Keys, compareContext, AreJsonWebKeysEqual))
+            if (!AreEnumsEqual<JsonWebKey>(jsonWebKeySet1.Keys, jsonWebKeySet2.Keys, context, AreJsonWebKeysEqual))
             {
                 return false;
             }
@@ -360,33 +389,33 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        private static bool AreJwtSecurityTokensEqual(JwtSecurityToken jwt1, JwtSecurityToken jwt2, CompareContext compareContext)
+        private static bool AreJwtSecurityTokensEqual(JwtSecurityToken jwt1, JwtSecurityToken jwt2, CompareContext context)
         {
-            if (!AreEqual<JwtHeader>(jwt1.Header, jwt2.Header, compareContext, AreJwtHeadersEqual))
+            if (!AreEqual<JwtHeader>(jwt1.Header, jwt2.Header, context, AreJwtHeadersEqual))
                 return false;
 
-            if (!AreEqual<JwtPayload>(jwt1.Payload, jwt2.Payload, compareContext, AreJwtPayloadsEqual))
+            if (!AreEqual<JwtPayload>(jwt1.Payload, jwt2.Payload, context, AreJwtPayloadsEqual))
                 return false;
 
-            if (!AreEnumsEqual<Claim>(jwt1.Claims, jwt2.Claims, compareContext, AreClaimsEqual))
+            if (!AreEnumsEqual<Claim>(jwt1.Claims, jwt2.Claims, context, AreClaimsEqual))
                 return false;
 
-            if (!string.Equals(jwt1.Actor, jwt2.Actor, compareContext.StringComparison))
+            if (!string.Equals(jwt1.Actor, jwt2.Actor, context.StringComparison))
                 return false;
 
-            if (!AreEnumsEqual<string>(jwt1.Audiences, jwt2.Audiences, compareContext, AreStringsEqual))
+            if (!AreEnumsEqual<string>(jwt1.Audiences, jwt2.Audiences, context, AreStringsEqual))
                 return false;
 
-            if (!string.Equals(jwt1.Id, jwt2.Id, compareContext.StringComparison))
+            if (!string.Equals(jwt1.Id, jwt2.Id, context.StringComparison))
                 return false;
 
-            if (!string.Equals(jwt1.Issuer, jwt2.Issuer, compareContext.StringComparison))
+            if (!string.Equals(jwt1.Issuer, jwt2.Issuer, context.StringComparison))
                 return false;
 
-            if (compareContext.ExpectRawData && !string.Equals( jwt1.RawData, jwt2.RawData, compareContext.StringComparison))
+            if (context.ExpectRawData && !string.Equals( jwt1.RawData, jwt2.RawData, context.StringComparison))
                 return false;
 
-            if (!string.Equals(jwt1.SignatureAlgorithm, jwt2.SignatureAlgorithm, compareContext.StringComparison))
+            if (!string.Equals(jwt1.SignatureAlgorithm, jwt2.SignatureAlgorithm, context.StringComparison))
                 return false;
 
             if (jwt1.ValidFrom != jwt2.ValidFrom)
@@ -395,7 +424,7 @@ namespace System.IdentityModel.Test
             if (jwt1.ValidTo != jwt2.ValidTo)
                 return false;
 
-            if (!AreEnumsEqual<SecurityKey>(jwt1.SecurityKeys, jwt2.SecurityKeys, compareContext, AreSecurityKeysEqual))
+            if (!AreEnumsEqual<SecurityKey>(jwt1.SecurityKeys, jwt2.SecurityKeys, context, AreSecurityKeysEqual))
                 return false;
 
             // no reason to check keys, as they are always empty for now.
@@ -534,7 +563,7 @@ namespace System.IdentityModel.Test
             return string.Equals(string1, string2, context.StringComparison);
         }
 
-        private static bool AreTokenValidationParametersEqual(TokenValidationParameters validationParameters1, TokenValidationParameters validationParameters2, CompareContext compareContext)
+        private static bool AreTokenValidationParametersEqual(TokenValidationParameters validationParameters1, TokenValidationParameters validationParameters2, CompareContext context)
         {
             HashSet<string> matchingFailures = new HashSet<string>();
 
@@ -558,22 +587,22 @@ namespace System.IdentityModel.Test
             if (validationParameters1.ClockSkew != validationParameters2.ClockSkew)
                 matchingFailures.Add("ClockSkew");
 
-            if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKey, validationParameters2.IssuerSigningKey, compareContext, AreSecurityKeysEqual))
+            if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKey, validationParameters2.IssuerSigningKey, context, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKey");
 
-            //if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKeyResolver, validationParameters2.IssuerSigningKeyResolver, compareContext, AreSecurityKeysEqual))
+            //if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKeyResolver, validationParameters2.IssuerSigningKeyResolver, context, AreSecurityKeysEqual))
             //    matchingFailures.Add("IssuerSigningKeyRetriever");
 
-            if (!AreEnumsEqual<SecurityKey>(validationParameters1.IssuerSigningKeys, validationParameters2.IssuerSigningKeys, compareContext, AreSecurityKeysEqual))
+            if (!AreEnumsEqual<SecurityKey>(validationParameters1.IssuerSigningKeys, validationParameters2.IssuerSigningKeys, context, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKeys");
 
             if ((validationParameters1.IssuerSigningKeyValidator == null && validationParameters2.IssuerSigningKeyValidator != null) || (validationParameters1.IssuerSigningKeyValidator != null && validationParameters2.IssuerSigningKeyValidator == null))
                 matchingFailures.Add("IssuerSigningKeyValidator");
 
-            if (!AreEqual<SecurityToken>(validationParameters1.IssuerSigningToken, validationParameters2.IssuerSigningToken, compareContext, AreSecurityTokensEqual))
+            if (!AreEqual<SecurityToken>(validationParameters1.IssuerSigningToken, validationParameters2.IssuerSigningToken, context, AreSecurityTokensEqual))
                 matchingFailures.Add("IssuerSigningKey");
 
-            if (!AreEnumsEqual<SecurityToken>(validationParameters1.IssuerSigningTokens, validationParameters2.IssuerSigningTokens, compareContext, AreSecurityTokensEqual))
+            if (!AreEnumsEqual<SecurityToken>(validationParameters1.IssuerSigningTokens, validationParameters2.IssuerSigningTokens, context, AreSecurityTokensEqual))
                 matchingFailures.Add("IssuerSigningTokens");
 
             if ((validationParameters1.IssuerValidator == null && validationParameters2.IssuerValidator != null) || (validationParameters1.IssuerValidator != null && validationParameters2.IssuerValidator == null))
@@ -639,15 +668,15 @@ namespace System.IdentityModel.Test
 
         // Not currently used.
 
-        private static bool AreKeyRetrieversEqual(Func<string, IEnumerable<SecurityKey>> keyRetrevier1, Func<string, IEnumerable<SecurityKey>> keyRetrevier2, CompareContext compareContext)
+        private static bool AreKeyRetrieversEqual(Func<string, IEnumerable<SecurityKey>> keyRetrevier1, Func<string, IEnumerable<SecurityKey>> keyRetrevier2, CompareContext context)
         {
-            if (!AreEnumsEqual<SecurityKey>(keyRetrevier1("keys"), keyRetrevier2("keys"), compareContext, AreSecurityKeysEqual))
+            if (!AreEnumsEqual<SecurityKey>(keyRetrevier1("keys"), keyRetrevier2("keys"), context, AreSecurityKeysEqual))
                 return false;
 
             return true;
         }
 
-        private static bool AreAudValidatorsEqual(Action<IEnumerable<string>, SecurityToken, TokenValidationParameters> validator1, Action<IEnumerable<string>, SecurityToken, bool> validator2, CompareContext compareContext)
+        private static bool AreAudValidatorsEqual(Action<IEnumerable<string>, SecurityToken, TokenValidationParameters> validator1, Action<IEnumerable<string>, SecurityToken, bool> validator2, CompareContext context)
         {
             //validator1(new string[]{"str"}, null, IdentityUtilities.DefaultTokenValidationParameters);
             //validator2(new string[]{"str"}, null, IdentityUtilities.DefaultTokenValidationParameters);
@@ -655,7 +684,7 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        private static bool AreLifetimeValidatorsEqual(Func<SecurityToken, bool> validator1, Func<SecurityToken, bool> validator2, CompareContext compareContext)
+        private static bool AreLifetimeValidatorsEqual(Func<SecurityToken, bool> validator1, Func<SecurityToken, bool> validator2, CompareContext context)
         {
             if (validator1(null) != validator2(null))
                 return false;
@@ -663,7 +692,7 @@ namespace System.IdentityModel.Test
             return true;
         }
 
-        private static bool AreIssValidatorsEqual(Func<string, SecurityToken, bool> validator1, Func<string, SecurityToken, bool> validator2, CompareContext compareContext)
+        private static bool AreIssValidatorsEqual(Func<string, SecurityToken, bool> validator1, Func<string, SecurityToken, bool> validator2, CompareContext context)
         {
             if (validator1("bob", null) != validator2("bob", null))
                 return false;

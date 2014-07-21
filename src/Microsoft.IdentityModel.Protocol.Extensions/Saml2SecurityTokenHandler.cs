@@ -333,68 +333,73 @@ namespace Microsoft.IdentityModel.Tokens
 
             Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
 
-            if (validationParameters.LifetimeValidator != null)
+            if (validationParameters.ValidateLifetime)
             {
-                if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
+                if (validationParameters.LifetimeValidator != null)
                 {
-                    throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, securityToken));
+                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
+                    {
+                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, securityToken));
+                    }
                 }
-            }
-            else
-            {
-                ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
+                else
+                {
+                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
+                }
             }
 
             // TODO
             // need to validate   ValidateConfirmationData(subjectConfirmation.SubjectConfirmationData);
 
-            List<string> audiences = new List<string>();
-            if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.AudienceRestrictions != null)
+            if (validationParameters.ValidateAudience)
             {
-                foreach (Saml2AudienceRestriction restriction in samlToken.Assertion.Conditions.AudienceRestrictions)
+                List<string> audiences = new List<string>();
+                if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.AudienceRestrictions != null)
                 {
-                    if (restriction==null)
+                    foreach (Saml2AudienceRestriction restriction in samlToken.Assertion.Conditions.AudienceRestrictions)
                     {
-                        continue;
-                    }
-
-                    foreach (Uri uri in restriction.Audiences)
-                    {
-                        if (uri == null)
+                        if (restriction == null)
                         {
                             continue;
                         }
 
-                        audiences.Add(uri.OriginalString);
+                        foreach (Uri uri in restriction.Audiences)
+                        {
+                            if (uri == null)
+                            {
+                                continue;
+                            }
+
+                            audiences.Add(uri.OriginalString);
+                        }
                     }
                 }
-            }
-                
-            if (validationParameters.AudienceValidator != null)
-            {
-                if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
+
+
+                if (validationParameters.AudienceValidator != null)
                 {
-                    throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, securityToken));
+                    if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
+                    {
+                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, securityToken));
+                    }
+                }
+                else
+                {
+                    ValidateAudience(audiences, samlToken, validationParameters);
                 }
             }
-            else
-            {
-                ValidateAudience(audiences, samlToken, validationParameters);
-            }                            
 
             string issuer  = samlToken.Assertion.Issuer != null ? samlToken.Assertion.Issuer.Value : null;
-            if (validationParameters.IssuerValidator != null)
+            if (validationParameters.ValidateIssuer)
             {
-                issuer = validationParameters.IssuerValidator(issuer, samlToken, validationParameters);
-            }
-            else
-            {
-                issuer = ValidateIssuer( issuer, samlToken, validationParameters);
-            }
-
-            if (string.IsNullOrWhiteSpace(issuer))
-            {
-                throw new SecurityTokenInvalidIssuerException(ErrorMessages.IDX10203);
+                if (validationParameters.IssuerValidator != null)
+                {
+                    issuer = validationParameters.IssuerValidator(issuer, samlToken, validationParameters);
+                }
+                else
+                {
+                    issuer = ValidateIssuer(issuer, samlToken, validationParameters);
+                }
             }
 
             if (samlToken.IssuerToken != null)

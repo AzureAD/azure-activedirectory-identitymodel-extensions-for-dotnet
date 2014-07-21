@@ -166,6 +166,65 @@ namespace System.IdentityModel.Test
             JavaScriptSerializer js = new JavaScriptSerializer();
             string jsString = js.Serialize(Entity.Default);
             Assert.AreEqual(jsString, jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
+
+            jwtHandler = new JwtSecurityTokenHandler();
+            jwt = jwtHandler.CreateToken(
+                    issuer: issuer,
+                    audience: audience,
+                    signingCredentials: KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2,
+                    subject: new ClaimsIdentity(ClaimSets.GroupClaims(issuer, issuer)),
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(1),
+                    notBefore: DateTime.UtcNow);
+
+            encodedJwt = jwtHandler.WriteToken(jwt);
+            validationParameters =
+                new TokenValidationParameters
+                {
+                    IssuerSigningKey = KeyingMaterial.DefaultAsymmetricKey_2048,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            SecurityToken validatedJwt = null;
+            ClaimsPrincipal claimsPrincipal = jwtHandler.ValidateToken(jwt.RawData, validationParameters, out validatedJwt);
+
+            string iss = @"https://sts.windows-ppe.net/5803816d-c4ab-4601-a128-e2576e5d6910/";
+            List<Claim> overClaims = JsonClaims.OverClaims(iss, iss);
+            DateTime nbf = DateTime.UtcNow;
+            DateTime exp = nbf + TimeSpan.FromHours(1);
+
+            jwt = jwtHandler.CreateToken(
+                    signingCredentials: KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2,
+                    subject: new ClaimsIdentity(overClaims)
+            );
+
+            encodedJwt = jwtHandler.WriteToken(jwt);
+            validationParameters =
+                new TokenValidationParameters
+                {
+                    IssuerSigningKey = KeyingMaterial.DefaultAsymmetricKey_2048,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            validatedJwt = null;
+            Dictionary<string, string> inbound = new Dictionary<string, string>(JwtSecurityTokenHandler.InboundClaimTypeMap);
+            JwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
+            claimsPrincipal = jwtHandler.ValidateToken(jwt.RawData, validationParameters, out validatedJwt);
+            foreach(var typemap in inbound)
+            {
+                JwtSecurityTokenHandler.InboundClaimTypeMap.Add(typemap);
+            }
+
+            overClaims.Add(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(jwt.ValidTo).ToString(), ClaimValueTypes.String, iss, iss));
+            overClaims.Add(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(jwt.ValidFrom).ToString(), ClaimValueTypes.String, iss, iss));
+            CompareContext context = CompareContext.Default;
+            if (!IdentityComparer.AreEqual<IEnumerable<Claim>>(overClaims, claimsPrincipal.Claims, context))
+            {
+                Assert.Fail("JsonClaims.OverClaims != claimsPrincipal.Claims");
+            }
         }
 
         [TestMethod]

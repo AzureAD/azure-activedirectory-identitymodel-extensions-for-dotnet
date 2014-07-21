@@ -61,11 +61,12 @@ namespace System.IdentityModel.Tokens
         private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+        private Int32 _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
         /// </summary>
-        public readonly Int32 DefaultTokenLifetimeInMinutes = 60;
+        public static readonly Int32 DefaultTokenLifetimeInMinutes = 60;
 
         private static FieldInfo _certFieldInfo;
         private static Type _x509AsymmKeyType;
@@ -253,7 +254,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return _maximumTokenSizeInBytes;
+                return _defaultTokenLifetimeInMinutes;
             }
 
             set
@@ -263,7 +264,7 @@ namespace System.IdentityModel.Tokens
                     throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10104, value.ToString(CultureInfo.InvariantCulture)));
                 }
 
-                _maximumTokenSizeInBytes = value;
+                _defaultTokenLifetimeInMinutes = value;
             }
         }
 
@@ -640,39 +641,47 @@ namespace System.IdentityModel.Tokens
             }
 
             Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
-
-            if (validationParameters.LifetimeValidator != null)
+            if (validationParameters.ValidateLifetime)
             {
-                if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
+                if (validationParameters.LifetimeValidator != null)
                 {
-                    throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, jwt.ToString()));
+                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
+                    {
+                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, jwt.ToString()));
+                    }
+                }
+                else
+                {
+                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
                 }
             }
-            else
-            {
-                ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
-            }
 
-            if (validationParameters.AudienceValidator != null)
+            if (validationParameters.ValidateAudience)
             {
-                if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
+                if (validationParameters.AudienceValidator != null)
                 {
-                    throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, jwt.ToString()));
+                    if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
+                    {
+                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, jwt.ToString()));
+                    }
                 }
-            }
-            else
-            {
-                this.ValidateAudience(jwt.Audiences, jwt, validationParameters);
+                else
+                {
+                    this.ValidateAudience(jwt.Audiences, jwt, validationParameters);
+                }
             }
 
             string issuer = jwt.Issuer;
-            if (validationParameters.IssuerValidator != null)
+            if (validationParameters.ValidateIssuer)
             {
-                issuer = validationParameters.IssuerValidator(issuer, jwt, validationParameters);
-            }
-            else
-            {
-                issuer = ValidateIssuer(issuer, jwt, validationParameters);
+                if (validationParameters.IssuerValidator != null)
+                {
+                    issuer = validationParameters.IssuerValidator(issuer, jwt, validationParameters);
+                }
+                else
+                {
+                    issuer = ValidateIssuer(issuer, jwt, validationParameters);
+                }
             }
 
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
@@ -681,13 +690,10 @@ namespace System.IdentityModel.Tokens
                 ValidateToken(jwt.Actor, validationParameters, out actor);
             }
 
-
             if (jwt.SigningKey != null)
             {
                 this.ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
             }
-
-            validatedToken = jwt;
 
             ClaimsIdentity identity = this.CreateClaimsIdentity(jwt, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
@@ -695,6 +701,7 @@ namespace System.IdentityModel.Tokens
                 identity.BootstrapContext = new BootstrapContext(securityToken);
             }
 
+            validatedToken = jwt;
             return new ClaimsPrincipal(identity);
         }
 
@@ -844,8 +851,7 @@ namespace System.IdentityModel.Tokens
             }
 
             JwtSecurityToken jwt = this.ReadToken(token) as JwtSecurityToken;
-
-            string[] parts = token.Split('.');
+            string[] parts = token.Split(new char[] { '.' }, 3);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]);
             byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(parts[2]);
 

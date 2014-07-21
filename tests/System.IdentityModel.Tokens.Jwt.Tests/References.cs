@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Security.Claims;
 namespace System.IdentityModel.Test
 {
     public static class Issuers
@@ -47,5 +49,36 @@ namespace System.IdentityModel.Test
     public static class Saml2SignedTokens
     {
         public static readonly string AAD_GotJWT = @"<Assertion ID='_775bef7d-0ba5-4df5-98f8-ec57f2b0cbef' IssueInstant='2013-04-11T20:02:45.903Z' Version='2.0' xmlns='urn:oasis:names:tc:SAML:2.0:assertion'><Issuer>https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/</Issuer><ds:Signature xmlns:ds='http://www.w3.org/2000/09/xmldsig#'><ds:SignedInfo><ds:CanonicalizationMethod Algorithm='http://www.w3.org/2001/10/xml-exc-c14n#' /><ds:SignatureMethod Algorithm='http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' /><ds:Reference URI='#_775bef7d-0ba5-4df5-98f8-ec57f2b0cbef'><ds:Transforms><ds:Transform Algorithm='http://www.w3.org/2000/09/xmldsig#enveloped-signature' /><ds:Transform Algorithm='http://www.w3.org/2001/10/xml-exc-c14n#' /></ds:Transforms><ds:DigestMethod Algorithm='http://www.w3.org/2001/04/xmlenc#sha256' /><ds:DigestValue>m1jXR5LORy7H+t+axtNauGnJakaKehvy0JhMZomZFrU=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>IhaRBWAG/QeskVPO5Qa3EGN0A/bJ8qPqmJnuhox5F3aAGgqeoxbMhdwDMuQ7GC/7ScYDtYnAKATV6xP0nKTzwlqj1ltDEDN9scDuJIotwnV+xm4PCqlIeSZBHfyhIDp0rlhZDmhOnNy6+53FqVWMo7aSE1FdMCEh2aBgTRLH4jBkx5pKV0kQOX9D0Hq2GaV0LaXjcguADKxPpb1Gl+g8g/H/79n96fHAPITA8WygZjv1Satow87N8WK49n9qZJBWqmMjaVix6oFHPMOkp/qWE7ZhWKS1ANU2AwLMvZ8AH+RDwhWTWHnLCq2duD4XlCTRiY8juIn+zgJ51sfWQRYa2w==</ds:SignatureValue><KeyInfo xmlns='http://www.w3.org/2000/09/xmldsig#'><X509Data><X509Certificate>MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng</X509Certificate></X509Data></KeyInfo></ds:Signature><Subject><NameID>X3hlFkILohbCj9c2Iib1NJg7e3hGhVsJdHuA7WRABp4</NameID><SubjectConfirmation Method='urn:oasis:names:tc:SAML:2.0:cm:bearer' /></Subject><Conditions NotBefore='2013-04-11T20:02:45.840Z' NotOnOrAfter='2013-04-12T08:02:45.840Z'><AudienceRestriction><Audience>https://localhost:44300/</Audience></AudienceRestriction></Conditions><AttributeStatement><Attribute Name='http://schemas.microsoft.com/identity/claims/objectidentifier'><AttributeValue>580e531c-87a4-415a-9f9d-6af51e2e1948</AttributeValue></Attribute><Attribute Name='http://schemas.microsoft.com/identity/claims/tenantid'><AttributeValue>d062b2b0-9aca-4ff7-b32a-ba47231a4002</AttributeValue></Attribute><Attribute Name='http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'><AttributeValue>Got</AttributeValue></Attribute><Attribute Name='http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'><AttributeValue>GotJwt@GotJwt.onmicrosoft.com</AttributeValue></Attribute><Attribute Name='http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'><AttributeValue>Jwt</AttributeValue></Attribute><Attribute Name='http://schemas.microsoft.com/identity/claims/identityprovider'><AttributeValue>https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/</AttributeValue></Attribute></AttributeStatement><AuthnStatement AuthnInstant='2013-04-11T20:02:45.000Z'><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>";
+    }
+
+    public static class JsonClaims
+    {
+        public static readonly string GroupClaims = @"{""iss"":[""http://www.GotJWT.com"",""https://sts.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/""],""aud"":[""http://www.contoso.com"",""0bb44690-eae0-4b2c-b2b1-64ac03098226""],""upn"":""badams@dushyantgill.net"",""family_name"":""Adams"",""unique_name"":""badams@dushyantgill.net"",""ver"":""1.0"",""groups"":[""c4324023-3424-4ba6-9320-1ce28431b113"",""08953f81-ffd6-44f9-887d-69855355ffbd"",""694a55b2-ec4c-480d-8a7d-26d34ea9225b""],""oid"":""0c9545d0-a670-4628-8c1f-e90618a3b940"",""nonce"":""02f9c7ba-1720-4d46-b00f-6731fe2c4d14"",""given_name"":""Brad"",""exp"":1405870465,""tid"":""5803816d-c4ab-4601-a128-e2576e5d6910"",""iat"":""1403822988"",""amr"":""pwd"",""nbf"":1405866865,""sub"":""355anlmMo6uvGyabeIqNqBTUJsEPdyijxouLjfmg8G8""}";
+
+        public static List<Claim> OverClaims(string issuer, string originalIssuer)
+        {
+            return new List<Claim>
+            {
+                new Claim("upn", "badams@dushyantgill.net", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("family_name", "Adams", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("unique_name", "badams@dushyantgill.net", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("ver", "1.0", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("aud", "0bb44690-eae0-4b2c-b2b1-64ac03098226", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("iss", "https://sts.windows-ppe.net/5803816d-c4ab-4601-a128-e2576e5d6910/", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("oid", "0c9545d0-a670-4628-8c1f-e90618a3b940", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("_claim_sources", @"{""src1"":{""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects""}}", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("_claim_sources", @"{""src2"":{""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects""}}", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("_claim_sources", @"{""src3"":{""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects""}}", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("_claim_names", @"{""groups"":""src1""}", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("_claim_names", @"{""groups"":""src2""}", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("_claim_names", @"{""groups"":""src3""}", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("nonce", "02f9c7ba-1720-4d46-b00f-6731fe2c4d14", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("given_name", "Brad", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("tid", "5803816d-c4ab-4601-a128-e2576e5d6910", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("iat", "1403822769", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("amr", @"[ ""pwd"" ]", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim("sub", "355anlmMo6uvGyabeIqNqBTUJsEPdyijxouLjfmg8G8", ClaimValueTypes.String, issuer, originalIssuer),
+            };
+        }
     }
 }

@@ -329,7 +329,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
         internal void Decode(string jwtEncodedString)
         {
-            string[] tokenParts = jwtEncodedString.Split('.');
+            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
             if (tokenParts.Length != 3)
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));

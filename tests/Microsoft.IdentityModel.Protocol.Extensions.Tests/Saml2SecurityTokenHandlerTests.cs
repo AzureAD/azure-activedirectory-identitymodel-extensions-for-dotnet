@@ -183,6 +183,10 @@ namespace Microsoft.IdentityModel.Test
                 ValidIssuer = "http://Bob",
             };
             ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, expectedException);
+
+            validationParameters.ValidateIssuer = false;
+            validationParameters.IssuerValidator = IdentityUtilities.IssuerValidatorThrows;
+            ValidateIssuer("bob", validationParameters, samlSecurityTokenHandler, ExpectedException.NoExceptionExpected);
         }
 
         private string ValidateIssuer(string issuer, TokenValidationParameters validationParameters, DerivedSamlSecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
@@ -248,6 +252,10 @@ namespace Microsoft.IdentityModel.Test
                 };
             TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
 
+            validationParameters.ValidateLifetime = false;
+            validationParameters.LifetimeValidator = IdentityUtilities.LifetimeValidatorThrows;
+            TestUtilities.ValidateToken(securityToken: samlToken, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+
         }
 
         private void ValidateAudience()
@@ -256,7 +264,7 @@ namespace Microsoft.IdentityModel.Test
             ExpectedException expectedException;
             string samlString = IdentityUtilities.CreateSaml2Token();
 
-            TokenValidationParameters tokenValidationParameters =
+            TokenValidationParameters validationParameters =
                 new TokenValidationParameters
                 {
                     IssuerSigningToken = IdentityUtilities.DefaultAsymmetricSigningToken,
@@ -266,64 +274,68 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             // Do not validate audience
-            tokenValidationParameters.ValidateAudience = false;
+            validationParameters.ValidateAudience = false;
             expectedException = ExpectedException.NoExceptionExpected;
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // no valid audiences
-            tokenValidationParameters.ValidateAudience = true;
+            validationParameters.ValidateAudience = true;
             expectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208");
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
-            tokenValidationParameters.ValidateAudience = true;
-            tokenValidationParameters.ValidAudience = "John";
+            validationParameters.ValidateAudience = true;
+            validationParameters.ValidAudience = "John";
             expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214");
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // UriKind.Absolute, no match.
-            tokenValidationParameters.ValidateAudience = true;
-            tokenValidationParameters.ValidAudience = IdentityUtilities.NotDefaultAudience;
+            validationParameters.ValidateAudience = true;
+            validationParameters.ValidAudience = IdentityUtilities.NotDefaultAudience;
             expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214");
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             expectedException = ExpectedException.NoExceptionExpected;
-            tokenValidationParameters.ValidAudience = IdentityUtilities.DefaultAudience;
-            tokenValidationParameters.ValidAudiences = null;
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            validationParameters.ValidAudience = IdentityUtilities.DefaultAudience;
+            validationParameters.ValidAudiences = null;
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // !UriKind.Absolute
             List<string> audiences = new List<string> { "John", "Paul", "George", "Ringo" };
-            tokenValidationParameters.ValidAudience = null;
-            tokenValidationParameters.ValidAudiences = audiences;
-            tokenValidationParameters.ValidateAudience = false;
+            validationParameters.ValidAudience = null;
+            validationParameters.ValidAudiences = audiences;
+            validationParameters.ValidateAudience = false;
             expectedException = ExpectedException.NoExceptionExpected;
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
             // UriKind.Absolute, no match
             audiences = new List<string> { "http://www.John.com", "http://www.Paul.com", "http://www.George.com", "http://www.Ringo.com", "    " };
-            tokenValidationParameters.ValidAudience = null;
-            tokenValidationParameters.ValidAudiences = audiences;
-            tokenValidationParameters.ValidateAudience = false;
+            validationParameters.ValidAudience = null;
+            validationParameters.ValidAudiences = audiences;
+            validationParameters.ValidateAudience = false;
             expectedException = ExpectedException.NoExceptionExpected;
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
-            tokenValidationParameters.ValidateAudience = true;
+            validationParameters.ValidateAudience = true;
             expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10214");
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
-            tokenValidationParameters.ValidateAudience = true;
+            validationParameters.ValidateAudience = true;
             expectedException = ExpectedException.NoExceptionExpected;
             audiences.Add(IdentityUtilities.DefaultAudience);
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
 
-            tokenValidationParameters.AudienceValidator =
+            validationParameters.AudienceValidator =
                 (aud, token, tvp) =>
                 {
                     return false;
                 };
             expectedException = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10231:");
             audiences.Add(IdentityUtilities.DefaultAudience);
-            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: tokenValidationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: expectedException);
+
+            validationParameters.ValidateAudience = false;
+            validationParameters.AudienceValidator = IdentityUtilities.AudienceValidatorThrows;
+            TestUtilities.ValidateToken(securityToken: samlString, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 
         private class DerivedSamlSecurityTokenHandler : Saml2SecurityTokenHandler

@@ -19,11 +19,8 @@
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
@@ -661,7 +658,9 @@ namespace System.IdentityModel.Test
                 };
             TestUtilities.ValidateToken(jwt.RawData, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
 
-            
+            validationParameters.ValidateLifetime = false;
+            validationParameters.LifetimeValidator = IdentityUtilities.LifetimeValidatorThrows;
+            TestUtilities.ValidateToken(securityToken: jwt.RawData, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 
         [TestMethod]
@@ -865,6 +864,10 @@ namespace System.IdentityModel.Test
             validationParameters.ValidIssuer = null;
             validationParameters.ValidIssuers = new string[] { "http://Simple.CertData_2048", IdentityUtilities.DefaultIssuer };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+
+            validationParameters.ValidateIssuer = false;
+            validationParameters.IssuerValidator = IdentityUtilities.IssuerValidatorThrows;
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
         }
 
         [TestMethod]
@@ -933,6 +936,10 @@ namespace System.IdentityModel.Test
 
             ee = new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10231:");
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
+
+            validationParameters.ValidateAudience = false;
+            validationParameters.AudienceValidator = IdentityUtilities.AudienceValidatorThrows;
+            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
     }    
 }
