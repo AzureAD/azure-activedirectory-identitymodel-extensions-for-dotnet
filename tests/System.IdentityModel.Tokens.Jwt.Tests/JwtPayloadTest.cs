@@ -60,9 +60,6 @@ namespace System.IdentityModel.Test
         public void JwtPayload_Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
-
-            Assert.AreEqual(jwtPayload.Comparer.GetType(), StringComparer.Ordinal.GetType(), "jwtPayload.Comparer.GetType() != StringComparer.Ordinal.GetType()");
-
             List<Claim> claims = jwtPayload.Claims as List<Claim>;
             Assert.IsNotNull(claims, "claims as List<Claim> == null");
 
@@ -91,8 +88,8 @@ namespace System.IdentityModel.Test
             JwtPayload jwtPayload = new JwtPayload();
             Type type = typeof(JwtPayload);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 19)
-                Assert.Fail("Number of properties has changed from 19 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 20)
+                Assert.Fail("Number of properties has changed from 20 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -109,6 +106,7 @@ namespace System.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("Jti", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Iat", new List<object>{(string)null, 10, 0}),
                         new KeyValuePair<string, List<object>>("Iss", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Nbf", new List<object>{(string)null, 1, 0 }),
                         new KeyValuePair<string, List<object>>("Nonce", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Sub", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     },
@@ -132,15 +130,29 @@ namespace System.IdentityModel.Test
         [Description( "Test claims as objects" )]
         public void JwtPalyoad_Claims()
         {
-            JwtPayload jwtPayload = new JwtPayload();
+            List<string> errors = new List<string>();
+            var jwtPayload = new JwtPayload();
+    
             // multiple audiences
+            foreach (string aud in IdentityUtilities.DefaultAudiences)
+            {
+                jwtPayload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, aud));
+            }
 
-            jwtPayload.Add(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudiences);
-            string encodedPayload = jwtPayload.Encode();
-            JwtPayload newjwtPayload = Base64UrlEncoder.Decode(encodedPayload).DeserializeJwtPayload();
+            string encodedPayload = jwtPayload.Base64UrlEncode();
+            var deserializedPayload = JwtPayload.Base64UrlDeserialize(encodedPayload);
 
-            Assert.IsTrue(IdentityComparer.AreEqual(jwtPayload, newjwtPayload));
+            if (!IdentityComparer.AreEqual(jwtPayload, deserializedPayload))
+            {
+                errors.Add("!IdentityComparer.AreEqual(jwtPayload, deserializedPayload)");
+            }
 
+            if (!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Aud, IdentityUtilities.DefaultAudiences))
+            {
+                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Aud, IdentityUtilities.DefaultAudiences)");
+            }
+
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
         }
 
         [TestMethod]
@@ -150,7 +162,7 @@ namespace System.IdentityModel.Test
         {
             JwtPayload jwtPayload = new JwtPayload();
             int? time = 10000;
-            jwtPayload.Add( "exp", time );
+            jwtPayload.Add("exp", time );
             DateTime payloadTime = EpochTime.DateTime( time.Value );
             DateTime payloadValidTo = jwtPayload.ValidTo;
 

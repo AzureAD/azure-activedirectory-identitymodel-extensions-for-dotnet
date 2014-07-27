@@ -179,7 +179,6 @@ namespace System.IdentityModel.Test
             validationParameters.ValidateActor = false;
             validationParameters.SaveSigninToken = true;
 
-            // Create the Jwts
             string jwtActorAsymmetric = IdentityUtilities.DefaultAsymmetricJwt;
             string jwtActorSymmetric = IdentityUtilities.DefaultSymmetricJwt;
 

@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.GetSet(context);
-            TestUtilities.ReportErrors("ConfigurationManager_GetSets()", context.Errors);
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, context.Errors);
 
             TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"));
             TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));

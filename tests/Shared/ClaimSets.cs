@@ -6,9 +6,9 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,11 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Test;
 using System.Collections.Generic;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Web.Script.Serialization;
-
 using Claim = System.Security.Claims.Claim;
 using ClaimsIdentity = System.Security.Claims.ClaimsIdentity;
 using ClaimTypes = System.Security.Claims.ClaimTypes;
@@ -35,7 +35,7 @@ namespace System.IdentityModel.Test
     {
         public static string ActorIssuer = "http://www.GotJwt.com/Actor";
 
-        static Claim _actor             = new Claim( JwtRegisteredClaimNames.Actort, JwtTestTokens.Simple( ActorIssuer, ActorIssuer ).ToString() );
+        static Claim _actor             = new Claim( JwtRegisteredClaimNames.Actort, IdentityUtilities.CreateJwtSecurityToken( ActorIssuer, ActorIssuer ).ToString() );
         static Claim _audience          = new Claim( JwtRegisteredClaimNames.Aud, "audClaimSets.Value" );
         static Claim _badHeaderType     = new Claim( JwtHeaderParameterNames.Typ, "BADDTYPE" );
         static Claim _expBadDateFormat  = new Claim( JwtRegisteredClaimNames.Exp, "BADDATEFORMAT" );
@@ -48,11 +48,11 @@ namespace System.IdentityModel.Test
         static Claim _principal         = new Claim( JwtRegisteredClaimNames.Prn, "princlipalClaimSets.Value" );
         static Claim _sub               = new Claim( JwtRegisteredClaimNames.Sub, "Subject.Value" );
         static Claim _type              = new Claim( JwtRegisteredClaimNames.Typ, "Type.Value" );
-        
+
         public static IEnumerable<Claim> AllReserved
         {
             // these are all current reserved claims.
-            // should be updated as the spec changes, refer to 
+            // should be updated as the spec changes, refer to
             // JwtConstants.cs
             get
             {
@@ -71,12 +71,12 @@ namespace System.IdentityModel.Test
 
         public static IEnumerable<Claim> Audience
         {
-            get { yield return _audience; }        
+            get { yield return _audience; }
         }
 
         public static IEnumerable<Claim> BadDateFormats
         {
-            get 
+            get
             {
                 yield return _nbfBadDateFormat;
                 yield return _expBadDateFormat;
@@ -98,6 +98,21 @@ namespace System.IdentityModel.Test
             get { yield return _issuer; }
         }
 
+        public static IEnumerable<Claim> MultipleAudiences(string issuer, string orignalIssuer)
+        {
+            foreach(var aud in IdentityUtilities.DefaultAudiences)
+            {
+                yield return new Claim("aud", aud, ClaimValueTypes.String, issuer, orignalIssuer);
+            }
+
+            yield return new Claim("iss", issuer, ClaimValueTypes.String, issuer, orignalIssuer);
+
+            foreach (var c in SimpleShortClaimtypes(issuer, orignalIssuer))
+            {
+                yield return c;
+            }
+        }
+
         public static IEnumerable<Claim> Simple( string issuer, string originalIssuer )
         {
             return new List<Claim>()
@@ -109,6 +124,24 @@ namespace System.IdentityModel.Test
                 new Claim( ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer, originalIssuer ),
                 new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer, originalIssuer ),
             };
+        }
+
+        public static IEnumerable<Claim> SimpleShortClaimtypes(string issuer, string originalIssuer)
+        {
+            return new List<Claim>()
+            {                
+                NewClaimWithShortType(ClaimTypes.Country, "USA", ClaimValueTypes.String, issuer, originalIssuer),
+                NewClaimWithShortType(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, issuer, originalIssuer),
+                NewClaimWithShortType(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, issuer, originalIssuer ),
+                NewClaimWithShortType(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, issuer, originalIssuer),
+                NewClaimWithShortType(ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer, originalIssuer ),
+                NewClaimWithShortType(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer, originalIssuer ),
+            };
+        }
+
+        public static Claim NewClaimWithShortType(string claimType, string claimValue, string claimValueType, string issuer, string originalIssuer)
+        {
+            return new Claim(JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey(ClaimTypes.Country) ? JwtSecurityTokenHandler.OutboundClaimTypeMap[ClaimTypes.Country] : ClaimTypes.Country, claimValue, claimValueType, issuer, originalIssuer);
         }
 
         public static IEnumerable<Claim> ActorClaimNotJwt( string issuer, string originalIssuer )
@@ -294,7 +327,7 @@ namespace System.IdentityModel.Test
         /// <summary>
         /// Uses JwtSecurityTokenHandler.OutboundClaimTypeMap to map claimtype.
         /// </summary>
-        /// <param name="claim"></param>
+        /// <param name="jwtClaim"></param>
         /// <returns></returns>
         public static Claim OutboundClaim( Claim claim )
         {
@@ -312,9 +345,9 @@ namespace System.IdentityModel.Test
         }
 
         /// <summary>
-        /// Simulates that a claim arrived and was mapped, adds the short name property for any claims that would have been translated
+        /// Simulates that a jwtClaim arrived and was mapped, adds the short name property for any claims that would have been translated
         /// </summary>
-        /// <param name="claim"></param>
+        /// <param name="jwtClaim"></param>
         /// <returns></returns>
         public static Claim InboundClaim( Claim claim )
         {
@@ -376,7 +409,7 @@ namespace System.IdentityModel.Test
         }
 
         public string Email { get; set; }
-            
+
         public bool Email_Verified { get; set; }
 
         public string Urn { get; set; }
@@ -386,7 +419,7 @@ namespace System.IdentityModel.Test
         public double pi  { get; set; }
 
         public string Nothing { get; set; }
-            
+
         public string[] FavoriteColors { get; set; }
 
         public Address Address { get; set; }
@@ -416,9 +449,9 @@ namespace System.IdentityModel.Test
     public class Request
     {
         public string NicKName { get; set; }
-            
+
         public AuthTime AuthTime { get; set; }
-            
+
         public Acr Acr { get; set; }
     }
 
@@ -428,9 +461,9 @@ namespace System.IdentityModel.Test
     public class Address
     {
         public string Locality { get; set; }
-            
+
         public string Region   { get; set; }
-            
+
         public string Country  { get; set; }
     }
 }

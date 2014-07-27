@@ -57,6 +57,7 @@ namespace System.IdentityModel.Tokens
         private static IDictionary<string, string> inboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
         private static IDictionary<string, string> outboundClaimTypeMap = ClaimTypeMapping.OutboundClaimTypeMap;
         private static string shortClaimTypeProperty = ClaimProperties.Namespace + "/ShortTypeName";
+        private static string jsonClaimTypeProperty = ClaimProperties.Namespace + "/json_type";
         private static ISet<string> inboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
         private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
@@ -227,6 +228,29 @@ namespace System.IdentityModel.Tokens
                 }
 
                 shortClaimTypeProperty = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain .Net type that was recogninzed when JwtPayload.Claims serialized the value to JSON.
+        /// <para>See <seealso cref="InboundClaimTypeMap"/> for more information.</para>
+        /// </summary>
+        /// <exception cref="ArgumentException">if <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
+        public static string JsonClaimTypeProperty
+        {
+            get
+            {
+                return jsonClaimTypeProperty;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "value"));
+                }
+
+                jsonClaimTypeProperty = value;
             }
         }
 
@@ -450,7 +474,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="signatureProvider">optional <see cref="SignatureProvider"/>.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
-        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para></remarks>       
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para></remarks>
         /// <para>If signautureProvider is not null, then it will be used to create the signature and <see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning( SecurityKey, string )"/> will not be called.</para>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
@@ -481,7 +505,8 @@ namespace System.IdentityModel.Tokens
             }
 
             string signature = string.Empty;
-            string signingInput = string.Concat(header.Encode(), ".", payload.Encode());
+            string signingInput = string.Concat(header.Base64UrlEncode(), ".", payload.Base64UrlEncode());
+
             if (signatureProvider != null)
             {
                 signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
@@ -627,15 +652,19 @@ namespace System.IdentityModel.Tokens
 
             JwtSecurityToken jwt = this.ValidateSignature(securityToken, validationParameters);
 
-            object obj = null;
+            if (jwt.SigningKey != null)
+            {
+                this.ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+            }
+
             DateTime? notBefore = null;
-            if (jwt.Payload.TryGetValue(JwtRegisteredClaimNames.Nbf, out obj))
+            if (jwt.Payload.Nbf != null)
             {
                 notBefore = new DateTime?(jwt.ValidFrom);
             }
 
             DateTime? expires = null;
-            if (jwt.Payload.TryGetValue(JwtRegisteredClaimNames.Exp, out obj))
+            if (jwt.Payload.Exp != null)
             {
                 expires = new DateTime?(jwt.ValidTo);
             }
@@ -688,11 +717,6 @@ namespace System.IdentityModel.Tokens
             {
                 SecurityToken actor = null;
                 ValidateToken(jwt.Actor, validationParameters, out actor);
-            }
-
-            if (jwt.SigningKey != null)
-            {
-                this.ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
             }
 
             ClaimsIdentity identity = this.CreateClaimsIdentity(jwt, issuer, validationParameters);
@@ -1026,15 +1050,11 @@ namespace System.IdentityModel.Tokens
                 }
 
                 string claimType;
-                bool wasMapped = false;
-                if (JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(jwtClaim.Type))
-                {
-                    claimType = JwtSecurityTokenHandler.InboundClaimTypeMap[jwtClaim.Type];
-                    wasMapped = true;
-                }
-                else
+                bool wasMapped = true;
+                if (!JwtSecurityTokenHandler.InboundClaimTypeMap.TryGetValue(jwtClaim.Type, out claimType))
                 {
                     claimType = jwtClaim.Type;
+                    wasMapped = false;
                 }
 
                 if (claimType == ClaimTypes.Actor)
@@ -1049,27 +1069,23 @@ namespace System.IdentityModel.Tokens
                         JwtSecurityToken actor = this.ReadToken(jwtClaim.Value) as JwtSecurityToken;
                         identity.Actor = this.CreateClaimsIdentity(actor, issuer, validationParameters);
                     }
-                    else
-                    {
-                        Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
-                        if (wasMapped)
-                        {
-                            claim.Properties.Add(ShortClaimTypeProperty, jwtClaim.Type);
-                        }
-
-                        identity.AddClaim(claim);
-                    }
                 }
-                else
+
+                Claim c = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
+                if (jwtClaim.Properties.Count > 0)
                 {
-                    Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
-                    if (wasMapped)
+                    foreach(var kv in jwtClaim.Properties)
                     {
-                        claim.Properties.Add(ShortClaimTypeProperty, jwtClaim.Type);
+                        c.Properties[kv.Key] = kv.Value;
                     }
-
-                    identity.AddClaim(claim);
                 }
+
+                if (wasMapped)
+                {
+                    c.Properties[ShortClaimTypeProperty] = jwtClaim.Type;
+                }
+
+                identity.AddClaim(c);
             }
 
             return identity;

@@ -77,7 +77,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
         /// </summary>
-        public readonly string DefaultAuthenticationType = AuthenticationTypes.Federation;
+        public static readonly string DefaultAuthenticationType = AuthenticationTypes.Federation;
 
         /// <summary>
         /// Default for the clock skew.

@@ -195,13 +195,45 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Encodes this instance as a Base64UrlEncoded string.
+        /// Serializes this instance to JSON.
         /// </summary>
-        /// <remarks>Returns the current state. If this instance has changed since the last call, the value will be different.</remarks>
-        /// <returns>a string BaseUrlEncoded representing the contents of this header.</returns>
-        public string Encode()
+        /// <returns>this instance as JSON.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        public virtual string SerializeToJson()
         {
-            return Base64UrlEncoder.Encode(this.SerializeToJson());
+            return JsonExtensions.SerializeToJson(this as IDictionary<string, string>);
+        }
+
+        /// <summary>
+        /// Encodes this instance as Base64UrlEncoded JSON.
+        /// </summary>
+        /// <returns>Base64UrlEncoded JSON.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        public virtual string Base64UrlEncode()
+        {
+            return Base64UrlEncoder.Encode(SerializeToJson());
+        }
+
+        /// <summary>
+        /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
+        /// </summary>
+        /// <param name="base64UrlEncodedJsonString">base64url encoded JSON to deserialize.</param>
+        /// <returns>an instance of <see cref="JwtHeader"/>.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        public static JwtHeader Base64UrlDeserialize(string base64UrlEncodedJsonString)
+        {
+            return JsonExtensions.DeserializeJwtHeader(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
+        }
+
+        /// <summary>
+        /// Deserialzes JSON into a <see cref="JwtHeader"/> instance.
+        /// </summary>
+        /// <param name="jsonString"> the JSON to deserialize.</param>
+        /// <returns>an instance of <see cref="JwtHeader"/>.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        public static JwtHeader Deserialize(string jsonString)
+        {
+            return JsonExtensions.DeserializeJwtHeader(jsonString);
         }
     }
 }

@@ -20,33 +20,117 @@ namespace System.IdentityModel.Tokens
 {
     using System.Diagnostics.CodeAnalysis;
     using System.Web.Script.Serialization;
-    
+
+    /// <summary>
+    /// Definition for a delegate that can be set on <see cref="JsonExtensions.Serializer"/> to control serialization of objects into JSON.
+    /// </summary>
+    /// <param name="obj">Object to serialize</param>
+    /// <returns>The serialized object.</returns>
+    public delegate string Serializer(object obj);
+
+    /// <summary>
+    /// Definition for a delegate that can be set on <see cref="JsonExtensions.Deserializer"/> to control deserialization JSON into objects.
+    /// </summary>
+    /// <param name="obj">JSON to deserialize.</param>
+    /// <param name="targetType">type expected.</param>
+    /// <returns>The deserialized object.</returns>
+    public delegate object Deserializer(string obj, Type targetType);
+
     /// <summary>
     /// Dictionary extensions for serializations
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
-    internal static class JsonExtensions
+    public static class JsonExtensions
     {
-        public static string SerializeToJson(this object value)
+        private static JavaScriptSerializer _javaScriptSerializer;
+        private static Serializer _serializer;
+        private static Deserializer _deserializer;
+
+        static JsonExtensions()
         {
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Serialize(value);
+            _javaScriptSerializer = new JavaScriptSerializer();
+            _serializer = _javaScriptSerializer.Serialize;
+            _deserializer = _javaScriptSerializer.Deserialize;
         }
 
-        public static T DeserializeFromJson<T>(this string value)
+        /// <summary>
+        /// Gets or sets a <see cref="Serializer"/> to use when serializing objects to JSON.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public static Serializer Serializer
         {
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Deserialize<T>(value);
+            get
+            {
+                return _serializer;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                _serializer = value;
+            }
         }
 
-        public static JwtHeader DeserializeJwtHeader(this string value)
+        /// <summary>
+        /// Gets or sets a <see cref="Deserializer"/> to use when deserializing objects from JSON.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+
+        public static Deserializer Deserializer
         {
-            return DeserializeFromJson<JwtHeader>(value);
+            get
+            {
+                return _deserializer;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                _deserializer = value;
+            }
         }
 
-        public static JwtPayload DeserializeJwtPayload(this string value)
+        /// <summary>
+        /// Serializes an object to JSON.
+        /// </summary>
+        /// <param name="value">The object to serialize</param>
+        /// <returns>the object as JSON.</returns>
+        public static string SerializeToJson(object value)
         {
-            return DeserializeFromJson<JwtPayload>(value);
+            return Serializer(value);
+        }
+
+        /// <summary>
+        /// Deserialzes JSON into an instance of type T.
+        /// </summary>
+        /// <typeparam name="T">the object type.</typeparam>
+        /// <param name="jsonString">the JSON to deserialze.</param>
+        /// <returns>a new instance of type T.</returns>
+        public static T DeserializeFromJson<T>(string jsonString) where T : class
+        {
+            return Deserializer(jsonString, typeof(T)) as T;
+        }
+
+        /// <summary>
+        /// Deserialzes JSON into an instance of <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <param name="jsonString">the JSON to deserialze.</param>
+        /// <returns>a new instance <see cref="JwtHeader"/>.</returns>
+        public static JwtHeader DeserializeJwtHeader(string jsonString)
+        {
+            return Deserializer(jsonString, typeof(JwtHeader)) as JwtHeader;
+        }
+
+        /// <summary>
+        /// Deserialzes JSON into an instance of <see cref="JwtPayload"/>.
+        /// </summary>
+        /// <param name="jsonString">the JSON to deserialze.</param>
+        /// <returns>a new instance <see cref="JwtPayload"/>.</returns>
+        public static JwtPayload DeserializeJwtPayload(string jsonString)
+        {
+            return Deserializer(jsonString, typeof(JwtPayload)) as JwtPayload;
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Test
                     Object = validationContext,
                 };
             TestUtilities.GetSet(context);
-            TestUtilities.ReportErrors("OpenIdConnectProtocolValidationContext_GetSets()", context.Errors);
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, context.Errors);
         }
     }
 }

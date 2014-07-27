@@ -77,10 +77,10 @@ namespace System.IdentityModel.Tokens
         /// <param name="jwtEncodedString">The results of encoding and applying the cryptographic operations to the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>.</param>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>        
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
-        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null.</exception>        
+        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null.</exception>
         /// <exception cref="ArgumentException">'jwtEncodedString' contains only whitespace.</exception>        
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
-        public JwtSecurityToken(JwtHeader header, JwtPayload payload, string jwtEncodedString)
+        internal JwtSecurityToken(JwtHeader header, JwtPayload payload, string jwtEncodedString)
         {
             if (header == null)
             {
@@ -117,6 +117,29 @@ namespace System.IdentityModel.Tokens
             this.payload = payload;
             this.rawData = jwtEncodedString;
             this.signature = tokenParts[2];
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the encoded <see cref="JwtHeader"/> and <see cref="JwtPayload"/>. The jwtEncodedString is the result of those operations.
+        /// </summary>
+        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
+        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
+        /// <exception cref="ArgumentNullException">'header' is null.</exception>
+        /// <exception cref="ArgumentNullException">'payload' is null.</exception>
+        public JwtSecurityToken(JwtHeader header, JwtPayload payload)
+        {
+            if (header == null)
+            {
+                throw new ArgumentNullException("header");
+            }
+
+            if (payload == null)
+            {
+                throw new ArgumentNullException("payload");
+            }
+
+            this.header = header;
+            this.payload = payload;
         }
 
         /// <summary>
@@ -175,7 +198,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public virtual string EncodedHeader
         {
-            get { return this.header.Encode(); }
+            get { return this.header.Base64UrlEncode(); }
         }
 
         /// <summary>
@@ -183,7 +206,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public virtual string EncodedPayload
         {
-            get { return this.payload.Encode(); }
+            get { return this.payload.Base64UrlEncode(); }
         }
 
         /// <summary>
@@ -337,7 +360,7 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this.header = Base64UrlEncoder.Decode(tokenParts[0]).DeserializeJwtHeader();
+                this.header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
                 string type = null;
@@ -361,7 +384,7 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this.payload = Base64UrlEncoder.Decode(tokenParts[1]).DeserializeJwtPayload();
+                this.payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
             }
             catch (Exception ex)
             {

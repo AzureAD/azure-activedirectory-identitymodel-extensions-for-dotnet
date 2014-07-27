@@ -19,9 +19,9 @@
 namespace System.IdentityModel.Tokens
 {
     using Microsoft.IdentityModel;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
     using System.Security.Claims;
 
     /// <summary>
@@ -45,8 +45,8 @@ namespace System.IdentityModel.Tokens
         /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
         /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
         /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
-        /// <param name="notBefore">notbefore.HasValue a { nbf, 'value' } is added.</param>
-        /// <param name="expires">expires.HasValue a { exp, 'value' } claim is added.</param>
+        /// <param name="notBefore">if notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
+        /// <param name="expires">if expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
         /// <para>If a 'nbf' or 'exp' claim exists in the 'claims' it will be replaced with the 'notbefore' and 'expires' if they are not null.</para></remarks>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
@@ -76,7 +76,7 @@ namespace System.IdentityModel.Tokens
 
             // if claims had an exp or nbf claim they will be overridden
             if (expires.HasValue)
-            { 
+            {
                 this[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(expires.Value.ToUniversalTime());
             }
 
@@ -141,25 +141,43 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
+                List<string> audiences = new List<string>();
+
                 object value = null;
-                if (this.TryGetValue(JwtRegisteredClaimNames.Aud, out value))
+                if (!TryGetValue(JwtRegisteredClaimNames.Aud, out value))
                 {
-                    IList<string> audiences = value as IList<string>;
-                    if (audiences != null)
+                    return audiences;
+                }
+
+                string str = value as string;
+                if (str != null)
+                {
+                    audiences.Add(str);
+                    return audiences;
+                }
+
+                IEnumerable<object> values = value as IEnumerable<object>;
+                if (values != null)
+                {
+                    foreach (var item in values)
                     {
-                        return audiences;
-                    }
-                    else
-                    {
-                        string audience = value as string;
-                        if (audience != null)
+                        str = item as string;
+                        if (str != null)
                         {
-                            return new List<string> { audience };
+                            audiences.Add(str);
+                        }
+                        else
+                        {
+                            audiences.Add(JsonExtensions.SerializeToJson(item));
                         }
                     }
                 }
+                else
+                {
+                    audiences.Add(JsonExtensions.SerializeToJson(value));
+                }
 
-                return new List<string>();
+                return audiences;
             }
         }
 
@@ -191,7 +209,6 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'expiration' claim { exp, 'value' }.
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        //public int? Expiration
         public int? Exp
         {
             get { return this.GetIntClaim(JwtRegisteredClaimNames.Exp); }
@@ -213,7 +230,6 @@ namespace System.IdentityModel.Tokens
         /// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
         /// </summary>
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        //public int? IssuedAt
         public int? Iat
         {
             get { return this.GetIntClaim(JwtRegisteredClaimNames.Iat); }
@@ -229,6 +245,15 @@ namespace System.IdentityModel.Tokens
             {
                 return this.GetStandardClaim(JwtRegisteredClaimNames.Iss);
             }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'expiration' claim { nbf, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'notbefore' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
+        public int? Nbf
+        {
+            get { return this.GetIntClaim(JwtRegisteredClaimNames.Nbf); }
         }
 
         /// <summary>
@@ -291,19 +316,56 @@ namespace System.IdentityModel.Tokens
                 List<Claim> claims = new List<Claim>();
                 string issuer = this.Iss ?? ClaimsIdentity.DefaultIssuer;
 
+                // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
                 foreach (KeyValuePair<string, object> keyValuePair in this)
                 {
                     string claimType = keyValuePair.Key;
-                    IEnumerable<object> values = keyValuePair.Value as IEnumerable<object>;
-                    if (values != null)
+                    string claimValue = keyValuePair.Value as string;
+                    Claim c = null;
+
+                    if (claimValue != null)
                     {
-                        claims.AddRange(from claimValue in values
-                                        select new Claim(claimType, claimValue.ToString(), ClaimValueTypes.String, issuer, issuer));
+                        claims.Add(new Claim(keyValuePair.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
                     }
                     else
                     {
-                        Claim claim = new Claim(claimType, keyValuePair.Value.ToString(), ClaimValueTypes.String, issuer, issuer);
-                        claims.Add(claim);
+                        IEnumerable<object> values = keyValuePair.Value as IEnumerable<object>;
+                        if (values != null)
+                        {
+                            foreach(var item in values)
+                            {
+                                string str = item as string;
+                                if (str != null)
+                                {
+                                    claims.Add(new Claim(keyValuePair.Key, str, ClaimValueTypes.String, issuer, issuer));
+                                }
+                                else
+                                {
+                                    c = new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(item), JwtConstants.JsonClaimValueType, issuer, issuer);
+                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = item.GetType().ToString();
+                                    claims.Add(c);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            IDictionary<string, object> dictionary = keyValuePair.Value as IDictionary<string, object>;
+                            if (dictionary != null)
+                            {
+                                foreach (var item in dictionary)
+                                {
+                                    c = new Claim(claimType, "{" + JsonExtensions.SerializeToJson(item.Key) + ":" + JsonExtensions.SerializeToJson(item.Value) + "}", JwtConstants.JsonClaimValueType, issuer, issuer);
+                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+                                    claims.Add(c);
+                                }
+                            }
+                            else
+                            {
+                                c = new Claim(claimType, JsonExtensions.SerializeToJson(keyValuePair.Value), JwtConstants.JsonClaimValueType, issuer, issuer);
+                                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = keyValuePair.Value.GetType().ToString();
+                                claims.Add(c);
+                            }
+                        }
                     }
                 }
 
@@ -349,14 +411,15 @@ namespace System.IdentityModel.Tokens
                     continue;
                 }
 
-                string jsonClaimType = claim.Type;
-                if (JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey(jsonClaimType))
+                string jsonClaimType = null;
+                if (!JwtSecurityTokenHandler.OutboundClaimTypeMap.TryGetValue(claim.Type, out jsonClaimType))
                 {
-                    jsonClaimType = JwtSecurityTokenHandler.OutboundClaimTypeMap[jsonClaimType];
+                    jsonClaimType = claim.Type;
                 }
 
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
                 object value;
-                if (this.TryGetValue(jsonClaimType, out value))
+                if (TryGetValue(jsonClaimType, out value))
                 {
                     IList<object> claimValues = value as IList<object>;
                     if (claimValues == null)
@@ -366,24 +429,13 @@ namespace System.IdentityModel.Tokens
                         this[jsonClaimType] = claimValues;
                     }
 
-                    claimValues.Add(GetClaimValueUsingValueType(claim));
+                    claimValues.Add(jsonClaimValue);
                 }
                 else
                 {
-                    this.Add(jsonClaimType, GetClaimValueUsingValueType(claim));
+                    this[jsonClaimType] = jsonClaimValue;
                 }
             }
-        }
-
-        /// <summary>
-        /// Encodes this instance as a Base64UrlEncoded string.
-        /// </summary>
-        /// <remarks>Returns the current state. If this instance has changed since the last call, the value will be different.
-        /// <para>No cryptographic operations are performed. See <see cref="JwtSecurityTokenHandler"/> for details.</para></remarks>
-        /// <returns>a string BaseUrlEncoded representing the contents of this payload.</returns>
-        public string Encode()
-        {
-            return Base64UrlEncoder.Encode(this.SerializeToJson());
         }
 
         internal object GetClaimValueUsingValueType(Claim claim)
@@ -438,16 +490,16 @@ namespace System.IdentityModel.Tokens
 
         internal string GetStandardClaim(string claimType)
         {
-            object value;
-            if (this.TryGetValue(claimType, out value))
+            object value = null;
+            if (TryGetValue(claimType, out value))
             {
-                IList<object> claimValues = value as IList<object>;
-                if (claimValues != null)
+                string str = value as string;
+                if (str != null)
                 {
-                    return claimValues.SerializeToJson();
+                    return str;
                 }
 
-                return value.ToString();
+                return JsonExtensions.SerializeToJson(value);
             }
 
             return null;
@@ -455,10 +507,10 @@ namespace System.IdentityModel.Tokens
 
         internal int? GetIntClaim(string claimType)
         {
-            object value;
             int? retval = null;
 
-            if (this.TryGetValue(claimType, out value))
+            object value;
+            if (TryGetValue(claimType, out value))
             {
                 IList<object> claimValues = value as IList<object>;
                 if (claimValues != null)
@@ -527,8 +579,7 @@ namespace System.IdentityModel.Tokens
         private DateTime GetDateTime(string key)
         {
             object dateValue;
-
-            if (!this.TryGetValue(key, out dateValue))
+            if (!TryGetValue(key, out dateValue))
             {
                 return DateTime.MinValue;
             }
@@ -568,6 +619,48 @@ namespace System.IdentityModel.Tokens
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Serializes this instance to JSON.
+        /// </summary>
+        /// <returns>this instance as JSON.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        public virtual string SerializeToJson()
+        {
+            return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
+        }
+
+        /// <summary>
+        /// Encodes this instance as Base64UrlEncoded JSON.
+        /// </summary>
+        /// <returns>Base64UrlEncoded JSON.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        public virtual string Base64UrlEncode()
+        {
+            return Base64UrlEncoder.Encode(SerializeToJson());
+        }
+
+        /// <summary>
+        /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtPayload"/> instance.
+        /// </summary>
+        /// <param name="base64UrlEncodedJsonString">base64url encoded JSON to deserialize.</param>
+        /// <returns>an instance of <see cref="JwtPayload"/>.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        public static JwtPayload Base64UrlDeserialize(string base64UrlEncodedJsonString)
+        {
+            return JsonExtensions.DeserializeJwtPayload(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
+        }
+
+        /// <summary>
+        /// Deserialzes JSON into a <see cref="JwtPayload"/> instance.
+        /// </summary>
+        /// <param name="jsonString">the JSON to deserialize.</param>
+        /// <returns>an instance of <see cref="JwtPayload"/>.</returns>
+        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        public static JwtPayload Deserialize(string jsonString)
+        {
+            return JsonExtensions.DeserializeJwtPayload(jsonString);
         }
     }
 }

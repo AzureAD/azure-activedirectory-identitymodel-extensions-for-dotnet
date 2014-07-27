@@ -566,27 +566,4 @@ namespace System.IdentityModel.Test
             return null;
         }
     }
-
-    public class JWTWithKeys : JwtSecurityToken
-    {
-        static ReadOnlyCollection<SecurityKey> _keys = (new List<SecurityKey> { new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256) }).AsReadOnly();
-
-        public JWTWithKeys(string jwtEncodedString)
-            : base(jwtEncodedString)
-        {
-        }
-
-        public JWTWithKeys(string issuer, string audience, IEnumerable<Claim> claims, DateTime? expires, DateTime? notbefore)
-            : base(issuer, audience, claims, expires, notbefore)
-        { }
-
-        public override ReadOnlyCollection<SecurityKey> SecurityKeys
-        {
-            get
-            {
-                return _keys;
-            }
-        }
-    }
-
 }

@@ -17,7 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.Web.Script.Serialization;
 namespace System.IdentityModel.Test
 {
     public static class Issuers
@@ -43,7 +45,7 @@ namespace System.IdentityModel.Test
         public static string Symmetric_256   =      @"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1ZCI6Imh0dHA6Ly9Db250b3NvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2NvdW50cnkiOiJVU0EiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyQGNvbnRvc28uY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZ2l2ZW5uYW1lIjoiVG9ueSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2hvbWVwaG9uZSI6IjU1NS4xMjEyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMiLCJzdWIiOiJib2IifQ._IFPA82MzKeV4IrsgZX8mkAEfzWT8-zEE4b5R2nzih4";
         public static string InvalidPayload =       @"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1dCI6InZ4VThJR1pYdEFtemg0NzdDT05CR2dYRTlfYyJ9.eyJcdWQiOiJodHRwOi8vbG9jYWxob3N0L1JQIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdC9TdHMiLCJuYmYiOjEzNjcyODA0MDUsImV4cCI6MTM2NzMwOTIwNSwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZ2l2ZW5uYW1lIjoiYWFsIn0.Pro66IUD94jvZNnG_l96Hph78L_LYSx6eobO6QfWF3y038ebLZorhKYgAj1LtsNVAbq7E_I5tnoI1Y4YUV5_wMGtMqT_XTB4N8vktDzf0Y32MhopsDrveofJAAFAUP1npYZtFF89RAWzy1GaXqXw05SbUcyMPWTSvmPk_frzJRTc-utAaBAp-zKqS1KXGB_s99x7lDxy3ZFMDFtFHQlOJiXeClXYCVkB-ZmvrSFSAIasFK4eIG9pOcMY43_wS7ybNjF7WncY6PEi6JmUoh2AwA-SCdY-Bhs80Tf4GMB2HsmuMkSVgoptt6Fgf-q8LhWG0W80g66JRgdhMj85BZ6bxg";
         public static string LiveJwt        =       @"eyJhbGciOiJIUzI1NiIsImtpZCI6IjAiLCJ0eXAiOiJKV1QifQ.eyJ2ZXIiOjEsImlzcyI6InVybjp3aW5kb3dzOmxpdmVpZCIsImV4cCI6MTM2ODY0ODg2MywidWlkIjoiMzgwZTE3YzMxNGU2ZmMyODA0NzA3MjI5NTc3MjEwZmIiLCJhdWQiOiJ3d3cuc3JpLWRldjEwMC5jb20iLCJ1cm46bWljcm9zb2Z0OmFwcHVyaSI6Im1zLWFwcDovL1MtMS0xNS0yLTM2MzczOTQzNzAtMjIzMTgyMTkzNi01NjUwMTU1MS0xNTE0NjEzNDgyLTQ1NjgzNjc4LTM1NzUyNjE4NTItMjMzNTgyNjkwIiwidXJuOm1pY3Jvc29mdDphcHBpZCI6IjAwMDAwMDAwNEMwRTdBNUMifQ.I-sE7t6IJUho1TfgaLilNuzro-pWOMgg33rQ351GcoM";
-
+        public static string OverClaims =           @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImtyaU1QZG1Cdng2OHNrVDgtbVBBQjNCc2VlQSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLndpbmRvd3MubmV0IiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTQwNTk2ODkyMiwibmJmIjoxNDA1OTY4OTIyLCJleHAiOjE0MDU5NzI4MjIsInZlciI6IjEuMCIsInRpZCI6IjcyZjk4OGJmLTg2ZjEtNDFhZi05MWFiLTJkN2NkMDExZGI0NyIsImFtciI6WyJwd2QiXSwib2lkIjoiMzVjNzZlZWQtZjY0MC00YWU3LWFhZTItMzI3NzE3MWVhM2U1IiwidXBuIjoibmJhbGlnYUBtaWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJuYmFsaWdhQG1pY3Jvc29mdC5jb20iLCJzdWIiOiI1R0UwVkhBSlBuaUdNSWluN3dMNFBFMFE5MjAzTG00bHJBUnBrcEFBYmprIiwicHVpZCI6IjEwMDM3RkZFODAxQjI4QTAiLCJmYW1pbHlfbmFtZSI6IkJhbGlnYSIsImdpdmVuX25hbWUiOiJOYW1yYXRhIiwiX2NsYWltX25hbWVzIjp7Imdyb3VwcyI6InNyYzEifSwiX2NsYWltX3NvdXJjZXMiOnsic3JjMSI6eyJlbmRwb2ludCI6Imh0dHBzOi8vZ3JhcGgud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3L3VzZXJzLzM1Yzc2ZWVkLWY2NDAtNGFlNy1hYWUyLTMyNzcxNzFlYTNlNS9nZXRNZW1iZXJPYmplY3RzIn19LCJhcHBpZCI6IjExOGUxNzBmLWNmMjYtNDAwZi1hMGU5LTk2OTEwYjMxMTg3ZSIsImFwcGlkYWNyIjoiMSIsInNjcCI6IlVzZXJQcm9maWxlLlJlYWQiLCJhY3IiOiIxIn0.PWNfaBajC6KAr2dKiG0aJ1295hIXm9XWZPdrCw6zMgT0s46rrcBFMWOJQ-4Cz1aSqour6tslg8cl4_1rAjlkVwsXs7QTekMHxIcf3SPpM6vPTa7OfQ4dzBbPQV_QKif1xBXDkFQfZPAF2tPwcK_VBzHT0Z94_CpOtxChXmGEctW38Rt6f8bC_aaD6nsTZOt6NdAmI2AVOchpp7qNWEdBTvdcoNyz_a5VbUwWsHGCvozcOLjjFLles-K0BhiFw3MyJU_DMG-H6TgeBtwJPiuU2vHUTea26sfKHbpe7GypBo1PjY7odDWMH-d7c1Z0fT-UL15dAV419zX1NGbl-cujsw";
     }
 
     public static class Saml2SignedTokens
@@ -55,30 +57,75 @@ namespace System.IdentityModel.Test
     {
         public static readonly string GroupClaims = @"{""iss"":[""http://www.GotJWT.com"",""https://sts.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/""],""aud"":[""http://www.contoso.com"",""0bb44690-eae0-4b2c-b2b1-64ac03098226""],""upn"":""badams@dushyantgill.net"",""family_name"":""Adams"",""unique_name"":""badams@dushyantgill.net"",""ver"":""1.0"",""groups"":[""c4324023-3424-4ba6-9320-1ce28431b113"",""08953f81-ffd6-44f9-887d-69855355ffbd"",""694a55b2-ec4c-480d-8a7d-26d34ea9225b""],""oid"":""0c9545d0-a670-4628-8c1f-e90618a3b940"",""nonce"":""02f9c7ba-1720-4d46-b00f-6731fe2c4d14"",""given_name"":""Brad"",""exp"":1405870465,""tid"":""5803816d-c4ab-4601-a128-e2576e5d6910"",""iat"":""1403822988"",""amr"":""pwd"",""nbf"":1405866865,""sub"":""355anlmMo6uvGyabeIqNqBTUJsEPdyijxouLjfmg8G8""}";
 
-        public static List<Claim> OverClaims(string issuer, string originalIssuer)
+        public static Dictionary<string, Dictionary<string, string>> ClaimSources
         {
-            return new List<Claim>
+            get
             {
-                new Claim("upn", "badams@dushyantgill.net", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("family_name", "Adams", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("unique_name", "badams@dushyantgill.net", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("ver", "1.0", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("aud", "0bb44690-eae0-4b2c-b2b1-64ac03098226", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("iss", "https://sts.windows-ppe.net/5803816d-c4ab-4601-a128-e2576e5d6910/", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("oid", "0c9545d0-a670-4628-8c1f-e90618a3b940", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("_claim_sources", @"{""src1"":{""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects""}}", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("_claim_sources", @"{""src2"":{""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects""}}", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("_claim_sources", @"{""src3"":{""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects""}}", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("_claim_names", @"{""groups"":""src1""}", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("_claim_names", @"{""groups"":""src2""}", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("_claim_names", @"{""groups"":""src3""}", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("nonce", "02f9c7ba-1720-4d46-b00f-6731fe2c4d14", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("given_name", "Brad", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("tid", "5803816d-c4ab-4601-a128-e2576e5d6910", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("iat", "1403822769", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("amr", @"[ ""pwd"" ]", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim("sub", "355anlmMo6uvGyabeIqNqBTUJsEPdyijxouLjfmg8G8", ClaimValueTypes.String, issuer, originalIssuer),
-            };
+                return new Dictionary<string, Dictionary<string, string>>
+                {
+                    {   "src1",
+                        new Dictionary<string,string>
+                        {
+                            { "endpoint", "https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"},
+                            { "access_token", "ksj3n283dke"}
+                        }
+                    },
+                    {   "src2",
+                        new Dictionary<string,string>
+                        {
+                            { "endpoint2", "https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"},
+                            { "access_token2", "ksj3n283dke"}
+                        }
+                    }
+
+                };
+            }
+        }
+
+        public static Dictionary<string, string> ClaimNames
+        {
+            get
+            {
+                return new Dictionary<string, string>
+                {
+                    { "groups",
+                      "src1"
+                    },
+                    { "groups2",
+                      "src2"
+                    }
+                };
+            }
+        }
+
+        public static ClaimsIdentity ClaimsIdentityDistributedClaims(string issuer, string authType, Dictionary<string, Dictionary<string, string>> claimSources, Dictionary<string, string> claimNames )
+        {
+            List<Claim> claims = new List<Claim>();
+            AddClaimSources(claimSources, claims, issuer);
+            AddClaimNames(claimNames, claims, issuer);
+            return new ClaimsIdentity(claims, authType);
+        }
+
+        public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer)
+        {
+            JavaScriptSerializer jss = new JavaScriptSerializer();
+            foreach(var kv in claimNames)
+            {
+                Claim c = new Claim("_claim_names", @"{""" + kv.Key + @""":""" + kv.Value + @"""}", JwtConstants.JsonClaimValueType, issuer);
+                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+                claims.Add(c);
+            }
+        }
+
+        public static void AddClaimSources(Dictionary<string, Dictionary<string, string>> claimSources, List<Claim> claims, string issuer)
+        {
+            JavaScriptSerializer jss = new JavaScriptSerializer();
+            foreach (var kv in claimSources)
+            {
+                Claim c = new Claim("_claim_sources", @"{""" + kv.Key + @""":" + jss.Serialize(kv.Value) + @"}", JwtConstants.JsonClaimValueType, issuer);
+                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+                claims.Add(c);
+            }
         }
     }
 }

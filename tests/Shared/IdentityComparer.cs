@@ -62,6 +62,8 @@ namespace System.IdentityModel.Test
             int numMatched = 0;
 
             List<T> toMatch = new List<T>(t2);
+            List<T> expectedToMatch = new List<T>(t1);
+            List<KeyValuePair<T,T>> matchedTs = new List<KeyValuePair<T,T>>();
             
             // helps debugging to see what didn't match
             List<T> notMatched = new List<T>();
@@ -74,6 +76,7 @@ namespace System.IdentityModel.Test
                     if (areEqual(t, toMatch[i], context))
                     {
                         numMatched++;
+                        matchedTs.Add(new KeyValuePair<T, T>(toMatch[i], t));
                         matched = true;
                         toMatch.RemoveAt(i);
                         break;
@@ -376,11 +379,6 @@ namespace System.IdentityModel.Test
 
         private static bool AreJwtPayloadsEqual(JwtPayload payload1, JwtPayload payload2, CompareContext context)
         {
-            if (payload1.Count != payload2.Count)
-            {
-                return false;
-            }
-
             if (!AreEnumsEqual<Claim>(payload1.Claims, payload2.Claims, context, AreClaimsEqual))
             {
                 return false;

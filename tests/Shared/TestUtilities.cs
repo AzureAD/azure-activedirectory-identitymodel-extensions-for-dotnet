@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        public static void ReportErrors(string testInfo, List<string> errors)
+        public static void AssertFailIfErrors(string testInfo, List<string> errors)
         {
             if (errors.Count != 0)
             {

@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.GetSet(context);
-            TestUtilities.ReportErrors("OpenIdConnectProtocolValidator_GetSets()", context.Errors);
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, context.Errors);
 
             ExpectedException ee = ExpectedException.ArgumentNullException();
             Assert.IsNotNull(validationParameters.HashAlgorithmMap);

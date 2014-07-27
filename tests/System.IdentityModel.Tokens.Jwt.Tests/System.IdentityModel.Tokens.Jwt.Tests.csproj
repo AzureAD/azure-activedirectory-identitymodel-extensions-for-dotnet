@@ -66,6 +66,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\Shared\ClaimSets.cs">
+      <Link>ClaimSets.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>ExpectedException.cs</Link>
     </Compile>
@@ -81,7 +84,6 @@
     <Compile Include="..\Shared\TestUtilities.cs">
       <Link>TestUtilities.cs</Link>
     </Compile>
-    <Compile Include="ClaimSets.cs" />
     <Compile Include="CreateAndValidateTokens.cs" />
     <Compile Include="ExtensibilityTests.cs" />
     <Compile Include="JwtDerivedTestTypes.cs" />
@@ -97,7 +99,6 @@
     <Compile Include="References.cs" />
     <Compile Include="SignatureProviderTests.cs" />
     <Compile Include="TestContextProvider.cs" />
-    <Compile Include="Tokens.cs" />
     <Compile Include="TokenValidationParametersTests.cs" />
     <Compile Include="ValidatorsTests.cs" />
     <Compile Include="X509CertificateValidatorExTests.cs" />

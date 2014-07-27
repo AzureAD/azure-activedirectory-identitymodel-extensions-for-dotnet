@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.IO;
+using System.Reflection;
 using System.Security.Claims;
 using System.Web.Script.Serialization;
 using System.Xml;
@@ -32,6 +33,18 @@ namespace System.IdentityModel.Test
     [TestClass]
     public class CreateAndValidateTokens
     {
+        public class CreateAndValidateParams
+        {
+            public JwtSecurityToken CompareTo { get; set; }
+            public Type ExceptionType { get; set; }
+            public SigningCredentials SigningCredentials { get; set; }
+            public SecurityToken SigningToken { get; set; }
+            public TokenValidationParameters TokenValidationParameters { get; set; }
+            public IEnumerable<Claim> Claims { get; set; }
+            public string Case { get; set; }
+            public string Issuer { get; set; }
+        }
+
         private static string _roleClaimTypeForDelegate = "RoleClaimTypeForDelegate";
         private static string _nameClaimTypeForDelegate = "NameClaimTypeForDelegate";
 
@@ -51,6 +64,57 @@ namespace System.IdentityModel.Test
         public TestContext TestContext { get; set; }
 
         [TestMethod]
+        [TestProperty("TestCaseID", "B14F1FE2-F7A5-450F-8A6D-D0898112570E")]
+        [Description("Create Token with multiple audiences")]
+        public void CreateAndValidateTokens_MultipleAudiences()
+        {
+            List<string> errors = new List<string>();
+
+            var handler = new JwtSecurityTokenHandler();
+            var payload = new JwtPayload();
+            var header = new JwtHeader();
+
+            payload.AddClaims(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer));
+            var jwtToken = new JwtSecurityToken(header, payload);
+            var jwt = handler.WriteToken(jwtToken);
+
+            var validationParameters =
+                new TokenValidationParameters
+                {
+                    RequireExpirationTime = false,
+                    RequireSignedTokens = false,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            SecurityToken validatedJwt = null;
+            var cp = handler.ValidateToken(jwt, validationParameters, out validatedJwt);
+            var ci = new ClaimsIdentity(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), AuthenticationTypes.Federation);
+            var cpExpected = new ClaimsPrincipal(ci);
+            var compareContext = new CompareContext();
+            if (!IdentityComparer.AreEqual<ClaimsPrincipal>(cp, cpExpected, compareContext))
+            {
+                errors.Add("IdentityComparer.AreEqual<ClaimsPrincipal>(cp, cpExpected, compareContext)");
+            }
+
+            var audiences = (validatedJwt as JwtSecurityToken).Audiences;
+            var jwtAudiences = jwtToken.Audiences;
+
+            if (!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, jwtAudiences))
+            {
+                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, jwtAudiences)");
+            }
+
+            if (!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, IdentityUtilities.DefaultAudiences))
+            {
+                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, IdentityUtilities.DefaultAudiences)");
+            }
+
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+        }
+
+        [TestMethod]
         [TestProperty("TestCaseID", "0FA94A41-B904-46C9-B9F1-BF0AEC23045A")]
         [Description("Create EMPTY JwtToken")]
         public void CreateAndValidateTokens_EmptyToken()
@@ -63,51 +127,105 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "8058D994-9600-455D-8B6C-753DE2E26529")]
-        [Description("Serialize / Deserialize in different ways.")]
+        [Description("Ensures that Serializing and Deserializing usin xml or json have same results.")]
         public void CreateAndValidateTokens_RoundTripTokens()
         {
-            SecurityToken validatedToken;
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            //handler.CertificateValidator = X509CertificateValidator.None;
+            CreateAndValidateParams createAndValidateParams;
+            string issuer = "issuer";
+            string originalIssuer = "originalIssuer";
 
-            foreach (CreateAndValidateParams jwtParams in JwtTestTokens.All)
+            createAndValidateParams = new CreateAndValidateParams
             {
-                Console.WriteLine("Validating streaming from JwtSecurityToken and TokenValidationParameters is same for Case: '" + jwtParams.Case);
-
-                string jwt = handler.WriteToken(jwtParams.CompareTo);
-                ClaimsPrincipal principal = handler.ValidateToken(jwt, jwtParams.TokenValidationParameters, out validatedToken);
-
-                // create from security descriptor
-                SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
-                tokenDescriptor.SigningCredentials = jwtParams.SigningCredentials;
-                tokenDescriptor.Lifetime = new Lifetime(jwtParams.CompareTo.ValidFrom, jwtParams.CompareTo.ValidTo);
-                tokenDescriptor.Subject = new ClaimsIdentity(jwtParams.Claims);
-                tokenDescriptor.TokenIssuerName = jwtParams.CompareTo.Issuer;
-                foreach(string str in jwtParams.CompareTo.Audiences)
+                Case = "ClaimSets.DuplicateTypes",
+                Claims = ClaimSets.DuplicateTypes(issuer, originalIssuer),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.DuplicateTypes(issuer, originalIssuer), null),
+                ExceptionType = null,
+                TokenValidationParameters = new TokenValidationParameters
                 {
-                    if (!string.IsNullOrWhiteSpace(str))
-                    {
-                        tokenDescriptor.AppliesToAddress = str;
-                    }
+                    RequireSignedTokens = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuer = false,
                 }
+            };
 
+            RunRoundTrip(createAndValidateParams, handler);
 
-                JwtSecurityToken token = handler.CreateToken(tokenDescriptor) as JwtSecurityToken;
-                Assert.IsTrue(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
+            createAndValidateParams = new CreateAndValidateParams
+            {
+                Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
+                Claims = ClaimSets.Simple(issuer, originalIssuer),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2),
+                ExceptionType = null,
+                SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                SigningToken = KeyingMaterial.DefaultX509Token_2048,
+                TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                    IssuerSigningKey = new X509SecurityKey(KeyingMaterial.DefaultCert_2048),
+                    ValidIssuer = issuer,
+                }
+            };
 
-                // write as xml
-                MemoryStream ms = new MemoryStream();
-                XmlDictionaryWriter writer = XmlDictionaryWriter.CreateDictionaryWriter(XmlTextWriter.Create(ms));
-                handler.WriteToken(writer, jwtParams.CompareTo);
-                writer.Flush();
-                ms.Flush();
-                ms.Seek(0, SeekOrigin.Begin);
-                XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
-                reader.Read();
-                token = handler.ReadToken(reader) as JwtSecurityToken;
-                ms.Close();
-                IdentityComparer.AreEqual(token, jwtParams.CompareTo);
+            RunRoundTrip(createAndValidateParams, handler);
+
+            createAndValidateParams = new CreateAndValidateParams
+            {
+                Case = "ClaimSets.Simple_simpleSigned_Symmetric",
+                Claims = ClaimSets.Simple(issuer, originalIssuer),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
+                ExceptionType = null,
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                SigningToken = KeyingMaterial.DefaultSymmetricSecurityToken_256,
+                TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                    IssuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    ValidIssuer = issuer,
+                }
+            };
+
+            RunRoundTrip(createAndValidateParams, handler);
+        }
+
+        private void RunRoundTrip(CreateAndValidateParams jwtParams, JwtSecurityTokenHandler handler)
+        {
+            SecurityToken validatedToken;
+
+            string jwt = handler.WriteToken(jwtParams.CompareTo);
+            ClaimsPrincipal principal = handler.ValidateToken(jwt, jwtParams.TokenValidationParameters, out validatedToken);
+
+            // create from security descriptor
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
+            tokenDescriptor.SigningCredentials = jwtParams.SigningCredentials;
+            tokenDescriptor.Lifetime = new Lifetime(jwtParams.CompareTo.ValidFrom, jwtParams.CompareTo.ValidTo);
+            tokenDescriptor.Subject = new ClaimsIdentity(jwtParams.Claims);
+            tokenDescriptor.TokenIssuerName = jwtParams.CompareTo.Issuer;
+            foreach (string str in jwtParams.CompareTo.Audiences)
+            {
+                if (!string.IsNullOrWhiteSpace(str))
+                {
+                    tokenDescriptor.AppliesToAddress = str;
+                }
             }
+
+
+            JwtSecurityToken token = handler.CreateToken(tokenDescriptor) as JwtSecurityToken;
+            Assert.IsTrue(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
+
+            // write as xml
+            MemoryStream ms = new MemoryStream();
+            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateDictionaryWriter(XmlTextWriter.Create(ms));
+            handler.WriteToken(writer, jwtParams.CompareTo);
+            writer.Flush();
+            ms.Flush();
+            ms.Seek(0, SeekOrigin.Begin);
+            XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
+            reader.Read();
+            token = handler.ReadToken(reader) as JwtSecurityToken;
+            ms.Close();
+            IdentityComparer.AreEqual(token, jwtParams.CompareTo);
         }
 
         [TestMethod]
@@ -147,11 +265,36 @@ namespace System.IdentityModel.Test
             string issuer = "http://www.GotJWT.com";
             string audience = "http://www.contoso.com";
 
-            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), expires: DateTime.UtcNow + TimeSpan.FromHours(1), notBefore: DateTime.UtcNow );
+            JwtPayload jwtPayloadClaimSources = new JwtPayload();
+            jwtPayloadClaimSources.Add("_claim_sources", JsonClaims.ClaimSources);
+            jwtPayloadClaimSources.Add("_claim_names", JsonClaims.ClaimNames);
+
+            JwtSecurityToken jwtClaimSources = 
+                new JwtSecurityToken(
+                    new JwtHeader(),
+                    jwtPayloadClaimSources);
+
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            string encodedJwt = jwtHandler.WriteToken(jwt);
+            string encodedJwt = jwtHandler.WriteToken(jwtClaimSources);
+            var validationParameters =
+                new TokenValidationParameters
+                {
+                    RequireSignedTokens = false,
+                    IssuerValidator = (s, st, tvp) => { return issuer;},
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                };
+
+            SecurityToken validatedJwt = null;
+            var claimsPrincipal = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedJwt);
+            Assert.IsTrue(IdentityComparer.AreEqual
+                (claimsPrincipal.Identity as ClaimsIdentity, 
+                 JsonClaims.ClaimsIdentityDistributedClaims(issuer, TokenValidationParameters.DefaultAuthenticationType, JsonClaims.ClaimSources, JsonClaims.ClaimNames)));
+
+            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), expires: DateTime.UtcNow + TimeSpan.FromHours(1), notBefore: DateTime.UtcNow );
+            encodedJwt = jwtHandler.WriteToken(jwt);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
-            TokenValidationParameters validationParameters = new TokenValidationParameters()
+            validationParameters = new TokenValidationParameters()
             {
                 RequireSignedTokens = false,
                 ValidateAudience = false,
@@ -186,45 +329,9 @@ namespace System.IdentityModel.Test
                     ValidateLifetime = false,
                 };
 
-            SecurityToken validatedJwt = null;
-            ClaimsPrincipal claimsPrincipal = jwtHandler.ValidateToken(jwt.RawData, validationParameters, out validatedJwt);
-
-            string iss = @"https://sts.windows-ppe.net/5803816d-c4ab-4601-a128-e2576e5d6910/";
-            List<Claim> overClaims = JsonClaims.OverClaims(iss, iss);
-            DateTime nbf = DateTime.UtcNow;
-            DateTime exp = nbf + TimeSpan.FromHours(1);
-
-            jwt = jwtHandler.CreateToken(
-                    signingCredentials: KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2,
-                    subject: new ClaimsIdentity(overClaims)
-            );
-
-            encodedJwt = jwtHandler.WriteToken(jwt);
-            validationParameters =
-                new TokenValidationParameters
-                {
-                    IssuerSigningKey = KeyingMaterial.DefaultAsymmetricKey_2048,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false,
-                };
-
             validatedJwt = null;
-            Dictionary<string, string> inbound = new Dictionary<string, string>(JwtSecurityTokenHandler.InboundClaimTypeMap);
-            JwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             claimsPrincipal = jwtHandler.ValidateToken(jwt.RawData, validationParameters, out validatedJwt);
-            foreach(var typemap in inbound)
-            {
-                JwtSecurityTokenHandler.InboundClaimTypeMap.Add(typemap);
-            }
 
-            overClaims.Add(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(jwt.ValidTo).ToString(), ClaimValueTypes.String, iss, iss));
-            overClaims.Add(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(jwt.ValidFrom).ToString(), ClaimValueTypes.String, iss, iss));
-            CompareContext context = CompareContext.Default;
-            if (!IdentityComparer.AreEqual<IEnumerable<Claim>>(overClaims, claimsPrincipal.Claims, context))
-            {
-                Assert.Fail("JsonClaims.OverClaims != claimsPrincipal.Claims");
-            }
         }
 
         [TestMethod]

@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -25,6 +26,7 @@ using System.Text;
 using System.Xml;
 using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -36,7 +38,7 @@ namespace Microsoft.IdentityModel.Test
     /// SamlTokens
     /// JwtTokens
     /// </summary>
-    public class IdentityUtilities
+    public static class IdentityUtilities
     {
         /// <summary>
         /// Computes the CHash per 
@@ -51,7 +53,6 @@ namespace Microsoft.IdentityModel.Test
             return Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
         }
 
-
         public static string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
         {
             return CreateJwtToken(tokenDescriptor, new JwtSecurityTokenHandler());
@@ -62,6 +63,14 @@ namespace Microsoft.IdentityModel.Test
             return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
         }
 
+        public static JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string originalIssuer = null)
+        {
+            string iss = issuer ?? IdentityUtilities.DefaultIssuer;
+            string originalIss = originalIssuer ?? IdentityUtilities.DefaultOriginalIssuer;
+
+            return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
+        }
+
         public static JwtSecurityToken CreateJwtSecurityToken()
         {
             return CreateJwtSecurityToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor) as JwtSecurityToken;
@@ -70,6 +79,13 @@ namespace Microsoft.IdentityModel.Test
         public static JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
             return (new JwtSecurityTokenHandler()).CreateToken(tokenDescriptor) as JwtSecurityToken;
+        }
+
+        public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string originalIssuer, IEnumerable<Claim> claims, SigningCredentials signingCredentials)
+        {
+            JwtPayload payload = new JwtPayload(issuer, "urn:uri", claims, DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(10));
+            JwtHeader header = new JwtHeader(signingCredentials);
+            return new JwtSecurityToken(header, payload);
         }
 
         public static string CreateSaml2Token()

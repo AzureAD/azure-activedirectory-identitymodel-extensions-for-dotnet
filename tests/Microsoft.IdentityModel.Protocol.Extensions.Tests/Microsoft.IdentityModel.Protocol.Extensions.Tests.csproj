@@ -80,6 +80,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\Shared\ClaimSets.cs">
+      <Link>ClaimSets.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>ExpectedException.cs</Link>
     </Compile>
