@@ -361,7 +361,7 @@ namespace Microsoft.IdentityModel.Protocols
                 long ticks;
                 try
                 {
-                    ticks = Convert.ToInt64(timestamp);
+                    ticks = Convert.ToInt64(timestamp, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch(Exception ex)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(), System.DateTime.MaxValue.Ticks.ToString()), ex);
+                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), ex);
                 }
 
                 DateTime utcNow = DateTime.UtcNow;

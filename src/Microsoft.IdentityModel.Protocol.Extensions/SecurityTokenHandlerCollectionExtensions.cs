@@ -17,18 +17,16 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-
-using SamlHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 using Saml2Handler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using SamlHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Extensions
 {
     /// <summary>
-    /// Extensions to <see cref="SecurityTokenHandler"/> that provide support for validating a security securityToken
+    /// Extensions to <see cref="SecurityTokenHandler"/> that provide support for validating a security token
     /// passed as a string and using <see cref="TokenValidationParameters"/>.
     /// </summary>
     public static class SecurityTokenHandlerCollectionExtensions

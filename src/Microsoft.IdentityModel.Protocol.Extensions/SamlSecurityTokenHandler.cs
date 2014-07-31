@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets a value indicating whether the class provides serialization functionality to serialize securityToken handled 
+        /// Gets a value indicating whether the class provides serialization functionality to serialize securityToken handled
         /// by this instance.
         /// </summary>
         /// <returns>true if the WriteToken method can serialize this securityToken.</returns>
@@ -215,9 +215,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Obsolete method, use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="token">not supported.</param>
+        /// <param name="tokenString">not supported.</param>
         /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
-        public override SecurityToken ReadToken(string token)
+        public override SecurityToken ReadToken(string tokenString)
         {
             throw new NotSupportedException(ErrorMessages.IDX11007);
         }
@@ -453,25 +453,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Serializes to <see cref="SamlSecurityToken"/> to a string.
         /// </summary>
-        /// <param name="securityToken">A <see cref="SamlSecurityToken"/>.</param>
-        public override string WriteToken(SecurityToken securityToken)
+        /// <param name="token">A <see cref="SamlSecurityToken"/>.</param>
+        public override string WriteToken(SecurityToken token)
         {
-            if (securityToken == null)
+            if (token == null)
             {
-                throw new ArgumentNullException("securityToken");
+                throw new ArgumentNullException("token");
             }
 
-            SamlSecurityToken samlSecurityToken = securityToken as SamlSecurityToken;
+            SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), securityToken.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
             }
 
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
             {
-                _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, securityToken);
+                _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, token);
                 return stringBuilder.ToString();
             }
         }
@@ -480,26 +480,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// Serializes to XML a securityToken of the type handled by this instance.
         /// </summary>
         /// <param name="writer">The XML writer.</param>
-        /// <param name="securityToken">A securityToken of type <see cref="TokenType"/>.</param>
-        public override void WriteToken(XmlWriter writer, SecurityToken securityToken)
+        /// <param name="token">A securityToken of type <see cref="TokenType"/>.</param>
+        public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
             {
                 throw new ArgumentNullException("writer");
             }
 
-            if (securityToken == null)
+            if (token == null)
             {
                 throw new ArgumentNullException("token");
             }
 
-            SamlSecurityToken samlSecurityToken = securityToken as SamlSecurityToken;
+            SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), securityToken.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
             }
 
-            _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(writer, securityToken);
+            _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(writer, token);
         }
 
         private class SMSamlHandlerPrivate : SamlHandler

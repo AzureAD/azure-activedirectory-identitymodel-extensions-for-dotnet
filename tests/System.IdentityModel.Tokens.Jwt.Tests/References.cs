@@ -19,7 +19,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-using System.Web.Script.Serialization;
+
 namespace System.IdentityModel.Test
 {
     public static class Issuers
@@ -108,7 +108,6 @@ namespace System.IdentityModel.Test
 
         public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer)
         {
-            JavaScriptSerializer jss = new JavaScriptSerializer();
             foreach(var kv in claimNames)
             {
                 Claim c = new Claim("_claim_names", @"{""" + kv.Key + @""":""" + kv.Value + @"""}", JwtConstants.JsonClaimValueType, issuer);
@@ -119,10 +118,9 @@ namespace System.IdentityModel.Test
 
         public static void AddClaimSources(Dictionary<string, Dictionary<string, string>> claimSources, List<Claim> claims, string issuer)
         {
-            JavaScriptSerializer jss = new JavaScriptSerializer();
             foreach (var kv in claimSources)
             {
-                Claim c = new Claim("_claim_sources", @"{""" + kv.Key + @""":" + jss.Serialize(kv.Value) + @"}", JwtConstants.JsonClaimValueType, issuer);
+                Claim c = new Claim("_claim_sources", @"{""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value) + @"}", JwtConstants.JsonClaimValueType, issuer);
                 c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
                 claims.Add(c);
             }

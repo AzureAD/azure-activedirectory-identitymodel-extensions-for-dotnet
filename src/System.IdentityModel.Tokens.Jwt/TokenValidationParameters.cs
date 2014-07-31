@@ -83,7 +83,7 @@ namespace System.IdentityModel.Tokens
         /// Default for the clock skew.
         /// </summary>
         /// <remarks>300 seconds (5 minutes).</remarks>
-        public static TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300); // 5 min.
+        public static readonly TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300); // 5 min.
 
         /// <summary>
         /// Default for the maximm token size.

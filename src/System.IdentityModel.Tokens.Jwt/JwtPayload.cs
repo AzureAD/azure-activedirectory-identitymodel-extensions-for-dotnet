@@ -35,7 +35,16 @@ namespace System.IdentityModel.Tokens
         /// Creates a empty <see cref="JwtPayload"/>
         /// </summary>
         public JwtPayload()
-            : base(StringComparer.Ordinal)
+            : this(issuer: null, audience: null, claims: null, notBefore: null, expires: null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with <see cref="IEnumerable{Claim}"/>. Default string comparer <see cref="StringComparer.Ordinal"/>.
+        /// <param name="claims">the claims to add.</param>
+        /// </summary>
+        public JwtPayload(IEnumerable<Claim> claims)
+            : this(issuer: null, audience: null, claims: claims, notBefore: null, expires: null)
         {
         }
 
@@ -48,7 +57,7 @@ namespace System.IdentityModel.Tokens
         /// <param name="notBefore">if notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
         /// <param name="expires">if expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
-        /// <para>If a 'nbf' or 'exp' claim exists in the 'claims' it will be replaced with the 'notbefore' and 'expires' if they are not null.</para></remarks>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
             : base(StringComparer.Ordinal)
@@ -62,7 +71,9 @@ namespace System.IdentityModel.Tokens
             }
 
             if (claims != null)
+            {
                 this.AddClaims(claims);
+            }
 
             if (!string.IsNullOrWhiteSpace(issuer))
             {
@@ -74,7 +85,6 @@ namespace System.IdentityModel.Tokens
                 this[JwtRegisteredClaimNames.Aud] = audience;
             }
 
-            // if claims had an exp or nbf claim they will be overridden
             if (expires.HasValue)
             {
                 this[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(expires.Value.ToUniversalTime());
@@ -438,7 +448,7 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        internal object GetClaimValueUsingValueType(Claim claim)
+        internal static object GetClaimValueUsingValueType(Claim claim)
         {
             if (claim.ValueType == ClaimValueTypes.Integer)
             {

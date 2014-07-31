@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel
 
         // configuration retrieval errors
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
-        public const string IDX10801 = "IDX10801: Unable to create an RSA pulblic key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
+        public const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
         public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
         public const string IDX10803 = "IDX10803: Unable to create to obtain configuration from: '{0}'.";
 

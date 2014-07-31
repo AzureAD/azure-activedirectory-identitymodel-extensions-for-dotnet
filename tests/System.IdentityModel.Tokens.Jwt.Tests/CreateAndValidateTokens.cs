@@ -25,7 +25,6 @@ using System.IdentityModel.Tokens;
 using System.IO;
 using System.Reflection;
 using System.Security.Claims;
-using System.Web.Script.Serialization;
 using System.Xml;
 
 namespace System.IdentityModel.Test
@@ -262,12 +261,15 @@ namespace System.IdentityModel.Test
         [Description("This test ensures that a Json serialized object, when added as the value of a claim, can be recognized and reconstituted.")]
         public void CreateAndValidateTokens_JsonClaims()
         {
+            List<string> errors = new List<string>();
+
             string issuer = "http://www.GotJWT.com";
-            string audience = "http://www.contoso.com";
+            string claimSources = "_claim_sources";
+            string claimNames = "_claim_names";
 
             JwtPayload jwtPayloadClaimSources = new JwtPayload();
-            jwtPayloadClaimSources.Add("_claim_sources", JsonClaims.ClaimSources);
-            jwtPayloadClaimSources.Add("_claim_names", JsonClaims.ClaimNames);
+            jwtPayloadClaimSources.Add(claimSources, JsonClaims.ClaimSources);
+            jwtPayloadClaimSources.Add(claimNames, JsonClaims.ClaimNames);
 
             JwtSecurityToken jwtClaimSources = 
                 new JwtSecurityToken(
@@ -279,59 +281,59 @@ namespace System.IdentityModel.Test
             var validationParameters =
                 new TokenValidationParameters
                 {
-                    RequireSignedTokens = false,
                     IssuerValidator = (s, st, tvp) => { return issuer;},
+                    RequireSignedTokens = false,
                     ValidateAudience = false,
                     ValidateLifetime = false,
                 };
 
             SecurityToken validatedJwt = null;
             var claimsPrincipal = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedJwt);
-            Assert.IsTrue(IdentityComparer.AreEqual
-                (claimsPrincipal.Identity as ClaimsIdentity, 
-                 JsonClaims.ClaimsIdentityDistributedClaims(issuer, TokenValidationParameters.DefaultAuthenticationType, JsonClaims.ClaimSources, JsonClaims.ClaimNames)));
-
-            JwtSecurityToken jwt = new JwtSecurityToken(issuer: issuer, audience: audience, claims: ClaimSets.JsonClaims(issuer, issuer), expires: DateTime.UtcNow + TimeSpan.FromHours(1), notBefore: DateTime.UtcNow );
-            encodedJwt = jwtHandler.WriteToken(jwt);
-            JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
-            validationParameters = new TokenValidationParameters()
+            if (!IdentityComparer.AreEqual
+                (claimsPrincipal.Identity as ClaimsIdentity,
+                 JsonClaims.ClaimsIdentityDistributedClaims(issuer, TokenValidationParameters.DefaultAuthenticationType, JsonClaims.ClaimSources, JsonClaims.ClaimNames)))
             {
-                RequireSignedTokens = false,
-                ValidateAudience = false,
-                ValidIssuer = issuer,
+                errors.Add("JsonClaims.ClaimSources, JsonClaims.ClaimNames: test failed");
             };
+
+            Claim c = claimsPrincipal.FindFirst(claimSources);
+            if (!c.Properties.ContainsKey(JwtSecurityTokenHandler.JsonClaimTypeProperty))
+            {
+                errors.Add(claimSources + " claim, did not have json property: " + JwtSecurityTokenHandler.JsonClaimTypeProperty);
+            }
+            else
+            {
+                if (!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal))
+                {
+                    errors.Add("!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal)" +
+                        "value is: " + c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty]);
+                }
+            }
+
+            JwtSecurityToken jwtWithEntity =
+                new JwtSecurityToken(
+                    new JwtHeader(),
+                    new JwtPayload(claims: ClaimSets.EntityAsJsonClaim(issuer, issuer)));
+
+            encodedJwt = jwtHandler.WriteToken(jwtWithEntity);
+            JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
 
             SecurityToken validatedToken;
             var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
-            Assert.IsNotNull(jsonClaim, "Did not find Jsonclaims. Looking for claim of type: '" + typeof(Entity).ToString() + "'");
+            if (jsonClaim == null)
+            {
+                errors.Add("Did not find Jsonclaims. Looking for claim of type: '" + typeof(Entity).ToString() + "'");
+            };
 
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string jsString = js.Serialize(Entity.Default);
-            Assert.AreEqual(jsString, jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
+            string jsString = JsonExtensions.SerializeToJson(Entity.Default);
 
-            jwtHandler = new JwtSecurityTokenHandler();
-            jwt = jwtHandler.CreateToken(
-                    issuer: issuer,
-                    audience: audience,
-                    signingCredentials: KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2,
-                    subject: new ClaimsIdentity(ClaimSets.GroupClaims(issuer, issuer)),
-                    expires: DateTime.UtcNow + TimeSpan.FromHours(1),
-                    notBefore: DateTime.UtcNow);
+            if (!string.Equals(jsString, jsonClaim.Value, StringComparison.Ordinal))
+            {
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting:\n'{1}'.\nReceived:\n'{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
+            }
 
-            encodedJwt = jwtHandler.WriteToken(jwt);
-            validationParameters =
-                new TokenValidationParameters
-                {
-                    IssuerSigningKey = KeyingMaterial.DefaultAsymmetricKey_2048,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false,
-                };
-
-            validatedJwt = null;
-            claimsPrincipal = jwtHandler.ValidateToken(jwt.RawData, validationParameters, out validatedJwt);
-
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
         }
 
         [TestMethod]
@@ -339,36 +341,6 @@ namespace System.IdentityModel.Test
         [Description("These test ensures that the SubClaim is used the identity, when ClaimsIdentity.Name is called.")]
         public void CreateAndValidateTokens_SubClaim()
         {
-            string issuer = "http://www.GotJWT.com";
-            string audience = "http://www.contoso.com";
-            SecurityToken validatedToken;
-
-            JwtSecurityToken jwt = 
-                new JwtSecurityToken(
-                    issuer: issuer, 
-                    audience: audience, 
-                    claims: ClaimSets.JsonClaims(issuer, issuer), 
-                    expires: DateTime.UtcNow + TimeSpan.FromHours(1), 
-                    notBefore: DateTime.UtcNow);
-
-            JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            string encodedJwt = jwtHandler.WriteToken(jwt);
-            JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
-            TokenValidationParameters validationParameters = 
-                new TokenValidationParameters()
-                {
-                    RequireSignedTokens = false,
-                    ValidateAudience = false,
-                    ValidIssuer = issuer,
-                };
-
-            var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
-            Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
-            Assert.IsNotNull(jsonClaim, string.Format(CultureInfo.InvariantCulture, "Did not find Jsonclaims. Looking for claim of type: '{0}'", typeof(Entity).ToString()));
-
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string jsString = js.Serialize(Entity.Default);
-            Assert.AreEqual(jsString, jsonClaim.Value, string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting '{1}'.\nReceived '{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
         }
 
         private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)

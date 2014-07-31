@@ -19,7 +19,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
@@ -35,8 +34,6 @@ namespace Microsoft.IdentityModel.Protocols
     public class JsonWebKeySet
     {
         private static JavaScriptSerializer _javaScriptSerializer;
-
-        // kept private to hide that a List is used public member returns IList.
         private List<JsonWebKey> _keys = new List<JsonWebKey>();
 
         static JsonWebKeySet()

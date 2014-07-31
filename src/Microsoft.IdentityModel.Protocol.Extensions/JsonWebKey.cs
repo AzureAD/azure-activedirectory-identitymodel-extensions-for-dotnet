@@ -18,7 +18,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -80,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols
                     str = obj as string;
                     if (str != null)
                     {
-                        Alg = obj as string;
+                        Alg = str;
                     }
                 }
 

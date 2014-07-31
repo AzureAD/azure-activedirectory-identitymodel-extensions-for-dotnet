@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates a new instance of <see cref="SecurityKeyResolver"/>
         /// </summary>
-        /// <param name="securityToken"> related security token.</param>
+        /// <param name="securityToken">related security token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         public SecurityKeyResolver(string securityToken, TokenValidationParameters validationParameters)
         {
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        private bool Matches(SecurityKeyIdentifierClause keyIdentifierClause, SecurityKey key, CertMatcher certMatcher, out SecurityToken token)
+        private static bool Matches(SecurityKeyIdentifierClause keyIdentifierClause, SecurityKey key, CertMatcher certMatcher, out SecurityToken token)
         {
             token = null;
             if (certMatcher != null)

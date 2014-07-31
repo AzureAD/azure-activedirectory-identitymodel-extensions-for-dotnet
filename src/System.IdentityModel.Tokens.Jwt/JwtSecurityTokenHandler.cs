@@ -587,31 +587,31 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Reads a token encoded in JSON Compact serialized format.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
+        /// <param name="tokenString">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
         /// using 'JSON Web Signature' (JWS).</param>
         /// <remarks>
         /// The JWT must be encoded using Base64Url encoding of the UTF-8 representation of the JWT: Header, Payload and Signature. 
         /// The contents of the JWT returned are not validated in any way, the token is simply decoded. Use ValidateToken to validate the JWT.
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
-        public override SecurityToken ReadToken(string token)
+        public override SecurityToken ReadToken(string tokenString)
         {
-            if (token == null)
+            if (tokenString == null)
             {
                 throw new ArgumentNullException("token");
             }
 
-            if (token.Length * 2 > this.MaximumTokenSizeInBytes)
+            if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, token.Length, this.MaximumTokenSizeInBytes));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, tokenString.Length, this.MaximumTokenSizeInBytes));
             }
 
-            if (!this.CanReadToken(token))
+            if (!this.CanReadToken(tokenString))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType(), token));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType(), tokenString));
             }
 
-            return new JwtSecurityToken(token);
+            return new JwtSecurityToken(tokenString);
         }
 
         /// <summary>
@@ -871,7 +871,12 @@ namespace System.IdentityModel.Tokens
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                throw new ArgumentNullException("securityToken");
+                throw new ArgumentNullException("token");
+            }
+
+            if (validationParameters == null)
+            {
+                throw new ArgumentNullException("validationParameters");
             }
 
             JwtSecurityToken jwt = this.ReadToken(token) as JwtSecurityToken;
@@ -1010,7 +1015,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <param name="securityKey"></param>
         /// <returns></returns>
-        private string CreateKeyString(SecurityKey securityKey)
+        private static string CreateKeyString(SecurityKey securityKey)
         {
             if (securityKey == null)
             {
@@ -1192,9 +1197,21 @@ namespace System.IdentityModel.Tokens
         /// <param name="keyIdentifier">the <see cref="SecurityKeyIdentifier"/> found in the token.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <exception cref="ArgumentNullException">if 'keyIdentifier' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, SecurityToken securityToken, SecurityKeyIdentifier keyIdentifier, TokenValidationParameters validationParameters)
         {
+            if (keyIdentifier == null)
+            {
+                throw new ArgumentNullException("keyIdentifier");
+            }
+
+            if (validationParameters == null)
+            {
+                throw new ArgumentNullException("validationParameters");
+            }
+
             foreach (SecurityKeyIdentifierClause keyIdentifierClause in keyIdentifier)
             {
                 CertMatcher certMatcher = null;
@@ -1272,7 +1289,7 @@ namespace System.IdentityModel.Tokens
             return null;
         }
 
-        private bool Matches(SecurityKeyIdentifierClause keyIdentifierClause, SecurityKey key, CertMatcher certMatcher, out SecurityToken token)
+        private static bool Matches(SecurityKeyIdentifierClause keyIdentifierClause, SecurityKey key, CertMatcher certMatcher, out SecurityToken token)
         {
             token = null;
             if (certMatcher != null)

@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the securityToken type supported by this handler.
+        /// Gets the token type supported by this handler.
         /// </summary>
         public override Type TokenType
         {
@@ -85,10 +85,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets a value indicating whether the class provides serialization functionality to serialize securityToken handled 
+        /// Gets a value indicating whether the class provides serialization functionality to serialize the token handled
         /// by this instance.
         /// </summary>
-        /// <returns>true if the WriteToken method can serialize this securityToken.</returns>
+        /// <returns>true if the WriteToken method can serialize this token.</returns>
         public override bool CanWriteToken
         {
             get { return true; }
@@ -127,9 +127,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates the security securityToken reference when the securityToken is not attached to the message.
+        /// Creates the security token reference when the token is not attached to the message.
         /// </summary>
-        /// <param name="token">The saml securityToken.</param>
+        /// <param name="token">The saml token.</param>
         /// <param name="attached">Boolean that indicates if a attached or unattached
         /// reference needs to be created.</param>
         /// <returns>A <see cref="Saml2AssertionKeyIdentifierClause"/>.</returns>
@@ -144,17 +144,22 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates a <see cref="ClaimsIdentity"/> from the Saml2 securityToken.
+        /// Creates a <see cref="ClaimsIdentity"/> from the Saml2 token.
         /// </summary>
         /// <param name="samlToken">The Saml2SecurityToken.</param>
         /// <param name="issuer">the issuer value for each <see cref="Claim"/> in the <see cref="ClaimsIdentity"/>.</param>
-        /// <param name="validationParameters"> contains parameters for validating the securityToken.</param>
+        /// <param name="validationParameters"> contains parameters for validating the token.</param>
         /// <returns>An IClaimIdentity.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
             {
                 throw new ArgumentNullException("samlToken");
+            }
+
+            if (validationParameters == null)
+            {
+                throw new ArgumentNullException("validationParameters");
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
@@ -224,9 +229,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Obsolete method, use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="Saml2SecurityToken"/>.
         /// </summary>
-        /// <param name="token">not supported.</param>
+        /// <param name="tokenString">not supported.</param>
         /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="Saml2SecurityToken"/>.</exception>
-        public override SecurityToken ReadToken(string token)
+        public override SecurityToken ReadToken(string tokenString)
         {
             throw new NotSupportedException(ErrorMessages.IDX11006);
         }
@@ -242,13 +247,25 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Reads a SAML 2.0 securityToken from the XmlReader.
+        /// Reads a SAML 2.0 token from the XmlReader.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="Saml2SecurityToken"/> element.</param>
-        /// <param name="validationParameters">Contains data and information needed for reading the securityToken.</param>
+        /// <param name="validationParameters">Contains data and information needed for reading the token.</param>
+        /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <returns>An instance of a <see cref="Saml2SecurityToken"/>.</returns>
         public virtual SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
+            if (validationParameters == null)
+            {
+                throw new ArgumentNullException("validationParameters");
+            }
+
             return (new Saml2Handler()
             {
                 Configuration = new SecurityTokenHandlerConfiguration
@@ -269,9 +286,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Reads and validates a well fromed Saml2 securityToken.
+        /// Reads and validates a well fromed Saml2 token.
         /// </summary>
-        /// <param name="securityToken">A Saml2 securityToken.</param>
+        /// <param name="securityToken">A Saml2 token.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
         /// <param name="validatedToken">The <see cref="SamlSecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
@@ -469,53 +486,53 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Serializes to <see cref="Saml2SecurityToken"/> to a string.
         /// </summary>
-        /// <param name="securityToken">A <see cref="Saml2SecurityToken"/>.</param>
-        public override string WriteToken(SecurityToken securityToken)
+        /// <param name="token">A <see cref="Saml2SecurityToken"/>.</param>
+        public override string WriteToken(SecurityToken token)
         {
-            if (securityToken == null)
+            if (token == null)
             {
-                throw new ArgumentNullException("securityToken");
+                throw new ArgumentNullException("token");
             }
 
-            Saml2SecurityToken samlSecurityToken = securityToken as Saml2SecurityToken;
+            Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), securityToken.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType()));
             }
 
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
             {
-                _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, securityToken);
+                _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, token);
                 return stringBuilder.ToString();
             }
         }
 
         /// <summary>
-        /// Serializes to XML a securityToken of the type handled by this instance.
+        /// Serializes to XML a token of the type handled by this instance.
         /// </summary>
         /// <param name="writer">The XML writer.</param>
-        /// <param name="securityToken">A securityToken of type <see cref="TokenType"/>.</param>
-        public override void WriteToken(XmlWriter writer, SecurityToken securityToken)
+        /// <param name="token">A token of type <see cref="TokenType"/>.</param>
+        public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
             {
                 throw new ArgumentNullException("writer");
             }
 
-            if (securityToken == null)
+            if (token == null)
             {
                 throw new ArgumentNullException("token");
             }
 
-            Saml2SecurityToken samlSecurityToken = securityToken as Saml2SecurityToken;
+            Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), securityToken.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
             }
 
-            _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(writer, securityToken);
+            _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(writer, token);
         }
 
         private class SMSaml2HandlerPrivate : Saml2Handler

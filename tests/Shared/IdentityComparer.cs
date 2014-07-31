@@ -426,7 +426,7 @@ namespace System.IdentityModel.Test
                 return false;
 
             // no reason to check keys, as they are always empty for now.
-            //ReadOnlyCollection<SecurityKey> keys = jwt.SecurityKeys;
+            //ReadOnlyCollection<SecurityKey> keys = jwtWithEntity.SecurityKeys;
 
             return true;
         }

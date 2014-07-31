@@ -18,6 +18,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IdentityModel;
 using System.Net.Http;
 using System.Threading;
@@ -120,7 +121,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumAutomaticRefreshInterval)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value));
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value));
                 }
                 _automaticRefreshInterval = value;
             }
@@ -136,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumRefreshInterval)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(ErrorMessages.IDX10106, MinimumRefreshInterval, value));
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10106, MinimumRefreshInterval, value));
                 }
                 _refreshInterval = value;
             }
@@ -209,7 +210,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (_currentConfiguration == null)
                 {
-                    throw new Exception(string.Format(ErrorMessages.IDX10803, _metadataAddress ?? "null"), retrieveEx);
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10803, _metadataAddress ?? "null"), retrieveEx);
                 }
 
                 // Stale metadata is better than no metadata
