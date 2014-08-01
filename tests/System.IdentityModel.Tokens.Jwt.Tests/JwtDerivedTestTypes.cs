@@ -38,12 +38,6 @@ namespace System.IdentityModel.Test
             Init();
         }
 
-        public DerivedJwtSecurityToken(JwtHeader header, JwtPayload payload, string encodedJwt)
-            : base(header, payload, encodedJwt)
-        {
-            Init();
-        }
-
         public DerivedJwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? expires = null, DateTime? notbefore = null, SigningCredentials signingCredentials = null)
             : base(issuer, audience, claims, expires, notbefore, signingCredentials)
         {

@@ -23,6 +23,7 @@ namespace System.IdentityModel.Tokens
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
+    using System.IO;
     using System.Reflection;
     using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
@@ -87,7 +88,7 @@ namespace System.IdentityModel.Tokens
 
         /// <summary>Gets or sets the <see cref="IDictionary{TKey, TValue}"/> used to map Inbound Cryptographic Algorithms.</summary>
         /// <remarks>Strings that describe Cryptographic Algorithms that are understood by the runtime are not necessarily the same values used in the JsonWebToken specification.
-        /// <para>When a <see cref="JwtSecurityToken"/> signature is validated, the algorithm is obtained from the HeaderParameter { alg, 'value' }.  
+        /// <para>When a <see cref="JwtSecurityToken"/> signature is validated, the algorithm is obtained from the HeaderParameter { alg, 'value' }.
         /// The 'value' is translated according to this mapping and the translated 'value' is used when performing cryptographic operations.</para>
         /// <para>Default mapping is:</para>
         /// <para>&#160;&#160;&#160;&#160;RS256 => http://www.w3.org/2001/04/xmldsig-more#rsa-sha256 </para>
@@ -378,28 +379,31 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("reader");
             }
 
-            reader.MoveToContent();
-
-            if (reader.IsStartElement(WSSecurityConstantsInternal.Elements.BinarySecurityToken, WSSecurityConstantsInternal.Namespace))
+            try
             {
-                string valueType = reader.GetAttribute(WSSecurityConstantsInternal.Attributes.ValueType, null);
-                string encodingType = reader.GetAttribute(WSSecurityConstantsInternal.Attributes.EncodingType, null);
-
-                if (encodingType != null && !StringComparer.Ordinal.Equals(encodingType, WSSecurityConstantsInternal.Base64EncodingType))
+                reader.MoveToContent();
+                if (reader.IsStartElement(WSSecurityConstantsInternal.Elements.BinarySecurityToken, WSSecurityConstantsInternal.Namespace))
                 {
-                    return false;
-                }
+                    string valueType = reader.GetAttribute(WSSecurityConstantsInternal.Attributes.ValueType, null);
+                    string encodingType = reader.GetAttribute(WSSecurityConstantsInternal.Attributes.EncodingType, null);
 
-                if (valueType != null && StringComparer.Ordinal.Equals(valueType, JwtConstants.TokenTypeAlt))
-                {
-                    return true;
-                }
+                    if (encodingType != null && !StringComparer.Ordinal.Equals(encodingType, WSSecurityConstantsInternal.Base64EncodingType))
+                    {
+                        return false;
+                    }
 
-                if (valueType != null && StringComparer.OrdinalIgnoreCase.Equals(valueType, JwtConstants.TokenType))
-                {
+                    if (valueType != null && !StringComparer.Ordinal.Equals(valueType, JwtConstants.TokenTypeAlt) && !StringComparer.OrdinalIgnoreCase.Equals(valueType, JwtConstants.TokenType))
+                    {
+                        return false;
+                    }
+
                     return true;
                 }
             }
+            catch(XmlException)
+            { }
+            catch(InvalidOperationException)
+            { }
 
             return false;
         }
@@ -427,7 +431,12 @@ namespace System.IdentityModel.Tokens
                 return false;
             }
 
-            return Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex);
+            if (!Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex))
+            {
+                return CanReadToken(XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(tokenString))));
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -462,7 +471,7 @@ namespace System.IdentityModel.Tokens
         }
  
         /// <summary>
-        /// Uses the <see cref="JwtSecurityToken(JwtHeader, JwtPayload, string )"/> constructor, first creating the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>.
+        /// Uses the <see cref="JwtSecurityToken(JwtHeader, JwtPayload, string, string, string)"/> constructor, first creating the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>.
         /// <para>If <see cref="SigningCredentials"/> is not null, <see cref="JwtSecurityToken.RawData"/> will be signed.</para>
         /// </summary>
         /// <param name="issuer">the issuer of the token.</param>
@@ -504,19 +513,21 @@ namespace System.IdentityModel.Tokens
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
             }
 
-            string signature = string.Empty;
-            string signingInput = string.Concat(header.Base64UrlEncode(), ".", payload.Base64UrlEncode());
+            string rawHeader = header.Base64UrlEncode();
+            string rawPayload = payload.Base64UrlEncode();
+            string rawSignature = string.Empty;
+            string signingInput = string.Concat(rawHeader, ".", rawPayload);
 
             if (signatureProvider != null)
             {
-                signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
+                rawSignature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
             }
             else if (signingCredentials != null)
             {
-                signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, signingCredentials.SigningKey, signingCredentials.SignatureAlgorithm, signatureProvider));
+                rawSignature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, signingCredentials.SigningKey, signingCredentials.SignatureAlgorithm, signatureProvider));
             }
 
-            return new JwtSecurityToken(header, payload, string.Concat(signingInput, ".", signature));
+            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
         }
 
         /// <summary>
@@ -611,7 +622,14 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType(), tokenString));
             }
 
-            return new JwtSecurityToken(tokenString);
+            if (Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex))
+            {
+                return new JwtSecurityToken(tokenString);
+            }
+            else
+            {
+                return ReadToken(XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(tokenString))));
+            }
         }
 
         /// <summary>
@@ -880,9 +898,8 @@ namespace System.IdentityModel.Tokens
             }
 
             JwtSecurityToken jwt = this.ReadToken(token) as JwtSecurityToken;
-            string[] parts = token.Split(new char[] { '.' }, 3);
-            byte[] encodedBytes = Encoding.UTF8.GetBytes(parts[0] + "." + parts[1]);
-            byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(parts[2]);
+            byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.RawHeader + "." + jwt.RawPayload);
+            byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(jwt.RawSignature);
 
             if (signatureBytes == null)
             {

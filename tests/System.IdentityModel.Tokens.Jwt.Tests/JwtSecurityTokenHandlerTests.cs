@@ -34,39 +34,63 @@ namespace System.IdentityModel.Test
         private const string _templateWithoutEncoding = @"<wsse:{0}  xmlns:wsu='{1}' xmlns:wsse='{2}' ValueType='{3}'>{4}</wsse:{0}>";
         private const string _templateWithoutns       = @"<{0}  ValueType='{1}' EncodingType='{2}'>{3}<{0}>";
 
+        public static string JwtTokenTypeString
+        {
+            get
+            {
+                return string.Format( _templateWithEncoding,
+                                      WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                      WSSecurityConstantsInternal.Namespace,
+                                      WSSecurityConstantsInternal.Namespace,
+                                      JwtConstants.TokenType,
+                                      WSSecurityConstantsInternal.Base64EncodingType,
+                                      Convert.ToBase64String(Encoding.UTF8.GetBytes(EncodedJwts.Asymmetric_LocalSts)));
+            }
+        }
+
         public static XmlReader JwtTokenType
         {
             get
             {
-                string bst = string.Format( _templateWithEncoding,
-                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            JwtConstants.TokenType,
-                                            WSSecurityConstantsInternal.Base64EncodingType,
-                                            EncodedJwts.Asymmetric_LocalSts );
-
-                XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
+                XmlReader reader = XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(JwtTokenTypeString)));
                 reader.MoveToContent();
                 return reader;
             }
         }
 
+        public static string JwtTokenTypeAltString
+        {
+            get
+            {
+                return string.Format(_templateWithEncoding,
+                                     WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     JwtConstants.TokenTypeAlt,
+                                     WSSecurityConstantsInternal.Base64EncodingType,
+                                     Convert.ToBase64String(Encoding.UTF8.GetBytes(EncodedJwts.Asymmetric_LocalSts)));
+            }
+        }
         public static XmlReader JwtTokenTypeAlt
         {
             get
             {
-                string bst = string.Format( _templateWithEncoding,
-                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            JwtConstants.TokenTypeAlt,
-                                            WSSecurityConstantsInternal.Base64EncodingType,
-                                            EncodedJwts.Asymmetric_LocalSts );
-
-                XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
+                XmlReader reader = XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(JwtTokenTypeAltString)));
                 reader.MoveToContent();
                 return reader;
+            }
+        }
+
+        public static string WithoutEncodingTypeString
+        {
+            get
+            {
+                return string.Format(_templateWithoutEncoding,
+                                     WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     JwtConstants.TokenType,
+                                     Convert.ToBase64String(Encoding.UTF8.GetBytes(EncodedJwts.Asymmetric_LocalSts)));
             }
         }
 
@@ -74,65 +98,75 @@ namespace System.IdentityModel.Test
         {
             get
             {
-                string bst = string.Format( _templateWithoutEncoding,
-                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            JwtConstants.TokenType,
-                                            EncodedJwts.Asymmetric_LocalSts );
-
-                XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
+                XmlReader reader = XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(WithoutEncodingTypeString)));
                 reader.MoveToContent();
                 return reader;
             }
         }
 
+        public static string WithWrongEncodingTypeString
+        {
+            get
+            {
+                return string.Format(_templateWithEncoding,
+                                     WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     JwtConstants.TokenType,
+                                     "BadEncoding",
+                                     Convert.ToBase64String(Encoding.UTF8.GetBytes(EncodedJwts.Asymmetric_LocalSts)));
+            }
+        }
         public static XmlReader WithWrongEncodingType
         {
             get
             {
-                string bst = string.Format( _templateWithEncoding,
-                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            JwtConstants.TokenType,
-                                            "BadEncoding",
-                                            EncodedJwts.Asymmetric_LocalSts );
-
-                XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
+                XmlReader reader = XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(WithWrongEncodingTypeString)));
                 reader.MoveToContent();
                 return reader;
             }
         }
 
+        public static string WithWrongTokenTypeString
+        {
+            get
+            {
+                return string.Format(_templateWithoutEncoding,
+                                     WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     WSSecurityConstantsInternal.Namespace,
+                                     "JwtConstants.TokenTypeShort",
+                                     Convert.ToBase64String(Encoding.UTF8.GetBytes(EncodedJwts.Asymmetric_LocalSts)));
+            }
+        }
         public static XmlReader WithWrongTokenType
         {
             get
             {
-                string bst = string.Format( _templateWithoutEncoding,
-                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            WSSecurityConstantsInternal.Namespace,
-                                            "JwtConstants.TokenTypeShort",
-                                            EncodedJwts.Asymmetric_LocalSts );
-
-                XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
+                XmlReader reader = XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(WithWrongTokenTypeString)));
                 reader.MoveToContent();
                 return reader;
             }
         }
+
+        public static string WithoutNSString
+        {
+            get 
+            {
+                return string.Format(_templateWithoutns,
+                                     WSSecurityConstantsInternal.Elements.BinarySecurityToken,
+                                     JwtConstants.TokenType,
+                                     WSSecurityConstantsInternal.Base64EncodingType,
+                                     Convert.ToBase64String(Encoding.UTF8.GetBytes(EncodedJwts.Asymmetric_LocalSts)));
+            }
+        }
+
 
         public static XmlReader WithoutNS
         {
             get
             {
-                string bst = string.Format( _templateWithoutns,
-                                            WSSecurityConstantsInternal.Elements.BinarySecurityToken,
-                                            JwtConstants.TokenType,
-                                            WSSecurityConstantsInternal.Base64EncodingType,
-                                            EncodedJwts.Asymmetric_LocalSts );
-
-                XmlReader reader = XmlReader.Create( new MemoryStream( UTF8Encoding.UTF8.GetBytes( bst ) ) );
+                XmlReader reader = XmlReader.Create(new MemoryStream(UTF8Encoding.UTF8.GetBytes(WithoutNSString)));
                 reader.MoveToContent();
                 return reader;
             }
@@ -536,6 +570,13 @@ namespace System.IdentityModel.Test
             // Encoded string
             Assert.IsFalse(RunCanReadStringVariation(null, tokenHandler, ExpectedException.ArgumentNullException()));
             Assert.IsFalse(RunCanReadStringVariation("bob", tokenHandler, ExpectedException.NoExceptionExpected));
+
+            Assert.IsFalse(RunCanReadStringVariation(XmlReaderVariation.WithoutNSString, tokenHandler, ExpectedException.NoExceptionExpected));
+            Assert.IsTrue(RunCanReadStringVariation(XmlReaderVariation.JwtTokenTypeString, tokenHandler, ExpectedException.NoExceptionExpected));
+            Assert.IsTrue(RunCanReadStringVariation(XmlReaderVariation.JwtTokenTypeAltString, tokenHandler, ExpectedException.NoExceptionExpected));
+            Assert.IsTrue(RunCanReadStringVariation(XmlReaderVariation.WithoutEncodingTypeString, tokenHandler, ExpectedException.NoExceptionExpected));
+            Assert.IsFalse(RunCanReadStringVariation(XmlReaderVariation.WithWrongEncodingTypeString, tokenHandler, ExpectedException.NoExceptionExpected));
+            Assert.IsFalse(RunCanReadStringVariation(XmlReaderVariation.WithWrongTokenTypeString, tokenHandler, ExpectedException.NoExceptionExpected));
         }
 
         private bool RunCanReadXmlVariation(XmlReader reader, JwtSecurityTokenHandler tokenHandler,ExpectedException expectedException)
@@ -630,6 +671,30 @@ namespace System.IdentityModel.Test
             TestUtilities.ValidateToken("ValidateToken_String_Only_IllFormed", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentException(substringExpected: "IDX10708:"));
             TestUtilities.ValidateToken("     ", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentNullException());
             TestUtilities.ValidateToken(EncodedJwts.Asymmetric_LocalSts, null, tokenHandler, ExpectedException.ArgumentNullException());
+
+            var tvpNoValidation =
+                new TokenValidationParameters
+                {
+                    IssuerSigningKey = KeyingMaterial.AsymmetricKey_LocalSts,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            TestUtilities.ValidateToken(XmlReaderVariation.JwtTokenTypeAltString,
+                                        tvpNoValidation,
+                                        tokenHandler,
+                                        ExpectedException.NoExceptionExpected);
+
+            TestUtilities.ValidateToken(XmlReaderVariation.JwtTokenTypeString,
+                                        tvpNoValidation,
+                                        tokenHandler,
+                                        ExpectedException.NoExceptionExpected);
+
+            TestUtilities.ValidateToken(XmlReaderVariation.JwtTokenTypeString,
+                                        tvpNoValidation,
+                                        tokenHandler,
+                                        ExpectedException.NoExceptionExpected);
 
             JwtSecurityToken jwt = tokenHandler.CreateToken(
                 IdentityUtilities.DefaultIssuer,

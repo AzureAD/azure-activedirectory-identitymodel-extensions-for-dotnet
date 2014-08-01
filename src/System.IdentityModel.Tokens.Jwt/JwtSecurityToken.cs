@@ -36,7 +36,9 @@ namespace System.IdentityModel.Tokens
         private string id;
         private JwtPayload payload;
         private string rawData;
-        private string signature = string.Empty;
+        private string rawHeader;
+        private string rawPayload;
+        private string rawSignature = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JwtSecurityToken"/> from a string in JWS Compact serialized format.
@@ -47,7 +49,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
         /// <remarks>
         /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>
-        /// </remarks>>
+        /// </remarks>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1642:ConstructorSummaryDocumentationMustBeginWithStandardText", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public JwtSecurityToken(string jwtEncodedString)
         {
@@ -74,13 +76,14 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
         /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
-        /// <param name="jwtEncodedString">The results of encoding and applying the cryptographic operations to the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>.</param>
-        /// <exception cref="ArgumentNullException">'header' is null.</exception>        
+        /// <param name="rawHeader">base64urlencoded JwtHeader</param>
+        /// <param name="rawPayload">base64urlencoded JwtPayload</param>
+        /// <param name="rawSignature">base64urlencoded JwtSignature</param>
+        /// <exception cref="ArgumentNullException">'header' is null.</exception>
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
-        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null.</exception>
-        /// <exception cref="ArgumentException">'jwtEncodedString' contains only whitespace.</exception>        
-        /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
-        internal JwtSecurityToken(JwtHeader header, JwtPayload payload, string jwtEncodedString)
+        /// <exception cref="ArgumentNullException">'rawSignature' is null.</exception>
+        /// <exception cref="ArgumentException">'rawHeader' or 'rawPayload' is null or whitespace.</exception>
+        public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
         {
             if (header == null)
             {
@@ -92,31 +95,27 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("payload");
             }
 
-            if (jwtEncodedString == null)
+            if (rawSignature == null)
             {
-                throw new ArgumentNullException("jwtEncodedString");
+                throw new ArgumentNullException("rawSignature");
             }
 
-            if (string.IsNullOrWhiteSpace(jwtEncodedString))
+            if (string.IsNullOrWhiteSpace(rawHeader))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "jwtEncodedString"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "rawHeader"));
             }
 
-            if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
+            if (string.IsNullOrWhiteSpace(rawPayload))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
-            }
-
-            string[] tokenParts = jwtEncodedString.Split('.');
-            if (tokenParts.Length != 3)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "rawPayload"));
             }
 
             this.header = header;
             this.payload = payload;
-            this.rawData = jwtEncodedString;
-            this.signature = tokenParts[2];
+            this.rawData = string.Concat(rawHeader, ".", rawPayload, ".", rawSignature);
+            this.rawHeader = rawHeader;
+            this.rawPayload = rawPayload;
+            this.rawSignature = rawSignature;
         }
 
         /// <summary>
@@ -246,19 +245,41 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/> 
-        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string )"/></remarks>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
         public string RawData
         {
             get { return this.rawData; }
         }
 
         /// <summary>
-        /// Gets the current signature over the jwt
+        /// Gets the original raw data of this instance when it was created.
         /// </summary>
-        public string EncodedSignature
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawHeader
         {
-            get { return this.signature; }
+            get { return this.rawHeader; }
+        }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawPayload
+        {
+            get { return this.rawPayload; }
+        }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawSignature
+        {
+            get { return this.rawSignature; }
         }
 
         /// <summary>
@@ -397,7 +418,9 @@ namespace System.IdentityModel.Tokens
             }
 
             this.rawData = jwtEncodedString;
-            this.signature = tokenParts[2];
+            this.rawHeader = tokenParts[0];
+            this.rawPayload = tokenParts[1];
+            this.rawSignature = tokenParts[2];
         }
 
         internal void SetId(string id)
