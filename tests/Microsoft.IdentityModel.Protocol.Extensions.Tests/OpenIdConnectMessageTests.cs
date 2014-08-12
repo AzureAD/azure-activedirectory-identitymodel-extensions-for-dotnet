@@ -120,15 +120,6 @@ namespace Microsoft.IdentityModel.Test
             if (message.RedirectUri != null)
                 errors.Add("message.RedirectUri != null");
 
-            if (message.ResponseMode != OpenIdConnectMessage.DefaultResponseMode)
-                errors.Add(string.Format(CultureInfo.InvariantCulture, "message.ResponseMode: '{0}' != OpenIdConnectMessage.DefaultResponseMode: '{1}'", message.ResponseMode, OpenIdConnectMessage.DefaultResponseMode));
-
-            if (message.ResponseType != OpenIdConnectMessage.DefaultResponseType)
-                errors.Add(string.Format(CultureInfo.InvariantCulture, "message.ResponseType: '{0}' != OpenIdConnectMessage.DefaultResponseType: '{1}'", message.ResponseMode, OpenIdConnectMessage.DefaultResponseType));
-
-            if (message.Scope != OpenIdConnectMessage.DefaultScope)
-                errors.Add(string.Format(CultureInfo.InvariantCulture, "message.Scope: '{0}' != OpenIdConnectMessage.DefaultScope: '{1}'", message.Scope, OpenIdConnectMessage.DefaultScope));
-
             if (message.State != null)
                 errors.Add("message.State != null");
 
@@ -153,8 +144,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectMessage message = new OpenIdConnectMessage();
             Type type = typeof(OpenIdConnectMessage);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 50)
-                Assert.Fail("Number of public fields has changed from 50 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 47)
+                Assert.Fail("Number of public fields has changed from 47 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -187,10 +178,10 @@ namespace Microsoft.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("Prompt", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("RedirectUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("RequestUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("ResponseMode", new List<object>{OpenIdConnectMessage.DefaultResponseMode, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("ResponseType", new List<object>{OpenIdConnectMessage.DefaultResponseType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("ResponseMode", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("ResponseType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Resource", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("Scope", new List<object>{OpenIdConnectMessage.DefaultScope, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Scope", new List<object>{null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("SessionState", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("State", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("TargetLinkUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -234,9 +225,18 @@ namespace Microsoft.IdentityModel.Test
 
             // Empty string
             OpenIdConnectMessage message = new OpenIdConnectMessage();
+
             string url = message.BuildRedirectUrl();
-            string expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile");
+            string expected = string.Format(CultureInfo.InvariantCulture, @"");
             Report("1", errors, url, expected);
+
+            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
+            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
+            message.Scope = OpenIdConnectScopes.OpenIdProfile;
+
+            url = message.BuildRedirectUrl();
+            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile");
+            Report("1a", errors, url, expected);
 
             // Nonce added
             message.Nonce = nonce;
@@ -246,7 +246,11 @@ namespace Microsoft.IdentityModel.Test
 
             // IssuerAddress only
             message = new OpenIdConnectMessage(issuerAddress);
+            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
+            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
+            message.Scope = OpenIdConnectScopes.OpenIdProfile;
             message.Nonce = nonce;
+
             url = message.BuildRedirectUrl();
             expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}", issuerAddress, nonce);
             Report("3", errors, url, expected);
@@ -265,6 +269,9 @@ namespace Microsoft.IdentityModel.Test
 
             // IssuerAdderss, Redirect_uri, Response
             message = new OpenIdConnectMessage(issuerAddress);
+            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
+            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
+            message.Scope = OpenIdConnectScopes.OpenIdProfile;
             message.Nonce = nonce;
             message.RedirectUri = redirectUri;
             message.Resource = resource;
@@ -274,6 +281,9 @@ namespace Microsoft.IdentityModel.Test
 
             // IssuerAdderss, Redirect_uri, Response, customParam
             message = new OpenIdConnectMessage(issuerAddress);
+            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
+            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
+            message.Scope = OpenIdConnectScopes.OpenIdProfile;
             message.Nonce = nonce;
             message.Parameters.Add(customParameterName, customParameterValue);
             message.RedirectUri = redirectUri;

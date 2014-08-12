@@ -28,93 +28,16 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
-        private static string _defaultResponseMode;
-        private static string _defaultResponseType;
-        private static string _defaultScope;
-
-        /// <summary>
-        /// Gets or sets the default ResponseMode to use when creating a url
-        /// </summary>
-        public static string DefaultResponseMode
-        {
-            get
-            {
-                return _defaultResponseMode;
-            }
-
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentNullException("DefaultResponseMode");
-                }
-
-                _defaultResponseMode = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the default 'response_type' to use when creating a url
-        /// </summary>
-        public static string DefaultResponseType
-        {
-            get
-            {
-                return _defaultResponseType;
-            }
-
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentNullException("DefaultResponseType");
-                }
-
-                _defaultResponseType = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the default 'scope' to use when creating a url
-        /// </summary>
-        public static string DefaultScope
-        {
-            get
-            {
-                return _defaultScope;
-            }
-
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentNullException("DefaultScope");
-                }
-
-                _defaultScope = value;
-            }
-        }
-
-        static OpenIdConnectMessage()
-        {
-            _defaultResponseMode = OpenIdConnectResponseModes.FormPost;
-            _defaultResponseType = OpenIdConnectResponseTypes.CodeIdToken;
-            _defaultScope = OpenIdConnectScopes.OpenIdProfile;
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
         public OpenIdConnectMessage() : this(string.Empty) {}
 
         /// <summary>
-        /// Initializes an instance of <see cref="AuthenticationProtocolMessage"/> class with a specific issuerAddress.
+        /// Initializes an instance of <see cref="OpenIdConnectMessage"/> class with a specific issuerAddress.
         /// </summary>
         public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) 
         {
-            ResponseMode = DefaultResponseMode;
-            ResponseType = DefaultResponseType;
-            Scope = DefaultScope;
         }
 
         /// <summary>

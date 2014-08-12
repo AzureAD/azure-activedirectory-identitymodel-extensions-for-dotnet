@@ -43,9 +43,6 @@ namespace Microsoft.IdentityModel.Tokens
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { Saml2TokenProfile11, OasisWssSaml2TokenProfile11 };
 
-        // TODO what is this used for?
-        // private SecurityTokenSerializer keyInfoSerializer;
-
         // never set any properties on the handler.
         private static SMSaml2HandlerPrivate _smSaml2HandlerPrivateNeverSetAnyProperties = new SMSaml2HandlerPrivate();
 
