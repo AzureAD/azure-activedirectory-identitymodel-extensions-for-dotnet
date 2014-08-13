@@ -251,8 +251,8 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             HashAlgorithm hashAlgorithm = null;
-            string algorithm = string.Empty;
-            if (!jwt.Header.TryGetValue(JwtHeaderParameterNames.Alg, out algorithm))
+            string algorithm = jwt.Header.Alg;
+            if (algorithm == null)
             {
                 algorithm = JwtAlgorithms.RSA_SHA256;
             }

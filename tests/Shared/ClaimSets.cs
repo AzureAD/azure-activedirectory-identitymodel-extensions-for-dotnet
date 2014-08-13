@@ -274,7 +274,7 @@ namespace System.IdentityModel.Test
 
                 foreach ( string key in header.Keys )
                 {
-                    string value = header[key];
+                    string value = JsonExtensions.SerializeToJson(header[key]);
                     yield return new Claim( key, value, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
                 }
             }

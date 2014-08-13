@@ -384,8 +384,8 @@ namespace System.IdentityModel.Tokens
                 this.header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
-                string type = null;
-                if (this.header.TryGetValue(JwtHeaderParameterNames.Typ, out type))
+                string type = this.header.Typ;
+                if (type != null)
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {

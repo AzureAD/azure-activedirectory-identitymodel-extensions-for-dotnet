@@ -29,7 +29,7 @@ namespace System.IdentityModel.Tokens
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Serialize not really supported.")]
-    public class JwtHeader : Dictionary<string, string>
+    public class JwtHeader : Dictionary<string, object>
     {
         private SigningCredentials signingCredentials;
 
@@ -111,9 +111,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                string algorithm = null;
-                this.TryGetValue(JwtHeaderParameterNames.Alg, out algorithm);
-                return algorithm;
+                return this.GetStandardClaim(JwtHeaderParameterNames.Alg);
             }
         }
 
@@ -126,6 +124,18 @@ namespace System.IdentityModel.Tokens
             get
             {
                 return this.signingCredentials;
+            }
+        }
+
+        /// <summary>
+        /// Gets the mime type (Typ) of the token.
+        /// </summary>
+        /// <remarks>If the mime type is not found, null is returned.</remarks>
+        public string Typ
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtHeaderParameterNames.Typ);
             }
         }
 
@@ -146,13 +156,11 @@ namespace System.IdentityModel.Tokens
             get
             {
                 SecurityKeyIdentifier ski = new SecurityKeyIdentifier();
-                string keyIdentifier = null;
-
-                if (this.TryGetValue(JwtHeaderParameterNames.X5t, out keyIdentifier))
+                if (this.ContainsKey(JwtHeaderParameterNames.X5t))
                 {
                     try
                     {
-                        ski.Add(new X509ThumbprintKeyIdentifierClause(Base64UrlEncoder.DecodeBytes(keyIdentifier)));
+                        ski.Add(new X509ThumbprintKeyIdentifierClause(Base64UrlEncoder.DecodeBytes(GetStandardClaim(JwtHeaderParameterNames.X5t))));
                     }
                     catch (Exception ex)
                     {
@@ -165,34 +173,52 @@ namespace System.IdentityModel.Tokens
                     }
                 }
 
-                if (this.TryGetValue(JwtHeaderParameterNames.Jku, out keyIdentifier))
+                if (this.ContainsKey(JwtHeaderParameterNames.Jku))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jku, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jku, GetStandardClaim(JwtHeaderParameterNames.Jku)));
                 }
 
-                if (this.TryGetValue(JwtHeaderParameterNames.Jwk, out keyIdentifier))
+                if (this.ContainsKey(JwtHeaderParameterNames.Jwk))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jwk, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jwk, GetStandardClaim(JwtHeaderParameterNames.Jwk)));
                 }
 
-                if (this.TryGetValue(JwtHeaderParameterNames.X5u, out keyIdentifier))
+                if (this.ContainsKey(JwtHeaderParameterNames.X5u))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5u, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5u, GetStandardClaim(JwtHeaderParameterNames.X5u)));
                 }
 
-                if (this.TryGetValue(JwtHeaderParameterNames.X5c, out keyIdentifier))
+                if (this.ContainsKey(JwtHeaderParameterNames.X5c))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5c, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5c, GetStandardClaim(JwtHeaderParameterNames.X5c)));
                 }
 
-                if (this.TryGetValue(JwtHeaderParameterNames.Kid, out keyIdentifier))
+                if (this.ContainsKey(JwtHeaderParameterNames.Kid))
                 {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Kid, keyIdentifier));
+                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Kid, GetStandardClaim(JwtHeaderParameterNames.Kid)));
                 }
 
                 return ski;
             }
         }
+
+        internal string GetStandardClaim(string claimType)
+        {
+            object value = null;
+            if (TryGetValue(claimType, out value))
+            {
+                string str = value as string;
+                if (str != null)
+                {
+                    return str;
+                }
+
+                return JsonExtensions.SerializeToJson(value);
+            }
+
+            return null;
+        }
+
 
         /// <summary>
         /// Serializes this instance to JSON.
@@ -201,7 +227,7 @@ namespace System.IdentityModel.Tokens
         /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string SerializeToJson()
         {
-            return JsonExtensions.SerializeToJson(this as IDictionary<string, string>);
+            return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
         }
 
         /// <summary>
