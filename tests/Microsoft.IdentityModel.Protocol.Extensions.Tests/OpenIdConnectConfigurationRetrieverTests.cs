@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Test
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(
-                    new TestDocumentRetriever(primaryDocument, secondaryDocument), "primary", CancellationToken.None);
+                     "primary", new TestDocumentRetriever(primaryDocument, secondaryDocument), CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -183,8 +183,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(
-                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), "primary", CancellationToken.None);
+                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync("primary",
+                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)

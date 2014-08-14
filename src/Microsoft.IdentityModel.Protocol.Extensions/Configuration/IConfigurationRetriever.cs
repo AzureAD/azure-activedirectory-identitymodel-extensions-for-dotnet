@@ -23,6 +23,6 @@ namespace Microsoft.IdentityModel.Protocols
 {
     internal interface IConfigurationRetriever<T>
     {
-        Task<T> GetConfigurationAsync(IDocumentRetriever retriever, string address, CancellationToken cancel);
+        Task<T> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel);
     }
 }
