@@ -25,54 +25,58 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// OpenIdConnectConfigurationRetriever - TODO
+    ///  Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address.
     /// </summary>
     public class OpenIdConnectConfigurationRetriever : IConfigurationRetriever<OpenIdConnectConfiguration>
     {
 
         /// <summary>
-        /// GetAsync
+        /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address.
         /// </summary>
-        /// <param name="address">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns></returns>
+        /// <param name="address">address of the discovery document.</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return GetAsync(new GenericDocumentRetriever(), address, cancel);
+            return GetAsync(address, new GenericDocumentRetriever(), cancel);
         }
 
         /// <summary>
-        /// GetAsync
+        /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address and an <see cref="HttpClient"/>.
         /// </summary>
-        /// <param name="address">TODO</param>
-        /// <param name="httpClient">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns></returns>
+        /// <param name="address">address of the discovery document.</param>
+        /// <param name="httpClient">the <see cref="HttpClient"/> to use to read the discovery document.</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
-            return GetAsync(new HttpDocumentRetriever(httpClient), address, cancel);
+            return GetAsync(address, new HttpDocumentRetriever(httpClient), cancel);
         }
 
-        Task<OpenIdConnectConfiguration> IConfigurationRetriever<OpenIdConnectConfiguration>.GetConfigurationAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        Task<OpenIdConnectConfiguration> IConfigurationRetriever<OpenIdConnectConfiguration>.GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
-            return GetAsync(retriever, address, cancel);
+            return GetAsync(address, retriever, cancel);
         }
 
 
         /// <summary>
-        /// GetAsync
+        /// Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address and an <see cref="IDocumentRetriever"/>.
         /// </summary>
-        /// <param name="retriever">TODO</param>
-        /// <param name="address">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns></returns>
-        public static async Task<OpenIdConnectConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        /// <param name="address">address of the discovery document.</param>
+        /// <param name="retriever">the <see cref="IDocumentRetriever"/> to use to read the discovery document</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
+        public static async Task<OpenIdConnectConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
-            if (retriever == null)
-                throw new ArgumentNullException("retriever");
-
             if (string.IsNullOrWhiteSpace(address))
+            {
                 throw new ArgumentNullException("address");
+            }
+
+            if (retriever == null)
+            {
+                throw new ArgumentNullException("retriever");
+            }
 
             string doc = await retriever.GetDocumentAsync(address, cancel);
             OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration(doc);

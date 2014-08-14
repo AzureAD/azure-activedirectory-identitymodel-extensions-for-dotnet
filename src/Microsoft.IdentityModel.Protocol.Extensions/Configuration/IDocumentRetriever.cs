@@ -22,17 +22,16 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// IDocumentRetriever
+    /// Interface that defines a document retriever that returns the document as a string.
     /// </summary>
-    /// <remarks>TODO</remarks>
     public interface IDocumentRetriever
     {
         /// <summary>
-        /// GetDocumentAsync
+        /// Obtains a document from an address.
         /// </summary>
-        /// <param name="address">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="address">location of document.</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>document as a string.</returns>
         Task<string> GetDocumentAsync(string address, CancellationToken cancel);
     }
 }

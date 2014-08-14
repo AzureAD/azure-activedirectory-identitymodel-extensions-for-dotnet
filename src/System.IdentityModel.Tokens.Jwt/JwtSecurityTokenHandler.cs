@@ -796,7 +796,6 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'token' is null.</exception>
         /// <exception cref="ArgumentException">'token' is not a not <see cref="JwtSecurityToken"/>.</exception>
         /// <returns>The <see cref="JwtSecurityToken"/> as a signed (if <see cref="SigningCredentials"/> exist) encoded string.</returns>
-        //TODO - need way to specify signature provider
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)

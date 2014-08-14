@@ -47,16 +47,16 @@ namespace Microsoft.IdentityModel.Tokens
         private static SMSaml2HandlerPrivate _smSaml2HandlerPrivateNeverSetAnyProperties = new SMSaml2HandlerPrivate();
 
         /// <summary>
-        /// Saml2SecurityTokenHandler - TODO
+        /// Initializes a new instance of <see cref="Saml2SecurityTokenHandler"/>.
         /// </summary>
         public Saml2SecurityTokenHandler()
         {
         }
 
         /// <summary>
-        /// GetTokenTypeIdentifiers - TODO
+        /// Gets the token type identifier(s) supported by this handler.
         /// </summary>
-        /// <returns>TODO</returns>
+        /// <returns>A collection of strings that identify the tokens this instance can handle.</returns>
         public override string[] GetTokenTypeIdentifiers()
         {
             return _tokenTypeIdentifiers;

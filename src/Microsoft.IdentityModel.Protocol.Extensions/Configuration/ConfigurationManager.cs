@@ -27,9 +27,9 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// ConfigurationManager
+    /// Manages the retrieval of Configuration data.
     /// </summary>
-    /// <typeparam name="T">TODO</typeparam>
+    /// <typeparam name="T">must be a class.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : IConfigurationManager<T> where T : class
     {
@@ -202,7 +202,6 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                     catch (Exception ex)
                     {
-                        // TODO: Log
                         retrieveEx = ex;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
                     }

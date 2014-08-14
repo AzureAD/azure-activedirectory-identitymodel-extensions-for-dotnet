@@ -25,7 +25,8 @@ using System.Security.Cryptography.X509Certificates;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Resolves securitykeys
+    /// Resolves securitykeys, used when working with Saml1 and Saml2 tokens as the EnvelopingSignatureReader needs this 
+    /// to find keys.
     /// </summary>
     internal class SecurityKeyResolver : SecurityTokenResolver
     {
@@ -60,11 +61,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// TryResolveSecurityKeyCore
+        /// Returns a <see cref="SecurityKey"/> that matches the <see cref="SecurityKeyIdentifierClause"/>
         /// </summary>
-        /// <param name="keyIdentifierClause">TODO</param>
-        /// <param name="key">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="keyIdentifierClause">clause to match.</param>
+        /// <param name="key">key to assign.</param>
+        /// <returns>true if matched.</returns>
         protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
         {
             SecurityToken token = null;
@@ -72,22 +73,22 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// TryResolveTokenCore
+        /// Sets a <see cref="SecurityKey"/> that matches the <see cref="SecurityKeyIdentifierClause"/>
         /// </summary>
-        /// <param name="keyIdentifierClause">TODO</param>
-        /// <param name="token">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="keyIdentifierClause">clause to match.</param>
+        /// <param name="token">token to assign.</param>
+        /// <returns>throws <see cref="NotImplementedException"/>.</returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
         {
             throw new System.NotImplementedException();
         }
 
         /// <summary>
-        /// TryResolveTokenCore
+        /// Sets a <see cref="SecurityToken"/> that matches the <see cref="SecurityKeyIdentifier"/>
         /// </summary>
-        /// <param name="keyIdentifier">TODO</param>
-        /// <param name="token">TODO</param>
-        /// <returns></returns>
+        /// <param name="keyIdentifier">keyidentifier to match.</param>
+        /// <param name="token">token to set.</param>
+        /// <returns>true if matched.</returns>
         protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
         {
             token = null;

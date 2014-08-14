@@ -63,6 +63,79 @@ namespace System.IdentityModel.Test
         public TestContext TestContext { get; set; }
 
         [TestMethod]
+        [TestProperty("TestCaseID", "52BE8540-1CA5-4C50-8A38-CE352C88D5D2")]
+        [Description("Create Token with X5c's")]
+        public void CreateAndValidateTokens_MultipleX5C()
+        {
+            List<string> errors = new List<string>();
+            var handler = new JwtSecurityTokenHandler();
+            var payload = new JwtPayload();
+            var header = new JwtHeader();
+
+            payload.AddClaims(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer));
+            List<string> x5cs = new List<string> { "x5c1", "x5c2" };
+            header.Add(JwtHeaderParameterNames.X5c, x5cs);
+            var jwtToken = new JwtSecurityToken(header, payload);
+            var jwt = handler.WriteToken(jwtToken);
+
+            var validationParameters =
+                new TokenValidationParameters
+                {
+                    RequireExpirationTime = false,
+                    RequireSignedTokens = false,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            SecurityToken validatedSecurityToken = null;
+            var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+
+            JwtSecurityToken validatedJwt = validatedSecurityToken as JwtSecurityToken;
+            object x5csInHeader = validatedJwt.Header[JwtHeaderParameterNames.X5c];
+            if (x5csInHeader == null)
+            {
+                errors.Add("1: validatedJwt.Header[JwtHeaderParameterNames.X5c]");
+            }
+            else
+            {
+                var list = x5csInHeader as IEnumerable<object>;
+                if ( list == null )
+                {
+                    errors.Add("2: var list = x5csInHeader as IEnumerable<object>; is NULL.");
+                }
+
+                int num = 0;
+                foreach(var str in list)
+                {
+                    num++;
+                    if (!(str is string))
+                    {
+                        errors.Add("3: str is not string, is:" + str.ToString());
+                    }
+                }
+
+                if (num != x5cs.Count)
+                {
+                    errors.Add("4: num != x5cs.Count. num: " + num.ToString() + "x5cs.Count: " + x5cs.Count.ToString());
+                }
+            }
+
+            // make sure we can still validate with existing logic.
+            header = new JwtHeader(KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2);
+            header.Add(JwtHeaderParameterNames.X5c, x5cs);
+            jwtToken = new JwtSecurityToken(header, payload);
+            jwt = handler.WriteToken(jwtToken);
+
+            validationParameters.IssuerSigningToken = KeyingMaterial.DefaultAsymmetricX509Token_2048;
+            validationParameters.RequireSignedTokens = true;
+            validatedSecurityToken = null;
+            cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+        }
+
+        [TestMethod]
         [TestProperty("TestCaseID", "B14F1FE2-F7A5-450F-8A6D-D0898112570E")]
         [Description("Create Token with multiple audiences")]
         public void CreateAndValidateTokens_MultipleAudiences()

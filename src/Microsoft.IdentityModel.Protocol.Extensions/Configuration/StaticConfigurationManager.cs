@@ -23,17 +23,18 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// StaticConfigurationManager
+    /// This type is for users that want a fixed and static Configuration.
+    /// In this case, the configuration is obtained and passed to the constructor.
     /// </summary>
-    /// <typeparam name="T">TODO</typeparam>
-    public class StaticConfigurationManager<T> : IConfigurationManager<T>
+    /// <typeparam name="T">must be a class.</typeparam>
+    public class StaticConfigurationManager<T> : IConfigurationManager<T> where T : class
     {
         private T _configuration;
 
         /// <summary>
-        /// StaticConfigurationManager
+        /// Initializes an new instance of <see cref="StaticConfigurationManager"/> with a Configuration instance.
         /// </summary>
-        /// <param name="configuration">TODO</param>
+        /// <param name="configuration">Configuration of type <see cref="OpenIdConnectConfiguration"/> or <see cref="WsFederationConfiguration"/>.</param>
         public StaticConfigurationManager(T configuration)
         {
             if (configuration == null)
@@ -45,22 +46,20 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// GetConfigurationAsync
+        /// Obtains an updated version of Configuration.
         /// </summary>
-        /// <param name="cancel">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>Configuration of type T.</returns>
         public Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             return Task.FromResult(_configuration);
         }
 
         /// <summary>
-        /// RequestRefresh
+        /// For the this type, this is a no-op
         /// </summary>
-        /// <remarks>TODO</remarks>
         public void RequestRefresh()
         {
-            // TODO: throw new NotSupportedException()?
         }
     }
 }

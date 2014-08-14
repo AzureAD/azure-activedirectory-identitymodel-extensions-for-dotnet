@@ -22,10 +22,10 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// IConfigurationManager
+    /// Interface that defines a model for retrieving configuration data.
     /// </summary>
-    /// <typeparam name="T">TODO</typeparam>
-    public interface IConfigurationManager<T>
+    /// <typeparam name="T">must be class</typeparam>
+    public interface IConfigurationManager<T> where T : class
     {
         /// <summary>
         /// Retrieve the current configuration, refreshing and/or caching as needed.

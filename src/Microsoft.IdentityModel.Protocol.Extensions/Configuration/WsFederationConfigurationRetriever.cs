@@ -31,58 +31,59 @@ using System.Xml;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// WsFederationConfigurationRetriever - TODO
+    ///  Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.
     /// </summary>
     public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
     {
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
 
         /// <summary>
-        /// GetAsync - TODO
+        /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.
         /// </summary>
-        /// <param name="address">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="address">address of the metadata document.</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return GetAsync(new GenericDocumentRetriever(), address, cancel);
+            return GetAsync(address, new GenericDocumentRetriever(), cancel);
         }
 
         /// <summary>
-        /// GetAsync - TODO
+        /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address and an <see cref="HttpClient"/>.
         /// </summary>
-        /// <param name="address">TODO</param>
-        /// <param name="httpClient">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns>TODO</returns>
+        /// <param name="address">address of the metadata document.</param>
+        /// <param name="httpClient">the <see cref="HttpClient"/> to use to read the metadata document.</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
         public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
-            return GetAsync(new HttpDocumentRetriever(httpClient), address, cancel);
+            return GetAsync(address, new HttpDocumentRetriever(httpClient), cancel);
         }
 
-        // Internal
-        Task<WsFederationConfiguration> IConfigurationRetriever<WsFederationConfiguration>.GetConfigurationAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        Task<WsFederationConfiguration> IConfigurationRetriever<WsFederationConfiguration>.GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
-            return GetAsync(retriever, address, cancel);
+            return GetAsync(address, retriever, cancel);
         }
 
         /// <summary>
-        /// GetAsync - TODO
+        /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address and an <see cref="IDocumentRetriever"/>.
         /// </summary>
-        /// <param name="retriever">TODO</param>
-        /// <param name="address">TODO</param>
-        /// <param name="cancel">TODO</param>
-        /// <returns>TODO</returns>
-        public static async Task<WsFederationConfiguration> GetAsync(IDocumentRetriever retriever, string address, CancellationToken cancel)
+        /// <param name="address">address of the metadata document.</param>
+        /// <param name="retriever">the <see cref="IDocumentRetriever"/> to use to read the metadata document</param>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        public static async Task<WsFederationConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
-            if (retriever == null)
-            {
-                throw new ArgumentNullException("retriever");
-            }
             if (string.IsNullOrWhiteSpace(address))
             {
                 throw new ArgumentNullException("address");
             }
+
+            if (retriever == null)
+            {
+                throw new ArgumentNullException("retriever");
+            }
+
             WsFederationConfiguration configuration = new WsFederationConfiguration();
 
             string document = await retriever.GetDocumentAsync(address, cancel);
@@ -100,24 +101,21 @@ namespace Microsoft.IdentityModel.Protocols
                 }
 
                 SecurityTokenServiceDescriptor stsd = entityDescriptor.RoleDescriptors.OfType<SecurityTokenServiceDescriptor>().First();
-                if (stsd == null)
+                if (stsd != null)
                 {
-                    throw new InvalidOperationException("Missing descriptor"/*Resources.Exception_MissingDescriptor*/);
-                }
-
-                configuration.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
-
-                foreach (KeyDescriptor keyDescriptor in stsd.Keys)
-                {
-                    if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
+                    configuration.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
+                    foreach (KeyDescriptor keyDescriptor in stsd.Keys)
                     {
-                        foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
+                        if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
                         {
-                            X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
-                            if (x509Clause != null)
+                            foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
                             {
-                                var key =  new X509SecurityKey(new X509Certificate2(x509Clause.GetX509RawData()));
-                                configuration.SigningKeys.Add(key);
+                                X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
+                                if (x509Clause != null)
+                                {
+                                    var key = new X509SecurityKey(new X509Certificate2(x509Clause.GetX509RawData()));
+                                    configuration.SigningKeys.Add(key);
+                                }
                             }
                         }
                     }
