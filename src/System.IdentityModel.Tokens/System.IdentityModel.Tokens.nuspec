@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <title>Security Token Handling for K</title>
+    <id>System.IdentityModel.Tokens</id>
+    <version>5.0.0.0</version>
+    <authors>>Microsoft Open Technologies.</authors>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_enu.htm</licenseUrl>
+    <projectUrl>http://go.microsoft.com/fwlink/?LinkId=272508</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>This package provides an K assembly for processing tokens.</description>
+    <summary>This package provides an assembly containing classes which extend K.</summary>
+    <language>en-US</language>
+    <owners>Microsoft Open Technologies.</owners>
+    <tags>JWT, JSON Web Token, K, AspNet, Authentication</tags>
+    <copyright>Copyright (c) Microsoft Open Technologies. All rights reserved</copyright>
+  </metadata>
+</package>
