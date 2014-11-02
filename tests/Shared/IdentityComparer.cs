@@ -457,6 +457,9 @@ namespace System.IdentityModel.Test
             if (!string.Equals(configuration1.TokenEndpoint, configuraiton2.TokenEndpoint, context.StringComparison))
                 return false;
 
+            if (!string.Equals(configuration1.UserInfoEndpoint, configuraiton2.UserInfoEndpoint, context.StringComparison))
+                return false;
+
             return true;
         }
         

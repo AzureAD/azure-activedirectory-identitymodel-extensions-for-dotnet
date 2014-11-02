@@ -82,6 +82,7 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectConfiguration configuration;
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataPingString, expectedException: ExpectedException.NoExceptionExpected);
+            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationPing));
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataPingLabsJWKSString, expectedException: ExpectedException.NoExceptionExpected);
             Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationPingLabsJWKS));
@@ -111,7 +112,7 @@ namespace Microsoft.IdentityModel.Test
             GetAndCheckConfiguration("end_session_endpoint", "EndSessionEndpoint");
             GetAndCheckConfiguration("jwks_uri", "JwksUri", OpenIdConfigData.AADCommonUrl);
             GetAndCheckConfiguration("token_endpoint", "TokenEndpoint");
-            GetAndCheckConfiguration("user_info_endpoint", "UserInfoEndpoint");
+            GetAndCheckConfiguration("userinfo_endpoint", "UserInfoEndpoint");
         }
 
         private async Task<OpenIdConnectConfiguration> GetConfigurationFromHttpAsync(string uri, ExpectedException expectedException, OpenIdConnectConfiguration expectedConfiguration = null)
