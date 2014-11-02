@@ -162,6 +162,15 @@ namespace Microsoft.IdentityModel.Test
             string base64String3 = Convert.ToBase64String(Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected3.N));
             rsa3.FromXmlString(string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, base64String3, JsonWebKeyFromPingExpected3.E));
 
+            OpenIdConnectConfigurationPing =
+                new OpenIdConnectConfiguration()
+                {
+                    AuthorizationEndpoint = "https://connect-interop.pinglabs.org:9031/as/authorization.oauth2",
+                    Issuer = "https://connect-interop.pinglabs.org:9031",
+                    TokenEndpoint = "https://connect-interop.pinglabs.org:9031/as/token.oauth2",
+                    UserInfoEndpoint = "https://connect-interop.pinglabs.org:9031/idp/userinfo.openid"
+                };
+
             OpenIdConnectConfigurationPingLabsJWKS =
                 new OpenIdConnectConfiguration()
                 {
@@ -450,6 +459,7 @@ namespace Microsoft.IdentityModel.Test
         public static OpenIdConnectConfiguration OpenIdConnectConfigurationSingleX509Data1;
         public static OpenIdConnectConfiguration OpenIdConnectConfigurationWithKeys1;
         public static OpenIdConnectConfiguration OpenIdConnectConfigurationPingLabsJWKS;
+        public static OpenIdConnectConfiguration OpenIdConnectConfigurationPing;
         public static X509Certificate2 X509CertificateJsonWebKey1;
         public static X509Certificate2 X509CertificateJsonWebKey2;
         public static IDictionary<string, object> JsonWebKeyDictionary1;
