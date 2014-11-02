@@ -23,7 +23,6 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Constants for Json Web tokens.
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310:FieldNamesMustNotContainUnderscore", Justification = "Following definitions in spec.")]
     public static class JwtConstants
     {
         /// <summary>

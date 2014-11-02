@@ -16,9 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Xml;
 
 namespace System.IdentityModel.Tokens
 {
@@ -31,6 +29,8 @@ namespace System.IdentityModel.Tokens
         /// Returns true if the token can be read, false otherwise.
         /// </summary>
         bool CanReadToken(string securityToken);
+
+        bool CanValidateToken { get; }
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.

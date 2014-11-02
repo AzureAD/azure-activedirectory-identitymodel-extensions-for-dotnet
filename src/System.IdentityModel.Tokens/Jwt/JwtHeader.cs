@@ -18,7 +18,6 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Security.Cryptography.X509Certificates;
@@ -63,7 +62,7 @@ namespace System.IdentityModel.Tokens
         /// <para>&#160;&#160;&#160;&#160;'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' => 'RS256'</para>
         /// <para>&#160;&#160;&#160;&#160;'http://www.w3.org/2001/04/xmldsig-more#hmac-sha256' => 'HS256'</para>
         /// </remarks>
-        public JwtHeader(SigningCredentials signingCredentials = null)
+        public JwtHeader(SigningCredentials signingCredentials)
             : base(StringComparer.Ordinal)
         {
             this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
@@ -79,23 +78,25 @@ namespace System.IdentityModel.Tokens
                 }
 
                 this[JwtHeaderParameterNames.Alg] = algorithm;
-                if (signingCredentials.SigningKeyIdentifier != null)
-                {
-                    foreach (SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier)
-                    {
-                        NamedKeySecurityKeyIdentifierClause namedKeyClause = clause as NamedKeySecurityKeyIdentifierClause;
-                        if (namedKeyClause != null)
-                        {
-                            this[namedKeyClause.Name] = namedKeyClause.Id;
-                        }
-                    }
-                }
+                this[JwtHeaderParameterNames.Kid] = signingCredentials.SigningKey.KeyId;
 
-                X509SigningCredentials x509SigningCredentials = signingCredentials as X509SigningCredentials;
-                if (x509SigningCredentials != null && x509SigningCredentials.Certificate != null)
-                {
-                    this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
-                }
+                //if (signingCredentials.SigningKeyIdentifier != null)
+                //{
+                //    foreach (SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier)
+                //    {
+                //        NamedKeySecurityKeyIdentifierClause namedKeyClause = clause as NamedKeySecurityKeyIdentifierClause;
+                //        if (namedKeyClause != null)
+                //        {
+                //            this[namedKeyClause.Name] = namedKeyClause.Id;
+                //        }
+                //    }
+                //}
+
+                //X509SigningCredentials x509SigningCredentials = signingCredentials as X509SigningCredentials;
+                //if (x509SigningCredentials != null && x509SigningCredentials.Certificate != null)
+                //{
+                //    this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
+                //}
             }
             else
             {
@@ -139,68 +140,80 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        /// <summary>
-        /// Gets a <see cref="SecurityKeyIdentifier"/> that contains a <see cref="SecurityKeyIdentifierClause"/> for each key found.
-        /// </summary>
-        /// <remarks>
-        /// Keys are identified by matching a 'Reserved Header Parameter Name' found in the in JSON Web Signature specification.
-        /// <para>Names recognized are: jku, jkw, kid, x5c, x5t, x5u</para>
-        /// <para>'x5t' adds a <see cref="X509ThumbprintKeyIdentifierClause"/> passing a the Base64UrlDecoded( Value ) to the constructor.</para>
-        /// <para>'jku', 'jkw', 'kid', 'x5u', 'x5c' each add a <see cref="NamedKeySecurityKeyIdentifierClause"/> with the { Name, Value } passed to the <see cref=" NamedKeySecurityKeyIdentifierClause( string, string )"/>.</para>
-        /// <para>   </para>
-        /// <para>If no keys are found, an empty <see cref="SecurityKeyIdentifier"/> will be returned.</para>
-        /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations", Justification="Back compat")]
-        public virtual SecurityKeyIdentifier SigningKeyIdentifier
+        ///// <summary>
+        ///// Gets a <see cref="SecurityKeyIdentifier"/> that contains a <see cref="SecurityKeyIdentifierClause"/> for each key found.
+        ///// </summary>
+        ///// <remarks>
+        ///// Keys are identified by matching a 'Reserved Header Parameter Name' found in the in JSON Web Signature specification.
+        ///// <para>Names recognized are: jku, jkw, kid, x5c, x5t, x5u</para>
+        ///// <para>'x5t' adds a <see cref="X509ThumbprintKeyIdentifierClause"/> passing a the Base64UrlDecoded( Value ) to the constructor.</para>
+        ///// <para>'jku', 'jkw', 'kid', 'x5u', 'x5c' each add a <see cref="NamedKeySecurityKeyIdentifierClause"/> with the { Name, Value } passed to the <see cref=" NamedKeySecurityKeyIdentifierClause( string, string )"/>.</para>
+        ///// <para>   </para>
+        ///// <para>If no keys are found, an empty <see cref="SecurityKeyIdentifier"/> will be returned.</para>
+        ///// </remarks>
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations", Justification="Back compat")]
+        //public virtual SecurityKeyIdentifier SigningKeyIdentifier
+        //{
+        //    get
+        //    {
+        //        SecurityKeyIdentifier ski = new SecurityKeyIdentifier();
+        //        if (this.ContainsKey(JwtHeaderParameterNames.X5t))
+        //        {
+        //            try
+        //            {
+        //                ski.Add(new X509ThumbprintKeyIdentifierClause(Base64UrlEncoder.DecodeBytes(GetStandardClaim(JwtHeaderParameterNames.X5t))));
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                if (DiagnosticUtility.IsFatal(ex))
+        //                {
+        //                    throw;
+        //                }
+
+        //                throw new FormatException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10705, JwtHeaderParameterNames.X5t), ex);
+        //            }
+        //        }
+
+        //        if (this.ContainsKey(JwtHeaderParameterNames.Jku))
+        //        {
+        //            ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jku, GetStandardClaim(JwtHeaderParameterNames.Jku)));
+        //        }
+
+        //        if (this.ContainsKey(JwtHeaderParameterNames.Jwk))
+        //        {
+        //            ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jwk, GetStandardClaim(JwtHeaderParameterNames.Jwk)));
+        //        }
+
+        //        if (this.ContainsKey(JwtHeaderParameterNames.X5u))
+        //        {
+        //            ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5u, GetStandardClaim(JwtHeaderParameterNames.X5u)));
+        //        }
+
+        //        if (this.ContainsKey(JwtHeaderParameterNames.X5c))
+        //        {
+        //            ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5c, GetStandardClaim(JwtHeaderParameterNames.X5c)));
+        //        }
+
+        //        if (this.ContainsKey(JwtHeaderParameterNames.Kid))
+        //        {
+        //            ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Kid, GetStandardClaim(JwtHeaderParameterNames.Kid)));
+        //        }
+
+        //        return ski;
+        //    }
+        //}
+
+        public string Kid
         {
             get
             {
-                SecurityKeyIdentifier ski = new SecurityKeyIdentifier();
-                if (this.ContainsKey(JwtHeaderParameterNames.X5t))
-                {
-                    try
-                    {
-                        ski.Add(new X509ThumbprintKeyIdentifierClause(Base64UrlEncoder.DecodeBytes(GetStandardClaim(JwtHeaderParameterNames.X5t))));
-                    }
-                    catch (Exception ex)
-                    {
-                        if (DiagnosticUtility.IsFatal(ex))
-                        {
-                            throw;
-                        }
-
-                        throw new FormatException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10705, JwtHeaderParameterNames.X5t), ex);
-                    }
-                }
-
-                if (this.ContainsKey(JwtHeaderParameterNames.Jku))
-                {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jku, GetStandardClaim(JwtHeaderParameterNames.Jku)));
-                }
-
-                if (this.ContainsKey(JwtHeaderParameterNames.Jwk))
-                {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Jwk, GetStandardClaim(JwtHeaderParameterNames.Jwk)));
-                }
-
-                if (this.ContainsKey(JwtHeaderParameterNames.X5u))
-                {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5u, GetStandardClaim(JwtHeaderParameterNames.X5u)));
-                }
-
-                if (this.ContainsKey(JwtHeaderParameterNames.X5c))
-                {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.X5c, GetStandardClaim(JwtHeaderParameterNames.X5c)));
-                }
-
-                if (this.ContainsKey(JwtHeaderParameterNames.Kid))
-                {
-                    ski.Add(new NamedKeySecurityKeyIdentifierClause(JwtHeaderParameterNames.Kid, GetStandardClaim(JwtHeaderParameterNames.Kid)));
-                }
-
-                return ski;
+                return GetStandardClaim(JwtHeaderParameterNames.Kid);
             }
-        }
+            set
+            {
+            }
+
+        } 
 
         internal string GetStandardClaim(string claimType)
         {

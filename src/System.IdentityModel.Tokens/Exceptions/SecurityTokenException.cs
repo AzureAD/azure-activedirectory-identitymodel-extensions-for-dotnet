@@ -18,12 +18,21 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using System.Security.Cryptography;
-
-    public abstract class AsymmetricSecurityKey : SecurityKey
+    public class SecurityTokenException : Exception
     {
-        public abstract AsymmetricAlgorithm GetAsymmetricAlgorithm(string algorithm, bool privateKey);
-        public abstract HashAlgorithm GetHashAlgorithmForSignature(string algorithm);
-        public abstract bool HasPrivateKey();
+        public SecurityTokenException()
+            : base()
+        {
+        }
+
+        public SecurityTokenException(string message)
+            : base(message)
+        {
+        }
+
+        public SecurityTokenException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

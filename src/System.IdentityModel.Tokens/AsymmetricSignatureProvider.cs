@@ -18,7 +18,6 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Security.Cryptography;
@@ -26,14 +25,14 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool disposed;
+        private RSACryptoServiceProvider rsa;
         private HashAlgorithm hash;
-        private AsymmetricSignatureFormatter formatter;
-        private AsymmetricSignatureDeformatter deformatter;
-        private AsymmetricSecurityKey key;
+        //private AsymmetricSignatureFormatter formatter;
+        //private AsymmetricSignatureDeformatter deformatter;
+        //private AsymmetricSecurityKey key;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
@@ -93,20 +92,22 @@ namespace System.IdentityModel.Tokens
         public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false)
         {
             if (key == null)
-            {
                 throw new ArgumentNullException("key");
-            }
 
             if (algorithm == null)
-            {
                 throw new ArgumentNullException("algorithm");
-            }
 
             if (string.IsNullOrWhiteSpace(algorithm))
-            {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm"));
-            }
 
+            if (key.IsSupportedAlgorithm(algorithm))
+                throw new ArgumentNullException("algorithm is not supported: " + algorithm);
+
+            this.rsa = key.GetAsymmetricAlgorithm(algorithm, willCreateSignatures) as RSACryptoServiceProvider;
+            if (this.rsa == null)
+                throw new ArgumentException("key must be RSACryptoServiceProvider, is: " + key.GetType().ToString());
+
+            // TODO - brentsch, minimum size is relative to algorithm
             if (willCreateSignatures)
             {
                 if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning)
@@ -120,10 +121,9 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10630, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
-            this.key = key;
             try
             {
-                this.hash = this.key.GetHashAlgorithmForSignature(algorithm);
+                this.hash = key.GetHashAlgorithmForSignature(algorithm);
             }
             catch (Exception ex)
             {
@@ -132,56 +132,56 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10618, algorithm, this.key.ToString(), ex), ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10618, algorithm, key.ToString(), ex), ex);
             }
 
             if (this.hash == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10611, algorithm, this.key.ToString()));
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10611, algorithm, key.ToString()));
             }
 
-            if (willCreateSignatures)
-            {
-                try
-                {
-                    this.formatter = this.key.GetSignatureFormatter(algorithm);
-                    this.formatter.SetHashAlgorithm(this.hash.GetType().ToString());
-                }
-                catch (Exception ex)
-                {
-                    if (DiagnosticUtility.IsFatal(ex))
-                    {
-                        throw;
-                    }
+            //if (willCreateSignatures)
+            //{
+            //    try
+            //    {
+            //        this.formatter = this.key.GetSignatureFormatter(algorithm);
+            //        this.formatter.SetHashAlgorithm(this.hash.GetType().ToString());
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        if (DiagnosticUtility.IsFatal(ex))
+            //        {
+            //            throw;
+            //        }
 
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10614, algorithm, this.key.ToString(), ex), ex);
-                }
+            //        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10614, algorithm, this.key.ToString(), ex), ex);
+            //    }
 
-                if (this.formatter == null)
-                {
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10615, algorithm, this.key.ToString()));
-                }
-            }
+            //    if (this.formatter == null)
+            //    {
+            //        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10615, algorithm, this.key.ToString()));
+            //    }
+            //}
 
-            try
-            {
-                this.deformatter = this.key.GetSignatureDeformatter(algorithm);
-                this.deformatter.SetHashAlgorithm(this.hash.GetType().ToString());
-            }
-            catch (Exception ex)
-            {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
+            //try
+            //{
+            //    this.deformatter = this.key.GetSignatureDeformatter(algorithm);
+            //    this.deformatter.SetHashAlgorithm(this.hash.GetType().ToString());
+            //}
+            //catch (Exception ex)
+            //{
+            //    if (DiagnosticUtility.IsFatal(ex))
+            //    {
+            //        throw;
+            //    }
 
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10616, algorithm, this.key.ToString(), ex), ex);
-            }
+            //    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10616, algorithm, this.key.ToString(), ex), ex);
+            //}
 
-            if (this.deformatter == null)
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10617, algorithm, this.key.ToString()));
-            }
+            //if (this.deformatter == null)
+            //{
+            //    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10617, algorithm, this.key.ToString()));
+            //}
         }
 
         /// <summary>
@@ -211,17 +211,7 @@ namespace System.IdentityModel.Tokens
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            if (this.formatter == null)
-            {
-                throw new InvalidOperationException(ErrorMessages.IDX10620);
-            }
-
-            if (this.hash == null)
-            {
-                throw new InvalidOperationException(ErrorMessages.IDX10621);
-            }
-
-            return this.formatter.CreateSignature(this.hash.ComputeHash(input));
+            return rsa.SignData(input, hash);
         }
 
         /// <summary>
@@ -264,24 +254,18 @@ namespace System.IdentityModel.Tokens
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            if (this.deformatter == null)
-            {
-                throw new InvalidOperationException(ErrorMessages.IDX10629);
-            }
-
             if (this.hash == null)
             {
                 throw new InvalidOperationException(ErrorMessages.IDX10621);
             }
 
-            return this.deformatter.VerifySignature(this.hash.ComputeHash(input), signature);
+            return rsa.VerifyData(input, hash, signature);
         }
 
         /// <summary>
         /// Calls <see cref="HashAlgorithm.Dispose()"/> to release this managed resources.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         protected override void Dispose(bool disposing)
         {
             if (!this.disposed)

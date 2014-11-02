@@ -19,7 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using System.Diagnostics.CodeAnalysis;
-    using System.Web.Script.Serialization;
+    //using System.Runtime.Serialization.Json;
 
     /// <summary>
     /// Definition for a delegate that can be set on <see cref="JsonExtensions.Serializer"/> to control serialization of objects into JSON.
@@ -39,18 +39,17 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Dictionary extensions for serializations
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     public static class JsonExtensions
     {
-        private static JavaScriptSerializer _javaScriptSerializer;
+        //private static DataContractJsonSerializer _javaScriptSerializer;
         private static Serializer _serializer;
         private static Deserializer _deserializer;
 
         static JsonExtensions()
         {
-            _javaScriptSerializer = new JavaScriptSerializer();
-            _serializer = _javaScriptSerializer.Serialize;
-            _deserializer = _javaScriptSerializer.Deserialize;
+           // _javaScriptSerializer = new JavaScriptSerializer();
+            //_serializer = _javaScriptSerializer.Serialize;
+            //_deserializer = _javaScriptSerializer.Deserialize;
         }
 
         /// <summary>

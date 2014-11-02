@@ -16,37 +16,36 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace System.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when a security is missing an ExpirationTime.
+    /// Throw this exception when a received Security Token has expiration time in the past.
     /// </summary>
-    public class SecurityTokenNoExpirationException : SecurityTokenValidationException
+    public class SecurityTokenExpiredException : SecurityTokenValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
+        /// Initializes a new instance of  <see cref="SecurityTokenExpiredException"/>
         /// </summary>
-        public SecurityTokenNoExpirationException()
-            : base()
+        public SecurityTokenExpiredException()
+            : base("SecurityToken has Expired")
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
+        /// Initializes a new instance of  <see cref="SecurityTokenExpiredException"/>
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SecurityTokenNoExpirationException(String message)
+        public SecurityTokenExpiredException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
+        /// Initializes a new instance of  <see cref="SecurityTokenExpiredException"/>
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SecurityTokenNoExpirationException(String message, Exception innerException)
-            : base(message, innerException)
+        public SecurityTokenExpiredException(string message, Exception inner)
+            : base(message, inner)
         {
         }
     }

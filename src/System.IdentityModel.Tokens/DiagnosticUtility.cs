@@ -59,11 +59,8 @@ namespace System.IdentityModel
         {
             bool returnValue = false;
 
-            if ((exception is OutOfMemoryException && !(exception is InsufficientMemoryException)) ||                
-                exception is AccessViolationException ||
-                exception is SEHException ||
-                exception is TypeInitializationException ||
-                exception is TargetInvocationException)
+            if (exception is OutOfMemoryException ||
+                exception is TypeInitializationException)
             {
                 returnValue = true;
             }

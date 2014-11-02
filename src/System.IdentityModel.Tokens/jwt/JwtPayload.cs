@@ -18,7 +18,6 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;

@@ -25,7 +25,6 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Defines the inbound and outbound mapping for claim claim types from jwt to .net claim 
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private fields.")]
     internal static class ClaimTypeMapping
     {
         // this is the short to long mapping.
@@ -104,7 +103,8 @@ namespace System.IdentityModel.Tokens
                 { "idp", "http://schemas.microsoft.com/identity/claims/identityprovider" },
                 { "insidecorporatenetwork", "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork" },
                 { "isregistereduser", "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser" },
-                { "ppid", System.IdentityModel.Claims.ClaimTypes.PPID },
+                // TODO - brent, set proper url for ppid
+                { "ppid", "System.IdentityModel.Claims.ClaimTypes.PPID" },
                 { "primarygroupsid", ClaimTypes.PrimaryGroupSid },
                 { "primarysid", ClaimTypes.PrimarySid },
                 { "proxy", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy" },

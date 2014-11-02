@@ -18,7 +18,6 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
 
@@ -26,7 +25,6 @@ namespace System.IdentityModel.Tokens
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
     /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
     public class SignatureProviderFactory
     {
         /// <summary>

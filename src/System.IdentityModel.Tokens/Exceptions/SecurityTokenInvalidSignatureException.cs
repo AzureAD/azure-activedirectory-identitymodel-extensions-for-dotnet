@@ -16,14 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-
 namespace System.IdentityModel.Tokens
 {
     /// <summary>
     /// This exception is thrown when 'signature' of a token was not valid.
     /// </summary>
-    [Serializable]
     public class SecurityTokenInvalidSignatureException : SecurityTokenValidationException
     {
         /// <summary>
@@ -50,16 +47,6 @@ namespace System.IdentityModel.Tokens
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
         public SecurityTokenInvalidSignatureException(String message, Exception innerException)
             : base(message, innerException)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidSignatureException"/> class.
-        /// </summary>
-        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
-        /// <param name="context">The contextual information about the source or destination.</param>
-        protected SecurityTokenInvalidSignatureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

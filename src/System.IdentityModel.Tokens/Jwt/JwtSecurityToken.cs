@@ -18,7 +18,6 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
@@ -29,7 +28,6 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for internal or private fields.")]
     public class JwtSecurityToken : SecurityToken
     {
         private JwtHeader header;
@@ -50,7 +48,6 @@ namespace System.IdentityModel.Tokens
         /// <remarks>
         /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>
         /// </remarks>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1642:ConstructorSummaryDocumentationMustBeginWithStandardText", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public JwtSecurityToken(string jwtEncodedString)
         {
             if (null == jwtEncodedString)
@@ -286,9 +283,9 @@ namespace System.IdentityModel.Tokens
         /// Gets the <see cref="SecurityKey"/>s for this instance.
         /// </summary>
         /// <remarks>By default an empty collection is returned.</remarks>
-        public override ReadOnlyCollection<SecurityKey> SecurityKeys
+        public override SecurityKey SecurityKey
         {
-            get { return new ReadOnlyCollection<SecurityKey>(new List<SecurityKey>()); }
+            get { return null; }
         }
 
         /// <summary>
@@ -313,16 +310,6 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <remarks><see cref="JwtSecurityTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
         public SecurityKey SigningKey
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityToken"/> that contains a <see cref="SecurityKey"/> that signed this instance.
-        /// </summary>
-        /// <remarks><see cref="JwtSecurityTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
-        public SecurityToken SigningToken
         {
             get;
             set;

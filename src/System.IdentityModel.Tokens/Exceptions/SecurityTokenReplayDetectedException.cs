@@ -16,37 +16,36 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace System.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when a security is missing an ExpirationTime.
+    /// Throw this exception when a received Security Token has been replayed.
     /// </summary>
-    public class SecurityTokenNoExpirationException : SecurityTokenValidationException
+    public class SecurityTokenReplayDetectedException : SecurityTokenValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
+        /// Initializes a new instance of  <see cref="SecurityTokenReplayDetectedException"/>
         /// </summary>
-        public SecurityTokenNoExpirationException()
-            : base()
+        public SecurityTokenReplayDetectedException()
+            : base("SecurityToken replay detected")
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
+        /// Initializes a new instance of  <see cref="SecurityTokenReplayDetectedException"/>
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SecurityTokenNoExpirationException(String message)
+        public SecurityTokenReplayDetectedException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenNoExpirationException"/> class.
+        /// Initializes a new instance of  <see cref="SecurityTokenReplayDetectedException"/>
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SecurityTokenNoExpirationException(String message, Exception innerException)
-            : base(message, innerException)
+        public SecurityTokenReplayDetectedException(string message, Exception inner)
+            : base(message, inner)
         {
         }
     }

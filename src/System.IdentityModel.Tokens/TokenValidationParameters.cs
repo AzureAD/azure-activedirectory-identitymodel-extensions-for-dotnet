@@ -18,12 +18,10 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using Microsoft.IdentityModel;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Globalization;
-    using System.IdentityModel.Selectors;
     using System.Security.Claims;
 
     /// <summary>
@@ -42,7 +40,7 @@ namespace System.IdentityModel.Tokens
     /// <param name="keyIdentifier">the <see cref="SecurityKeyIdentifier"/> found in the token. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns></returns>
-    public delegate SecurityKey IssuerSigningKeyResolver(string token, SecurityToken securityToken, SecurityKeyIdentifier keyIdentifier, TokenValidationParameters validationParameters);
+    public delegate SecurityKey IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for IssuerValidator.
@@ -68,8 +66,7 @@ namespace System.IdentityModel.Tokens
     public class TokenValidationParameters
     {
         private string _authenticationType;
-        private X509CertificateValidator _certificateValidator;
-        private ReadOnlyCollection<SecurityToken> _clientDecryptionTokens = new List<SecurityToken>().AsReadOnly();
+        private IList<SecurityToken> _clientDecryptionTokens = new List<SecurityToken>();
         private TimeSpan _clockSkew = DefaultClockSkew;
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
@@ -77,7 +74,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
         /// </summary>
-        public static readonly string DefaultAuthenticationType = AuthenticationTypes.Federation;
+        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation";
 
         /// <summary>
         /// Default for the clock skew.
@@ -103,15 +100,15 @@ namespace System.IdentityModel.Tokens
 
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
-            CertificateValidator = other.CertificateValidator;
+            //CertificateValidator = other.CertificateValidator;
             ClockSkew = other.ClockSkew;
             ClientDecryptionTokens = other.ClientDecryptionTokens;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
-            IssuerSigningToken = other.IssuerSigningToken;
-            IssuerSigningTokens = other.IssuerSigningTokens;
+            //IssuerSigningToken = other.IssuerSigningToken;
+            //IssuerSigningTokens = other.IssuerSigningTokens;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
             NameClaimType = other.NameClaimType;
@@ -178,27 +175,27 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
-        /// </summary>
-        public X509CertificateValidator CertificateValidator
-        {
-            get
-            {
-                return _certificateValidator;
-            }
+        ///// <summary>
+        ///// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
+        ///// </summary>
+        //public X509CertificateValidator CertificateValidator
+        //{
+        //    get
+        //    {
+        //        return _certificateValidator;
+        //    }
 
-            set
-            {
-                _certificateValidator = value;
-            }
-        }
+        //    set
+        //    {
+        //        _certificateValidator = value;
+        //    }
+        //}
 
         /// <summary>
         /// Gets or sets the <see cref="ReadOnlyCollection{SecurityToken}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        public ReadOnlyCollection<SecurityToken> ClientDecryptionTokens
+        public IList<SecurityToken> ClientDecryptionTokens
         {
             get
             {
@@ -316,23 +313,23 @@ namespace System.IdentityModel.Tokens
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityToken"/> that is used for validating signed tokens. 
-        /// </summary>
-        public SecurityToken IssuerSigningToken
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// Gets or sets the <see cref="SecurityToken"/> that is used for validating signed tokens. 
+        ///// </summary>
+        //public SecurityToken IssuerSigningToken
+        //{
+        //    get;
+        //    set;
+        //}
 
-        /// <summary>
-        /// Gets or sets the <see cref="IEnumerable{SecurityToken}"/> that are to be used for validating signed tokens. 
-        /// </summary>
-        public IEnumerable<SecurityToken> IssuerSigningTokens
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// Gets or sets the <see cref="IEnumerable{SecurityToken}"/> that are to be used for validating signed tokens. 
+        ///// </summary>
+        //public IEnumerable<SecurityToken> IssuerSigningTokens
+        //{
+        //    get;
+        //    set;
+        //}
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token. The delegate returns the issuer to use.
