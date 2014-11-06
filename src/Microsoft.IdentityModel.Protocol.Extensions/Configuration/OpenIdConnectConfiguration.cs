@@ -140,6 +140,15 @@ namespace Microsoft.IdentityModel.Protocols
                     TokenEndpoint = str;
                 }
             }
+
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.UserInfoEndpoint, out obj))
+            {
+                str = obj as string;
+                if (str != null)
+                {
+                    UserInfoEndpoint = str;
+                }
+            }
         }
 
         /// <summary>
