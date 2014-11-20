@@ -267,7 +267,12 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 try
                 {
-                    hashAlgorithm = HashAlgorithm.Create(algorithm);
+                    // todo factory for creation
+
+                    if (algorithm == JwtAlgorithms.RSA_SHA256)
+                    {
+                        hashAlgorithm = SHA256.Create();
+                    }
                 }
                 catch (Exception ex)
                 {

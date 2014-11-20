@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IdentityModel.Tokens;
-using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -29,7 +28,6 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class OpenIdConnectConfiguration
     {
-        private static JavaScriptSerializer _javaScriptSerializer;
         private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
         private Collection<string> _responseTypesSupported = new Collection<string>();
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
@@ -38,7 +36,6 @@ namespace Microsoft.IdentityModel.Protocols
 
         static OpenIdConnectConfiguration()
         {
-            _javaScriptSerializer = new JavaScriptSerializer();
         }
 
         /// <summary>
@@ -59,8 +56,6 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 throw new ArgumentNullException("json");
             }
-
-            SetFromDictionary(_javaScriptSerializer.Deserialize<Dictionary<string, object>>(json));
         }
 
         /// <summary>

@@ -100,15 +100,12 @@ namespace System.IdentityModel.Tokens
 
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
-            //CertificateValidator = other.CertificateValidator;
             ClockSkew = other.ClockSkew;
             ClientDecryptionTokens = other.ClientDecryptionTokens;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
-            //IssuerSigningToken = other.IssuerSigningToken;
-            //IssuerSigningTokens = other.IssuerSigningTokens;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
             NameClaimType = other.NameClaimType;
@@ -313,24 +310,6 @@ namespace System.IdentityModel.Tokens
             set;
         }
 
-        ///// <summary>
-        ///// Gets or sets the <see cref="SecurityToken"/> that is used for validating signed tokens. 
-        ///// </summary>
-        //public SecurityToken IssuerSigningToken
-        //{
-        //    get;
-        //    set;
-        //}
-
-        ///// <summary>
-        ///// Gets or sets the <see cref="IEnumerable{SecurityToken}"/> that are to be used for validating signed tokens. 
-        ///// </summary>
-        //public IEnumerable<SecurityToken> IssuerSigningTokens
-        //{
-        //    get;
-        //    set;
-        //}
-
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token. The delegate returns the issuer to use.
         /// </summary>
@@ -484,6 +463,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
         /// </summary>
+        [DefaultValue(false)]
         public bool ValidateIssuerSigningKey
         {
             get;

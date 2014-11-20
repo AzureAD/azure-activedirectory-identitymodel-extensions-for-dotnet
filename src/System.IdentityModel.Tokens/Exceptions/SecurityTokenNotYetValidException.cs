@@ -20,6 +20,9 @@ using System;
 
 namespace System.IdentityModel.Tokens
 {
+#if DESKTOPNET45
+        [Serializable]
+#endif
     /// <summary>
     /// Throw this exception when a received Security token has an effective time 
     /// in the future.
@@ -49,5 +52,18 @@ namespace System.IdentityModel.Tokens
             : base(message, inner)
         {
         }
+
+#if DESKTOPNET45
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenNotYetValidException"/> class.
+        /// </summary>
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected SecurityTokenNotYetValidException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+#endif
+
     }
 }

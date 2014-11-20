@@ -24,7 +24,9 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// This exception is thrown when an OpenIdConnect protocol handler encounters an invalid chash.
     /// </summary>
+#if DESKTOPNET45
     [Serializable]
+#endif
     public class OpenIdConnectProtocolInvalidCHashException : OpenIdConnectProtocolException
     {
         /// <summary>
@@ -53,6 +55,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
         }
 
+#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectProtocolInvalidCHashException"/> class.
         /// </summary>
@@ -62,5 +65,6 @@ namespace Microsoft.IdentityModel.Protocols
             : base(info, context)
         {
         }
+#endif
     }
 }

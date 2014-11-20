@@ -18,7 +18,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -27,15 +26,12 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class JsonWebKey
     {
-        private static JavaScriptSerializer _javaScriptSerializer;
-
         // kept private to hide that a List is used.
         // public member returns an IList.
         private IList<string> _certificateClauses = new List<string>();
 
         static JsonWebKey()
         {
-            _javaScriptSerializer = new JavaScriptSerializer();
         }
 
         /// <summary>
@@ -56,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols
                 return;
             }
 
-            SetFromDictionary(_javaScriptSerializer.Deserialize<Dictionary<string, object>>(json));
+            // TODO - brent, serializer
         }
 
         /// <summary>
@@ -130,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5c, out obj))
                 {
-                    ArrayList jclauses = obj as ArrayList;
+                    List<object> jclauses = obj as List<object>;
                     if (jclauses != null)
                     {
                         foreach (var clause in jclauses)

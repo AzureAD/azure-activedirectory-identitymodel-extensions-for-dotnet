@@ -20,9 +20,9 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IdentityModel;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -90,7 +90,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="docRetriever">the <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
         public ConfigurationManager(string metadataAddress, IDocumentRetriever docRetriever)
         {
+#if WsFed
             if (!typeof(T).Equals(typeof(WsFederationConfiguration)) && (!typeof(T).Equals(typeof(OpenIdConnectConfiguration))))
+#else
+            if (!typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
+#endif
             {
                 throw new NotImplementedException(typeof(T).FullName);
             }
@@ -149,10 +153,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>Configuration of type T.</returns>
         private static IConfigurationRetriever<T> GetConfigurationRetriever()
         {
+#if WsFed
             if (typeof(T).Equals(typeof(WsFederationConfiguration)))
             {
                 return (IConfigurationRetriever<T>)new WsFederationConfigurationRetriever();
             }
+#endif
             if (typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
             {
                 return (IConfigurationRetriever<T>)new OpenIdConnectConfigurationRetriever();

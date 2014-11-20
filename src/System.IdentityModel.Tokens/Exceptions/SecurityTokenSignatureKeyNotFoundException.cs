@@ -18,10 +18,13 @@
 
 namespace System.IdentityModel.Tokens
 {
+#if DESKTOPNET45
+        [Serializable]
+#endif
     /// <summary>
     /// This exception is thrown when a security token contained a key identifier but the key was not found by the runtime.
     /// </summary>
-    public class SecurityTokenSignatureKeyNotFoundException : SecurityTokenValidationException
+    public class SecurityTokenSignatureKeyNotFoundException : SecurityTokenInvalidSignatureException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenSignatureKeyNotFoundException"/> class.
@@ -49,5 +52,16 @@ namespace System.IdentityModel.Tokens
             : base(message, innerException)
         {
         }
+#if DESKTOPNET45
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenSignatureKeyNotFoundException"/> class.
+        /// </summary>
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected SecurityTokenSignatureKeyNotFoundException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+#endif
     }
 }

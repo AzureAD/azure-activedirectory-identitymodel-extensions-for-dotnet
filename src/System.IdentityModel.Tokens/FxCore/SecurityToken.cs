@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -15,15 +15,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------
-
-namespace System.IdentityModel
+namespace System.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
-
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Suppressed for private or internal fields.")]
-    internal static class TextStrings
+    public abstract class SecurityToken
     {
-        public const string Empty = "empty";
-        public const string Null  = "null";
+        public abstract string Id { get; }
+        public abstract SecurityKey SecurityKey { get; }
+        public abstract DateTime ValidFrom { get; }
+        public abstract DateTime ValidTo { get; }
     }
 }

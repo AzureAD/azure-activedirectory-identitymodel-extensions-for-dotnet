@@ -19,7 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using System.Diagnostics.CodeAnalysis;
-    //using System.Runtime.Serialization.Json;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Definition for a delegate that can be set on <see cref="JsonExtensions.Serializer"/> to control serialization of objects into JSON.
@@ -41,15 +41,13 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     public static class JsonExtensions
     {
-        //private static DataContractJsonSerializer _javaScriptSerializer;
         private static Serializer _serializer;
         private static Deserializer _deserializer;
 
         static JsonExtensions()
         {
-           // _javaScriptSerializer = new JavaScriptSerializer();
-            //_serializer = _javaScriptSerializer.Serialize;
-            //_deserializer = _javaScriptSerializer.Deserialize;
+           _serializer = JsonConvert.SerializeObject;
+           _deserializer = JsonConvert.DeserializeObject;
         }
 
         /// <summary>

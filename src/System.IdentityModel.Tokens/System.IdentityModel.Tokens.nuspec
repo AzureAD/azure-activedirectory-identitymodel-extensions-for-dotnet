@@ -3,16 +3,35 @@
   <metadata>
     <title>Security Token Handling for K</title>
     <id>System.IdentityModel.Tokens</id>
-    <version>5.0.0.0</version>
+    <version>5.0.0-beta-2</version>
     <authors>>Microsoft Open Technologies.</authors>
+    <owners>Microsoft Open Technologies.</owners>
     <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_enu.htm</licenseUrl>
     <projectUrl>http://go.microsoft.com/fwlink/?LinkId=272508</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>This package provides an K assembly for processing tokens.</description>
     <summary>This package provides an assembly containing classes which extend K.</summary>
     <language>en-US</language>
-    <owners>Microsoft Open Technologies.</owners>
     <tags>JWT, JSON Web Token, K, AspNet, Authentication</tags>
     <copyright>Copyright (c) Microsoft Open Technologies. All rights reserved</copyright>
+    <dependencies>
+      <dependency id="System.Collections" version="4.0.10-beta-*" />
+      <dependency id="System.Collections.Specialized" version="4.0.0-beta-*" />
+      <dependency id="System.Diagnostics.Contracts" version="4.0.0-beta-*" />
+      <dependency id="System.Diagnostics.Tools" version="4.0.0-beta-*" />
+      <dependency id="System.Globalization" version="4.0.10-beta-*" />
+      <dependency id="System.IO" version="4.0.10-beta-*" />
+      <dependency id="System.IO.Compression" version="4.0.0-beta-*" />
+      <dependency id="System.Runtime" version="4.0.20-beta-*" />
+      <dependency id="System.Runtime.Extensions" version="4.0.10-beta-*" />
+      <dependency id="System.Security.Claims" version="4.0.0.0-beta-*" />
+      <dependency id="System.Security.Cryptography.Encryption.RSA" version="4.0.0-beta-*" />
+      <dependency id="System.Security.Cryptography.Hashing.Algorithms" version="4.0.0-beta-*" />
+      <dependency id="System.Security.Cryptography.X509Certificates" version="4.0.0-beta-*" />
+      <dependency id="System.Security.Principal" version="4.0.0-beta-*" />
+      <dependency id="System.Text.RegularExpressions" version="4.0.10-beta-*" />
+      <dependency id="System.Threading" version="4.0.0-beta-*" />
+      <dependency id="System.Runtime.Serialization.Json" version="4.0.0.0-beta-*" />
+    </dependencies>
   </metadata>
 </package>

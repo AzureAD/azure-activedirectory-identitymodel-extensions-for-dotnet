@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Text;
-using System.Web;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -46,14 +45,14 @@ namespace Microsoft.IdentityModel.Protocols
             strBuilder.Append("<html><head><title>");
             strBuilder.Append(PostTitle);
             strBuilder.Append("</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"");
-            strBuilder.Append(HttpUtility.HtmlAttributeEncode(IssuerAddress));
+            strBuilder.Append(Uri.EscapeDataString(IssuerAddress));
             strBuilder.Append(">");
             foreach (KeyValuePair<string, string> parameter in _parameters)
             {
                 strBuilder.Append("<input type=\"hidden\" name=\"");
-                strBuilder.Append(HttpUtility.HtmlAttributeEncode(parameter.Key));
+                strBuilder.Append(Uri.EscapeDataString(parameter.Key));
                 strBuilder.Append("\" value=\"");
-                strBuilder.Append(HttpUtility.HtmlAttributeEncode(parameter.Value));
+                strBuilder.Append(Uri.EscapeDataString(parameter.Value));
                 strBuilder.Append(" />");
             }
 
@@ -92,9 +91,9 @@ namespace Microsoft.IdentityModel.Protocols
                     strBuilder.Append('&');
                 }
 
-                strBuilder.Append(HttpUtility.UrlEncode(parameter.Key));
+                strBuilder.Append(Uri.EscapeDataString(parameter.Key));
                 strBuilder.Append('=');
-                strBuilder.Append(HttpUtility.UrlEncode(parameter.Value));
+                strBuilder.Append(Uri.EscapeDataString(parameter.Value));
                 skipDelimiter = false;
             }
 

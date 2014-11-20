@@ -18,6 +18,11 @@
 
 namespace System.IdentityModel.Tokens
 {
+
+#if DESKTOPNET45
+        [Serializable]
+#endif
+
     public class SecurityTokenValidationException : SecurityTokenException
     {
         public SecurityTokenValidationException()
@@ -34,5 +39,18 @@ namespace System.IdentityModel.Tokens
             : base(message, innerException)
         {
         }
+
+#if DESKTOPNET45
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenValidationException"/> class.
+        /// </summary>
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected SecurityTokenValidationException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+#endif
+
     }
 }

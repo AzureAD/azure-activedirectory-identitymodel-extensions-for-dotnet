@@ -19,6 +19,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,11 +36,11 @@ namespace Microsoft.IdentityModel.Protocols
             }
             try
             {
-                using (WebClient client = new WebClient())
+                using (HttpClient client = new HttpClient())
                 {
-                    using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelAsync()))
+                    using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelPendingRequests()))
                     {
-                        return await client.DownloadStringTaskAsync(address);
+                        return await client.GetStringAsync(address);
                     }
                 }
             }

@@ -684,7 +684,7 @@ namespace System.IdentityModel.Tokens
                     return jwt;
                 }
 
-                throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10504, jwt.ToString()));
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10504, jwt.ToString()));
             }
 
             string mappedAlgorithm = jwt.Header.Alg;
@@ -726,10 +726,10 @@ namespace System.IdentityModel.Tokens
                 }
                 catch (Exception ex)
                 {
-                    throw new SignatureVerificationFailedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10502, CreateKeyString(securityKey), ex.ToString(), jwt.ToString()), ex);
+                    throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10502, CreateKeyString(securityKey), ex.ToString(), jwt.ToString()), ex);
                 }
 
-                throw new SignatureVerificationFailedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10501, CreateKeyString(securityKey), jwt.ToString()));
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10501, CreateKeyString(securityKey), jwt.ToString()));
 
             }
             else
@@ -767,7 +767,7 @@ namespace System.IdentityModel.Tokens
                     keysAttempted.AppendLine(CreateKeyString(securityKey));
                 }
 
-                throw new SignatureVerificationFailedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), firstException);
+                throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), firstException);
             }
         }
 

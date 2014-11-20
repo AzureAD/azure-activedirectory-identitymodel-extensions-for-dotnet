@@ -20,6 +20,9 @@ using System;
 
 namespace System.IdentityModel.Tokens
 {
+#if DESKTOPNET45
+        [Serializable]
+#endif
     /// <summary>
     /// Throw this exception when a received Security Token has been replayed.
     /// </summary>
@@ -48,5 +51,18 @@ namespace System.IdentityModel.Tokens
             : base(message, inner)
         {
         }
+
+#if DESKTOPNET45
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenReplayDetectedException"/> class.
+        /// </summary>
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected SecurityTokenReplayDetectedException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+#endif
+
     }
 }

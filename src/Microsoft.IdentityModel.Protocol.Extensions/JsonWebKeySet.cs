@@ -23,7 +23,6 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Web.Script.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -33,12 +32,10 @@ namespace Microsoft.IdentityModel.Protocols
     /// <remarks>provides support for http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-5 </remarks>
     public class JsonWebKeySet
     {
-        private static JavaScriptSerializer _javaScriptSerializer;
         private List<JsonWebKey> _keys = new List<JsonWebKey>();
 
         static JsonWebKeySet()
         {
-            _javaScriptSerializer = new JavaScriptSerializer();
         }
 
         /// <summary>
@@ -60,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("json");
             }
 
-            SetFromDictionary(_javaScriptSerializer.Deserialize<Dictionary<string, object>>(json));
+            // TODO - brent, serializer
         }
 
         /// <summary>
@@ -93,9 +90,9 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets the Keys translated to <see cref="IList{SecurityToken}"/>.
         /// </summary>
         /// <returns>A <see cref="X509SecurityToken"/> for each 'X5c' that is composed from a single certificate. A NamedKeySecurityToken for each raw rsa public key.</returns>
-        public IList<SecurityToken> GetSigningTokens()
+        public IList<SecurityKey> GetSigningKeys()
         {
-            List<SecurityToken> tokens = new List<SecurityToken>();
+            List<SecurityKey> keys = new List<SecurityKey>();
             for (int i = 0; i < _keys.Count; i++)
             {
                 JsonWebKey webKey = _keys[i];
@@ -114,11 +111,13 @@ namespace Microsoft.IdentityModel.Protocols
                             X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
                             if (!string.IsNullOrWhiteSpace(webKey.Kid))
                             {
-                                tokens.Add(new X509SecurityToken(cert, webKey.Kid));
+                                // TODO, brent - figure out KID
+                                //keys.Add(new X509SecurityKey(cert, webKey.Kid));
+                                keys.Add(new X509SecurityKey(cert));
                             }
                             else
                             {
-                                tokens.Add(new X509SecurityToken(cert));
+                                keys.Add(new X509SecurityKey(cert));
                             }
                         }
                         catch (CryptographicException ex)
@@ -147,11 +146,14 @@ namespace Microsoft.IdentityModel.Protocols
 
                             if (string.IsNullOrWhiteSpace(webKey.Kid))
                             {
-                                tokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, Guid.NewGuid().ToString(), new RsaSecurityKey(rsa)));
+                                // TODO, brent - figure out KID
+                                //keys.Add(JsonWebKeyParameterNames.Kid, Guid.NewGuid().ToString(), new RsaSecurityKey(rsa)));
+                                keys.Add(new RsaSecurityKey(rsa));
                             }
                             else
                             {
-                                tokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, webKey.Kid, new RsaSecurityKey(rsa)));
+                                //keys.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, webKey.Kid, new RsaSecurityKey(rsa)));
+                                keys.Add(new RsaSecurityKey(rsa));
                             }
                         }
                         catch (CryptographicException ex)
@@ -166,7 +168,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
-            return tokens;
+            return keys;
         }
 
         private void SetFromDictionary(IDictionary<string, object> dictionary)
@@ -177,7 +179,7 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentException(ErrorMessages.IDX10800);
             }
 
-            ArrayList keys = obj as ArrayList;
+            List<object> keys = obj as List<object>;
             if (keys != null)
             {
                 foreach (var key in keys)

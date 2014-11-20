@@ -204,3 +204,4 @@ log
 packages/*
 stash/*
 TestResults/*
+docs/*

@@ -1,12 +1,26 @@
 {
-    "version": "5.0.0-beta-2",
+    "version": "2.0.0-beta-2",
     "dependencies": {
-        "CoreCLR": "1.0.0.0-beta2-10167",
-        "Newtonsoft.Json": "6.0.6.0"
+        "System.IdentityModel.Tokens": "5.0.0-beta-2"
     },
-    "exclude": [ "SignatureVerificationFailedException.cs" ],
+    "code": [ "**\\*.cs", "..\\common\\*.cs" ],
+    "exclude": [
+        "SecurityKeyResolver.cs",
+        "SecurityTokenHandlerCollectionExtensions.cs",
+        "Saml2SecurityTokenHandler.cs",
+        "SamlSecurityTokenHandler.cs",
+        "Saml2SecurityToken.cs",
+        "SamlSecurityToken.cs",
+        "WsFederationMessage.cs",
+        "Configuration\\WsFederationConfiguration.cs",
+        "Configuration\\WsFederationConfigurationRetriever.cs"
+    ],
     "frameworks": {
-       "aspnet50": {},
+        "aspnet50": {
+          "frameworkAssemblies": {
+                "System.Net.Http": ""
+            }
+        },
         "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
@@ -16,6 +30,7 @@
                 "System.Globalization": "4.0.10-beta-*",
                 "System.IO": "4.0.10-beta-*",
                 "System.IO.Compression": "4.0.0-beta-*",
+                "System.Net.Http": "4.0.0-beta-*",
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Runtime.Extensions": "4.0.10-beta-*",
                 "System.Security.Claims": "4.0.0.0-beta-*",
@@ -25,6 +40,7 @@
                 "System.Security.Principal": "4.0.0-beta-*",
                 "System.Text.RegularExpressions": "4.0.10-beta-*",
                 "System.Threading": "4.0.0-beta-*",
+                "System.Threading.Tasks": "4.0.10-beta-*",
                 "System.Runtime.Serialization.Json": "4.0.0.0-beta-*"
             }
         }
