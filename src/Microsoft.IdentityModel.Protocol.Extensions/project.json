@@ -1,7 +1,8 @@
 {
     "version": "2.0.0-beta-2",
     "dependencies": {
-        "System.IdentityModel.Tokens": "5.0.0-beta-2"
+        "System.IdentityModel.Tokens": "5.0.0-beta-2",
+        "KoreBuild": "0.2.1.0-beta2-*"
     },
     "code": [ "**\\*.cs", "..\\common\\*.cs" ],
     "exclude": [
