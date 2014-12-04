@@ -24,47 +24,19 @@ namespace System.IdentityModel.Tokens
     {
         PrivateKeyStatus privateKeyStatus = PrivateKeyStatus.AvailabilityNotDetermined;
         readonly RSA rsa;
+        RSAParameters _rsaParamaeters;
 
-        public RsaSecurityKey(RSA rsa)
+        object hashAlg = null;
+
+        public RsaSecurityKey(RSAParameters parameters)
         {
-            if (rsa == null)
-                throw new ArgumentNullException("rsa");
-
-            this.rsa = rsa;
+            _rsaParamaeters = parameters;
         }
 
         public override int KeySize
         {
-            get { return this.rsa.KeySize; }
-        }
-
-        public override AsymmetricAlgorithm GetAsymmetricAlgorithm(string algorithm, bool requiresPrivateKey)
-        {
-            if (requiresPrivateKey && !HasPrivateKey())
-            {
-                throw new CryptographicException("NoPrivateKeyAvailable");
-            }
-
-            return this.rsa;
-        }
-
-        public override HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
-        {
-            if (string.IsNullOrEmpty(algorithm))
-            {
-                throw new ArgumentNullException("algorithm");
-            }
-
-            // TODO - brentsch - introduce Creation
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha1Signature:
-                    return SHA1.Create();
-                case SecurityAlgorithms.RsaSha256Signature:
-                    return SHA256.Create();
-                default:
-                    throw new CryptographicException("UnsupportedAlgorithmForCryptoOperation: " + algorithm);
-            }
+            // TODO - brentsch, this shouldn't be fixed size
+            get { return 2048; }
         }
 
         public override bool HasPrivateKey()
@@ -96,9 +68,7 @@ namespace System.IdentityModel.Tokens
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
-            {
-                throw new ArgumentNullException("algorithm");
-            }
+                return false;
 
             switch (algorithm)
             {
@@ -109,6 +79,22 @@ namespace System.IdentityModel.Tokens
                     return false;
             }
         }
+        //public override byte[] GetPublicBytes()
+        //{
+        //    return null;
+        //}
+
+        //public override byte[] GetPublicAndPrivateBytes()
+        //{
+        //    return null;
+        //}
+
+        public override SignatureProvider GetSignatureProvider(string algorithm)
+        {
+            return new AsymmetricSignatureProvider(this, algorithm, false);
+        }
+
+        public RSAParameters Parameters { get { return _rsaParamaeters; } }
 
         enum PrivateKeyStatus
         {

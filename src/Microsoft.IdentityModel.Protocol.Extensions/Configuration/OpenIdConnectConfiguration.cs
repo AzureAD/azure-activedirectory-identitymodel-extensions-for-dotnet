@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,6 +27,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Contains OpenIdConnect configuration that can be populated from a json string.
     /// </summary>
+    [JsonObject]
     public class OpenIdConnectConfiguration
     {
         private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
@@ -140,21 +142,25 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the authorization endpoint.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.AuthorizationEndpoint, Required = Required.Default)]
         public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets the check_session_iframe.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.CheckSessionIframe, Required = Required.Default)]
         public string CheckSessionIframe { get; set; }
 
         /// <summary>
         /// Gets or sets the end session endpoint.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.EndSessionEndpoint, Required = Required.Default)]
         public string EndSessionEndpoint { get; set; }
 
         /// <summary>
         /// Gets the collection of 'id_token_signing_alg_values_supported'.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IdTokenSigningAlgValuesSupported, Required = Required.Default)]
         public ICollection<string> IdTokenSigningAlgValuesSupported
         {
             get
@@ -166,11 +172,13 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the 'issuer'.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.Issuer, Required = Required.Default)]
         public string Issuer { get; set; }
 
         /// <summary>
         /// Gets or sets the 'jwks_uri'
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.JwksUri, Required = Required.Default)]
         public string JwksUri{ get; set; }
 
         /// <summary>
@@ -181,6 +189,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the collection of 'response_types_supported'.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ResponseTypesSupported, Required = Required.Default)]
         public ICollection<string> ResponseTypesSupported
         {
             get
@@ -201,19 +210,9 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets the <see cref="ICollection{SecurityToken}"/> that the IdentityProvider indicates are to be used signing tokens.
-        /// </summary>
-        public ICollection<SecurityToken> SigningTokens
-        {
-            get
-            {
-                return _signingTokens;
-            }
-        }
-
-        /// <summary>
         /// Gets the collection of 'subject_types_supported'.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.SubjectTypesSupported, Required = Required.Default)]
         public ICollection<string> SubjectTypesSupported
         {
             get
@@ -225,12 +224,13 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the 'token_endpoint'.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.TokenEndpoint, Required = Required.Default)]
         public string TokenEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets the 'user_info_endpoint'.
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.UserInfoEndpoint, Required = Required.Default)]
         public string UserInfoEndpoint { get; set; }
-
     }
 }

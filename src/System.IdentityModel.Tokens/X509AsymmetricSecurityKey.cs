@@ -28,6 +28,7 @@ namespace System.IdentityModel.Tokens
         bool privateKeyAvailabilityDetermined;
         PublicKey publicKey;
         RSA rsa;
+        object hashAlg = null;
 
         object thisLock = new Object();
 
@@ -94,28 +95,26 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        public override AsymmetricAlgorithm GetAsymmetricAlgorithm(string algorithm, bool requiresPrivateKey)
+        public override SignatureProvider GetSignatureProvider(string algorithm)
         {
+
             if (string.IsNullOrWhiteSpace("algorithm"))
                 throw new ArgumentNullException("algorithm");
 
-            if (requiresPrivateKey && !HasPrivateKey())
-            {
-                throw new CryptographicException("NoPrivateKeyAvailable");
-            }
+            //if (requiresPrivateKey && !HasPrivateKey())
+            //{
+            //    throw new CryptographicException("NoPrivateKeyAvailable");
+            //}
 
             if (IsSupportedAlgorithm(algorithm))
             {
-                if (requiresPrivateKey)
-                    return this.PrivateKey;
-
-                return this.PublicKey.Key;
+                return new AsymmetricSignatureProvider(this, algorithm, false);
             }
 
             throw new CryptographicException("Algorithm not supported: " + algorithm);
         }
 
-        public override HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
+        public HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
             {
@@ -141,6 +140,7 @@ namespace System.IdentityModel.Tokens
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
+            // TODO - brentsch, algorithm may not be a signature algorithm
             switch (algorithm)
             {
                 case SecurityAlgorithms.RsaSha256Signature:

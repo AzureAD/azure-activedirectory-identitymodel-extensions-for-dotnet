@@ -1,8 +1,8 @@
 {
-    "version": "2.0.0-beta-2",
+    "version": "2.0.2-beta-2",
     "dependencies": {
-        "System.IdentityModel.Tokens": "5.0.0-beta-2",
-        "KoreBuild": "0.2.1.0-beta2-*"
+        "Newtonsoft.Json": "6.0.6.0",
+        "System.IdentityModel.Tokens": "5.0.2-beta-*"
     },
     "code": [ "**\\*.cs", "..\\common\\*.cs" ],
     "exclude": [
@@ -18,7 +18,7 @@
     ],
     "frameworks": {
         "aspnet50": {
-          "frameworkAssemblies": {
+            "frameworkAssemblies": {
                 "System.Net.Http": ""
             }
         },
@@ -48,6 +48,7 @@
     },
     "compilationOptions": {
         "allowUnsafe": true,
+        "define": [ "USE_STRINGS_FOR_RSA" ],
         "warningsAsErrors": false
     }
 }

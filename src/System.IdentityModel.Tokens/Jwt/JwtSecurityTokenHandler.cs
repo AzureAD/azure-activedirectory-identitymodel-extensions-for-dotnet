@@ -632,7 +632,13 @@ namespace System.IdentityModel.Tokens
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm)
         {
             // in the case that a SignatureProviderFactory can handle nulls, just don't check here.
+            //SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
+
+#if SignatureProvider
             SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
+#else
+            SignatureProvider signatureProvider = key.GetSignatureProvider(algorithm);
+#endif
             if (signatureProvider == null)
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10636, key == null ? "Null" : key.ToString(), algorithm == null ? "Null" : algorithm));
@@ -699,18 +705,10 @@ namespace System.IdentityModel.Tokens
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
                 securityKey = validationParameters.IssuerSigningKeyResolver(token, jwt, kid, validationParameters);
-                if (securityKey == null)
-                {
-                    throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10505, kid, jwt.ToString()));
-                }
             }
             else
             {
                 securityKey = ResolveIssuerSigningKey(token, jwt, kid, validationParameters);
-                if (securityKey == null)
-                {
-                    throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10500, kid, jwt.ToString()));
-                }
             }
 
             // if a security key couldn't be resolved, then try them all in else

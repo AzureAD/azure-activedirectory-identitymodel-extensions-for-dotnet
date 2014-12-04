@@ -18,10 +18,19 @@
 
 namespace System.IdentityModel.Tokens
 {
-    public abstract class SecurityKey
+    public interface ISignatureAlgorithm
     {
-        public abstract int KeySize { get; }
-        public string KeyId { get; set; }
-        public abstract bool IsSupportedAlgorithm(string algorithm);
+        // TODO - brentsch, add buffer offset???
+        //void SignData(byte[] buffer, int offset, int count, object halg);
+        byte[] SignData(byte[] buffer);
+
+        // TODO - brentsch, do we need 'str' parameter? since we asked the key for a specific algorithm?
+        //byte[] SignHash(byte[] rgbHash, string str);
+
+        //bool VerifyData(byte[] buffer, object halg, byte[] signature);
+
+        // TODO - brentsch, do we need 'str' parameter? since we asked the key for a specific algorithm?
+        //bool VerifyHash(byte[] rgbHash, string str, byte[] rgbSignature);
+        bool VerifyData(byte[] data, byte[] rgbSignature);
     }
 }

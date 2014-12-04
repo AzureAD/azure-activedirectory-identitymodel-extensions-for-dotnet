@@ -18,27 +18,32 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/draft-ietf-jose-json-web-key-25.
     /// </summary>
+
+    [JsonObject]
     public class JsonWebKey
     {
         // kept private to hide that a List is used.
         // public member returns an IList.
         private IList<string> _certificateClauses = new List<string>();
 
-        static JsonWebKey()
-        {
-        }
-
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKey"/>.
         /// </summary>
         public JsonWebKey()
         {
+        }
+
+        static public JsonWebKey Create(string json)
+        {
+            return JsonConvert.DeserializeObject<JsonWebKey>(json);
         }
 
         /// <summary>
@@ -52,7 +57,23 @@ namespace Microsoft.IdentityModel.Protocols
                 return;
             }
 
-            // TODO - brent, serializer
+            // TODO - brent, serializer needs to be pluggable
+            var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
+            Copy(key);
+        }
+
+        private void Copy(JsonWebKey key)
+        {
+            this.Alg = key.Alg;
+            this.E = key.E;
+            this.KeyOps = key.KeyOps;
+            this.Kid = key.Kid;
+            this.Kty = key.Kty;
+            this.N = key.N;
+            this.Use = key.Use;
+            this._certificateClauses = key._certificateClauses;
+            this.X5t = key.X5t;
+            this.X5u = key.X5u;
         }
 
         /// <summary>
@@ -84,7 +105,12 @@ namespace Microsoft.IdentityModel.Protocols
                     str = obj as string;
                     if (str != null)
                     {
+                    // TODO - brentsch, log an error if not right type
+#if USE_STRINGS_FOR_RSA
                         E = str;
+#else
+                        E = Base64UrlEncoder.DecodeBytes(str);
+#endif
                     }
                 }
 
@@ -120,7 +146,11 @@ namespace Microsoft.IdentityModel.Protocols
                     str = obj as string;
                     if (str != null)
                     {
+#if USE_STRINGS_FOR_RSA
                         N = str;
+#else
+                        N = Base64UrlEncoder.DecodeBytes(str);
+#endif
                     }
                 }
 
@@ -176,36 +206,56 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the 'alg' (KeyType).
         /// </summary>       
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Alg, Required = Required.Default)]
         public string Alg { get; set; }
 
         /// <summary>
         /// Gets or sets the E 'e'
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.E, Required = Required.Default)]
+#if USE_STRINGS_FOR_RSA
         public string E { get; set; }
+#else
+        [JsonConverter(typeof(Base64UrlConverter))]
+        public byte[] E { get; set; }
 
+#endif
         /// <summary>
         /// Gets or sets the 'key_ops' (Key Operations).
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.KeyOps, Required = Required.Default)]
         public string KeyOps { get; set; }
 
         /// <summary>
         /// Gets or sets the 'kid' (Key ID).
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kid, Required = Required.Default)]
         public string Kid { get; set; }
 
         /// <summary>
         /// Gets or sets the 'kty' (Key Type).
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kty, Required = Required.Default)]
         public string Kty { get; set; }
 
-        /// <summary>
-        /// Gets or sets the modulus 'n'
-        /// </summary>
+        // RSA modulus, in Base64.
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.N, Required = Required.Default)]
+#if USE_STRINGS_FOR_RSA
         public string N { get; set; }
+#else
+        [JsonConverter( typeof( Base64UrlConverter ) )]
+        public byte[] N { get; set; }
+#endif
+        /// <summary>
+        /// Gets or sets the 'use' (Public Key Use).
+        /// </summary>       
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Use, Required = Required.Default)]
+        public string Use { get; set; }
 
         /// <summary>
         /// Gets the 'x5c' collection (X.509 Certificate Chain).
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5c, Required = Required.Default)]
         public IList<string> X5c
         {
             get
@@ -217,16 +267,13 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the 'k5t' (X.509 Certificate SHA-1 thumbprint).
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5t, Required = Required.Default)]
         public string X5t { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x5u' (X.509 URL).
         /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5u, Required = Required.Default)]
         public string X5u { get; set; }
-
-        /// <summary>
-        /// Gets or sets the 'use' (Public Key Use).
-        /// </summary>       
-        public string Use { get; set; }
     }
 }

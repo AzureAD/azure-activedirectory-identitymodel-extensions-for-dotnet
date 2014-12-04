@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -57,7 +58,10 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("json");
             }
 
-            // TODO - brent, serializer
+            // TODO - brent, serializer needs to be pluggable
+            var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
+
+            _keys = jwebKeys._keys;
         }
 
         /// <summary>
@@ -87,9 +91,8 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets the Keys translated to <see cref="IList{SecurityToken}"/>.
+        /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
         /// </summary>
-        /// <returns>A <see cref="X509SecurityToken"/> for each 'X5c' that is composed from a single certificate. A NamedKeySecurityToken for each raw rsa public key.</returns>
         public IList<SecurityKey> GetSigningKeys()
         {
             List<SecurityKey> keys = new List<SecurityKey>();
@@ -97,64 +100,61 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 JsonWebKey webKey = _keys[i];
 
-                // create NamedSecurityToken for Kid'base64String, only RSA keys are supported.
+                // TODO - brentsch, add support for other keys
                 if (!StringComparer.Ordinal.Equals(webKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
                     continue;
 
                 if ((string.IsNullOrWhiteSpace(webKey.Use) || (StringComparer.Ordinal.Equals(webKey.Use, JsonWebKeyUseNames.Sig))))
                 {
-                    if (webKey.X5c.Count == 1 && !string.IsNullOrWhiteSpace(webKey.X5c[0]))
+                    if (webKey.X5c != null)
                     {
-                        try
+                        foreach (var certString in webKey.X5c)
                         {
-                            // Add chaining
-                            X509Certificate2 cert = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
-                            if (!string.IsNullOrWhiteSpace(webKey.Kid))
+                            try
                             {
-                                // TODO, brent - figure out KID
-                                //keys.Add(new X509SecurityKey(cert, webKey.Kid));
-                                keys.Add(new X509SecurityKey(cert));
+                                // Add chaining
+                                SecurityKey key = new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(certString)));
+                                key.KeyId = webKey.Kid;
+                                keys.Add(key);
                             }
-                            else
+                            catch (CryptographicException ex)
                             {
-                                keys.Add(new X509SecurityKey(cert));
+                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), ex);
                             }
-                        }
-                        catch (CryptographicException ex)
-                        {
-                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), ex);
-                        }
-                        catch (FormatException fex)
-                        {
-                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), fex);
+                            catch (FormatException fex)
+                            {
+                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), fex);
+                            }
                         }
                     }
 
-                    // only support public RSA
+                    // TODO - brentsch, support private RSA
+#if USE_STRINGS_FOR_RSA
                     if (!string.IsNullOrWhiteSpace(webKey.E) && !string.IsNullOrWhiteSpace(webKey.N))
+#else
+                    if ((webKey.E != null) && (webKey.N != null))
+#endif
                     {
                         try
                         {
-                            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-                            rsa.ImportParameters(
-                                new RSAParameters
-                                {
-                                    Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                                    Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                                }
-                            );
+                            SecurityKey key =
+                                 new RsaSecurityKey
+                                 (
+                                     new RSAParameters
+                                    {
+                                    // TODO - brentsch, get rid of this #if - make a choice :-)
+#if USE_STRINGS_FOR_RSA
+                                        Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
+                                        Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
+#else
+                                        Exponent = webKey.E,
+                                        Modulus =  webKey.N,
+#endif
+                                    }
 
-                            if (string.IsNullOrWhiteSpace(webKey.Kid))
-                            {
-                                // TODO, brent - figure out KID
-                                //keys.Add(JsonWebKeyParameterNames.Kid, Guid.NewGuid().ToString(), new RsaSecurityKey(rsa)));
-                                keys.Add(new RsaSecurityKey(rsa));
-                            }
-                            else
-                            {
-                                //keys.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, webKey.Kid, new RsaSecurityKey(rsa)));
-                                keys.Add(new RsaSecurityKey(rsa));
-                            }
+                                );
+                            key.KeyId = webKey.Kid;
+                            keys.Add(key);
                         }
                         catch (CryptographicException ex)
                         {

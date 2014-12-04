@@ -46,14 +46,14 @@ namespace Microsoft.IdentityModel.Protocols
             strBuilder.Append(PostTitle);
             strBuilder.Append("</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"");
             strBuilder.Append(Uri.EscapeDataString(IssuerAddress));
-            strBuilder.Append(">");
+            strBuilder.Append("\">");
             foreach (KeyValuePair<string, string> parameter in _parameters)
             {
                 strBuilder.Append("<input type=\"hidden\" name=\"");
                 strBuilder.Append(Uri.EscapeDataString(parameter.Key));
                 strBuilder.Append("\" value=\"");
                 strBuilder.Append(Uri.EscapeDataString(parameter.Value));
-                strBuilder.Append(" />");
+                strBuilder.Append("\" />");
             }
 
             strBuilder.Append("<noscript><p>");

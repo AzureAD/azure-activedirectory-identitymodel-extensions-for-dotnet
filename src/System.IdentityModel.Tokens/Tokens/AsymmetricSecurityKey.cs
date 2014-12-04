@@ -22,8 +22,10 @@ namespace System.IdentityModel.Tokens
 
     public abstract class AsymmetricSecurityKey : SecurityKey
     {
-        public abstract AsymmetricAlgorithm GetAsymmetricAlgorithm(string algorithm, bool privateKey);
-        public abstract HashAlgorithm GetHashAlgorithmForSignature(string algorithm);
         public abstract bool HasPrivateKey();
+
+        //public abstract byte[] GetPublicBytes();
+
+        //public abstract byte[] GetPublicAndPrivateBytes();
     }
 }

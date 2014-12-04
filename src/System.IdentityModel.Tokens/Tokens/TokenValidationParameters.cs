@@ -37,7 +37,7 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
     /// <param name="securityToken">the <SecurityToken> that is being validated. It may be null.</SecurityToken></param>
-    /// <param name="keyIdentifier">the <see cref="SecurityKeyIdentifier"/> found in the token. It may be null.</param>
+    /// <param name="kid">a key identifier. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns></returns>
     public delegate SecurityKey IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
