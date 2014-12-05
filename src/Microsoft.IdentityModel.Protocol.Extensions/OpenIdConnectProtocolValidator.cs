@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Protocols
                 { JwtAlgorithms.RSA_SHA512, "SHA512" },
                 { JwtAlgorithms.HMAC_SHA512, "SHA512" },
           };
+
         private TimeSpan _nonceLifetime = DefaultNonceLifetime;
 
         /// <summary>
@@ -257,22 +258,20 @@ namespace Microsoft.IdentityModel.Protocols
                 algorithm = JwtAlgorithms.RSA_SHA256;
             }
 
-            string alg = string.Empty;
-            if (HashAlgorithmMap.TryGetValue(algorithm, out alg))
-            {
-                algorithm = alg;
-            }
-
             try
             {
                 try
                 {
-                    // todo factory for creation
-
-                    if (algorithm == JwtAlgorithms.RSA_SHA256)
+                    switch (algorithm)
                     {
-                        hashAlgorithm = SHA256.Create();
+                        case "SHA256":
+                        case JwtAlgorithms.RSA_SHA256:
+                        case JwtAlgorithms.ECDSA_SHA256:
+                        case JwtAlgorithms.HMAC_SHA256:
+                            hashAlgorithm = SHA256.Create();
+                            break;
                     }
+
                 }
                 catch (Exception ex)
                 {
