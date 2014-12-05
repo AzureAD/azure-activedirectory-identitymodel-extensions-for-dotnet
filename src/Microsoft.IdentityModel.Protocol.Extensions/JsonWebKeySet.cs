@@ -16,14 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -34,10 +33,6 @@ namespace Microsoft.IdentityModel.Protocols
     public class JsonWebKeySet
     {
         private List<JsonWebKey> _keys = new List<JsonWebKey>();
-
-        static JsonWebKeySet()
-        {
-        }
 
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKeySet"/>.
@@ -76,7 +71,20 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("dictionary");
             }
 
-            SetFromDictionary(dictionary);
+            object obj = null;
+            if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
+            {
+                throw new ArgumentException(ErrorMessages.IDX10800);
+            }
+
+            List<object> keys = obj as List<object>;
+            if (keys != null)
+            {
+                foreach (var key in keys)
+                {
+                    _keys.Add(new JsonWebKey(key as Dictionary<string, object>));
+                }
+            }
         }
 
         /// <summary>
@@ -170,23 +178,5 @@ namespace Microsoft.IdentityModel.Protocols
 
             return keys;
         }
-
-        private void SetFromDictionary(IDictionary<string, object> dictionary)
-        {
-            object obj = null;
-            if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
-            {
-                throw new ArgumentException(ErrorMessages.IDX10800);
-            }
-
-            List<object> keys = obj as List<object>;
-            if (keys != null)
-            {
-                foreach (var key in keys)
-                {
-                    _keys.Add(new JsonWebKey(key as Dictionary<string, object>));
-                }
-            }
-         }
     }
 }
