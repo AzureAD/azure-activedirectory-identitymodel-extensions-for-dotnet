@@ -33,6 +33,14 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Answers if this <see cref="SignatureProvider"/> supports the key, algorithm pair.
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/> for key material.</param>
+        /// <param name="algorithm">the crypto algorithm to use.</param>
+        /// <returns>'true' if algorithm is supported.</returns>
+        public abstract bool IsSupportedAlgorithm(SecurityKey key, string algorithm);
+
+        /// <summary>
         /// Produces a signature over the 'input'
         /// </summary>
         /// <param name="input">bytes to sign.</param>

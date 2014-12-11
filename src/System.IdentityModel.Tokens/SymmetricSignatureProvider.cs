@@ -101,6 +101,12 @@ namespace System.IdentityModel.Tokens
             }
         }
 
+        public override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            // TODO - brentsch, add support for symmetric algorithms
+            return false;
+        }
+
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="SymmetricSecurityKey"/> and 'algorithm' passed to <see cref="SymmetricSignatureProvider( SymmetricSecurityKey, string )"/>.
         /// </summary>

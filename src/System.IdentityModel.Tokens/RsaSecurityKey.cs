@@ -20,87 +20,73 @@ namespace System.IdentityModel.Tokens
 {
     using System.Security.Cryptography;
 
-    sealed public class RsaSecurityKey : AsymmetricSecurityKey
+    public class RsaSecurityKey : AsymmetricSecurityKey
     {
-        PrivateKeyStatus privateKeyStatus = PrivateKeyStatus.AvailabilityNotDetermined;
-        readonly RSA rsa;
-        RSAParameters _rsaParamaeters;
+        private RSAParameters _rsaParamaeters;
 
-        object hashAlg = null;
-
-        public RsaSecurityKey(RSAParameters parameters)
+        public RsaSecurityKey(RSAParameters rsaParameters)
         {
-            _rsaParamaeters = parameters;
+            // must have private or public key
+            // TODO - brentsch, D.Length must == Modulus.Length
+
+            if (   !(rsaParameters.D == null || rsaParameters.DP == null || rsaParameters.DQ == null || rsaParameters.P == null || rsaParameters.Q == null)
+                && !(rsaParameters.Exponent == null || rsaParameters.Modulus == null))
+            {
+                // TODO - brentsch - error message
+                throw new ArgumentException("no public or private key material found");
+            }
+
+            _rsaParamaeters = rsaParameters;
         }
 
         public override int KeySize
         {
-            // TODO - brentsch, this shouldn't be fixed size
-            get { return 2048; }
+            get
+            {
+                if (HasPublicKey)
+                    return _rsaParamaeters.Modulus.Length * 8;
+                else if (HasPrivateKey)
+                    return _rsaParamaeters.D.Length * 8;
+                else
+                    return 0;
+            }
         }
 
-        public override bool HasPrivateKey()
+        public override bool HasPrivateKey
         {
-            if (this.privateKeyStatus == PrivateKeyStatus.AvailabilityNotDetermined)
+            get
             {
-                RSACryptoServiceProvider rsaCryptoServiceProvider = this.rsa as RSACryptoServiceProvider;
-                if (rsaCryptoServiceProvider != null)
-                {
-                    this.privateKeyStatus = rsaCryptoServiceProvider.PublicOnly ? PrivateKeyStatus.DoesNotHavePrivateKey : PrivateKeyStatus.HasPrivateKey;
-                }
-                else
-                {
-                    try
-                    {
-                        byte[] hash = new byte[20];
-                        this.rsa.DecryptValue(hash); // imitate signing
-                        this.privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
-                    }
-                    catch (CryptographicException)
-                    {
-                        this.privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
-                    }
-                }
+                return !(_rsaParamaeters.D == null || _rsaParamaeters.DP == null || _rsaParamaeters.DQ == null || _rsaParamaeters.P == null || _rsaParamaeters.Q == null);
             }
-            return this.privateKeyStatus == PrivateKeyStatus.HasPrivateKey;
+        }
+
+        public override bool HasPublicKey
+        {
+            get
+            {
+                return !(_rsaParamaeters.Exponent == null || _rsaParamaeters.Modulus == null);
+            }
         }
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
+            return SignatureProviderFactory.IsSupportedAlgorithm(this, algorithm);
+        }
 
-            switch (algorithm)
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
+        {
+            if (verifyOnly)
+                return SignatureProviderFactory.CreateForVerifying(this, algorithm);
+            else
+                return SignatureProviderFactory.CreateForSigning(this, algorithm);
+        }
+
+        public RSAParameters Parameters
+        {
+            get
             {
-                case SecurityAlgorithms.RsaSha1Signature:
-                case SecurityAlgorithms.RsaSha256Signature:
-                    return true;
-                default:
-                    return false;
+                return _rsaParamaeters;
             }
-        }
-        //public override byte[] GetPublicBytes()
-        //{
-        //    return null;
-        //}
-
-        //public override byte[] GetPublicAndPrivateBytes()
-        //{
-        //    return null;
-        //}
-
-        public override SignatureProvider GetSignatureProvider(string algorithm)
-        {
-            return new AsymmetricSignatureProvider(this, algorithm, false);
-        }
-
-        public RSAParameters Parameters { get { return _rsaParamaeters; } }
-
-        enum PrivateKeyStatus
-        {
-            AvailabilityNotDetermined,
-            HasPrivateKey,
-            DoesNotHavePrivateKey
         }
     }
 }

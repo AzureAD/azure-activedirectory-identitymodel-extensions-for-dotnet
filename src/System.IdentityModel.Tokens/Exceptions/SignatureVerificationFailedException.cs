@@ -32,8 +32,7 @@ namespace System.IdentityModel
         /// Initializes a new instance of  <see cref="SignatureVerificationFailedException"/>
         /// </summary>
         public SignatureVerificationFailedException()
-            : base("Signature Failed")
-            // TODO - brentsch Error message.
+            : base()
         {
         }
 

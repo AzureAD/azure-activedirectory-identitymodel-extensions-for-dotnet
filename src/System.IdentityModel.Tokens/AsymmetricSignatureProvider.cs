@@ -113,8 +113,76 @@ namespace System.IdentityModel.Tokens
                 return;    
             }
 
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                rsa = x509Key.pnew RSACryptoServiceProvider();
+                rsa.ImportParameters(rsaKey.Parameters);
+
+                // TODO - brentsch - SHA384, SHA512
+                if (algorithm == SecurityAlgorithms.RsaSha1Signature)
+                {
+                    hash = SHA1.Create();
+                }
+
+                if (algorithm == SecurityAlgorithms.RsaSha256Signature)
+                {
+                    hash = SHA256.Create();
+                }
+
+                return;
+            }
+
             throw new NotSupportedException("algorithm not supported");
 
+        }
+
+        public override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            RsaSecurityKey rsaSecurityKey = key as RsaSecurityKey;
+            if (rsaSecurityKey != null)
+                return AsymmetricSignatureProvider.IsSupportedAlgorithm(rsaSecurityKey, algorithm);
+
+            return false;
+        }
+
+        public static bool IsSupportedAlgorithm(X509SecurityKey key, string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha1Signature:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSha512Signature:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsSupportedAlgorithm(RsaSecurityKey key, string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha1Signature:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSha512Signature:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
 
         /// <summary>

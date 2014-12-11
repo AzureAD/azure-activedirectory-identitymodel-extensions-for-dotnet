@@ -24,11 +24,11 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
-using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+//using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+//using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 
-namespace Microsoft.IdentityModel.Test
+namespace System.IdentityModel.Test
 {
     /// <summary>
     /// Main purpose of this code is to serve up Identities
@@ -48,20 +48,39 @@ namespace Microsoft.IdentityModel.Test
         /// <returns></returns>
         public static string CreateCHash(string authorizationCode, string algorithm)
         {
-            HashAlgorithm hashAlgorithm = HashAlgorithm.Create(algorithm);
+            HashAlgorithm hashAlgorithm = null;
+            switch (algorithm)
+            {
+                case "SHA1":
+                    hashAlgorithm = SHA1.Create();
+                    break;
+                case "SHA256":
+                    hashAlgorithm = SHA256.Create();
+                    break;
+                case "SHA384":
+                    hashAlgorithm = SHA384.Create();
+                    break;
+                case "SHA512":
+                    hashAlgorithm = SHA512.Create();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("Hash algorithm not known: " + algorithm);
+            }
+
             byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(authorizationCode));
             return Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
         }
 
-        public static string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
-        {
-            return CreateJwtToken(tokenDescriptor, new JwtSecurityTokenHandler());
-        }
+        // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
+        //public static string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
+        //{
+        //    return CreateJwtToken(tokenDescriptor, new JwtSecurityTokenHandler());
+        //}
 
-        public static string CreateJwtToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
-        {
-            return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
-        }
+        //public static string CreateJwtToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        //{
+        //    return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
+        //}
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string originalIssuer = null)
         {
@@ -71,15 +90,17 @@ namespace Microsoft.IdentityModel.Test
             return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
         }
 
+#if INCLUDE_SAML
         public static JwtSecurityToken CreateJwtSecurityToken()
         {
             return CreateJwtSecurityToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor) as JwtSecurityToken;
         }
 
-        public static JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
-        {
-            return (new JwtSecurityTokenHandler()).CreateToken(tokenDescriptor) as JwtSecurityToken;
-        }
+        // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
+        //public static JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
+        //{
+        //    return (new JwtSecurityTokenHandler()).CreateToken(tokenDescriptor) as JwtSecurityToken;
+        //}
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string originalIssuer, IEnumerable<Claim> claims, SigningCredentials signingCredentials)
         {
@@ -88,11 +109,13 @@ namespace Microsoft.IdentityModel.Test
             return new JwtSecurityToken(header, payload);
         }
 
+
         public static string CreateSaml2Token()
         {
             return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
         }
 
+        // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor)
         {
             return CreateSaml2Token(securityTokenDescriptor, new IMSaml2TokenHandler());
@@ -143,14 +166,14 @@ namespace Microsoft.IdentityModel.Test
             writer.Close();
             return sb.ToString();
         }
-
+#endif
         public const string DefaultAuthenticationType = "Federation";
 
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }
         public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
 
-        public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2; } }
-        public static SecurityToken DefaultAsymmetricSigningToken { get { return KeyingMaterial.DefaultAsymmetricX509Token_2048; ; } }
+        public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2; } }
+        public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; } }
 
         public static IEnumerable<Claim> DefaultClaims 
         { 
@@ -187,7 +210,7 @@ namespace Microsoft.IdentityModel.Test
         public const string DefaultOriginalIssuer = "http://gotjwt.com/Original";
 
         public static SigningCredentials DefaultSymmetricSigningCredentials { get { return KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2; } }
-        public static SecurityToken DefaultSymmetricSigningToken { get { return KeyingMaterial.DefaultSymmetricSecurityToken_256; ; } }
+        public static SecurityKey DefaultSymmetricSigningKey { get { return KeyingMaterial.DefaultSymmetricSecurityKey_256; ; } }
         public static string DefaultAsymmetricJwt
         {
             get { return DefaultJwt(DefaultAsymmetricSecurityTokenDescriptor); }
@@ -201,7 +224,16 @@ namespace Microsoft.IdentityModel.Test
         public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
+
+            return tokenHandler.WriteToken(
+                tokenHandler.CreateToken(
+                    audience: securityTokenDescriptor.Audience,
+                    expires: securityTokenDescriptor.Expires,
+                    notBefore: securityTokenDescriptor.NotBefore,
+                    issuer: securityTokenDescriptor.Issuer,
+                    subject: new ClaimsIdentity(securityTokenDescriptor.Claims),
+                    signingCredentials: securityTokenDescriptor.SigningCredentials                    
+                    ));
         }
 
         public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor
@@ -218,30 +250,31 @@ namespace Microsoft.IdentityModel.Test
         {
             return new SecurityTokenDescriptor
             {
-                AppliesToAddress = DefaultAudience,
+                Audience = DefaultAudience,
                 SigningCredentials = signingCredentials,
-                Subject = DefaultClaimsIdentity,
-                TokenIssuerName = DefaultIssuer,
-                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
+                Claims = DefaultClaims,
+                Issuer = DefaultIssuer,
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
             };
         }
 
         public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
         {
-            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningToken); }
+            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }
         }
 
         public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
         {
-            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningToken); }
+            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningKey); }
         }
 
-        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityToken securityToken)
+        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityKey key)
         {
             return new TokenValidationParameters
             {
                 AuthenticationType = DefaultAuthenticationType,
-                IssuerSigningToken = securityToken,
+                IssuerSigningKey = key,
                 ValidAudience = DefaultAudience,
                 ValidIssuer = DefaultIssuer,
             };
@@ -274,7 +307,7 @@ namespace Microsoft.IdentityModel.Test
         public const string NotDefaultIssuer = "http://notgotjwt.com";
         public const string NotDefaultOriginalIssuer = "http://notgotjwt.com/Original";
         public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
-        public static SecurityToken NotDefaultSigningToken = KeyingMaterial.DefaultX509Token_2048;
+        public static SecurityKey NotDefaultSigningKey = KeyingMaterial.RsaSecurityKey_2048;
         
         public static bool AudienceValidatorReturnsTrue(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {

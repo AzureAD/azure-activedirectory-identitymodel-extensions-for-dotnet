@@ -1,12 +1,41 @@
 {
     "version": "5.0.2-beta-2",
     "dependencies": {
-        "Newtonsoft.Json": "6.0.6.0"
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.2-beta-*",
+        "Newtonsoft.Json": "6.0.6.0",
+        "Shouldly": "1.1.1.1",
+        "System.IdentityModel.Tokens": "5.0.2-beta-*",
+        "Xunit.KRunner": "1.0.0-*"
     },
+    "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
-        "SecurityTokenDescriptor.cs",
-        "SignatureVerificationFailedException.cs",
-        "Tokens/SymmetricKey.cs"
+        "CreateAndValidateTokens.cs",
+        "ExtensibilityTests.cs",
+        "JwtConfigTests.cs",
+        "JwtDerivedTestTypes.cs",
+        "JwtHeaderTests.cs",
+        "JwtPayloadTest.cs",
+        "JwtSecurityTokenHandlerTests.cs",
+        "JwtSecurityTokenRequirementTests.cs",
+        "JwtSecurityTokenTests.cs",
+        "JwtTestUtilities.cs",
+        "NamedKeyIssuerTokenResolverConfigTest.cs",
+        "NamedKeyIssuerTokenResolverTests.cs",
+        "NamedKeySecurityKeyIdentifierClauseTests.cs",
+        "NamedKeySecurityTokenTests.cs",
+        "Performance.cs",
+        "References.cs",
+        "RemoteDomain.cs",
+        "RemoteDomainManager.cs",
+        "SignatureProviderTests.cs",
+        "TestContextProvider.cs",
+        "TokenValidationParametersTests.cs",
+        "TokenValidationParams.cs",
+        "TokenValidationParamsTests.cs",
+        "V1ToV2Converter.cs",
+        "ValidatorsTests.cs",
+        "X509CertificateValidatorExTests.cs",
+        "X509SecurityKeyTests.cs"
     ],
     "frameworks": {
        "aspnet50": {},

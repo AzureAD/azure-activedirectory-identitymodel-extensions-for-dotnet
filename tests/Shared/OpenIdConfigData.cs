@@ -152,15 +152,27 @@ namespace Microsoft.IdentityModel.Test
                     TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
                 };
 
-            RSACryptoServiceProvider rsa1 = new RSACryptoServiceProvider();
-            RSACryptoServiceProvider rsa2 = new RSACryptoServiceProvider();
-            RSACryptoServiceProvider rsa3 = new RSACryptoServiceProvider();
-            string base64String1 = Convert.ToBase64String(Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected1.N));
-            rsa1.FromXmlString(string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, base64String1, JsonWebKeyFromPingExpected1.E));
-            string base64String2 = Convert.ToBase64String(Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected2.N));
-            rsa2.FromXmlString(string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, base64String2, JsonWebKeyFromPingExpected2.E));
-            string base64String3 = Convert.ToBase64String(Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected3.N));
-            rsa3.FromXmlString(string.Format(CultureInfo.InvariantCulture, rsaImportTemplate, base64String3, JsonWebKeyFromPingExpected3.E));
+
+            RSAParameters rsa1 =
+                new RSAParameters
+                {
+                    Exponent = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected1.E),
+                    Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected1.N)
+                };
+
+            RSAParameters rsa2 =
+                new RSAParameters
+                {
+                    Exponent = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected2.E),
+                    Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected2.N)
+                };
+
+            RSAParameters rsa3 =
+                new RSAParameters
+                {
+                    Exponent = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected3.E),
+                    Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected3.N)
+                };
 
             OpenIdConnectConfigurationPingLabsJWKS =
                 new OpenIdConnectConfiguration()
@@ -168,7 +180,7 @@ namespace Microsoft.IdentityModel.Test
                     JwksUri = "PingLabsJWKS.json",
                 };
 
-            OpenIdConnectConfigurationPingLabsJWKS.SigningTokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, JsonWebKeyFromPingExpected1.Kid, new RsaSecurityKey(rsa1)));
+            OpenIdConnectConfigurationPingLabsJWKS.SigningKTokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, JsonWebKeyFromPingExpected1.Kid, new RsaSecurityKey(rsa1)));
             OpenIdConnectConfigurationPingLabsJWKS.SigningTokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, JsonWebKeyFromPingExpected2.Kid, new RsaSecurityKey(rsa2)));
             OpenIdConnectConfigurationPingLabsJWKS.SigningTokens.Add(new NamedKeySecurityToken(JsonWebKeyParameterNames.Kid, JsonWebKeyFromPingExpected3.Kid, new RsaSecurityKey(rsa3)));
 

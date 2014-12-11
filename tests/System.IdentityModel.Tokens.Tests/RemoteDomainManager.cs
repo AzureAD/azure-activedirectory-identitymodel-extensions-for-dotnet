@@ -16,13 +16,21 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace System.IdentityModel.Test
 {
-    using System.Security.Cryptography;
-
-    public abstract class AsymmetricSecurityKey : SecurityKey
+    /// <summary>
+    /// Part of the machinery for simulating loading config from web.config
+    /// </summary>
+    [Serializable]
+    public abstract class RemoteDomainManager : MarshalByRefObject
     {
-        public abstract bool HasPrivateKey { get; }
-        public abstract bool HasPublicKey { get; }
+        public static T CreateInDomain<T>( AppDomain domain )
+        {
+            return (T)domain.CreateInstanceAndUnwrap( typeof( T ).Assembly.FullName, typeof( T ).FullName );
+        }
+
+        public abstract void Start( string testCase );
+        public abstract void Stop();
+        public abstract void TearDown();
     }
 }

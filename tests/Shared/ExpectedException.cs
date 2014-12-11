@@ -18,15 +18,12 @@
 
 #define  _Verbose
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Configuration;
 using System.Globalization;
-using System.IdentityModel;
 using System.IdentityModel.Tokens;
 using System.IO;
+using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace System.IdentityModel.Test
 {
     /// <summary>
     /// When a test case throws an exception, this class helps to determine if the exception is as exptected.
@@ -55,10 +52,6 @@ namespace Microsoft.IdentityModel.Test
             return new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: substringExpected, innerTypeExpected: inner); 
         }
 
-        public static ExpectedException ConfigurationErrorsException(string substringExpected = null, Type inner = null)
-        {
-            return new ExpectedException(typeExpected: typeof(ConfigurationErrorsException), substringExpected: substringExpected, innerTypeExpected: inner);
-        }
         public Type InnerTypeExpected { get; set; }
 
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
@@ -89,23 +82,18 @@ namespace Microsoft.IdentityModel.Test
 
         public void ProcessException(Exception exception)
         {
-            // no need to check unit test asertions.
-            if (typeof(Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException) == exception.GetType())
-            {
-                throw exception;
-            }
 
             if (TypeExpected == null)
             {
-                Assert.IsNull(exception, "Did NOT expect exception, caught: '" + exception + "'");
+                Assert.True(exception == null, "Did NOT expect exception, caught: '" + exception + "'");
             }
             else
             {
-                Assert.IsNotNull(exception, "Expected exception of type: '" + TypeExpected + " 'exception' parameter was null");
-                Assert.AreEqual(TypeExpected, exception.GetType(), "Expected exception of type: '" + TypeExpected + "', caught: '" + exception + "'");
+                Assert.True(exception != null, "Expected exception of type: '" + TypeExpected + " 'exception' parameter was null");
+                Assert.True(TypeExpected == exception.GetType(), "Expected exception of type: '" + TypeExpected + "', caught: '" + exception + "'");
                 if (!string.IsNullOrWhiteSpace(SubstringExpected))
                 {
-                    Assert.IsTrue(exception.ToString().Contains(SubstringExpected), string.Format(CultureInfo.InvariantCulture, "Substring expected: '{0}', exception: '{1}'", SubstringExpected, exception.ToString()));
+                    Assert.True(exception.ToString().Contains(SubstringExpected), string.Format(CultureInfo.InvariantCulture, "Substring expected: '{0}', exception: '{1}'", SubstringExpected, exception.ToString()));
                 }
             }
 
@@ -113,14 +101,14 @@ namespace Microsoft.IdentityModel.Test
             {
                 if (exception != null && exception.InnerException != null)
                 {
-                    Assert.Fail("EXPECTED InnerException is null, but caught an exception where expection.InnerException != null. \nInnerExecption:\n" + exception.InnerException + "\nException:\n" + exception);
+                    Assert.True(false, "EXPECTED InnerException is null, but caught an exception where expection.InnerException != null. \nInnerExecption:\n" + exception.InnerException + "\nException:\n" + exception);
                 }
             }
             else
             {
-                Assert.IsNotNull(exception, "InnerException is NOT null, but EXPECTED InnerException is null. InnerTypeExpected: '" + InnerTypeExpected + ".");
-                Assert.IsNotNull(exception.InnerException, "'exception.InnerException' was NULL, expeced to find: '" + InnerTypeExpected + "'");
-                Assert.AreEqual(InnerTypeExpected, exception.InnerException.GetType(), "InnerExceptions didn't match on type, InnerTypeExpected:\n '" + InnerTypeExpected + "', exception.InnerException: '" + exception.InnerException + "'");
+                Assert.True(exception != null, "InnerException is NOT null, but EXPECTED InnerException is null. InnerTypeExpected: '" + InnerTypeExpected + ".");
+                Assert.True(exception.InnerException != null, "'exception.InnerException' was NULL, expeced to find: '" + InnerTypeExpected + "'");
+                Assert.True(InnerTypeExpected == exception.InnerException.GetType(), "InnerExceptions didn't match on type, InnerTypeExpected:\n '" + InnerTypeExpected + "', exception.InnerException: '" + exception.InnerException + "'");
             }
 
 #if _Verbose
@@ -132,7 +120,7 @@ namespace Microsoft.IdentityModel.Test
         {
             if (TypeExpected != null)
             {
-                Assert.Fail("Exception was expected, type: '" + TypeExpected + "'.");
+                Assert.True(false, "Exception was expected, type: '" + TypeExpected + "'.");
             }
         }
 

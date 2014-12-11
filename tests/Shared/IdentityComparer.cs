@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Test;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -139,17 +138,6 @@ namespace System.IdentityModel.Test
                 return true;
 
             return areEqual(t1, t2, context);
-        }
-
-        private static bool AreBootstrapContextsEqual(BootstrapContext bc1, BootstrapContext bc2, CompareContext context)
-        {
-            if (!AreEqual<SecurityToken>(bc1.SecurityToken, bc2.SecurityToken, context, AreSecurityTokensEqual))
-                return false;
-
-            if (!AreEqual<string>(bc1.Token, bc2.Token, context, AreStringsEqual))
-                return false;
-
-            return true;
         }
 
         private static bool AreBytesEqual(byte[] bytes1, byte[] bytes2)
@@ -319,10 +307,11 @@ namespace System.IdentityModel.Test
                 errors.Add("jsonWebkey1.Alg != jsonWebkey2.Alg: " + jsonWebkey1.Alg ?? "null" + ", " + jsonWebkey2.Alg ?? "null");
             }
 
-            if (!string.Equals(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps, context.StringComparison))
-            {
-                errors.Add("jsonWebkey1.KeyOps != jsonWebkey2.KeyOps: " + jsonWebkey1.KeyOps + ", " + jsonWebkey2.KeyOps);
-            }
+            // TODO - brentsch, KeyOps is a list <BREAKING>
+            //if (!string.Equals(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps, context.StringComparison))
+            //{
+            //    errors.Add("jsonWebkey1.KeyOps != jsonWebkey2.KeyOps: " + jsonWebkey1.KeyOps + ", " + jsonWebkey2.KeyOps);
+            //}
 
             if (!string.Equals(jsonWebkey1.Kid, jsonWebkey2.Kid, context.StringComparison))
             {
@@ -422,7 +411,8 @@ namespace System.IdentityModel.Test
             if (jwt1.ValidTo != jwt2.ValidTo)
                 return false;
 
-            if (!AreEnumsEqual<SecurityKey>(jwt1.SecurityKeys, jwt2.SecurityKeys, context, AreSecurityKeysEqual))
+            // TODO - brentsch, SecurityKeys missing just single KEY <BREAKING>
+            if (!AreSecurityKeysEqual(jwt1.SecurityKey, jwt2.SecurityKey, context))
                 return false;
 
             // no reason to check keys, as they are always empty for now.
@@ -448,8 +438,9 @@ namespace System.IdentityModel.Test
             if (!string.Equals(configuration1.JwksUri, configuraiton2.JwksUri, context.StringComparison))
                 return false;
 
-            if (!AreEnumsEqual<SecurityToken>(configuration1.SigningTokens, configuraiton2.SigningTokens, context, AreSecurityTokensEqual))
-                return false;
+            // TODO - brentsch, SigningTokens gone <BREAKING>
+            //if (!AreEnumsEqual<SecurityToken>(configuration1.SigningTokens, configuraiton2.SigningTokens, context, AreSecurityTokensEqual))
+            //    return false;
 
             if (!AreEnumsEqual<SecurityKey>(configuration1.SigningKeys, configuraiton2.SigningKeys, context, AreSecurityKeysEqual))
                 return false;
@@ -459,17 +450,18 @@ namespace System.IdentityModel.Test
 
             return true;
         }
-        
-        private static bool AreSecurityKeyIdentifiersEqual(SecurityKeyIdentifier ski1, SecurityKeyIdentifier ski2, CompareContext context)
-        {
-            if (ski1.GetType() == ski1.GetType())
-                return false;
 
-            if (ski1.Count != ski2.Count)
-                return false;
+        // TODO - brentsch, SecurityKeyIdentifier gone <BREAKING>
+        //private static bool AreSecurityKeyIdentifiersEqual(SecurityKeyIdentifier ski1, SecurityKeyIdentifier ski2, CompareContext context)
+        //{
+        //    if (ski1.GetType() == ski1.GetType())
+        //        return false;
 
-            return true;
-        }
+        //    if (ski1.Count != ski2.Count)
+        //        return false;
+
+        //    return true;
+        //}
      
         private static bool AreSecurityKeysEqual(SecurityKey securityKey1, SecurityKey securityKey2, CompareContext context)
         {
@@ -487,21 +479,22 @@ namespace System.IdentityModel.Test
                 return false;
             }
 
-            X509AsymmetricSecurityKey x509AsymmKey1 = securityKey1 as X509AsymmetricSecurityKey;
-            if (x509AsymmKey1 != null)
-            {
-                X509AsymmetricSecurityKey x509AsymmKey2 = securityKey2 as X509AsymmetricSecurityKey;
-                X509Certificate2 x509Cert1 = TestUtilities.GetField(x509AsymmKey1, "certificate") as X509Certificate2;
-                X509Certificate2 x509Cert2 = TestUtilities.GetField(x509AsymmKey2, "certificate") as X509Certificate2;
-                if (x509Cert1 == null && x509Cert2 == null)
-                    return true;
+            // TODO - brentsch, X509AsymmetricSecurityKey gone <BREAKING>
+            //X509SecurityKey x509AsymmKey1 = securityKey1 as X509AsymmetricSecurityKey;
+            //if (x509AsymmKey1 != null)
+            //{
+            //    X509AsymmetricSecurityKey x509AsymmKey2 = securityKey2 as X509AsymmetricSecurityKey;
+            //    X509Certificate2 x509Cert1 = TestUtilities.GetField(x509AsymmKey1, "certificate") as X509Certificate2;
+            //    X509Certificate2 x509Cert2 = TestUtilities.GetField(x509AsymmKey2, "certificate") as X509Certificate2;
+            //    if (x509Cert1 == null && x509Cert2 == null)
+            //        return true;
 
-                if (x509Cert1 == null || x509Cert2 == null)
-                    return false;
+            //    if (x509Cert1 == null || x509Cert2 == null)
+            //        return false;
 
-                if (x509Cert1.Thumbprint != x509Cert2.Thumbprint)
-                    return false;
-            }
+            //    if (x509Cert1.Thumbprint != x509Cert2.Thumbprint)
+            //        return false;
+            //}
 
             SymmetricSecurityKey symKey1 = securityKey1 as SymmetricSecurityKey;
             if (symKey1 != null)
@@ -511,30 +504,36 @@ namespace System.IdentityModel.Test
                     return false;
             }
 
+            // TODO - brentsch, <BREAKING> AsymmetricAlgorithm gone
+            // TODO - rewrite test checking RSAParameters
             RsaSecurityKey rsaKey = securityKey1 as RsaSecurityKey;
-            if (rsaKey != null)
-            {
-                RSA rsa1 = (rsaKey.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
-                RSA rsa2 = ((securityKey2 as RsaSecurityKey).GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
+            //if (rsaKey != null)
+            //{
+            //    RSA rsa1 = (rsaKey.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
+            //    RSA rsa2 = ((securityKey2 as RsaSecurityKey).GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
 
-                if (!string.Equals(rsa1.ToXmlString(false), rsa2.ToXmlString(false), StringComparison.Ordinal))
-                    return false;
-            }
+            //    if (!string.Equals(rsa1.ToXmlString(false), rsa2.ToXmlString(false), StringComparison.Ordinal))
+            //        return false;
+            //}
 
             return true;
         }
 
+        // TODO - brentsch, add errors to context
         private static bool AreSecurityTokensEqual(SecurityToken token1, SecurityToken token2, CompareContext context)
         {
             if (token1.GetType() != token2.GetType())
                 return false;
 
-            if (!AreEnumsEqual<SecurityKey>(token1.SecurityKeys, token2.SecurityKeys, CompareContext.Default, AreSecurityKeysEqual))
-                return false;
+            // TODO - brentsch, SecurityKeys missing just single KEY <BREAKING>
+            // if (!AreEnumsEqual<SecurityKey>(token1.SecurityKeys, token2.SecurityKeys, CompareContext.Default, AreSecurityKeysEqual))
+            if (!AreSecurityKeysEqual(token1.SecurityKey, token2.SecurityKey, context))
+                    return false;
 
             return true;
         }
 
+        // TODO - brentsch, add errors to context
         private static bool AreSigningCredentialsEqual(SigningCredentials cred1, SigningCredentials cred2, CompareContext context)
         {
             if (cred1.GetType() != cred2.GetType())
@@ -550,8 +549,9 @@ namespace System.IdentityModel.Test
             if (!AreEqual<SecurityKey>(cred1.SigningKey, cred2.SigningKey, context, AreSecurityKeysEqual))
                 return false;
 
-            if (!AreEqual<SecurityKeyIdentifier>(cred1.SigningKeyIdentifier, cred2.SigningKeyIdentifier, context, AreSecurityKeyIdentifiersEqual))
-                return false;
+            // TODO - brentsch, SecurityKeyIdentifier gone <BREAKING>
+            //if (!AreEqual<SecurityKeyIdentifier>(cred1.SigningKeyIdentifier, cred2.SigningKeyIdentifier, context, AreSecurityKeyIdentifiersEqual))
+            //    return false;
 
             return true;
         }
@@ -571,14 +571,16 @@ namespace System.IdentityModel.Test
             if (validationParameters1.AuthenticationType != validationParameters2.AuthenticationType)
                 matchingFailures.Add("AuthenticationType");
 
-            if ((validationParameters1.CertificateValidator == null && validationParameters2.CertificateValidator != null) || (validationParameters1.CertificateValidator != null && validationParameters2.CertificateValidator == null))
-                matchingFailures.Add("CertificateValidator");
+            // TODO - brentsch, add back CertificateValidator
+            //if ((validationParameters1.CertificateValidator == null && validationParameters2.CertificateValidator != null) || (validationParameters1.CertificateValidator != null && validationParameters2.CertificateValidator == null))
+            //    matchingFailures.Add("CertificateValidator");
 
-            if (validationParameters1.CertificateValidator != null)
-            { 
-                if (validationParameters1.CertificateValidator.GetType() != validationParameters2.CertificateValidator.GetType())
-                    matchingFailures.Add("CertificateValidatorType");
-            }
+            //if (validationParameters1.CertificateValidator != null)
+            //{ 
+            //    if (validationParameters1.CertificateValidator.GetType() != validationParameters2.CertificateValidator.GetType())
+            //        matchingFailures.Add("CertificateValidatorType");
+            //}
+
             if (validationParameters1.ClockSkew != validationParameters2.ClockSkew)
                 matchingFailures.Add("ClockSkew");
 
@@ -597,11 +599,12 @@ namespace System.IdentityModel.Test
             if ((validationParameters1.IssuerSigningKeyValidator == null && validationParameters2.IssuerSigningKeyValidator != null) || (validationParameters1.IssuerSigningKeyValidator != null && validationParameters2.IssuerSigningKeyValidator == null))
                 matchingFailures.Add("IssuerSigningKeyValidator");
 
-            if (!AreEqual<SecurityToken>(validationParameters1.IssuerSigningToken, validationParameters2.IssuerSigningToken, context, AreSecurityTokensEqual))
-                matchingFailures.Add("IssuerSigningKey");
+            // TODO - brentsch, IssuerSigningToken(s) gone <BREAKING>
+            //if (!AreEqual<SecurityToken>(validationParameters1.IssuerSigningToken, validationParameters2.IssuerSigningToken, context, AreSecurityTokensEqual))
+            //    matchingFailures.Add("IssuerSigningKey");
 
-            if (!AreEnumsEqual<SecurityToken>(validationParameters1.IssuerSigningTokens, validationParameters2.IssuerSigningTokens, context, AreSecurityTokensEqual))
-                matchingFailures.Add("IssuerSigningTokens");
+            //if (!AreEnumsEqual<SecurityToken>(validationParameters1.IssuerSigningTokens, validationParameters2.IssuerSigningTokens, context, AreSecurityTokensEqual))
+            //    matchingFailures.Add("IssuerSigningTokens");
 
             if ((validationParameters1.IssuerValidator == null && validationParameters2.IssuerValidator != null) || (validationParameters1.IssuerValidator != null && validationParameters2.IssuerValidator == null))
                 matchingFailures.Add("IssuerValidator");

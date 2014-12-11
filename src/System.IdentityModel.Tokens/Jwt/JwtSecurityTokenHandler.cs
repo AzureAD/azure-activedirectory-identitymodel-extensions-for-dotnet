@@ -637,7 +637,7 @@ namespace System.IdentityModel.Tokens
 #if SignatureProvider
             SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
 #else
-            SignatureProvider signatureProvider = key.GetSignatureProvider(algorithm);
+            SignatureProvider signatureProvider = key.GetSignatureProvider(algorithm, true);
 #endif
             if (signatureProvider == null)
             {

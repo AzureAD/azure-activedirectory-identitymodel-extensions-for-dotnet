@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
-    /// <remarks>provides support for http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-5 </remarks>
+    /// <remarks>provides support for http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27 </remarks>
     public class JsonWebKeySet
     {
         private List<JsonWebKey> _keys = new List<JsonWebKey>();
@@ -82,7 +82,9 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 foreach (var key in keys)
                 {
-                    _keys.Add(new JsonWebKey(key as Dictionary<string, object>));
+                    Dictionary<string, object> dic = key as Dictionary<string, object>;
+                    if (dic != null)
+                        _keys.Add(new JsonWebKey(dic));
                 }
             }
         }

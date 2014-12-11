@@ -16,9 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using Claim = System.Security.Claims.Claim;
 using ClaimsIdentity = System.Security.Claims.ClaimsIdentity;
@@ -258,7 +256,7 @@ namespace System.IdentityModel.Test
             yield return new Claim("STBSample10", @"ᄓᄕᇬᇌᇜᇱㄱㅣ가힝", ClaimValueTypes.String, issuer, originalIssuer);
         }
 
-        public static IEnumerable<Claim> ClaimsPlus( IEnumerable<Claim> claims = null, SigningCredentials signingCredential = null, Lifetime lifetime = null, string issuer = null, string originalIssuer = null, string audience = null )
+        public static IEnumerable<Claim> ClaimsPlus( IEnumerable<Claim> claims = null, SigningCredentials signingCredential = null, DateTime? notBefore = null, DateTime? expires = null, string issuer = null, string originalIssuer = null, string audience = null )
         {
             string thisIssuer = issuer ?? ClaimsIdentity.DefaultIssuer;
             string thisOriginalIssuer = originalIssuer ?? thisIssuer;
@@ -279,21 +277,17 @@ namespace System.IdentityModel.Test
                 }
             }
 
-            if ( lifetime != null )
-            {
-                yield return new Claim( JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(lifetime.Created.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-                yield return new Claim( JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate( lifetime.Expires.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-            }
+            if (notBefore.HasValue)
+                yield return new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(notBefore.Value).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer);
+
+            if (expires.HasValue)
+                yield return new Claim( JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate( expires.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
 
             if ( audience != null )
-            {
                 yield return new Claim( JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-            }
 
             if ( issuer != null )
-            {
                 yield return new Claim( JwtRegisteredClaimNames.Iss, issuer, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-            }
         }
 
         public static IEnumerable<Claim> EntityAsJsonClaim( string issuer, string orginalIssuer )

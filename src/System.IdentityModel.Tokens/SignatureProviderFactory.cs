@@ -27,6 +27,8 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     public class SignatureProviderFactory
     {
+        public static SignatureProviderFactory Default;
+
         /// <summary>
         /// This is the minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
         /// </summary>
@@ -45,6 +47,11 @@ namespace System.IdentityModel.Tokens
         private static Int32 minimumAsymmetricKeySizeInBitsForSigning = AbsoluteMinimumAsymmetricKeySizeInBitsForSigning;
         private static Int32 minimumAsymmetricKeySizeInBitsForVerifying = AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
         private static Int32 minimumSymmetricKeySizeInBits = AbsoluteMinimumSymmetricKeySizeInBits;
+
+        static SignatureProviderFactory()
+        {
+            Default = new SignatureProviderFactory();
+        }
 
         /// <summary>
         /// Gets or sets the minimum <see cref="SymmetricSecurityKey"/>.KeySize"/>.
@@ -182,7 +189,24 @@ namespace System.IdentityModel.Tokens
         /// </returns>
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
+            if (!IsSupportedAlgorithm(key, algorithm))
+            {
+                // TODO - brentsch, exception message
+                throw new ArgumentException("Algorithm not supported");
+            }
+
             return CreateProvider(key, algorithm, false);
+        }
+
+        public virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            RsaSecurityKey rsaSecurityKey = key as RsaSecurityKey;
+            if (rsaSecurityKey != null)
+            {
+                return AsymmetricSignatureProvider.IsSupportedAlgorithm(rsaSecurityKey, algorithm);
+            }
+
+            return false;
         }
 
         /// <summary>

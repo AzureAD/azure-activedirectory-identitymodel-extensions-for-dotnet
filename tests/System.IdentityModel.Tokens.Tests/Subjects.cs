@@ -16,26 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
-{
-    /// <summary>
-    /// Interface
-    /// </summary>
-    public interface IExpirableCache
-    {
-        /// <summary>
-        /// Try to add an item to the cache.
-        /// </summary>
-        /// <param name="item">item to add.</param>
-        /// <param name="expiresOn"></param>
-        /// <returns>true is item was successfully added, false otherwise.</returns>
-        bool TryAdd(string item, DateTime expiresOn);
+using System.Security.Claims;
 
-        /// <summary>
-        /// Try to find an item.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns>true if found, false otherwise.</returns>
-        bool TryFind(string item);
+namespace System.IdentityModel.Test
+{
+    public static class Subjects
+    {
+        public static ClaimsIdentity Simple( string issuer, string originalIssuer )
+        {
+            return new ClaimsIdentity( ClaimSets.Simple( issuer, originalIssuer ) );
+        }
     }
 }

@@ -18,12 +18,10 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.Security.Claims;
-    using System.Text.RegularExpressions;
+    using Collections.Generic;
+    using Globalization;
+    using Security.Claims;
+    using Text.RegularExpressions;
 
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).

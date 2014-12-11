@@ -20,10 +20,27 @@ namespace System.IdentityModel.Tokens
 {
     public abstract class SecurityKey
     {
+        private SignatureProviderFactory _signatureProviderFactory = SignatureProviderFactory.Default;
+
         public abstract int KeySize { get; }
         public string KeyId { get; set; }
         public abstract bool IsSupportedAlgorithm(string algorithm);
-        public abstract SignatureProvider GetSignatureProvider(string algorithm);
-        public SignatureProviderFactory SignatureProviderFactory { get; set; }
+        public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
+        public SignatureProviderFactory SignatureProviderFactory
+        {
+            get
+            {
+                return _signatureProviderFactory;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("value");
+                };
+
+                _signatureProviderFactory = value;
+            }
+        }
     }
 }
