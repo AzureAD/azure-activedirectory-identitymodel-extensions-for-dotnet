@@ -16,15 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace System.IdentityModel.Test
 {
     public class GetSetContext
     {
@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public static class TestUtilities
     {
+#if USE_REFLECTION
         /// <summary>
         /// Calls all public instance and static properties on an object
         /// </summary>
@@ -94,11 +95,11 @@ namespace Microsoft.IdentityModel.Test
                 }
                 catch (Exception ex)
                 {
-                    Assert.Fail(string.Format("Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex));
+                    Assert.True(false, string.Format("Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex));
                 }
             }
         }
-
+#endif
         /// <summary>
         /// Gets a named field on an object
         /// </summary>
@@ -134,7 +135,7 @@ namespace Microsoft.IdentityModel.Test
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
 
-            Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
+            Assert.True(propertyInfo != null, "property is not found: " + property + ", type: " + type.ToString());
 
             return propertyInfo.GetValue(obj);
         }
@@ -209,10 +210,10 @@ namespace Microsoft.IdentityModel.Test
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
 
-            Assert.IsNotNull(propertyInfo, "property get is not found: " + property + ", type: " + type.ToString());
+            Assert.True(propertyInfo != null, "property get is not found: " + property + ", type: " + type.ToString());
 
             object retval = propertyInfo.GetValue(obj);
-            Assert.IsTrue(initialPropertyValue == retval);
+            Assert.True(initialPropertyValue == retval);
 
             if (propertyInfo.CanWrite)
             {
@@ -220,7 +221,7 @@ namespace Microsoft.IdentityModel.Test
                 {
                     propertyInfo.SetValue(obj, propertyValue);
                     retval = propertyInfo.GetValue(obj);
-                    Assert.IsTrue(propertyValue == retval);
+                    Assert.True(propertyValue == retval);
                 }
             }
         }
@@ -235,7 +236,7 @@ namespace Microsoft.IdentityModel.Test
                 foreach (string str in errors)
                     sb.AppendLine(str);
 
-                Assert.Fail(sb.ToString());
+                Assert.True(false, sb.ToString());
             }
         }
 
@@ -278,20 +279,20 @@ namespace Microsoft.IdentityModel.Test
         /// <param name="expectedException">checks that exception is correct.</param>
         public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException)
         {
-            Assert.IsNotNull(obj, "'obj' can not be null");
-            Assert.IsFalse(string.IsNullOrWhiteSpace(property), "'property' can not be null or whitespace");
+            Assert.NotNull(obj);
+            Assert.False(string.IsNullOrWhiteSpace(property));
 
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
 
-            Assert.IsNotNull(propertyInfo, "'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
-            Assert.IsTrue(propertyInfo.CanWrite, "can not write to property: '" + property + "', type: '" + type.ToString() + "'");
+            Assert.True(propertyInfo != null, "'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
+            Assert.True(propertyInfo.CanWrite, "can not write to property: '" + property + "', type: '" + type.ToString() + "'");
 
             try
             {
                 propertyInfo.SetValue(obj, propertyValue);
                 object retval = propertyInfo.GetValue(obj);
-                Assert.AreEqual(propertyValue, retval);
+                Assert.Equal(propertyValue, retval);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -312,7 +313,7 @@ namespace Microsoft.IdentityModel.Test
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
 
-            Assert.IsNotNull(propertyInfo, "property is not found: " + property + ", type: " + type.ToString());
+            Assert.True(propertyInfo != null, "property is not found: " + property + ", type: " + type.ToString());
 
             object retval = propertyInfo.GetValue(obj);
             if (propertyInfo.CanWrite)
@@ -321,7 +322,7 @@ namespace Microsoft.IdentityModel.Test
             }
             else
             {
-                Assert.Fail("property 'set' is not found: " + property + ", type: " + type.ToString());
+                Assert.True(false, "property 'set' is not found: " + property + ", type: " + type.ToString());
             }
         }
   
@@ -345,8 +346,8 @@ namespace Microsoft.IdentityModel.Test
         public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
         {
             TokenValidationParameters tvp = validationParameters.Clone() as TokenValidationParameters;
-            Microsoft.IdentityModel.Test.TokenReplayCache replayCache =
-               new Microsoft.IdentityModel.Test.TokenReplayCache()
+            TokenReplayCache replayCache =
+               new TokenReplayCache()
                {
                    OnAddReturnValue = true,
                    OnFindReturnValue = false,

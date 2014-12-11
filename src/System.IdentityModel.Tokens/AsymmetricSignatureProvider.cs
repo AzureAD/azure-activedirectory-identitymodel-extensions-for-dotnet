@@ -116,7 +116,7 @@ namespace System.IdentityModel.Tokens
             X509SecurityKey x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
-                rsa = x509Key.pnew RSACryptoServiceProvider();
+                rsa = new RSACryptoServiceProvider();
                 rsa.ImportParameters(rsaKey.Parameters);
 
                 // TODO - brentsch - SHA384, SHA512

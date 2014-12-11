@@ -59,7 +59,7 @@ namespace System.IdentityModel.Tokens
             get { return this.keySize; }
         }
 
-        public override SignatureProvider GetSignatureProvider(string algorithm)
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool forSigning)
         {
             return null;
         }

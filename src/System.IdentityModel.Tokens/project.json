@@ -4,8 +4,8 @@
         "Newtonsoft.Json": "6.0.6.0"
     },
     "exclude": [
-        "SecurityTokenDescriptor.cs",
         "SignatureVerificationFailedException.cs",
+        "Tokens/SecurityTokenDescriptor.cs",
         "Tokens/SymmetricKey.cs"
     ],
     "frameworks": {
