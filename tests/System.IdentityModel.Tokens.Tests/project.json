@@ -9,7 +9,6 @@
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
-        "CreateAndValidateTokens.cs",
         "ExtensibilityTests.cs",
         "JwtConfigTests.cs",
         "JwtDerivedTestTypes.cs",
@@ -24,7 +23,6 @@
         "NamedKeySecurityKeyIdentifierClauseTests.cs",
         "NamedKeySecurityTokenTests.cs",
         "Performance.cs",
-        "References.cs",
         "RemoteDomain.cs",
         "RemoteDomainManager.cs",
         "SignatureProviderTests.cs",

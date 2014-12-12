@@ -16,11 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace System.IdentityModel.Test
 {
     using System;
     using System.Collections.Generic;
     using System.Security.Claims;
+    using System.IdentityModel.Tokens;
 
     /// <summary>
     /// This is a place holder for all the attributes related to the issued token.

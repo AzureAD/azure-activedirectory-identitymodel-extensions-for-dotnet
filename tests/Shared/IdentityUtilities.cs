@@ -90,17 +90,19 @@ namespace System.IdentityModel.Test
             return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
         }
 
-#if INCLUDE_SAML
-        public static JwtSecurityToken CreateJwtSecurityToken()
-        {
-            return CreateJwtSecurityToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor) as JwtSecurityToken;
-        }
-
         // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
-        //public static JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
-        //{
-        //    return (new JwtSecurityTokenHandler()).CreateToken(tokenDescriptor) as JwtSecurityToken;
-        //}
+        public static string CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            return handler.WriteToken(handler.CreateToken(
+                issuer: tokenDescriptor.Issuer,
+                audience: tokenDescriptor.Audience,
+                expires: tokenDescriptor.Expires,
+                notBefore: tokenDescriptor.NotBefore,
+                signingCredentials: tokenDescriptor.SigningCredentials,
+                subject: new ClaimsIdentity(tokenDescriptor.Claims)
+                ) as JwtSecurityToken);
+        }
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string originalIssuer, IEnumerable<Claim> claims, SigningCredentials signingCredentials)
         {
@@ -109,7 +111,7 @@ namespace System.IdentityModel.Test
             return new JwtSecurityToken(header, payload);
         }
 
-
+#if INCLUDE_SAML
         public static string CreateSaml2Token()
         {
             return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);

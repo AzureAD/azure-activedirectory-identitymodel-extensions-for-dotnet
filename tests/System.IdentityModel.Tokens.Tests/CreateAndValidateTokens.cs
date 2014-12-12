@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
@@ -35,7 +34,7 @@ namespace System.IdentityModel.Test
             public JwtSecurityToken CompareTo { get; set; }
             public Type ExceptionType { get; set; }
             public SigningCredentials SigningCredentials { get; set; }
-            public SecurityToken SigningToken { get; set; }
+            public SecurityKey SigningKey { get; set; }
             public TokenValidationParameters TokenValidationParameters { get; set; }
             public IEnumerable<Claim> Claims { get; set; }
             public string Case { get; set; }
@@ -45,24 +44,8 @@ namespace System.IdentityModel.Test
         private static string _roleClaimTypeForDelegate = "RoleClaimTypeForDelegate";
         private static string _nameClaimTypeForDelegate = "NameClaimTypeForDelegate";
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        /// <summary>
-        /// The test context that is set by Visual Studio and TAEF - need to keep this exact signature
-        /// </summary>
-        public TestContext TestContext { get; set; }
 
         [Fact]
-        [TestProperty("TestCaseID", "52BE8540-1CA5-4C50-8A38-CE352C88D5D2")]
-        [Description("Create Token with X5c's")]
         public void CreateAndValidateTokens_MultipleX5C()
         {
             List<string> errors = new List<string>();
@@ -98,13 +81,13 @@ namespace System.IdentityModel.Test
             else
             {
                 var list = x5csInHeader as IEnumerable<object>;
-                if ( list == null )
+                if (list == null)
                 {
                     errors.Add("2: var list = x5csInHeader as IEnumerable<object>; is NULL.");
                 }
 
                 int num = 0;
-                foreach(var str in list)
+                foreach (var str in list)
                 {
                     num++;
                     if (!(str is string))
@@ -120,22 +103,20 @@ namespace System.IdentityModel.Test
             }
 
             // make sure we can still validate with existing logic.
-            header = new JwtHeader(KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2);
+            header = new JwtHeader(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2);
             header.Add(JwtHeaderParameterNames.X5c, x5cs);
             jwtToken = new JwtSecurityToken(header, payload);
             jwt = handler.WriteToken(jwtToken);
 
-            validationParameters.IssuerSigningToken = KeyingMaterial.DefaultAsymmetricX509Token_2048;
+            validationParameters.IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048;
             validationParameters.RequireSignedTokens = true;
             validatedSecurityToken = null;
             cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
 
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+            TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleX5C", errors);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "B14F1FE2-F7A5-450F-8A6D-D0898112570E")]
-        [Description("Create Token with multiple audiences")]
+        [Fact]
         public void CreateAndValidateTokens_MultipleAudiences()
         {
             List<string> errors = new List<string>();
@@ -160,7 +141,7 @@ namespace System.IdentityModel.Test
 
             SecurityToken validatedJwt = null;
             var cp = handler.ValidateToken(jwt, validationParameters, out validatedJwt);
-            var ci = new ClaimsIdentity(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), AuthenticationTypes.Federation);
+            var ci = new ClaimsIdentity(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), "AuthenticationTypes.Federation");
             var cpExpected = new ClaimsPrincipal(ci);
             var compareContext = new CompareContext();
             if (!IdentityComparer.AreEqual<ClaimsPrincipal>(cp, cpExpected, compareContext))
@@ -181,23 +162,19 @@ namespace System.IdentityModel.Test
                 errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, IdentityUtilities.DefaultAudiences)");
             }
 
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+            TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleAudiences", errors);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "0FA94A41-B904-46C9-B9F1-BF0AEC23045A")]
-        [Description("Create EMPTY JwtToken")]
+        [Fact(DisplayName = "Create EMPTY JwtToken")]
         public void CreateAndValidateTokens_EmptyToken()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string jwt = handler.WriteToken(new JwtSecurityToken("", ""));
             JwtSecurityToken token = new JwtSecurityToken(jwt);
-            Assert.IsTrue(IdentityComparer.AreEqual<JwtSecurityToken>(token, new JwtSecurityToken("", "")));
+            Assert.True(IdentityComparer.AreEqual<JwtSecurityToken>(token, new JwtSecurityToken("", "")));
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "8058D994-9600-455D-8B6C-753DE2E26529")]
-        [Description("Ensures that Serializing and Deserializing usin xml or json have same results.")]
+        [Fact(DisplayName = "Ensures that Serializing and Deserializing usin xml or json have same results.")]
         public void CreateAndValidateTokens_RoundTripTokens()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -229,7 +206,7 @@ namespace System.IdentityModel.Test
                 CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2),
                 ExceptionType = null,
                 SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
-                SigningToken = KeyingMaterial.DefaultX509Token_2048,
+                SigningKey = KeyingMaterial.DefaultX509Key_2048,
                 TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
@@ -247,7 +224,7 @@ namespace System.IdentityModel.Test
                 CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
                 ExceptionType = null,
                 SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                SigningToken = KeyingMaterial.DefaultSymmetricSecurityToken_256,
+                SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
                 TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
@@ -269,48 +246,42 @@ namespace System.IdentityModel.Test
             // create from security descriptor
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
             tokenDescriptor.SigningCredentials = jwtParams.SigningCredentials;
-            tokenDescriptor.Lifetime = new Lifetime(jwtParams.CompareTo.ValidFrom, jwtParams.CompareTo.ValidTo);
-            tokenDescriptor.Subject = new ClaimsIdentity(jwtParams.Claims);
-            tokenDescriptor.TokenIssuerName = jwtParams.CompareTo.Issuer;
+            tokenDescriptor.NotBefore = jwtParams.CompareTo.ValidFrom;
+            tokenDescriptor.Expires    = jwtParams.CompareTo.ValidTo;
+            tokenDescriptor.Claims     = jwtParams.Claims;
+            tokenDescriptor.Issuer = jwtParams.CompareTo.Issuer;
             foreach (string str in jwtParams.CompareTo.Audiences)
             {
                 if (!string.IsNullOrWhiteSpace(str))
                 {
-                    tokenDescriptor.AppliesToAddress = str;
+                    tokenDescriptor.Audience = str;
                 }
             }
 
 
-            JwtSecurityToken token = handler.CreateToken(tokenDescriptor) as JwtSecurityToken;
-            Assert.IsTrue(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
+            JwtSecurityToken token = handler.CreateToken(
+                issuer: tokenDescriptor.Issuer,
+                audience: tokenDescriptor.Audience,
+                expires: tokenDescriptor.Expires,
+                notBefore: tokenDescriptor.NotBefore,
+                subject: new ClaimsIdentity(tokenDescriptor.Claims),
+                signingCredentials: tokenDescriptor.SigningCredentials ) as JwtSecurityToken;
 
-            // write as xml
-            MemoryStream ms = new MemoryStream();
-            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateDictionaryWriter(XmlTextWriter.Create(ms));
-            handler.WriteToken(writer, jwtParams.CompareTo);
-            writer.Flush();
-            ms.Flush();
-            ms.Seek(0, SeekOrigin.Begin);
-            XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, XmlDictionaryReaderQuotas.Max);
-            reader.Read();
-            token = handler.ReadToken(reader) as JwtSecurityToken;
-            ms.Close();
-            IdentityComparer.AreEqual(token, jwtParams.CompareTo);
+            Assert.True(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
+
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "DD27BA83-2621-4DF9-A863-C436A9F73BB9")]
-        [Description("These Jwts are created with duplicate claims. This test ensure that multiple claims are roundtripped")]
+        [Fact(DisplayName = "These Jwts are created with duplicate claims. This test ensure that multiple claims are roundtripped")]
         public void CreateAndValidateTokens_DuplicateClaims()
         {
             SecurityToken validatedToken;
-            string encodedJwt = IdentityUtilities.CreateJwtToken(
+            string encodedJwt = IdentityUtilities.CreateJwtSecurityToken(
                 new SecurityTokenDescriptor
                 { 
-                    AppliesToAddress = IdentityUtilities.DefaultAudience,
+                    Audience = IdentityUtilities.DefaultAudience,
                     SigningCredentials = IdentityUtilities.DefaultSymmetricSigningCredentials,
-                    Subject = new ClaimsIdentity(ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer)),
-                    TokenIssuerName = IdentityUtilities.DefaultIssuer,
+                    Claims = ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
+                    Issuer = IdentityUtilities.DefaultIssuer,
                 });
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -322,14 +293,12 @@ namespace System.IdentityModel.Test
 
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultSymmetricTokenValidationParameters, out validatedToken);
 
-            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), new CompareContext { IgnoreProperties = true, IgnoreSubject = true }));
+            Assert.True(IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), new CompareContext { IgnoreProperties = true, IgnoreSubject = true }));
 
             JwtSecurityTokenHandler.InboundClaimFilter.Clear();
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "FC7354C3-140B-4036-862A-BAFEA948D262")]
-        [Description("This test ensures that a Json serialized object, when added as the value of a claim, can be recognized and reconstituted.")]
+        [Fact(DisplayName = "This test ensures that a Json serialized object, when added as the value of a claim, can be recognized and reconstituted.")]
         public void CreateAndValidateTokens_JsonClaims()
         {
             List<string> errors = new List<string>();
@@ -404,12 +373,10 @@ namespace System.IdentityModel.Test
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "Find Jsonclaims of type: '{0}', but they weren't equal.\nExpecting:\n'{1}'.\nReceived:\n'{2}'", typeof(Entity).ToString(), jsString, jsonClaim.Value));
             }
 
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+            TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_JsonClaims", errors);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "F443747C-5AA1-406D-B0FE-53152CA92DA3")]
-        [Description("These test ensures that the SubClaim is used the identity, when ClaimsIdentity.Name is called.")]
+        [Fact(DisplayName = "These test ensures that the SubClaim is used the identity, when ClaimsIdentity.Name is called.")]
         public void CreateAndValidateTokens_SubClaim()
         {
         }
@@ -424,9 +391,7 @@ namespace System.IdentityModel.Test
             return _roleClaimTypeForDelegate;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "A0DF768E-5073-49E7-90C9-ED97BDCF4B9F")]
-        [Description("Tests Name and Role claim delegates")]
+        [Fact(DisplayName = "Tests Name and Role claim delegates")]
         public void CreateAndValidateTokens_NameAndRoleClaimDelegates()
         {
             string defaultName = "defaultName";
@@ -441,7 +406,7 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             TokenValidationParameters validationParameters = new TokenValidationParameters
             {
-                IssuerSigningToken = KeyingMaterial.DefaultX509Token_2048,
+                IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
                 NameClaimType = validationParametersNameClaimType,
                 RoleClaimType = validationParametersRoleClaimType,
                 ValidateAudience = false,
@@ -478,7 +443,7 @@ namespace System.IdentityModel.Test
             // check for defaults
             validationParameters = new TokenValidationParameters
             {
-                IssuerSigningToken = KeyingMaterial.DefaultX509Token_2048,
+                IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
                 ValidateAudience = false,
                 ValidateIssuer = false,
             };
@@ -495,18 +460,18 @@ namespace System.IdentityModel.Test
         private void CheckNamesAndRole(string[] names, string[] roles, ClaimsPrincipal principal, string expectedNameClaimType = ClaimsIdentity.DefaultNameClaimType, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
         {
             ClaimsIdentity identity = principal.Identity as ClaimsIdentity;
-            Assert.AreEqual(identity.NameClaimType, expectedNameClaimType);
-            Assert.AreEqual(identity.RoleClaimType, expectedRoleClaimType);
-            Assert.IsTrue(principal.IsInRole(roles[0]));
+            Assert.Equal(identity.NameClaimType, expectedNameClaimType);
+            Assert.Equal(identity.RoleClaimType, expectedRoleClaimType);
+            Assert.True(principal.IsInRole(roles[0]));
             for (int i = 1; i < roles.Length; i++)
             {
-                Assert.IsFalse(principal.IsInRole(roles[i]));
+                Assert.False(principal.IsInRole(roles[i]));
             }
 
-            Assert.AreEqual(identity.Name, names[0]);
+            Assert.Equal(identity.Name, names[0]);
             for (int i = 1; i < names.Length; i++)
             {
-                Assert.AreNotEqual(identity.Name, names[i]);
+                Assert.NotEqual(identity.Name, names[i]);
             }
         }
     }
