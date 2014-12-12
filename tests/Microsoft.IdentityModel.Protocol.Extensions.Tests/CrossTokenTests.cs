@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
@@ -33,29 +33,9 @@ namespace Microsoft.IdentityModel.Test
     /// The purpose of these tests are to ensure that Saml, Saml2 and Jwt handling 
     /// results in the same exceptions, claims etc.
     /// </summary>
-    [TestClass]
     public class CrossTokenTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "ADEFAC1A-07AC-4A0E-B49E-F7FF39CC2DD5")]
-        [Description("Tests: Validates tokens")]
+        [Fact(DisplayName = "Tests: Validates tokens")]
         public void CrossToken_ValidateToken()
         {
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
@@ -116,33 +96,25 @@ namespace Microsoft.IdentityModel.Test
         }
 
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "c49e0f0a-decb-48a9-8695-25999ecfac59")]
-        [Description("Tests: Validates Signatures")]
+        [Fact(DisplayName = "Tests: Validates Signatures")]
         public void CrossToken_ValidateSignature()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "fbed514b-d3ed-49ef-92ac-40a175cf6c6d")]
-        [Description("Tests: Validate Audience")]
+        [Fact(DisplayName = "Tests: Validate Audience")]
         public void CrossToken_ValidateAudience()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "a4d35cae-5312-4110-b2c0-325fbce4c085")]
-        [Description("Tests: Validate Issuer")]
+        [Fact(DisplayName = "Tests: Validate Issuer")]
         public void CrossToken_ValidateIssuer()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "3f5f3a1f-49cc-495a-8198-7c321e870294")]
-        [Description("Tests: ValidateLifetime")]
+        [Fact(DisplayName = "Tests: ValidateLifetime")]
         public void CrossToken_ValidateLifetime()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same

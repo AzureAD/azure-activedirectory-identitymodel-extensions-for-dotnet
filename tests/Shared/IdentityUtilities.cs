@@ -16,17 +16,16 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
-//using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-//using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
+#if SAML
+using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
+#endif
 
 namespace System.IdentityModel.Test
 {
@@ -339,6 +338,6 @@ namespace System.IdentityModel.Test
         public static bool LifetimeValidatorThrows(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
         {
             throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
-        }
+        }        
     }
 }

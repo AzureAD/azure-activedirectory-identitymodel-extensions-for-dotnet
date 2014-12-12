@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
@@ -28,29 +28,9 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class OpenIdConnectMetadataTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "3452b8a7-fae1-4b20-b78b-03f90c39ee81")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void OpenIdConnectConfiguration_Constructors()
         {
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
@@ -100,9 +80,7 @@ namespace Microsoft.IdentityModel.Test
             return openIdConnectConfiguration;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "60d42142-5fbe-4bbc-aefa-9b18de426cbc")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void OpenIdConnectConfiguration_Defaults()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
@@ -114,9 +92,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsNotNull(configuration.SigningKeys);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "55312093-0e2d-4ca2-bb20-9bf125856ea3")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void OpenIdConnectConfiguration_GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
@@ -154,6 +130,5 @@ namespace Microsoft.IdentityModel.Test
             Assert.AreEqual(configuration.TokenEndpoint, token_Endpoint);
             Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys));
         }
-
     }
 }

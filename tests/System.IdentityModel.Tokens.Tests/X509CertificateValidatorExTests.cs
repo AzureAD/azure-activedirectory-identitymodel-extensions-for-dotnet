@@ -16,40 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
-using System.ServiceModel.Security;
 
 namespace System.IdentityModel.Test
 {
-    [TestClass]
     public class X509CertificateValidatorExTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        { }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        { }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider(TestContext);
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "189E9A03-9D77-4E78-9BBA-E9F80BC27711")]
-        [Description("Tests: Constructor")]
+        [Fact(DisplayName = "Tests: Constructor")]
         public void X509CertificateValidatorEx_Constructor()
         {
             X509CertificateValidatorEx validator = new X509CertificateValidatorEx(X509CertificateValidationMode.None, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
@@ -58,9 +33,7 @@ namespace System.IdentityModel.Test
             validator = new X509CertificateValidatorEx(X509CertificateValidationMode.PeerOrChainTrust, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "189E9A03-9D77-4E78-9BBA-E9F80BC27711")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void X509CertificateValidatorEx_Defaults()
         {
         }

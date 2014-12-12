@@ -22,41 +22,42 @@ namespace System.IdentityModel.Tokens
 
     public class SymmetricSecurityKey : SecurityKey
     {
-        int keySize;
-        byte[] symmetricKey;
+        int _keySize;
+        byte[] _key;
 
-        public SymmetricSecurityKey(byte[] symmetricKey)
-            : this(symmetricKey, true)
+        public SymmetricSecurityKey(byte[] key)
+            : this(key, true)
         {
         }
 
-        public SymmetricSecurityKey(byte[] symmetricKey, bool cloneBuffer)
+        public SymmetricSecurityKey(byte[] key, bool cloneBuffer)
         {
-            if (symmetricKey == null)
+            if (key == null)
             {
-                throw new ArgumentNullException("symmetricKey");
+                throw new ArgumentNullException("key");
             }
 
-            if (symmetricKey.Length == 0)
+            if (key.Length == 0)
             {
                 throw new ArgumentException("SR.GetString(SR.SymmetricKeyLengthTooShort, symmetricKey.Length))");
             }
-            this.keySize = symmetricKey.Length * 8;
+
+            _keySize = _key.Length * 8;
 
             if (cloneBuffer)
             {
-                this.symmetricKey = new byte[symmetricKey.Length];
-                Buffer.BlockCopy(symmetricKey, 0, this.symmetricKey, 0, symmetricKey.Length);
+                _key = new byte[key.Length];
+                Buffer.BlockCopy(key, 0, _key, 0, key.Length);
             }
             else
             {
-                this.symmetricKey = symmetricKey;
+                _key = key;
             }
         }
 
         public override int KeySize
         {
-            get { return this.keySize; }
+            get { return _keySize; }
         }
 
         public override SignatureProvider GetSignatureProvider(string algorithm, bool forSigning)
@@ -69,15 +70,9 @@ namespace System.IdentityModel.Tokens
             return false;
         }
 
-
-        public virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
+        public virtual byte[] Key
         {
-            return null;
-        }
-
-        public virtual byte[] GetSymmetricKey()
-        {
-            return this.symmetricKey;
+            get { return _key; }
         }
 
         //public abstract byte[] GenerateDerivedKey(string algorithm, byte[] label, byte[] nonce, int derivedKeyLength, int offset);

@@ -17,44 +17,21 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using System.Web;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class OpenIdConnectMessageTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup( TestContext testContext )
-        {
-            // Start local STS
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            // Stop local STS
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "CFB7A712-9FA8-4A31-8446-2EA93CECC2AC")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void OpenIdConnectMessage_Constructors()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
@@ -73,9 +50,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "B644D6D6-26C0-4417-AF9C-F59CFC5E7903")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void OpenIdConnectMessage_Defaults()
         {
             List<string> errors = new List<string>();
@@ -132,13 +107,11 @@ namespace Microsoft.IdentityModel.Test
                 foreach (string error in errors)
                     sb.AppendLine(error);
 
-                Assert.Fail("OpenIdConnectMessage_Defaults *** Test Failures:\n" + sb.ToString());
+                Assert.Fail("OpenIdConnectMessage_Defaults *** Test Failures:\n" + sb.ToString();
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "E3499C32-5062-4F89-A209-3024613EB73B")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void OpenIdConnectMessage_GetSets()
         {
             OpenIdConnectMessage message = new OpenIdConnectMessage();
@@ -209,9 +182,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "38024A53-CF6A-48C4-8AF3-E9C97E2B86FC")]
-        [Description( "Tests: Publics" )]
+        [Fact(DisplayName = "Tests: Publics")]
         public void OpenIdConnectMessage_Publics()
         {
             string issuerAddress = "http://gotJwt.onmicrosoft.com";
@@ -303,9 +274,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "TBD")]
-        [Description( "Tests: NULL form parameters" )]
+        [Fact(DisplayName = "Tests: NULL form parameters")]
         public void OpenIdConnectMessage_NullFormParameters()
         {
             List<KeyValuePair<string, string[]>> formData = new List<KeyValuePair<string, string[]>>();
@@ -321,7 +290,7 @@ namespace Microsoft.IdentityModel.Test
         private void Report(string id, List<string> errors, string url, string expected)
         {
             if (!string.Equals(url, expected, StringComparison.Ordinal))
-                errors.Add("id: " + id + Environment.NewLine + "message.BuildRedirectUrl() != expected" + Environment.NewLine + Environment.NewLine + url + Environment.NewLine + Environment.NewLine + expected + Environment.NewLine);
+                errors.Add("id: " + id + Environment.NewLine + "message.BuildRedirectUrl( != expected" + Environment.NewLine + Environment.NewLine + url + Environment.NewLine + Environment.NewLine + expected + Environment.NewLine);
         }
     }
 }

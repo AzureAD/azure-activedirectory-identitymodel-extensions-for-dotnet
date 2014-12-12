@@ -17,39 +17,15 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
 
 namespace System.IdentityModel.Test
 {
-    [TestClass]
     public class X509SecurityKeyTests
     {
-                /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup( TestContext testContext )
-        {}
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {}
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider( TestContext );
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "7884A13A-0DEE-4EB8-87F5-BDD4226B32FD")]
-        [Description("Tests: Constructor")]
+        [Fact(DisplayName = "Tests: Constructor")]
         public void X509SecurityKey_Constructor()
         {
             X509SecurityKey x509SecurityKey;
@@ -69,7 +45,7 @@ namespace System.IdentityModel.Test
             try
             {
                 x509SecurityKey = new X509SecurityKey(x509Certificate2);
-                Assert.ReferenceEquals(x509Certificate2, x509SecurityKey.Certificate);
+                Assert.Same(x509Certificate2, x509SecurityKey.Certificate);
             }
             catch (Exception exception)
             {
@@ -77,9 +53,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "227AC92B-16D3-47A8-AD47-0F49D0157D6D")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void X509SecurityKey_Defaults()
         {
             // there are no defaults.

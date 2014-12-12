@@ -16,14 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
@@ -95,7 +92,7 @@ namespace System.IdentityModel.Test
         protected override void ValidateAudience(IEnumerable<string> audiences, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
-            Assert.IsNotNull(derivedJwt);
+            Assert.NotNull(derivedJwt);
             ValidateAudienceCalled = true;
             base.ValidateAudience(audiences, jwt, validationParameters);
         }
@@ -103,7 +100,7 @@ namespace System.IdentityModel.Test
         protected override string ValidateIssuer(string issuer, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
-            Assert.IsNotNull(derivedJwt);
+            Assert.NotNull(derivedJwt);
             ValidateIssuerCalled = true;
             return base.ValidateIssuer(issuer, jwt, validationParameters);
         }
@@ -111,7 +108,7 @@ namespace System.IdentityModel.Test
         protected override void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = securityToken as DerivedJwtSecurityToken;
-            Assert.IsNotNull(derivedJwt);
+            Assert.NotNull(derivedJwt);
             ValidateIssuerSigningKeyCalled = true;
             base.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
         }
@@ -119,7 +116,7 @@ namespace System.IdentityModel.Test
         protected override void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
-            Assert.IsNotNull(derivedJwt);
+            Assert.NotNull(derivedJwt);
             ValidateLifetimeCalled = true;
             base.ValidateLifetime(notBefore, expires, jwt, validationParameters);
         }
@@ -128,7 +125,7 @@ namespace System.IdentityModel.Test
         {
             Jwt = base.ValidateSignature(securityToken, validationParameters);
             DerivedJwtSecurityToken derivedJwt = Jwt as DerivedJwtSecurityToken;
-            Assert.IsNotNull(derivedJwt);
+            Assert.NotNull(derivedJwt);
             ValidateSignatureCalled = true;
             return Jwt;
         }
@@ -164,27 +161,12 @@ namespace System.IdentityModel.Test
 
     public class NotAsymmetricOrSymmetricSecurityKey : SecurityKey
     {
-        public override byte[] DecryptKey(string algorithm, byte[] keyData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override byte[] EncryptKey(string algorithm, byte[] keyData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsAsymmetricAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             throw new NotImplementedException();
         }
 
-        public override bool IsSymmetricAlgorithm(string algorithm)
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             throw new NotImplementedException();
         }
@@ -199,74 +181,29 @@ namespace System.IdentityModel.Test
 
     public class ReturnNullSymmetricSecurityKey : SymmetricSecurityKey
     {
-        public KeyedHashAlgorithm KeyedHashAlgorithm { get; set; }
+        public ReturnNullSymmetricSecurityKey(byte[] keyBytes)
+            : base(keyBytes)
+        { }
+
         public SymmetricSecurityKey SymmetricSecurityKey { get; set; }
 
-        public override byte[] GenerateDerivedKey(string algorithm, byte[] label, byte[] nonce, int derivedKeyLength, int offset)
+        public override byte[] Key
         {
-            throw new NotImplementedException();
-        }
-
-        public override System.Security.Cryptography.ICryptoTransform GetDecryptionTransform(string algorithm, byte[] iv)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override System.Security.Cryptography.ICryptoTransform GetEncryptionTransform(string algorithm, byte[] iv)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int GetIVSize(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override System.Security.Cryptography.KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
-        {
-            return KeyedHashAlgorithm;
-        }
-
-        public override System.Security.Cryptography.SymmetricAlgorithm GetSymmetricAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override byte[] GetSymmetricKey()
-        {
-            if (SymmetricSecurityKey == null)
+            get
             {
-                return null;
+                if (SymmetricSecurityKey == null)
+                {
+                    return null;
+                }
+
+                return SymmetricSecurityKey.Key;
             }
-
-            return SymmetricSecurityKey.GetSymmetricKey();
-        }
-
-        public override byte[] DecryptKey(string algorithm, byte[] keyData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override byte[] EncryptKey(string algorithm, byte[] keyData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsAsymmetricAlgorithm(string algorithm)
-        {
-            return false;
         }
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             return true;
         }
-
-        public override bool IsSymmetricAlgorithm(string algorithm)
-        {
-            return true;
-        }
-
         public override int KeySize
         {
             get
@@ -285,48 +222,9 @@ namespace System.IdentityModel.Test
     {
         public ReturnNullAsymmetricSecurityKey() { }
 
-        public AsymmetricSignatureDeformatter AsymmetricSignatureDeformatter { get; set; }
-        public AsymmetricSignatureFormatter AsymmetricSignatureFormatter { get; set; }
-        public HashAlgorithm HashAlgorithm { get; set; }
-
-        public override System.Security.Cryptography.AsymmetricAlgorithm GetAsymmetricAlgorithm(string algorithm, bool privateKey)
+        public override bool HasPrivateKey
         {
-            throw new NotImplementedException();
-        }
-
-        public override System.Security.Cryptography.HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
-        {
-            return HashAlgorithm;
-        }
-
-        public override System.Security.Cryptography.AsymmetricSignatureDeformatter GetSignatureDeformatter(string algorithm)
-        {
-            return AsymmetricSignatureDeformatter;
-        }
-
-        public override System.Security.Cryptography.AsymmetricSignatureFormatter GetSignatureFormatter(string algorithm)
-        {
-            return AsymmetricSignatureFormatter;
-        }
-
-        public override bool HasPrivateKey()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override byte[] DecryptKey(string algorithm, byte[] keyData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override byte[] EncryptKey(string algorithm, byte[] keyData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsAsymmetricAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
+            get { throw new NotImplementedException(); }
         }
 
         public override bool IsSupportedAlgorithm(string algorithm)
@@ -334,7 +232,7 @@ namespace System.IdentityModel.Test
             throw new NotImplementedException();
         }
 
-        public override bool IsSymmetricAlgorithm(string algorithm)
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             throw new NotImplementedException();
         }
@@ -343,6 +241,14 @@ namespace System.IdentityModel.Test
         {
             get { throw new NotImplementedException(); }
         }
+
+        public override bool HasPublicKey
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 
     /// <summary>
@@ -350,49 +256,34 @@ namespace System.IdentityModel.Test
     /// </summary>
     public class FaultingAsymmetricSecurityKey : AsymmetricSecurityKey
     {
-        public FaultingAsymmetricSecurityKey(AsymmetricSecurityKey key = null, AsymmetricAlgorithm agorithm = null, AsymmetricSignatureDeformatter deformatter = null, AsymmetricSignatureFormatter formatter = null, HashAlgorithm hash = null, bool hasPrivateKey = false)
+        AsymmetricSecurityKey _key;
+
+        public FaultingAsymmetricSecurityKey(AsymmetricSecurityKey key = null, AsymmetricAlgorithm agorithm = null, bool hasPrivateKey = false)
         {
-            Key = key;
+            _key = key;
         }
 
-        public AsymmetricSecurityKey Key { get; set; }
-        public AsymmetricAlgorithm Algorithm { get; set; }
-        public AsymmetricSignatureDeformatter deformatter { get; set; }
-        public AsymmetricSignatureFormatter formatter { get; set; }
-        public HashAlgorithm hash { get; set; }
-        public bool hasPrivateKey { get; set; }
-
-        public override AsymmetricAlgorithm GetAsymmetricAlgorithm(string algorithm, bool privateKey)
+        public override bool HasPrivateKey
         {
-            return Key.GetAsymmetricAlgorithm(algorithm, privateKey);
+            get { return _key.HasPrivateKey; }
         }
 
-        public override HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
+        public override bool HasPublicKey
         {
-            return Key.GetHashAlgorithmForSignature(algorithm);
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        public override AsymmetricSignatureDeformatter GetSignatureDeformatter(string algorithm)
+        public override int KeySize { get { return _key.KeySize; } }
+
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
-            return Key.GetSignatureDeformatter(algorithm);
+            throw new NotImplementedException();
         }
 
-        public override AsymmetricSignatureFormatter GetSignatureFormatter(string algorithm)
-        {
-            return Key.GetSignatureFormatter(algorithm);
-        }
-
-        public override bool HasPrivateKey()
-        {
-            return Key.HasPrivateKey();
-        }
-
-        public override int KeySize { get { return Key.KeySize; } }
-        public override byte[] DecryptKey(string algorithm, byte[] keyData) { return Key.DecryptKey(algorithm, keyData); }
-        public override byte[] EncryptKey(string algorithm, byte[] keyData) { return Key.EncryptKey(algorithm, keyData); }
-        public override bool IsAsymmetricAlgorithm(string algorithm) { return Key.IsAsymmetricAlgorithm(algorithm); }
-        public override bool IsSupportedAlgorithm(string algorithm) { return Key.IsSupportedAlgorithm(algorithm); }
-        public override bool IsSymmetricAlgorithm(string algorithm) { return Key.IsSymmetricAlgorithm(algorithm); }
+        public override bool IsSupportedAlgorithm(string algorithm) { return _key.IsSupportedAlgorithm(algorithm); }
     }
 
     /// <summary>
@@ -407,6 +298,7 @@ namespace System.IdentityModel.Test
         byte[] _keyBytes;
 
         public FaultingSymmetricSecurityKey(SymmetricSecurityKey key, Exception throwMe, SymmetricAlgorithm algorithm = null, KeyedHashAlgorithm keyedHash = null, byte[] keyBytes = null)
+            : base(keyBytes)
         {
             _throwMe = throwMe;
             _key = key;
@@ -415,35 +307,19 @@ namespace System.IdentityModel.Test
             _keyBytes = keyBytes;
         }
 
-        public override KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
+        public override byte[] Key
         {
-            if (_throwMe != null)
-                throw _throwMe;
+            get
+            {
+                if (_throwMe != null)
+                    throw _throwMe;
 
-            return _keyedHash;
+                return _keyBytes;
+            }
         }
-
-        public override byte[] GetSymmetricKey()
-        {
-            if (_throwMe != null)
-                throw _throwMe;
-
-            return _keyBytes;
-        }
-
-        public override byte[] GenerateDerivedKey(string algorithm, byte[] label, byte[] nonce, int derivedKeyLength, int offset) { return _key.GenerateDerivedKey(algorithm, label, nonce, derivedKeyLength, offset); }
-        public override ICryptoTransform GetDecryptionTransform(string algorithm, byte[] iv) { return _key.GetDecryptionTransform(algorithm, iv); }
-        public override ICryptoTransform GetEncryptionTransform(string algorithm, byte[] iv) { return _key.GetEncryptionTransform(algorithm, iv); }
-        public override int GetIVSize(string algorithm) { return _key.GetIVSize(algorithm); }
-        public override SymmetricAlgorithm GetSymmetricAlgorithm(string algorithm) { return _key.GetSymmetricAlgorithm(algorithm); }
-
 
         public override int KeySize { get { return _key.KeySize; } }
-        public override byte[] DecryptKey(string algorithm, byte[] keyData) { return _key.DecryptKey(algorithm, keyData); }
-        public override byte[] EncryptKey(string algorithm, byte[] keyData) { return _key.EncryptKey(algorithm, keyData); }
-        public override bool IsAsymmetricAlgorithm(string algorithm) { return _key.IsAsymmetricAlgorithm(algorithm); }
         public override bool IsSupportedAlgorithm(string algorithm) { return _key.IsSupportedAlgorithm(algorithm); }
-        public override bool IsSymmetricAlgorithm(string algorithm) { return _key.IsSymmetricAlgorithm(algorithm); }
     }
 
     public class FaultingKeyedHashAlgorithm : KeyedHashAlgorithm
@@ -493,57 +369,24 @@ namespace System.IdentityModel.Test
         }
     }
 
-    public class AlwaysSucceedCertificateValidator : X509CertificateValidator
-    {
-        public override void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
-        {
-            return;
-        }
+    // TODO <BREAKING> X509CertificateValidator
+    //public class AlwaysSucceedCertificateValidator : X509CertificateValidator
+    //{
+    //    public override void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
+    //    {
+    //        return;
+    //    }
 
-        public static AlwaysSucceedCertificateValidator New { get { return new AlwaysSucceedCertificateValidator(); } }
-    }
+    //    public static AlwaysSucceedCertificateValidator New { get { return new AlwaysSucceedCertificateValidator(); } }
+    //}
 
-    public class AlwaysThrowCertificateValidator : X509CertificateValidator
-    {
-        public override void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
-        {
-            throw new SecurityTokenValidationException("Certificate not valid");
-        }
-    }
-
-    /// <summary>
-    /// This allows a return value of a specific key or token
-    /// Helpful for extensibility tests where the Jwt SKI is null or empty.
-    /// </summary>
-    public class SetReturnSecurityTokenResolver : SecurityTokenResolver
-    {
-        public SetReturnSecurityTokenResolver(SecurityToken token, SecurityKey key)
-        {
-            SecurityKey = key;
-            SecurityToken = token;
-        }
-
-        public SecurityKey SecurityKey { get; set; }
-        public SecurityToken SecurityToken { get; set; }
-
-        protected override bool TryResolveSecurityKeyCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityKey key)
-        {
-            key = SecurityKey;
-            return true;
-        }
-
-        protected override bool TryResolveTokenCore(SecurityKeyIdentifierClause keyIdentifierClause, out SecurityToken token)
-        {
-            token = SecurityToken;
-            return true;
-        }
-
-        protected override bool TryResolveTokenCore(SecurityKeyIdentifier keyIdentifier, out SecurityToken token)
-        {
-            token = SecurityToken;
-            return true;
-        }
-    }
+    //public class AlwaysThrowCertificateValidator : X509CertificateValidator
+    //{
+    //    public override void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
+    //    {
+    //        throw new SecurityTokenValidationException("Certificate not valid");
+    //    }
+    //}
 
     /// <summary>
     /// Helpful for extensibility testing for errors.

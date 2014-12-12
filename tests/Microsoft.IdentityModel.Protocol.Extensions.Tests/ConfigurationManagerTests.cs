@@ -16,66 +16,39 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Threading;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class ConfigurationManagerTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "39792f21-e6cd-4b6a-bebd-fee9b86304d8")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void ConfigurationManager_Constructors()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "2fa31653-3822-42a5-b87f-2c992df4f75e")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void ConfigurationManager_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "bce22318-a3a8-411f-9c39-84846ec16229")]
-        [Description("Tests: GetSets")]
-        [DeploymentItem("OpenIdConnectMetadata.json")]
-        [DeploymentItem("OpenIdConnectMetadata2.json")]
-        [DeploymentItem("JsonWebKeySet.json")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void ConfigurationManager_GetSets()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 2)
-                Assert.Fail("Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
+                Assert.True(false, "Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
 
             TimeSpan defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             TimeSpan defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
@@ -151,9 +124,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsTrue(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "d8f4af92-e769-45f2-9347-62a1da348a04")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void ConfigurationManager_Publics()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");

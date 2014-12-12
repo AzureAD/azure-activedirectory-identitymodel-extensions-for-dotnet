@@ -17,38 +17,19 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Reflection;
+using System.IdentityModel.Test;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class WsFederationMessageTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "1bbaf972-ea13-44c4-8f0a-9309e24f8c0e")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void WsFederationAuthenticationMessage_Constructors()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -69,9 +50,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "0217d16e-42b5-4cb5-930e-98e3b4c3c2c6")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void WsFederationAuthenticationMessage_Defaults()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -97,9 +76,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsNull(wsFederationMessage.Wtrealm);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "0c6c4266-8cc5-4fd6-b403-d13f6e1ab38c")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void WsFederationAuthenticationMessage_GetSets()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -112,9 +89,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "6787d22d-5dc3-448c-877d-25fefe5aa062")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void WsFederationAuthenticationMessage_Publics()
         {
             string issuerAdderss = @"http://www.gotjwt.com";

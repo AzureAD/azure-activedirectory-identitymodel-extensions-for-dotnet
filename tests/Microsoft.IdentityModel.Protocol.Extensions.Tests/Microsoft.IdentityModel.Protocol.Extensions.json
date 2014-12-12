@@ -10,14 +10,26 @@
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
         "JwtSecurityTokenHandlerTests.cs",
+        "JwtSecurityTokenRequirementTests.cs",
         "JwtSecurityTokenTests.cs",
+        "JwtTestUtilities.cs",
+        "NamedKeyIssuerTokenResolverConfigTest.cs",
+        "NamedKeyIssuerTokenResolverTests.cs",
+        "NamedKeySecurityKeyIdentifierClauseTests.cs",
+        "NamedKeySecurityTokenTests.cs",
         "Performance.cs",
         "SignatureProviderTests.cs",
+        "TestContextProvider.cs",
         "TokenValidationParametersTests.cs",
-        "X509CertificateValidatorExTests.cs"
+        "TokenValidationParams.cs",
+        "TokenValidationParamsTests.cs",
+        "V1ToV2Converter.cs",
+        "ValidatorsTests.cs",
+        "X509CertificateValidatorExTests.cs",
+        "X509SecurityKeyTests.cs"
     ],
     "frameworks": {
-        "aspnet50": { },
+       "aspnet50": {},
         "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
@@ -42,7 +54,5 @@
     "compilationOptions": {
         "allowUnsafe": true,
         "warningsAsErrors": false
-    },
-    "configurations": {
     }
 }

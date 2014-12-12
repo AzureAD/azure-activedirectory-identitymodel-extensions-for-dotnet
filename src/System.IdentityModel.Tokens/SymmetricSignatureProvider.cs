@@ -69,7 +69,8 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this.keyedHash = key.GetKeyedHashAlgorithm(algorithm);
+                // TODO - need replacement for KeyedHashAlgorithm
+                // this.keyedHash = KeyedHashAlgorithm.Create.GetKeyedHashAlgorithm(algorithm);
             }
             catch (Exception ex)
             {
@@ -88,7 +89,7 @@ namespace System.IdentityModel.Tokens
 
             try
             {
-                this.keyedHash.Key = key.GetSymmetricKey();
+                this.keyedHash.Key = key.Key;
             }
             catch (Exception ex)
             {

@@ -9,15 +9,34 @@
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
-        "JwtSecurityTokenHandlerTests.cs",
-        "JwtSecurityTokenTests.cs",
-        "Performance.cs",
-        "SignatureProviderTests.cs",
-        "TokenValidationParametersTests.cs",
-        "X509CertificateValidatorExTests.cs"
+        "cs",
+        "AuthenticationProtocolMessageTests.cs",
+        "ConfigurationManagerTests.cs",
+        "CrossTokenTests.cs",
+        "DerivedTypes.cs",
+        "End2EndTests.cs",
+        "GenericDocumentRetrieverTests.cs",
+        "HttpDocumentRetrieverTests.cs",
+        "JsonWebKeySetTests.cs",
+        "JsonWebKeyTests.cs",
+        "MessageComparer.cs",
+        "OpenIdConnectConfigurationRetrieverTests.cs",
+        "OpenIdConnectConfigurationTests.cs",
+        "OpenIdConnectConstantsTests.cs",
+        "OpenIdConnectMessageTests.cs",
+        "OpenIdConnectProtocolValidationContextTests.cs",
+        "OpenIdConnectProtocolValidatorTests.cs",
+        "Saml2SecurityTokenHandlerTests.cs",
+        "SamlSecurityTokenHandlerTests.cs",
+        "SecurityTokenHandlerCollectionExtensionsTests.cs",
+        "StaticConfigurationManagerTests.cs",
+        "WsFederationConfigurationRetrieverTests.cs",
+        "WsFederationConfigurationTests.cs",
+        "WsFederationConstantsTests.cs",
+        "WsFederationMessageTests.cs",
     ],
     "frameworks": {
-        "aspnet50": { },
+       "aspnet50": {},
         "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
@@ -42,7 +61,5 @@
     "compilationOptions": {
         "allowUnsafe": true,
         "warningsAsErrors": false
-    },
-    "configurations": {
     }
 }

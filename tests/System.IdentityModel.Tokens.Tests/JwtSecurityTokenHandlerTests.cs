@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.IO;
@@ -27,6 +26,8 @@ using System.Xml;
 
 namespace System.IdentityModel.Test
 {
+
+#if JWT_XML
     public class XmlReaderVariation
     {
         public const string  WsuId                    = "c9b6b6b4-bd35-46ae-8146-15d6b00d22ed";
@@ -173,36 +174,13 @@ namespace System.IdentityModel.Test
         }
 
     }
+    #endif
 
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class JwtSecurityTokenHandlerTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        { }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        { }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider(TestContext);
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "B237EA9D-0453-4717-8870-E6A49DE04F0E")]
         [Description("Actor Tests.  Ensure that 'actors' work correctly inbound and outbound.  Signed, with and without bootstrap context")]
         public void JwtSecurityTokenHandler_ActorTests()
         {
@@ -266,8 +244,6 @@ namespace System.IdentityModel.Test
             return claimsPrincipal;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "A1976E06-F5D5-4DDB-88F8-E57B86B4EC64")]
         [Description("Claim Type Mapping - Inbound and Outbound")]
         public void JwtSecurityTokenHandler_ClaimTypeMapping()
         {
@@ -491,8 +467,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "7F6372F7-36A7-47AE-8C1E-A4EF230194D5")]
         [Description("Ensures that JwtSecurityTokenHandler defaults are as expected")]
         public void JwtSecurityTokenHandler_Defaults()
         {
@@ -523,8 +497,6 @@ namespace System.IdentityModel.Test
         }
 
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "2CADC17D-D1F4-4A20-B54A-44FE37445348")]
         [Description("Tests: WriteXmlToken Tests")]
         public void JwtSecurityTokenHandler_WriteXmlToken()
         {
@@ -551,8 +523,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "70553299-B307-48AD-A406-3CB12E7C6463")]
         [Description("CanRead Tests")]
         public void JwtSecurityTokenHandler_CanRead()
         {
@@ -611,8 +581,6 @@ namespace System.IdentityModel.Test
             return retVal;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "94084020-42E7-47D0-A398-021124F7F28C")]
         [Description("Read Tests")]
         public void JwtSecurityTokenHandler_Read()
         {
@@ -659,8 +627,6 @@ namespace System.IdentityModel.Test
             return retVal;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "94084020-42E7-47D0-A398-021124F7F28C")]
         [Description("Validate Tokens")]
         public void JwtSecurityTokenHandler_ValidateToken()
         {
@@ -727,8 +693,6 @@ namespace System.IdentityModel.Test
             TestUtilities.ValidateToken(securityToken: jwt.RawData, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "B6C1D4D1-3CF9-4281-B024-39FCBD03160E")]
         [Description("JWTSecurityTokenHandler - tests that the bootstrap context is saved and is as expected")]
         public void JwtSecurityTokenHandler_BootstrapToken()
         {
@@ -749,8 +713,6 @@ namespace System.IdentityModel.Test
         }
 
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "D540296C-BEFD-4D37-BC94-6E3FD9DBBC31")]
         [Description("JWTSecurityTokenHandler - ReadToken")]
         public void JwtSecurityTokenHandler_ReadToken()
         {
@@ -797,8 +759,6 @@ namespace System.IdentityModel.Test
             return retVal;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "00E34491-C6F0-40FA-AA66-090729F46927")]
         [Description("Signature Validation")]
         public void JwtSecurityTokenHandler_SignatureValidation()
         {
@@ -884,8 +844,6 @@ namespace System.IdentityModel.Test
             };
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "6356C21F-280C-4A9E-875C-F6543DF0A5E3")]
         [Description("Issuer Validation TVP")]
         public void JwtSecurityTokenHandler_IssuerValidation()
         {
@@ -934,8 +892,6 @@ namespace System.IdentityModel.Test
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "6356C21F-280C-4A9E-875C-F6543DF0A5E3")]
         [Description("Audience Validation")]
         public void JwtSecurityTokenHandler_AudienceValidation()
         {

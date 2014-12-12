@@ -16,71 +16,44 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
+using Xunit;
+
 using Claim = System.Security.Claims.Claim;
 
 namespace System.IdentityModel.Test
 {
-    [TestClass]
     public class JwtPayloadTests
     {
         /// <summary>
         /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
         /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-
-        public TestContext TestContext { get; set; }
-
-
-        [ClassInitialize]
-        public static void ClassSetup( TestContext testContext )
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider( TestContext );
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "0B55BD6C-40F7-4C82-A0B7-D0B799EA3289")]
-        [Description("Ensures that JwtPayload defaults are as expected")]
+        [Fact(DisplayName = "Ensures that JwtPayload defaults are as expected")]
         public void JwtPayload_Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
             List<Claim> claims = jwtPayload.Claims as List<Claim>;
-            Assert.IsNotNull(claims, "claims as List<Claim> == null");
+            Assert.True(claims != null, "claims as List<Claim> == null");
 
             foreach (Claim c in jwtPayload.Claims)
             {
-                Assert.Fail("jwtPayload.Claims should be empty");
+                Assert.True(false, "jwtPayload.Claims should be empty");
             }
 
-            Assert.IsNotNull(jwtPayload.Aud, "jwtPayload.Aud should not be null");
+            Assert.True(jwtPayload.Aud != null, "jwtPayload.Aud should not be null");
             foreach(string audience in jwtPayload.Aud)
             {
-                Assert.Fail("jwtPayload.Aud should be empty");
+                Assert.True(false, "jwtPayload.Aud should be empty");
             }
 
-            Assert.AreEqual(jwtPayload.ValidFrom, DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
-            Assert.AreEqual(jwtPayload.ValidTo, DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
+            Assert.True(jwtPayload.ValidFrom == DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
+            Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "DB01AD64-AB08-4AD6-ACE9-197878AAD9B6")]
-        [Description("Tests: GetSets, covers defaults")]
+        [Fact(DisplayName = "Tests: GetSets, covers defaults")]
         public void JwtPayload_GetSets()
         {
             // Aud, Claims, ValidFrom, ValidTo handled in Defaults.
@@ -89,7 +62,7 @@ namespace System.IdentityModel.Test
             Type type = typeof(JwtPayload);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 20)
-                Assert.Fail("Number of properties has changed from 20 to: " + properties.Length + ", adjust tests");
+                Assert.True(false,"Number of properties has changed from 20 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -121,13 +94,11 @@ namespace System.IdentityModel.Test
                 foreach (string str in context.Errors)
                     sb.AppendLine(str);
 
-                Assert.Fail(sb.ToString());
+                Assert.True(false, sb.ToString());
             }
         }
 
-        [TestMethod]
-        [TestProperty( "TestCaseID", "4D8369F1-8846-41C2-89C9-3827955032A6" )]
-        [Description( "Test claims as objects" )]
+        [Fact(DisplayName =  "Test claims as objects" )]
         public void JwtPalyoad_Claims()
         {
             List<string> errors = new List<string>();
@@ -152,12 +123,10 @@ namespace System.IdentityModel.Test
                 errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Aud, IdentityUtilities.DefaultAudiences)");
             }
 
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+            TestUtilities.AssertFailIfErrors("JwtPalyoad_Claims", errors);
         }
 
-        [TestMethod]
-        [TestProperty( "TestCaseID", "F443747C-5AA1-406D-B0FE-53152CA92DA3" )]
-        [Description( "Tests adding non-strings as 'exp'" )]
+        [Fact(DisplayName =  "Tests adding non-strings as 'exp'" )]
         public void JwtPalyoad_ObjectClaims()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -166,10 +135,10 @@ namespace System.IdentityModel.Test
             DateTime payloadTime = EpochTime.DateTime( time.Value );
             DateTime payloadValidTo = jwtPayload.ValidTo;
 
-            Assert.AreEqual(EpochTime.DateTime(time.Value), jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
+            Assert.True(EpochTime.DateTime(time.Value) == jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
 
             int? expirationTime = jwtPayload.Exp;
-            Assert.AreEqual(expirationTime, time, "expirationTime != time");
+            Assert.True(expirationTime == time, "expirationTime != time");
         }
     }
 }

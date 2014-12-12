@@ -500,7 +500,7 @@ namespace System.IdentityModel.Test
             if (symKey1 != null)
             {
                 SymmetricSecurityKey symKey2 = securityKey2 as SymmetricSecurityKey;
-                if (!AreBytesEqual(symKey1.GetSymmetricKey(), symKey2.GetSymmetricKey()))
+                if (!AreBytesEqual(symKey1.Key, symKey2.Key))
                     return false;
             }
 

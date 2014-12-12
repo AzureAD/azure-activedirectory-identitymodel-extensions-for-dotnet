@@ -16,12 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.IdentityModel.Test;
+
 using SamlSecurityTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
@@ -29,46 +30,22 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class SamlSecurityTokenHandlerTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "cc3fff9a-ef48-4818-8c25-b814a9888cfe")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void SamlSecurityTokenHandler_Constructors()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "c97d3f29-5032-4d63-88c3-9863be253b6d")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void SamlSecurityTokenHandler_Defaults()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             Assert.IsTrue(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "d739cd25-b7fa-4191-b0be-e60fa8cf8651")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void SamlSecurityTokenHandler_GetSets()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
@@ -76,9 +53,7 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "9D11B4D9-957F-4E30-9420-AD0683A5BF87")]
-        [Description("Tests: Protected")]
+        [Fact(DisplayName = "Tests: Protected")]
         public void SamlSecurityTokenHandler_Protected()
         {
             CreateClaims();
@@ -104,9 +79,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "82db9de3-7c75-4721-b1bb-b38fe097c398")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void SamlSecurityTokenHandler_Publics()
         {
             CanReadToken();

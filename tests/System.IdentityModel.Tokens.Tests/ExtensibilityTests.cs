@@ -16,43 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
     /// <summary>
     /// Test some key extensibility scenarios
     /// </summary>
-    [TestClass]
     public class ExtensibilityTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        { }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        { }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider(TestContext);
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D")]
-        [Description("Extensibility tests for JwtSecurityTokenHandler")]
+        [Fact(DisplayName = "Extensibility tests for JwtSecurityTokenHandler")]
         public void JwtSecurityTokenHandler_Extensibility()
         {
             DerivedJwtSecurityTokenHandler handler = new DerivedJwtSecurityTokenHandler()
@@ -88,13 +63,13 @@ namespace System.IdentityModel.Test
             {
                 SecurityToken validatedToken;
                 handler.ValidateToken(jwt, validationParameters, out validatedToken);
-                Assert.IsNotNull(handler.Jwt as DerivedJwtSecurityToken);
-                Assert.IsTrue(handler.ReadTokenCalled);
-                Assert.IsFalse(handler.ValidateAudienceCalled);
-                Assert.IsTrue(handler.ValidateIssuerCalled);
-                Assert.IsTrue(handler.ValidateIssuerSigningKeyCalled);
-                Assert.IsTrue(handler.ValidateLifetimeCalled);
-                Assert.IsTrue(handler.ValidateSignatureCalled);
+                Assert.NotNull(handler.Jwt as DerivedJwtSecurityToken);
+                Assert.True(handler.ReadTokenCalled);
+                Assert.True(handler.ValidateAudienceCalled);
+                Assert.True(handler.ValidateIssuerCalled);
+                Assert.True(handler.ValidateIssuerSigningKeyCalled);
+                Assert.True(handler.ValidateLifetimeCalled);
+                Assert.True(handler.ValidateSignatureCalled);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -103,9 +78,9 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D")]
-        [Description("Extensibility tests for NamedKeySecurityKeyIdentifierClause")]
+#if BREAKING
+        // NamedKeySecurityKeyIdentifierClause gone
+        [Fact(DisplayName = "Extensibility tests for NamedKeySecurityKeyIdentifierClause")]
         public void NamedKeySecurityKeyIdentifierClause_Extensibility()
         {
             string clauseName = "kid";
@@ -116,15 +91,15 @@ namespace System.IdentityModel.Test
             SigningCredentials signingCredentials = new SigningCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256Digest, keyIdentifier);
             JwtHeader jwtHeader = new JwtHeader(signingCredentials);
             SecurityKeyIdentifier ski = jwtHeader.SigningKeyIdentifier;
-            Assert.AreEqual(ski.Count, 1, "ski.Count != 1 ");
+            Assert.Equal(ski.Count, 1, "ski.Count != 1 ");
 
             NamedKeySecurityKeyIdentifierClause clauseOut = ski.Find<NamedKeySecurityKeyIdentifierClause>();
             Assert.IsNotNull(clauseOut, "NamedKeySecurityKeyIdentifierClause not found");
-            Assert.AreEqual(clauseOut.Name, clauseName, "clauseOut.Id != clauseId");
-            Assert.AreEqual(clauseOut.Id, keyId, "clauseOut.KeyIdentifier != keyId");
+            Assert.Equal(clauseOut.Name, clauseName, "clauseOut.Id != clauseId");
+            Assert.Equal(clauseOut.Id, keyId, "clauseOut.KeyIdentifier != keyId");
 
             NamedKeySecurityToken NamedKeySecurityToken = new NamedKeySecurityToken(clauseName, keyId, new SecurityKey[] { KeyingMaterial.DefaultSymmetricSecurityKey_256 });
-            Assert.IsTrue(NamedKeySecurityToken.MatchesKeyIdentifierClause(clause), "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
+            ((NamedKeySecurityToken.MatchesKeyIdentifierClause(clause), "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
 
             List<SecurityKey> list = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256 };
             Dictionary<string, IList<SecurityKey>> keys = new Dictionary<string, IList<SecurityKey>>() { { "kid", list }, };
@@ -132,10 +107,9 @@ namespace System.IdentityModel.Test
             SecurityKey sk = nkitr.ResolveSecurityKey(clause);
             Assert.IsNotNull(sk, "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
         }
+#endif
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "C4FC2FC1-5AB0-4A73-A620-59D1FBF92D7A")]
-        [Description("Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
+        [Fact(DisplayName = "Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
         public void AsymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -155,9 +129,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "A8068888-87D8-49D6-919F-CDF9AAC26F57")]
-        [Description("Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
+        [Fact(DisplayName = "Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
         public void SymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();

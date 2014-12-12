@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 
@@ -31,37 +31,9 @@ namespace System.IdentityModel.Test
     /// SymmetricSignatureProvider
     /// AsymmetricSignatureProvider
     /// </summary>
-    [TestClass]
     public class SignatureProviderTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        { }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        { }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-#if _Verbose
-            _verbose = true;
-#endif
-
-            _testContextProvider = new TestContextProvider(TestContext);
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "4A9C4A2E-C50F-4A57-A85B-2D6D4F14ADF1")]
-        [Description("Tests for SignatureProviderFactory")]
+        [Fact(DisplayName = "Tests for SignatureProviderFactory")]
         public void SignatureProviderFactory_Tests()
         {
             SignatureProviderFactory factory = new SignatureProviderFactory();
@@ -152,9 +124,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "F7B5A336-BF04-4589-9F8E-36451E1E3B7F")]
-        [Description("AsymmetricSignatureProvider Constructor")]
+        [Fact(DisplayName = "AsymmetricSignatureProvider Constructor")]
         public void AsymmetricSignatureProvider_Constructor()
         {
             AsymmetricSecurityKey privateKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey;
@@ -208,9 +178,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "8A43293F-196C-47B8-8C1D-59CDAD30C39E")]
-        [Description("Tests for AsymmetricSignatureProvider.Dispose")]
+        [Fact(DisplayName = "Tests for AsymmetricSignatureProvider.Dispose")]
         public void AsymmetricSignatureProvider_Dispose()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultAsymmetricKey_Public_2048, SecurityAlgorithms.RsaSha256Signature);
@@ -245,9 +213,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "FC949834-617F-4C57-8643-C30F160E309D")]
-        [Description("Ensures that AsymmetricSignatureProvider defaults are as expected")]
+        [Fact(DisplayName = "Ensures that AsymmetricSignatureProvider defaults are as expected")]
         public void AsymmetricSignatureProvider_Defaults()
         {
             try
@@ -269,9 +235,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "4923DA59-3F32-4995-84D3-C49B0A08EEDE")]
-        [Description("Tests for Asymmetric and Symmetric SignAndVerify")]
+        [Fact(DisplayName = "Tests for Asymmetric and Symmetric SignAndVerify")]
         public void SignatureProviders_SignAndVerify()
         {
             // asymmetric
@@ -285,34 +249,34 @@ namespace System.IdentityModel.Test
             }
             catch (Exception ex)
             {
-                Assert.AreEqual(ex.GetType(), typeof(InvalidOperationException));
+                Assert.Equal(ex.GetType(), typeof(InvalidOperationException));
             }
 
             // asymmetric
             try
             {
                 Random r = new Random();
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultAsymmetricKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256Signature, true);
                 byte[] bytesin = new byte[1024];
                 r.NextBytes(bytesin);
                 byte[] signature = provider.Sign(bytesin);
-                Assert.IsTrue(provider.Verify(bytesin, signature));
+                Assert.True(provider.Verify(bytesin, signature));
             }
             catch (Exception)
             {
-                Assert.Fail("Should have thrown, it is possible that crypto config mapped this.");
+                Assert.True(false, "Should have thrown, it is possible that crypto config mapped this.");
             }
 
             // unknown algorithm
             try
             {
                 Random r = new Random();
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultAsymmetricKey_2048, "SecurityAlgorithms.RsaSha256Signature");
-                Assert.Fail(string.Format("Should have thrown, it is possible that crypto config mapped this."));
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, "SecurityAlgorithms.RsaSha256Signature");
+                Assert.True(false,string.Format("Should have thrown, it is possible that crypto config mapped this."));
             }
             catch (Exception ex)
             {
-                Assert.IsFalse(ex.GetType() != typeof(InvalidOperationException), "ex.GetType() != typeof( InvalidOperationException )");
+                Assert.False(ex.GetType() != typeof(InvalidOperationException), "ex.GetType() != typeof( InvalidOperationException )");
             }
 
             // symmetric
@@ -323,11 +287,11 @@ namespace System.IdentityModel.Test
                 byte[] bytesin = new byte[1024];
                 r.NextBytes(bytesin);
                 byte[] signature = provider.Sign(bytesin);
-                Assert.IsTrue(provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
+                Assert.True(provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
             }
             catch (Exception ex)
             {
-                Assert.Fail(string.Format("Unexpected exception received: '{0}'", ex));
+                Assert.True(false, string.Format("Unexpected exception received: '{0}'", ex));
             }
 
             // symmetric different byte[] sizes
@@ -336,11 +300,11 @@ namespace System.IdentityModel.Test
                 SymmetricSignatureProvider provider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature);
                 byte[] bytesin = new byte[1024];
                 byte[] signature = new byte[1024];
-                Assert.IsFalse(provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
+                Assert.False(provider.Verify(bytesin, signature), string.Format("Signature did not verify"));
             }
             catch (Exception ex)
             {
-                Assert.Fail(string.Format("Unexpected exception received: '{0}'", ex));
+                Assert.True(false, string.Format("Unexpected exception received: '{0}'", ex));
             }
 
             // unknown algorithm
@@ -348,17 +312,15 @@ namespace System.IdentityModel.Test
             {
                 Random r = new Random();
                 SymmetricSignatureProvider provider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_256, "SecurityAlgorithms.HmacSha256Signature");
-                Assert.Fail(string.Format("Should have thrown, it is possible that crypto config mapped this."));
+                Assert.True(false, string.Format("Should have thrown, it is possible that crypto config mapped this."));
             }
             catch (Exception ex)
             {
-                Assert.IsFalse(ex.GetType() != typeof(InvalidOperationException), "ex.GetType() != typeof( InvalidOperationException )");
+                Assert.False(ex.GetType() != typeof(InvalidOperationException), "ex.GetType() != typeof( InvalidOperationException )");
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "89AF7B31-7707-4E60-AC32-363C9CA78363")]
-        [Description("AsymmetricSignatureProvider Tests")]
+        [Fact(DisplayName = "AsymmetricSignatureProvider Tests")]
         public void AsymmetricSignatureProvider_Publics()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm);
@@ -372,9 +334,7 @@ namespace System.IdentityModel.Test
             SignatureProvider_VerifyVariation(provider, new byte[1], new byte[0], ExpectedException.ArgumentException("IDX10626:"));
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "F59BC1A3-C2D7-43F6-99FC-D25E57D1B99C")]
-        [Description("Tests for SymmetricSignatureProvider Constructor")]
+        [Fact(DisplayName = "Tests for SymmetricSignatureProvider Constructor")]
         public void SymmetricSignatureProvider_ConstructorTests()
         {
             // no errors
@@ -422,9 +382,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "E4E5F329-12D8-431A-A971-21F86299DBB1")]
-        [Description("Parameter checking for SymmetricSignatureProvider.Sign and .Verify")]
+        [Fact(DisplayName = "Parameter checking for SymmetricSignatureProvider.Sign and .Verify")]
         public void SymmetricSignatureProvider_Publics()
         {
             SymmetricSignatureProvider provider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.SigningKey as SymmetricSecurityKey, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.SignatureAlgorithm);

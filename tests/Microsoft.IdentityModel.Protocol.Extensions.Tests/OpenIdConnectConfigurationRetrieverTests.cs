@@ -25,31 +25,14 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
-    [TestClass]
     public class OpenIdConnectConfigurationRetrieverTests
     {
-        public TestContext TestContext { get; set; }
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
+        [Fact]
         public async Task OpenIdConnectConfigurationRetriever_FromNetwork()
         {
             OpenIdConnectConfiguration configuration = await GetConfigurationFromHttpAsync(OpenIdConfigData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
@@ -58,8 +41,8 @@ namespace Microsoft.IdentityModel.Test
             await GetConfigurationFromHttpAsync(string.Empty, expectedException: ExpectedException.ArgumentNullException());
             await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
         }
-        
-        [TestMethod]
+
+        [Fact]
 
         public async Task OpenIdConnectConfigurationRetriever_FromFile()
         {
@@ -71,12 +54,7 @@ namespace Microsoft.IdentityModel.Test
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
         }
 
-        [TestMethod]
-        [DeploymentItem("PingLabsJWKS.json")]
-        [DeploymentItem("JsonWebKeySetSingleX509Data.json")]
-        [DeploymentItem("JsonWebKeySetBadX509Data.json")]
-        [DeploymentItem("JsonWebKeySetBadBase64Data.json")]
-        [DeploymentItem("JsonWebKeySet.json")]
+        [Fact]
         public async Task OpenIdConnectConfigurationRetriever_FromText()
         {
             OpenIdConnectConfiguration configuration;
@@ -102,7 +80,7 @@ namespace Microsoft.IdentityModel.Test
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(FormatException)));
         }
 
-        [TestMethod]
+        [Fact]
         public void OpenIdConnectConfiguration_Properties()
         {
             // ensure that each property can be set independently
@@ -184,7 +162,7 @@ namespace Microsoft.IdentityModel.Test
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync("primary",
-                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), CancellationToken.None);
+                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), CancellationToken.None));
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)

@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
@@ -31,29 +31,9 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class OpenIdConnectProtocolValidatorTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "CA77926E-BE0E-4483-8A70-F96E5D651D3F")]
-        [Description("Tests: GenerateNonce")]
+        [Fact(DisplayName = "Tests: GenerateNonce")]
         public void OpenIdConnectProtocolValidator_GenerateNonce()
         {
             List<string> errors = new List<string>();
@@ -68,13 +48,9 @@ namespace Microsoft.IdentityModel.Test
             {
 
             }
-
-
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "4696852e-94e7-4c2b-a768-ce6e7f16e80d")]
-        [Description("Tests: GetSets, test covers defaults")]
+        [Fact(DisplayName = "Tests: GetSets, test covers defaults")]
         public void OpenIdConnectProtocolValidator_GetSets()
         {
             OpenIdConnectProtocolValidator validationParameters = new OpenIdConnectProtocolValidator();
@@ -119,9 +95,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "e905d825-a3ff-4461-a5a4-46d842d0c4ba")]
-        [Description("Tests: Validate")]
+        [Fact(DisplayName = "Tests: Validate")]
         public void OpenIdConnectProtocolValidator_Validate()
         {
             JwtSecurityToken jwt =  new JwtSecurityToken();
@@ -235,9 +209,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "9a082558-f87e-4ae0-be80-852fbcf869d4")]
-        [Description("Tests: Validation of CHash")]
+        [Fact(DisplayName = "Tests: Validation of CHash")]
         public void OpenIdConnectProtocolValidator_CHash()
         {
             PublicOpenIdConnectProtocolValidator protocolValidator = new PublicOpenIdConnectProtocolValidator();
@@ -342,7 +314,7 @@ namespace Microsoft.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "9a082558-f87e-4ae0-be80-852fbcf869d4")]
-        [Description("Tests: Validation of Nonce")]
+        [Fact(DisplayName = "Tests: Validation of Nonce")]
         public void OpenIdConnectProtocolValidator_ValidateNonce()
         {
             PublicOpenIdConnectProtocolValidator protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectProtocolValidator();

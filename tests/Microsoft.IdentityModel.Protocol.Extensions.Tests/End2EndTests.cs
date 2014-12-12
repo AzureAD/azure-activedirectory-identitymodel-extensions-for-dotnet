@@ -17,42 +17,21 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Threading;
+using System.IdentityModel.Test;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class End2EndTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "0226a914-61f6-41af-ba67-21261aeb356b")]
-        [Description("Tests: OpenIdConnect")]
-        [DeploymentItem("OpenIdConnectMetadata.json")]
-        [DeploymentItem("JsonWebKeySet.json")]
+        [Fact(DisplayName = "Tests: OpenIdConnect")]
         public void End2End_OpenIdConnect()
         {
             SigningCredentials rsaSigningCredentials = 
@@ -87,12 +66,9 @@ namespace Microsoft.IdentityModel.Test
             tokenHandler.ValidateToken(jwt.RawData, validationParameters, out securityToken);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "06fb4c0f-a67f-4924-aa06-0fc596fa3163")]
-        [Description("Tests: WsFederation")]
+        [Fact(DisplayName = "Tests: WsFederation")]
         public void End2End_WsFederation()
         {
-
         }
     }
 }

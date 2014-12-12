@@ -16,57 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class WsFederationConstantsTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup( TestContext testContext )
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "56010D25-C9C0-477E-8993-B1B2914918FD")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void WsFederationConstants_Constructors()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "56010D25-C9C0-477E-8993-B1B2914918FD")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void WsFederationConstants_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "56010D25-C9C0-477E-8993-B1B2914918FD")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void WsFederationConstants_GetSets()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "56010D25-C9C0-477E-8993-B1B2914918FD")]
-        [Description( "Tests: Publics" )]
+        [Fact(DisplayName = "Tests: Publics" )]
         public void WsFederationConstants_Publics()
         {
         }

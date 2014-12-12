@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,29 +28,9 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class JsonWebKeyTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "5c9f0af7-b2cf-4baa-a73a-986574714a64")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void JsonWebKey_Constructors()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
@@ -135,16 +115,12 @@ namespace Microsoft.IdentityModel.Test
             return jsonWebKey;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "54fa205b-5a50-4d29-9ff0-9c38c397106a")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void JsonWebKey_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "4642e46f-72cd-4ffe-80ea-1006036986a1")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void JsonWebKey_GetSets()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
@@ -159,9 +135,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, CompareContext.Default));
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "ee45364b-0792-4fea-8485-e36fc6381319")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void JsonWebKey_Publics()
         {
         }

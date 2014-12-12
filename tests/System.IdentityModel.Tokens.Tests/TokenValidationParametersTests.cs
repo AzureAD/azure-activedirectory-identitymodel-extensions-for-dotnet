@@ -16,215 +16,87 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
-using System.Reflection;
-using System.Security.Claims;
-using System.Text;
 
 namespace System.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class TokenValidationParametersTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup( TestContext testContext )
+        [Description("Defaults")]
+        public void Defaults()
         {
-            // Start local STS
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            // Stop local STS
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider( TestContext );
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
+            Assert.IsNull(tokenValidationParameters.AllowedAudience);
+            Assert.IsTrue(tokenValidationParameters.AudienceUriMode == Selectors.AudienceUriMode.BearerKeyOnly);
+            Assert.IsNull(tokenValidationParameters.AllowedAudience);
+            Assert.IsNull(tokenValidationParameters.AllowedAudiences);
+            Assert.IsFalse(tokenValidationParameters.SaveBootstrapContext);
+            Assert.IsNull(tokenValidationParameters.SigningToken);
+            Assert.IsNull(tokenValidationParameters.SigningTokens);
+            Assert.IsFalse(tokenValidationParameters.ValidateActor);
+            Assert.IsTrue(tokenValidationParameters.ValidateIssuer);
+            Assert.IsNull(tokenValidationParameters.ValidIssuer);
+            Assert.IsNull(tokenValidationParameters.ValidIssuers);
         }
 
         [TestMethod]
         [TestProperty( "TestCaseID", "5763D198-1A0A-474D-A5D3-A5BBC496EE7B" )]
-        [Description( "Tests: Publics" )]
-        public void TokenValidationParameters_Publics()
+        [Description( "ensures that set / gets are working" )]
+        public void SetGet()
         {
-            TokenValidationParameters validationParameters = new TokenValidationParameters();
-            Type type = typeof(TokenValidationParameters);
-            PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 30)
-                Assert.Fail("Number of properties has changed from 30 to: " + properties.Length + ", adjust tests");
+            List<string> validAudiences = new List<string>() { "Audience1" };
+            List<SecurityToken> signingTokens = new List<SecurityToken>(){ KeyingMaterial.AsymmetricX509Token_2048 };
+            List<string> validIssuers =  new List<string>() { "ValidIssuer1" };
 
-            SecurityKey issuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256;
-            SecurityKey issuerSigningKey2 = KeyingMaterial.SymmetricSecurityKey2_256;
-
-            List<SecurityKey> issuerSigningKeys =
-                new List<SecurityKey>
-                {
-                    KeyingMaterial.DefaultSymmetricSecurityKey_256,
-                    KeyingMaterial.SymmetricSecurityKey2_256
-                };
-
-            List<SecurityKey> issuerSigningKeysDup =
-                new List<SecurityKey>
-                {
-                    new InMemorySymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256),
-                    new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
-                };
-
-            string validAudience = "ValidAudience";
-            List<string> validAudiences = new List<string>{ validAudience };
-            string validIssuer = "ValidIssuer";
-            List<string> validIssuers = new List<string>{ validIssuer };
-
-            TokenValidationParameters validationParametersInline = new TokenValidationParameters()
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
             {
-                AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue,
-                IssuerSigningKey = issuerSigningKey,
-                IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey; },
-                IssuerSigningKeys = issuerSigningKeys,
-                IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
-                LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue,
-                SaveSigninToken = true,
-                ValidateAudience = false,
+                AllowedAudience = "AllowedAudience",
+                AudienceUriMode = Selectors.AudienceUriMode.Always,
+                AllowedAudiences = validAudiences,
+                SaveBootstrapContext = true,
+                SigningToken = KeyingMaterial.BinarayToken56BitKey,
+                SigningTokens = signingTokens,
+                ValidateActor = true,
                 ValidateIssuer = false,
-                ValidAudience = validAudience,
-                ValidAudiences = validAudiences,
-                ValidIssuer = validIssuer,
+                ValidIssuer = "ValidIssuer",
                 ValidIssuers = validIssuers,
             };
 
-            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.IssuerSigningKey, issuerSigningKey));
-            Assert.IsTrue(validationParametersInline.SaveSigninToken);
-            Assert.IsFalse(validationParametersInline.ValidateAudience);
-            Assert.IsFalse(validationParametersInline.ValidateIssuer);
-            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidAudience, validAudience));
-            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidAudiences, validAudiences));
-            Assert.IsTrue(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
+            Assert.IsFalse( tokenValidationParameters.AllowedAudience != "AllowedAudience" , string.Format( "Expecting: tokenValidationParameters.AllowedAudience == 'AllowedAudience'. Was: '{0}'", tokenValidationParameters.AllowedAudience ) );
 
-            TokenValidationParameters validationParametersSets = new TokenValidationParameters();
-            validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
-            validationParametersSets.IssuerSigningKey = new InMemorySymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
-            validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey2; };
-            validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
-            validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
-            validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue;
-            validationParametersSets.SaveSigninToken = true;
-            validationParametersSets.ValidateAudience = false;
-            validationParametersSets.ValidateIssuer = false;
-            validationParametersSets.ValidAudience = validAudience;
-            validationParametersSets.ValidAudiences = validAudiences;
-            validationParametersSets.ValidIssuer = validIssuer;
-            validationParametersSets.ValidIssuers = validIssuers;
+            Assert.IsFalse( tokenValidationParameters.AudienceUriMode != Selectors.AudienceUriMode.Always , string.Format( "Expecting: tokenValidationParameters.AudienceUriMode == Selectors.AudienceUriMode.Always. Was: '{0}'", tokenValidationParameters.AudienceUriMode ) );
 
-            Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(validationParametersInline, validationParametersSets));
+            Assert.IsFalse( tokenValidationParameters.AllowedAudiences == null , string.Format( "Expecting: tokenValidationParameters.AllowedAudiences != null.") );
 
-            TokenValidationParameters tokenValidationParametersCloned = validationParametersInline.Clone() as TokenValidationParameters;
-            Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(tokenValidationParametersCloned, validationParametersInline));
-            //tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple();
+            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.AllowedAudiences, validAudiences ) , "object.ReferenceEquals( tokenValidationParameters.AllowedAudiences,  validAudiences ) is false" );
+            
+            Assert.IsFalse( !tokenValidationParameters.SaveBootstrapContext , "tokenValidationParameters.SaveBootstrapContext != true" );
 
-            string id = Guid.NewGuid().ToString();
-            DerivedTokenValidationParameters derivedValidationParameters = new DerivedTokenValidationParameters(id, validationParametersInline);
-            DerivedTokenValidationParameters derivedValidationParametersCloned = derivedValidationParameters.Clone() as DerivedTokenValidationParameters;
-            Assert.IsTrue(IdentityComparer.AreEqual<TokenValidationParameters>(derivedValidationParameters, derivedValidationParametersCloned));
-            Assert.AreEqual(derivedValidationParameters.InternalString, derivedValidationParametersCloned.InternalString);
+            Assert.IsFalse( tokenValidationParameters.SigningToken == null , string.Format( "Expecting: tokenValidationParameters.SigningToken != null." ) );
+
+            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.SigningToken,  KeyingMaterial.BinarayToken56BitKey ) , "object.ReferenceEquals( tokenValidationParameters.SigningToken,  KeyingMaterial.BinarayToken56BitKey ) is false" );
+
+            Assert.IsFalse( tokenValidationParameters.SigningTokens == null , string.Format( "Expecting: tokenValidationParameters.SigningTokens != null." ) );
+
+            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) , "object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) is false" );
+
+            Assert.IsTrue( tokenValidationParameters.ValidateActor );
+
+            Assert.IsFalse( tokenValidationParameters.ValidateIssuer , string.Format( "Expecting: tokenValidationParameters.ValidateIssuer to be false" ) );
+
+            Assert.IsFalse( tokenValidationParameters.ValidIssuer == null , string.Format( "Expecting: tokenValidationParameters.ValidIssuer != null." ) );
+
+            Assert.IsFalse( tokenValidationParameters.ValidIssuer != "ValidIssuer" , string.Format( "Expecting: tokenValidationParameters.ValidIssuer !== ValidIssuer. Was: '{0}'", tokenValidationParameters.ValidIssuer ) );
+
+            Assert.IsFalse( tokenValidationParameters.ValidIssuers == null , string.Format( "Expecting: tokenValidationParameters.ValidIssuers != null." ) );
+
+            Assert.IsFalse( !object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) , "object.ReferenceEquals( tokenValidationParameters.SigningTokens, signingTokens ) is false" );
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "5C8D86B6-08C8-416D-995E-FE6856E70999")]
-        [Description("Tests: GetSets, covers defaults")]
-        public void TokenValidationParameters_GetSets()
-        {
-            TokenValidationParameters validationParameters = new TokenValidationParameters();
-            Type type = typeof(TokenValidationParameters);
-            PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 30)
-                Assert.Fail("Number of public fields has changed from 30 to: " + properties.Length + ", adjust tests");
-
-            GetSetContext context =
-                new GetSetContext
-                {
-                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
-                    {
-                        new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
-                        new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultAsymmetricKey_Public_2048, KeyingMaterial.DefaultSymmetricSecurityKey_256}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultAsymmetricKey_Public_2048, KeyingMaterial.DefaultSymmetricSecurityKey_256}, new List<SecurityKey>()}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningToken", new List<object>{(SecurityToken)null, KeyingMaterial.DefaultSymmetricSecurityToken_256, KeyingMaterial.DefaultAsymmetricX509Token_2048}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningTokens", new List<object>{(IEnumerable<SecurityToken>)null, new List<SecurityToken>{KeyingMaterial.DefaultAsymmetricX509Token_2048, KeyingMaterial.DefaultSymmetricSecurityToken_256}, new List<SecurityToken>()}),
-                        new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("RoleClaimType", new List<object>{ClaimsIdentity.DefaultRoleClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("RequireExpirationTime", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("RequireSignedTokens", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("SaveSigninToken", new List<object>{false, true, false}),
-                        new KeyValuePair<string, List<object>>("ValidateActor", new List<object>{false, true, false}),
-                        new KeyValuePair<string, List<object>>("ValidateAudience", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                    },
-                    Object = validationParameters,
-                };
-            TestUtilities.GetSet(context);
-
-            if (context.Errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Environment.NewLine);
-                foreach (string str in context.Errors)
-                    sb.AppendLine(str);
-
-                Assert.Fail(sb.ToString());
-            }
-
-            Assert.IsNull(validationParameters.AudienceValidator);
-            Assert.IsNotNull(validationParameters.ClientDecryptionTokens);
-            Assert.AreEqual(validationParameters.ClientDecryptionTokens.Count, 0);
-            Assert.IsNull(validationParameters.LifetimeValidator);
-            Assert.IsNull(validationParameters.IssuerSigningKeyResolver);
-            Assert.IsNull(validationParameters.IssuerValidator);
-            Assert.IsNull(validationParameters.ValidAudiences);
-            Assert.IsNull(validationParameters.ValidIssuers);
-
-        }
-
-        class DerivedTokenValidationParameters : TokenValidationParameters
-        {
-            string _internalString;
-            public DerivedTokenValidationParameters(string internalString, TokenValidationParameters validationParameters)
-                : base(validationParameters)
-            {
-                _internalString = internalString;
-            }
-
-            protected DerivedTokenValidationParameters(DerivedTokenValidationParameters other)
-                : base(other)
-            {
-                _internalString = other._internalString;
-            }
-
-            public string InternalString{ get {return _internalString; }}
-
-            public override TokenValidationParameters Clone()
-            {
-                return new DerivedTokenValidationParameters(this);
-            }
-        }
     }
 }
 

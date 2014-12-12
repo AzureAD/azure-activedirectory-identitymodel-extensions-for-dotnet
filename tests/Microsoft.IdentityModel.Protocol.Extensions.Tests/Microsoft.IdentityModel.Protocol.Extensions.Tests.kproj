@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>b449c824-9d81-4588-a562-e61d9215c976</ProjectGuid>
+    <ProjectGuid>CC665B24-9531-41B9-93C1-EF7F425AB33C</ProjectGuid>
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
@@ -14,10 +14,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AssemblyName>System.IdentityModel.Tokens.Tests</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.Protocol.Extensions.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <RootNamespace>System.IdentityModel.Tests</RootNamespace>
+    <RootNamespace>Microsoft.IdentityModel.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
@@ -32,6 +32,16 @@
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>ExpectedException.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IdentityUtilities.cs">
+      <Link>IdentityUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\OpenIdConfigData.cs">
+      <Link>OpenIdConfigData.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\TestUtilities.cs">
+      <Link>TestUtilities.cs</Link>
+    </Compile>
+
   </ItemGroup>
   <Import Project="$(VSToolsPath)\AspNet\Microsoft.Web.AspNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

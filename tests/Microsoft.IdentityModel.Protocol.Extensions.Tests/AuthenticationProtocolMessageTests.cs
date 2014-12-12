@@ -17,62 +17,39 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// Tests for AuthenticationProtocolMessage.
     /// </summary>
-    [TestClass]
     public class AuthenticationProtocolMessageTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "5e55552c-a805-4367-8708-301adf91780c")]
-        [Description("Tests: Constructors")]
-        public void AuthenticationProtocolMessage_Constructors()
+        [Fact(DisplayName = "Tests: Constructors")]
+        public void AuthenticationProtocolMessage_Constructors(
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "89d0aa7e-f73d-421a-8538-9805d73a23c2")]
-        [Description("Tests: Defaults")]
-        public void AuthenticationProtocolMessage_Defaults()
+        [Fact(DisplayName = "Tests: Defaults")]
+        public void AuthenticationProtocolMessage_Defaults(
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
-            Assert.AreEqual(authenticationProtocolMessage.IssuerAddress, string.Empty);
-            Assert.IsNotNull(authenticationProtocolMessage.Parameters);
-            Assert.IsTrue(authenticationProtocolMessage.Parameters.Count == 0);
+            Assert.Equal(authenticationProtocolMessage.IssuerAddress, string.Empty);
+            Assert.NotNull(authenticationProtocolMessage.Parameters);
+            ((authenticationProtocolMessage.Parameters.Count == 0);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "407e4efe-3345-4aff-9ce1-4c4d5842fe3f")]
-        [Description("Tests: GetSets")]
-        public void AuthenticationProtocolMessage_GetSets()
+        [Fact(DisplayName = "Tests: GetSets")]
+        public void AuthenticationProtocolMessage_GetSets(
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
 
-            List<string> properties = new List<string>()
+            List<string> properties = new List<string>(
             {
                 "IssuerAddress",
                 "PostTitle",
@@ -89,10 +66,8 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "0ae1f9b1-d652-4937-b76a-c771aa4055a2")]
-        [Description("Tests: Publics")]
-        public void AuthenticationProtocolMessage_Publics()
+        [Fact(DisplayName = "Tests: Publics")]
+        public void AuthenticationProtocolMessage_Publics(
         {
             string value1 = "value1";
             string value2 = "value2";
@@ -169,7 +144,7 @@ namespace Microsoft.IdentityModel.Test
                 : base(issuerAddress)
             { }
 
-            public DerivedAuthenticationProtocolMessage()
+            public DerivedAuthenticationProtocolMessage(
             { }
         }
     }

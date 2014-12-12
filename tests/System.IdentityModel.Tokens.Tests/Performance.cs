@@ -16,47 +16,20 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IdentityModel.Protocols.WSTrust;
-using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
     /// <summary>
     /// This test is a good place to grook how to create tokens.
     /// </summary>
-    [TestClass]
     public class PerformanceTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup( TestContext testContext )
-        { }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        { }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider( TestContext );
-        }
-
-        [TestMethod]
-        [TestProperty( "TestCaseID", "65A4AD1F-100F-41C3-AD84-4FE08C1F9A6D" )]
-        [Description( "Performance tests for creating Jwts" )]
-        [Ignore]
+        [Fact(DisplayName = "Performance tests for creating Jwts" )]
         public void Jwt_Performance()
         {            
             SecurityTokenDescriptor tokenDescriptor;

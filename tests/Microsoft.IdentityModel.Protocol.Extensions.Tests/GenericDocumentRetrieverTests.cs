@@ -16,57 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class GenericDocumentRetrieverTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "5418a8f4-2882-446f-ab63-dc313a81ee6d")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void GenericDocumentRetriever_Constructors()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "f68fc2cf-f838-4156-96aa-c5cea7c0022b")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void GenericDocumentRetriever_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "e0d01c40-4847-4555-8631-7c8a4207a2a9")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void GenericDocumentRetriever_GetSets()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "5610d77c-53e2-46cb-aafc-7443a554a883")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void GenericDocumentRetriever_Publics()
         {
         }

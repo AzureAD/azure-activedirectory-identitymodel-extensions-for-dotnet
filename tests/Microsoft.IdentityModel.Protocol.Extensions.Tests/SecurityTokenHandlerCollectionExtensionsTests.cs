@@ -17,10 +17,10 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Extensions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel;
+using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
 
@@ -32,36 +32,14 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class SecurityTokenHandlerCollectionExtensionsTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "603183b5-7716-4a8a-930c-22b809ea867e")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void SecurityTokenHandlerCollectionExtensions_Constructors()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "d9d1d67a-dc5a-4f10-86ca-7c95ae1a3403")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void SecurityTokenHandlerCollectionExtensions_Defaults()
         {
             SecurityTokenHandlerCollection securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
@@ -75,20 +53,16 @@ namespace Microsoft.IdentityModel.Test
             foreach (var tokenHandler in securityTokenValidators)
             {
                 ISecurityTokenValidator tokenValidator = tokenHandler as ISecurityTokenValidator;
-                Assert.IsNotNull(tokenValidator, "tokenHandler is not ISecurityTokenHandler, is" + tokenHandler.GetType().ToString());             
+                Assert.IsNotNull(tokenValidator, "tokenHandler is not ISecurityTokenHandler, is" + tokenHandler.GetType().ToString());
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "1b96ccf4-bd97-4224-91cd-4b90fb3723fc")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void SecurityTokenHandlerCollectionExtensions_GetSets()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "e5e10a35-574d-4f62-b80c-7ae6bb946639")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void SecurityTokenHandlerCollectionExtensions_Publics()
         {
             SecurityTokenHandlerCollection securityTokenValidators = new SecurityTokenHandlerCollection();
@@ -133,7 +107,6 @@ namespace Microsoft.IdentityModel.Test
             {
                 expectedException.ProcessException(exception);
             }
-
         }
     }
 }

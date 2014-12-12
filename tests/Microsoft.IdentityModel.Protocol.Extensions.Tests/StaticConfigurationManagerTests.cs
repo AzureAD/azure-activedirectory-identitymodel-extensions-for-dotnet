@@ -16,57 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class StaticConfigurationManagerTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "88007729-686f-4071-81b7-9439f5bf8abc")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void StaticConfigurationManager_Constructors()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "101f7e27-df8c-4935-9501-d3a0a2df0057")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void StaticConfigurationManager_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "8c0efe1e-7e93-4071-ae71-c69110fba06f")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void StaticConfigurationManager_GetSets()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "02ce8ba3-e5bf-4bae-9a88-c19aa4186f54")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void StaticConfigurationManager_Publics()
         {
         }

@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -32,29 +32,9 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class JsonWebKeySetTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "6dc1a5b5-d458-44ba-aa29-50ada648d191")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void JsonWebKeySet_Constructors()
         {
             JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
@@ -70,10 +50,7 @@ namespace Microsoft.IdentityModel.Test
             RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "C6A4AFA6-25A2-44F4-A8FB-83BBEC4DB9A1")]
-        [Description("Tests: Interop")]
-        [DeploymentItem("google-certs.json")]
+        [Fact(DisplayName = "Tests: Interop")]
         public void JsonWebKeySet_Interop()
         {
             string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);
@@ -152,23 +129,17 @@ namespace Microsoft.IdentityModel.Test
             return jsonWebKeys;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "ae4aac50-6410-49c3-8cd1-92d81681e8b9")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void JsonWebKeySet_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "bffd5933-f161-4fb1-aaae-bb6ad8787972")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void JsonWebKeySet_GetSets()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "c8d70600-a3ac-4c88-bd9d-2140481d4cf7")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void JsonWebKeySet_Publics()
         {
         }

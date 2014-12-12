@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
@@ -30,29 +30,9 @@ namespace Microsoft.IdentityModel.Test
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class OpenIdConnectProtocolValidationContextTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "E040FDE8-26C8-4F4A-A005-A8A44185FC24")]
-        [Description("Tests: GetSets, test covers defaults")]
+        [Fact(DisplayName = "Tests: GetSets, test covers defaults")]
         public void OpenIdConnectProtocolValidationContext_GetSets()
         {
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();

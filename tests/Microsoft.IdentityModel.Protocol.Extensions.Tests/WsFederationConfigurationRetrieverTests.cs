@@ -16,57 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 
     /// </summary>
-    [TestClass]
     public class WsFederationConfigurationRetrieverTests
     {
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "8291beca-274c-4af0-afa0-cf928b5ffc77")]
-        [Description("Tests: Constructors")]
+        [Fact(DisplayName = "Tests: Constructors")]
         public void WsFederationConfigurationRetriever_Constructors()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "07b73f2a-68b8-4765-b877-d944a6ea12b0")]
-        [Description("Tests: Defaults")]
+        [Fact(DisplayName = "Tests: Defaults")]
         public void WsFederationConfigurationRetriever_Defaults()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "b2092bc4-38ab-4b01-8746-3bfc2d2edb4c")]
-        [Description("Tests: GetSets")]
+        [Fact(DisplayName = "Tests: GetSets")]
         public void WsFederationConfigurationRetriever_GetSets()
         {
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "7e4f4bcc-3084-4906-afb8-6c38d935939c")]
-        [Description("Tests: Publics")]
+        [Fact(DisplayName = "Tests: Publics")]
         public void WsFederationConfigurationRetriever_Publics()
         {
         }
