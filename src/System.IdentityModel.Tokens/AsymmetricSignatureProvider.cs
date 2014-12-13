@@ -28,7 +28,7 @@ namespace System.IdentityModel.Tokens
     public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool disposed;
-        private RSACryptoServiceProvider rsa;
+        private RSACryptoServiceProvider rsaCryptoServiceProvider;
         private HashAlgorithm hash;
 
         /// <summary>
@@ -96,8 +96,8 @@ namespace System.IdentityModel.Tokens
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
             if (rsaKey != null)
             {
-                rsa = new RSACryptoServiceProvider();
-                rsa.ImportParameters(rsaKey.Parameters);
+                rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
 
                 // TODO - brentsch - SHA384, SHA512
                 if (algorithm == SecurityAlgorithms.RsaSha1Signature)
@@ -116,8 +116,15 @@ namespace System.IdentityModel.Tokens
             X509SecurityKey x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
-                rsa = new RSACryptoServiceProvider();
-                rsa.ImportParameters(rsaKey.Parameters);
+                if (willCreateSignatures)
+                {
+                    rsaCryptoServiceProvider = x509Key.PrivateKey as RSACryptoServiceProvider;
+                }
+                else
+                {
+                    rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                    (rsaCryptoServiceProvider as RSA).ImportParameters((x509Key.PrivateKey as RSA).ExportParameters(false));
+                }
 
                 // TODO - brentsch - SHA384, SHA512
                 if (algorithm == SecurityAlgorithms.RsaSha1Signature)
@@ -133,8 +140,7 @@ namespace System.IdentityModel.Tokens
                 return;
             }
 
-            throw new NotSupportedException("algorithm not supported");
-
+            throw new NotSupportedException("algorithm OR key type not supported not supported: " + algorithm + ", " + key.GetType().ToString());
         }
 
         public override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
@@ -212,7 +218,7 @@ namespace System.IdentityModel.Tokens
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            return rsa.SignData(input, hash);
+            return rsaCryptoServiceProvider.SignData(input, hash);
         }
 
         /// <summary>
@@ -260,7 +266,7 @@ namespace System.IdentityModel.Tokens
                 throw new InvalidOperationException(ErrorMessages.IDX10621);
             }
 
-            return rsa.VerifyData(input, hash, signature);
+            return rsaCryptoServiceProvider.VerifyData(input, hash, signature);
         }
 
         /// <summary>
