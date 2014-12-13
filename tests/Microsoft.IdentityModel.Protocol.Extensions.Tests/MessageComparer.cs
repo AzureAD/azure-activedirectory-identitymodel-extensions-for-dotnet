@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Test
             return true;
         }
 
+#if SAML
         public static bool AreEqual(WsFederationMessage wsFederationMessage1, WsFederationMessage wsFederationMessage2)
         {
             if (!MessageComparer.AreEqual(wsFederationMessage1 as AuthenticationProtocolMessage, wsFederationMessage2 as AuthenticationProtocolMessage))
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Test
 
             return true;
         }
-
+#endif
         static bool DoObjectsHaveSameNullState(object object1, object object2)
         {
             if ((object1 == null && object2 != null) || (object1 != null && object2 == null))

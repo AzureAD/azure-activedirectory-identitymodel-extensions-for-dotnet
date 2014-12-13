@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Test
             Type type = typeof(OpenIdConnectProtocolValidationContext);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 2)
-                Assert.Fail("Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
+                Assert.True(true, "Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Test
                     Object = validationContext,
                 };
             TestUtilities.GetSet(context);
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, context.Errors);
+            TestUtilities.AssertFailIfErrors("OpenIdConnectProtocolValidationContext_GetSets", context.Errors);
         }
     }
 }

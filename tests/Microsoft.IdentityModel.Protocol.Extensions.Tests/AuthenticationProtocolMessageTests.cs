@@ -19,7 +19,7 @@
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
-
+using System.IdentityModel.Test;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -30,26 +30,26 @@ namespace Microsoft.IdentityModel.Test
     public class AuthenticationProtocolMessageTests
     {
         [Fact(DisplayName = "Tests: Constructors")]
-        public void AuthenticationProtocolMessage_Constructors(
+        public void AuthenticationProtocolMessage_Constructors()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
         }
 
         [Fact(DisplayName = "Tests: Defaults")]
-        public void AuthenticationProtocolMessage_Defaults(
+        public void AuthenticationProtocolMessage_Defaults()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
             Assert.Equal(authenticationProtocolMessage.IssuerAddress, string.Empty);
             Assert.NotNull(authenticationProtocolMessage.Parameters);
-            ((authenticationProtocolMessage.Parameters.Count == 0);
+            Assert.Equal(authenticationProtocolMessage.Parameters.Count, 0);
         }
 
         [Fact(DisplayName = "Tests: GetSets")]
-        public void AuthenticationProtocolMessage_GetSets(
+        public void AuthenticationProtocolMessage_GetSets()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
 
-            List<string> properties = new List<string>(
+            List<string> properties = new List<string>()
             {
                 "IssuerAddress",
                 "PostTitle",
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "Tests: Publics")]
-        public void AuthenticationProtocolMessage_Publics(
+        public void AuthenticationProtocolMessage_Publics()
         {
             string value1 = "value1";
             string value2 = "value2";
@@ -110,29 +110,29 @@ namespace Microsoft.IdentityModel.Test
 
             authenticationProtocolMessage.SetParameter(param1, value1);
             authenticationProtocolMessage.RemoveParameter(param2);
-            Assert.AreEqual(authenticationProtocolMessage.GetParameter(param1), value1);
+            Assert.Equal(authenticationProtocolMessage.GetParameter(param1), value1);
 
             authenticationProtocolMessage.RemoveParameter(param1);
-            Assert.IsNull(authenticationProtocolMessage.GetParameter(param1));
+            Assert.Null(authenticationProtocolMessage.GetParameter(param1));
 
             authenticationProtocolMessage.SetParameter(param1, value1);
             authenticationProtocolMessage.SetParameter(param1, value2);
             authenticationProtocolMessage.SetParameter(param2, value2);
             authenticationProtocolMessage.SetParameter(param2, value1);
 
-            Assert.AreEqual(authenticationProtocolMessage.GetParameter(param1), value2);
-            Assert.AreEqual(authenticationProtocolMessage.GetParameter(param2), value1);
+            Assert.Equal(authenticationProtocolMessage.GetParameter(param1), value2);
+            Assert.Equal(authenticationProtocolMessage.GetParameter(param2), value1);
 
             authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage(@"http://www.gotjwt.com");
             authenticationProtocolMessage.SetParameter("bob", "     ");
 
             string queryString = authenticationProtocolMessage.BuildRedirectUrl();
-            Assert.IsNotNull(queryString);
-            Assert.IsTrue(queryString.Contains("bob"));
+            Assert.NotNull(queryString);
+            Assert.True(queryString.Contains("bob"));
 
             authenticationProtocolMessage.IssuerAddress = string.Empty;
             queryString = authenticationProtocolMessage.BuildRedirectUrl();
-            Assert.IsNotNull(queryString);
+            Assert.NotNull(queryString);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Test
                 : base(issuerAddress)
             { }
 
-            public DerivedAuthenticationProtocolMessage(
+            public DerivedAuthenticationProtocolMessage()
             { }
         }
     }

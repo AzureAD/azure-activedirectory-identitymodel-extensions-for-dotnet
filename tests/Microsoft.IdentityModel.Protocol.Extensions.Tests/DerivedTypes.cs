@@ -21,7 +21,6 @@
 namespace Microsoft.IdentityModel.Test
 {
     using System;
-    using System.IdentityModel.Selectors;
     using System.IdentityModel.Tokens;
     
     /// <summary>

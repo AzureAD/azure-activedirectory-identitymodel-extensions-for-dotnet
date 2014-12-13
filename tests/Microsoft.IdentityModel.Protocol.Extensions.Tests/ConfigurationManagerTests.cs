@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.GetSet(context);
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, context.Errors);
+            TestUtilities.AssertFailIfErrors("ConfigurationManager_GetSets", context.Errors);
 
             TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"));
             TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
@@ -75,8 +75,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectConfiguration configuration = configManager.GetConfigurationAsync().Result;
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             OpenIdConnectConfiguration configuration2 = configManager.GetConfigurationAsync().Result;
-            Assert.IsTrue(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
-            Assert.IsTrue(object.ReferenceEquals(configuration, configuration2));
+            Assert.True(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
+            Assert.True(object.ReferenceEquals(configuration, configuration2));
 
             // AutomaticRefreshInterval should pick up new bits.
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
@@ -85,8 +85,8 @@ namespace Microsoft.IdentityModel.Test
             Thread.Sleep(1);
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             configuration2 = configManager.GetConfigurationAsync().Result;
-            Assert.IsFalse(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
-            Assert.IsFalse(object.ReferenceEquals(configuration, configuration2));
+            Assert.False(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
+            Assert.False(object.ReferenceEquals(configuration, configuration2));
 
             // RefreshInterval is set to MaxValue
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
@@ -94,8 +94,8 @@ namespace Microsoft.IdentityModel.Test
             configManager.RefreshInterval = TimeSpan.MaxValue;
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             configuration2 = configManager.GetConfigurationAsync().Result;
-            Assert.IsTrue(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
-            Assert.IsTrue(object.ReferenceEquals(configuration, configuration2));
+            Assert.True(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
+            Assert.True(object.ReferenceEquals(configuration, configuration2));
 
             // Refresh should have no effect
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
@@ -103,8 +103,8 @@ namespace Microsoft.IdentityModel.Test
             configManager.RefreshInterval = TimeSpan.FromHours(10);
             configManager.RequestRefresh();
             configuration2 = configManager.GetConfigurationAsync().Result;
-            Assert.IsTrue(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
-            Assert.IsTrue(object.ReferenceEquals(configuration, configuration2));
+            Assert.True(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
+            Assert.True(object.ReferenceEquals(configuration, configuration2));
 
             // Refresh should force pickup of new config
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
@@ -114,14 +114,14 @@ namespace Microsoft.IdentityModel.Test
             configManager.RequestRefresh();
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             configuration2 = configManager.GetConfigurationAsync().Result;
-            Assert.IsFalse(object.ReferenceEquals(configuration, configuration2));
-            Assert.IsFalse(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
+            Assert.False(object.ReferenceEquals(configuration, configuration2));
+            Assert.False(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
 
             // Refresh set to MaxValue
             configManager.RefreshInterval = TimeSpan.MaxValue;
             configuration = configManager.GetConfigurationAsync().Result;
-            Assert.IsTrue(object.ReferenceEquals(configuration, configuration2));
-            Assert.IsTrue(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
+            Assert.True(object.ReferenceEquals(configuration, configuration2));
+            Assert.True(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
         }
 
         [Fact(DisplayName = "Tests: Publics")]

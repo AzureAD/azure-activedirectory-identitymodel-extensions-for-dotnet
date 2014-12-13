@@ -9,11 +9,7 @@
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
-        "JwtSecurityTokenHandlerTests.cs",
-        "JwtSecurityTokenTests.cs",
         "Performance.cs",
-        "SignatureProviderTests.cs",
-        "TokenValidationParametersTests.cs",
         "X509CertificateValidatorExTests.cs"
     ],
     "frameworks": {

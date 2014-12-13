@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
+using System.IdentityModel.Test;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.Test
             Type type = typeof(OpenIdConnectProtocolValidator);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 9)
-                Assert.Fail("Number of properties has changed from 9 to: " + properties.Length + ", adjust tests");
+                Assert.True(true, "Number of properties has changed from 9 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -77,11 +78,11 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.GetSet(context);
-            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, context.Errors);
+            TestUtilities.AssertFailIfErrors("OpenIdConnectProtocolValidator_GetSets", context.Errors);
 
             ExpectedException ee = ExpectedException.ArgumentNullException();
-            Assert.IsNotNull(validationParameters.HashAlgorithmMap);
-            Assert.AreEqual(validationParameters.HashAlgorithmMap.Count, 9);
+            Assert.NotNull(validationParameters.HashAlgorithmMap);
+            Assert.Equal(validationParameters.HashAlgorithmMap.Count, 9);
 
             ee = ExpectedException.ArgumentOutOfRangeException();
             try
@@ -312,8 +313,6 @@ namespace Microsoft.IdentityModel.Test
             return;
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "9a082558-f87e-4ae0-be80-852fbcf869d4")]
         [Fact(DisplayName = "Tests: Validation of Nonce")]
         public void OpenIdConnectProtocolValidator_ValidateNonce()
         {

@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Test
         public async Task OpenIdConnectConfigurationRetriever_FromNetwork()
         {
             OpenIdConnectConfiguration configuration = await GetConfigurationFromHttpAsync(OpenIdConfigData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsNotNull(configuration);
+            Assert.NotNull(configuration);
             
             await GetConfigurationFromHttpAsync(string.Empty, expectedException: ExpectedException.ArgumentNullException());
             await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
@@ -48,10 +48,10 @@ namespace Microsoft.IdentityModel.Test
         {
             OpenIdConnectConfiguration configuration;
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
+            Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
 
             // jwt_uri points to bad formated JSON
-            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(WebException)));
+            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException());
         }
 
         [Fact]
@@ -62,10 +62,10 @@ namespace Microsoft.IdentityModel.Test
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataPingString, expectedException: ExpectedException.NoExceptionExpected);
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataPingLabsJWKSString, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationPingLabsJWKS));
+            Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationPingLabsJWKS));
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataString, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
+            Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
 
             // jwt_uri is not reachable
             await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadUriKeysString, string.Empty, expectedException: ExpectedException.IOException());
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Test
             await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadFormatString, string.Empty, expectedException: new ExpectedException(typeExpected: typeof(ArgumentException)));
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataSingleX509DataString, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationSingleX509Data1));
+            Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationSingleX509Data1));
 
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadX509DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(CryptographicException)));
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(FormatException)));
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (expectedConfiguration != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
             }
 
             return openIdConnectConfiguration;
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (expectedConfiguration != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
             }
 
             return openIdConnectConfiguration;
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (expectedConfiguration != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
             }
 
             return openIdConnectConfiguration;
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Test
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync("primary",
-                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), CancellationToken.None));
+                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -172,7 +172,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (expectedConfiguration != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
             }
 
             return openIdConnectConfiguration;
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Test
                 OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration(jsonString);
                 OpenIdConnectConfiguration expectedConfiguration = new OpenIdConnectConfiguration();
                 TestUtilities.SetProperty(expectedConfiguration, propertyName, jsonValue);
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
             }
             catch (Exception exception)
             {

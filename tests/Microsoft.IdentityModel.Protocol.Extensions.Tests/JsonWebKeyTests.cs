@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Test
         public void JsonWebKey_Constructors()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
-            Assert.IsTrue(IsDefaultJsonWebKey(jsonWebKey));
+            Assert.True(IsDefaultJsonWebKey(jsonWebKey));
             string str = "hello";
             str = null;
 
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Test
 
             // valid json, JsonWebKey2
             jsonWebKey = RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyString2, OpenIdConfigData.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(!IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1));
+            Assert.True(!IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1));
 
             // invalid json, JsonWebKeyBadFormatString1
             RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException());
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (compareTo != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(jsonWebKey, compareTo), "jsonWebKey created from: " + ( obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                Assert.True(IdentityComparer.AreEqual(jsonWebKey, compareTo), "jsonWebKey created from: " + ( obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
 
             return jsonWebKey;
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Test
                 jsonWebKey.X5c.Add(method);
             }
 
-            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, CompareContext.Default));
+            Assert.True(IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, CompareContext.Default));
         }
 
         [Fact(DisplayName = "Tests: Publics")]

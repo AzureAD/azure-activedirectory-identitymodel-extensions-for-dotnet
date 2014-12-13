@@ -16,85 +16,57 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Reflection;
+using Xunit;
 using Claim = System.Security.Claims.Claim;
 
 namespace System.IdentityModel.Test
 {
-    [TestClass]
     public class JwtSecurityTokenTests
     {
-        /// <summary>
-        /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
-        /// </summary>
-        protected TestContextProvider _testContextProvider;
-
-        public TestContext TestContext { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
-        { }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        { }
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            _testContextProvider = new TestContextProvider(TestContext);
-        }
-
-        [TestMethod]
-        [TestProperty("TestCaseID", "EEA6CD8E-DC65-485E-9EC9-9037AC3382A4")]
-        [Description("Ensures that JwtSecurityToken defaults are as expected")]
+        [Fact( DisplayName = "Ensures that JwtSecurityToken defaults are as expected")]
         public void JwtSecurityToken_Defaults()
         {
             JwtSecurityToken jwt = new JwtSecurityToken();
 
             List<Claim> claims = jwt.Claims as List<Claim>;
-            Assert.IsNotNull(claims);
+            Assert.NotNull(claims);
 
             foreach (Claim c in jwt.Claims)
             {
-                Assert.Fail("claims.Count != 0");
+                Assert.True(false, "claims.Count != 0");
                 break;
             }
 
-            Assert.IsNull(jwt.Actor);
-            Assert.IsNotNull(jwt.Audiences);
+            Assert.Null(jwt.Actor);
+            Assert.NotNull(jwt.Audiences);
             foreach (string aud in jwt.Audiences)
             {
-                Assert.Fail("jwt.Audiences should be empty");
+                Assert.True(false, "jwt.Audiences should be empty");
             }
-            Assert.IsNull(jwt.Id);
-            Assert.IsNull(jwt.Issuer);
-            Assert.IsNotNull(jwt.SecurityKeys);
-            Assert.IsNotNull(jwt.SignatureAlgorithm);
-            Assert.AreEqual(jwt.SignatureAlgorithm, "none");
-            Assert.IsNull(jwt.SigningCredentials);
-            Assert.IsNull(jwt.SigningKey);
-            Assert.IsNull(jwt.SigningToken);
-            Assert.IsNull(jwt.Subject);
-            Assert.AreEqual(jwt.ValidFrom, DateTime.MinValue);
-            Assert.AreEqual(jwt.ValidTo, DateTime.MinValue);
-            Assert.IsNull(jwt.RawData);
-            Assert.IsNotNull(jwt.Header);
-            Assert.IsNotNull(jwt.Payload);
-            Assert.IsNotNull(jwt.EncodedHeader);
-            Assert.IsNotNull(jwt.EncodedPayload);
+            Assert.Null(jwt.Id);
+            Assert.Null(jwt.Issuer);
+            Assert.NotNull(jwt.SecurityKey);
+            Assert.NotNull(jwt.SignatureAlgorithm);
+            Assert.Equal(jwt.SignatureAlgorithm, "none");
+            Assert.Null(jwt.SigningCredentials);
+            Assert.Null(jwt.SigningKey);
+            Assert.Null(jwt.Subject);
+            Assert.Equal(jwt.ValidFrom, DateTime.MinValue);
+            Assert.Equal(jwt.ValidTo, DateTime.MinValue);
+            Assert.Null(jwt.RawData);
+            Assert.NotNull(jwt.Header);
+            Assert.NotNull(jwt.Payload);
+            Assert.NotNull(jwt.EncodedHeader);
+            Assert.NotNull(jwt.EncodedPayload);
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "F5803908-4CFA-4038-B506-045CF65D39BD")]
-        [Description("Tests JwtSecurityToken Constructor that takes an EncodedString")]
+        [Fact( DisplayName = "Tests JwtSecurityToken Constructor that takes an EncodedString")]
         public void JwtSecurityToken_EncodedStringConstruction()
         {
-            Console.WriteLine("Entering: " + MethodBase.GetCurrentMethod());
+            Console.WriteLine("Entering: JwtSecurityToken_EncodedStringConstruction");
             string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
 
             RunEncodedTest(new JwtSecurityTokenTestVariation
@@ -203,18 +175,16 @@ namespace System.IdentityModel.Test
 
             if (null != variation.ExpectedJwtSecurityToken)
             {
-                Assert.IsTrue(
+                Assert.True(
                     IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt),
                     string.Format("Testcase: {0}.  JWTSecurityTokens are not equal.", variation.Name));
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "F5803908-4CFA-4038-B506-045CF65D39BD")]
-        [Description("Tests: Constructor")]
+        [Fact( DisplayName = "Tests: Constructor")]
         public void JwtSecurityToken_Constructor()
         {
-            Console.WriteLine(string.Format("Entering: '{0}'", MethodBase.GetCurrentMethod()));
+            Console.WriteLine("Entering: JwtSecurityToken_Constructor");
             RunConstructionTest(
                 new JwtSecurityTokenTestVariation
                 {
@@ -300,12 +270,12 @@ namespace System.IdentityModel.Test
 
                 if (null != variation.ExpectedJwtSecurityToken)
                 {
-                    Assert.IsTrue(IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt));
+                    Assert.True(IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt));
                 }
             }
             catch (Exception ex)
             {
-                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
+                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
             }
         }
     }

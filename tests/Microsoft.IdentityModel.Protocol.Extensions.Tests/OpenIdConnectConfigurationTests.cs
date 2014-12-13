@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Test
 
             if (!exceptionHit && compareTo != null)
             {
-                Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
 
             return openIdConnectConfiguration;
@@ -84,12 +84,12 @@ namespace Microsoft.IdentityModel.Test
         public void OpenIdConnectConfiguration_Defaults()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
-            Assert.IsNull(configuration.AuthorizationEndpoint);
-            Assert.IsNull(configuration.EndSessionEndpoint);
-            Assert.IsNull(configuration.Issuer);
-            Assert.IsNull(configuration.JwksUri);
-            Assert.IsNull(configuration.TokenEndpoint);
-            Assert.IsNotNull(configuration.SigningKeys);
+            Assert.Null(configuration.AuthorizationEndpoint);
+            Assert.Null(configuration.EndSessionEndpoint);
+            Assert.Null(configuration.Issuer);
+            Assert.Null(configuration.JwksUri);
+            Assert.Null(configuration.TokenEndpoint);
+            Assert.NotNull(configuration.SigningKeys);
         }
 
         [Fact(DisplayName = "Tests: GetSets")]
@@ -123,12 +123,12 @@ namespace Microsoft.IdentityModel.Test
             configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.Cert_1024));
             configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.DefaultCert_2048));
 
-            Assert.AreEqual(configuration.AuthorizationEndpoint, authorization_Endpoint);
-            Assert.AreEqual(configuration.EndSessionEndpoint, end_Session_Endpoint);
-            Assert.AreEqual(configuration.Issuer, issuer);
-            Assert.AreEqual(configuration.JwksUri, jwks_Uri);
-            Assert.AreEqual(configuration.TokenEndpoint, token_Endpoint);
-            Assert.IsTrue(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys));
+            Assert.Equal(configuration.AuthorizationEndpoint, authorization_Endpoint);
+            Assert.Equal(configuration.EndSessionEndpoint, end_Session_Endpoint);
+            Assert.Equal(configuration.Issuer, issuer);
+            Assert.Equal(configuration.JwksUri, jwks_Uri);
+            Assert.Equal(configuration.TokenEndpoint, token_Endpoint);
+            Assert.True(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys));
         }
     }
 }

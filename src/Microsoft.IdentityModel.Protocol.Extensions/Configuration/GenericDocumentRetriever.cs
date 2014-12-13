@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     // Works for c:\, file://, http://, ftp://, etc.
-    internal class GenericDocumentRetriever : IDocumentRetriever
+    public class GenericDocumentRetriever : IDocumentRetriever
     {
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {

@@ -62,7 +62,7 @@ namespace System.IdentityModel.Test
     /// </summary>
     public static class TestUtilities
     {
-#if USE_REFLECTION
+//#if USE_REFLECTION
         /// <summary>
         /// Calls all public instance and static properties on an object
         /// </summary>
@@ -72,12 +72,12 @@ namespace System.IdentityModel.Test
         {
             if (obj == null)
             {
-                Console.WriteLine(string.Format("Entering: '{0}', obj is null, have to return.  Is the Testcase: '{1}' right?", MethodBase.GetCurrentMethod(), testcase ?? "testcase is null"));
+                Console.WriteLine(string.Format("Entering: '{0}', obj is null, have to return.  Is the Testcase: '{1}' right?", "CallAllPublicInstanceAndStaticPropertyGets", testcase ?? "testcase is null"));
                 return;
             }
 
             Type type = obj.GetType();
-            Console.WriteLine(string.Format("Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, MethodBase.GetCurrentMethod()));
+            Console.WriteLine(string.Format("Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, "CallAllPublicInstanceAndStaticPropertyGets"));
 
             // call get all public static properties of MyClass type
 
@@ -99,7 +99,7 @@ namespace System.IdentityModel.Test
                 }
             }
         }
-#endif
+//#endif
         /// <summary>
         /// Gets a named field on an object
         /// </summary>
@@ -362,7 +362,6 @@ namespace System.IdentityModel.Test
             replayCache.OnFindReturnValue = false;
             replayCache.OnAddReturnValue = false;
             TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
-
         }
     }
 }

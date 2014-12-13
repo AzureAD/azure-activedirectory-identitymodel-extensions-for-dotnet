@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.IdentityModel.Test;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -35,9 +36,9 @@ namespace Microsoft.IdentityModel.Test
         public void OpenIdConnectMessage_Constructors()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
-            Assert.AreEqual(openIdConnectMessage.IssuerAddress, string.Empty);
+            Assert.Equal(openIdConnectMessage.IssuerAddress, string.Empty);
             openIdConnectMessage = new OpenIdConnectMessage("http://www.got.jwt.com");
-            Assert.AreEqual(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
+            Assert.Equal(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
             ExpectedException expectedException = ExpectedException.ArgumentNullException("issuerAddress");
             try
             {
@@ -101,14 +102,7 @@ namespace Microsoft.IdentityModel.Test
             if (message.UiLocales != null)
                 errors.Add("message.UiLocales != null");
 
-            if (errors.Count > 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                foreach (string error in errors)
-                    sb.AppendLine(error);
-
-                Assert.Fail("OpenIdConnectMessage_Defaults *** Test Failures:\n" + sb.ToString();
-            }
+            TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
         }
 
         [Fact(DisplayName = "Tests: GetSets")]
@@ -118,7 +112,7 @@ namespace Microsoft.IdentityModel.Test
             Type type = typeof(OpenIdConnectMessage);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 47)
-                Assert.Fail("Number of public fields has changed from 47 to: " + properties.Length + ", adjust tests");
+                Assert.True(true, "Number of public fields has changed from 47 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -170,16 +164,7 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             TestUtilities.GetSet(context);
-
-            if (context.Errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Environment.NewLine);
-                foreach (string str in context.Errors)
-                    sb.AppendLine(str);
-
-                Assert.Fail(sb.ToString());
-            }
+            TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_GetSets*** Test Failures:\n", context.Errors);
         }
 
         [Fact(DisplayName = "Tests: Publics")]
@@ -229,13 +214,13 @@ namespace Microsoft.IdentityModel.Test
             // IssuerAdderss and Redirect_uri
             message.RedirectUri = redirectUri;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&redirect_uri={2}", issuerAddress, message.Nonce, HttpUtility.UrlEncode(redirectUri));
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&redirect_uri={2}", issuerAddress, message.Nonce, Uri.EscapeUriString(redirectUri));
             Report("4", errors, url, expected);
 
             // IssuerAdderss empty and Redirect_uri
             message.IssuerAddress = string.Empty;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={0}&redirect_uri={1}", message.Nonce, HttpUtility.UrlEncode(redirectUri));
+            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={0}&redirect_uri={1}", message.Nonce, Uri.EscapeDataString(redirectUri));
             Report("5", errors, url, expected);
 
             // IssuerAdderss, Redirect_uri, Response
@@ -247,7 +232,7 @@ namespace Microsoft.IdentityModel.Test
             message.RedirectUri = redirectUri;
             message.Resource = resource;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&redirect_uri={2}&resource={3}", issuerAddress, message.Nonce, HttpUtility.UrlEncode(redirectUri), HttpUtility.UrlEncode(resource));
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&redirect_uri={2}&resource={3}", issuerAddress, message.Nonce, Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
             Report("6", errors, url, expected);
 
             // IssuerAdderss, Redirect_uri, Response, customParam
@@ -260,18 +245,10 @@ namespace Microsoft.IdentityModel.Test
             message.RedirectUri = redirectUri;
             message.Resource = resource;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", issuerAddress, message.Nonce, HttpUtility.UrlEncode(customParameterName), HttpUtility.UrlEncode(customParameterValue), HttpUtility.UrlEncode(redirectUri), HttpUtility.UrlEncode(resource));
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", issuerAddress, message.Nonce, Uri.EscapeDataString(customParameterName), Uri.EscapeDataString(customParameterValue), Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
             Report("7", errors, url, expected);
 
-            if (errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Environment.NewLine);
-                foreach (string str in errors)
-                    sb.AppendLine(str);
-
-                Assert.Fail(sb.ToString());
-            }
+            TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Publics*** Test Failures:\n", errors);
         }
 
         [Fact(DisplayName = "Tests: NULL form parameters")]
@@ -284,7 +261,7 @@ namespace Microsoft.IdentityModel.Test
             formData.Add(new KeyValuePair<string, string[]>(null, new string[] { null }));
             formData.Add(new KeyValuePair<string, string[]>(null, null));
             OpenIdConnectMessage msg = new OpenIdConnectMessage(formData);
-            Assert.IsNotNull(msg);
+            Assert.NotNull(msg);
         }
 
         private void Report(string id, List<string> errors, string url, string expected)
