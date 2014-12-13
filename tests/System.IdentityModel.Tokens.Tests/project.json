@@ -39,6 +39,9 @@
         "allowUnsafe": true,
         "warningsAsErrors": false
     },
+    "commands": {
+        "test": "Xunit.KRunner"
+    },
     "configurations": {
     }
 }

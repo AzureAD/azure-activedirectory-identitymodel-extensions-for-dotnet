@@ -42,17 +42,8 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException("SR.GetString(SR.SymmetricKeyLengthTooShort, symmetricKey.Length))");
             }
 
+            _key = key.CloneByteArray();
             _keySize = _key.Length * 8;
-
-            if (cloneBuffer)
-            {
-                _key = new byte[key.Length];
-                Buffer.BlockCopy(key, 0, _key, 0, key.Length);
-            }
-            else
-            {
-                _key = key;
-            }
         }
 
         public override int KeySize
@@ -72,7 +63,7 @@ namespace System.IdentityModel.Tokens
 
         public virtual byte[] Key
         {
-            get { return _key; }
+            get { return _key.CloneByteArray(); }
         }
 
         //public abstract byte[] GenerateDerivedKey(string algorithm, byte[] label, byte[] nonce, int derivedKeyLength, int offset);

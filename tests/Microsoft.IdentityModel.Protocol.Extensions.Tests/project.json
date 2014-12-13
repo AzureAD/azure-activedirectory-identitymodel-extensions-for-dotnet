@@ -21,7 +21,7 @@
         "WsFederationMessageTests.cs",
     ],
     "frameworks": {
-       "aspnet50": {},
+        "aspnet50": { },
         "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
@@ -42,6 +42,9 @@
                 "System.Threading": "4.0.0-beta-*"
             }
         }
+    },
+    "commands": {
+        "test": "Xunit.KRunner"
     },
     "compilationOptions": {
         "allowUnsafe": true,
