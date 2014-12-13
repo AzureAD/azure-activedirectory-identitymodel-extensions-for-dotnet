@@ -29,13 +29,13 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class AuthenticationProtocolMessageTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "AuthenticationProtocolMessageTests: Constructors")]
         public void AuthenticationProtocolMessage_Constructors()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "AuthenticationProtocolMessageTests: Defaults")]
         public void AuthenticationProtocolMessage_Defaults()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.Equal(authenticationProtocolMessage.Parameters.Count, 0);
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "AuthenticationProtocolMessageTests: GetSets")]
         public void AuthenticationProtocolMessage_GetSets()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "AuthenticationProtocolMessageTests: Publics")]
         public void AuthenticationProtocolMessage_Publics()
         {
             string value1 = "value1";

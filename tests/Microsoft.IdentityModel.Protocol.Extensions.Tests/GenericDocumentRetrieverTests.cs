@@ -25,22 +25,22 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class GenericDocumentRetrieverTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "GenericDocumentRetrieverTests: Constructors")]
         public void GenericDocumentRetriever_Constructors()
         {
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "GenericDocumentRetrieverTests: Defaults")]
         public void GenericDocumentRetriever_Defaults()
         {
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "GenericDocumentRetrieverTests: GetSets")]
         public void GenericDocumentRetriever_GetSets()
         {
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "GenericDocumentRetrieverTests: Publics")]
         public void GenericDocumentRetriever_Publics()
         {
         }

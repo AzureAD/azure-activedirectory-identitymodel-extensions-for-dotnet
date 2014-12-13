@@ -18,9 +18,6 @@
 
 namespace System.IdentityModel.Tokens
 {
-    using System.Collections.ObjectModel;
-    using System.Security.Claims;
-
     /// <summary>
     /// Defines the interface for a Security Token Handler.
     /// </summary>

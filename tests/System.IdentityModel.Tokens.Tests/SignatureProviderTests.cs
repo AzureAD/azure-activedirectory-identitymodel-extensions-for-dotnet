@@ -16,10 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Xunit;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
@@ -33,7 +32,7 @@ namespace System.IdentityModel.Test
     /// </summary>
     public class SignatureProviderTests
     {
-        [Fact(DisplayName = "Tests for SignatureProviderFactory")]
+        [Fact(DisplayName = "SignatureProviderTests: SignatureProviderFactory")]
         public void SignatureProviderFactory_Tests()
         {
             SignatureProviderFactory factory = new SignatureProviderFactory();
@@ -124,7 +123,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "AsymmetricSignatureProvider Constructor")]
+        [Fact(DisplayName = "SignatureProviderTests: AsymmetricSignatureProvider Constructor")]
         public void AsymmetricSignatureProvider_Constructor()
         {
             AsymmetricSecurityKey privateKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey;
@@ -178,7 +177,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests for AsymmetricSignatureProvider.Dispose")]
+        [Fact(DisplayName = "SignatureProviderTests: AsymmetricSignatureProvider.Dispose")]
         public void AsymmetricSignatureProvider_Dispose()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_Public_2048, SecurityAlgorithms.RsaSha256Signature);
@@ -213,7 +212,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Ensures that AsymmetricSignatureProvider defaults are as expected")]
+        [Fact(DisplayName = "SignatureProviderTests: AsymmetricSignatureProvider - Defaults")]
         public void AsymmetricSignatureProvider_Defaults()
         {
             try
@@ -235,7 +234,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests for Asymmetric and Symmetric SignAndVerify")]
+        [Fact(DisplayName = "SignatureProviderTests: Asymmetric and Symmetric SignAndVerify")]
         public void SignatureProviders_SignAndVerify()
         {
             // asymmetric
@@ -320,7 +319,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "AsymmetricSignatureProvider Tests")]
+        [Fact(DisplayName = "AsymmetricSignatureProvider: Publics")]
         public void AsymmetricSignatureProvider_Publics()
         {
             AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SigningKey as AsymmetricSecurityKey, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.SignatureAlgorithm);
@@ -334,7 +333,7 @@ namespace System.IdentityModel.Test
             SignatureProvider_VerifyVariation(provider, new byte[1], new byte[0], ExpectedException.ArgumentException("IDX10626:"));
         }
 
-        [Fact(DisplayName = "Tests for SymmetricSignatureProvider Constructor")]
+        [Fact(DisplayName = "SymmetricSignatureProvider: Constructor")]
         public void SymmetricSignatureProvider_ConstructorTests()
         {
             // no errors
@@ -384,7 +383,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Parameter checking for SymmetricSignatureProvider.Sign and .Verify")]
+        [Fact(DisplayName = "SymmetricSignatureProvider: Sign - Verify")]
         public void SymmetricSignatureProvider_Publics()
         {
             SymmetricSignatureProvider provider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.SigningKey as SymmetricSecurityKey, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.SignatureAlgorithm);

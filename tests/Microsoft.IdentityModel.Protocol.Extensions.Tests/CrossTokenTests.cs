@@ -16,16 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Xunit;
 using System;
 using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-
+using Xunit;
 using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
-using SMSamlTokenHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 using SMSaml2TokenHandler = System.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using SMSamlTokenHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -35,7 +34,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class CrossTokenTests
     {
-        [Fact(DisplayName = "Tests: Validates tokens")]
+        [Fact(DisplayName = "CrossTokenTests: Validates tokens")]
         public void CrossToken_ValidateToken()
         {
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
@@ -96,25 +95,25 @@ namespace Microsoft.IdentityModel.Test
         }
 
 
-        [Fact(DisplayName = "Tests: Validates Signatures")]
+        [Fact(DisplayName = "CrossTokenTests: Validates Signatures")]
         public void CrossToken_ValidateSignature()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
-        [Fact(DisplayName = "Tests: Validate Audience")]
+        [Fact(DisplayName = "CrossTokenTests: Validate Audience")]
         public void CrossToken_ValidateAudience()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
-        [Fact(DisplayName = "Tests: Validate Issuer")]
+        [Fact(DisplayName = "CrossTokenTests: Validate Issuer")]
         public void CrossToken_ValidateIssuer()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
         }
 
-        [Fact(DisplayName = "Tests: ValidateLifetime")]
+        [Fact(DisplayName = "CrossTokenTests: ValidateLifetime")]
         public void CrossToken_ValidateLifetime()
         {
             // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same

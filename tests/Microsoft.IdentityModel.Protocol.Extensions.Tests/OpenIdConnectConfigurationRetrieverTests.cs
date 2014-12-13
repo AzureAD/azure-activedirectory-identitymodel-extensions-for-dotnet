@@ -16,15 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Protocols;
 using System;
 using System.IdentityModel.Test;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -32,8 +31,8 @@ namespace Microsoft.IdentityModel.Test
     public class OpenIdConnectConfigurationRetrieverTests
     {
 
-        [Fact]
-        public async Task OpenIdConnectConfigurationRetriever_FromNetwork()
+        [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromNetwork")]
+        public async Task FromNetwork()
         {
             OpenIdConnectConfiguration configuration = await GetConfigurationFromHttpAsync(OpenIdConfigData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
             Assert.NotNull(configuration);
@@ -42,9 +41,9 @@ namespace Microsoft.IdentityModel.Test
             await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
         }
 
-        [Fact]
+        [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromFile")]
 
-        public async Task OpenIdConnectConfigurationRetriever_FromFile()
+        public async Task FromFile()
         {
             OpenIdConnectConfiguration configuration;
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);
@@ -54,8 +53,8 @@ namespace Microsoft.IdentityModel.Test
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException());
         }
 
-        [Fact]
-        public async Task OpenIdConnectConfigurationRetriever_FromText()
+        [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromText")]
+        public async Task FromText()
         {
             OpenIdConnectConfiguration configuration;
 
@@ -80,8 +79,8 @@ namespace Microsoft.IdentityModel.Test
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(FormatException)));
         }
 
-        [Fact]
-        public void OpenIdConnectConfiguration_Properties()
+        [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: Properties")]
+        public void Properties()
         {
             // ensure that each property can be set independently
             GetAndCheckConfiguration("authorization_endpoint", "AuthorizationEndpoint");

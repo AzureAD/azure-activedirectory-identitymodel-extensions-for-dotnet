@@ -3,7 +3,6 @@
     "dependencies": {
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.2-beta-*",
         "Newtonsoft.Json": "6.0.6.0",
-        "Shouldly": "1.1.1.1",
         "System.IdentityModel.Tokens": "5.0.2-beta-*",
         "Xunit.KRunner": "1.0.0-*"
     },

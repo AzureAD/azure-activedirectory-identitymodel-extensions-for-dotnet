@@ -17,13 +17,12 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Extensions;
-using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-
+using Xunit;
 using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
@@ -34,12 +33,12 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class SecurityTokenHandlerCollectionExtensionsTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: Constructors")]
         public void SecurityTokenHandlerCollectionExtensions_Constructors()
         {
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: Defaults")]
         public void SecurityTokenHandlerCollectionExtensions_Defaults()
         {
             SecurityTokenHandlerCollection securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
@@ -57,12 +56,12 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: GetSets")]
         public void SecurityTokenHandlerCollectionExtensions_GetSets()
         {
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: Publics")]
         public void SecurityTokenHandlerCollectionExtensions_Publics()
         {
             SecurityTokenHandlerCollection securityTokenValidators = new SecurityTokenHandlerCollection();

@@ -19,10 +19,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-using System.IO;
-using System.Reflection;
 using System.Security.Claims;
-using System.Xml;
 using Xunit;
 
 namespace System.IdentityModel.Test
@@ -45,7 +42,7 @@ namespace System.IdentityModel.Test
         private static string _nameClaimTypeForDelegate = "NameClaimTypeForDelegate";
 
 
-        [Fact]
+        [Fact (DisplayName = "CreateAndValidateTokens: CreateAndValidateTokens_MultipleX5C")]
         public void CreateAndValidateTokens_MultipleX5C()
         {
             List<string> errors = new List<string>();
@@ -116,7 +113,7 @@ namespace System.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleX5C", errors);
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateAndValidateTokens: CreateAndValidateTokens_MultipleAudiences")]
         public void CreateAndValidateTokens_MultipleAudiences()
         {
             List<string> errors = new List<string>();
@@ -165,8 +162,8 @@ namespace System.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleAudiences", errors);
         }
 
-        [Fact(DisplayName = "Create EMPTY JwtToken")]
-        public void CreateAndValidateTokens_EmptyToken()
+        [Fact(DisplayName = "CreateAndValidateTokens: EmptyToken, serialize and deserialze an empyt JWT")]
+        public void EmptyToken()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string jwt = handler.WriteToken(new JwtSecurityToken("", ""));
@@ -174,8 +171,8 @@ namespace System.IdentityModel.Test
             Assert.True(IdentityComparer.AreEqual<JwtSecurityToken>(token, new JwtSecurityToken("", "")));
         }
 
-        [Fact(DisplayName = "Ensures that Serializing and Deserializing usin xml or json have same results.")]
-        public void CreateAndValidateTokens_RoundTripTokens()
+        [Fact(DisplayName = "CreateAndValidateTokens: RoundTripTokens, serialize and deserialize using different claimsets")]
+        public void RoundTripTokens()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             CreateAndValidateParams createAndValidateParams;
@@ -271,7 +268,7 @@ namespace System.IdentityModel.Test
 
         }
 
-        [Fact(DisplayName = "These Jwts are created with duplicate claims. This test ensure that multiple claims are roundtripped")]
+        [Fact(DisplayName = "CreateAndValidateTokens: DuplicateClaims - roundtrips with duplicate claims")]
         public void CreateAndValidateTokens_DuplicateClaims()
         {
             SecurityToken validatedToken;
@@ -298,7 +295,7 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler.InboundClaimFilter.Clear();
         }
 
-        [Fact(DisplayName = "This test ensures that a Json serialized object, when added as the value of a claim, can be recognized and reconstituted.")]
+        [Fact(DisplayName = "CreateAndValidateTokens: JsonClaims - claims values are objects serailized as json, can be recognized and reconstituted.")]
         public void CreateAndValidateTokens_JsonClaims()
         {
             List<string> errors = new List<string>();
@@ -376,7 +373,7 @@ namespace System.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_JsonClaims", errors);
         }
 
-        [Fact(DisplayName = "These test ensures that the SubClaim is used the identity, when ClaimsIdentity.Name is called.")]
+        [Fact(DisplayName = "CreateAndValidateTokens: SubClaim - is used the identity, when ClaimsIdentity.Name is called.")]
         public void CreateAndValidateTokens_SubClaim()
         {
         }
@@ -391,7 +388,8 @@ namespace System.IdentityModel.Test
             return _roleClaimTypeForDelegate;
         }
 
-        [Fact(DisplayName = "Tests Name and Role claim delegates")]
+        // TODO - brentsch, move to TokenValidationParameter tests.
+        [Fact(DisplayName = "CreateAndValidateTokens: NameAndRoleClaimDelegates - name and role type delegates.")]
         public void CreateAndValidateTokens_NameAndRoleClaimDelegates()
         {
             string defaultName = "defaultName";

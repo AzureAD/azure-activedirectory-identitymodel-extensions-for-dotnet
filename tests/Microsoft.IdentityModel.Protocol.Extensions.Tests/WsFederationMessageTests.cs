@@ -17,10 +17,10 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
-using System.Reflection;
 using System.IdentityModel.Test;
+using System.Reflection;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class WsFederationMessageTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "WsFederationMessageTests: Constructors")]
         public void WsFederationAuthenticationMessage_Constructors()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "WsFederationMessageTests: Defaults")]
         public void WsFederationAuthenticationMessage_Defaults()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsNull(wsFederationMessage.Wtrealm);
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "WsFederationMessageTests: GetSets")]
         public void WsFederationAuthenticationMessage_GetSets()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "WsFederationMessageTests: Publics")]
         public void WsFederationAuthenticationMessage_Publics()
         {
             string issuerAdderss = @"http://www.gotjwt.com";

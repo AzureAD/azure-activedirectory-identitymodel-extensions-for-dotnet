@@ -17,15 +17,12 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -34,7 +31,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class JsonWebKeySetTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "JsonWebKeySetTests: Constructors")]
         public void JsonWebKeySet_Constructors()
         {
             JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
@@ -50,7 +47,7 @@ namespace Microsoft.IdentityModel.Test
             RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
         }
 
-        [Fact(DisplayName = "Tests: Interop")]
+        [Fact(DisplayName = "JsonWebKeySetTests: Interop")]
         public void JsonWebKeySet_Interop()
         {
             string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);
@@ -129,17 +126,17 @@ namespace Microsoft.IdentityModel.Test
             return jsonWebKeys;
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "JsonWebKeySetTests: Defaults")]
         public void JsonWebKeySet_Defaults()
         {
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "JsonWebKeySetTests: GetSets")]
         public void JsonWebKeySet_GetSets()
         {
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "JsonWebKeySetTests: Publics")]
         public void JsonWebKeySet_Publics()
         {
         }

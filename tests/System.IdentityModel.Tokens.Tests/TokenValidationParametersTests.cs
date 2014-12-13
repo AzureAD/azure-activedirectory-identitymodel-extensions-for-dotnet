@@ -27,7 +27,7 @@ namespace System.IdentityModel.Test
 {
     public class TokenValidationParametersTests
     {
-        [Fact( DisplayName = "Tests: Publics")]
+        [Fact( DisplayName = "TokenValidationParametersTests: Publics")]
         public void TokenValidationParameters_Publics()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
@@ -111,7 +111,7 @@ namespace System.IdentityModel.Test
             Assert.Equal(derivedValidationParameters.InternalString, derivedValidationParametersCloned.InternalString);
         }
 
-        [Fact( DisplayName ="Tests: GetSets, covers defaults")]
+        [Fact( DisplayName = "TokenValidationParametersTests: GetSets, covers defaults")]
         public void TokenValidationParameters_GetSets()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();

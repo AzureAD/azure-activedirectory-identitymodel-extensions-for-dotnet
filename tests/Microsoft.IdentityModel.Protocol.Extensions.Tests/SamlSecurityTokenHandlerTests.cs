@@ -16,13 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Xunit;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
-using System.IdentityModel.Test;
-
+using Xunit;
 using SamlSecurityTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
@@ -32,20 +31,20 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class SamlSecurityTokenHandlerTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Constructors")]
         public void SamlSecurityTokenHandler_Constructors()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Defaults")]
         public void SamlSecurityTokenHandler_Defaults()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             Assert.IsTrue(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: GetSets")]
         public void SamlSecurityTokenHandler_GetSets()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
@@ -53,7 +52,7 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
-        [Fact(DisplayName = "Tests: Protected")]
+        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Protected")]
         public void SamlSecurityTokenHandler_Protected()
         {
             CreateClaims();
@@ -79,7 +78,7 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Publics")]
         public void SamlSecurityTokenHandler_Publics()
         {
             CanReadToken();

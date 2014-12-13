@@ -17,15 +17,14 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
-using System.IdentityModel.Test;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -34,8 +33,8 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class OpenIdConnectProtocolValidatorTests
     {
-        [Fact(DisplayName = "Tests: GenerateNonce")]
-        public void OpenIdConnectProtocolValidator_GenerateNonce()
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: GenerateNonce")]
+        public void GenerateNonce()
         {
             List<string> errors = new List<string>();
             OpenIdConnectProtocolValidator protocolValidator = new OpenIdConnectProtocolValidator();
@@ -51,8 +50,8 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: GetSets, test covers defaults")]
-        public void OpenIdConnectProtocolValidator_GetSets()
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: GetSets, test covers defaults")]
+        public void GetSets()
         {
             OpenIdConnectProtocolValidator validationParameters = new OpenIdConnectProtocolValidator();
             Type type = typeof(OpenIdConnectProtocolValidator);
@@ -96,8 +95,8 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Validate")]
-        public void OpenIdConnectProtocolValidator_Validate()
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validate")]
+        public void Validate()
         {
             JwtSecurityToken jwt =  new JwtSecurityToken();
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
@@ -210,8 +209,8 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Validation of CHash")]
-        public void OpenIdConnectProtocolValidator_CHash()
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of CHash")]
+        public void Validate_CHash()
         {
             PublicOpenIdConnectProtocolValidator protocolValidator = new PublicOpenIdConnectProtocolValidator();
 
@@ -313,8 +312,8 @@ namespace Microsoft.IdentityModel.Test
             return;
         }
 
-        [Fact(DisplayName = "Tests: Validation of Nonce")]
-        public void OpenIdConnectProtocolValidator_ValidateNonce()
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of Nonce")]
+        public void ValidateNonce()
         {
             PublicOpenIdConnectProtocolValidator protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectProtocolValidator();
             string nonceWithTimeStamp = protocolValidatorRequiresTimeStamp.GenerateNonce();

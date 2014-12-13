@@ -26,12 +26,12 @@ namespace System.IdentityModel.Test
     /// </summary>
     public class JwtHeaderTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "JwtHeaderTests: Constructors")]
         public void JwtHeader_Constructors()
         {
         }
 
-        [Fact(DisplayName = "Ensures that JwtHeader defaults are as expected")]
+        [Fact(DisplayName = "JwtHeaderTests: Defaults")]
         public void JwtHeader_Defaults()
         {
             JwtHeader jwtHeader = new JwtHeader();
@@ -44,12 +44,12 @@ namespace System.IdentityModel.Test
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "JwtHeaderTests: GetSets")]
         public void JwtHeader_GetSets()
         {
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "JwtHeaderTests: Publics")]
         public void JwtHeader_Publics()
         {
         }

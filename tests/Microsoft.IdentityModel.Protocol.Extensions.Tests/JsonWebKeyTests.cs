@@ -17,11 +17,10 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -30,7 +29,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class JsonWebKeyTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "JsonWebKeyTests: Constructors")]
         public void JsonWebKey_Constructors()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
@@ -115,12 +114,12 @@ namespace Microsoft.IdentityModel.Test
             return jsonWebKey;
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "JsonWebKeyTests: Defaults")]
         public void JsonWebKey_Defaults()
         {
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "JsonWebKeyTests: GetSets")]
         public void JsonWebKey_GetSets()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.True(IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, CompareContext.Default));
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "JsonWebKeyTests: Publics")]
         public void JsonWebKey_Publics()
         {
         }

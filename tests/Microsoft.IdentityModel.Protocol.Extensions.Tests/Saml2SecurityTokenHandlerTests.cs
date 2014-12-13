@@ -16,13 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Xunit;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using Xunit;
 using Saml2SecurityTokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using System.IdentityModel.Test;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -31,20 +31,20 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class Saml2SecurityTokenHandlerTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "Saml2SecurityTokenHandlerTests: Constructors")]
         public void Saml2SecurityTokenHandler_Constructors()
         {
             Saml2SecurityTokenHandler saml2SecurityTokenHandler = new Saml2SecurityTokenHandler();
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "Saml2SecurityTokenHandlerTests: Defaults")]
         public void Saml2SecurityTokenHandler_Defaults()
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
             Assert.IsTrue(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "Saml2SecurityTokenHandlerTests: GetSets")]
         public void Saml2SecurityTokenHandler_GetSets()
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "Saml2SecurityTokenHandlerTests: Publics")]
         public void Saml2SecurityTokenHandler_Publics()
         {
             //CanReadToken();

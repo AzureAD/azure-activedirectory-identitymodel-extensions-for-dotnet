@@ -27,7 +27,7 @@ namespace System.IdentityModel.Test
     /// </summary>
     public class ExtensibilityTests
     {
-        [Fact(DisplayName = "Extensibility tests for JwtSecurityTokenHandler")]
+        [Fact(DisplayName = "ExtensibilityTests: JwtSecurityTokenHandler")]
         public void JwtSecurityTokenHandler_Extensibility()
         {
             DerivedJwtSecurityTokenHandler handler = new DerivedJwtSecurityTokenHandler()
@@ -109,7 +109,7 @@ namespace System.IdentityModel.Test
         }
 #endif
 
-        [Fact(DisplayName = "Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
+        [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
         public void AsymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -129,7 +129,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
         }
 
-        [Fact(DisplayName = "Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
+        [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
         public void SymmetricSignatureProvider_Extensibility()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();

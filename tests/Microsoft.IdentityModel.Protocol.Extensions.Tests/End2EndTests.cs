@@ -17,12 +17,11 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
-using System.IdentityModel.Tokens;
-using System.Security.Cryptography;
-using System.Threading;
 using System.IdentityModel.Test;
+using System.IdentityModel.Tokens;
+using System.Threading;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -31,7 +30,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class End2EndTests
     {
-        [Fact(DisplayName = "Tests: OpenIdConnect")]
+        [Fact(DisplayName = "End2EndTests: OpenIdConnect")]
         public void End2End_OpenIdConnect()
         {
             SigningCredentials rsaSigningCredentials = 
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.Test
             tokenHandler.ValidateToken(jwt.RawData, validationParameters, out securityToken);
         }
 
-        [Fact(DisplayName = "Tests: WsFederation")]
+        [Fact(DisplayName = "End2EndTests: WsFederation")]
         public void End2End_WsFederation()
         {
         }

@@ -16,15 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Xunit;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
     public class X509CertificateValidatorExTests
     {
-        [Fact(DisplayName = "Tests: Constructor")]
+        [Fact(DisplayName = "X509CertificateValidatorExTests: Constructor")]
         public void X509CertificateValidatorEx_Constructor()
         {
             X509CertificateValidatorEx validator = new X509CertificateValidatorEx(X509CertificateValidationMode.None, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
@@ -33,7 +33,7 @@ namespace System.IdentityModel.Test
             validator = new X509CertificateValidatorEx(X509CertificateValidationMode.PeerOrChainTrust, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "X509CertificateValidatorExTests: Defaults")]
         public void X509CertificateValidatorEx_Defaults()
         {
         }

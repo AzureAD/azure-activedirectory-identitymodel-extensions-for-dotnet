@@ -18,10 +18,10 @@
 
 using Microsoft.IdentityModel.Protocols;
 using System;
-using System.Threading;
-using System.Reflection;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
+using System.Reflection;
+using System.Threading;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -31,17 +31,17 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class ConfigurationManagerTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "ConfigurationManagerTests: Constructors")]
         public void ConfigurationManager_Constructors()
         {
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "ConfigurationManagerTests: Defaults")]
         public void ConfigurationManager_Defaults()
         {
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "ConfigurationManagerTests: GetSets")]
         public void ConfigurationManager_GetSets()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.True(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
+        [Fact(DisplayName = "ConfigurationManagerTests: Publics")]
         public void ConfigurationManager_Publics()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");

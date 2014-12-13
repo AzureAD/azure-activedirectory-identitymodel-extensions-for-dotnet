@@ -16,10 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Xunit;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
@@ -28,7 +27,7 @@ namespace System.IdentityModel.Test
     /// </summary>
     public class ValidatorsTests
     {
-        [Fact(DisplayName = "Tests: AudienceValidator")]
+        [Fact(DisplayName = "ValidatorsTests: AudienceValidator")]
         public void Validators_Audience()
         {
             List<string> audiences = new List<string> { "", IdentityUtilities.DefaultAudience };
@@ -57,7 +56,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: IssuerValidator")]
+        [Fact(DisplayName = "ValidatorsTests: IssuerValidator")]
         public void Validators_Issuer()
         {
             List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
@@ -86,7 +85,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: LifetimeValidator")]
+        [Fact(DisplayName = "ValidatorsTests: LifetimeValidator")]
         public void Validators_Lifetime()
         {
             RunLifetimeTest(expires: null, notBefore: null, securityToken: null, validationParameters: null, ee: ExpectedException.ArgumentNullException());
@@ -111,7 +110,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: SecurityKeyValidator")]
+        [Fact(DisplayName = "ValidatorsTests: SecurityKeyValidator")]
         public void Validators_SecurityKey()
         {
         }

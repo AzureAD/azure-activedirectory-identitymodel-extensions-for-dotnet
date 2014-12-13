@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
-using System.Reflection;
 using Xunit;
 using Claim = System.Security.Claims.Claim;
 
@@ -26,7 +25,7 @@ namespace System.IdentityModel.Test
 {
     public class JwtSecurityTokenTests
     {
-        [Fact( DisplayName = "Ensures that JwtSecurityToken defaults are as expected")]
+        [Fact( DisplayName = "JwtSecurityTokenTests: Defaults")]
         public void JwtSecurityToken_Defaults()
         {
             JwtSecurityToken jwt = new JwtSecurityToken();
@@ -63,7 +62,7 @@ namespace System.IdentityModel.Test
             Assert.NotNull(jwt.EncodedPayload);
         }
 
-        [Fact( DisplayName = "Tests JwtSecurityToken Constructor that takes an EncodedString")]
+        [Fact( DisplayName = "JwtSecurityTokenTests: Constructor using encoded string.")]
         public void JwtSecurityToken_EncodedStringConstruction()
         {
             Console.WriteLine("Entering: JwtSecurityToken_EncodedStringConstruction");
@@ -181,7 +180,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact( DisplayName = "Tests: Constructor")]
+        [Fact( DisplayName = "JwtSecurityTokenTests:: Constructors")]
         public void JwtSecurityToken_Constructor()
         {
             Console.WriteLine("Entering: JwtSecurityToken_Constructor");

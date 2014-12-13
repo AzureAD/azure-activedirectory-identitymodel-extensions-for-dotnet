@@ -31,7 +31,7 @@ namespace System.IdentityModel.Test
         /// <summary>
         /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
         /// </summary>
-        [Fact(DisplayName = "Ensures that JwtPayload defaults are as expected")]
+        [Fact(DisplayName = "JwtPayloadTests: Ensures that JwtPayload defaults are as expected")]
         public void JwtPayload_Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -53,7 +53,7 @@ namespace System.IdentityModel.Test
             Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
-        [Fact(DisplayName = "Tests: GetSets, covers defaults")]
+        [Fact(DisplayName = "JwtPayloadTests: GetSets, covers defaults")]
         public void JwtPayload_GetSets()
         {
             // Aud, Claims, ValidFrom, ValidTo handled in Defaults.
@@ -98,7 +98,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName =  "Test claims as objects" )]
+        [Fact(DisplayName = "JwtPayloadTests: Claims as objects")]
         public void JwtPalyoad_Claims()
         {
             List<string> errors = new List<string>();
@@ -126,7 +126,7 @@ namespace System.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("JwtPalyoad_Claims", errors);
         }
 
-        [Fact(DisplayName =  "Tests adding non-strings as 'exp'" )]
+        [Fact(DisplayName = "JwtPayloadTests: Adding non-strings as 'exp'")]
         public void JwtPalyoad_ObjectClaims()
         {
             JwtPayload jwtPayload = new JwtPayload();

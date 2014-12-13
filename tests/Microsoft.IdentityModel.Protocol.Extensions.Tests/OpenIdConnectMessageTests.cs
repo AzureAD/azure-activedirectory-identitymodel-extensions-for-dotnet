@@ -20,9 +20,8 @@ using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
-using System.Text;
 using System.IdentityModel.Test;
+using System.Reflection;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -32,8 +31,8 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class OpenIdConnectMessageTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
-        public void OpenIdConnectMessage_Constructors()
+        [Fact(DisplayName = "OpenIdConnectMessageTests: Constructors")]
+        public void Constructors()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
             Assert.Equal(openIdConnectMessage.IssuerAddress, string.Empty);
@@ -51,8 +50,8 @@ namespace Microsoft.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
-        public void OpenIdConnectMessage_Defaults()
+        [Fact(DisplayName = "OpenIdConnectMessageTests: Defaults")]
+        public void Defaults()
         {
             List<string> errors = new List<string>();
             OpenIdConnectMessage message = new OpenIdConnectMessage();
@@ -105,8 +104,8 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
-        public void OpenIdConnectMessage_GetSets()
+        [Fact(DisplayName = "OpenIdConnectMessageTests: GetSets")]
+        public void GetSets()
         {
             OpenIdConnectMessage message = new OpenIdConnectMessage();
             Type type = typeof(OpenIdConnectMessage);
@@ -167,8 +166,8 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_GetSets*** Test Failures:\n", context.Errors);
         }
 
-        [Fact(DisplayName = "Tests: Publics")]
-        public void OpenIdConnectMessage_Publics()
+        [Fact(DisplayName = "OpenIdConnectMessageTests: Publics")]
+        public void Publics()
         {
             string issuerAddress = "http://gotJwt.onmicrosoft.com";
             string customParameterName = "Custom Parameter Name";
@@ -251,8 +250,8 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Publics*** Test Failures:\n", errors);
         }
 
-        [Fact(DisplayName = "Tests: NULL form parameters")]
-        public void OpenIdConnectMessage_NullFormParameters()
+        [Fact(DisplayName = "OpenIdConnectMessageTests: NULL form parameters")]
+        public void NullFormParameters()
         {
             List<KeyValuePair<string, string[]>> formData = new List<KeyValuePair<string, string[]>>();
             formData.Add(new KeyValuePair<string, string[]>("key", new string[] { "data" }));

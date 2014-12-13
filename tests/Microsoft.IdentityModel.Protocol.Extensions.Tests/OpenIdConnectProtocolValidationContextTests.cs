@@ -17,13 +17,11 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
-using System.IdentityModel.Tokens;
 using System.Reflection;
-using System.Text;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -32,7 +30,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class OpenIdConnectProtocolValidationContextTests
     {
-        [Fact(DisplayName = "Tests: GetSets, test covers defaults")]
+        [Fact(DisplayName = "OpenIdConnectProtocolValidationContextTests: GetSets, test covers defaults")]
         public void OpenIdConnectProtocolValidationContext_GetSets()
         {
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();

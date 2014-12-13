@@ -17,11 +17,11 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
-using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
 using System.IdentityModel.Tokens;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class OpenIdConnectMetadataTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "OpenIdConnectMetadataTests: Constructors")]
         public void OpenIdConnectConfiguration_Constructors()
         {
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Test
             return openIdConnectConfiguration;
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "OpenIdConnectMetadataTests: Defaults")]
         public void OpenIdConnectConfiguration_Defaults()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.NotNull(configuration.SigningKeys);
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "OpenIdConnectMetadataTests: GetSets")]
         public void OpenIdConnectConfiguration_GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();

@@ -25,22 +25,22 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class WsFederationConstantsTests
     {
-        [Fact(DisplayName = "Tests: Constructors")]
+        [Fact(DisplayName = "WsFederationConstantsTests: Constructors")]
         public void WsFederationConstants_Constructors()
         {
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "WsFederationConstantsTests: Defaults")]
         public void WsFederationConstants_Defaults()
         {
         }
 
-        [Fact(DisplayName = "Tests: GetSets")]
+        [Fact(DisplayName = "WsFederationConstantsTests: GetSets")]
         public void WsFederationConstants_GetSets()
         {
         }
 
-        [Fact(DisplayName = "Tests: Publics" )]
+        [Fact(DisplayName = "WsFederationConstantsTests: Publics")]
         public void WsFederationConstants_Publics()
         {
         }

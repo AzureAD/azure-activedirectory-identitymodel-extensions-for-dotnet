@@ -16,16 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Test;
-using Xunit;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
+using Xunit;
 
 namespace System.IdentityModel.Test
 {
     public class X509SecurityKeyTests
     {
-        [Fact(DisplayName = "Tests: Constructor")]
+        [Fact(DisplayName = "X509SecurityKeyTests: Constructor")]
         public void X509SecurityKey_Constructor()
         {
             X509SecurityKey x509SecurityKey;
@@ -53,7 +52,7 @@ namespace System.IdentityModel.Test
             }
         }
 
-        [Fact(DisplayName = "Tests: Defaults")]
+        [Fact(DisplayName = "X509SecurityKeyTests: Defaults")]
         public void X509SecurityKey_Defaults()
         {
             // there are no defaults.
