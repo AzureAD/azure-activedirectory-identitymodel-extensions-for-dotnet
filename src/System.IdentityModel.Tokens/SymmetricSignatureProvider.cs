@@ -52,40 +52,17 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("key");
             }
 
-            if (null == algorithm)
-            {
-                throw new ArgumentNullException(algorithm);
-            }
+            if (!IsSupportedAlgorithm(algorithm))
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
 
-            if (string.IsNullOrWhiteSpace(algorithm))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm"));
-            }
 
             if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits));
             }
 
-            try
-            {
-                // TODO - need replacement for KeyedHashAlgorithm
-                // this.keyedHash = KeyedHashAlgorithm.Create.GetKeyedHashAlgorithm(algorithm);
-            }
-            catch (Exception ex)
-            {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
-
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10632, algorithm, key, ex), ex);
-            }
-
-            if (this.keyedHash == null)
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10633, algorithm, key));
-            }
+            // TODO - need replacement for KeyedHashAlgorithm
+            this.keyedHash = GetKeyedHashAlgorithm(algorithm);
 
             try
             {
@@ -102,10 +79,22 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        public override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        public override bool IsSupportedAlgorithm(string algorithm)
         {
             // TODO - brentsch, add support for symmetric algorithms
             return false;
+        }
+
+        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw new ArgumentNullException("algorithm");
+
+            switch (algorithm)
+            {
+                default:
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm));
+            }
         }
 
         /// <summary>

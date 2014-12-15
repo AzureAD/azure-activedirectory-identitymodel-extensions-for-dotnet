@@ -624,7 +624,7 @@ namespace System.IdentityModel.Test
             var tvpNoValidation =
                 new TokenValidationParameters
                 {
-                    IssuerSigningKey = KeyingMaterial.RsaSecurityKey_Public_2048,
+                    IssuerSigningKey = KeyingMaterial.RsaSecurityKey_2048_Public,
                     ValidateAudience = false,
                     ValidateIssuer = false,
                     ValidateLifetime = false,

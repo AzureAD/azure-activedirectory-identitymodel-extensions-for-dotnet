@@ -50,12 +50,6 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">
         /// 'key' is null.
         /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// 'algorithm' is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// 'algorithm' contains only whitespace.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// willCreateSignatures is true and <see cref="AsymmetricSecurityKey"/>.KeySize is less than <see cref="SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning"/>.
         /// </exception>
@@ -63,21 +57,15 @@ namespace System.IdentityModel.Tokens
         /// <see cref="AsymmetricSecurityKey"/>.KeySize is less than <see cref="SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying"/>. Note: this is always checked.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Is thrown if the <see cref="AsymmetricSecurityKey.GetHashAlgorithmForSignature"/> throws.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Is thrown if the <see cref="AsymmetricSecurityKey.GetHashAlgorithmForSignature"/> returns null.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Is thrown if the <see cref="AsymmetricSignatureFormatter.SetHashAlgorithm"/> throws.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Is thrown if the <see cref="AsymmetricSignatureDeformatter.SetHashAlgorithm"/> throws.
+        /// Is thrown if <see cref="GetHashAlgorithm"/> throws.
         /// </exception>
         public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
+
+            if (!IsSupportedAlgorithm(algorithm))
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
 
             // TODO - brentsch, minimum size is relative to algorithm
             if (willCreateSignatures)
@@ -86,6 +74,11 @@ namespace System.IdentityModel.Tokens
                 {
                     throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10631, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning));
                 }
+
+                if (!key.HasPrivateKey)
+                {
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10638, key.ToString()));
+                }
             }
 
             if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying)
@@ -93,23 +86,12 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10630, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
+            hash = GetHashAlgorithm(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
             if (rsaKey != null)
             {
                 rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                 (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
-
-                // TODO - brentsch - SHA384, SHA512
-                if (algorithm == SecurityAlgorithms.RsaSha1Signature)
-                {
-                    hash = SHA1.Create();
-                }
-
-                if (algorithm == SecurityAlgorithms.RsaSha256Signature)
-                {
-                    hash = SHA256.Create();
-                }
-
                 return;    
             }
 
@@ -122,44 +104,43 @@ namespace System.IdentityModel.Tokens
                 }
                 else
                 {
-                    rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                    (rsaCryptoServiceProvider as RSA).ImportParameters((x509Key.PrivateKey as RSA).ExportParameters(false));
+                    rsaCryptoServiceProvider = x509Key.PublicKey.Key as RSACryptoServiceProvider;
                 }
-
-                // TODO - brentsch - SHA384, SHA512
-                if (algorithm == SecurityAlgorithms.RsaSha1Signature)
-                {
-                    hash = SHA1.Create();
-                }
-
-                if (algorithm == SecurityAlgorithms.RsaSha256Signature)
-                {
-                    hash = SHA256.Create();
-                }
-
                 return;
             }
 
-            throw new NotSupportedException("algorithm OR key type not supported not supported: " + algorithm + ", " + key.GetType().ToString());
+            throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10641, key.ToString()));
         }
 
-        public override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        protected virtual HashAlgorithm GetHashAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw new ArgumentNullException("algorithm");
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha1Signature:
+                    return SHA1.Create();
+
+                case SecurityAlgorithms.RsaSha256Signature:
+                    return SHA256.Create();
+
+                case SecurityAlgorithms.RsaSha384Signature:
+                    return SHA384.Create();
+
+                case SecurityAlgorithms.RsaSha512Signature:
+                    return SHA512.Create();
+
+                default:
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm));
+            }
+        }
+
+        public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
                 return false;
-
-            RsaSecurityKey rsaSecurityKey = key as RsaSecurityKey;
-            if (rsaSecurityKey != null)
-                return AsymmetricSignatureProvider.IsSupportedAlgorithm(rsaSecurityKey, algorithm);
-
-            return false;
-        }
-
-        public static bool IsSupportedAlgorithm(X509SecurityKey key, string algorithm)
-        {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
+        
             switch (algorithm)
             {
                 case SecurityAlgorithms.RsaSha1Signature:

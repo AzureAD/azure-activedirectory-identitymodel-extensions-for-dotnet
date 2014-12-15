@@ -26,11 +26,6 @@ namespace System.IdentityModel.Tokens
         byte[] _key;
 
         public SymmetricSecurityKey(byte[] key)
-            : this(key, true)
-        {
-        }
-
-        public SymmetricSecurityKey(byte[] key, bool cloneBuffer)
         {
             if (key == null)
             {

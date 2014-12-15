@@ -29,8 +29,9 @@ namespace System.IdentityModel.Tokens
             // must have private or public key
             // TODO - brentsch, D.Length must == Modulus.Length
 
-            if (   !(rsaParameters.D == null || rsaParameters.DP == null || rsaParameters.DQ == null || rsaParameters.P == null || rsaParameters.Q == null)
-                && !(rsaParameters.Exponent == null || rsaParameters.Modulus == null))
+            bool hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null;
+            bool hasPublicKey = rsaParameters.Exponent != null && rsaParameters.Modulus != null;
+            if (!hasPrivateKey && !hasPublicKey)
             {
                 // TODO - brentsch - error message
                 throw new ArgumentException("no public or private key material found");

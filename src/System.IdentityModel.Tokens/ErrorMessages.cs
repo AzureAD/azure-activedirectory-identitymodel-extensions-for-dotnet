@@ -137,6 +137,10 @@ namespace System.IdentityModel.Tokens
         public const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
         public const string IDX10636 = "IDX10636: SignatureProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX10637 = "IDX10637: the 'validationMode' is not supported '{0}'.  Supported values are: 'ChainTrust, PeerTrust, PeerOrChainTrust, None'.";
+        public const string IDX10638 = "IDX10638: Cannot created the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
+        public const string IDX10639 = "IDX10639: Cannot created the SignatureProvider, the algorithm is not supported: '{0}'.";
+        public const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
+        public const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
 
         // JWT specific errors
         public const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.\nInnerException: '{2}'.";

@@ -18,10 +18,11 @@
 
 #define  _Verbose
 
-using System;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IO;
+using System.Security.Cryptography;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.IdentityModel.Test
@@ -53,6 +54,11 @@ namespace System.IdentityModel.Test
             return new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: substringExpected, innerTypeExpected: inner); 
         }
 
+        public static ExpectedException CryptographicException(string substringExpected = null, Type inner = null)
+        {
+            return new ExpectedException(typeExpected: typeof(CryptographicException), substringExpected: substringExpected, innerTypeExpected: inner);
+        }
+
         public Type InnerTypeExpected { get; set; }
 
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
@@ -81,20 +87,48 @@ namespace System.IdentityModel.Test
             } 
         }
 
-        public void ProcessException(Exception exception)
+        public void ProcessException(Exception exception, List<string> errors = null)
         {
+            string err;
 
             if (TypeExpected == null)
             {
-                Assert.True(exception == null, "Did NOT expect exception, caught: '" + exception + "'");
+                err = "Did NOT expect exception, caught: '" + exception + "'";
+                if (errors != null)
+                    errors.Add(err);
+                else
+                    Assert.True(false, err);
             }
             else
             {
-                Assert.True(exception != null, "Expected exception of type: '" + TypeExpected + " 'exception' parameter was null");
-                Assert.True(TypeExpected == exception.GetType(), "Expected exception of type: '" + TypeExpected + "', caught: '" + exception + "'");
+                if (exception == null)
+                {
+                    err = "Expected exception of type: '" + TypeExpected + " 'exception' parameter was null";
+                    if (errors != null)
+                        errors.Add(err);
+                    else
+                        Assert.True(false, err);
+                }
+
+                if (TypeExpected != exception.GetType())
+                {
+                    err = "Expected exception of type: '" + TypeExpected + "', caught: '" + exception + "'";
+                    if (errors != null)
+                        errors.Add(err);
+                    else
+                        Assert.True(false, err);
+                }
+
                 if (!string.IsNullOrWhiteSpace(SubstringExpected))
                 {
-                    Assert.True(exception.ToString().Contains(SubstringExpected), string.Format(CultureInfo.InvariantCulture, "Substring expected: '{0}', exception: '{1}'", SubstringExpected, exception.ToString()));
+                    if (!exception.Message.StartsWith(SubstringExpected))
+                    {
+                        err = string.Format("Substring expected: '{0}', exception: '{1}'", SubstringExpected, exception.ToString());
+                        if (errors != null)
+                            errors.Add(err);
+                        else
+                            Assert.True(false, err);
+                    }
                 }
             }
 
@@ -102,14 +136,42 @@ namespace System.IdentityModel.Test
             {
                 if (exception != null && exception.InnerException != null)
                 {
-                    Assert.True(false, "EXPECTED InnerException is null, but caught an exception where expection.InnerException != null. \nInnerExecption:\n" + exception.InnerException + "\nException:\n" + exception);
+                    err = "EXPECTED InnerException is null, but caught an exception where expection.InnerException != null. \nInnerExecption:\n" + exception.InnerException + "\nException:\n" + exception;
+                    if (errors != null)
+                        errors.Add(err);
+                    else
+                        Assert.True(false, err);
                 }
             }
             else
             {
-                Assert.True(exception != null, "InnerException is NOT null, but EXPECTED InnerException is null. InnerTypeExpected: '" + InnerTypeExpected + ".");
-                Assert.True(exception.InnerException != null, "'exception.InnerException' was NULL, expeced to find: '" + InnerTypeExpected + "'");
-                Assert.True(InnerTypeExpected == exception.InnerException.GetType(), "InnerExceptions didn't match on type, InnerTypeExpected:\n '" + InnerTypeExpected + "', exception.InnerException: '" + exception.InnerException + "'");
+                if (exception != null)
+                {
+                    err = "InnerException is NOT null, but EXPECTED InnerException is null. InnerTypeExpected: '" + InnerTypeExpected + ".";
+                    if (errors == null)
+                        errors.Add(err);
+                    else
+                        Assert.True(false, err);
+                }
+
+                if (exception.InnerException != null)
+                {
+                    err = "'exception.InnerException' was NULL, expeced to find: '" + InnerTypeExpected + "'";
+
+                    if (errors != null)
+                        errors.Add(err);
+                    else
+                        Assert.True(false, err);
+                }
+
+                if (InnerTypeExpected == exception.InnerException.GetType())
+                {
+                    err = "InnerExceptions didn't match on type, InnerTypeExpected:\n '" + InnerTypeExpected + "', exception.InnerException: '" + exception.InnerException + "'";
+                    if (errors != null)
+                        errors.Add(err);
+                    else
+                        Assert.True(false, err);
+                }
             }
 
 #if _Verbose
@@ -117,11 +179,14 @@ namespace System.IdentityModel.Test
 #endif
         }
 
-        public void ProcessNoException()
+        public void ProcessNoException(List<string> errors = null)
         {
             if (TypeExpected != null)
             {
-                Assert.True(false, "Exception was expected, type: '" + TypeExpected + "'.");
+                if (errors != null)
+                    errors.Add("Exception was expected, type: '" + TypeExpected + "'.");
+                else
+                    Assert.True(false, "Exception was expected, type: '" + TypeExpected + "'.");
             }
         }
 
