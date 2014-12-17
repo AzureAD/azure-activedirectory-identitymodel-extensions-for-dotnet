@@ -11,7 +11,6 @@ namespace System.IdentityModel.Tokens
     public class X509SecurityKey : AsymmetricSecurityKey
     {
         X509Certificate2    _certificate;
-        object              _hashAlg;
         AsymmetricAlgorithm _privateKey;
         bool                _privateKeyAvailabilityDetermined;
         PublicKey           _publicKey;

@@ -18,10 +18,7 @@
 
 using Microsoft.IdentityModel.Protocols;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -30,8 +27,6 @@ namespace Microsoft.IdentityModel.Test
 {
     public class OpenIdConfigData
     {
-        private static string rsaImportTemplate = @"<RSAKeyValue><Modulus>{0}</Modulus><Exponent>{1}</Exponent></RSAKeyValue>";
-
         static OpenIdConfigData()
         {
             JsonWebKeyFromPingExpected1 =
@@ -213,6 +208,29 @@ namespace Microsoft.IdentityModel.Test
                     {
                         KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
                     });
+
+            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(
+                new RsaSecurityKey(
+                    new RSAParameters
+                    {
+                        Exponent = Base64UrlEncoder.DecodeBytes(n2),
+                        Modulus = Base64UrlEncoder.DecodeBytes(e2),
+                    })
+                {
+                    KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
+                });
+
+            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(
+                new RsaSecurityKey(
+                    new RSAParameters
+                    {
+                        Exponent = Base64UrlEncoder.DecodeBytes(n2),
+                        Modulus = Base64UrlEncoder.DecodeBytes(e2),
+                    })
+                {
+                    KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
+                });
+
 
             OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey1));
             OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(new X509SecurityKey(X509CertificateJsonWebKey2));

@@ -252,7 +252,7 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Returns 'true' which indicates this instance can validate a <see cref="JwtSecurityToken"/>.
         /// </summary>
-        public virtual bool CanValidateToken
+        public override bool CanValidateToken
         {
             get { return true; }
         }
@@ -568,7 +568,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'token' is null.</exception>
         /// <exception cref="ArgumentException">'token' is not a not <see cref="JwtSecurityToken"/>.</exception>
         /// <returns>The <see cref="JwtSecurityToken"/> as a signed (if <see cref="SigningCredentials"/> exist) encoded string.</returns>
-        public virtual string WriteToken(SecurityToken token)
+        public override string WriteToken(SecurityToken token)
         {
             if (token == null)
             {
