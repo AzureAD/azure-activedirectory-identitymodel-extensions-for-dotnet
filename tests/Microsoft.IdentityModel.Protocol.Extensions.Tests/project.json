@@ -31,7 +31,7 @@
                 "System.IO": "4.0.10-beta-*",
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Runtime.Extensions": "4.0.10-beta-*",
-                "System.Security.Claims": "4.0.0.0-beta-*",
+                "System.Security.Claims": "4.0.0-beta-*",
                 "System.Security.Cryptography.Encryption.RSA": "4.0.0-beta-*",
                 "System.Security.Cryptography.Hashing.Algorithms": "4.0.0-beta-*",
                 "System.Security.Cryptography.X509Certificates": "4.0.0-beta-*",
