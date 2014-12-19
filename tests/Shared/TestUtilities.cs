@@ -62,7 +62,6 @@ namespace System.IdentityModel.Test
     /// </summary>
     public static class TestUtilities
     {
-//#if USE_REFLECTION
         /// <summary>
         /// Calls all public instance and static properties on an object
         /// </summary>
@@ -80,6 +79,7 @@ namespace System.IdentityModel.Test
             Console.WriteLine(string.Format("Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, "CallAllPublicInstanceAndStaticPropertyGets"));
 
             // call get all public static properties of MyClass type
+
 
             PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
 
@@ -99,7 +99,7 @@ namespace System.IdentityModel.Test
                 }
             }
         }
-//#endif
+
         /// <summary>
         /// Gets a named field on an object
         /// </summary>
