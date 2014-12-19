@@ -1,4 +1,4 @@
 {
-    "sources": [ "src", "tests\\System.IdentityModel.Tokens.Tests" ],
+    "sources": [ "src", "tests" ],
     "shared": "tests\\Shared"
 }

@@ -4,7 +4,7 @@
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.2-beta-*",
         "Newtonsoft.Json": "6.0.6.0",
         "System.IdentityModel.Tokens": "5.0.2-beta-*",
-        "Xunit.KRunner": "1.0.0-*"
+        "xunit.runner.kre": "1.0.0-*"
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
@@ -12,29 +12,12 @@
         "X509CertificateValidatorExTests.cs"
     ],
     "frameworks": {
-        "aspnet50": { },
-        "aspnetcore50": {
-            "dependencies": {
-                "System.Collections": "4.0.10-beta-*",
-                "System.Collections.Specialized": "4.0.0-beta-*",
-                "System.Diagnostics.Contracts": "4.0.0-beta-*",
-                "System.Diagnostics.Tools": "4.0.0-beta-*",
-                "System.Globalization": "4.0.10-beta-*",
-                "System.IO": "4.0.10-beta-*",
-                "System.Runtime": "4.0.20-beta-*",
-                "System.Runtime.Extensions": "4.0.10-beta-*",
-                "System.Security.Claims": "4.0.0-beta-*",
-                "System.Security.Cryptography.X509Certificates": "4.0.0-beta-*",
-                "System.Security.Cryptography.Encryption.RSA": "4.0.0-beta-*",
-                "System.Security.Cryptography.Hashing.Algorithms": "4.0.0-beta-*",
-                "System.Security.Principal": "4.0.0-beta-*",
-                "System.Text.RegularExpressions": "4.0.10-beta-*",
-                "System.Threading": "4.0.0-beta-*"
-            }
+        "aspnet50": {
+
         }
     },
     "commands": {
-        "test": "Xunit.KRunner"
+        "test": "xunit.runner.kre"
     },
     "compilationOptions": {
         "allowUnsafe": true,
