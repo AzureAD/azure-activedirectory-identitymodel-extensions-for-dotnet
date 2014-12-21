@@ -31,6 +31,7 @@
                 "System.Diagnostics.Tools": "4.0.0-beta-*",
                 "System.Globalization": "4.0.10-beta-*",
                 "System.IO": "4.0.10-beta-*",
+                "System.IO.FileSystem": "4.0.0-beta-*",
                 "System.Net.Http": "4.0.0-beta-*",
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Runtime.Extensions": "4.0.10-beta-*",

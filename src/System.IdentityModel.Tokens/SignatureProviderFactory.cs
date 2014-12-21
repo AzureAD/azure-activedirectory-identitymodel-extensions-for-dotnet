@@ -189,24 +189,7 @@ namespace System.IdentityModel.Tokens
         /// </returns>
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
-            if (!IsSupportedAlgorithm(key, algorithm))
-            {
-                // TODO - brentsch, exception message
-                throw new ArgumentException("Algorithm not supported");
-            }
-
             return CreateProvider(key, algorithm, false);
-        }
-
-        public virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
-        {
-            RsaSecurityKey rsaSecurityKey = key as RsaSecurityKey;
-            if (rsaSecurityKey != null)
-            {
-                return AsymmetricSignatureProvider.IsSupportedAlgorithm(rsaSecurityKey, algorithm);
-            }
-
-            return false;
         }
 
         /// <summary>

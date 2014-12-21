@@ -320,6 +320,8 @@ namespace System.IdentityModel.Tokens
         /// <para><see cref="Claim.Issuer"/> and <see cref="Claim.OriginalIssuer"/> will be set to the value of <see cref="Iss"/> ( <see cref="string.Empty"/> if null).</para></remarks>
         public virtual IEnumerable<Claim> Claims
         {
+            // TODO - brentschmaltz, need to hook a provider for: keyValuePair -> IEnumerable<Claim>
+            // Current work assumes NewtonSoft
             get
             {
                 List<Claim> claims = new List<Claim>();
@@ -338,20 +340,32 @@ namespace System.IdentityModel.Tokens
                     }
                     else
                     {
-                        IEnumerable<object> values = keyValuePair.Value as IEnumerable<object>;
+
+                        var values = keyValuePair.Value as Newtonsoft.Json.Linq.JArray;
                         if (values != null)
                         {
                             foreach(var item in values)
                             {
-                                string str = item as string;
+                                claims.Add(new Claim(keyValuePair.Key, item.ToString()));
+                            }
+                            continue;
+                        }
+
+                        var objects = keyValuePair.Value as IEnumerable<object>;
+                        if (objects != null)
+                        {
+                            foreach (var obj in objects)
+                            {
+                                string str = obj as string;
                                 if (str != null)
                                 {
                                     claims.Add(new Claim(keyValuePair.Key, str, ClaimValueTypes.String, issuer, issuer));
+                                    continue;
                                 }
                                 else
                                 {
-                                    c = new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(item), JwtConstants.JsonClaimValueType, issuer, issuer);
-                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = item.GetType().ToString();
+                                    c = new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(obj), JwtConstants.JsonClaimValueType, issuer, issuer);
+                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = obj.GetType().ToString();
                                     claims.Add(c);
                                 }
                             }

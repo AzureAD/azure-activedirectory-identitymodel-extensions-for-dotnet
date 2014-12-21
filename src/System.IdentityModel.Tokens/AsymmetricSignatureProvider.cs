@@ -154,23 +154,6 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        public static bool IsSupportedAlgorithm(RsaSecurityKey key, string algorithm)
-        {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha1Signature:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSha512Signature:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
 
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( AsymmetricSecurityKey, string, bool )"/>.

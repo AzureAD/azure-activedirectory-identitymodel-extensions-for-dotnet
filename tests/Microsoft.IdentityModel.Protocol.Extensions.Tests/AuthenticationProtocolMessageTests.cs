@@ -29,17 +29,29 @@ namespace Microsoft.IdentityModel.Test
     /// </summary>
     public class AuthenticationProtocolMessageTests
     {
-        [Fact(DisplayName = "AuthenticationProtocolMessageTests: Constructors")]
-        public void AuthenticationProtocolMessage_Constructors()
-        {
-            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
-        }
-
         [Fact(DisplayName = "AuthenticationProtocolMessageTests: Defaults")]
         public void AuthenticationProtocolMessage_Defaults()
         {
+            List<string> errors = new List<string>();
+            string issuerAddress = "http://www.gotjwt.com";
+
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
-            Assert.Equal(authenticationProtocolMessage.IssuerAddress, string.Empty);
+            if (!IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, string.Empty, CompareContext.Default))
+            {
+                errors.Add("authenticationProtocolMessage.IssuerAddress != string.Empty: " + authenticationProtocolMessage.IssuerAddress ?? "null");
+            }
+
+            authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage(issuerAddress);
+            if (!IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, issuerAddress, CompareContext.Default))
+            {
+                errors.Add("authenticationProtocolMessage.IssuerAddress != issuerAddress: " + authenticationProtocolMessage.IssuerAddress ?? "null" + " , " + issuerAddress);
+            }
+
+            if (authenticationProtocolMessage.Parameters == null)
+            {
+                errors.Add("uthenticationProtocolMessage.Parameters .IssuerAddress != issuerAddress: " + authenticationProtocolMessage.IssuerAddress ?? "null" + " , " + issuerAddress);
+            }
+
             Assert.NotNull(authenticationProtocolMessage.Parameters);
             Assert.Equal(authenticationProtocolMessage.Parameters.Count, 0);
         }
@@ -47,7 +59,7 @@ namespace Microsoft.IdentityModel.Test
         [Fact(DisplayName = "AuthenticationProtocolMessageTests: GetSets")]
         public void AuthenticationProtocolMessage_GetSets()
         {
-            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
+            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage("http://www.gotjwt.com");
 
             List<string> properties = new List<string>()
             {
@@ -74,7 +86,7 @@ namespace Microsoft.IdentityModel.Test
             string param1 = "param1";
             string param2 = "param2";
 
-            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
+            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage("http://www.gotjwt.com");
             ExpectedException expectedException = ExpectedException.ArgumentNullException(substringExpected: "parameter");
             try
             {
@@ -140,11 +152,11 @@ namespace Microsoft.IdentityModel.Test
         /// </summary>
         private class DerivedAuthenticationProtocolMessage : AuthenticationProtocolMessage
         {
-            public DerivedAuthenticationProtocolMessage(string issuerAddress)
-                : base(issuerAddress)
+            public DerivedAuthenticationProtocolMessage()
             { }
 
-            public DerivedAuthenticationProtocolMessage()
+            public DerivedAuthenticationProtocolMessage(string issuerAddress)
+                : base(issuerAddress)
             { }
         }
     }

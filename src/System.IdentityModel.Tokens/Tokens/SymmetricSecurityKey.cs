@@ -51,11 +51,6 @@ namespace System.IdentityModel.Tokens
             return null;
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            return false;
-        }
-
         public virtual byte[] Key
         {
             get { return _key.CloneByteArray(); }

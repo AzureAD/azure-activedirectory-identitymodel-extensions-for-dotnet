@@ -121,7 +121,7 @@ namespace System.IdentityModel.Test
 
                 if (!string.IsNullOrWhiteSpace(SubstringExpected))
                 {
-                    if (!exception.Message.StartsWith(SubstringExpected))
+                    if (!exception.Message.Contains(SubstringExpected))
                     {
                         err = string.Format("Substring expected: '{0}', exception: '{1}'", SubstringExpected, exception.ToString());
                         if (errors != null)
@@ -145,26 +145,16 @@ namespace System.IdentityModel.Test
             }
             else
             {
-                if (exception != null)
+                if (exception.InnerException == null)
                 {
-                    err = "InnerException is NOT null, but EXPECTED InnerException is null. InnerTypeExpected: '" + InnerTypeExpected + ".";
-                    if (errors == null)
-                        errors.Add(err);
-                    else
-                        Assert.True(false, err);
-                }
-
-                if (exception.InnerException != null)
-                {
-                    err = "'exception.InnerException' was NULL, expeced to find: '" + InnerTypeExpected + "'";
-
+                    err = "exception.InnerException is NOT null, but EXPECTED InnerException is null. InnerTypeExpected: '" + InnerTypeExpected + ".";
                     if (errors != null)
                         errors.Add(err);
                     else
                         Assert.True(false, err);
                 }
 
-                if (InnerTypeExpected == exception.InnerException.GetType())
+                if (InnerTypeExpected != exception.InnerException.GetType())
                 {
                     err = "InnerExceptions didn't match on type, InnerTypeExpected:\n '" + InnerTypeExpected + "', exception.InnerException: '" + exception.InnerException + "'";
                     if (errors != null)

@@ -73,7 +73,6 @@ namespace System.IdentityModel.Tokens
         /// Gets or sets a <see cref="Deserializer"/> to use when deserializing objects from JSON.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-
         public static Deserializer Deserializer
         {
             get

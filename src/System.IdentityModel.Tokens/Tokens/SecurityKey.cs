@@ -24,7 +24,6 @@ namespace System.IdentityModel.Tokens
 
         public abstract int KeySize { get; }
         public string KeyId { get; set; }
-        public abstract bool IsSupportedAlgorithm(string algorithm);
         public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
         public SignatureProviderFactory SignatureProviderFactory
         {

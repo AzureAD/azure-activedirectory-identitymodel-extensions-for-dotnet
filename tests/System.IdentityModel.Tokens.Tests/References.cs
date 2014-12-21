@@ -106,12 +106,17 @@ namespace System.IdentityModel.Test
             return new ClaimsIdentity(claims, authType);
         }
 
+        // TODO - brentschmaltz, breaking
         public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer)
         {
             foreach(var kv in claimNames)
             {
-                Claim c = new Claim("_claim_names", @"{""" + kv.Key + @""":""" + kv.Value + @"""}", JwtConstants.JsonClaimValueType, issuer);
-                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+
+                //TODO - brentschmaltz, breaking this property change from commented to current
+                //Claim c = new Claim("_claim_names", @"{""" + kv.Key + @""":""" + kv.Value + @"""}", JwtConstants.JsonClaimValueType, issuer);
+                //c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+                Claim c = new Claim("_claim_names", @"""" + kv.Key + @""":""" + kv.Value + @"""", JwtConstants.JsonClaimValueType, issuer);
+                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
                 claims.Add(c);
             }
         }
@@ -120,8 +125,11 @@ namespace System.IdentityModel.Test
         {
             foreach (var kv in claimSources)
             {
-                Claim c = new Claim("_claim_sources", @"{""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value) + @"}", JwtConstants.JsonClaimValueType, issuer);
-                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+                //TODO - brentschmaltz, breaking this property change from commented to current
+                //Claim c = new Claim("_claim_sources", @"{""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value) + @"}", JwtConstants.JsonClaimValueType, issuer);
+                //c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
+                Claim c = new Claim("_claim_sources", @"""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value), JwtConstants.JsonClaimValueType, issuer);
+                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
                 claims.Add(c);
             }
         }

@@ -69,11 +69,6 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            return SignatureProviderFactory.IsSupportedAlgorithm(this, algorithm);
-        }
-
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (verifyOnly)

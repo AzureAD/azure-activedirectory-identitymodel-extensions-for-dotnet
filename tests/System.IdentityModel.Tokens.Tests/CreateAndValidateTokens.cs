@@ -276,7 +276,7 @@ namespace System.IdentityModel.Test
                 new SecurityTokenDescriptor
                 { 
                     Audience = IdentityUtilities.DefaultAudience,
-                    SigningCredentials = IdentityUtilities.DefaultSymmetricSigningCredentials,
+                    SigningCredentials = IdentityUtilities.DefaultAsymmetricSigningCredentials,
                     Claims = ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
                     Issuer = IdentityUtilities.DefaultIssuer,
                 });
@@ -288,9 +288,11 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler.InboundClaimFilter.Add("iss");
             JwtSecurityTokenHandler.InboundClaimFilter.Add("nbf");
 
-            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultSymmetricTokenValidationParameters, out validatedToken);
+            ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, out validatedToken);
 
-            Assert.True(IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), new CompareContext { IgnoreProperties = true, IgnoreSubject = true }));
+            var context = new CompareContext { IgnoreProperties = true, IgnoreSubject = true };
+            if (!IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), context))
+                TestUtilities.AssertFailIfErrors("CreateAndValidateTokens: DuplicateClaims - roundtrips with duplicate claims", context.Diffs);
 
             JwtSecurityTokenHandler.InboundClaimFilter.Clear();
         }
@@ -326,11 +328,15 @@ namespace System.IdentityModel.Test
 
             SecurityToken validatedJwt = null;
             var claimsPrincipal = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedJwt);
+            var context = CompareContext.Default;
+            context.Title = "1";
             if (!IdentityComparer.AreEqual
                 (claimsPrincipal.Identity as ClaimsIdentity,
-                 JsonClaims.ClaimsIdentityDistributedClaims(issuer, TokenValidationParameters.DefaultAuthenticationType, JsonClaims.ClaimSources, JsonClaims.ClaimNames)))
+                 JsonClaims.ClaimsIdentityDistributedClaims(issuer, TokenValidationParameters.DefaultAuthenticationType, JsonClaims.ClaimSources, JsonClaims.ClaimNames),
+                 context))
             {
                 errors.Add("JsonClaims.ClaimSources, JsonClaims.ClaimNames: test failed");
+                errors.AddRange(context.Diffs);
             };
 
             Claim c = claimsPrincipal.FindFirst(claimSources);
@@ -340,7 +346,9 @@ namespace System.IdentityModel.Test
             }
             else
             {
-                if (!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal))
+                //TODO - brentschmaltz, breaking this property change from commented to current
+                //if (!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal))
+                if (!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], "Newtonsoft.Json.Linq.JProperty", StringComparison.Ordinal))
                 {
                     errors.Add("!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal)" +
                         "value is: " + c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty]);

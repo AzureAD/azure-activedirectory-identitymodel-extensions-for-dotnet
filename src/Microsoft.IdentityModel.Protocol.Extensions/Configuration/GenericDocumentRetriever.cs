@@ -25,7 +25,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    // Works for c:\, file://, http://, ftp://, etc.
+    // Works for local files, http https
+    // TODO - brentschmaltz, proper documentation
     public class GenericDocumentRetriever : IDocumentRetriever
     {
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
@@ -34,6 +35,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 throw new ArgumentNullException("address");
             }
+
             try
             {
                 using (HttpClient client = new HttpClient())
@@ -46,7 +48,14 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw new IOException("Unable to get document from: " + address, ex);
+                if (File.Exists(address))
+                {
+                    return File.ReadAllText(address);
+                }
+                else
+                {
+                    throw new IOException("Unable to get document from: " + address, ex);
+                }
             }
         }
     }

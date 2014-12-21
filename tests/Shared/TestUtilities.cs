@@ -40,7 +40,6 @@ namespace System.IdentityModel.Test
 
     public class TokenReplayCache : ITokenReplayCache
     {
-
         public bool OnAddReturnValue { get; set; }
         
         public bool OnFindReturnValue { get; set; }
@@ -226,20 +225,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-        public static void AssertFailIfErrors(string testInfo, List<string> errors)
-        {
-            if (errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(testInfo);
-                sb.AppendLine(Environment.NewLine);
-                foreach (string str in errors)
-                    sb.AppendLine(str);
-
-                Assert.True(false, sb.ToString());
-            }
-        }
-
         public static string SerializeAsSingleCommaDelimitedString(IEnumerable<string> strings)
         {
             if (null == strings)
@@ -362,6 +347,25 @@ namespace System.IdentityModel.Test
             replayCache.OnFindReturnValue = false;
             replayCache.OnAddReturnValue = false;
             TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
+        }
+
+        public static void AssertEqual(string testid, object obj1, object obj2,  Func<object, object, CompareContext, bool> areEqual, CompareContext cc)
+        {
+            areEqual(obj1, obj2, cc);
+        }
+
+        public static void AssertFailIfErrors(string testInfo, List<string> errors)
+        {
+            if (errors.Count != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(testInfo);
+                sb.AppendLine(Environment.NewLine);
+                foreach (string str in errors)
+                    sb.AppendLine(str);
+
+                Assert.True(false, sb.ToString());
+            }
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Gets or sets the Gets or sets the passive token endpoint.
+        /// Gets or sets token endpoint.
         /// </summary>
         public string TokenEndpoint { get; set; }
     }

@@ -762,7 +762,7 @@ namespace System.IdentityModel.Tokens
                         exceptionStrings.AppendLine(ex.ToString());
                     }
 
-                    keysAttempted.AppendLine(CreateKeyString(securityKey));
+                    keysAttempted.AppendLine(CreateKeyString(sk));
                 }
 
                 throw new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), firstException);
@@ -954,24 +954,12 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
         /// <param name="securityToken">the <SecurityToken> that is being validated.</SecurityToken></param>
-        /// <param name="keyIdentifier">the <see cref="SecurityKeyIdentifier"/> found in the token.</param>
+        /// <param name="kid">the key identifier found in the token.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <exception cref="ArgumentNullException">if 'keyIdentifier' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
         {
-            if (kid == null)
-            {
-                throw new ArgumentNullException("kid");
-            }
-
-            if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
-
             return null;
         }
 

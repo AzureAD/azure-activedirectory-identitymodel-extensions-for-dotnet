@@ -45,12 +45,18 @@ namespace Microsoft.IdentityModel.Test
 
         public async Task FromFile()
         {
-            OpenIdConnectConfiguration configuration;
-            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);
-            Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1));
+            CompareContext cc =
+                new CompareContext
+                {
+                    IgnoreType = false,
+                };
+
+            OpenIdConnectConfiguration configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataFile, expectedException: ExpectedException.NoExceptionExpected);
+
+            Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1, cc));
 
             // jwt_uri points to bad formated JSON
-            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException());
+            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
         }
 
         [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromText")]

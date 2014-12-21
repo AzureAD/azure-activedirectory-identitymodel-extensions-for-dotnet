@@ -83,15 +83,10 @@ namespace System.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace("algorithm"))
                 throw new ArgumentNullException("algorithm");
 
-            if (IsSupportedAlgorithm(algorithm))
-            {
-                if (verifyOnly)
-                    return SignatureProviderFactory.CreateForVerifying(this, algorithm);
-                else
-                    return SignatureProviderFactory.CreateForSigning(this, algorithm);
-            }
-
-            throw new CryptographicException("Algorithm not supported: " + algorithm);
+            if (verifyOnly)
+                return SignatureProviderFactory.CreateForVerifying(this, algorithm);
+            else
+                return SignatureProviderFactory.CreateForSigning(this, algorithm);
         }
 
         //public HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
@@ -124,11 +119,6 @@ namespace System.IdentityModel.Tokens
             {
                 return true;
             }
-        }
-
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            return SignatureProviderFactory.IsSupportedAlgorithm(this, algorithm);
         }
 
         /// <summary>

@@ -202,28 +202,6 @@ namespace Microsoft.IdentityModel.Test
                 new RsaSecurityKey(
                     new RSAParameters
                     {
-                        Exponent = Base64UrlEncoder.DecodeBytes(n),
-                        Modulus = Base64UrlEncoder.DecodeBytes(e),
-                    })
-                    {
-                        KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
-                    });
-
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(
-                new RsaSecurityKey(
-                    new RSAParameters
-                    {
-                        Exponent = Base64UrlEncoder.DecodeBytes(n2),
-                        Modulus = Base64UrlEncoder.DecodeBytes(e2),
-                    })
-                {
-                    KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
-                });
-
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(
-                new RsaSecurityKey(
-                    new RSAParameters
-                    {
                         Exponent = Base64UrlEncoder.DecodeBytes(n2),
                         Modulus = Base64UrlEncoder.DecodeBytes(e2),
                     })

@@ -161,11 +161,6 @@ namespace System.IdentityModel.Test
 
     public class NotAsymmetricOrSymmetricSecurityKey : SecurityKey
     {
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             throw new NotImplementedException();
@@ -200,10 +195,6 @@ namespace System.IdentityModel.Test
             }
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            return true;
-        }
         public override int KeySize
         {
             get
@@ -225,11 +216,6 @@ namespace System.IdentityModel.Test
         public override bool HasPrivateKey
         {
             get { throw new NotImplementedException(); }
-        }
-
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
         }
 
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
@@ -283,7 +269,6 @@ namespace System.IdentityModel.Test
             throw new NotImplementedException();
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm) { return _key.IsSupportedAlgorithm(algorithm); }
     }
 
     /// <summary>
@@ -319,7 +304,6 @@ namespace System.IdentityModel.Test
         }
 
         public override int KeySize { get { return _key.KeySize; } }
-        public override bool IsSupportedAlgorithm(string algorithm) { return _key.IsSupportedAlgorithm(algorithm); }
     }
 
     public class FaultingKeyedHashAlgorithm : KeyedHashAlgorithm
