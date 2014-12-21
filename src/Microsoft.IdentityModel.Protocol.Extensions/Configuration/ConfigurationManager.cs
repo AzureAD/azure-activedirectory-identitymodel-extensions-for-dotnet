@@ -208,6 +208,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                     catch (Exception ex)
                     {
+                        // TODO - brentschmaltz, we need to expose this error.  Logging etc.
                         retrieveEx = ex;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
                     }

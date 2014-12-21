@@ -4,7 +4,7 @@
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.2-beta-*",
         "Newtonsoft.Json": "6.0.6.0",
         "System.IdentityModel.Tokens": "5.0.2-beta-*",
-        "xunit.runner.kre": "1.0.0-*"
+        "Xunit.KRunner": "1.0.0-*"
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
@@ -17,7 +17,7 @@
         }
     },
     "commands": {
-        "test": "xunit.runner.kre"
+        "test": "Xunit.KRunner"
     },
     "compilationOptions": {
         "allowUnsafe": true,

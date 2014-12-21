@@ -190,13 +190,13 @@ namespace Microsoft.IdentityModel.Test
             message.Scope = OpenIdConnectScopes.OpenIdProfile;
 
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile");
+            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile");
             Report("1a", errors, url, expected);
 
             // Nonce added
             message.Nonce = nonce;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={0}", nonce);
+            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={0}", nonce);
             Report("2", errors, url, expected);
 
             // IssuerAddress only
@@ -207,19 +207,19 @@ namespace Microsoft.IdentityModel.Test
             message.Nonce = nonce;
 
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}", issuerAddress, nonce);
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}", Uri.EscapeUriString(issuerAddress), nonce);
             Report("3", errors, url, expected);
 
             // IssuerAdderss and Redirect_uri
             message.RedirectUri = redirectUri;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&redirect_uri={2}", issuerAddress, message.Nonce, Uri.EscapeUriString(redirectUri));
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}", Uri.EscapeUriString(issuerAddress), message.Nonce, Uri.EscapeDataString(redirectUri));
             Report("4", errors, url, expected);
 
             // IssuerAdderss empty and Redirect_uri
             message.IssuerAddress = string.Empty;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={0}&redirect_uri={1}", message.Nonce, Uri.EscapeDataString(redirectUri));
+            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={0}&redirect_uri={1}", message.Nonce, Uri.EscapeDataString(redirectUri));
             Report("5", errors, url, expected);
 
             // IssuerAdderss, Redirect_uri, Response
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Test
             message.RedirectUri = redirectUri;
             message.Resource = resource;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&redirect_uri={2}&resource={3}", issuerAddress, message.Nonce, Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}&resource={3}", issuerAddress, message.Nonce, Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
             Report("6", errors, url, expected);
 
             // IssuerAdderss, Redirect_uri, Response, customParam
@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Test
             message.RedirectUri = redirectUri;
             message.Resource = resource;
             url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", issuerAddress, message.Nonce, Uri.EscapeDataString(customParameterName), Uri.EscapeDataString(customParameterValue), Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
+            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", issuerAddress, message.Nonce, Uri.EscapeDataString(customParameterName), Uri.EscapeDataString(customParameterValue), Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
             Report("7", errors, url, expected);
 
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Publics*** Test Failures:\n", errors);
