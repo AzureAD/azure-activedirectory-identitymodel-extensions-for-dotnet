@@ -189,10 +189,13 @@ namespace System.IdentityModel.Test
             validationParameters.SaveSigninToken = true;
 
             string jwtActorAsymmetric = IdentityUtilities.DefaultAsymmetricJwt;
-            string jwtActorSymmetric = IdentityUtilities.DefaultSymmetricJwt;
 
+#if SymmetricKeySuport
+            // TODO - brentschmaltz, SymmetricKeys need support
+            string jwtActorSymmetric = IdentityUtilities.DefaultSymmetricJwt;
+#endif
             // actor can be set by adding the claim directly
-            ClaimsIdentity claimsIdentity = IdentityUtilities.DefaultClaimsIdentity;
+            ClaimsIdentity claimsIdentity = ClaimSets.DefaultClaimsIdentity;
             claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, jwtActorAsymmetric));
             JwtSecurityToken jwtToken = tokendHandler.CreateToken
                     (issuer: IdentityUtilities.DefaultIssuer,
@@ -204,6 +207,7 @@ namespace System.IdentityModel.Test
             validationParameters.ValidateActor = true;
             ClaimsPrincipal claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorAsymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.NoExceptionExpected);
 
+#if SymmetricKeySuport
             // Validation on actor will fail because the keys are different types
             claimsIdentity = IdentityUtilities.DefaultClaimsIdentity;
             claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, jwtActorSymmetric));
@@ -218,6 +222,7 @@ namespace System.IdentityModel.Test
             // Will succeed be validation is off
             validationParameters.ValidateActor = false;
             claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorSymmetric, validationParameters, IdentityUtilities.DefaultSymmetricTokenValidationParameters, tokendHandler, ExpectedException.NoExceptionExpected);
+#endif
         }
 
         private ClaimsPrincipal RunActorVariation(string secutityToken, string actor, TokenValidationParameters validationParameters, TokenValidationParameters actorValidationParameters,  JwtSecurityTokenHandler tokendHandler, ExpectedException expectedException)
@@ -543,7 +548,7 @@ namespace System.IdentityModel.Test
 
             return retVal;
         }
-        #endif
+#endif
 
         private bool RunCanReadStringVariation(string securityToken, JwtSecurityTokenHandler tokenHandler, ExpectedException expectedException)
         {
@@ -650,7 +655,7 @@ namespace System.IdentityModel.Test
             JwtSecurityToken jwt = tokenHandler.CreateToken(
                 IdentityUtilities.DefaultIssuer,
                 IdentityUtilities.DefaultAudience,
-                IdentityUtilities.DefaultClaimsIdentity,
+                ClaimSets.DefaultClaimsIdentity,
                 DateTime.UtcNow,
                 DateTime.UtcNow + TimeSpan.FromHours(1),
                 IdentityUtilities.DefaultAsymmetricSigningCredentials);
@@ -683,9 +688,9 @@ namespace System.IdentityModel.Test
         {
             SecurityToken validatedToken;
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            TokenValidationParameters validationParameters = IdentityUtilities.DefaultSymmetricTokenValidationParameters;
+            TokenValidationParameters validationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters;
             validationParameters.SaveSigninToken = false;
-            string jwt = IdentityUtilities.DefaultSymmetricJwt;
+            string jwt = IdentityUtilities.DefaultAsymmetricJwt;
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
             object context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext;
             Assert.Null(context);
@@ -769,10 +774,12 @@ namespace System.IdentityModel.Test
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
+#if SymmetricKeySuport
             // "Symmetric_256"
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_256);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts")), validationParameters, tokenHandler, expectedException);
+#endif
 
             // "Signature missing, just two parts",
             expectedException = ExpectedException.SecurityTokenValidationException("IDX10504:");
@@ -799,10 +806,12 @@ namespace System.IdentityModel.Test
             validationParameters = SignatureValidationParameters( signingKey: KeyingMaterial.DefaultX509Key_Public_2048 );
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
+#if SymmetricKeySuport
             // "BinaryKey 56Bits",
             expectedException = ExpectedException.SignatureVerificationFailedException( innerTypeExpected: typeof(ArgumentOutOfRangeException), substringExpected: "IDX10503:");
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_256);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
+#endif
         }
 
         private static TokenValidationParameters SignatureValidationParameters(SecurityKey signingKey = null, IEnumerable<SecurityKey> signingKeys = null)

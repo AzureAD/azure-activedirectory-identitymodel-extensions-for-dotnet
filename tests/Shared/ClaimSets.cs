@@ -54,7 +54,6 @@ namespace System.IdentityModel.Test
         public const string NotDefaultNameClaimType = "NotDefaultNameClaimType";
         public const string NotDefaultRoleClaimType = "NotDefaultRoleClaimType";
 
-
         private static List<Claim> _defaultClaims;
         private static List<Claim> _defaultClaimsWithoutEmail;
         private static List<Claim> _defaultDuplicatedClaims;

@@ -57,6 +57,7 @@ namespace System.IdentityModel.Test
             FactoryCreateFor("Verifying: - AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
             SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
 
+#if SymmetricKeySuport
             SignatureProviderFactory.MinimumSymmetricKeySizeInBits = 512;
             FactoryCreateFor("Siging:    - SymmetricKeySize Key to small", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10603:"));
             FactoryCreateFor("Verifying: - SymmetricKeySize Key to small", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10603"));
@@ -99,6 +100,7 @@ namespace System.IdentityModel.Test
             {
                 expectedException.ProcessException(ex);
             }
+#endif
         }
 
         private void FactoryCreateFor(string testcase, SecurityKey key, string algorithm, SignatureProviderFactory factory, ExpectedException expectedException)
@@ -312,12 +314,10 @@ namespace System.IdentityModel.Test
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, ExpectedException.NoExceptionExpected, errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", ExpectedException.InvalidOperationException(substringExpected: "IDX10640:"), errors);
-
+#if SymmetricKeySuport
             // Symmetric
             SignatureProviders_Sign_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10640:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.SymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10640:"), errors);
-
-#if VERIFY
             try
             {
                 Random r = new Random();
@@ -414,9 +414,11 @@ namespace System.IdentityModel.Test
             SignatureProvider_VerifyVariation(provider, new byte[1], new byte[0], ExpectedException.ArgumentException("IDX10626:"));
         }
 
+#if SymmetricKeySuport
         [Fact(DisplayName = "SymmetricSignatureProvider: Constructor")]
         public void SymmetricSignatureProvider_ConstructorTests()
         {
+
             // no errors
             SymmetricSignatureProvider_ConstructorVariation("Creates with no errors", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.NoExceptionExpected);
 
@@ -432,12 +434,10 @@ namespace System.IdentityModel.Test
             key = new FaultingSymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, null);
             SymmetricSignatureProvider_ConstructorVariation("Constructor:   - SecurityKey returns null KeyedHashAlgorithm", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("IDX10633:"));
 
-#if KEYED_HASH
             //_keyedHash.Key = _key.GetSymmetricKey() is null;            
             KeyedHashAlgorithm keyedHashAlgorithm = KeyingMaterial.DefaultSymmetricSecurityKey_256.GetKeyedHashAlgorithm(SecurityAlgorithms.HmacSha256Signature);
             key = new FaultingSymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, null, null, keyedHashAlgorithm, null);
             SymmetricSignatureProvider_ConstructorVariation("Constructor:   - key returns null bytes to pass to _keyedHashKey", key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("IDX10634:", typeof(NullReferenceException)));
-#endif
         }
 
         private void SymmetricSignatureProvider_ConstructorVariation(string testcase, SymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
@@ -463,7 +463,9 @@ namespace System.IdentityModel.Test
                 expectedException.ProcessException(ex);
             }
         }
+#endif
 
+#if SymmetricKeySuport
         [Fact(DisplayName = "SymmetricSignatureProvider: Publics")]
         public void SymmetricSignatureProvider_Publics()
         {
@@ -483,7 +485,7 @@ namespace System.IdentityModel.Test
             SignatureProvider_SignVariation(provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
             SignatureProvider_VerifyVariation(provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
         }
-
+#endif
         private void SignatureProvider_VerifyVariation(SignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedException)
         {
             try

@@ -214,6 +214,7 @@ namespace System.IdentityModel.Test
 
             RunRoundTrip(createAndValidateParams, handler);
 
+#if SymmetricKeySuport
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.Simple_simpleSigned_Symmetric",
@@ -231,6 +232,7 @@ namespace System.IdentityModel.Test
             };
 
             RunRoundTrip(createAndValidateParams, handler);
+#endif
         }
 
         private void RunRoundTrip(CreateAndValidateParams jwtParams, JwtSecurityTokenHandler handler)

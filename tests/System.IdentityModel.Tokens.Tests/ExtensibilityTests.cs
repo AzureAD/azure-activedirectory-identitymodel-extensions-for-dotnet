@@ -41,7 +41,7 @@ namespace System.IdentityModel.Test
                     issuer: Issuers.GotJwt,
                     audience: Audiences.AuthFactors,
                     claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
-                    signingCredentials: KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(10),
                     notBefore: DateTime.UtcNow
                 );
@@ -49,7 +49,7 @@ namespace System.IdentityModel.Test
             string encodedJwt = handler.WriteToken(jwt);
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
-                IssuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048,
                 ValidateAudience = false,
                 ValidIssuer = Issuers.GotJwt,
             };
@@ -129,6 +129,7 @@ namespace System.IdentityModel.Test
             ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
         }
 
+#if SymmetricKeySuport
         [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
         public void SymmetricSignatureProvider_Extensibility()
         {
@@ -148,7 +149,7 @@ namespace System.IdentityModel.Test
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, ExpectedException.NoExceptionExpected);
             ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
         }
-
+#endif
         private void RunAlgorithmMappingTest(string jwt, TokenValidationParameters validationParameters, JwtSecurityTokenHandler handler, ExpectedException expectedException)
         {
             try

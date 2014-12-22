@@ -18,7 +18,6 @@
 
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,6 +53,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 else
                 {
+                    // TODO - brentschmaltz, loc
                     throw new IOException("Unable to get document from: " + address, ex);
                 }
             }

@@ -112,7 +112,7 @@ namespace System.IdentityModel.Test
             {
                 Name = "EncodedString: header is not encoded properly: '123'",
                 EncodedString = string.Format("{0}.{1}.{2}", "123", tokenParts[1], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(ArgumentException)),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(Newtonsoft.Json.JsonReaderException)),
             });
 
             RunEncodedTest(new JwtSecurityTokenTestVariation
@@ -126,7 +126,7 @@ namespace System.IdentityModel.Test
             {
                 Name = "EncodedString: payload is not encoded correctly: '123'",
                 EncodedString = string.Format("{1}.{0}.{2}", "123", tokenParts[0], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(ArgumentException)),
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(Newtonsoft.Json.JsonReaderException)),
             });
 
             RunEncodedTest(new JwtSecurityTokenTestVariation

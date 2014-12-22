@@ -36,21 +36,21 @@ namespace System.IdentityModel.Test
             if (properties.Length != 30)
                 Assert.True(false, "Number of properties has changed from 30 to: " + properties.Length + ", adjust tests");
 
-            SecurityKey issuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256;
-            SecurityKey issuerSigningKey2 = KeyingMaterial.SymmetricSecurityKey2_256;
+            SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
+            SecurityKey issuerSigningKey2 = KeyingMaterial.RsaSecurityKey_2048;
 
             List<SecurityKey> issuerSigningKeys =
                 new List<SecurityKey>
                 {
-                    KeyingMaterial.DefaultSymmetricSecurityKey_256,
-                    KeyingMaterial.SymmetricSecurityKey2_256
+                    KeyingMaterial.DefaultX509Key_Public_2048,
+                    KeyingMaterial.RsaSecurityKey_2048
                 };
 
             List<SecurityKey> issuerSigningKeysDup =
                 new List<SecurityKey>
                 {
-                    new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256),
-                    new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256)
+                    KeyingMaterial.DefaultX509Key_Public_2048,
+                    KeyingMaterial.RsaSecurityKey_2048
                 };
 
             string validAudience = "ValidAudience";
@@ -85,7 +85,7 @@ namespace System.IdentityModel.Test
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
-            validationParametersSets.IssuerSigningKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
+            validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey2; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
@@ -128,8 +128,8 @@ namespace System.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         //new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
                         new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSecurityKey_256}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSecurityKey_256}, new List<SecurityKey>()}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaParameters_1024}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
                         new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("RoleClaimType", new List<object>{ClaimsIdentity.DefaultRoleClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("RequireExpirationTime", new List<object>{true, false, true}),

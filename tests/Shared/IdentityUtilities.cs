@@ -175,110 +175,21 @@ namespace System.IdentityModel.Test
 
         public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2; } }
         public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; } }
-
-        public static IEnumerable<Claim> DefaultClaims 
-        { 
-            get 
-            {
-                return new List<Claim>()
-                {
-                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, DefaultIssuer, DefaultIssuer),
-                };
-            }
-        }
         
-        public static ClaimsIdentity DefaultClaimsIdentity 
-        { 
-            get 
-            {
-                return new ClaimsIdentity(DefaultClaims, DefaultAuthenticationType); 
-            }
-        }
-
         public static ClaimsPrincipal DefaultClaimsPrincipal 
         { 
             get 
             { 
-                return new ClaimsPrincipal(DefaultClaimsIdentity); 
+                return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); 
             } 
         }
 
         public const string DefaultIssuer = "http://gotjwt.com";
         public const string DefaultOriginalIssuer = "http://gotjwt.com/Original";
 
-        public static SigningCredentials DefaultSymmetricSigningCredentials { get { return KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2; } }
-        public static SecurityKey DefaultSymmetricSigningKey { get { return KeyingMaterial.DefaultSymmetricSecurityKey_256; ; } }
         public static string DefaultAsymmetricJwt
         {
-            get { return DefaultJwt(DefaultAsymmetricSecurityTokenDescriptor); }
-        }
-
-        public static string DefaultSymmetricJwt
-        {
-            get { return DefaultJwt(DefaultSymmetricSecurityTokenDescriptor); }
-        }
-
-        public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
-        {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-
-            return tokenHandler.WriteToken(
-                tokenHandler.CreateToken(
-                    audience: securityTokenDescriptor.Audience,
-                    expires: securityTokenDescriptor.Expires,
-                    notBefore: securityTokenDescriptor.NotBefore,
-                    issuer: securityTokenDescriptor.Issuer,
-                    subject: new ClaimsIdentity(securityTokenDescriptor.Claims),
-                    signingCredentials: securityTokenDescriptor.SigningCredentials                    
-                    ));
-        }
-
-        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor
-        {
-            get { return DefaultSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials); }
-        }
-
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor
-        {
-            get { return DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials); }
-        }
-
-        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
-        {
-            return new SecurityTokenDescriptor
-            {
-                Audience = DefaultAudience,
-                SigningCredentials = signingCredentials,
-                Claims = DefaultClaims,
-                Issuer = DefaultIssuer,
-                IssuedAt = DateTime.UtcNow,
-                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-            };
-        }
-
-        public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }
-        }
-
-        public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningKey); }
-        }
-
-        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityKey key)
-        {
-            return new TokenValidationParameters
-            {
-                AuthenticationType = DefaultAuthenticationType,
-                IssuerSigningKey = key,
-                ValidAudience = DefaultAudience,
-                ValidIssuer = DefaultIssuer,
-            };
+            get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }
         }
 
         public const string NotDefaultAudience = "http://notrelyingparty.com";
@@ -309,6 +220,65 @@ namespace System.IdentityModel.Test
         public const string NotDefaultOriginalIssuer = "http://notgotjwt.com/Original";
         public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SecurityKey NotDefaultSigningKey = KeyingMaterial.RsaSecurityKey_2048;
+
+
+#if SymmetricKeySuport
+        public static string DefaultSymmetricJwt
+        {
+            get { return DefaultJwt(KeyingMaterial.DefaulgSymmetricSecurityKey); }
+        }
+#endif
+
+public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
+        {
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+
+            return tokenHandler.WriteToken(
+                tokenHandler.CreateToken(
+                    audience: securityTokenDescriptor.Audience,
+                    expires: securityTokenDescriptor.Expires,
+                    notBefore: securityTokenDescriptor.NotBefore,
+                    issuer: securityTokenDescriptor.Issuer,
+                    subject: new ClaimsIdentity(securityTokenDescriptor.Claims),
+                    signingCredentials: securityTokenDescriptor.SigningCredentials                    
+                    ));
+        }
+
+
+        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                Audience = DefaultAudience,
+                SigningCredentials = signingCredentials,
+                Claims = ClaimSets.DefaultClaims,
+                Issuer = DefaultIssuer,
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+            };
+        }
+
+        public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
+        {
+            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }
+        }
+
+#if SymmetricKeySuport
+        public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
+        {
+            get { return DefaultTokenValidationParameters(KeyingMaterial.DefaultSymmetricSigningKey); }
+        }
+#endif
+        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityKey key)
+        {
+            return new TokenValidationParameters
+            {
+                AuthenticationType = DefaultAuthenticationType,
+                IssuerSigningKey = key,
+                ValidAudience = DefaultAudience,
+                ValidIssuer = DefaultIssuer,
+            };
+        }
         
         public static bool AudienceValidatorReturnsTrue(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {

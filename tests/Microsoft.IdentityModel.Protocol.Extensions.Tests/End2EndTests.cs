@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Test
             JwtSecurityToken jwt = tokenHandler.CreateToken(
                 configuration.Issuer,
                 IdentityUtilities.DefaultAudience,
-                IdentityUtilities.DefaultClaimsIdentity,
+                ClaimSets.DefaultClaimsIdentity,
                 DateTime.UtcNow,
                 DateTime.UtcNow + TimeSpan.FromHours(1),
                 rsaSigningCredentials );
