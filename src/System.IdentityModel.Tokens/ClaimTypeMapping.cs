@@ -103,8 +103,7 @@ namespace System.IdentityModel.Tokens
                 { "idp", "http://schemas.microsoft.com/identity/claims/identityprovider" },
                 { "insidecorporatenetwork", "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork" },
                 { "isregistereduser", "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser" },
-                // TODO - brent, set proper url for ppid
-                { "ppid", "System.IdentityModel.Claims.ClaimTypes.PPID" },
+                { "ppid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier" },
                 { "primarygroupsid", ClaimTypes.PrimaryGroupSid },
                 { "primarysid", ClaimTypes.PrimarySid },
                 { "proxy", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy" },

@@ -348,7 +348,7 @@ namespace System.IdentityModel.Test
             get { yield return _issuer; }
         }
 
-        public static IEnumerable<Claim> MultipleAudiences(string issuer, string orignalIssuer)
+        public static IEnumerable<Claim> MultipleAudiences(string issuer = IdentityUtilities.DefaultIssuer, string orignalIssuer = IdentityUtilities.DefaultIssuer)
         {
             foreach(var aud in IdentityUtilities.DefaultAudiences)
             {
@@ -356,7 +356,16 @@ namespace System.IdentityModel.Test
             }
 
             yield return new Claim("iss", issuer, ClaimValueTypes.String, issuer, orignalIssuer);
+            foreach (var c in SimpleShortClaimtypes(issuer, orignalIssuer))
+            {
+                yield return c;
+            }
+        }
 
+        public static IEnumerable<Claim> SingleAudience(string issuer = IdentityUtilities.DefaultIssuer, string orignalIssuer = IdentityUtilities.DefaultIssuer)
+        {
+            yield return new Claim("aud", IdentityUtilities.DefaultAudience, ClaimValueTypes.String, issuer, orignalIssuer);
+            yield return new Claim("iss", issuer, ClaimValueTypes.String, issuer, orignalIssuer);
             foreach (var c in SimpleShortClaimtypes(issuer, orignalIssuer))
             {
                 yield return c;

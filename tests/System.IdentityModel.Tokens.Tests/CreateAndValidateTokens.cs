@@ -113,55 +113,6 @@ namespace System.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleX5C", errors);
         }
 
-        [Fact(DisplayName = "CreateAndValidateTokens: CreateAndValidateTokens_MultipleAudiences")]
-        public void CreateAndValidateTokens_MultipleAudiences()
-        {
-            List<string> errors = new List<string>();
-
-            var handler = new JwtSecurityTokenHandler();
-            var payload = new JwtPayload();
-            var header = new JwtHeader();
-
-            payload.AddClaims(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer));
-            var jwtToken = new JwtSecurityToken(header, payload);
-            var jwt = handler.WriteToken(jwtToken);
-
-            var validationParameters =
-                new TokenValidationParameters
-                {
-                    RequireExpirationTime = false,
-                    RequireSignedTokens = false,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false,
-                };
-
-            SecurityToken validatedJwt = null;
-            var cp = handler.ValidateToken(jwt, validationParameters, out validatedJwt);
-            var ci = new ClaimsIdentity(ClaimSets.MultipleAudiences(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), "AuthenticationTypes.Federation");
-            var cpExpected = new ClaimsPrincipal(ci);
-            var compareContext = new CompareContext();
-            if (!IdentityComparer.AreEqual<ClaimsPrincipal>(cp, cpExpected, compareContext))
-            {
-                errors.Add("IdentityComparer.AreEqual<ClaimsPrincipal>(cp, cpExpected, compareContext)");
-            }
-
-            var audiences = (validatedJwt as JwtSecurityToken).Audiences;
-            var jwtAudiences = jwtToken.Audiences;
-
-            if (!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, jwtAudiences))
-            {
-                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, jwtAudiences)");
-            }
-
-            if (!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, IdentityUtilities.DefaultAudiences))
-            {
-                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, IdentityUtilities.DefaultAudiences)");
-            }
-
-            TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleAudiences", errors);
-        }
-
         [Fact(DisplayName = "CreateAndValidateTokens: EmptyToken, serialize and deserialze an empyt JWT")]
         public void EmptyToken()
         {

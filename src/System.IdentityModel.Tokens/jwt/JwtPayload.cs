@@ -165,6 +165,7 @@ namespace System.IdentityModel.Tokens
                     return audiences;
                 }
 
+                // Audiences must be an array of string;
                 IEnumerable<object> values = value as IEnumerable<object>;
                 if (values != null)
                 {
@@ -177,7 +178,7 @@ namespace System.IdentityModel.Tokens
                         }
                         else
                         {
-                            audiences.Add(JsonExtensions.SerializeToJson(item));
+                            audiences.Add(item.ToString());
                         }
                     }
                 }

@@ -257,6 +257,16 @@ namespace System.IdentityModel.Tokens
             get { return true; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the class provides serialization functionality to serialize token handled 
+        /// by this instance.
+        /// </summary>
+        /// <returns>true if the WriteToken method can serialize this token.</returns>
+        public override bool CanWriteToken
+        {
+            get { return true; }
+        }
+
 
         /// <summary>
         /// Gets and sets the token lifetime in minutes.
@@ -699,6 +709,7 @@ namespace System.IdentityModel.Tokens
                 mappedAlgorithm = InboundAlgorithmMap[mappedAlgorithm];
             }
 
+            // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
             string kid = jwt.Header.Kid;
             SecurityKey securityKey = null;
 
@@ -711,7 +722,7 @@ namespace System.IdentityModel.Tokens
                 securityKey = ResolveIssuerSigningKey(token, jwt, kid, validationParameters);
             }
 
-            // if a security key couldn't be resolved, then try them all in else
+            // if the security key is resolved, try just the one key
             if (securityKey != null)
             { 
                 try

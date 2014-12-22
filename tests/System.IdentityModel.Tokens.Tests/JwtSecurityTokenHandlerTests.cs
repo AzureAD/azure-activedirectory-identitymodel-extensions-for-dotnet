@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Protocols;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -190,10 +191,6 @@ namespace System.IdentityModel.Test
 
             string jwtActorAsymmetric = IdentityUtilities.DefaultAsymmetricJwt;
 
-#if SymmetricKeySuport
-            // TODO - brentschmaltz, SymmetricKeys need support
-            string jwtActorSymmetric = IdentityUtilities.DefaultSymmetricJwt;
-#endif
             // actor can be set by adding the claim directly
             ClaimsIdentity claimsIdentity = ClaimSets.DefaultClaimsIdentity;
             claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, jwtActorAsymmetric));
@@ -208,6 +205,9 @@ namespace System.IdentityModel.Test
             ClaimsPrincipal claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorAsymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.NoExceptionExpected);
 
 #if SymmetricKeySuport
+            // TODO - brentschmaltz, SymmetricKeys need support
+            string jwtActorSymmetric = IdentityUtilities.DefaultSymmetricJwt;
+
             // Validation on actor will fail because the keys are different types
             claimsIdentity = IdentityUtilities.DefaultClaimsIdentity;
             claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, jwtActorSymmetric));
@@ -341,8 +341,8 @@ namespace System.IdentityModel.Test
 
                 foreach (var kv in adfsStrings)
                 {
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] == kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
+                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: '" + kv.Key + "'");
+                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] == kv.Value, "Inbound mapping wrong: key '" + kv.Key + "' expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: '" + kv.Value + "'");
                 }
 
                 var handler = new JwtSecurityTokenHandler();
@@ -755,58 +755,52 @@ namespace System.IdentityModel.Test
         {
             // "Security Key Identifier not found",
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            ExpectedException expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10503:");
-            TokenValidationParameters validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.RsaSecurityKey_2048);
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
+            TokenValidationParameters validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_LocalSts);
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), validationParameters, tokenHandler, expectedException);
 
             // "Asymmetric_LocalSts"
             expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_2048);
+            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_LocalSts);
+            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
+
+            // "SigningKey null, SigningKeys single key",
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey> { KeyingMaterial.X509SecurityKey_LocalSts });
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
             // "Asymmetric_1024"
             expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);
+            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_1024);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
-            // "Asymmetric_2048"
+            // Cyrano was generated from AAD 12-22-2014
+            JsonWebKeySet webKeySet = new JsonWebKeySet(OpenIdConfigData.CyranoJsonWebKeySet);
             expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters = SignatureValidationParameters(signingKeys: webKeySet.GetSigningKeys());
+            TestUtilities.ValidateToken(EncodedJwts.Cyrano, validationParameters, tokenHandler, expectedException);
+
+            // "Signature missing, just two parts",
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:");
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);
+            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
+
+            // "SigningKey and SigningKeys both null",
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
+            validationParameters = SignatureValidationParameters();
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
+
+            // "SigningKeys empty",
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
+            validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey>());
+            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
 #if SymmetricKeySuport
             // "Symmetric_256"
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_256);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts")), validationParameters, tokenHandler, expectedException);
-#endif
 
-            // "Signature missing, just two parts",
-            expectedException = ExpectedException.SecurityTokenValidationException("IDX10504:");
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
-
-            // "SigningToken and SigningTokens both null",
-            expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10503:");
-            validationParameters = SignatureValidationParameters();
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "SigningToken null, SigningTokens valid",
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters( signingKeys: new List<SecurityKey> { KeyingMaterial.DefaultX509Key_Public_2048 } );
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "SigningToken no keys",
-            expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10503:");
-            validationParameters = SignatureValidationParameters();
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "RSA signingtoken"
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters( signingKey: KeyingMaterial.DefaultX509Key_Public_2048 );
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-#if SymmetricKeySuport
             // "BinaryKey 56Bits",
             expectedException = ExpectedException.SignatureVerificationFailedException( innerTypeExpected: typeof(ArgumentOutOfRangeException), substringExpected: "IDX10503:");
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_256);
