@@ -49,32 +49,47 @@ namespace System.IdentityModel.Test
             string encodedJwt = handler.WriteToken(jwt);
             TokenValidationParameters tvp = new TokenValidationParameters()
             {
-                IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048,
+                IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
                 ValidateAudience = false,
                 ValidIssuer = Issuers.GotJwt,
             };
 
-            ValidateDerived(encodedJwt, handler, tvp, ExpectedException.NoExceptionExpected);
+            List<string> errors = new List<string>();
+            ValidateDerived(encodedJwt, handler, tvp, ExpectedException.NoExceptionExpected, errors);
         }
 
-        private void ValidateDerived(string jwt, DerivedJwtSecurityTokenHandler handler, TokenValidationParameters validationParameters, ExpectedException expectedException)
+        private void ValidateDerived(string jwt, DerivedJwtSecurityTokenHandler handler, TokenValidationParameters validationParameters, ExpectedException expectedException, List<string> errors)
         {
             try
             {
                 SecurityToken validatedToken;
                 handler.ValidateToken(jwt, validationParameters, out validatedToken);
-                Assert.NotNull(handler.Jwt as DerivedJwtSecurityToken);
-                Assert.True(handler.ReadTokenCalled);
-                Assert.True(handler.ValidateAudienceCalled);
-                Assert.True(handler.ValidateIssuerCalled);
-                Assert.True(handler.ValidateIssuerSigningKeyCalled);
-                Assert.True(handler.ValidateLifetimeCalled);
-                Assert.True(handler.ValidateSignatureCalled);
-                expectedException.ProcessNoException();
+                if ((handler.Jwt as DerivedJwtSecurityToken) == null)
+                    errors.Add("(handler.Jwt as DerivedJwtSecurityToken) == null");
+
+                if (!handler.ReadTokenCalled)
+                    errors.Add("!handler.ReadTokenCalled");
+
+                if (!handler.ValidateAudienceCalled)
+                    errors.Add("!handler.ValidateAudienceCalled");
+
+                if (!handler.ValidateIssuerCalled)
+                    errors.Add("!handler.ValidateIssuerCalled");
+
+                if (!handler.ValidateIssuerSigningKeyCalled)
+                    errors.Add("!handler.ValidateIssuerSigningKeyCalled");
+
+                if (!handler.ValidateLifetimeCalled)
+                    errors.Add("!handler.ValidateLifetimeCalled");
+
+                if (!handler.ValidateSignatureCalled)
+                    errors.Add("!handler.ValidateSignatureCalled");
+
+                expectedException.ProcessNoException(errors);
             }
             catch (Exception ex)
             {
-                expectedException.ProcessException(ex);
+                expectedException.ProcessException(ex, errors);
             }
         }
 
@@ -115,16 +130,16 @@ namespace System.IdentityModel.Test
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             string newAlgorithmValue = "bobsYourUncle";
 
-            string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, newAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
+            string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.RsaSha1Signature, newAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
             JwtSecurityToken jwt = handler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2) as JwtSecurityToken;
-            ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
+            ReplaceAlgorithm(SecurityAlgorithms.RsaSha1Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "IDX10502:", innerTypeExpected: typeof(InvalidOperationException));
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:", innerTypeExpected: typeof(InvalidOperationException));
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, expectedException);
 
-            // inbound is mapped to Rsa256
-            originalAlgorithmValue = ReplaceAlgorithm(newAlgorithmValue, SecurityAlgorithms.RsaSha256Signature, JwtSecurityTokenHandler.InboundAlgorithmMap);
+            // inbound is mapped to RsaSha1
+            originalAlgorithmValue = ReplaceAlgorithm(newAlgorithmValue, SecurityAlgorithms.RsaSha1Signature, JwtSecurityTokenHandler.InboundAlgorithmMap);
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, ExpectedException.NoExceptionExpected);
             ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
         }

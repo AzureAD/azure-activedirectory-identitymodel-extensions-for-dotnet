@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Test
         [Fact(DisplayName = "End2EndTests: OpenIdConnect")]
         public void End2End_OpenIdConnect()
         {
+            // TODO - brentschmaltz, consolidate and move tests to CreateAndValidateTokens.
             SigningCredentials rsaSigningCredentials = 
                 new SigningCredentials(
                     KeyingMaterial.RsaSecurityKey_2048, 
@@ -41,15 +42,18 @@ namespace Microsoft.IdentityModel.Test
                     );
 
             //"<RSAKeyValue><Modulus>rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"
-            OpenIdConnectConfiguration configuration = OpenIdConnectConfigurationRetriever.GetAsync(OpenIdConfigData.OpenIdConnectMetadataFile, CancellationToken.None).Result;            
+            OpenIdConnectConfiguration configuration = OpenIdConnectConfigurationRetriever.GetAsync(OpenIdConfigData.OpenIdConnectMetadataFileEnd2End, CancellationToken.None).Result;
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            JwtSecurityToken jwt = tokenHandler.CreateToken(
-                configuration.Issuer,
-                IdentityUtilities.DefaultAudience,
-                ClaimSets.DefaultClaimsIdentity,
-                DateTime.UtcNow,
-                DateTime.UtcNow + TimeSpan.FromHours(1),
-                rsaSigningCredentials );
+            JwtSecurityToken jwtToken = 
+                tokenHandler.CreateToken(
+                    configuration.Issuer,
+                    IdentityUtilities.DefaultAudience,
+                    ClaimSets.DefaultClaimsIdentity,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow + TimeSpan.FromHours(1),
+                    rsaSigningCredentials);
+
+            tokenHandler.WriteToken(jwtToken);
 
             TokenValidationParameters validationParameters =
                 new TokenValidationParameters
@@ -60,7 +64,7 @@ namespace Microsoft.IdentityModel.Test
                 };
 
             SecurityToken securityToken = null;
-            tokenHandler.ValidateToken(jwt.RawData, validationParameters, out securityToken);
+            tokenHandler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
         }
 
         [Fact(DisplayName = "End2EndTests: WsFederation")]

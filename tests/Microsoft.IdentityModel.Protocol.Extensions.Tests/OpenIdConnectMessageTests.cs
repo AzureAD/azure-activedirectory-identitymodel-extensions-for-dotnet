@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Test
             Assert.Equal(openIdConnectMessage.IssuerAddress, string.Empty);
             openIdConnectMessage = new OpenIdConnectMessage("http://www.got.jwt.com");
             Assert.Equal(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
-            ExpectedException expectedException = ExpectedException.ArgumentNullException("issuerAddress");
+            ExpectedException expectedException = ExpectedException.ArgumentNullException("IssuerAddress");
             try
             {
                 openIdConnectMessage = new OpenIdConnectMessage((string)null);

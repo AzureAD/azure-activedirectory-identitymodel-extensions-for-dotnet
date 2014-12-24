@@ -99,9 +99,10 @@ namespace Microsoft.IdentityModel.Test
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectMetadata_GetSets");
 
             List<string> methods = new List<string> { "AuthorizationEndpoint", "EndSessionEndpoint", "Issuer", "JwksUri", "TokenEndpoint", "UserInfoEndpoint" };
+            List<string> errors = new List<string>();
             foreach(string method in methods)
             {
-                TestUtilities.GetSet(configuration, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
+                TestUtilities.GetSet(configuration, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() }, errors);
             }
 
             string authorization_Endpoint = Guid.NewGuid().ToString();
@@ -123,12 +124,26 @@ namespace Microsoft.IdentityModel.Test
             configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.Cert_1024));
             configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.DefaultCert_2048));
 
-            Assert.Equal(configuration.AuthorizationEndpoint, authorization_Endpoint);
-            Assert.Equal(configuration.EndSessionEndpoint, end_Session_Endpoint);
-            Assert.Equal(configuration.Issuer, issuer);
-            Assert.Equal(configuration.JwksUri, jwks_Uri);
-            Assert.Equal(configuration.TokenEndpoint, token_Endpoint);
-            Assert.True(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys));
+            if (!string.Equals(configuration.AuthorizationEndpoint, authorization_Endpoint))
+                errors.Add("");
+
+            if (!string.Equals(configuration.EndSessionEndpoint, end_Session_Endpoint))
+                errors.Add("");
+
+            if (!string.Equals(configuration.Issuer, issuer))
+                errors.Add("");
+
+            if (!string.Equals(configuration.JwksUri, jwks_Uri))
+                errors.Add("");
+
+            if (!string.Equals(configuration.TokenEndpoint, token_Endpoint))
+                errors.Add("");
+
+            CompareContext context = new CompareContext();
+            if (!IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys, context))
+                errors.AddRange(context.Diffs);
+
+            TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
         }
     }
 }

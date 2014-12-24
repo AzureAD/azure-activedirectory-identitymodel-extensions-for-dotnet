@@ -204,15 +204,23 @@ namespace System.IdentityModel.Test
         /// <param name="property"></param>
         /// <param name="initialPropertyValue"></param>
         /// <param name="setPropertyValue"></param>
-        public static void GetSet(object obj, string property, object initialPropertyValue, object[] setPropertyValues)
+        public static void GetSet(object obj, string property, object initialPropertyValue, object[] setPropertyValues, List<string> errors)
         {
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
 
-            Assert.True(propertyInfo != null, "property get is not found: " + property + ", type: " + type.ToString());
+            if (propertyInfo == null)
+            {
+                errors.Add("property get is not found: " + property + ", type: " + type.ToString());
+                return;
+            }
 
             object retval = propertyInfo.GetValue(obj);
-            Assert.True(initialPropertyValue == retval);
+            if (initialPropertyValue != retval)
+            {
+                errors.Add("initialPropertyValue != retval: " + initialPropertyValue + " , " + retval);
+                return;
+            }
 
             if (propertyInfo.CanWrite)
             {
@@ -220,7 +228,10 @@ namespace System.IdentityModel.Test
                 {
                     propertyInfo.SetValue(obj, propertyValue);
                     retval = propertyInfo.GetValue(obj);
-                    Assert.True(propertyValue == retval);
+                    if (propertyValue != retval)
+                    {
+                        errors.Add("propertyValue != retval: " + propertyValue + " , " + retval);
+                    }
                 }
             }
         }
@@ -354,12 +365,12 @@ namespace System.IdentityModel.Test
             areEqual(obj1, obj2, cc);
         }
 
-        public static void AssertFailIfErrors(string testInfo, List<string> errors)
+        public static void AssertFailIfErrors(string testId, List<string> errors)
         {
             if (errors.Count != 0)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine(testInfo);
+                sb.AppendLine(testId);
                 sb.AppendLine(Environment.NewLine);
                 foreach (string str in errors)
                     sb.AppendLine(str);

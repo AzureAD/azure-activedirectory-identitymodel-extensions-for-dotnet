@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Test
             RunJsonWebKeySetTest((IDictionary<string, object>)null, null, ExpectedException.ArgumentNullException(), false);
 
             RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException());
+            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:"));
         }
 
         [Fact(DisplayName = "JsonWebKeySetTests: Interop")]

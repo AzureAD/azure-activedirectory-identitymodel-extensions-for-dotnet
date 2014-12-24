@@ -64,8 +64,6 @@ namespace System.IdentityModel.Test
                 {
                     Alg = "SHA256",
                     E = "AQAB",
-                    // TODO - fix test
-                    //KeyOps = "signing",
                     Kid = "NGTFvdK-fythEuLwjpwAJOM9n-A",
                     Kty = "RSA",
                     N = "rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw==",
@@ -75,6 +73,7 @@ namespace System.IdentityModel.Test
                 };
             
             JsonWebKeyExpected1.X5c.Add(JsonWebKey_X5c_1);
+            JsonWebKeyExpected1.KeyOps.Add("signing");
 
             JsonWebKeyDictionary1 =
                 new Dictionary<string, object>
@@ -84,13 +83,14 @@ namespace System.IdentityModel.Test
                     {"key_ops", "signing"},
                     {"kid", "NGTFvdK-fythEuLwjpwAJOM9n-A"},
                     {"kty", "RSA"},
-                    {"n", "kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="},                    
+                    {"n", "rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="},
                     // TODO - fix test
                     //{"x5c", new ArrayList(new List<string> { "MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng"})},
                     {"x5t", "NGTFvdK-fythEuLwjpwAJOM9n-A"},
                     {"x5u", "https://jsonkeyurl"},
                     {"use", "sig"},
                 };
+            JsonWebKeyDictionary1["x5c"] = JsonWebKey_X5c_1;
 
             JsonWebKeyExpected2 = 
                 new JsonWebKey
@@ -113,12 +113,9 @@ namespace System.IdentityModel.Test
             JsonWebKeyExpectedBadX509Data =
                 new JsonWebKey
                 {
-                    Alg = null,
-                    KeyOps = null,
                     Kid = "kriMPdmBvx68skT8-mPAB3BseeA",
                     Kty = "RSA",
                     X5t = "kriMPdmBvx68skT8-mPAB3BseeA",
-                    X5u = null,
                     Use = "sig"
                 };
 
@@ -171,7 +168,7 @@ namespace System.IdentityModel.Test
                     Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPingExpected3.N)
                 };
 
-            OpenIdConnectConfiguration OpenIdConnectConfigurationPingLabsJWKS =
+            OpenIdConnectConfigurationPingLabsJWKS =
                 new OpenIdConnectConfiguration()
                 {
                     JwksUri = "PingLabsJWKS.json",
@@ -272,7 +269,7 @@ namespace System.IdentityModel.Test
         public static string JsonWebKeyString1 =
                                         @"{ ""alg"":""SHA256"",
                                             ""e"":""AQAB"",
-                                            ""key_ops"":""signing"",
+                                            ""key_ops"":[""signing""],
                                             ""kid"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
                                             ""kty"":""RSA"",                                            
                                             ""n"":""rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="",                                            
@@ -422,6 +419,8 @@ namespace System.IdentityModel.Test
                                                                   ""request_uri_parameter_supported"":false}";
 
         public static string OpenIdConnectMetadataFile = @"OpenIdConnectMetadata.json";
+        public static string OpenIdConnectMetadataFileEnd2End = @"OpenIdConnectMetadataEnd2End.json";
+
         public static string OpenIdConnectMetadataJsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
 
         public static string OpenIdConnectMetadataString =

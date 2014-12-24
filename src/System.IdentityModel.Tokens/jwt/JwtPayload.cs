@@ -130,6 +130,7 @@ namespace System.IdentityModel.Tokens
                 return this.GetStandardClaim(JwtRegisteredClaimNames.Amr);
             }
         }
+
         /// <summary>
         /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
         /// </summary>

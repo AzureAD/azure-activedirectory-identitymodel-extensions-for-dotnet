@@ -47,7 +47,7 @@ namespace System.IdentityModel.Test
             }
             Assert.Null(jwt.Id);
             Assert.Null(jwt.Issuer);
-            Assert.NotNull(jwt.SecurityKey);
+            Assert.Null(jwt.SecurityKey);
             Assert.NotNull(jwt.SignatureAlgorithm);
             Assert.Equal(jwt.SignatureAlgorithm, "none");
             Assert.Null(jwt.SigningCredentials);

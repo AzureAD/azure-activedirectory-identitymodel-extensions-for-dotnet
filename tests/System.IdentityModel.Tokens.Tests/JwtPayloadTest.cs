@@ -61,8 +61,8 @@ namespace System.IdentityModel.Test
             JwtPayload jwtPayload = new JwtPayload();
             Type type = typeof(JwtPayload);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 20)
-                Assert.True(false,"Number of properties has changed from 20 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 22)
+                Assert.True(false,"Number of properties has changed from 22 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -86,16 +86,7 @@ namespace System.IdentityModel.Test
                     Object = jwtPayload,
                 };
             TestUtilities.GetSet(context);
-
-            if (context.Errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Environment.NewLine);
-                foreach (string str in context.Errors)
-                    sb.AppendLine(str);
-
-                Assert.True(false, sb.ToString());
-            }
+            TestUtilities.AssertFailIfErrors("JwtPayload_GetSets", context.Errors);
         }
 
         [Fact(DisplayName = "JwtPayloadTests: Claims as objects")]

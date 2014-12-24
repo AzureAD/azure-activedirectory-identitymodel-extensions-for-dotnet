@@ -70,7 +70,6 @@ namespace System.IdentityModel.Test
             if (object.ReferenceEquals(t1, t2))
                 return true;
 
-
             List<T> toMatch = new List<T>(t2);
             List<T> expectedToMatch = new List<T>(t1);
             if (toMatch.Count != expectedToMatch.Count)
@@ -88,7 +87,6 @@ namespace System.IdentityModel.Test
             List<T> notMatched = new List<T>();
             foreach (var t in t1)
             {
-                numToMatch++;
                 bool matched = false;
                 for (int i = 0; i < toMatch.Count; i++)
                 {
@@ -140,6 +138,25 @@ namespace System.IdentityModel.Test
 
         public static bool AreEqual<T>(T t1, T t2, CompareContext context)
         {
+
+            if (t1 == null && t2 == null)
+                return true;
+
+            if (t1 == null)
+            {
+                context.Diffs.Add("t1 == null, t2 != null");
+                return false;
+            }
+
+            if (t2 == null)
+            {
+                context.Diffs.Add("t1 != null, t2 == null");
+                return false;
+            }
+
+            if (object.ReferenceEquals(t1, t2))
+                return true;
+
             if (t1 is TokenValidationParameters)
                 return AreEqual<TokenValidationParameters>(t1 as TokenValidationParameters, t2 as TokenValidationParameters, context, AreTokenValidationParametersEqual);
             else if (t1 is ClaimsIdentity)
@@ -151,7 +168,7 @@ namespace System.IdentityModel.Test
             else if (t1 is JsonWebKey)
                 return AreEqual<JsonWebKey>(t1 as JsonWebKey, t2 as JsonWebKey, context, AreJsonWebKeysEqual);
             else if (t1 is JsonWebKeySet)
-                return AreEqual<JsonWebKeySet>(t1 as JsonWebKeySet, t2 as JsonWebKeySet, context, AreJsonWebKeyKeySetsEqual);
+                return AreEqual<JsonWebKeySet>(t1 as JsonWebKeySet, t2 as JsonWebKeySet, context, AreJsonWebKeySetsEqual);
             else if (t1 is JwtPayload)
                 return AreEqual<JwtPayload>(t1 as JwtPayload, t2 as JwtPayload, context, AreJwtPayloadsEqual);
             else if (t1 is JwtSecurityToken)
@@ -165,7 +182,7 @@ namespace System.IdentityModel.Test
             else if (t1 is IEnumerable<string>)
                 return AreEnumsEqual<string>(t1 as IEnumerable<string>, t2 as IEnumerable<string>, context, AreStringsEqual);
 
-            throw new InvalidOperationException("type not known");
+            throw new InvalidOperationException("IdentityComparer: AreEqual<T> - type not known: " + t1.GetType());
         }
 
         public static bool AreEqual<T>(T t1, T t2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)
@@ -429,7 +446,7 @@ namespace System.IdentityModel.Test
             return (matchingFailures.Count == 0);
         }
 
-        public static bool AreJsonWebKeyKeySetsEqual(JsonWebKeySet jsonWebKeySet1, JsonWebKeySet jsonWebKeySet2, CompareContext context)
+        public static bool AreJsonWebKeySetsEqual(JsonWebKeySet jsonWebKeySet1, JsonWebKeySet jsonWebKeySet2, CompareContext context)
         {
             if (!AreEnumsEqual<JsonWebKey>(jsonWebKeySet1.Keys, jsonWebKeySet2.Keys, context, AreJsonWebKeysEqual))
             {
@@ -548,6 +565,22 @@ namespace System.IdentityModel.Test
 
         public static bool AreSecurityKeysEqual(SecurityKey securityKey1, SecurityKey securityKey2, CompareContext context)
         {
+
+            if (securityKey1 == null && securityKey2 == null)
+                return true;
+
+            if (securityKey1 == null)
+            {
+                context.Diffs.Add("(securityKey1 == null && securityKey2 != null)");
+                return false;
+            }
+
+            if (securityKey2 == null)
+            {
+                context.Diffs.Add("(securityKey1 != null && securityKey2 == null)");
+                return false;
+            }
+
             if (!context.IgnoreType && (securityKey1.GetType() != securityKey2.GetType()))
                 return false;
 

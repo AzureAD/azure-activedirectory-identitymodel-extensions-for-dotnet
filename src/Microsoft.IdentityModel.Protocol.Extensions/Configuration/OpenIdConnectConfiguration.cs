@@ -40,6 +40,16 @@ namespace Microsoft.IdentityModel.Protocols
         {
         }
 
+        static public OpenIdConnectConfiguration Create(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                throw new ArgumentNullException("json");
+            }
+
+            return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
+        }
+
         /// <summary>
         /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/>.
         /// </summary>
@@ -58,6 +68,24 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 throw new ArgumentNullException("json");
             }
+
+            OpenIdConnectConfiguration config = Create(json);
+            Copy(config);
+        }
+
+        private void Copy(OpenIdConnectConfiguration config)
+        {
+            AuthorizationEndpoint = config.AuthorizationEndpoint;
+            CheckSessionIframe = config.CheckSessionIframe;
+            EndSessionEndpoint = config.EndSessionEndpoint;
+            _idTokenSigningAlgValuesSupported = config._idTokenSigningAlgValuesSupported;
+            Issuer = config.Issuer;
+            JwksUri = config.JwksUri;
+            JsonWebKeySet = config.JsonWebKeySet;
+            _responseTypesSupported = config._responseTypesSupported;
+            _signingKeys = config._signingKeys;
+            TokenEndpoint = config.TokenEndpoint;
+            UserInfoEndpoint = config.UserInfoEndpoint;
         }
 
         /// <summary>
@@ -70,16 +98,6 @@ namespace Microsoft.IdentityModel.Protocols
             if (dictionary == null)
             {
                 throw new ArgumentNullException("dictionary");
-            }
-
-            SetFromDictionary(dictionary);
-        }
-
-        private void SetFromDictionary(IDictionary<string, object> dictionary)
-        {
-            if (dictionary == null)
-            {
-                return;
             }
 
             object obj = null;

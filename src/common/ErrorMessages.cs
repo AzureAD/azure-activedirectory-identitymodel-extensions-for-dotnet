@@ -157,6 +157,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
         public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
         public const string IDX10803 = "IDX10803: Unable to create to obtain configuration from: '{0}'.";
+        public const string IDX10804 = "IDX10804: Unable to parse deserialze string to JsonWebKeySet: '{0}'.";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";

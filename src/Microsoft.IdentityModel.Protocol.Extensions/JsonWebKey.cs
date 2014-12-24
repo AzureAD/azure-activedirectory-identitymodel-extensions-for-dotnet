@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                return;
+                throw new ArgumentNullException("json");
             }
 
             // TODO - brent, serializer needs to be pluggable
@@ -71,7 +71,8 @@ namespace Microsoft.IdentityModel.Protocols
             this.DQ = key.DQ;
             this.E = key.E;
             this.K = key.K;
-            this._keyops = new List<string>(key.KeyOps);
+            if (key.KeyOps != null)
+                this._keyops = new List<string>(key.KeyOps);
             this.Kid = key.Kid;
             this.Kty = key.Kty;
             this.N = key.N;
@@ -80,7 +81,8 @@ namespace Microsoft.IdentityModel.Protocols
             this.Q = key.Q;
             this.QI = key.QI;
             this.Use = key.Use;
-            this._certificateClauses = new List<string>(key.X5c);
+            if (key.X5c != null)
+                this._certificateClauses = new List<string>(key.X5c);
             this.X5t = key.X5t;
             this.X5tS256 = key.X5tS256;
             this.X5u = key.X5u;
@@ -301,7 +303,21 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the 'key_ops' (Key Operations)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.KeyOps, Required = Required.Default)]
-        public IList<string> KeyOps { get; set; }
+        public IList<string> KeyOps
+        {
+            get
+            {
+                return _keyops;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                foreach (string keyOp in value)
+                    _keyops.Add(keyOp);
+            }
+        }
 
         /// <summary>
         /// Gets or sets the 'kid' (Key ID)..
@@ -376,6 +392,14 @@ namespace Microsoft.IdentityModel.Protocols
             get
             {
                 return _certificateClauses;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                foreach (string clause in value)
+                    _certificateClauses.Add(clause);
             }
         }
 

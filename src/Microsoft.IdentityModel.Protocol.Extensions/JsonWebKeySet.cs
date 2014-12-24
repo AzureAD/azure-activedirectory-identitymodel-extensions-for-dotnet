@@ -53,10 +53,17 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("json");
             }
 
-            // TODO - brent, serializer needs to be pluggable
-            var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
-
-            _keys = jwebKeys._keys;
+            // TODO - brentschmaltz, exceptions
+            // TODO - brentschmaltz, serializer needs to be pluggable
+            try
+            {
+                var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
+                _keys = jwebKeys._keys;
+            }
+            catch(Exception ex)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json));
+            }
         }
 
         /// <summary>

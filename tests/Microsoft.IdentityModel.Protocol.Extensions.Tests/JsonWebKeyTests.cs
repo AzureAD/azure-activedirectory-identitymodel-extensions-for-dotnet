@@ -34,37 +34,42 @@ namespace Microsoft.IdentityModel.Test
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
             Assert.True(IsDefaultJsonWebKey(jsonWebKey));
-            string str = "hello";
-            str = null;
 
+            List<string> errors = new List<string>();
             // null string, nothing to add
-            RunJsonWebKeyTest(str, new JsonWebKey(), ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 1", null, null, ExpectedException.ArgumentNullException(substringExpected: "json"), true, errors);
 
             // null dictionary, nothing to add
-            RunJsonWebKeyTest(null, new JsonWebKey(), ExpectedException.NoExceptionExpected, false);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 2", null, null, ExpectedException.ArgumentNullException(substringExpected: "dictionary"), false, errors);
 
             // valid json, JsonWebKey1
-            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyFromPing, OpenIdConfigData.JsonWebKeyFromPingExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 3", OpenIdConfigData.JsonWebKeyFromPing, OpenIdConfigData.JsonWebKeyFromPingExpected1, ExpectedException.NoExceptionExpected, false, errors);
 
             // valid json, JsonWebKey1
-            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyString1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 4", OpenIdConfigData.JsonWebKeyString1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected, false, errors);
 
             // valid dictionary, JsonWebKey1
-            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyDictionary1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 5", OpenIdConfigData.JsonWebKeyDictionary1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected, false, errors);
 
             // valid json, JsonWebKey2
-            jsonWebKey = RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyString2, OpenIdConfigData.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected);
-            Assert.True(!IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1));
+            jsonWebKey = RunJsonWebKeyTest("JsonWebKey_Constructors: 6", OpenIdConfigData.JsonWebKeyString2, OpenIdConfigData.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected, false, errors);
+            CompareContext context = new CompareContext();
+            if (IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1, context))
+            {
+                errors.Add("IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1)");
+                errors.AddRange(context.Diffs);
+            }
 
             // invalid json, JsonWebKeyBadFormatString1
-            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException());
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 7", OpenIdConfigData.JsonWebKeyBadFormatString1, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonReaderException)), false, errors);
 
             // invalid json, JsonWebKeyBadFormatString2
-            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException());
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 8", OpenIdConfigData.JsonWebKeyBadFormatString2, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonSerializationException), innerTypeExpected: typeof(ArgumentException)), false, errors);
 
             // invalid json, JsonWebKeyBadx509String1
-            RunJsonWebKeyTest(OpenIdConfigData.JsonWebKeyBadX509String, OpenIdConfigData.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 9", OpenIdConfigData.JsonWebKeyBadX509String, OpenIdConfigData.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected, false, errors);
 
+            TestUtilities.AssertFailIfErrors("JsonWebKey_Constructors", errors);
         }
 
         /// <summary>
@@ -75,7 +80,7 @@ namespace Microsoft.IdentityModel.Test
         /// <param name="expectedException"></param>
         /// <param name="asString"> this is useful when passing null for parameter 'is' and 'as' don't contain type info.</param>
         /// <returns></returns>
-        private JsonWebKey RunJsonWebKeyTest(object obj, JsonWebKey compareTo, ExpectedException expectedException, bool asString = true)
+        private JsonWebKey RunJsonWebKeyTest(string testId, object obj, JsonWebKey compareTo, ExpectedException expectedException, bool asString, List<string> errors)
         {
             JsonWebKey jsonWebKey = null;
             try
@@ -99,16 +104,22 @@ namespace Microsoft.IdentityModel.Test
                         jsonWebKey = new JsonWebKey(obj as IDictionary<string, object>);
                     }
                 }
-                expectedException.ProcessNoException();
+                expectedException.ProcessNoException(errors);
             }
             catch (Exception ex)
             {
-                expectedException.ProcessException(ex);
+                expectedException.ProcessException(ex, errors);
             }
 
             if (compareTo != null)
             {
-                Assert.True(IdentityComparer.AreEqual(jsonWebKey, compareTo), "jsonWebKey created from: " + ( obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                CompareContext context = new CompareContext();
+                if (!IdentityComparer.AreEqual(jsonWebKey, compareTo, context))
+                {
+                    errors.Add(testId + "\n!IdentityComparer.AreEqual(jsonWebKey, compareTo, context)\n" + jsonWebKey.ToString() + "\n" + compareTo.ToString() + "\n");
+                    errors.AddRange(context.Diffs);
+                    errors.Add("\n");
+                }
             }
 
             return jsonWebKey;
@@ -124,14 +135,21 @@ namespace Microsoft.IdentityModel.Test
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jsonWebKey, "JsonWebKey_GetSets");
-            List<string> methods = new List<string>{"Alg", "KeyOps", "Kid", "Kty", "X5t", "X5u", "Use"};
+            List<string> methods = new List<string>{"Alg", "Kid", "Kty", "X5t", "X5u", "Use"};
+            List<string> errors = new List<string>();
             foreach(string method in methods)
             {
-                TestUtilities.GetSet(jsonWebKey, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() });
+                TestUtilities.GetSet(jsonWebKey, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString()}, errors);
                 jsonWebKey.X5c.Add(method);
             }
 
-            Assert.True(IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, CompareContext.Default));
+            CompareContext context = new CompareContext();
+            if (IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, context))
+            {
+                errors.AddRange(context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors("JsonWebKey_GetSets", errors);
         }
 
         [Fact(DisplayName = "JsonWebKeyTests: Publics")]
@@ -144,7 +162,7 @@ namespace Microsoft.IdentityModel.Test
             if (jsonWebKey.Alg != null)
                 return false;
 
-            if (jsonWebKey.KeyOps != null)
+            if (jsonWebKey.KeyOps.Count != 0)
                 return false;
 
             if (jsonWebKey.Kid != null)

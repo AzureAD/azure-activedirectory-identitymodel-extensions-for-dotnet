@@ -817,6 +817,7 @@ namespace System.IdentityModel.Test
                 RequireExpirationTime = false,
                 ValidateAudience = false,
                 ValidateIssuer = false,
+                ValidateLifetime = false,
             };
         }
 
