@@ -65,7 +65,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("key");
 
             if (!IsSupportedAlgorithm(algorithm))
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
 
             // TODO - brentsch, minimum size is relative to algorithm
             if (willCreateSignatures)

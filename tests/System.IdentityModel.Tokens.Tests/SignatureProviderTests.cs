@@ -47,7 +47,7 @@ namespace System.IdentityModel.Test
             FactoryCreateFor("Verifying: - SecurityKey type not Asymmetric or Symmetric", NotAsymmetricOrSymmetricSecurityKey.New, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentException("IDX10600:"));
 
             // Private keys missing
-            FactoryCreateFor("Siging:    - SecurityKey without private key", KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.InvalidOperationException(substringExpected: "IDX10614:", inner: typeof(NotSupportedException)));
+            FactoryCreateFor("Siging:    - SecurityKey without private key", KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"));
             FactoryCreateFor("Verifying: - SecurityKey without private key", KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.NoExceptionExpected);
 
             // Key size checks
@@ -140,20 +140,18 @@ namespace System.IdentityModel.Test
 
             // null, empty algorithm digest
             AsymmetricConstructorVariation("Signing:   - NUll key", null, sha2SignatureAlgorithm, expectedException: ExpectedException.ArgumentNullException());
-            AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == null", privateKey, null, expectedException: ExpectedException.ArgumentNullException());
-            AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == whitespace", privateKey, "    ", expectedException: ExpectedException.ArgumentException("IDX10002"));
+            AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == null", privateKey, null, expectedException: ExpectedException.ArgumentException());
+            AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == whitespace", privateKey, "    ", expectedException: ExpectedException.ArgumentException("IDX10640:"));
 
             // Private keys missing
-            AsymmetricConstructorVariation("Signing:   - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.InvalidOperationException(inner: typeof(NotSupportedException)));
+            AsymmetricConstructorVariation("Signing:   - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.InvalidOperationException());
             AsymmetricConstructorVariation("Verifying: - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
 
             // _formatter not created
-            AsymmetricConstructorVariation("Signing:   - key cannot create _formatter", KeyingMaterial.X509SecurityKey_1024, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "IDX10618", inner: typeof(NotSupportedException)));
+            AsymmetricConstructorVariation("Signing:   - key cannot create _formatter", KeyingMaterial.X509SecurityKey_1024, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.ArgumentException("IDX10640:"));
 
             // _deformatter not created
-            AsymmetricConstructorVariation("Verifying: - key cannot create _deformatter", KeyingMaterial.DefaultX509Key_Public_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.InvalidOperationException(substringExpected: "IDX10618", inner: typeof(NotSupportedException)));
-
-            Console.WriteLine("Test missing: key.GetHashAlgorithmForSignature( signingCredentials.SignatureAlgorithm );"); //TODO: Should this be fixed?
+            AsymmetricConstructorVariation("Verifying: - key cannot create _deformatter", KeyingMaterial.DefaultX509Key_Public_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.ArgumentException(substringExpected: "IDX10640"));
         }
 
         private void AsymmetricConstructorVariation(string testcase, AsymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
@@ -313,7 +311,7 @@ namespace System.IdentityModel.Test
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10631:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, ExpectedException.NoExceptionExpected, errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"), errors);
-            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", ExpectedException.InvalidOperationException(substringExpected: "IDX10640:"), errors);
+            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", ExpectedException.ArgumentException(substringExpected: "IDX10640:"), errors);
 #if SymmetricKeySuport
             // Symmetric
             SignatureProviders_Sign_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10640:"), errors);
