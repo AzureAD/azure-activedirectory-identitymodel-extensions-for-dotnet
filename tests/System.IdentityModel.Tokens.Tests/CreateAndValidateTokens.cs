@@ -89,7 +89,8 @@ namespace System.IdentityModel.Test
                     num++;
                     if (!(str is string))
                     {
-                        errors.Add("3: str is not string, is:" + str.ToString());
+                        errors.Add("3: str is not string, is: " + str.GetType());
+						errors.Add("token : " + validatedJwt.ToString());
                     }
                 }
 
@@ -105,7 +106,7 @@ namespace System.IdentityModel.Test
             jwtToken = new JwtSecurityToken(header, payload);
             jwt = handler.WriteToken(jwtToken);
 
-            validationParameters.IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048;
+            validationParameters.IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             validationParameters.RequireSignedTokens = true;
             validatedSecurityToken = null;
             cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);

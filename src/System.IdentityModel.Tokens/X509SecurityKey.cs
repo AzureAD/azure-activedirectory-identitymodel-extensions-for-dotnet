@@ -27,6 +27,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("certificate");
 
             _certificate = certificate;
+			KeyId = certificate.Thumbprint;
         }
 
         public override int KeySize

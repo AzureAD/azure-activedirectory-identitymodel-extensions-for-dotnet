@@ -22,10 +22,10 @@ namespace System.IdentityModel.Tokens
     using System.Globalization;
     using System.Security.Cryptography;
 
-    /// <summary>
-    /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
-    /// </summary>
-    public class AsymmetricSignatureProvider : SignatureProvider
+	/// <summary>
+	/// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
+	/// </summary>
+	public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool disposed;
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
@@ -100,11 +100,21 @@ namespace System.IdentityModel.Tokens
             {
                 if (willCreateSignatures)
                 {
-                    rsaCryptoServiceProvider = x509Key.PrivateKey as RSACryptoServiceProvider;
+					RSACryptoServiceProvider privateKey = x509Key.PrivateKey as RSACryptoServiceProvider;
+					var enhCsp = new RSACryptoServiceProvider().CspKeyContainerInfo;
+					var cspparams = new CspParameters(enhCsp.ProviderType, enhCsp.ProviderName, privateKey.CspKeyContainerInfo.KeyContainerName);
+					rsaCryptoServiceProvider = new RSACryptoServiceProvider(cspparams);
+
+//					rsaCryptoServiceProvider = x509Key.PrivateKey as RSACryptoServiceProvider;
                 }
                 else
                 {
-                    rsaCryptoServiceProvider = x509Key.PublicKey.Key as RSACryptoServiceProvider;
+					RSACryptoServiceProvider privateKey = x509Key.PublicKey.Key as RSACryptoServiceProvider;
+					var enhCsp = new RSACryptoServiceProvider().CspKeyContainerInfo;
+					var cspparams = new CspParameters(enhCsp.ProviderType, enhCsp.ProviderName, privateKey.CspKeyContainerInfo.KeyContainerName);
+					rsaCryptoServiceProvider = new RSACryptoServiceProvider(cspparams);
+
+//					rsaCryptoServiceProvider = x509Key.PublicKey.Key as RSACryptoServiceProvider;
                 }
                 return;
             }
@@ -182,7 +192,7 @@ namespace System.IdentityModel.Tokens
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            return rsaCryptoServiceProvider.SignData(input, hash);
+			return rsaCryptoServiceProvider.SignData(input, hash);
         }
 
         /// <summary>
