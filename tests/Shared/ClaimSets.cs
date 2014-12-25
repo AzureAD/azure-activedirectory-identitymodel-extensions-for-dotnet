@@ -66,7 +66,6 @@ namespace System.IdentityModel.Test
         private static ClaimsPrincipal _defaultClaimsPrincipal;
         private static ClaimsIdentity  _claimsIdentityDerivedClaims;
         private static ClaimsIdentity  _derivedDefaultClaimsIdentity;
-        private static ClaimsIdentity  _derivedWithDerivedClaimsClaimsIdentity;
         private static ClaimsIdentity  _derivedClaimsIdentityDefaultClaims;
         private static ClaimsIdentity  _derivedClaimsIdentityDerivedClaims;
 

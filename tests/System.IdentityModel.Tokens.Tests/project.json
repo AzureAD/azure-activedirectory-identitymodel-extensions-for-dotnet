@@ -1,10 +1,11 @@
 {
-    "version": "5.0.2-beta-2",
+    "version": "5.0.3-beta-2",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.2-beta-*",
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.3-beta-*",
         "Newtonsoft.Json": "6.0.6.0",
-        "System.IdentityModel.Tokens": "5.0.2-beta-*",
-        "Xunit.KRunner": "1.0.0-*"
+        "System.IdentityModel.Tokens": "5.0.3-beta-*",
+		"Xunit.KRunner": "1.0.0-*",
+		"xunit.runner.kre": "1.0.0-*"
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
@@ -17,7 +18,7 @@
         }
     },
     "commands": {
-        "test": "Xunit.KRunner"
+        "test":  "xunit.runner.kre"
     },
     "compilationOptions": {
         "allowUnsafe": true,

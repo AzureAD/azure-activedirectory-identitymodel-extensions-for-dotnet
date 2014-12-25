@@ -1,8 +1,10 @@
 {
-    "version": "2.0.2-beta-2",
+    "version": "2.0.3-beta-2",
     "dependencies": {
         "Newtonsoft.Json": "6.0.6.0",
-        "System.IdentityModel.Tokens": "5.0.2-beta-*"
+        "System.IdentityModel.Tokens": "5.0.3-beta-*",
+        "KRE-CoreCLR-x86": "1.0.0.0-rc1-*",
+        "CoreCLR": "1.0.0.0-rc1-*"
     },
     "code": [ "**\\*.cs", "..\\common\\*.cs" ],
     "exclude": [
@@ -20,13 +22,13 @@
         "aspnet50": {
             "frameworkAssemblies": {
                 "System.Net.Http": "",
-                "System.IO": "4.0.0.0"
+                "System.IO": ""
             }
         },
         "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
-                "System.Collections.Specialized": "4.0.0-beta-*",
+                "System.Collections.Specialized": "4.0.0-*",
                 "System.Diagnostics.Contracts": "4.0.0-beta-*",
                 "System.Diagnostics.Tools": "4.0.0-beta-*",
                 "System.Globalization": "4.0.10-beta-*",
@@ -36,7 +38,7 @@
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Runtime.Extensions": "4.0.10-beta-*",
                 "System.Security.Claims": "4.0.0.0-beta-*",
-                "System.Security.Cryptography.Encryption.RSA": "4.0.0-beta-*",
+                "System.Security.Cryptography.RSA": "4.0.0-beta-*",
                 "System.Security.Cryptography.Hashing.Algorithms": "4.0.0-beta-*",
                 "System.Security.Cryptography.X509Certificates": "4.0.0-beta-*",
                 "System.Security.Principal": "4.0.0-beta-*",
