@@ -139,7 +139,6 @@ ClientBin/
 *~
 *.dbmdl
 *.dbproj.schemaview
-*.pfx
 *.publishsettings
 
 # RIA/Silverlight projects
