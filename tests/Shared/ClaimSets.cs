@@ -66,7 +66,6 @@ namespace System.IdentityModel.Test
         private static ClaimsPrincipal _defaultClaimsPrincipal;
         private static ClaimsIdentity  _claimsIdentityDerivedClaims;
         private static ClaimsIdentity  _derivedDefaultClaimsIdentity;
-        private static ClaimsIdentity  _derivedWithDerivedClaimsClaimsIdentity;
         private static ClaimsIdentity  _derivedClaimsIdentityDefaultClaims;
         private static ClaimsIdentity  _derivedClaimsIdentityDerivedClaims;
 
@@ -455,7 +454,7 @@ namespace System.IdentityModel.Test
         /// <param name="issuer"></param>
         /// <param name="originalIssuer"></param>
         /// <returns></returns>
-        public static IEnumerable<Claim> DuplicateTypes( string issuer, string originalIssuer )
+        public static IEnumerable<Claim> DuplicateTypes( string issuer = IdentityUtilities.DefaultIssuer, string originalIssuer = IdentityUtilities.DefaultOriginalIssuer)
         {
             return new List<Claim>
             {

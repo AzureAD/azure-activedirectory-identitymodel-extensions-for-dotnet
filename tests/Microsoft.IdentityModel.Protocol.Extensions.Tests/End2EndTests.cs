@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Test
     public class End2EndTests
     {
         [Fact(DisplayName = "End2EndTests: OpenIdConnect")]
-        public void End2End_OpenIdConnect()
+        public void OpenIdConnect()
         {
             // TODO - brentschmaltz, consolidate and move tests to CreateAndValidateTokens.
             SigningCredentials rsaSigningCredentials = 
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "End2EndTests: WsFederation")]
-        public void End2End_WsFederation()
+        public void WsFederation()
         {
         }
     }

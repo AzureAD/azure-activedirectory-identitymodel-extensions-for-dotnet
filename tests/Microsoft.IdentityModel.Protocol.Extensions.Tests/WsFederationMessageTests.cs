@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Test
     public class WsFederationMessageTests
     {
         [Fact(DisplayName = "WsFederationMessageTests: Constructors")]
-        public void WsFederationAuthenticationMessage_Constructors()
+        public void Constructors()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
             Assert.AreEqual(wsFederationMessage.IssuerAddress, string.Empty);
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "WsFederationMessageTests: Defaults")]
-        public void WsFederationAuthenticationMessage_Defaults()
+        public void Defaults()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
 
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "WsFederationMessageTests: GetSets")]
-        public void WsFederationAuthenticationMessage_GetSets()
+        public void GetSets()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
 
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "WsFederationMessageTests: Publics")]
-        public void WsFederationAuthenticationMessage_Publics()
+        public void Publics()
         {
             string issuerAdderss = @"http://www.gotjwt.com";
             string wreply = @"http://www.relyingparty.com";

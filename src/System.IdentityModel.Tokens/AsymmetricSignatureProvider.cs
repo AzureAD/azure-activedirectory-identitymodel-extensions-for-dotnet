@@ -22,13 +22,14 @@ namespace System.IdentityModel.Tokens
     using System.Globalization;
     using System.Security.Cryptography;
 
-    /// <summary>
-    /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
-    /// </summary>
-    public class AsymmetricSignatureProvider : SignatureProvider
+	/// <summary>
+	/// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
+	/// </summary>
+	public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool disposed;
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
+        private RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
         private HashAlgorithm hash;
 
         /// <summary>
@@ -65,7 +66,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("key");
 
             if (!IsSupportedAlgorithm(algorithm))
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
 
             // TODO - brentsch, minimum size is relative to algorithm
             if (willCreateSignatures)
@@ -98,14 +99,18 @@ namespace System.IdentityModel.Tokens
             X509SecurityKey x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
+                RSACryptoServiceProvider rsa = null;
                 if (willCreateSignatures)
                 {
-                    rsaCryptoServiceProvider = x509Key.PrivateKey as RSACryptoServiceProvider;
+					rsa = x509Key.PrivateKey as RSACryptoServiceProvider;
                 }
                 else
                 {
-                    rsaCryptoServiceProvider = x509Key.PublicKey.Key as RSACryptoServiceProvider;
+                    rsa = x509Key.PublicKey.Key as RSACryptoServiceProvider;
                 }
+
+                rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
+
                 return;
             }
 
@@ -182,7 +187,13 @@ namespace System.IdentityModel.Tokens
                 throw new ObjectDisposedException(GetType().ToString());
             }
 
-            return rsaCryptoServiceProvider.SignData(input, hash);
+            if (rsaCryptoServiceProvider != null)
+                return rsaCryptoServiceProvider.SignData(input, hash);
+            else if (rsaCryptoServiceProviderProxy != null)
+                return rsaCryptoServiceProviderProxy.SignData(input, hash);
+
+            // TODO - brentschmaltz, error message.
+            throw new InvalidOperationException("Crypto not supported");
         }
 
         /// <summary>
@@ -230,7 +241,13 @@ namespace System.IdentityModel.Tokens
                 throw new InvalidOperationException(ErrorMessages.IDX10621);
             }
 
-            return rsaCryptoServiceProvider.VerifyData(input, hash, signature);
+            if (rsaCryptoServiceProvider != null)
+                return rsaCryptoServiceProvider.VerifyData(input, hash, signature);
+            else if (rsaCryptoServiceProviderProxy != null)
+                return rsaCryptoServiceProviderProxy.VerifyData(input, hash, signature);
+
+            // TODO - brentschmaltz, error message.
+            throw new InvalidOperationException("Crypto not supported");
         }
 
         /// <summary>

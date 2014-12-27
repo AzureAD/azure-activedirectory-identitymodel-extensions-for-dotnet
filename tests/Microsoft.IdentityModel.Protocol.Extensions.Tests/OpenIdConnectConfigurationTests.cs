@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Test
     public class OpenIdConnectMetadataTests
     {
         [Fact(DisplayName = "OpenIdConnectMetadataTests: Constructors")]
-        public void OpenIdConnectConfiguration_Constructors()
+        public void Constructors()
         {
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
             RunOpenIdConnectConfigurationTest((IDictionary<string, object>)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "OpenIdConnectMetadataTests: Defaults")]
-        public void OpenIdConnectConfiguration_Defaults()
+        public void Defaults()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Assert.Null(configuration.AuthorizationEndpoint);
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "OpenIdConnectMetadataTests: GetSets")]
-        public void OpenIdConnectConfiguration_GetSets()
+        public void GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectMetadata_GetSets");

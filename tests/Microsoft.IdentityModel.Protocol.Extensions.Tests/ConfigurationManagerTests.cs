@@ -32,17 +32,17 @@ namespace Microsoft.IdentityModel.Test
     public class ConfigurationManagerTests
     {
         [Fact(DisplayName = "ConfigurationManagerTests: Constructors")]
-        public void ConfigurationManager_Constructors()
+        public void Constructors()
         {
         }
 
         [Fact(DisplayName = "ConfigurationManagerTests: Defaults")]
-        public void ConfigurationManager_Defaults()
+        public void Defaults()
         {
         }
 
         [Fact(DisplayName = "ConfigurationManagerTests: GetSets")]
-        public void ConfigurationManager_GetSets()
+        public void GetSets()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "ConfigurationManagerTests: Publics")]
-        public void ConfigurationManager_Publics()
+        public void Publics()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json");
             OpenIdConnectConfiguration config = configManager.GetConfigurationAsync(CancellationToken.None).Result;

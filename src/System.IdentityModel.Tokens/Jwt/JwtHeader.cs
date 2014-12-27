@@ -79,24 +79,6 @@ namespace System.IdentityModel.Tokens
 
                 this[JwtHeaderParameterNames.Alg] = algorithm;
                 this[JwtHeaderParameterNames.Kid] = signingCredentials.SigningKey.KeyId;
-
-                //if (signingCredentials.SigningKeyIdentifier != null)
-                //{
-                //    foreach (SecurityKeyIdentifierClause clause in signingCredentials.SigningKeyIdentifier)
-                //    {
-                //        NamedKeySecurityKeyIdentifierClause namedKeyClause = clause as NamedKeySecurityKeyIdentifierClause;
-                //        if (namedKeyClause != null)
-                //        {
-                //            this[namedKeyClause.Name] = namedKeyClause.Id;
-                //        }
-                //    }
-                //}
-
-                //X509SigningCredentials x509SigningCredentials = signingCredentials as X509SigningCredentials;
-                //if (x509SigningCredentials != null && x509SigningCredentials.Certificate != null)
-                //{
-                //    this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
-                //}
             }
             else
             {

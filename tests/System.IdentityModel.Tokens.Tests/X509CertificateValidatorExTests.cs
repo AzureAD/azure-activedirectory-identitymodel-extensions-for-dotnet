@@ -25,7 +25,7 @@ namespace System.IdentityModel.Test
     public class X509CertificateValidatorExTests
     {
         [Fact(DisplayName = "X509CertificateValidatorExTests: Constructor")]
-        public void X509CertificateValidatorEx_Constructor()
+        public void Constructor()
         {
             X509CertificateValidatorEx validator = new X509CertificateValidatorEx(X509CertificateValidationMode.None, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
             validator = new X509CertificateValidatorEx(X509CertificateValidationMode.PeerTrust, X509RevocationMode.NoCheck, StoreLocation.CurrentUser);
@@ -34,7 +34,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "X509CertificateValidatorExTests: Defaults")]
-        public void X509CertificateValidatorEx_Defaults()
+        public void Defaults()
         {
         }
     }

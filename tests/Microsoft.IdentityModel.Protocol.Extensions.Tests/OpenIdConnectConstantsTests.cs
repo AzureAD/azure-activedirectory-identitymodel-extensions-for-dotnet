@@ -26,23 +26,23 @@ namespace Microsoft.IdentityModel.Test
     public class OpenIdConnectConstantsTests
     {
         [Fact(DisplayName = "OpenIdConnectConstantsTests: Constructors")]
-        public void OpenIdConnectConstants_Constructors()
+        public void Constructors()
         {
 
         }
 
         [Fact(DisplayName = "OpenIdConnectConstantsTests: Defaults")]
-        public void OpenIdConnectConstants_Defaults()
+        public void Defaults()
         {
         }
 
         [Fact(DisplayName = "OpenIdConnectConstantsTests: GetSets")]
-        public void OpenIdConnectConstants_GetSets()
+        public void GetSets()
         {
         }
 
         [Fact(DisplayName = "OpenIdConnectConstantsTests: Publics")]
-        public void OpenIdConnectConstants_Publics()
+        public void Publics()
         {
         }
     }

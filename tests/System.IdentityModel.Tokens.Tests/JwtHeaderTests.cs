@@ -27,12 +27,12 @@ namespace System.IdentityModel.Test
     public class JwtHeaderTests
     {
         [Fact(DisplayName = "JwtHeaderTests: Constructors")]
-        public void JwtHeader_Constructors()
+        public void Constructors()
         {
         }
 
         [Fact(DisplayName = "JwtHeaderTests: Defaults")]
-        public void JwtHeader_Defaults()
+        public void Defaults()
         {
             JwtHeader jwtHeader = new JwtHeader();
             Assert.False(jwtHeader.ContainsValue(JwtConstants.HeaderType), "jwtHeader.ContainsValue( JwtConstants.HeaderType )");
@@ -45,12 +45,12 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JwtHeaderTests: GetSets")]
-        public void JwtHeader_GetSets()
+        public void GetSets()
         {
         }
 
         [Fact(DisplayName = "JwtHeaderTests: Publics")]
-        public void JwtHeader_Publics()
+        public void Publics()
         {
         }
     }

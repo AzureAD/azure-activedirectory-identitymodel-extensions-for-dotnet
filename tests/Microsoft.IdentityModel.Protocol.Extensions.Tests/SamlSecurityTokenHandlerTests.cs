@@ -32,20 +32,20 @@ namespace Microsoft.IdentityModel.Test
     public class SamlSecurityTokenHandlerTests
     {
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Constructors")]
-        public void SamlSecurityTokenHandler_Constructors()
+        public void Constructors()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
         }
 
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Defaults")]
-        public void SamlSecurityTokenHandler_Defaults()
+        public void Defaults()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             Assert.IsTrue(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: GetSets")]
-        public void SamlSecurityTokenHandler_GetSets()
+        public void GetSets()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10101"));
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Protected")]
-        public void SamlSecurityTokenHandler_Protected()
+        public void Protected()
         {
             CreateClaims();
         }
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Publics")]
-        public void SamlSecurityTokenHandler_Publics()
+        public void Publics()
         {
             CanReadToken();
             ValidateIssuer();

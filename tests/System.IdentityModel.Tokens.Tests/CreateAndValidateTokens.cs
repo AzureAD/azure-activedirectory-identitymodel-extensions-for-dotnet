@@ -16,10 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
+using System.Text;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace System.IdentityModel.Test
@@ -42,8 +45,8 @@ namespace System.IdentityModel.Test
         private static string _nameClaimTypeForDelegate = "NameClaimTypeForDelegate";
 
 
-        [Fact (DisplayName = "CreateAndValidateTokens: CreateAndValidateTokens_MultipleX5C")]
-        public void CreateAndValidateTokens_MultipleX5C()
+        [Fact(DisplayName = "CreateAndValidateTokens: CreateAndValidateTokens_MultipleX5C")]
+        public void MultipleX5C()
         {
             List<string> errors = new List<string>();
             var handler = new JwtSecurityTokenHandler();
@@ -86,11 +89,21 @@ namespace System.IdentityModel.Test
                 int num = 0;
                 foreach (var str in list)
                 {
-                    num++;
-                    if (!(str is string))
+                    var value = str as Newtonsoft.Json.Linq.JValue;
+                    if (value != null)
                     {
-                        errors.Add("3: str is not string, is:" + str.ToString());
+                        string aud = value.Value as string;
+                        if (aud != null)
+                        {
+
+                        }
                     }
+                    else if (!(str is string))
+                    {
+                        errors.Add("3: str is not string, is: " + str.GetType());
+                        errors.Add("token : " + validatedJwt.ToString());
+                    }
+                    num++;
                 }
 
                 if (num != x5cs.Count)
@@ -99,13 +112,18 @@ namespace System.IdentityModel.Test
                 }
             }
 
+            X509SecurityKey signingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
+            X509SecurityKey validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
+
             // make sure we can still validate with existing logic.
-            header = new JwtHeader(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2);
+            SigningCredentials signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256Signature, "foo");
+
+            header = new JwtHeader(signingCredentials);
             header.Add(JwtHeaderParameterNames.X5c, x5cs);
             jwtToken = new JwtSecurityToken(header, payload);
             jwt = handler.WriteToken(jwtToken);
 
-            validationParameters.IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048;
+            validationParameters.IssuerSigningKey = validateKey;
             validationParameters.RequireSignedTokens = true;
             validatedSecurityToken = null;
             cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
@@ -122,7 +140,7 @@ namespace System.IdentityModel.Test
             Assert.True(IdentityComparer.AreEqual<JwtSecurityToken>(token, new JwtSecurityToken("", "")));
         }
 
-        [Fact(DisplayName = "CreateAndValidateTokens: RoundTripTokens, serialize and deserialize using different claimsets")]
+        [Fact(DisplayName = "CreateAndValidateTokens: RoundTripTokens")]
         public void RoundTripTokens()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -133,8 +151,8 @@ namespace System.IdentityModel.Test
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.DuplicateTypes",
-                Claims = ClaimSets.DuplicateTypes(issuer, originalIssuer),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.DuplicateTypes(issuer, originalIssuer), null),
+                Claims = ClaimSets.DuplicateTypes(),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.DuplicateTypes(), null),
                 ExceptionType = null,
                 TokenValidationParameters = new TokenValidationParameters
                 {
@@ -146,20 +164,20 @@ namespace System.IdentityModel.Test
             };
 
             RunRoundTrip(createAndValidateParams, handler);
-
+            SigningCredentials signingCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, "");
+            X509SecurityKey verifyingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
                 Claims = ClaimSets.Simple(issuer, originalIssuer),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), signingCredentials),
                 ExceptionType = null,
-                SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
-                SigningKey = KeyingMaterial.DefaultX509Key_2048,
+                SigningCredentials = signingCredentials,
                 TokenValidationParameters = new TokenValidationParameters
                 {
+                    IssuerSigningKey = verifyingKey,
                     ValidateAudience = false,
-                    IssuerSigningKey = new X509SecurityKey(KeyingMaterial.DefaultCert_2048),
-                    ValidIssuer = issuer,
+                    ValidIssuer      = issuer,
                 }
             };
 
@@ -186,28 +204,26 @@ namespace System.IdentityModel.Test
 #endif
         }
 
-        private void RunRoundTrip(CreateAndValidateParams jwtParams, JwtSecurityTokenHandler handler)
+        private void RunRoundTrip(CreateAndValidateParams createandValidteParams, JwtSecurityTokenHandler handler)
         {
             SecurityToken validatedToken;
-
-            string jwt = handler.WriteToken(jwtParams.CompareTo);
-            ClaimsPrincipal principal = handler.ValidateToken(jwt, jwtParams.TokenValidationParameters, out validatedToken);
+            string jwt = handler.WriteToken(createandValidteParams.CompareTo);
+            ClaimsPrincipal principal = handler.ValidateToken(jwt, createandValidteParams.TokenValidationParameters, out validatedToken);
 
             // create from security descriptor
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
-            tokenDescriptor.SigningCredentials = jwtParams.SigningCredentials;
-            tokenDescriptor.NotBefore = jwtParams.CompareTo.ValidFrom;
-            tokenDescriptor.Expires    = jwtParams.CompareTo.ValidTo;
-            tokenDescriptor.Claims     = jwtParams.Claims;
-            tokenDescriptor.Issuer = jwtParams.CompareTo.Issuer;
-            foreach (string str in jwtParams.CompareTo.Audiences)
+            tokenDescriptor.SigningCredentials = createandValidteParams.SigningCredentials;
+            tokenDescriptor.NotBefore = createandValidteParams.CompareTo.ValidFrom;
+            tokenDescriptor.Expires    = createandValidteParams.CompareTo.ValidTo;
+            tokenDescriptor.Claims     = createandValidteParams.Claims;
+            tokenDescriptor.Issuer = createandValidteParams.CompareTo.Issuer;
+            foreach (string str in createandValidteParams.CompareTo.Audiences)
             {
                 if (!string.IsNullOrWhiteSpace(str))
                 {
                     tokenDescriptor.Audience = str;
                 }
             }
-
 
             JwtSecurityToken token = handler.CreateToken(
                 issuer: tokenDescriptor.Issuer,
@@ -217,12 +233,11 @@ namespace System.IdentityModel.Test
                 subject: new ClaimsIdentity(tokenDescriptor.Claims),
                 signingCredentials: tokenDescriptor.SigningCredentials ) as JwtSecurityToken;
 
-            Assert.True(IdentityComparer.AreEqual(token, jwtParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
-
+            Assert.True(IdentityComparer.AreEqual(token, createandValidteParams.CompareTo), "!IdentityComparer.AreEqual( token, jwtParams.CompareTo )");
         }
 
         [Fact(DisplayName = "CreateAndValidateTokens: DuplicateClaims - roundtrips with duplicate claims")]
-        public void CreateAndValidateTokens_DuplicateClaims()
+        public void DuplicateClaims()
         {
             SecurityToken validatedToken;
             string encodedJwt = IdentityUtilities.CreateJwtSecurityToken(
@@ -251,7 +266,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "CreateAndValidateTokens: JsonClaims - claims values are objects serailized as json, can be recognized and reconstituted.")]
-        public void CreateAndValidateTokens_JsonClaims()
+        public void RunJsonClaims()
         {
             List<string> errors = new List<string>();
 
@@ -335,7 +350,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "CreateAndValidateTokens: SubClaim - is used the identity, when ClaimsIdentity.Name is called.")]
-        public void CreateAndValidateTokens_SubClaim()
+        public void SubClaim()
         {
         }
 
@@ -351,7 +366,7 @@ namespace System.IdentityModel.Test
 
         // TODO - brentsch, move to TokenValidationParameter tests.
         [Fact(DisplayName = "CreateAndValidateTokens: NameAndRoleClaimDelegates - name and role type delegates.")]
-        public void CreateAndValidateTokens_NameAndRoleClaimDelegates()
+        public void NameAndRoleClaimDelegates()
         {
             string defaultName = "defaultName";
             string defaultRole = "defaultRole";

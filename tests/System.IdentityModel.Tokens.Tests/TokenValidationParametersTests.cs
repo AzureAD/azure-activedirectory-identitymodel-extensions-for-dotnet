@@ -28,13 +28,13 @@ namespace System.IdentityModel.Test
     public class TokenValidationParametersTests
     {
         [Fact( DisplayName = "TokenValidationParametersTests: Publics")]
-        public void TokenValidationParameters_Publics()
+        public void Publics()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 30)
-                Assert.True(false, "Number of properties has changed from 30 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 27)
+                Assert.True(false, "Number of properties has changed from 27 to: " + properties.Length + ", adjust tests");
 
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             SecurityKey issuerSigningKey2 = KeyingMaterial.RsaSecurityKey_2048;
@@ -112,13 +112,13 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "TokenValidationParametersTests: GetSets, covers defaults")]
-        public void TokenValidationParameters_GetSets()
+        public void GetSets()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 30)
-                Assert.True(false, "Number of public fields has changed from 30 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 27)
+                Assert.True(false, "Number of public fields has changed from 27 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -128,7 +128,7 @@ namespace System.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         //new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
                         new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaParameters_1024}),
+                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
                         new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
                         new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("RoleClaimType", new List<object>{ClaimsIdentity.DefaultRoleClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -144,16 +144,7 @@ namespace System.IdentityModel.Test
                     Object = validationParameters,
                 };
             TestUtilities.GetSet(context);
-
-            if (context.Errors.Count != 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Environment.NewLine);
-                foreach (string str in context.Errors)
-                    sb.AppendLine(str);
-
-                Assert.True(false, sb.ToString());
-            }
+            TestUtilities.AssertFailIfErrors("TokenValidationParametersTests: GetSets", context.Errors);
 
             Assert.Null(validationParameters.AudienceValidator);
             Assert.NotNull(validationParameters.ClientDecryptionTokens);

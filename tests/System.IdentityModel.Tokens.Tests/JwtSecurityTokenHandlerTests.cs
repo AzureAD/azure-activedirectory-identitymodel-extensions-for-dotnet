@@ -180,7 +180,7 @@ namespace System.IdentityModel.Test
     public class JwtSecurityTokenHandlerTests
     {
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Actor Tests.  Ensure that 'actors' work correctly inbound and outbound.  Signed, with and without bootstrap context")]
-        public void JwtSecurityTokenHandler_ActorTests()
+        public void ActorTests()
         {
             // Set up tests artifacts here.
             JwtSecurityTokenHandler tokendHandler = new JwtSecurityTokenHandler();
@@ -247,7 +247,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Claim Type Mapping - Inbound and Outbound")]
-        public void JwtSecurityTokenHandler_ClaimTypeMapping()
+        public void ClaimTypeMapping()
         {
             Dictionary<string, string> inboundClaimTypeMap = new Dictionary<string, string>(JwtSecurityTokenHandler.InboundClaimTypeMap);
             Dictionary<string, string> outboundClaimTypeMap = new Dictionary<string, string>(JwtSecurityTokenHandler.OutboundClaimTypeMap);
@@ -470,7 +470,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Ensures that JwtSecurityTokenHandler defaults are as expected")]
-        public void JwtSecurityTokenHandler_Defaults()
+        public void Defaults()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
@@ -567,7 +567,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Read Tokens")]
-        public void JwtSecurityTokenHandler_Read()
+        public void Read()
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwt;
@@ -616,7 +616,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Validate Tokens")]
-        public void JwtSecurityTokenHandler_ValidateToken()
+        public void ValidateToken()
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
@@ -684,7 +684,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Bootstrap context is saved and is as expected")]
-        public void JwtSecurityTokenHandler_BootstrapToken()
+        public void BootstrapToken()
         {
             SecurityToken validatedToken;
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -705,7 +705,7 @@ namespace System.IdentityModel.Test
 
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: ReadToken")]
-        public void JwtSecurityTokenHandler_ReadToken()
+        public void ReadToken()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             ExpectedException expectedException = ExpectedException.ArgumentOutOfRangeException();
@@ -751,7 +751,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Signature Validation")]
-        public void JwtSecurityTokenHandler_SignatureValidation()
+        public void SignatureValidation()
         {
             // "Security Key Identifier not found",
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -822,7 +822,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Issuer Validation TVP")]
-        public void JwtSecurityTokenHandler_IssuerValidation()
+        public void IssuerValidation()
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             string jwt = (tokenHandler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials) as JwtSecurityToken).RawData;
@@ -870,7 +870,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JwtSecurityTokenHandlerTests: Audience Validation")]
-        public void JwtSecurityTokenHandler_AudienceValidation()
+        public void AudienceValidation()
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 

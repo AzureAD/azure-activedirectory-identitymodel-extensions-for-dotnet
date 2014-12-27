@@ -26,22 +26,22 @@ namespace Microsoft.IdentityModel.Test
     public class WsFederationConfigurationRetrieverTests
     {
         [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: Constructors")]
-        public void WsFederationConfigurationRetriever_Constructors()
+        public void Constructors()
         {
         }
 
         [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: Defaults")]
-        public void WsFederationConfigurationRetriever_Defaults()
+        public void Defaults()
         {
         }
 
         [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: GetSets")]
-        public void WsFederationConfigurationRetriever_GetSets()
+        public void GetSets()
         {
         }
 
         [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: Publics")]
-        public void WsFederationConfigurationRetriever_Publics()
+        public void Publics()
         {
         }
     }

@@ -25,7 +25,7 @@ namespace System.IdentityModel.Test
     public class X509SecurityKeyTests
     {
         [Fact(DisplayName = "X509SecurityKeyTests: Constructor")]
-        public void X509SecurityKey_Constructor()
+        public void Constructor()
         {
             X509SecurityKey x509SecurityKey;
             ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
@@ -53,7 +53,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "X509SecurityKeyTests: Defaults")]
-        public void X509SecurityKey_Defaults()
+        public void Defaults()
         {
             // there are no defaults.
         }

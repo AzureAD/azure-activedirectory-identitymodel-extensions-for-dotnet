@@ -28,7 +28,7 @@ namespace System.IdentityModel.Test
     public class ValidatorsTests
     {
         [Fact(DisplayName = "ValidatorsTests: AudienceValidator")]
-        public void Validators_Audience()
+        public void Audience()
         {
             List<string> audiences = new List<string> { "", IdentityUtilities.DefaultAudience };
             List<string> invalidAudiences = new List<string> { "", IdentityUtilities.NotDefaultAudience };
@@ -57,7 +57,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "ValidatorsTests: IssuerValidator")]
-        public void Validators_Issuer()
+        public void Issuer()
         {
             List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
             List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
@@ -86,7 +86,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "ValidatorsTests: LifetimeValidator")]
-        public void Validators_Lifetime()
+        public void Lifetime()
         {
             RunLifetimeTest(expires: null, notBefore: null, securityToken: null, validationParameters: null, ee: ExpectedException.ArgumentNullException());
             RunLifetimeTest(expires: null, notBefore: null, securityToken: null, validationParameters: new TokenValidationParameters { ValidateLifetime = false }, ee: ExpectedException.NoExceptionExpected);
@@ -111,7 +111,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "ValidatorsTests: SecurityKeyValidator")]
-        public void Validators_SecurityKey()
+        public void SecurityKey()
         {
         }
     }

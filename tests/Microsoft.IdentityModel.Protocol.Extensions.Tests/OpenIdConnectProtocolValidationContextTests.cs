@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Test
     public class OpenIdConnectProtocolValidationContextTests
     {
         [Fact(DisplayName = "OpenIdConnectProtocolValidationContextTests: GetSets, test covers defaults")]
-        public void OpenIdConnectProtocolValidationContext_GetSets()
+        public void GetSets()
         {
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
             Type type = typeof(OpenIdConnectProtocolValidationContext);

@@ -34,12 +34,12 @@ namespace Microsoft.IdentityModel.Test
     public class SecurityTokenHandlerCollectionExtensionsTests
     {
         [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: Constructors")]
-        public void SecurityTokenHandlerCollectionExtensions_Constructors()
+        public void Constructors()
         {
         }
 
         [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: Defaults")]
-        public void SecurityTokenHandlerCollectionExtensions_Defaults()
+        public void Defaults()
         {
             SecurityTokenHandlerCollection securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
             foreach (var tokenHandler in securityTokenValidators)
@@ -57,12 +57,12 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: GetSets")]
-        public void SecurityTokenHandlerCollectionExtensions_GetSets()
+        public void GetSets()
         {
         }
 
         [Fact(DisplayName = "SecurityTokenHandlerCollectionExtensionsTests: Publics")]
-        public void SecurityTokenHandlerCollectionExtensions_Publics()
+        public void Publics()
         {
             SecurityTokenHandlerCollection securityTokenValidators = new SecurityTokenHandlerCollection();
             string defaultSamlToken = IdentityUtilities.CreateSamlToken();

@@ -803,6 +803,11 @@ namespace System.IdentityModel.Tokens
             }
             else
             {
+				X509SecurityKey x509Key = securityKey as X509SecurityKey;
+				if (x509Key != null)
+				{
+					return x509Key.ToString() + " - (thumbprint) : " + x509Key.Certificate.Thumbprint;
+				}
                 return securityKey.ToString();
             }
         }

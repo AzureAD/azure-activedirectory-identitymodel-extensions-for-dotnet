@@ -32,7 +32,7 @@ namespace System.IdentityModel.Test
         /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
         /// </summary>
         [Fact(DisplayName = "JwtPayloadTests: Ensures that JwtPayload defaults are as expected")]
-        public void JwtPayload_Defaults()
+        public void Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
             List<Claim> claims = jwtPayload.Claims as List<Claim>;
@@ -54,7 +54,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JwtPayloadTests: GetSets, covers defaults")]
-        public void JwtPayload_GetSets()
+        public void GetSets()
         {
             // Aud, Claims, ValidFrom, ValidTo handled in Defaults.
 
@@ -90,7 +90,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JwtPayloadTests: Claims as objects")]
-        public void JwtPalyoad_Claims()
+        public void Claims()
         {
             List<string> errors = new List<string>();
             var jwtPayload = new JwtPayload();
@@ -118,7 +118,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JwtPayloadTests: Adding non-strings as 'exp'")]
-        public void JwtPalyoad_ObjectClaims()
+        public void ObjectClaims()
         {
             JwtPayload jwtPayload = new JwtPayload();
             int? time = 10000;

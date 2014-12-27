@@ -1,7 +1,10 @@
 {
-    "version": "5.0.2-beta-2",
+    "version": "5.0.3-beta-2",
     "dependencies": {
-        "Newtonsoft.Json": "6.0.6.0"
+		"Newtonsoft.Json": "6.0.6.0",
+        "KRE-CoreCLR-x86": "1.0.0.0-rc1-*",
+        "CoreCLR": "1.0.0.0-rc1-*"
+
     },
     "exclude": [
         "SignatureVerificationFailedException.cs",
@@ -21,9 +24,9 @@
                 "System.IO.Compression": "4.0.0-beta-*",
                 "System.Runtime": "4.0.20-beta-*",
                 "System.Runtime.Extensions": "4.0.10-beta-*",
-                "System.Runtime.InteropServices": "4.0.20-beta-22231",
+                "System.Runtime.InteropServices": "4.0.20-beta-*",
                 "System.Security.Claims": "4.0.0.0-beta-*",
-                "System.Security.Cryptography.Encryption.RSA": "4.0.0-beta-*",
+				"System.Security.Cryptography.RSA": "4.0.0-beta-*",
                 "System.Security.Cryptography.Hashing.Algorithms": "4.0.0-beta-*",
                 "System.Security.Cryptography.X509Certificates": "4.0.0-beta-*",
                 "System.Security.Principal": "4.0.0-beta-*",

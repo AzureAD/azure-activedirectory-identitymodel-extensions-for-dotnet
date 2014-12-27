@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Test
     public class JsonWebKeyTests
     {
         [Fact(DisplayName = "JsonWebKeyTests: Constructors")]
-        public void JsonWebKey_Constructors()
+        public void Constructors()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
             Assert.True(IsDefaultJsonWebKey(jsonWebKey));
@@ -126,12 +126,12 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JsonWebKeyTests: Defaults")]
-        public void JsonWebKey_Defaults()
+        public void Defaults()
         {
         }
 
         [Fact(DisplayName = "JsonWebKeyTests: GetSets")]
-        public void JsonWebKey_GetSets()
+        public void GetSets()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jsonWebKey, "JsonWebKey_GetSets");
@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JsonWebKeyTests: Publics")]
-        public void JsonWebKey_Publics()
+        public void Publics()
         {
         }
 

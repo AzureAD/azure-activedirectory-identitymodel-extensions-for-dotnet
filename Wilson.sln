@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22320.0
+VisualStudioVersion = 14.0.22416.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.kproj", "{A0E7DD32-5189-439C-B460-5BA3B0561707}"
 EndProject
@@ -19,6 +19,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8905D2E3-4499-4A86-BF3E-F098F228DD59}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{FA4925AC-FDA5-470D-BC29-D857393E6D80}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "certs", "certs", "{1751FD49-8430-4046-9C16-1642A4A49CBA}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Certs\SelfSigned1024_SHA1.pfx = tests\Certs\SelfSigned1024_SHA1.pfx
+		tests\Certs\SelfSigned1024_SHA256.pfx = tests\Certs\SelfSigned1024_SHA256.pfx
+		tests\Certs\SelfSigned2048_SHA256.pfx = tests\Certs\SelfSigned2048_SHA256.pfx
+		tests\Certs\SelfSigned2048_SHA256_Public.cer = tests\Certs\SelfSigned2048_SHA256_Public.cer
+		tests\Certs\SelfSigned2048_SHA384.pfx = tests\Certs\SelfSigned2048_SHA384.pfx
+		tests\Certs\SelfSigned2048_SHA512.pfx = tests\Certs\SelfSigned2048_SHA512.pfx
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,5 +61,6 @@ Global
 		{B5416A2F-9918-44C0-9178-D25E89976A75} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{B449C824-9D81-4588-A562-E61D9215C976} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{CC665B24-9531-41B9-93C1-EF7F425AB33C} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{1751FD49-8430-4046-9C16-1642A4A49CBA} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 EndGlobal

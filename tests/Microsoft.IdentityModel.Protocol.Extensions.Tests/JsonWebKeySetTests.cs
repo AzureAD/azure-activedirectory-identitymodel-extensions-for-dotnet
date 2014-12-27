@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Test
     public class JsonWebKeySetTests
     {
         [Fact(DisplayName = "JsonWebKeySetTests: Constructors")]
-        public void JsonWebKeySet_Constructors()
+        public void Constructors()
         {
             JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
             Assert.True(IsDefaultJsonWebKeySet(jsonWebKeys));
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JsonWebKeySetTests: Interop")]
-        public void JsonWebKeySet_Interop()
+        public void Interop()
         {
             string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);
             RunJsonWebKeySetTest(certsData, OpenIdConfigData.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
@@ -127,17 +127,17 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "JsonWebKeySetTests: Defaults")]
-        public void JsonWebKeySet_Defaults()
+        public void Defaults()
         {
         }
 
         [Fact(DisplayName = "JsonWebKeySetTests: GetSets")]
-        public void JsonWebKeySet_GetSets()
+        public void GetSets()
         {
         }
 
         [Fact(DisplayName = "JsonWebKeySetTests: Publics")]
-        public void JsonWebKeySet_Publics()
+        public void Publics()
         {
         }
 

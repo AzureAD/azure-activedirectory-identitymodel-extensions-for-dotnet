@@ -26,7 +26,7 @@ namespace System.IdentityModel.Test
     public class JwtSecurityTokenTests
     {
         [Fact( DisplayName = "JwtSecurityTokenTests: Defaults")]
-        public void JwtSecurityToken_Defaults()
+        public void Defaults()
         {
             JwtSecurityToken jwt = new JwtSecurityToken();
 
@@ -63,7 +63,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenTests: Constructor using encoded string.")]
-        public void JwtSecurityToken_EncodedStringConstruction()
+        public void EncodedStringConstruction()
         {
             Console.WriteLine("Entering: JwtSecurityToken_EncodedStringConstruction");
             string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
@@ -181,7 +181,7 @@ namespace System.IdentityModel.Test
         }
 
         [Fact( DisplayName = "JwtSecurityTokenTests:: Constructors")]
-        public void JwtSecurityToken_Constructor()
+        public void Constructors()
         {
             Console.WriteLine("Entering: JwtSecurityToken_Constructor");
             RunConstructionTest(

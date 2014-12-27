@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Test
     public class AuthenticationProtocolMessageTests
     {
         [Fact(DisplayName = "AuthenticationProtocolMessageTests: Defaults")]
-        public void AuthenticationProtocolMessage_Defaults()
+        public void Defaults()
         {
             List<string> errors = new List<string>();
             string issuerAddress = "http://www.gotjwt.com";
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "AuthenticationProtocolMessageTests: GetSets")]
-        public void AuthenticationProtocolMessage_GetSets()
+        public void GetSets()
         {
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage("http://www.gotjwt.com");
 
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Test
         }
 
         [Fact(DisplayName = "AuthenticationProtocolMessageTests: Publics")]
-        public void AuthenticationProtocolMessage_Publics()
+        public void Publics()
         {
             string value1 = "value1";
             string value2 = "value2";
