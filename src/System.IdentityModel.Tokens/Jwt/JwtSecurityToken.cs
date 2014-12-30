@@ -280,7 +280,6 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="SecurityKey"/>s for this instance.
         /// </summary>
-        /// <remarks>By default an empty collection is returned.</remarks>
         public override SecurityKey SecurityKey
         {
             get { return null; }

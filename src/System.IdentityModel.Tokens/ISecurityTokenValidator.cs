@@ -30,12 +30,15 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         bool CanReadToken(string securityToken);
 
+        /// <summary>
+        /// Returns true if a token can be validated.
+        /// </summary>
         bool CanValidateToken { get; }
 
         /// <summary>
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
-        Int32 MaximumTokenSizeInBytes {get;set;}
+        Int32 MaximumTokenSizeInBytes { get; set; }
 
         /// <summary>
         /// Validates a token passed as a string using <see cref="TokenValidationParameters"/>

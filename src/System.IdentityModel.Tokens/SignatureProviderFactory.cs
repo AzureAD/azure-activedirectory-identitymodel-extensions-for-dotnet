@@ -250,7 +250,7 @@ namespace System.IdentityModel.Tokens
         }
 #endif
 
-    private static SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
+        private static SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
             {
@@ -267,8 +267,7 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm "));
             }
 
-            // TODO - brentsch, need to have max size on keys.
-
+            // TODO - brentschmaltz, need to have max size on keys.
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
             {

@@ -89,18 +89,21 @@ namespace System.IdentityModel.Test
                 EncodedString = null,
                 ExpectedException = ExpectedException.ArgumentNullException(),
             });
+
             RunEncodedTest(new JwtSecurityTokenTestVariation
             {
                 Name = "EncodedString: string.Empty",
                 EncodedString = string.Empty,
                 ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10002:"),
             });
+
             RunEncodedTest(new JwtSecurityTokenTestVariation
             {
                 Name = "EncodedString: single character: '1'",
                 EncodedString = "1",
                 ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
             });
+
             RunEncodedTest(new JwtSecurityTokenTestVariation
             {
                 Name = "EncodedString: two parts each a single character: '1.2'",

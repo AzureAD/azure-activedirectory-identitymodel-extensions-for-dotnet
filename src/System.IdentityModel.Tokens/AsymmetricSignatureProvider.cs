@@ -35,31 +35,23 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
-        /// <param name="key">
-        /// The <see cref="AsymmetricSecurityKey"/> that will be used for cryptographic operations.
-        /// </param>
-        /// <param name="algorithm">
-        /// The signature algorithm to apply.
-        /// </param>
-        /// <param name="willCreateSignatures">
-        /// If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
+        /// <param name="key">The <see cref="AsymmetricSecurityKey"/> that will be used for cryptographic operations.</param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="willCreateSignatures">If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
         /// <para>
         /// Creating signatures requires that the <see cref="AsymmetricSecurityKey"/> has access to a private key. 
         /// Verifying signatures (the default), does not require access to the private key.
         /// </para>
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// 'key' is null.
-        /// </exception>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// willCreateSignatures is true and <see cref="AsymmetricSecurityKey"/>.KeySize is less than <see cref="SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <see cref="AsymmetricSecurityKey"/>.KeySize is less than <see cref="SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying"/>. Note: this is always checked.
         /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Is thrown if <see cref="GetHashAlgorithm"/> throws.
-        /// </exception>
+        /// <exception cref="ArgumentException">if 'algorithm" is not supported.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if 'key' is not <see cref="RsaSecurityKey"/> or <see cref="X509SecurityKey"/>.</exception>
         public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false)
         {
             if (key == null)
@@ -122,6 +114,7 @@ namespace System.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw new ArgumentNullException("algorithm");
 
+            // TODO, brentschmaltz - include explicit algorithms: "SHA256" etc.
             switch (algorithm)
             {
                 case SecurityAlgorithms.RsaSha1Signature:
@@ -145,7 +138,9 @@ namespace System.IdentityModel.Tokens
         {
             if (string.IsNullOrEmpty(algorithm))
                 return false;
-        
+
+            // TODO, brentschmaltz - include explicit algorithms: "SHA256" etc.
+
             switch (algorithm)
             {
                 case SecurityAlgorithms.RsaSha1Signature:
@@ -158,7 +153,6 @@ namespace System.IdentityModel.Tokens
                     return false;
             }
         }
-
 
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( AsymmetricSecurityKey, string, bool )"/>.

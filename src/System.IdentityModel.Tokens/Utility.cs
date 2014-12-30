@@ -19,7 +19,6 @@
 namespace System.IdentityModel
 {
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
     internal static class Utility
