@@ -1,10 +1,9 @@
 {
-    "version": "2.0.3-beta-2",
+    "version": "2.0.0-beta1-1",
+    "description": "Provides types that provide support for OpenIdConnect protocol.",
     "dependencies": {
         "Newtonsoft.Json": "6.0.6.0",
-        "System.IdentityModel.Tokens": "5.0.3-beta-*",
-        "KRE-CoreCLR-x86": "1.0.0.0-rc1-*",
-        "CoreCLR": "1.0.0.0-rc1-*"
+        "System.IdentityModel.Tokens": "5.0.0-beta1-*"
     },
     "code": [ "**\\*.cs", "..\\common\\*.cs" ],
     "exclude": [

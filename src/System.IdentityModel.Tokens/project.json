@@ -1,10 +1,7 @@
 {
-    "version": "5.0.3-beta-2",
+    "version": "5.0.0-beta1-1",
     "dependencies": {
-		"Newtonsoft.Json": "6.0.6.0",
-        "KRE-CoreCLR-x86": "1.0.0.0-rc1-*",
-        "CoreCLR": "1.0.0.0-rc1-*"
-
+		"Newtonsoft.Json": "6.0.6.0"
     },
     "exclude": [
         "SignatureVerificationFailedException.cs",

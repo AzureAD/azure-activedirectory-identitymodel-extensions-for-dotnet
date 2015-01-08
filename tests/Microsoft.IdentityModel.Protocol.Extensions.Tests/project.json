@@ -1,9 +1,9 @@
 {
-    "version": "5.0.3-beta-2",
+    "version": "2.0.0-beta1-1",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.3-beta-*",
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-*",
         "Newtonsoft.Json": "6.0.6.0",
-        "System.IdentityModel.Tokens": "5.0.3-beta-*",
+        "System.IdentityModel.Tokens": "5.0.0-*",
 		"Xunit.KRunner": "1.0.0.0-rc1-10618",
 		"xunit.runner.kre": "1.0.0-*"
     },
@@ -27,7 +27,7 @@
         "test": "xunit.runner.kre"
     },
     "compilationOptions": {
-        "allowUnsafe": true,
+        "allowUnsafe": false,
         "warningsAsErrors": false
     }
 }

@@ -204,3 +204,4 @@ packages/*
 stash/*
 TestResults/*
 docs/*
+backup/*

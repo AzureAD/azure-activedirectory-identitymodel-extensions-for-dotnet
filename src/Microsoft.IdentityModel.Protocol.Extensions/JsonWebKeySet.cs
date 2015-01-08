@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch(Exception ex)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), ex);
             }
         }
 
