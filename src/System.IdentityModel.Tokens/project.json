@@ -1,14 +1,8 @@
 {
-    "version": "5.0.0-beta1-1",
+    "version": "5.0.0-beta1",
     "dependencies": {
 		"Newtonsoft.Json": "6.0.6.0"
     },
-    "exclude": [
-        "SignatureVerificationFailedException.cs",
-        "Tokens/IAsymmetricSignatureAlgorithm.cs",
-        "Tokens/SecurityTokenDescriptor.cs",
-        "Tokens/SymmetricKey.cs"
-    ],
     "frameworks": {
        "aspnet50": {},
         "aspnetcore50": {
