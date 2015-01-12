@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>System.IdentityModel.Tokens</id>
-    <version>5.0.3-beta-2</version>
+    <version>5.0.0-beta1</version>
     <title>System.IdentityModel.Tokens</title>
     <authors>System.IdentityModel.Tokens</authors>
     <owners>System.IdentityModel.Tokens</owners>
@@ -23,14 +23,14 @@
         <dependency id="System.IO.Compression" version="4.0.0-beta-*" />
         <dependency id="System.Runtime" version="4.0.20-beta-*" />
         <dependency id="System.Runtime.Extensions" version="4.0.10-beta-*" />
+        <dependency id="System.Runtime.InteropServices" version="4.0.20-beta-*" />
         <dependency id="System.Security.Claims" version="4.0.0-beta-*" />
-        <dependency id="System.Security.Cryptography.RSA" version="4.0.0-beta-*" />
         <dependency id="System.Security.Cryptography.Hashing.Algorithms" version="4.0.0-beta-*" />
+        <dependency id="System.Security.Cryptography.RSA" version="4.0.0-beta-*" />
         <dependency id="System.Security.Cryptography.X509Certificates" version="4.0.0-beta-*" />
         <dependency id="System.Security.Principal" version="4.0.0-beta-*" />
         <dependency id="System.Text.RegularExpressions" version="4.0.10-beta-*" />
         <dependency id="System.Threading" version="4.0.0-beta-*" />
-        <dependency id="System.Threading.Tasks" version="4.0.0-beta-*" />
       </group>
     </dependencies>
     <frameworkAssemblies>
