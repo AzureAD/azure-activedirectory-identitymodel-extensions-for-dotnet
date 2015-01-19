@@ -204,52 +204,6 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-#if ISignatureAlgorithm
-        public static ISignatureAlgorithm CreateSignatureAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException("key");
-            }
-
-            AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
-            if (asymmetricKey != null)
-            {
-                if (willCreateSignatures)
-                {
-                    if (asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForSigning)
-                    {
-                        throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigning));
-                    }
-                }
-
-                if (asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForVerifying)
-                {
-                    throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifying));
-                }
-
-                return asymmetricKey.GetSignatureAlgorithm(algorithm, willCreateSignatures);
-            }
-
-
-            // TODO - brentsch, support for symmetricKeys
-            throw new NotSupportedException("no support for SymmetricKeys");
-
-            SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
-            if (symmetricKey != null)
-            {
-                if (symmetricKey.KeySize < MinimumSymmetricKeySizeInBits)
-                {
-                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), MinimumSymmetricKeySizeInBits));
-                }
-
-                return new SymmetricSignatureProvider(symmetricKey, algorithm);
-            }
-
-            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10600, typeof(SignatureProvider).ToString(), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType()));
-        }
-#endif
-
         private static SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
@@ -267,7 +221,6 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm "));
             }
 
-            // TODO - brentschmaltz, need to have max size on keys.
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
             {

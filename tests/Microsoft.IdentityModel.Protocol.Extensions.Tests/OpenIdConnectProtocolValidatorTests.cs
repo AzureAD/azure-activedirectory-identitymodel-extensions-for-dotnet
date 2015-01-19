@@ -280,7 +280,6 @@ namespace Microsoft.IdentityModel.Test
             ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: ExpectedException.NoExceptionExpected);
 
             // Creation of algorithm failed, need to map.
-            // TODO - brentschmaltz, need negative test
             // protocolValidator.SetHashAlgorithmMap(emptyDictionary);
             // ValidateCHash(jwt: jwtWithSignatureChash1, protocolValidator: protocolValidator, validationContext: validationContext, ee: new ExpectedException(typeExpected: typeof(OpenIdConnectProtocolInvalidCHashException), substringExpected: "IDX10307:"));
             //protocolValidator.SetHashAlgorithmMap(mappedDictionary);

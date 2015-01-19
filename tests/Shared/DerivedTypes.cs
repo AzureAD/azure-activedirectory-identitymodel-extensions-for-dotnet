@@ -21,13 +21,8 @@
 
 namespace System.IdentityModel.Test
 {
-
-    using System;
-    using System.IdentityModel.Tokens;
+    using Collections.Generic;
     using Security.Claims;
-    using System.Collections.Generic;
-
-    // TODO, brentschmaltz - this is temporary until changes to Claims are in Desktop.
 
 #if ASPNET50CORE
     /// <summary>

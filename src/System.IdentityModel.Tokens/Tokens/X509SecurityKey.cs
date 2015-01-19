@@ -22,7 +22,6 @@ namespace System.IdentityModel.Tokens
         /// <param name="certificate"> cert to use.</param>
         public X509SecurityKey(X509Certificate2 certificate)
         { 
-            // TODO - brentsch, need tests for DSA
             if (certificate == null)
                 throw new ArgumentNullException("certificate");
 

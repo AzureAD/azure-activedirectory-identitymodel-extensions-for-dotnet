@@ -362,9 +362,6 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            // TODO
-            // need to validate   ValidateConfirmationData(subjectConfirmation.SubjectConfirmationData);
-
             if (validationParameters.ValidateAudience)
             {
                 List<string> audiences = new List<string>();

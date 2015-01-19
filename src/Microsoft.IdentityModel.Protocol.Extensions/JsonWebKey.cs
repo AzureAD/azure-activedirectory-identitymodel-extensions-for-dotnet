@@ -57,7 +57,6 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("json");
             }
 
-            // TODO - brent, serializer needs to be pluggable
             var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
             Copy(key);
         }
@@ -144,12 +143,7 @@ namespace Microsoft.IdentityModel.Protocols
                 str = obj as string;
                 if (str != null)
                 {
-                // TODO - brentsch, log an error if not right type
-#if USE_STRINGS_FOR_RSA
                     E = str;
-#else
-                    E = Base64UrlEncoder.DecodeBytes(str);
-#endif
                 }
             }
 

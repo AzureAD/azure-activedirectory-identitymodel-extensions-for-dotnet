@@ -98,25 +98,25 @@ namespace Microsoft.IdentityModel.Test
         [Fact(DisplayName = "CrossTokenTests: Validates Signatures")]
         public void CrossToken_ValidateSignature()
         {
-            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
+            // ensure jwt, saml1 and saml2 work the same
         }
 
         [Fact(DisplayName = "CrossTokenTests: Validate Audience")]
         public void CrossToken_ValidateAudience()
         {
-            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
+            // ensure jwt, saml1 and saml2 work the same
         }
 
         [Fact(DisplayName = "CrossTokenTests: Validate Issuer")]
         public void CrossToken_ValidateIssuer()
         {
-            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
+            // ensure jwt, saml1 and saml2 work the same
         }
 
         [Fact(DisplayName = "CrossTokenTests: ValidateLifetime")]
         public void CrossToken_ValidateLifetime()
         {
-            // TODO - when finalizing OM, ensure jwt, saml1 and saml2 work the same
+            // ensure jwt, saml1 and saml2 work the same
         }
     }
 }

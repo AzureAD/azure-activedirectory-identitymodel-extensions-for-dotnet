@@ -49,7 +49,6 @@
     },
     "compilationOptions": {
         "allowUnsafe": true,
-        "define": [ "USE_STRINGS_FOR_RSA" ],
         "warningsAsErrors": false
     }
 }

@@ -322,8 +322,6 @@ namespace System.IdentityModel.Tokens
         /// <para><see cref="Claim.Issuer"/> and <see cref="Claim.OriginalIssuer"/> will be set to the value of <see cref="Iss"/> ( <see cref="string.Empty"/> if null).</para></remarks>
         public virtual IEnumerable<Claim> Claims
         {
-            // TODO - brentschmaltz, need to hook a provider for: keyValuePair -> IEnumerable<Claim>
-            // Current work assumes NewtonSoft
             get
             {
                 List<Claim> claims = new List<Claim>();

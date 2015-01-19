@@ -53,8 +53,6 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("json");
             }
 
-            // TODO - brentschmaltz, exceptions
-            // TODO - brentschmaltz, serializer needs to be pluggable
             try
             {
                 var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
@@ -117,7 +115,6 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 JsonWebKey webKey = _keys[i];
 
-                // TODO - brentsch, add support for other keys
                 if (!StringComparer.Ordinal.Equals(webKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
                     continue;
 
@@ -145,28 +142,17 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                     }
 
-                    // TODO - brentsch, support private RSA
-#if USE_STRINGS_FOR_RSA
                     if (!string.IsNullOrWhiteSpace(webKey.E) && !string.IsNullOrWhiteSpace(webKey.N))
-#else
-                    if ((webKey.E != null) && (webKey.N != null))
-#endif
                     {
                         try
                         {
                             SecurityKey key =
                                  new RsaSecurityKey
                                  (
-                                     new RSAParameters
+                                    new RSAParameters
                                     {
-                                    // TODO - brentsch, get rid of this #if - make a choice :-)
-#if USE_STRINGS_FOR_RSA
                                         Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
                                         Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-#else
-                                        Exponent = webKey.E,
-                                        Modulus =  webKey.N,
-#endif
                                     }
 
                                 );
