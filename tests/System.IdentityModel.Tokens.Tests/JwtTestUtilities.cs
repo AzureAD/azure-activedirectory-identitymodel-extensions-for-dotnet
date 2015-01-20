@@ -50,9 +50,6 @@ namespace System.IdentityModel.Test
         public JwtSecurityToken Actor { get; set; }
         public string Audience { get; set; }
         public bool BoolRetVal { get; set; }
-
-        //TODO - brentsch <BREAKING> X509CertificateValidator gone
-        // public X509CertificateValidator CertificateValidator { get; set; }
         public IEnumerable<Claim> Claims { get; set; }
         public ClaimsPrincipal ClaimsPrincipal { get; set; }
         public uint DefaultTokenLifetimeInMinutes { get; set; }
@@ -84,8 +81,6 @@ namespace System.IdentityModel.Test
         public byte[] UnsignedBytes { get; set; }
         public DateTime NotBefore { get { return _notbefore; } set { _notbefore = value; } }
         public DateTime Expires { get { return _expires; } set { _expires = value; } }
-        // TODO not available in core
-        //public XmlNodeList XmlNodeList { get; set; }
         public XmlReader XmlReader { get; set; }
         public XmlWriter XmlWriter { get; set; }
     }

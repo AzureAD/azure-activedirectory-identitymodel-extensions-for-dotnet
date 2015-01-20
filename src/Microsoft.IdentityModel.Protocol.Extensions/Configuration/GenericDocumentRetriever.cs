@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols
 {
     // Works for local files, http https
-    // TODO - brentschmaltz, proper documentation
     public class GenericDocumentRetriever : IDocumentRetriever
     {
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
@@ -53,7 +52,6 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 else
                 {
-                    // TODO - brentschmaltz, loc
                     throw new IOException("Unable to get document from: " + address, ex);
                 }
             }

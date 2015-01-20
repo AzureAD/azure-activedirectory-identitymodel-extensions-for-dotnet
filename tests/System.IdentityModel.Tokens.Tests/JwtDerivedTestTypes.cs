@@ -353,25 +353,6 @@ namespace System.IdentityModel.Test
         }
     }
 
-    // TODO <BREAKING> X509CertificateValidator
-    //public class AlwaysSucceedCertificateValidator : X509CertificateValidator
-    //{
-    //    public override void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
-    //    {
-    //        return;
-    //    }
-
-    //    public static AlwaysSucceedCertificateValidator New { get { return new AlwaysSucceedCertificateValidator(); } }
-    //}
-
-    //public class AlwaysThrowCertificateValidator : X509CertificateValidator
-    //{
-    //    public override void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
-    //    {
-    //        throw new SecurityTokenValidationException("Certificate not valid");
-    //    }
-    //}
-
     /// <summary>
     /// Helpful for extensibility testing for errors.
     /// </summary>

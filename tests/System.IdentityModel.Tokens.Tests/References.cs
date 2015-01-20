@@ -36,7 +36,6 @@ namespace System.IdentityModel.Test
         public const string Empty = "";
     }
 
-    // TODO make these dynamic, as these are going to expire soon.
     public static class EncodedJwts
     {
         public static string Asymmetric_LocalSts =  @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1ZCI6Imh0dHA6Ly9Db250b3NvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2NvdW50cnkiOiJVU0EiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyQGNvbnRvc28uY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZ2l2ZW5uYW1lIjoiVG9ueSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2hvbWVwaG9uZSI6IjU1NS4xMjEyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMiLCJzdWIiOiJib2IifQ.QW0Wfw-R5n3BHXE0vG-0giRFeB6W9oFrWJyFTaLI0qICDYx3yZ2eLXJ3zNFLVf3OG-MqytN5tqUdNfK1mRzeubqvdODHLFX36e1o3X8DR_YumyyQvgSeTJ0wwqT8PowbE3nbKfiX4TtJ4jffBelGKnL6vdx3AU2cwvLfSVp8ppA";
@@ -107,15 +106,10 @@ namespace System.IdentityModel.Test
             return new ClaimsIdentity(claims, authType);
         }
 
-        // TODO - brentschmaltz, breaking
         public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer)
         {
             foreach(var kv in claimNames)
             {
-
-                //TODO - brentschmaltz, breaking this property change from commented to current
-                //Claim c = new Claim("_claim_names", @"{""" + kv.Key + @""":""" + kv.Value + @"""}", JwtConstants.JsonClaimValueType, issuer);
-                //c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
                 Claim c = new Claim("_claim_names", @"""" + kv.Key + @""":""" + kv.Value + @"""", JwtConstants.JsonClaimValueType, issuer);
                 c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
                 claims.Add(c);
@@ -126,9 +120,6 @@ namespace System.IdentityModel.Test
         {
             foreach (var kv in claimSources)
             {
-                //TODO - brentschmaltz, breaking this property change from commented to current
-                //Claim c = new Claim("_claim_sources", @"{""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value) + @"}", JwtConstants.JsonClaimValueType, issuer);
-                //c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
                 Claim c = new Claim("_claim_sources", @"""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value), JwtConstants.JsonClaimValueType, issuer);
                 c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
                 claims.Add(c);

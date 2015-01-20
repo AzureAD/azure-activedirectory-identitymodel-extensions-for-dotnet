@@ -61,7 +61,6 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits));
             }
 
-            // TODO - need replacement for KeyedHashAlgorithm
             this.keyedHash = GetKeyedHashAlgorithm(algorithm);
 
             try
@@ -81,7 +80,6 @@ namespace System.IdentityModel.Tokens
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
-            // TODO - brentsch, add support for symmetric algorithms
             return false;
         }
 

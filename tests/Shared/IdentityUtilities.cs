@@ -70,17 +70,6 @@ namespace System.IdentityModel.Test
             return Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
         }
 
-        // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
-        //public static string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
-        //{
-        //    return CreateJwtToken(tokenDescriptor, new JwtSecurityTokenHandler());
-        //}
-
-        //public static string CreateJwtToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
-        //{
-        //    return tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor));
-        //}
-
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string originalIssuer = null)
         {
             string iss = issuer ?? IdentityUtilities.DefaultIssuer;
@@ -89,7 +78,6 @@ namespace System.IdentityModel.Test
             return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
         }
 
-        // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
         public static string CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -116,7 +104,6 @@ namespace System.IdentityModel.Test
             return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
         }
 
-        // TODO - brentsch, SecurityTokenDescriptor gone <BREAKING>
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor)
         {
             return CreateSaml2Token(securityTokenDescriptor, new IMSaml2TokenHandler());

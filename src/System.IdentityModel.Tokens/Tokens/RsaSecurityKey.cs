@@ -27,13 +27,10 @@ namespace System.IdentityModel.Tokens
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
             // must have private or public key
-            // TODO - brentsch, D.Length must == Modulus.Length
-
             bool hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null;
             bool hasPublicKey = rsaParameters.Exponent != null && rsaParameters.Modulus != null;
             if (!hasPrivateKey && !hasPublicKey)
             {
-                // TODO - brentsch - error message
                 throw new ArgumentException("no public or private key material found");
             }
 

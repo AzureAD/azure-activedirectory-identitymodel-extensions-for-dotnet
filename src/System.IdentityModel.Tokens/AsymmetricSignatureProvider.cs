@@ -60,7 +60,6 @@ namespace System.IdentityModel.Tokens
             if (!IsSupportedAlgorithm(algorithm))
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
 
-            // TODO - brentsch, minimum size is relative to algorithm
             if (willCreateSignatures)
             {
                 if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning)
@@ -114,7 +113,6 @@ namespace System.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw new ArgumentNullException("algorithm");
 
-            // TODO, brentschmaltz - include explicit algorithms: "SHA256" etc.
             switch (algorithm)
             {
                 case SecurityAlgorithms.RsaSha1Signature:
@@ -138,8 +136,6 @@ namespace System.IdentityModel.Tokens
         {
             if (string.IsNullOrEmpty(algorithm))
                 return false;
-
-            // TODO, brentschmaltz - include explicit algorithms: "SHA256" etc.
 
             switch (algorithm)
             {
@@ -186,7 +182,6 @@ namespace System.IdentityModel.Tokens
             else if (rsaCryptoServiceProviderProxy != null)
                 return rsaCryptoServiceProviderProxy.SignData(input, hash);
 
-            // TODO - brentschmaltz, error message.
             throw new InvalidOperationException("Crypto not supported");
         }
 
@@ -240,7 +235,6 @@ namespace System.IdentityModel.Tokens
             else if (rsaCryptoServiceProviderProxy != null)
                 return rsaCryptoServiceProviderProxy.VerifyData(input, hash, signature);
 
-            // TODO - brentschmaltz, error message.
             throw new InvalidOperationException("Crypto not supported");
         }
 

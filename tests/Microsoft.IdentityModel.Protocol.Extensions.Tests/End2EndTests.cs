@@ -33,7 +33,6 @@ namespace Microsoft.IdentityModel.Test
         [Fact(DisplayName = "End2EndTests: OpenIdConnect")]
         public void OpenIdConnect()
         {
-            // TODO - brentschmaltz, consolidate and move tests to CreateAndValidateTokens.
             SigningCredentials rsaSigningCredentials = 
                 new SigningCredentials(
                     KeyingMaterial.RsaSecurityKey_2048, 

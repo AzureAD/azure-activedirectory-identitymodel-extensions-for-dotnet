@@ -205,7 +205,6 @@ namespace System.IdentityModel.Test
             ClaimsPrincipal claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorAsymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.NoExceptionExpected);
 
 #if SymmetricKeySuport
-            // TODO - brentschmaltz, SymmetricKeys need support
             string jwtActorSymmetric = IdentityUtilities.DefaultSymmetricJwt;
 
             // Validation on actor will fail because the keys are different types
@@ -699,7 +698,7 @@ namespace System.IdentityModel.Test
             claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
             context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext;
             Assert.NotNull(context);
-            //TODO - brentsch, figure out BootstrapContext
+
             //Assert.True(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.Token, validationParameters, out validatedToken)));
         }
 

@@ -57,7 +57,6 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("json");
             }
 
-            // TODO - brent, serializer needs to be pluggable
             var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
             Copy(key);
         }
@@ -144,12 +143,7 @@ namespace Microsoft.IdentityModel.Protocols
                 str = obj as string;
                 if (str != null)
                 {
-                // TODO - brentsch, log an error if not right type
-#if USE_STRINGS_FOR_RSA
                     E = str;
-#else
-                    E = Base64UrlEncoder.DecodeBytes(str);
-#endif
                 }
             }
 
@@ -193,11 +187,7 @@ namespace Microsoft.IdentityModel.Protocols
                 str = obj as string;
                 if (str != null)
                 {
-#if USE_STRINGS_FOR_RSA
                     N = str;
-#else
-                    N = Base64UrlEncoder.DecodeBytes(str);
-#endif
                 }
             }
 
@@ -286,12 +276,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the 'e' (RSA - Exponent)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.E, Required = Required.Default)]
-#if USE_STRINGS_FOR_RSA
         public string E { get; set; }
-#else
-        [JsonConverter(typeof(Base64UrlConverter))]
-        public byte[] E { get; set; }
-#endif
         /// <summary>
         /// Gets or sets the 'k' (Symmetric - Key Value)..
         /// </summary>
@@ -336,12 +321,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the 'n' (RSA - Modulus)..
         /// </summary>
         /// <remarks> value is formated as: Base64urlEncoding</remarks>
-#if USE_STRINGS_FOR_RSA
         public string N { get; set; }
-#else
-        [JsonConverter( typeof( Base64UrlConverter ) )]
-        public byte[] N { get; set; }
-#endif
 
         /// <summary>
         /// Gets or sets the 'oth' (RSA - Other Primes Info)..

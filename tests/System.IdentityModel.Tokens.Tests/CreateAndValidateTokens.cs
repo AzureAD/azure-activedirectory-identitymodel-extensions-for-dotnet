@@ -314,8 +314,6 @@ namespace System.IdentityModel.Test
             }
             else
             {
-                //TODO - brentschmaltz, breaking this property change from commented to current
-                //if (!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal))
                 if (!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], "Newtonsoft.Json.Linq.JProperty", StringComparison.Ordinal))
                 {
                     errors.Add("!string.Equals(c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty], typeof(IDictionary<string, object>).ToString(), StringComparison.Ordinal)" +
@@ -364,7 +362,6 @@ namespace System.IdentityModel.Test
             return _roleClaimTypeForDelegate;
         }
 
-        // TODO - brentsch, move to TokenValidationParameter tests.
         [Fact(DisplayName = "CreateAndValidateTokens: NameAndRoleClaimDelegates - name and role type delegates.")]
         public void NameAndRoleClaimDelegates()
         {
