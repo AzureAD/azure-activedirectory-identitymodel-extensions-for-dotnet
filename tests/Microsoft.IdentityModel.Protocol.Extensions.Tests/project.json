@@ -1,10 +1,9 @@
 {
-    "version": "2.0.0-beta1-1",
+    "version": "2.0.0-beta1",
     "dependencies": {
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-*",
-        "Newtonsoft.Json": "6.0.6.0",
+        "Newtonsoft.Json": "6.0.6-*",
         "System.IdentityModel.Tokens": "5.0.0-*",
-		"Xunit.KRunner": "1.0.0.0-rc1-10618",
 		"xunit.runner.kre": "1.0.0-*"
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
