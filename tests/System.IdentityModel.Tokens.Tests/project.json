@@ -21,6 +21,6 @@
     },
     "compilationOptions": {
         "allowUnsafe": false,
-        "warningsAsErrors": false
+        "warningsAsErrors": true
     }
 }

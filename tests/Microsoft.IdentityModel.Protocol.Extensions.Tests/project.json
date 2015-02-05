@@ -1,9 +1,9 @@
 {
     "version": "2.0.0-beta1",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-*",
-        "Newtonsoft.Json": "6.0.6-*",
-        "System.IdentityModel.Tokens": "5.0.0-*",
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta1-*",
+        "Newtonsoft.Json": "6.0.6",
+        "System.IdentityModel.Tokens": "5.0.0-beta1-*",
 		"xunit.runner.kre": "1.0.0-*"
     },
     "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
@@ -27,6 +27,6 @@
     },
     "compilationOptions": {
         "allowUnsafe": false,
-        "warningsAsErrors": false
+        "warningsAsErrors": true
     }
 }

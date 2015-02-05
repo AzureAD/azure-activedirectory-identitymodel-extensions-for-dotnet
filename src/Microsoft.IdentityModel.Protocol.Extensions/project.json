@@ -26,29 +26,16 @@
         },
         "aspnetcore50": {
             "dependencies": {
-                "System.Collections": "4.0.10-beta-*",
                 "System.Collections.Specialized": "4.0.0-beta-*",
                 "System.Diagnostics.Contracts": "4.0.0-beta-*",
-                "System.Diagnostics.Tools": "4.0.0-beta-*",
                 "System.Globalization": "4.0.10-beta-*",
-                "System.IO": "4.0.10-beta-*",
                 "System.IO.FileSystem": "4.0.0-beta-*",
-                "System.Net.Http": "4.0.0-beta-*",
-                "System.Runtime": "4.0.20-beta-*",
-                "System.Runtime.Extensions": "4.0.10-beta-*",
-                "System.Security.Claims": "4.0.0.0-beta-*",
-                "System.Security.Cryptography.Hashing.Algorithms": "4.0.0-beta-*",
-                "System.Security.Cryptography.RSA": "4.0.0-beta-*",
-                "System.Security.Cryptography.X509Certificates": "4.0.0-beta-*",
-                "System.Security.Principal": "4.0.0-beta-*",
-                "System.Text.RegularExpressions": "4.0.10-beta-*",
-                "System.Threading": "4.0.10-beta-*",
-                "System.Threading.Tasks": "4.0.10-beta-*"
+                "System.Net.Http": "4.0.0-beta-*"
             }
         }
     },
     "compilationOptions": {
-        "allowUnsafe": true,
-        "warningsAsErrors": false
+        "allowUnsafe": false,
+        "warningsAsErrors": true
     }
 }
