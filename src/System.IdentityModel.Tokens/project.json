@@ -3,12 +3,18 @@
     "dependencies": {
         "Newtonsoft.Json": "6.0.6"
     },
+    "exclude": [
+        "Saml\\SamlSecurityTokenHandler.cs",
+        "Saml\\Saml2SecurityTokenHandler.cs",
+        "Saml\\SamlConstants.cs",
+        "Saml\\SecurityKeyResolver.cs",
+        "Tokens\\SecurityTokenHandlerCollectionExtensions.cs"
+    ],
     "frameworks": {
        "aspnet50": {},
         "aspnetcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
-                "System.Collections.Specialized": "4.0.0-beta-*",
                 "System.Diagnostics.Tools": "4.0.0-beta-*",
                 "System.Globalization": "4.0.10-beta-*",
                 "System.IO": "4.0.10-beta-*",
