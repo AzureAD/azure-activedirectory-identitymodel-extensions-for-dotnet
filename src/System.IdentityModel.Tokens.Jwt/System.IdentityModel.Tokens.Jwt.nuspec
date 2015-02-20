@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0"?>
 <package>
   <metadata>
-    <title> JSON Web Token Handler For the Microsoft .Net Framework 4.5</title>
+    <title>JSON Web Token Handler For the Microsoft .Net Framework 4.5</title>
     <id>System.IdentityModel.Tokens.Jwt</id>
     <version>$JWTVersion$</version>
-    <authors>>Microsoft Open Technologies.</authors>
-    <licenseUrl>http://www.microsoft.com/web/webpi/eula/aspnetcomponent_enu.htm</licenseUrl>
-    <projectUrl>http://go.microsoft.com/fwlink/?LinkId=272508</projectUrl>
+    <authors>$Authors$</authors>
+    <licenseUrl>$LicenseUrl$</licenseUrl>
+    <projectUrl>$ProjectUrl$</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>This package provides an assembly containing classes which extend the .NET Framework 4.5 with the necessary logic to process the JSON Web Token (JWT) format. That includes validating, parsing and generating JWT tokens; those capabilities can be applied both within the Windows Identity Foundation token processing pipeline and standalone, without any dependency on WIF’s configuration.</description>
     <summary>This package provides an assembly containing classes which extend the .NET Framework 4.5 with the necessary logic to process the JSON Web Token (JWT) format. That includes validating, parsing and generating JWT tokens; those capabilities can be applied both within the Windows Identity Foundation token processing pipeline and standalone, without any dependency on WIF’s configuration.</summary>
     <language>en-US</language>
-    <owners>Microsoft Open Technologies.</owners>
+    <owners>$Owners$</owners>
     <tags>JWT, JSON Web Token, WIF, Windows Identity Foundation, OAuth, OAuth2, Bearer, TokenHandler, Windows Azure Active Directory, Claims, Identity, Authentication</tags>
-    <copyright>Copyright (c) Microsoft Open Technologies. All rights reserved</copyright>
+    <copyright>$Copyright$</copyright>
   </metadata>
   <files>
     <file src="System.IdentityModel.Tokens.Jwt.dll" target="lib\net45" />
