@@ -359,12 +359,12 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Decodes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
+        /// Serializes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
         /// </summary>
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}\nRawData: {2}", this.header.SerializeToJson(), this.payload.SerializeToJson(), rawData ?? "Empty");
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this.header.SerializeToJson(), this.payload.SerializeToJson());
         }
 
         /// <summary>
