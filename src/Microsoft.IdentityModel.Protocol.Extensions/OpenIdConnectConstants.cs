@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string SubjectTypesSupported = "subject_types_supported";
         public const string TokenEndpoint = "token_endpoint";
         public const string TokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported";
-        public const string UserInfoEndpoint = "user_info_endpoint";
+        public const string UserInfoEndpoint = "userinfo_endpoint";
         #pragma warning restore 1591
     }
 }

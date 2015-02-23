@@ -345,7 +345,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (!(StringComparer.Ordinal.Equals(nonceFoundInJwt, validationContext.Nonce)))
             {
-                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, validationContext.Nonce, jwt.ToString()));
+                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, validationContext.Nonce, nonceFoundInJwt, jwt.ToString()));
             }
 
             if (RequireTimeStampInNonce)

@@ -43,18 +43,19 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual string BuildFormPost()
         {
             StringBuilder strBuilder = new StringBuilder();
-            strBuilder.Append("<html><head><title>");
-            strBuilder.Append(PostTitle);
-            strBuilder.Append("</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"");
-            strBuilder.Append(HttpUtility.HtmlAttributeEncode(IssuerAddress));
-            strBuilder.Append(">");
+            strBuilder.Append(String.Format(
+                CultureInfo.InvariantCulture,
+                "<html><head><title>{0}</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"{1}\">",
+                PostTitle,
+                HttpUtility.HtmlAttributeEncode(IssuerAddress)));
+
             foreach (KeyValuePair<string, string> parameter in _parameters)
             {
                 strBuilder.Append("<input type=\"hidden\" name=\"");
                 strBuilder.Append(HttpUtility.HtmlAttributeEncode(parameter.Key));
                 strBuilder.Append("\" value=\"");
                 strBuilder.Append(HttpUtility.HtmlAttributeEncode(parameter.Value));
-                strBuilder.Append(" />");
+                strBuilder.Append("\" />");
             }
 
             strBuilder.Append("<noscript><p>");

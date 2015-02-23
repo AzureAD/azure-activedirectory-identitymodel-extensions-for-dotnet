@@ -431,30 +431,33 @@ namespace System.IdentityModel.Test
             return true;
         }
         
-        private static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuraiton2, CompareContext context)
+        private static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuration2, CompareContext context)
         {
-            if (!string.Equals(configuration1.AuthorizationEndpoint, configuraiton2.AuthorizationEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.AuthorizationEndpoint, configuration2.AuthorizationEndpoint, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.CheckSessionIframe, configuraiton2.CheckSessionIframe, context.StringComparison))
+            if (!string.Equals(configuration1.CheckSessionIframe, configuration2.CheckSessionIframe, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.EndSessionEndpoint, configuraiton2.EndSessionEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.EndSessionEndpoint, configuration2.EndSessionEndpoint, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.Issuer, configuraiton2.Issuer, context.StringComparison))
+            if (!string.Equals(configuration1.Issuer, configuration2.Issuer, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.JwksUri, configuraiton2.JwksUri, context.StringComparison))
+            if (!string.Equals(configuration1.JwksUri, configuration2.JwksUri, context.StringComparison))
                 return false;
 
-            if (!AreEnumsEqual<SecurityToken>(configuration1.SigningTokens, configuraiton2.SigningTokens, context, AreSecurityTokensEqual))
+            if (!AreEnumsEqual<SecurityToken>(configuration1.SigningTokens, configuration2.SigningTokens, context, AreSecurityTokensEqual))
                 return false;
 
-            if (!AreEnumsEqual<SecurityKey>(configuration1.SigningKeys, configuraiton2.SigningKeys, context, AreSecurityKeysEqual))
+            if (!AreEnumsEqual<SecurityKey>(configuration1.SigningKeys, configuration2.SigningKeys, context, AreSecurityKeysEqual))
                 return false;
 
-            if (!string.Equals(configuration1.TokenEndpoint, configuraiton2.TokenEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.TokenEndpoint, configuration2.TokenEndpoint, context.StringComparison))
+                return false;
+
+            if (!string.Equals(configuration1.UserInfoEndpoint, configuration2.UserInfoEndpoint, context.StringComparison))
                 return false;
 
             return true;
