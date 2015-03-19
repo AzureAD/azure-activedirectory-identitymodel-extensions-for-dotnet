@@ -18,6 +18,8 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Test;
+using System.Security.Claims;
 
 namespace System.IdentityModel.Test
 {
@@ -79,6 +81,41 @@ namespace System.IdentityModel.Test
         [Description("Tests: Publics")]
         public void JwtHeader_Publics()
         {
+        }
+
+        [TestMethod]
+        [TestProperty("TestCaseID", "6B9F5AAA-6362-41A6-99A1-4AA55787ADEE")]
+        [Description("Tests: SigningKeyIdentifier")]
+        public void JwtHeader_SigningKeyIdentifier()
+        {
+            var cert = KeyingMaterial.DefaultAsymmetricCert_2048;
+            var header = new JwtHeader(new X509SigningCredentials(cert));
+            var payload = new JwtPayload( new Claim[]{new Claim("iss", "issuer")});
+            var jwt = new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "");
+            var handler = new JwtSecurityTokenHandler();
+            var signedJwt = handler.WriteToken(jwt);
+            SecurityToken token = null;
+            var validationParameters =
+                new TokenValidationParameters
+                {
+                    IssuerSigningToken = new X509SecurityToken(cert),
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            handler.ValidateToken(signedJwt, validationParameters, out token);
+
+            validationParameters =
+                new TokenValidationParameters
+                {
+                    IssuerSigningKey = new X509SecurityKey(cert),
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+
+            handler.ValidateToken(signedJwt, validationParameters, out token);
         }
     }
 }
