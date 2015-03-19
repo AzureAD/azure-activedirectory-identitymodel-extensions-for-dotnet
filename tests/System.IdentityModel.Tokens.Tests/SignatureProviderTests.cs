@@ -23,7 +23,6 @@ using Xunit;
 
 namespace System.IdentityModel.Test
 {
-
     /// <summary>
     /// This class tests:
     /// SignatureProviderFactory
@@ -235,6 +234,29 @@ namespace System.IdentityModel.Test
             }
         }
 
+        [Fact(DisplayName = "SignatureProviderTests: AsymmetricSignatureProvider - SupportedAlgorithms")]
+        public void AsymmetricSignatureProvider_SupportedAlgorithms()
+        {
+            foreach (var algorithm in
+                new string[] {
+                    JwtAlgorithms.ECDSA_SHA256,
+                    JwtAlgorithms.ECDSA_SHA384,
+                    JwtAlgorithms.ECDSA_SHA512,
+                    JwtAlgorithms.HMAC_SHA256,
+                    JwtAlgorithms.HMAC_SHA384,
+                    JwtAlgorithms.HMAC_SHA512,
+                    JwtAlgorithms.RSA_SHA256,
+                    JwtAlgorithms.RSA_SHA384,
+                    JwtAlgorithms.RSA_SHA512,
+                    SecurityAlgorithms.RsaSha1Signature,
+                    SecurityAlgorithms.RsaSha256Signature,
+                    SecurityAlgorithms.RsaSha384Signature,
+                    SecurityAlgorithms.RsaSha512Signature })
+            {
+                var provider = new PublicAsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, algorithm);
+            }
+        }
+
         [Fact(DisplayName = "SignatureProviderTests: Verify")]
         public void SignatureProviders_Verify()
         {
@@ -242,39 +264,39 @@ namespace System.IdentityModel.Test
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
-            byte[] signature = GetSignature(    KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha1Signature,   rawBytes);
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha1Signature,   rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha1Signature,   rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            byte[] signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha1Signature, rawBytes);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             // wrong hash
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             // wrong key
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha1Signature,   rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
 
-            signature = GetSignature(           KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha256Signature, rawBytes);
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             // wrong hash
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha1Signature,   rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             // wrong key
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
 
-            signature = GetSignature(           KeyingMaterial.RsaSecurityKey_4096,        SecurityAlgorithms.RsaSha256Signature, rawBytes);
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096,        SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            signature = GetSignature(KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaSha256Signature, rawBytes);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             // wrong hash
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha1Signature,   rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             // wrong key
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
 
             // sha384, 512
-            signature = GetSignature(           KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha384Signature, rawBytes);
+            signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha384Signature, rawBytes);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
 
-            signature = GetSignature(           KeyingMaterial.RsaSecurityKey_2048,        SecurityAlgorithms.RsaSha512Signature, rawBytes);
+            signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, rawBytes);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
 
             TestUtilities.AssertFailIfErrors("SignatureProviders_Verify", errors);

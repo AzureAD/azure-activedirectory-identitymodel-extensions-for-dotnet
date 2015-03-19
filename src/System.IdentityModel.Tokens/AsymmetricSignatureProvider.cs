@@ -118,13 +118,22 @@ namespace System.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaSha1Signature:
                     return SHA1.Create();
 
+                case JwtAlgorithms.ECDSA_SHA256:
+                case JwtAlgorithms.HMAC_SHA256:
+                case JwtAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return SHA256.Create();
 
+                case JwtAlgorithms.ECDSA_SHA384:
+                case JwtAlgorithms.HMAC_SHA384:
+                case JwtAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return SHA384.Create();
 
                 case SecurityAlgorithms.RsaSha512Signature:
+                case JwtAlgorithms.RSA_SHA512:
+                case JwtAlgorithms.ECDSA_SHA512:
+                case JwtAlgorithms.HMAC_SHA512:
                     return SHA512.Create();
 
                 default:
@@ -139,6 +148,15 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case JwtAlgorithms.ECDSA_SHA256:
+                case JwtAlgorithms.ECDSA_SHA384:
+                case JwtAlgorithms.ECDSA_SHA512:
+                case JwtAlgorithms.HMAC_SHA256:
+                case JwtAlgorithms.HMAC_SHA384:
+                case JwtAlgorithms.HMAC_SHA512:
+                case JwtAlgorithms.RSA_SHA256:
+                case JwtAlgorithms.RSA_SHA384:
+                case JwtAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha1Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
