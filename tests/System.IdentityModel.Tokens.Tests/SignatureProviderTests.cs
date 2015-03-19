@@ -237,6 +237,8 @@ namespace System.IdentityModel.Test
         [Fact(DisplayName = "SignatureProviderTests: AsymmetricSignatureProvider - SupportedAlgorithms")]
         public void AsymmetricSignatureProvider_SupportedAlgorithms()
         {
+            var errors = new List<string>();
+
             foreach (var algorithm in
                 new string[] {
                     JwtAlgorithms.ECDSA_SHA256,
@@ -253,7 +255,16 @@ namespace System.IdentityModel.Test
                     SecurityAlgorithms.RsaSha384Signature,
                     SecurityAlgorithms.RsaSha512Signature })
             {
-                var provider = new PublicAsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, algorithm);
+                try
+                {
+                    var provider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, algorithm);
+                }
+                catch(Exception ex)
+                {
+                    errors.Add("Creation of AsymmetricSignatureProvider with algorithm: " + algorithm + ", threw: " + ex.Message);
+                }
+
+                TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
             }
         }
 
