@@ -4,10 +4,9 @@
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta1-*",
         "Newtonsoft.Json": "6.0.6",
         "System.IdentityModel.Tokens": "5.0.0-beta1-*",
-	"xunit.runner.aspnet": "2.0.0-aspnet-*",
-	"CoreCLR": "1.0.0-t150309230624"
+	"xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
-    "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
+    "compile": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
         "Performance.cs",
         "X509CertificateValidatorExTests.cs"

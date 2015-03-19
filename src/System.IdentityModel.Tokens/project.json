@@ -1,8 +1,7 @@
 {
-    "version": "5.0.0-beta1",
+    "version": "5.0.1-*",
     "dependencies": {
-        "Newtonsoft.Json": "6.0.6",
-        "CoreCLR": "1.0.0-t150309230624"
+        "Newtonsoft.Json": "6.0.6"
     },
     "exclude": [
         "Saml\\SamlSecurityTokenHandler.cs",
