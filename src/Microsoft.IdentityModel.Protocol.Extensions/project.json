@@ -3,7 +3,8 @@
     "description": "Provides types that provide support for OpenIdConnect protocol.",
     "dependencies": {
         "Newtonsoft.Json": "6.0.6",
-        "System.IdentityModel.Tokens": "5.0.0-beta1-*"
+        "System.IdentityModel.Tokens": "5.0.0-beta1-*",
+	"CoreCLR": "1.0.0-t150309230624"
     },
     "code": [ "**\\*.cs", "..\\common\\*.cs" ],
     "exclude": [
@@ -12,13 +13,13 @@
         "Configuration\\WsFederationConfigurationRetriever.cs"
     ],
     "frameworks": {
-        "aspnet50": {
+        "dnx451": {
             "frameworkAssemblies": {
                 "System.Net.Http": "",
                 "System.IO": ""
             }
         },
-        "aspnetcore50": {
+        "dnxcore50": {
             "dependencies": {
                 "System.Collections.Specialized": "4.0.0-beta-*",
                 "System.Diagnostics.Contracts": "4.0.0-beta-*",

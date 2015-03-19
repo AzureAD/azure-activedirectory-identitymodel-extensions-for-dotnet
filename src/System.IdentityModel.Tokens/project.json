@@ -1,7 +1,8 @@
 {
     "version": "5.0.0-beta1",
     "dependencies": {
-        "Newtonsoft.Json": "6.0.6"
+        "Newtonsoft.Json": "6.0.6",
+        "CoreCLR": "1.0.0-t150309230624"
     },
     "exclude": [
         "Saml\\SamlSecurityTokenHandler.cs",
@@ -11,8 +12,8 @@
         "Tokens\\SecurityTokenHandlerCollectionExtensions.cs"
     ],
     "frameworks": {
-       "aspnet50": {},
-        "aspnetcore50": {
+       "dnx451": {},
+        "dnxcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
                 "System.Diagnostics.Tools": "4.0.0-beta-*",
