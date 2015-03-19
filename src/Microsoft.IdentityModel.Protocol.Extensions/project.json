@@ -12,13 +12,13 @@
         "Configuration\\WsFederationConfigurationRetriever.cs"
     ],
     "frameworks": {
-        "aspnet50": {
+        "dnx451": {
             "frameworkAssemblies": {
                 "System.Net.Http": "",
                 "System.IO": ""
             }
         },
-        "aspnetcore50": {
+        "dnxcore50": {
             "dependencies": {
                 "System.Collections.Specialized": "4.0.0-beta-*",
                 "System.Diagnostics.Contracts": "4.0.0-beta-*",
