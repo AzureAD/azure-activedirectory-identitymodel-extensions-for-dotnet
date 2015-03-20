@@ -19,7 +19,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
                 JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
                 SecurityToken token;
                 handler.ValidateToken(null, null, out token);
-
             }
             catch (Exception ex)
             {

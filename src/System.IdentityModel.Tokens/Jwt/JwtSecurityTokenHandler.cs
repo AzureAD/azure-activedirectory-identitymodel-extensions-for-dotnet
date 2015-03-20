@@ -99,8 +99,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    WilsonEventSource.Logger.WriteError("Value for InboundAlgorithm cannot be null");
-                    throw new ArgumentNullException("value");
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundAlgorithmMap"), typeof(ArgumentNullException));
                 }
 
                 inboundAlgorithmMap = value;
@@ -128,7 +127,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError("Value for OutboundAlgorithm cannot be null", typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundAlgorithmMap"), typeof(ArgumentNullException));
                 }
 
                 outboundAlgorithmMap = value;
@@ -151,7 +150,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError("Value for InboundClaimTypeMap cannot be null", typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimTypeMap"), typeof(ArgumentNullException));
                 }
 
                 inboundClaimTypeMap = value;
@@ -175,7 +174,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError("Value for OutboundClaimTypeMap cannot be null", typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundClaimTypeMap"), typeof(ArgumentNullException));
                 }
 
                 outboundClaimTypeMap = value;
@@ -196,7 +195,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError("Value for InboundClaimFilter cannot be null", typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimFilter"), typeof(ArgumentNullException));
                 }
 
                 inboundClaimFilter = value;
