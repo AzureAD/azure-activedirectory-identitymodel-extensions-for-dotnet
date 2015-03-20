@@ -19,10 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
-    using System.IO;
     using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;

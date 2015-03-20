@@ -5,20 +5,20 @@
         "Newtonsoft.Json": "6.0.6",
         "System.IdentityModel.Tokens": "5.0.0-beta1-*"
     },
-    "code": [ "**\\*.cs", "..\\common\\*.cs" ],
+    "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
     "exclude": [
         "WsFederationMessage.cs",
         "Configuration\\WsFederationConfiguration.cs",
         "Configuration\\WsFederationConfigurationRetriever.cs"
     ],
     "frameworks": {
-        "aspnet50": {
+        "dnx451": {
             "frameworkAssemblies": {
                 "System.Net.Http": "",
                 "System.IO": ""
             }
         },
-        "aspnetcore50": {
+        "dnxcore50": {
             "dependencies": {
                 "System.Collections.Specialized": "4.0.0-beta-*",
                 "System.Diagnostics.Contracts": "4.0.0-beta-*",

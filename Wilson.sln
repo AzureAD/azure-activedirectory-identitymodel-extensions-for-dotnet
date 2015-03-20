@@ -3,16 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22416.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.kproj", "{A0E7DD32-5189-439C-B460-5BA3B0561707}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.xproj", "{A0E7DD32-5189-439C-B460-5BA3B0561707}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocols.kproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocols.xproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A0E7DD32-5189-439C-B460-5BA3B0561707} = {A0E7DD32-5189-439C-B460-5BA3B0561707}
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "tests\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.kproj", "{B449C824-9D81-4588-A562-E61D9215C976}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "tests\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.xproj", "{B449C824-9D81-4588-A562-E61D9215C976}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.kproj", "{CC665B24-9531-41B9-93C1-EF7F425AB33C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.xproj", "{CC665B24-9531-41B9-93C1-EF7F425AB33C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}"
 EndProject
