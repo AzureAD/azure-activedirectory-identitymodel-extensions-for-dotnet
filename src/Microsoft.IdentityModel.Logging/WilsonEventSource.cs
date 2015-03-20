@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Logging
 {
+    /// <summary>
+    /// Event source based logger to log different events.
+    /// </summary>
     public class WilsonEventSource : EventSource
     {
         private static EventLevel _logLevel;
@@ -14,18 +16,10 @@ namespace Microsoft.IdentityModel.Logging
             _logLevel = EventLevel.Informational;
 		}
 
-        private string GetCallerMethodName()
-        {
-#if DNX451
-            var stackTrace = new StackTrace();
-            var methodBase = stackTrace.GetFrame(2).GetMethod();
-            var Class = methodBase.ReflectedType;
-            var Namespace = Class.Namespace;         //Added finding the namespace
-            return (Namespace + "." + Class.Name + "." + methodBase.Name);
-#endif
-            return "";
-        }
-		public static WilsonEventSource Logger { get; }
+        /// <summary>
+        /// Static logger that is exposed externally. An external application or framework can hook up a listener to this event source to log data in a custom way.
+        /// </summary>
+        public static WilsonEventSource Logger { get; }
 
 		[Event(1, Level = EventLevel.Verbose)]
 		public void WriteVerbose(string message)
@@ -63,6 +57,9 @@ namespace Microsoft.IdentityModel.Logging
             }
 		}
 
+        /// <summary>
+        /// Minimum log level to log events. Default is Informational.
+        /// </summary>
         public static EventLevel LogLevel
         {
             get
