@@ -3,7 +3,7 @@
     "dependencies": {
         "Microsoft.IdentityModel.Logging": "1.0.0-*",
         "System.IdentityModel.Tokens": "5.0.0-*",
-		"xunit.runner.aspnet": "1.0.0-*"
+        "xunit.runner.aspnet": "1.0.0-*"
     },
     "commands": {
         "test": "xunit.runner.aspnet"
