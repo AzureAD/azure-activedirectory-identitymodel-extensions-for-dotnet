@@ -174,7 +174,28 @@ namespace System.IdentityModel.Test
 
             RunEncodedTest(new JwtSecurityTokenTestVariation
             {
+                Name = "EncodedString: invalid for header, NO signature (JWT_AsymmetricSigned_AcsV2)",
+                EncodedString = "iJsL8.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yZWU5NDA1Mi1iZjM0LTRlODMtYWE2Zi1mODIxMjVjNjVkNzQvIiwiaWF0IjoxNDI2Nzk2MDA1LCJuYmYiOjE0MjY3OTYwMDUsImV4cCI6MTQyNjc5OTkwNSwidmVyIjoiMS4wIiwidGlkIjoiMmVlOTQwNTItYmYzNC00ZTgzLWFhNmYtZjgyMTI1YzY1ZDc0IiwiYW1yIjpbInB3ZCJdLCJvaWQiOiJlMWUxZTY0Ny01ZTJhLTQyMGYtYjY3Ny1lYWU3MWMxNjQ4ZWIiLCJ1cG4iOiJkYXZpZEBzb29jaGkub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMzRkZGOENEQzE0OUEiLCJzdWIiOiJWUjgzRllKTDhXR0o1MmVRMk8yMG81N0ZwNGR0OW5uUFVRT0ZtM3FWenpzIiwiZ2l2ZW5fbmFtZSI6IkRhdmlkIiwiZmFtaWx5X25hbWUiOiJNdXJyYXkiLCJuYW1lIjoiZGF2aWRtdSIsImdyb3VwcyI6WyI0NjVmYjhhNS03Njk5LTQyMDQtYjNlNy0zNzBlYjFkNDhjYjkiXSwidW5pcXVlX25hbWUiOiJkYXZpZEBzb29jaGkub25taWNyb3NvZnQuY29tIiwiYXBwaWQiOiIxOTUwYTI1OC0yMjdiLTRlMzEtYTljZi03MTc0OTU5NDVmYzIiLCJhcHBpZGFjciI6IjAiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24iLCJhY3IiOiIxIn0.iJsL8",
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(System.FormatException)),
+            });
+
+            RunEncodedTest(new JwtSecurityTokenTestVariation
+            {
+                Name = "EncodedString: invalid for payload, NO signature (JWT_AsymmetricSigned_AcsV2)",
+                EncodedString = tokenParts[0]+".eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yZWU5NDA1Mi1iZjM0LTRlODMtYWE2Zi1mODIxMjVjNjVkNzQvIiwiaWF0IjoxNDI2Nzk2MDA1LCJuYmYiOjE0MjY3OTYwMDUsImV4cCI6MTQyNjc5OTkwNSwidmVyIjoiMS4wIiwidGlkIjoiMmVlOTQwNTItYmYzNC00ZTgzLWFhNmYtZjgyMTI1YzY1ZDc0IiwiYW1yIjpbInB3ZCJdLCJvaWQiOiJlMWUxZTY0Ny01ZTJhLTQyMGYtYjY3Ny1lYWU3MWMxNjQ4ZWIiLCJ1cG4iOiJkYXZpZEBzb29jaGkub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMzRkZGOENEQzE0OUEiLCJzdWIiOiJWUjgzRllKTDhXR0o1MmVRMk8yMG81N0ZwNGR0OW5uUFVRT0ZtM3FWenpzIiwiZ2l2ZW5fbmFtZSI6IkRhdmlkIiwiZmFtaWx5X25hbWUiOiJNdXJyYXkiLCJuYW1lIjoiZGF2aWRtdSIsImdyb3VwcyI6WyI0NjVmYjhhNS03Njk5LTQyMDQtYjNlNy0zNzBlYjFkNDhjYjkiXSwidW5pcXVlX25hbWUiOiJkYXZpZEBzb29jaGkub25taWNyb3NvZnQuY29tIiwiYXBwaWQiOiIxOTUwYTI1OC0yMjdiLTRlMzEtYTljZi03MTc0OTU5NDVmYzIiLCJhcHBpZGFjciI6IjAiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24iLCJhY3IiOiIxIn0.iJsL8",
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(System.FormatException)),
+            });
+
+            RunEncodedTest(new JwtSecurityTokenTestVariation
+            {
                 Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
+                EncodedString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yZWU5NDA1Mi1iZjM0LTRlODMtYWE2Zi1mODIxMjVjNjVkNzQvIiwiaWF0IjoxNDI2Nzk2MDA1LCJuYmYiOjE0MjY3OTYwMDUsImV4cCI6MTQyNjc5OTkwNSwidmVyIjoiMS4wIiwidGlkIjoiMmVlOTQwNTItYmYzNC00ZTgzLWFhNmYtZjgyMTI1YzY1ZDc0IiwiYW1yIjpbInB3ZCJdLCJvaWQiOiJlMWUxZTY0Ny01ZTJhLTQyMGYtYjY3Ny1lYWU3MWMxNjQ4ZWIiLCJ1cG4iOiJkYXZpZEBzb29jaGkub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMzRkZGOENEQzE0OUEiLCJzdWIiOiJWUjgzRllKTDhXR0o1MmVRMk8yMG81N0ZwNGR0OW5uUFVRT0ZtM3FWenpzIiwiZ2l2ZW5fbmFtZSI6IkRhdmlkIiwiZmFtaWx5X25hbWUiOiJNdXJyYXkiLCJuYW1lIjoiZGF2aWRtdSIsImdyb3VwcyI6WyI0NjVmYjhhNS03Njk5LTQyMDQtYjNlNy0zNzBlYjFkNDhjYjkiXSwidW5pcXVlX25hbWUiOiJkYXZpZEBzb29jaGkub25taWNyb3NvZnQuY29tIiwiYXBwaWQiOiIxOTUwYTI1OC0yMjdiLTRlMzEtYTljZi03MTc0OTU5NDVmYzIiLCJhcHBpZGFjciI6IjAiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24iLCJhY3IiOiIxIn0.iJsL8",
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10703:", inner: typeof(System.FormatException)),
+            });
+
+            RunEncodedTest(new JwtSecurityTokenTestVariation
+            {
+                Name = "EncodedString: valid encoding, invalid encoding on signature",
                 EncodedString = string.Format("{0}.{1}.{2}.{3}", tokenParts[0], tokenParts[1], tokenParts[2], tokenParts[2]),
                 ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
             });
