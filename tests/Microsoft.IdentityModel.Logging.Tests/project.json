@@ -5,15 +5,12 @@
         "System.IdentityModel.Tokens": "5.0.0-*",
 		"xunit.runner.aspnet": "1.0.0-*"
     },
-
+    "commands": {
+        "test": "xunit.runner.aspnet"
+    },
     "frameworks" : {
         "dnx451" : { 
             "dependencies": {
-            }
-        },
-        "dnxcore50" : { 
-            "dependencies": {
-                "System.Runtime": "4.0.20-beta-22709"
             }
         }
     }
