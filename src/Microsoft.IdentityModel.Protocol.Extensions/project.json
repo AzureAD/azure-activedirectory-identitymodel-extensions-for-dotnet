@@ -1,5 +1,5 @@
 {
-    "version": "2.0.0-beta1",
+    "version": "2.0.0-beta4",
     "description": "Provides types that provide support for OpenIdConnect protocol.",
     "dependencies": {
         "Newtonsoft.Json": "6.0.6",
