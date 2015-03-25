@@ -414,7 +414,7 @@ namespace System.IdentityModel.Tokens
                         throw;
                     }
 
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "signature", tokenParts[1], jwtEncodedString), ex);
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "signature", tokenParts[2], jwtEncodedString), ex);
                 }
             }
 
