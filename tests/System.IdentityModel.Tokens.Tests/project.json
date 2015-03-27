@@ -1,9 +1,9 @@
 {
-    "version": "5.0.0-beta1",
+    "version": "5.0.0-*",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta1-*",
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta*",
         "Newtonsoft.Json": "6.0.6",
-        "System.IdentityModel.Tokens": "5.0.0-beta1-*",
+        "System.IdentityModel.Tokens": "5.0.0-beta*",
         "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
     "compile": [ "**\\*.cs", "..\\shared\\*.cs" ],

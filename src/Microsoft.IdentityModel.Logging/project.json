@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.0.0-beta4",
+	"version": "1.0.0-*",
 	"dependencies": {
         "System.Diagnostics.Tracing": "4.0.20-beta-*"
 	},
