@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelPendingRequests()))
                     {
-                        return await client.GetStringAsync(address);
+                        return await client.GetStringAsync(address).ConfigureAwait(false);
                     }
                 }
             }
