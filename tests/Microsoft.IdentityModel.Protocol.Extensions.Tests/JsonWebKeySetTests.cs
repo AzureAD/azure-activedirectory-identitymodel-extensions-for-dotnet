@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Protocols;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Test;
@@ -34,6 +35,7 @@ namespace Microsoft.IdentityModel.Test
         [Fact(DisplayName = "JsonWebKeySetTests: Constructors")]
         public void Constructors()
         {
+            //System.Diagnostics.Debugger.Launch();
             JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
             Assert.True(IsDefaultJsonWebKeySet(jsonWebKeys));
 
@@ -44,7 +46,7 @@ namespace Microsoft.IdentityModel.Test
             RunJsonWebKeySetTest((IDictionary<string, object>)null, null, ExpectedException.ArgumentNullException(), false);
 
             RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:"));
+            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:", inner: typeof(JsonReaderException)));
         }
 
         [Fact(DisplayName = "JsonWebKeySetTests: Interop")]

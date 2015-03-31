@@ -101,26 +101,29 @@ namespace System.IdentityModel.Test
         public static ClaimsIdentity ClaimsIdentityDistributedClaims(string issuer, string authType, Dictionary<string, Dictionary<string, string>> claimSources, Dictionary<string, string> claimNames )
         {
             List<Claim> claims = new List<Claim>();
-            AddClaimSources(claimSources, claims, issuer);
-            AddClaimNames(claimNames, claims, issuer);
-            return new ClaimsIdentity(claims, authType);
+            // TODO - workaround for null ref in Claim.Clone(). Was fixed and checked in 2/19, still hasn't made it to a build.
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(authType);
+            AddClaimSources(claimSources, claims, issuer, claimsIdentity);
+            AddClaimNames(claimNames, claims, issuer, claimsIdentity);
+            claimsIdentity.AddClaims(claims);
+            return claimsIdentity;
         }
 
-        public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer)
+        public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer, ClaimsIdentity subject)
         {
             foreach(var kv in claimNames)
             {
-                Claim c = new Claim("_claim_names", @"""" + kv.Key + @""":""" + kv.Value + @"""", JwtConstants.JsonClaimValueType, issuer);
+                Claim c = new Claim("_claim_names", @"""" + kv.Key + @""":""" + kv.Value + @"""", JwtConstants.JsonClaimValueType, issuer, issuer, subject);
                 c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
                 claims.Add(c);
             }
         }
 
-        public static void AddClaimSources(Dictionary<string, Dictionary<string, string>> claimSources, List<Claim> claims, string issuer)
+        public static void AddClaimSources(Dictionary<string, Dictionary<string, string>> claimSources, List<Claim> claims, string issuer, ClaimsIdentity subject)
         {
             foreach (var kv in claimSources)
             {
-                Claim c = new Claim("_claim_sources", @"""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value), JwtConstants.JsonClaimValueType, issuer);
+                Claim c = new Claim("_claim_sources", @"""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value), JwtConstants.JsonClaimValueType, issuer, issuer, subject);
                 c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
                 claims.Add(c);
             }
