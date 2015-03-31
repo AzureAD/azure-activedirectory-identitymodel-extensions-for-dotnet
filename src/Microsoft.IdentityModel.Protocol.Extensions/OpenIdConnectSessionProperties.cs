@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string CheckSessionIFrame = ".checkSessionIFrame";
    
         /// <summary>
-        /// Property defined for 'redirect_uri' set in the rquest for a 'code'
+        /// Property defined for 'redirect_uri' set in the request for a 'code'
         /// </summary>
         public const string RedirectUri = ".redirect_uri";
 

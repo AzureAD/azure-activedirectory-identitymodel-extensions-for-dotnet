@@ -83,12 +83,12 @@ namespace System.IdentityModel.Tokens
             GC.SuppressFinalize(this);
         }
 
-        public byte[] SignData(byte[] signingInput, HashAlgorithm hash)
+        public byte[] SignData(byte[] signingInput, object hash)
         {
             return this.rsa.SignData(signingInput, hash);
         }
 
-        public bool VerifyData(byte[] signingInput, HashAlgorithm hash, byte[] signature)
+        public bool VerifyData(byte[] signingInput, object hash, byte[] signature)
         {
             return this.rsa.VerifyData(signingInput, hash, signature);
         }
