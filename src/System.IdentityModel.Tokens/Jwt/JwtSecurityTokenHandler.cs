@@ -464,7 +464,7 @@ namespace System.IdentityModel.Tokens
 
             if (!this.CanReadToken(tokenString))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType() + ": " + tokenString), typeof(ArgumentException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType(), tokenString), typeof(ArgumentException));
             }
 
             return new JwtSecurityToken(tokenString);

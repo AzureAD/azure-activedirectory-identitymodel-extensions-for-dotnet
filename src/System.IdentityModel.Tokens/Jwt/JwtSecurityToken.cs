@@ -349,7 +349,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}\nRawData: {2}", this.header.SerializeToJson(), this.payload.SerializeToJson(), rawData ?? "Empty");
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this.header.SerializeToJson(), this.payload.SerializeToJson());
         }
 
         /// <summary>
@@ -403,6 +403,23 @@ namespace System.IdentityModel.Tokens
                 }
 
                 LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException));
+            }
+
+            if (!string.IsNullOrEmpty(tokenParts[2]))
+            {
+                try
+                {
+                    Base64UrlEncoder.DecodeBytes(tokenParts[2]);
+                }
+                catch (Exception ex)
+                {
+                    if (DiagnosticUtility.IsFatal(ex))
+                    {
+                        throw;
+                    }
+
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "signature", tokenParts[2], jwtEncodedString), ex);
+                }
             }
 
             this.rawData = jwtEncodedString;
