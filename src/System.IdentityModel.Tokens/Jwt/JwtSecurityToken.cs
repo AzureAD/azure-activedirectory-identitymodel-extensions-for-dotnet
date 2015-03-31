@@ -20,6 +20,7 @@ namespace System.IdentityModel.Tokens
 {
     using Collections.Generic;
     using Globalization;
+    using Microsoft.IdentityModel.Logging;
     using Security.Claims;
     using Text.RegularExpressions;
 
@@ -50,17 +51,17 @@ namespace System.IdentityModel.Tokens
         {
             if (null == jwtEncodedString)
             {
-                throw new ArgumentNullException("jwtEncodedString");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwtEncodedString"), typeof(ArgumentNullException));
             }
 
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "jwtEncodedString"));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException));
             }
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException));
             }
 
             this.Decode(jwtEncodedString);
@@ -82,27 +83,27 @@ namespace System.IdentityModel.Tokens
         {
             if (header == null)
             {
-                throw new ArgumentNullException("header");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException));
             }
 
             if (payload == null)
             {
-                throw new ArgumentNullException("payload");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException));
             }
 
             if (rawSignature == null)
             {
-                throw new ArgumentNullException("rawSignature");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": rawSignature"), typeof(ArgumentNullException));
             }
 
             if (string.IsNullOrWhiteSpace(rawHeader))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "rawHeader"));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawHeader"), typeof(ArgumentException));
             }
 
             if (string.IsNullOrWhiteSpace(rawPayload))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "rawPayload"));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawPayload"), typeof(ArgumentException));
             }
 
             this.header = header;
@@ -124,12 +125,12 @@ namespace System.IdentityModel.Tokens
         {
             if (header == null)
             {
-                throw new ArgumentNullException("header");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentException));
             }
 
             if (payload == null)
             {
-                throw new ArgumentNullException("payload");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException));
             }
 
             this.header = header;
@@ -152,7 +153,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (notBefore >= expires)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value), typeof(ArgumentException));
                 }
             }
 
@@ -357,14 +358,16 @@ namespace System.IdentityModel.Tokens
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
         internal void Decode(string jwtEncodedString)
         {
+            IdentityModelEventSource.Logger.WriteInformation("Decoding token into header, payload and signature.");
             string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
             if (tokenParts.Length != 3)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, "jwtEncodedString", jwtEncodedString));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException));
             }
 
             try
             {
+                IdentityModelEventSource.Logger.WriteVerbose("Deserializing header from the token");
                 this.header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
@@ -373,7 +376,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {
-                        throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type));
+                        LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type), typeof(SecurityTokenException));
                     }
                 }
             }
@@ -384,11 +387,12 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), ex);
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), typeof(ArgumentException));
             }
 
             try
             {
+                IdentityModelEventSource.Logger.WriteVerbose("Deserializing payload from the token");
                 this.payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
             }
             catch (Exception ex)
@@ -398,7 +402,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), ex);
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException));
             }
 
             this.rawData = jwtEncodedString;
