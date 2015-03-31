@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="throwException">boolean to set whether to throw exception or not. Default is true.</param>
         public static void LogError(string message, Type exceptionType, bool throwException = true)
         {
-            WilsonEventSource.Logger.WriteError(message);
+            IdentityModelEventSource.Logger.WriteError(message);
             
             if (throwException)
             {

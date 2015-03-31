@@ -47,7 +47,7 @@ namespace System.IdentityModel.Tokens
 
             if (!validationParameters.ValidateAudience)
             {
-                WilsonEventSource.Logger.WriteInformation("ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.");
+                IdentityModelEventSource.Logger.WriteInformation("ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.");
                 return;
             }
 
@@ -74,7 +74,7 @@ namespace System.IdentityModel.Tokens
                     {
                         if (string.Equals(audience, str, StringComparison.Ordinal))
                         {
-                            WilsonEventSource.Logger.WriteInformation(string.Format("Audience Validated. Audience: {0}", audience));
+                            IdentityModelEventSource.Logger.WriteInformation(string.Format("Audience Validated. Audience: {0}", audience));
                             return;
                         }
                     }
@@ -84,7 +84,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (string.Equals(audience, validationParameters.ValidAudience, StringComparison.Ordinal))
                     {
-                        WilsonEventSource.Logger.WriteInformation(string.Format("Audience Validated. Audience: {0}", audience));
+                        IdentityModelEventSource.Logger.WriteInformation(string.Format("Audience Validated. Audience: {0}", audience));
                         return;
                     }
                 }
@@ -114,7 +114,7 @@ namespace System.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuer)
             {
-                WilsonEventSource.Logger.WriteInformation("ValidateIssuer property on ValidationParamaters is set to false. Exiting without validating the issuer.");
+                IdentityModelEventSource.Logger.WriteInformation("ValidateIssuer property on ValidationParamaters is set to false. Exiting without validating the issuer.");
                 return issuer;
             }
 
@@ -132,7 +132,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
             {
-                WilsonEventSource.Logger.WriteInformation(string.Format("Issuer Validated. Issuer: {0}", issuer));
+                IdentityModelEventSource.Logger.WriteInformation(string.Format("Issuer Validated. Issuer: {0}", issuer));
                 return issuer;
             }
 
@@ -142,7 +142,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (string.Equals(str, issuer, StringComparison.Ordinal))
                     {
-                        WilsonEventSource.Logger.WriteInformation(string.Format("Issuer Validated. Issuer: {0}", issuer));
+                        IdentityModelEventSource.Logger.WriteInformation(string.Format("Issuer Validated. Issuer: {0}", issuer));
                         return issuer;
                     }
                 }
@@ -168,7 +168,7 @@ namespace System.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuerSigningKey)
             {
-                WilsonEventSource.Logger.WriteInformation("ValidateIssuerSigningKey property on ValidationParamaters is set to false. Exiting without validating the issuer signing key.");
+                IdentityModelEventSource.Logger.WriteInformation("ValidateIssuerSigningKey property on ValidationParamaters is set to false. Exiting without validating the issuer signing key.");
                 return;
             }
 
@@ -201,7 +201,7 @@ namespace System.IdentityModel.Tokens
 
             if (!validationParameters.ValidateLifetime)
             {
-                WilsonEventSource.Logger.WriteInformation("ValidateLifetime property on ValidationParamaters is set to false. Exiting without validating the lifetime.");
+                IdentityModelEventSource.Logger.WriteInformation("ValidateLifetime property on ValidationParamaters is set to false. Exiting without validating the lifetime.");
                 return;
             }
 
@@ -227,7 +227,7 @@ namespace System.IdentityModel.Tokens
             }
 
             // if it reaches here, that means lifetime of the token is valid
-            WilsonEventSource.Logger.WriteInformation("Lifetime of the token is validated.");
+            IdentityModelEventSource.Logger.WriteInformation("Lifetime of the token is validated.");
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace System.IdentityModel.Tokens
             }
 
             // if it reaches here, that means no token replay is detected.
-            WilsonEventSource.Logger.WriteInformation("No token replay is detected.");
+            IdentityModelEventSource.Logger.WriteInformation("No token replay is detected.");
         }
     }
 }
