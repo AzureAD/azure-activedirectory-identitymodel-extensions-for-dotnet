@@ -6,20 +6,20 @@ namespace Microsoft.IdentityModel.Logging
     /// <summary>
     /// Event source based logger to log different events.
     /// </summary>
-    public class WilsonEventSource : EventSource
+    public class IdentityModelEventSource : EventSource
     {
         private static EventLevel _logLevel;
 
-        static WilsonEventSource()
+        static IdentityModelEventSource()
         {
-            Logger = new WilsonEventSource();
+            Logger = new IdentityModelEventSource();
             _logLevel = EventLevel.Informational;
         }
 
         /// <summary>
         /// Static logger that is exposed externally. An external application or framework can hook up a listener to this event source to log data in a custom way.
         /// </summary>
-        public static WilsonEventSource Logger { get; }
+        public static IdentityModelEventSource Logger { get; }
 
         [Event(1, Level = EventLevel.Verbose)]
         public void WriteVerbose(string message)

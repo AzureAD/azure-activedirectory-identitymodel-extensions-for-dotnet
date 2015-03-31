@@ -360,13 +360,13 @@ namespace System.IdentityModel.Tokens
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                WilsonEventSource.Logger.WriteInformation(string.Format("Token string length greater than maximum length allowed. Token string length: {0}", tokenString.Length));
+                IdentityModelEventSource.Logger.WriteInformation(string.Format("Token string length greater than maximum length allowed. Token string length: {0}", tokenString.Length));
                 return false;
             }
 
             if (!Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex))
             {
-                WilsonEventSource.Logger.WriteInformation("Token string does not match the token format: header.payload.signature");
+                IdentityModelEventSource.Logger.WriteInformation("Token string does not match the token format: header.payload.signature");
                 return false;
             }
 
@@ -408,7 +408,7 @@ namespace System.IdentityModel.Tokens
                 notBefore = now;
             }
 
-            WilsonEventSource.Logger.WriteVerbose("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.");
+            IdentityModelEventSource.Logger.WriteVerbose("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.");
             JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires);
             JwtHeader header = new JwtHeader(signingCredentials);
 
@@ -425,16 +425,16 @@ namespace System.IdentityModel.Tokens
 
             if (signatureProvider != null)
             {
-                WilsonEventSource.Logger.WriteVerbose("Creating signature using the signature provider.");
+                IdentityModelEventSource.Logger.WriteVerbose("Creating signature using the signature provider.");
                 rawSignature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
             }
             else if (signingCredentials != null)
             {
-                WilsonEventSource.Logger.WriteVerbose("Creating raw signature using signing credentials.");
+                IdentityModelEventSource.Logger.WriteVerbose("Creating raw signature using signing credentials.");
                 rawSignature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, signingCredentials.SigningKey, signingCredentials.SignatureAlgorithm, signatureProvider));
             }
 
-            WilsonEventSource.Logger.WriteInformation("Creating security token from the header, payload and raw signature.");
+            IdentityModelEventSource.Logger.WriteInformation("Creating security token from the header, payload and raw signature.");
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
         }
 
@@ -450,7 +450,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
         public override SecurityToken ReadToken(string tokenString)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
 
             if (tokenString == null)
             {
@@ -482,7 +482,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", System.Reflection.MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", System.Reflection.MethodBase.GetCurrentMethod()));
 
             if (string.IsNullOrWhiteSpace(securityToken))
             {
@@ -574,7 +574,7 @@ namespace System.IdentityModel.Tokens
                 identity.BootstrapContext = securityToken;
             }
 
-            WilsonEventSource.Logger.WriteInformation("Security token validated.");
+            IdentityModelEventSource.Logger.WriteInformation("Security token validated.");
             validatedToken = jwt;
             return new ClaimsPrincipal(identity);
         }
@@ -591,7 +591,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>The <see cref="JwtSecurityToken"/> as a signed (if <see cref="SigningCredentials"/> exist) encoded string.</returns>
         public override string WriteToken(SecurityToken token)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
 
             if (token == null)
             {
@@ -612,7 +612,7 @@ namespace System.IdentityModel.Tokens
                 signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, jwt.SigningCredentials.SigningKey, jwt.SigningCredentials.SignatureAlgorithm));
             }
 
-            WilsonEventSource.Logger.WriteInformation("Adding the signature to the token.");
+            IdentityModelEventSource.Logger.WriteInformation("Adding the signature to the token.");
             return string.Concat(signingInput, ".", signature);
         }
 
@@ -629,7 +629,7 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="InvalidProgramException"><see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning(SecurityKey, string)"/> returns null.</exception>
         internal byte[] CreateSignature(string inputString, SecurityKey key, string algorithm, SignatureProvider signatureProvider = null)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
 
             if (null == inputString)
             {
@@ -657,7 +657,7 @@ namespace System.IdentityModel.Tokens
 
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
 
             // in the case that a SignatureProviderFactory can handle nulls, just don't check here.
             //SignatureProvider signatureProvider = SignatureProviderFactory.CreateForVerifying(key, algorithm);
@@ -692,7 +692,7 @@ namespace System.IdentityModel.Tokens
         /// <para>If the 'token' signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'token'.</para></remarks>
         protected virtual JwtSecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
 
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -748,7 +748,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
                     {
-                        WilsonEventSource.Logger.WriteInformation("Security token has a valid signature.");
+                        IdentityModelEventSource.Logger.WriteInformation("Security token has a valid signature.");
                         jwt.SigningKey = securityKey;
                         return jwt;
                     }
@@ -773,7 +773,7 @@ namespace System.IdentityModel.Tokens
                     {
                         if (this.ValidateSignature(encodedBytes, signatureBytes, sk, mappedAlgorithm))
                         {
-                            WilsonEventSource.Logger.WriteInformation("Security token has a valid signature.");
+                            IdentityModelEventSource.Logger.WriteInformation("Security token has a valid signature.");
                             jwt.SigningKey = securityKey;
                             return jwt;
                         }
@@ -803,7 +803,7 @@ namespace System.IdentityModel.Tokens
 
         private IEnumerable<SecurityKey> GetAllKeys(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
         {
-            WilsonEventSource.Logger.WriteInformation("Getting issuer signing keys from validaiton parameters.");
+            IdentityModelEventSource.Logger.WriteInformation("Getting issuer signing keys from validaiton parameters.");
             if (validationParameters.IssuerSigningKey != null)
                 yield return validationParameters.IssuerSigningKey;
 
@@ -821,7 +821,7 @@ namespace System.IdentityModel.Tokens
         {
             if (securityKey == null)
             {
-                WilsonEventSource.Logger.WriteWarning("security key is null");
+                IdentityModelEventSource.Logger.WriteWarning("security key is null");
                 return "null";
             }
             else
@@ -844,7 +844,7 @@ namespace System.IdentityModel.Tokens
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JwtSecurityToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JwtSecurityToken jwt, string issuer, TokenValidationParameters validationParameters)
         {
-            //WilsonEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
+            //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
             if (jwt == null)
             {
                 LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException));
@@ -855,7 +855,7 @@ namespace System.IdentityModel.Tokens
                 LogHelper.LogError(ErrorMessages.IDX10221, typeof(ArgumentNullException));
             }
 
-            WilsonEventSource.Logger.WriteInformation("Creating claims identity from the validated token.");
+            IdentityModelEventSource.Logger.WriteInformation("Creating claims identity from the validated token.");
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
             foreach (Claim jwtClaim in jwt.Claims)
             {

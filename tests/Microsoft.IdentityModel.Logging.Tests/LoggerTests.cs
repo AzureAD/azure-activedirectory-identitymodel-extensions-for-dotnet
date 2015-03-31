@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void LogMessageAndThrowException()
         {
             SampleListener listener = new SampleListener();
-            listener.EnableEvents(WilsonEventSource.Logger, EventLevel.Verbose);
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             try
             {
@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void LogMessage()
         {
             SampleListener listener = new SampleListener();
-            listener.EnableEvents(WilsonEventSource.Logger, EventLevel.Verbose);
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             TokenValidationParameters validationParameters = new TokenValidationParameters()
             {
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void TestLogLevel()
         {
             SampleListener listener = new SampleListener();
-            listener.EnableEvents(WilsonEventSource.Logger, EventLevel.Verbose);
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             handler.CreateToken();
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.DoesNotContain("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.", listener.TraceBuffer);
 
             // Setting log level to verbose so that all messages are logged.
-            WilsonEventSource.LogLevel = EventLevel.Verbose;
+            IdentityModelEventSource.LogLevel = EventLevel.Verbose;
             handler.CreateToken();
             Assert.Contains("Creating security token from the header, payload and raw signature.", listener.TraceBuffer);
             Assert.Contains("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.", listener.TraceBuffer);
