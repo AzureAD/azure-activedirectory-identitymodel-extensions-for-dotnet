@@ -16,11 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -44,9 +46,10 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentNullException("json");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException));
             }
 
+            IdentityModelEventSource.Logger.WriteInformation("OpenIdConnectConfiguration.Create: Deserializing json into OpenIdConnectConfiguration object");
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
         }
 
@@ -66,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if(string.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentNullException("json");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException));
             }
 
             OpenIdConnectConfiguration config = Create(json);
@@ -75,6 +78,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void Copy(OpenIdConnectConfiguration config)
         {
+            IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfiguration.Copy: Copying openIdConnect configuration object.");
             AuthorizationEndpoint = config.AuthorizationEndpoint;
             CheckSessionIframe = config.CheckSessionIframe;
             EndSessionEndpoint = config.EndSessionEndpoint;
@@ -97,8 +101,10 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (dictionary == null)
             {
-                throw new ArgumentNullException("dictionary");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException));
             }
+
+            IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfiguration.Constructor: Initializing an instance of OpenIdConnectConfiguration from a dictionary.");
 
             object obj = null;
             string str = null;

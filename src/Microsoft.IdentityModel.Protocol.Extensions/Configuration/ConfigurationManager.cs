@@ -23,6 +23,7 @@ using System.IdentityModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -96,17 +97,17 @@ namespace Microsoft.IdentityModel.Protocols
             if (!typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
 #endif
             {
-                throw new NotImplementedException(typeof(T).FullName);
+                LogHelper.LogError(typeof(T).FullName, typeof(NotImplementedException));
             }
 
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
-                throw new ArgumentNullException("metadataAddress");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException));
             }
 
             if (docRetriever == null)
             {
-                throw new ArgumentNullException("retriever");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException));
             }
 
             _metadataAddress = metadataAddress;
@@ -125,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumAutomaticRefreshInterval)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value), typeof(ArgumentOutOfRangeException));
                 }
                 _automaticRefreshInterval = value;
             }
@@ -141,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumRefreshInterval)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10106, MinimumRefreshInterval, value));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10106, MinimumRefreshInterval, value), typeof(ArgumentOutOfRangeException));
                 }
                 _refreshInterval = value;
             }
@@ -163,7 +164,8 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 return (IConfigurationRetriever<T>)new OpenIdConnectConfigurationRetriever();
             }
-            throw new NotImplementedException(typeof(T).FullName);
+            LogHelper.LogError(typeof(T).FullName, typeof(NotImplementedException));
+            return null;
         }
 
         /// <summary>
@@ -215,7 +217,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (_currentConfiguration == null)
                 {
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10803, _metadataAddress ?? "null"), retrieveEx);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10803, _metadataAddress ?? "null"), typeof(InvalidOperationException));
                 }
 
                 // Stale metadata is better than no metadata

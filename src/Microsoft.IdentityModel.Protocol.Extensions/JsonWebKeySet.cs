@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -50,17 +51,18 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentNullException("json");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException));
             }
 
             try
             {
+                IdentityModelEventSource.Logger.WriteVerbose("JsonWebKeySet.Constructor: Deserializing json string into json web keys.");
                 var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
                 _keys = jwebKeys._keys;
             }
             catch(Exception ex)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), ex);
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), ex.Message);
             }
         }
 
@@ -73,13 +75,13 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (dictionary == null)
             {
-                throw new ArgumentNullException("dictionary");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException));
             }
 
             object obj = null;
             if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
             {
-                throw new ArgumentException(ErrorMessages.IDX10800);
+                LogHelper.LogError(ErrorMessages.IDX10800, typeof(ArgumentException));
             }
 
             List<object> keys = obj as List<object>;
@@ -133,11 +135,11 @@ namespace Microsoft.IdentityModel.Protocols
                             }
                             catch (CryptographicException ex)
                             {
-                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), ex);
+                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), ex.Message);
                             }
                             catch (FormatException fex)
                             {
-                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), fex);
+                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), fex.Message);
                             }
                         }
                     }
@@ -161,11 +163,11 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                         catch (CryptographicException ex)
                         {
-                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), ex);
+                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex.Message);
                         }
                         catch (FormatException ex)
                         {
-                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), ex);
+                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex.Message);
                         }
                     }
                 }

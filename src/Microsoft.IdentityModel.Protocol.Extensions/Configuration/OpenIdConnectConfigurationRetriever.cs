@@ -17,10 +17,12 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -71,19 +73,24 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                throw new ArgumentNullException("address");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfigurationRetriever.GetAsync: address"), typeof(ArgumentNullException));
             }
 
             if (retriever == null)
             {
-                throw new ArgumentNullException("retriever");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfigurationRetriever.GetAsync: retriever"), typeof(ArgumentNullException));
             }
 
             string doc = await retriever.GetDocumentAsync(address, cancel);
+
+            IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfigurationRetriever.GetAsync: Deserializing the string obtained from metadata endpoint into openIdConnectConfiguration object.");
             OpenIdConnectConfiguration openIdConnectConfiguration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
+                IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfigurationRetriever.GetAsync: Retrieving json web keys from " + openIdConnectConfiguration.JwksUri);
                 doc = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
+
+                IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfigurationRetriever.GetAsync: Deserializing json web keys obtained from " + openIdConnectConfiguration.JwksUri);
                 openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(doc);
                 foreach (SecurityKey key in openIdConnectConfiguration.JsonWebKeySet.GetSigningKeys())
                 {

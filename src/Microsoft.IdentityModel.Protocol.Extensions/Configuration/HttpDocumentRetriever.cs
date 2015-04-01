@@ -17,10 +17,12 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -37,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (httpClient == null)
             {
-                throw new ArgumentNullException("httpClient");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": httpClient"), typeof(ArgumentNullException));
             }
             _httpClient = httpClient;
         }
@@ -46,17 +48,19 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                throw new ArgumentNullException("address");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException));
             }
             try
             {
+                IdentityModelEventSource.Logger.WriteVerbose("HttpDocumentRetriever.GetDocumentAsync: Obtaining information from metadata endpoint: " + address);
                 HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw new IOException("Unable to get document from: " + address, ex);
+                LogHelper.LogError("Unable to get document from: " + address, typeof(IOException), ex.Message);
+                return null;
             }
         }
     }

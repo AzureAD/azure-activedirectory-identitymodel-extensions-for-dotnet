@@ -19,6 +19,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -54,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentNullException("json");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException));
             }
 
             var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
@@ -97,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (dictionary == null)
             {
-                throw new ArgumentNullException("dictionary");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException));
             }
 
             object obj = null;
@@ -297,7 +299,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": KeyOps"), typeof(ArgumentNullException));
 
                 foreach (string keyOp in value)
                     _keyops.Add(keyOp);
@@ -376,7 +378,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": X5c"), typeof(ArgumentNullException));
 
                 foreach (string clause in value)
                     _certificateClauses.Add(clause);

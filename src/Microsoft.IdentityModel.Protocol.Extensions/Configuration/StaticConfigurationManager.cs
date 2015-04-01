@@ -17,8 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -39,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": configuration"), typeof(ArgumentNullException));
             }
 
             _configuration = configuration;

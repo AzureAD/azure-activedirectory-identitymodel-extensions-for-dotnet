@@ -19,7 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -49,7 +51,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": other"), typeof(ArgumentNullException));
             }
 
             foreach (KeyValuePair<string, string> keyValue in other.Parameters)
@@ -71,6 +73,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (nameValueCollection == null)
             {
+                IdentityModelEventSource.Logger.WriteWarning("OpenIdConnectMessage.Constructor: namevaluecollection is null");
                 return;
             }
 
@@ -91,6 +94,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (parameters == null)
             {
+                IdentityModelEventSource.Logger.WriteWarning("OpenIdConnectMessage.Constructor: parameters key-value pairs enumeration is null");
                 return;
             }
 

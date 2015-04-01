@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
+using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -33,7 +35,7 @@ namespace Microsoft.IdentityModel.Protocols
         private static string ToBase64UrlString( byte[] input )
         {
             if ( input == null )
-                throw new ArgumentNullException( "input" );
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "Base64UrlConverter.ToBase64UrlString: input"), typeof(ArgumentNullException));
 
             return Convert.ToBase64String( input ).TrimEnd( '=' ).Replace( '+', '-' ).Replace( '/', '_' );
         }
@@ -46,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols
         private static byte[] FromBase64UrlString( string input )
         {
             if ( string.IsNullOrEmpty( input ) )
-                throw new ArgumentNullException( "input" );
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "Base64UrlConverter.FromBase64UrlString: input"), typeof(ArgumentNullException));
 
             return Convert.FromBase64String( Pad( input.Replace( '-', '+' ).Replace( '_', '/' ) ) );
         }

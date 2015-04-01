@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -76,6 +77,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <para>for example: 635410359229176103.MjQxMzU0ODUtMTdiNi00NzAwLWE4MjYtNTE4NGExYmMxNTNlZmRkOGU4NjctZjQ5OS00MWIyLTljNTEtMjg3NmM0NzI4ZTc5</para></remarks>
         public virtual string GenerateNonce()
         {
+            IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectProtocolValidator.GenerateNonce: Generating nonce for openIdConnect message.");
             string nonce = Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString() + Guid.NewGuid().ToString()));
             if (RequireTimeStampInNonce)
             {
@@ -113,7 +115,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10105, value));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10105, value), typeof(ArgumentOutOfRangeException));
                 }
 
                 _nonceLifetime = value;
@@ -178,40 +180,40 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)
-                throw new ArgumentNullException("jwt");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException));
 
             if (validationContext == null)
-                throw new ArgumentNullException("validationContext");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException));
 
             // required claims
             if (jwt.Payload.Aud.Count == 0)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
 
             if (!jwt.Payload.Exp.HasValue)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
 
             if (!jwt.Payload.Iat.HasValue)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
 
             if (jwt.Payload.Iss == null)
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
 
             // sub is optional by default
             if (RequireSub && (string.IsNullOrWhiteSpace(jwt.Payload.Sub)))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
 
             // optional claims
             if (RequireAcr && string.IsNullOrWhiteSpace(jwt.Payload.Acr))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, jwt), typeof(OpenIdConnectProtocolException));
 
             if (RequireAmr && string.IsNullOrWhiteSpace(jwt.Payload.Amr))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, jwt), typeof(OpenIdConnectProtocolException));
 
             if (RequireAuthTime && string.IsNullOrWhiteSpace(jwt.Payload.AuthTime))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, jwt), typeof(OpenIdConnectProtocolException));
 
             if (RequireAzp && string.IsNullOrWhiteSpace(jwt.Payload.Azp))
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt), typeof(OpenIdConnectProtocolException));
 
             ValidateNonce(jwt, validationContext);
             ValidateCHash(jwt, validationContext);
@@ -230,25 +232,28 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>if <see cref="OpenIdConnectProtocolValidationContext.AuthorizationCode"/> is null, then the <see cref="JwtSecurityToken"/> 'c_hash' will not be validated.</remarks>
         protected virtual void ValidateCHash(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
+            IdentityModelEventSource.Logger.WriteInformation("OpenIdConnectProtocolValidator.ValidateCHash: validating chash of the jwt token.");
+
             if (jwt == null)
             {
-                throw new ArgumentNullException("jwt");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException));
             }
 
             if (validationContext == null)
             {
-                throw new ArgumentNullException("validationContext");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException));
             }
 
             // this handles the case the code is not expected
             if (validationContext.AuthorizationCode == null)
             {
+                IdentityModelEventSource.Logger.WriteWarning("OpenIdConnectProtocolValidator.ValidateCHash: validationContext.AuthorizationCode is null");
                 return;
             }
 
             if (!jwt.Payload.ContainsKey(JwtRegisteredClaimNames.CHash))
             {
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt), typeof(OpenIdConnectProtocolInvalidCHashException));
             }
 
             HashAlgorithm hashAlgorithm = null;
@@ -275,19 +280,19 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch (Exception ex)
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), ex);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), ex.Message);
                 }
 
                 if (hashAlgorithm == null)
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10307, algorithm, jwt));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10307, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException));
                 }
 
                 byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(validationContext.AuthorizationCode));
                 string hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
                 if (!StringComparer.Ordinal.Equals(jwt.Payload.CHash, hashString))
                 {
-                    throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, jwt.Payload.CHash, validationContext.AuthorizationCode, algorithm, jwt));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, jwt.Payload.CHash, validationContext.AuthorizationCode, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException));
                 }
             }
             finally
@@ -314,14 +319,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the <see cref="JwtSecurityToken"/>.</para></remarks>
         protected virtual void ValidateNonce(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
+            IdentityModelEventSource.Logger.WriteInformation("OpenIdConnectProtocolValidator.ValidateNonce: validating nonce of the jwt token.");
+
             if (jwt == null)
             {
-                throw new ArgumentNullException("jwt");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException));
             }
 
             if (validationContext == null)
             {
-                throw new ArgumentNullException("validationContext");
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException));
             }
 
             string nonceFoundInJwt = jwt.Payload.Nonce;
@@ -330,26 +337,27 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (validationContext.Nonce == null)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311), typeof(OpenIdConnectProtocolInvalidNonceException));
                 }
 
                 if (nonceFoundInJwt == null)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10322, jwt.ToString()));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10322, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
                 }
             }
             else if ((validationContext.Nonce != null) && (nonceFoundInJwt == null))
             {
-                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10323, validationContext.Nonce, jwt.ToString()));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10323, validationContext.Nonce, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
             }
             else if (validationContext.Nonce == null)
             {
+                IdentityModelEventSource.Logger.WriteWarning("OpenIdConnectProtocolValidator.ValidateNonce: validationContext.Nonce is null");
                 return;
             }
 
             if (!(StringComparer.Ordinal.Equals(nonceFoundInJwt, validationContext.Nonce)))
             {
-                throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, validationContext.Nonce, jwt.ToString()));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, validationContext.Nonce, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
             }
 
             if (RequireTimeStampInNonce)
@@ -357,24 +365,24 @@ namespace Microsoft.IdentityModel.Protocols
                 int endOfTimestamp = nonceFoundInJwt.IndexOf('.');
                 if (endOfTimestamp == -1)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10317, validationContext.Nonce));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10317, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException));
                 }
 
                 string timestamp = nonceFoundInJwt.Substring(0, endOfTimestamp);
-                DateTime nonceTime;
-                long ticks;
+                DateTime nonceTime = new DateTime(1979, 1, 1);          // initializing to some value otherwise it gives an error
+                long ticks = -1;
                 try
                 {
                     ticks = Convert.ToInt64(timestamp, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), ex);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), ex.Message);
                 }
 
                 if (ticks <= 0)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException));
                 }
 
                 try
@@ -383,13 +391,13 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch(Exception ex)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), ex);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), typeof(OpenIdConnectProtocolInvalidNonceException), ex.Message);
                 }
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
                 {
-                    throw new OpenIdConnectProtocolInvalidNonceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10316, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString()));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10316, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
                 }
             }
         }

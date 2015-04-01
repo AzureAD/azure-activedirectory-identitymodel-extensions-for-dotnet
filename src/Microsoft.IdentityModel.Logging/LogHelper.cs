@@ -13,13 +13,13 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">message to log.</param>
         /// <param name="exceptionType">Type of the exception to be thrown</param>
         /// <param name="throwException">boolean to set whether to throw exception or not. Default is true.</param>
-        public static void LogError(string message, Type exceptionType, bool throwException = true)
+        public static void LogError(string message, Type exceptionType, string exceptionMessage = null, bool throwException = true)
         {
             IdentityModelEventSource.Logger.WriteError(message);
             
             if (throwException)
             {
-                throw (Exception)Activator.CreateInstance(exceptionType, message);
+                throw (Exception)Activator.CreateInstance(exceptionType, exceptionMessage ?? message);
             }
         }
     }
