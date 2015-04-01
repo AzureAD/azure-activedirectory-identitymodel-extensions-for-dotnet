@@ -1,0 +1,83 @@
+{
+  "locked": false,
+  "version": -9998,
+  "projectFileDependencyGroups": {
+    "": [
+      "System.Diagnostics.Tracing >= 4.0.20-beta-*"
+    ],
+    "DNX,Version=v4.5.1": [],
+    "DNXCore,Version=v5.0": []
+  },
+  "libraries": {
+    "System.Diagnostics.Tracing/4.0.20-beta-22801": {
+      "serviceable": false,
+      "sha": "sDLeK35Ftc7y/9Ta0WnAKnyE+ZILvSmcourJ9thGrRA7ZcFJYA89f5VhAUEeznYG5fcU3uQOynx7vUV70ji57w==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {
+            "System.Runtime": "4.0.0-beta-22801"
+          },
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/net45/System.Diagnostics.Tracing.dll"
+          ],
+          "compileAssemblies": [
+            "lib/net45/System.Diagnostics.Tracing.dll"
+          ]
+        },
+        "DNXCore,Version=v5.0": {
+          "dependencies": {
+            "System.Runtime": "4.0.0-beta-22801"
+          },
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/aspnetcore50/System.Diagnostics.Tracing.dll"
+          ],
+          "compileAssemblies": [
+            "lib/contract/System.Diagnostics.Tracing.dll"
+          ]
+        }
+      },
+      "files": [
+        "License.rtf",
+        "System.Diagnostics.Tracing.4.0.20-beta-22801.nupkg",
+        "System.Diagnostics.Tracing.4.0.20-beta-22801.nupkg.sha512",
+        "System.Diagnostics.Tracing.nuspec",
+        "lib/aspnetcore50/System.Diagnostics.Tracing.dll",
+        "lib/contract/System.Diagnostics.Tracing.dll",
+        "lib/net45/System.Diagnostics.Tracing.dll",
+        "lib/portable-wpa81+wp80+win80+net45+aspnetcore50/System.Diagnostics.Tracing.dll"
+      ]
+    },
+    "System.Runtime/4.0.20-beta-22231": {
+      "serviceable": false,
+      "sha": "8CFWYP0ldITYQqgfMR6Wn7yjpOzrVzwkfDWHd3PtppILgmvo6rjuJd+KfZTCdacbf1WUbWsp1yuJcTpDYI3RUw==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {},
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [],
+          "compileAssemblies": []
+        },
+        "DNXCore,Version=v5.0": {
+          "dependencies": {},
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/aspnetcore50/System.Runtime.dll"
+          ],
+          "compileAssemblies": [
+            "lib/contract/System.Runtime.dll"
+          ]
+        }
+      },
+      "files": [
+        "License.rtf",
+        "System.Runtime.4.0.20-beta-22231.nupkg",
+        "System.Runtime.4.0.20-beta-22231.nupkg.sha512",
+        "System.Runtime.nuspec",
+        "lib/aspnetcore50/System.Runtime.dll",
+        "lib/contract/System.Runtime.dll"
+      ]
+    }
+  }
+}
