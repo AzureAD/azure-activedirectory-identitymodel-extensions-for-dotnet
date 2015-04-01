@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), ex.Message);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), ex);
                 }
 
                 if (hashAlgorithm == null)
@@ -377,7 +377,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), ex.Message);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), ex);
                 }
 
                 if (ticks <= 0)
@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch(Exception ex)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), typeof(OpenIdConnectProtocolInvalidNonceException), ex.Message);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), typeof(OpenIdConnectProtocolInvalidNonceException), ex);
                 }
 
                 DateTime utcNow = DateTime.UtcNow;

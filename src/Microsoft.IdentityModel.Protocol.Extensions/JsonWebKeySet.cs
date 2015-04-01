@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch(Exception ex)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), ex.Message);
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), ex);
             }
         }
 
@@ -135,11 +135,11 @@ namespace Microsoft.IdentityModel.Protocols
                             }
                             catch (CryptographicException ex)
                             {
-                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), ex.Message);
+                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), ex);
                             }
                             catch (FormatException fex)
                             {
-                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), fex.Message);
+                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), fex);
                             }
                         }
                     }
@@ -163,11 +163,11 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                         catch (CryptographicException ex)
                         {
-                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex.Message);
+                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex);
                         }
                         catch (FormatException ex)
                         {
-                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex.Message);
+                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex);
                         }
                     }
                 }
