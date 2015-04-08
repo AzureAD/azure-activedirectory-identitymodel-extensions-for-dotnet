@@ -63,10 +63,10 @@ namespace System.IdentityModel.Tokens
         private Int32 _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
 
 
-		/// <summary>
-		/// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
-		/// </summary>
-		public static readonly Int32 DefaultTokenLifetimeInMinutes = 60;
+        /// <summary>
+        /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
+        /// </summary>
+        public static readonly Int32 DefaultTokenLifetimeInMinutes = 60;
 
         static JwtSecurityTokenHandler()
         {
@@ -952,7 +952,7 @@ namespace System.IdentityModel.Tokens
                 }
             }
 
-            LogHelper.LogError("actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JWT", typeof(SecurityTokenException));
+            LogHelper.LogError(ErrorMessages.IDX10711, typeof(SecurityTokenException));
             return null;
         }
 

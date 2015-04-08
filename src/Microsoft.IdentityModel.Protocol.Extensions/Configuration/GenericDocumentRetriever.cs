@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 else
                 {
-                    LogHelper.LogError("Unable to get document from: " + address, typeof(IOException), ex);
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, address), typeof(IOException), ex);
                     return null;
                 }
             }
