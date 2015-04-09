@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("HttpDocumentRetriever.GetDocumentAsync: Obtaining information from metadata endpoint: " + address);
+                IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
                 HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);

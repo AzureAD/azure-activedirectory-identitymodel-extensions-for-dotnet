@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
                         {
-                            IdentityModelEventSource.Logger.WriteVerbose("WsFederationConfigurationRetriever.GetAsync: Adding signing keys into the configuration object.");
+                            IdentityModelEventSource.Logger.WriteVerbose("Adding signing keys into the configuration object.");
                             foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
                             {
                                 X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;

@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    IdentityModelEventSource.Logger.WriteVerbose("GenericDocumentRetriever.GetDocumentAsync: Obtaining information from metadata endpoint: " + address);
+                    IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
                     using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelPendingRequests()))
                     {
                         return await client.GetStringAsync(address).ConfigureAwait(false);

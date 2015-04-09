@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols
                 LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException));
             }
 
-            IdentityModelEventSource.Logger.WriteInformation("OpenIdConnectConfiguration.Create: Deserializing json into OpenIdConnectConfiguration object");
+            IdentityModelEventSource.Logger.WriteInformation("Deserializing json into OpenIdConnectConfiguration object");
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
         }
 
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void Copy(OpenIdConnectConfiguration config)
         {
-            IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfiguration.Copy: Copying openIdConnect configuration object.");
+            IdentityModelEventSource.Logger.WriteVerbose("Copying openIdConnect configuration object.");
             AuthorizationEndpoint = config.AuthorizationEndpoint;
             CheckSessionIframe = config.CheckSessionIframe;
             EndSessionEndpoint = config.EndSessionEndpoint;
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Protocols
                 LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException));
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose("OpenIdConnectConfiguration.Constructor: Initializing an instance of OpenIdConnectConfiguration from a dictionary.");
+            IdentityModelEventSource.Logger.WriteVerbose("Initializing an instance of OpenIdConnectConfiguration from a dictionary.");
 
             object obj = null;
             string str = null;
