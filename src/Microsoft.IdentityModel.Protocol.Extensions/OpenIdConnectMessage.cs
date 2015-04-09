@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             foreach (KeyValuePair<string, string[]> keyValue in parameters)
             {
-                if (keyValue.Value != null)
+                if (keyValue.Value != null && !string.IsNullOrWhiteSpace(keyValue.Key))
                 {
                     foreach (string strValue in keyValue.Value)
                     {

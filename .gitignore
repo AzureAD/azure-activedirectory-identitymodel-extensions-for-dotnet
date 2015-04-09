@@ -6,6 +6,9 @@
 *.user
 *.sln.docstates
 
+# lock files
+project.lock.json
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
