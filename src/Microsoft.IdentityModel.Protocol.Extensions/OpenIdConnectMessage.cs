@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     foreach (string strValue in keyValue.Value)
                     {
-                        if (strValue != null && keyValue.Key != null)
+                        if (strValue != null)
                         {
                             SetParameter(keyValue.Key, strValue);
                             break;
