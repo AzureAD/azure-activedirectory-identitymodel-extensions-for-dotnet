@@ -17,8 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Extensions
 {
@@ -29,20 +31,21 @@ namespace Microsoft.IdentityModel.Extensions
     {
         public static string Validate(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
+            IdentityModelEventSource.Logger.WriteInformation("validating issuers in the jwt token");
             if (validationParameters == null)
             {
-                throw new ArgumentNullException("validationParameters");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211), typeof(SecurityTokenInvalidIssuerException), EventLevel.Verbose);
             }
 
             // Throw if all possible places to validate against are null or empty
             if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && (validationParameters.ValidIssuers == null))
             {
-                throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10204));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10204), typeof(SecurityTokenInvalidIssuerException), EventLevel.Error);
             }
 
             if (!string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
@@ -80,7 +83,8 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            throw new SecurityTokenInvalidIssuerException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10205, validIssuer, validIssuers, issuer));
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10205, validIssuer, validIssuers, issuer), typeof(SecurityTokenInvalidIssuerException), EventLevel.Error);
+            return null;
         }
     }
 }

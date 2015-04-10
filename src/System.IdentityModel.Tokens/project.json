@@ -1,20 +1,24 @@
 {
-    "version": "5.0.0-beta1",
+    "version": "5.0.0-*",
     "dependencies": {
-        "Newtonsoft.Json": "6.0.6"
+		"Newtonsoft.Json": "6.0.6",
+		"Microsoft.IdentityModel.Logging": "1.0.0-beta4-*"
     },
+    "exclude": [
+        "Saml\\SamlSecurityTokenHandler.cs",
+        "Saml\\Saml2SecurityTokenHandler.cs",
+        "Saml\\SamlConstants.cs",
+        "Saml\\SecurityKeyResolver.cs",
+        "Tokens\\SecurityTokenHandlerCollectionExtensions.cs"
+    ],
     "frameworks": {
-       "aspnet50": {},
-        "aspnetcore50": {
+       "dnx451": {},
+        "dnxcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
-                "System.Collections.Specialized": "4.0.0-beta-*",
-                "System.Diagnostics.Contracts": "4.0.0-beta-*",
                 "System.Diagnostics.Tools": "4.0.0-beta-*",
                 "System.Globalization": "4.0.10-beta-*",
                 "System.IO": "4.0.10-beta-*",
-                "System.IO.Compression": "4.0.0-beta-*",
-                "System.Runtime": "4.0.20-beta-*",
                 "System.Runtime.Extensions": "4.0.10-beta-*",
                 "System.Runtime.InteropServices": "4.0.20-beta-*",
                 "System.Security.Claims": "4.0.0-beta-*",
@@ -28,7 +32,7 @@
         }
     },
     "compilationOptions": {
-        "allowUnsafe": true,
-        "warningsAsErrors": false
+        "allowUnsafe": false,
+        "warningsAsErrors": true
     }
 }

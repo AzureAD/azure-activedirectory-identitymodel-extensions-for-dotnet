@@ -1,19 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22416.0
+VisualStudioVersion = 14.0.22717.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.kproj", "{A0E7DD32-5189-439C-B460-5BA3B0561707}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocols.kproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A0E7DD32-5189-439C-B460-5BA3B0561707} = {A0E7DD32-5189-439C-B460-5BA3B0561707}
-	EndProjectSection
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "tests\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.kproj", "{B449C824-9D81-4588-A562-E61D9215C976}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.kproj", "{CC665B24-9531-41B9-93C1-EF7F425AB33C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8905D2E3-4499-4A86-BF3E-F098F228DD59}"
@@ -29,6 +18,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "certs", "certs", "{1751FD49
 		tests\Certs\SelfSigned2048_SHA384.pfx = tests\Certs\SelfSigned2048_SHA384.pfx
 		tests\Certs\SelfSigned2048_SHA512.pfx = tests\Certs\SelfSigned2048_SHA512.pfx
 	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.xproj", "{A0E7DD32-5189-439C-B460-5BA3B0561707}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocol.Extensions\Microsoft.IdentityModel.Protocols.xproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A0E7DD32-5189-439C-B460-5BA3B0561707} = {A0E7DD32-5189-439C-B460-5BA3B0561707}
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Logging", "src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.xproj", "{FE248334-75AC-4F60-9409-42A28C7A39AA}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "tests\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.xproj", "{B449C824-9D81-4588-A562-E61D9215C976}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.xproj", "{CC665B24-9531-41B9-93C1-EF7F425AB33C}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Logging.Tests", "tests\Microsoft.IdentityModel.Logging.Tests\Microsoft.IdentityModel.Logging.Tests.xproj", "{7BB23627-58D2-41D5-B711-ACC5D7F6654E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +56,14 @@ Global
 		{CC665B24-9531-41B9-93C1-EF7F425AB33C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC665B24-9531-41B9-93C1-EF7F425AB33C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC665B24-9531-41B9-93C1-EF7F425AB33C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE248334-75AC-4F60-9409-42A28C7A39AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE248334-75AC-4F60-9409-42A28C7A39AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE248334-75AC-4F60-9409-42A28C7A39AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE248334-75AC-4F60-9409-42A28C7A39AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BB23627-58D2-41D5-B711-ACC5D7F6654E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BB23627-58D2-41D5-B711-ACC5D7F6654E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BB23627-58D2-41D5-B711-ACC5D7F6654E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BB23627-58D2-41D5-B711-ACC5D7F6654E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,5 +74,7 @@ Global
 		{B449C824-9D81-4588-A562-E61D9215C976} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{CC665B24-9531-41B9-93C1-EF7F425AB33C} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{1751FD49-8430-4046-9C16-1642A4A49CBA} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{FE248334-75AC-4F60-9409-42A28C7A39AA} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
+		{7BB23627-58D2-41D5-B711-ACC5D7F6654E} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 EndGlobal

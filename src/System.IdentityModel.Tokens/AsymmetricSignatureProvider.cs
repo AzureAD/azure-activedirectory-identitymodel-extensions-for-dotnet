@@ -30,7 +30,12 @@ namespace System.IdentityModel.Tokens
         private bool disposed;
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
         private RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
+
+#if POST_RC
+        // brentschmaltz - feature missing in corefx calling SHA256.Create() fails. Workaround for corefx rc is to pass algoritm as string.
         private HashAlgorithm hash;
+#endif
+        private string hash;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
@@ -108,6 +113,41 @@ namespace System.IdentityModel.Tokens
             throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10641, key.ToString()));
         }
 
+        protected virtual string GetHashAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw new ArgumentNullException("algorithm");
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha1Signature:
+                    return "SHA1";
+
+                case JwtAlgorithms.ECDSA_SHA256:
+                case JwtAlgorithms.HMAC_SHA256:
+                case JwtAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.RsaSha256Signature:
+                    return "SHA256";
+
+                case JwtAlgorithms.ECDSA_SHA384:
+                case JwtAlgorithms.HMAC_SHA384:
+                case JwtAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.RsaSha384Signature:
+                    return "SHA384";
+
+                case SecurityAlgorithms.RsaSha512Signature:
+                case JwtAlgorithms.RSA_SHA512:
+                case JwtAlgorithms.ECDSA_SHA512:
+                case JwtAlgorithms.HMAC_SHA512:
+                    return "SHA512";
+
+                default:
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm));
+            }
+        }
+
+#if POST_RC
+        // brentschmaltz - feature missing in corefx
         protected virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -118,20 +158,29 @@ namespace System.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaSha1Signature:
                     return SHA1.Create();
 
+                case JwtAlgorithms.ECDSA_SHA256:
+                case JwtAlgorithms.HMAC_SHA256:
+                case JwtAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return SHA256.Create();
 
+                case JwtAlgorithms.ECDSA_SHA384:
+                case JwtAlgorithms.HMAC_SHA384:
+                case JwtAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return SHA384.Create();
 
                 case SecurityAlgorithms.RsaSha512Signature:
+                case JwtAlgorithms.RSA_SHA512:
+                case JwtAlgorithms.ECDSA_SHA512:
+                case JwtAlgorithms.HMAC_SHA512:
                     return SHA512.Create();
 
                 default:
                     throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm));
             }
         }
-
+#endif
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
@@ -139,6 +188,15 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case JwtAlgorithms.ECDSA_SHA256:
+                case JwtAlgorithms.ECDSA_SHA384:
+                case JwtAlgorithms.ECDSA_SHA512:
+                case JwtAlgorithms.HMAC_SHA256:
+                case JwtAlgorithms.HMAC_SHA384:
+                case JwtAlgorithms.HMAC_SHA512:
+                case JwtAlgorithms.RSA_SHA256:
+                case JwtAlgorithms.RSA_SHA384:
+                case JwtAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha1Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
@@ -250,11 +308,13 @@ namespace System.IdentityModel.Tokens
                 {
                     this.disposed = true;
 
-                    if (this.hash != null)
+#if POST_RC
+                    if (hash != null)
                     {
-                        this.hash.Dispose();
-                        this.hash = null;
+                        hash.Dispose();
+                        hash = null;
                     }
+#endif
                 }
             }
         }

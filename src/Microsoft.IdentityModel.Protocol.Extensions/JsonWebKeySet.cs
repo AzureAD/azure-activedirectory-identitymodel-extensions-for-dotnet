@@ -23,6 +23,8 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -50,17 +52,18 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentNullException("json");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             try
             {
+                IdentityModelEventSource.Logger.WriteVerbose("Deserializing json string into json web keys.");
                 var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
                 _keys = jwebKeys._keys;
             }
             catch(Exception ex)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), ex);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), EventLevel.Error, ex);
             }
         }
 
@@ -73,13 +76,13 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (dictionary == null)
             {
-                throw new ArgumentNullException("dictionary");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             object obj = null;
             if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
             {
-                throw new ArgumentException(ErrorMessages.IDX10800);
+                LogHelper.Throw(ErrorMessages.IDX10800, typeof(ArgumentException), EventLevel.Error);
             }
 
             List<object> keys = obj as List<object>;
@@ -133,11 +136,11 @@ namespace Microsoft.IdentityModel.Protocols
                             }
                             catch (CryptographicException ex)
                             {
-                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), ex);
+                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, ex);
                             }
                             catch (FormatException fex)
                             {
-                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), fex);
+                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, fex);
                             }
                         }
                     }
@@ -161,11 +164,11 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                         catch (CryptographicException ex)
                         {
-                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), ex);
+                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
                         }
                         catch (FormatException ex)
                         {
-                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), ex);
+                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
                         }
                     }
                 }

@@ -1,26 +1,28 @@
 {
-    "version": "5.0.0-beta1",
+    "version": "5.0.0-*",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta1-*",
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta4-*",
         "Newtonsoft.Json": "6.0.6",
-        "System.IdentityModel.Tokens": "5.0.0-beta1-*",
-        "xunit.runner.kre": "1.0.0-*"
+        "System.IdentityModel.Tokens": "5.0.0-beta4-*",
+        "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
-    "code": [ "**\\*.cs", "..\\shared\\*.cs" ],
+    "compile": [ "**\\*.cs", "..\\shared\\*.cs" ],
     "exclude": [
         "Performance.cs",
         "X509CertificateValidatorExTests.cs"
     ],
-    "frameworks": {
-        "aspnet50": {
-
-        }
-    },
     "commands": {
-        "test":  "xunit.runner.kre"
+        "test": "xunit.runner.aspnet"
+    },
+    "frameworks": {
+        "dnx451": {
+            "dependencies": {
+                "Shouldly": "1.1.1.1"
+            }
+        }
     },
     "compilationOptions": {
         "allowUnsafe": false,
-        "warningsAsErrors": false
+        "warningsAsErrors": true
     }
 }
