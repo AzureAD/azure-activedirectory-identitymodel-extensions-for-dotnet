@@ -27,6 +27,7 @@ using System.ServiceModel.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -76,12 +77,12 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                throw new ArgumentNullException("address");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (retriever == null)
             {
-                throw new ArgumentNullException("retriever");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             WsFederationConfiguration configuration = new WsFederationConfiguration();
@@ -108,6 +109,7 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
                         {
+                            IdentityModelEventSource.Logger.WriteVerbose("Adding signing keys into the configuration object.");
                             foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
                             {
                                 X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
