@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Logging
         static IdentityModelEventSource()
         {
             Logger = new IdentityModelEventSource();
-            _logLevel = EventLevel.Informational;
+            _logLevel = EventLevel.Warning;
         }
 
         /// <summary>

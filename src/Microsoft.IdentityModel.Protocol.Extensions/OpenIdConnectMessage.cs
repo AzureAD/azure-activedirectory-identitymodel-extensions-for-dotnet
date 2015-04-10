@@ -19,7 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -49,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": other"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (KeyValuePair<string, string> keyValue in other.Parameters)
@@ -71,6 +74,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (nameValueCollection == null)
             {
+                IdentityModelEventSource.Logger.WriteWarning("namevaluecollection is null");
                 return;
             }
 
@@ -91,6 +95,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (parameters == null)
             {
+                IdentityModelEventSource.Logger.WriteWarning("parameters key-value pairs enumeration is null");
                 return;
             }
 

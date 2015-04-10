@@ -12,6 +12,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void LogMessageAndThrowException()
         {
             SampleListener listener = new SampleListener();
+            IdentityModelEventSource.LogLevel = EventLevel.Verbose;             // since null parameters exceptions are logged at Verbose level
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             try
@@ -33,6 +34,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void LogMessage()
         {
             SampleListener listener = new SampleListener();
+            IdentityModelEventSource.LogLevel = EventLevel.Warning;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             TokenValidationParameters validationParameters = new TokenValidationParameters()
@@ -49,6 +51,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void TestLogLevel()
         {
             SampleListener listener = new SampleListener();
+            IdentityModelEventSource.LogLevel = EventLevel.Informational;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();

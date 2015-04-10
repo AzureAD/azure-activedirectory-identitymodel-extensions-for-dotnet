@@ -17,10 +17,13 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -31,13 +34,14 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                throw new ArgumentNullException("address");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
+                    IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
                     using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelPendingRequests()))
                     {
                         return await client.GetStringAsync(address).ConfigureAwait(false);
@@ -52,7 +56,8 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 else
                 {
-                    throw new IOException("Unable to get document from: " + address, ex);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
+                    return null;
                 }
             }
         }
