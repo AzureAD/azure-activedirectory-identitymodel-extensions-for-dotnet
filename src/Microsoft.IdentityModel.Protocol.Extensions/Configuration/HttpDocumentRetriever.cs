@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (httpClient == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": httpClient"), typeof(ArgumentNullException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": httpClient"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
             _httpClient = httpClient;
         }
@@ -48,18 +49,18 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("HttpDocumentRetriever.GetDocumentAsync: Obtaining information from metadata endpoint: " + address);
+                IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
                 HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                LogHelper.LogError("Unable to get document from: " + address, typeof(IOException), ex.Message);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
                 return null;
             }
         }

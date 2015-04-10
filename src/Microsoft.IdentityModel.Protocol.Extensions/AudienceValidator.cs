@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
@@ -32,21 +33,21 @@ namespace Microsoft.IdentityModel.Extensions
     {
         public static void Validate(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation("AudienceValidator.Validate: validating audience in the jwt token");
+            IdentityModelEventSource.Logger.WriteInformation("validating audience in the jwt token");
 
             if (audiences == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "AudienceValidator.Validate: audiences"), typeof(ArgumentNullException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "audiences"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationParameters == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "AudienceValidator.Validate: validationParameters"), typeof(ArgumentNullException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
-                LogHelper.LogError(ErrorMessages.IDX10208, typeof(SecurityTokenInvalidAudienceException));
+                LogHelper.Throw(ErrorMessages.IDX10208, typeof(SecurityTokenInvalidAudienceException), EventLevel.Error);
             }
 
 
@@ -77,7 +78,7 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)), typeof(SecurityTokenInvalidAudienceException));
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)), typeof(SecurityTokenInvalidAudienceException), EventLevel.Error);
         }
     }
 }
