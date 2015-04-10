@@ -37,17 +37,17 @@ namespace Microsoft.IdentityModel.Extensions
 
             if (audiences == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "audiences"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "audiences"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationParameters == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
             {
-                LogHelper.LogError(ErrorMessages.IDX10208, typeof(SecurityTokenInvalidAudienceException));
+                LogHelper.Throw(ErrorMessages.IDX10208, typeof(SecurityTokenInvalidAudienceException), EventLevel.Error);
             }
 
 
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)), typeof(SecurityTokenInvalidAudienceException));
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), validationParameters.ValidAudience ?? "null", Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)), typeof(SecurityTokenInvalidAudienceException), EventLevel.Error);
         }
     }
 }

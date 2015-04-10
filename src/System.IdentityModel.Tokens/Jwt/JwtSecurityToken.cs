@@ -52,17 +52,17 @@ namespace System.IdentityModel.Tokens
         {
             if (null == jwtEncodedString)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwtEncodedString"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwtEncodedString"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
             }
 
             this.Decode(jwtEncodedString);
@@ -84,27 +84,27 @@ namespace System.IdentityModel.Tokens
         {
             if (header == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (payload == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (rawSignature == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": rawSignature"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": rawSignature"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(rawHeader))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawHeader"), typeof(ArgumentException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawHeader"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(rawPayload))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawPayload"), typeof(ArgumentException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawPayload"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             this.header = header;
@@ -126,12 +126,12 @@ namespace System.IdentityModel.Tokens
         {
             if (header == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             if (payload == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             this.header = header;
@@ -154,7 +154,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (notBefore >= expires)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value), typeof(ArgumentException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value), typeof(ArgumentException), EventLevel.Error);
                 }
             }
 
@@ -363,7 +363,7 @@ namespace System.IdentityModel.Tokens
             string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
             if (tokenParts.Length != 3)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
             }
 
             try
@@ -377,7 +377,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
                     {
-                        LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type), typeof(SecurityTokenException));
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type), typeof(SecurityTokenException), EventLevel.Error);
                     }
                 }
             }
@@ -388,7 +388,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), typeof(ArgumentException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
             }
 
             try
@@ -403,7 +403,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
             }
 
             if (!string.IsNullOrEmpty(tokenParts[2]))

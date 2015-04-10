@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10105, value), typeof(ArgumentOutOfRangeException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10105, value), typeof(ArgumentOutOfRangeException), EventLevel.Error);
                 }
 
                 _nonceLifetime = value;
@@ -181,40 +181,40 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual void Validate(JwtSecurityToken jwt, OpenIdConnectProtocolValidationContext validationContext)
         {
             if (jwt == null)
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             if (validationContext == null)
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             // required claims
             if (jwt.Payload.Aud.Count == 0)
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             if (!jwt.Payload.Exp.HasValue)
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             if (!jwt.Payload.Iat.HasValue)
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             if (jwt.Payload.Iss == null)
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             // sub is optional by default
             if (RequireSub && (string.IsNullOrWhiteSpace(jwt.Payload.Sub)))
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10309, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             // optional claims
             if (RequireAcr && string.IsNullOrWhiteSpace(jwt.Payload.Acr))
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10312, jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             if (RequireAmr && string.IsNullOrWhiteSpace(jwt.Payload.Amr))
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10313, jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             if (RequireAuthTime && string.IsNullOrWhiteSpace(jwt.Payload.AuthTime))
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10314, jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             if (RequireAzp && string.IsNullOrWhiteSpace(jwt.Payload.Azp))
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt), typeof(OpenIdConnectProtocolException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10315, jwt), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
             ValidateNonce(jwt, validationContext);
             ValidateCHash(jwt, validationContext);
@@ -237,12 +237,12 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (jwt == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationContext == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             // this handles the case the code is not expected
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (!jwt.Payload.ContainsKey(JwtRegisteredClaimNames.CHash))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt), typeof(OpenIdConnectProtocolInvalidCHashException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error);
             }
 
             HashAlgorithm hashAlgorithm = null;
@@ -281,19 +281,19 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error, ex);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10306, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error, ex);
                 }
 
                 if (hashAlgorithm == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10307, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10307, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error);
                 }
 
                 byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(validationContext.AuthorizationCode));
                 string hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
                 if (!StringComparer.Ordinal.Equals(jwt.Payload.CHash, hashString))
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, jwt.Payload.CHash, validationContext.AuthorizationCode, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10304, jwt.Payload.CHash, validationContext.AuthorizationCode, algorithm, jwt), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error);
                 }
             }
             finally
@@ -324,12 +324,12 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (jwt == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationContext == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             string nonceFoundInJwt = jwt.Payload.Nonce;
@@ -338,17 +338,17 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (validationContext.Nonce == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311), typeof(OpenIdConnectProtocolInvalidNonceException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10311), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
                 }
 
                 if (nonceFoundInJwt == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10322, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10322, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
                 }
             }
             else if ((validationContext.Nonce != null) && (nonceFoundInJwt == null))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10323, validationContext.Nonce, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10323, validationContext.Nonce, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
             }
             else if (validationContext.Nonce == null)
             {
@@ -358,7 +358,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (!(StringComparer.Ordinal.Equals(nonceFoundInJwt, validationContext.Nonce)))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, validationContext.Nonce, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10301, nonceFoundInJwt, validationContext.Nonce, jwt.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
             }
 
             if (RequireTimeStampInNonce)
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Protocols
                 int endOfTimestamp = nonceFoundInJwt.IndexOf('.');
                 if (endOfTimestamp == -1)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10317, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10317, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
                 }
 
                 string timestamp = nonceFoundInJwt.Substring(0, endOfTimestamp);
@@ -378,12 +378,12 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error, ex);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error, ex);
                 }
 
                 if (ticks <= 0)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10318, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
                 }
 
                 try
@@ -392,13 +392,13 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 catch(Exception ex)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error, ex);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10320, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error, ex);
                 }
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10316, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10316, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
                 }
             }
         }

@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (String.IsNullOrEmpty(parameter))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             string value = null;
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": IssuerAddress"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": IssuerAddress"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _issuerAddress = value;
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": PostTitle"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": PostTitle"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _postTitle = value;
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (String.IsNullOrEmpty(parameter))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (_parameters.ContainsKey(parameter))
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (String.IsNullOrEmpty(parameter))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (value == null)
@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": ScriptButtonText"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": ScriptButtonText"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _scriptButtonText = value;
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": ScriptDisabledText"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": ScriptDisabledText"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _scriptDisabledText = value;

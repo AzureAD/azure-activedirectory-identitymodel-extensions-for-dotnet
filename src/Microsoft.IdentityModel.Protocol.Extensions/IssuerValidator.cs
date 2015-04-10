@@ -34,18 +34,18 @@ namespace Microsoft.IdentityModel.Extensions
             IdentityModelEventSource.Logger.WriteInformation("validating issuers in the jwt token");
             if (validationParameters == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211), typeof(SecurityTokenInvalidIssuerException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211), typeof(SecurityTokenInvalidIssuerException), EventLevel.Verbose);
             }
 
             // Throw if all possible places to validate against are null or empty
             if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && (validationParameters.ValidIssuers == null))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10204), typeof(SecurityTokenInvalidIssuerException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10204), typeof(SecurityTokenInvalidIssuerException), EventLevel.Error);
             }
 
             if (!string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Extensions
                 }
             }
 
-            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10205, validIssuer, validIssuers, issuer), typeof(SecurityTokenInvalidIssuerException));
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10205, validIssuer, validIssuers, issuer), typeof(SecurityTokenInvalidIssuerException), EventLevel.Error);
             return null;
         }
     }

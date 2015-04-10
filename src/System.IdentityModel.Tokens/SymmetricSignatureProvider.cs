@@ -52,17 +52,17 @@ namespace System.IdentityModel.Tokens
         {
             if (key == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (!IsSupportedAlgorithm(algorithm))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
             }
 
             if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
             }
 
             this.keyedHash = GetKeyedHashAlgorithm(algorithm);
@@ -78,7 +78,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException), EventLevel.Error);
             }
         }
 
@@ -91,14 +91,14 @@ namespace System.IdentityModel.Tokens
         {
             if (string.IsNullOrWhiteSpace(algorithm))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             switch (algorithm)
             {
                 default:
                     {
-                        LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException));
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException), EventLevel.Error);
                         return null;
                     }
             }
@@ -117,22 +117,22 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10624), typeof(ArgumentException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10624), typeof(ArgumentException), EventLevel.Error);
             }
 
             if (this.disposed)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, typeof(SymmetricSignatureProvider).ToString()), typeof(ObjectDisposedException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, typeof(SymmetricSignatureProvider).ToString()), typeof(ObjectDisposedException), EventLevel.Error);
             }
 
             if (this.keyedHash == null)
             {
-                LogHelper.LogError(ErrorMessages.IDX10623, typeof(InvalidOperationException));
+                LogHelper.Throw(ErrorMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
             }
 
             IdentityModelEventSource.Logger.WriteInformation("Creating signature using the input");
@@ -155,32 +155,32 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (signature == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
             {
-                LogHelper.LogError(ErrorMessages.IDX10625, typeof(ArgumentException));
+                LogHelper.Throw(ErrorMessages.IDX10625, typeof(ArgumentException), EventLevel.Error);
             }
 
             if (signature.Length == 0)
             {
-                LogHelper.LogError(ErrorMessages.IDX10626, typeof(ArgumentException));
+                LogHelper.Throw(ErrorMessages.IDX10626, typeof(ArgumentException), EventLevel.Error);
             }
 
             if (this.disposed)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, typeof(SymmetricSignatureProvider).ToString()), typeof(ObjectDisposedException));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, typeof(SymmetricSignatureProvider).ToString()), typeof(ObjectDisposedException), EventLevel.Error);
             }
 
             if (this.keyedHash == null)
             {
-                LogHelper.LogError(ErrorMessages.IDX10623, typeof(InvalidOperationException));
+                LogHelper.Throw(ErrorMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
             }
 
             IdentityModelEventSource.Logger.WriteInformation("Comparing the signature created over the input with the token signature");

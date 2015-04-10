@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (other == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": other"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": other"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (KeyValuePair<string, string> keyValue in other.Parameters)

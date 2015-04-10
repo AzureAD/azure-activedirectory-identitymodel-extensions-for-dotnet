@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             try
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 else
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
                     return null;
                 }
             }
