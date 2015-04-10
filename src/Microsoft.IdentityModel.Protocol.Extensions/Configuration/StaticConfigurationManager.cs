@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (configuration == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": configuration"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             _configuration = configuration;

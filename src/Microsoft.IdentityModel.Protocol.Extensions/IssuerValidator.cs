@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
@@ -30,15 +31,15 @@ namespace Microsoft.IdentityModel.Extensions
     {
         public static string Validate(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation("IssuerValidator.Validate: validating issuers in the jwt token");
+            IdentityModelEventSource.Logger.WriteInformation("validating issuers in the jwt token");
             if (validationParameters == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "IssuerValidator.Validate: validationParameters"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211), typeof(SecurityTokenInvalidIssuerException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10211), typeof(SecurityTokenInvalidIssuerException), EventLevel.Verbose);
             }
 
             // Throw if all possible places to validate against are null or empty

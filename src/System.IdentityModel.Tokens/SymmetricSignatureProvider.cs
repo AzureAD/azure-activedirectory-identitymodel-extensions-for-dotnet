@@ -19,6 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using System.Diagnostics.CodeAnalysis;
+    using System.Diagnostics.Tracing;
     using System.Globalization;
     using System.Runtime.CompilerServices;
     using System.Security.Cryptography;
@@ -51,7 +52,7 @@ namespace System.IdentityModel.Tokens
         {
             if (key == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (!IsSupportedAlgorithm(algorithm))
@@ -90,7 +91,7 @@ namespace System.IdentityModel.Tokens
         {
             if (string.IsNullOrWhiteSpace(algorithm))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             switch (algorithm)
@@ -116,7 +117,7 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
@@ -154,12 +155,12 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (signature == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)

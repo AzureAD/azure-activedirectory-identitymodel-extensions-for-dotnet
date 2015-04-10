@@ -19,6 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using System.Collections.Generic;
+    using System.Diagnostics.Tracing;
     using System.Globalization;
     using System.Security.Claims;
     using System.Security.Cryptography.X509Certificates;
@@ -99,7 +100,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundAlgorithmMap"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundAlgorithmMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 inboundAlgorithmMap = value;
@@ -127,7 +128,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundAlgorithmMap"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundAlgorithmMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 outboundAlgorithmMap = value;
@@ -150,7 +151,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimTypeMap"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 inboundClaimTypeMap = value;
@@ -174,7 +175,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundClaimTypeMap"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 outboundClaimTypeMap = value;
@@ -195,7 +196,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimFilter"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimFilter"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 inboundClaimFilter = value;
@@ -218,7 +219,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "ShortClaimTypeProperty"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "ShortClaimTypeProperty"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 shortClaimTypeProperty = value;
@@ -241,7 +242,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "JsonClaimTypeProperty"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "JsonClaimTypeProperty"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 jsonClaimTypeProperty = value;
@@ -309,7 +310,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value < 1)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)), typeof(ArgumentOutOfRangeException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -333,7 +334,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "SignatureProviderFactory"), typeof(ArgumentNullException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "SignatureProviderFactory"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 this.signatureProviderFactory = value;
@@ -355,7 +356,7 @@ namespace System.IdentityModel.Tokens
         {
             if (tokenString == null)
             {
-               LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "tokenstring"), typeof(ArgumentNullException));
+               LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "tokenstring"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
@@ -454,7 +455,7 @@ namespace System.IdentityModel.Tokens
 
             if (tokenString == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
@@ -486,12 +487,12 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(securityToken))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": securityToken"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": securityToken"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationParameters == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
@@ -595,7 +596,7 @@ namespace System.IdentityModel.Tokens
 
             if (token == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"),typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"),typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             JwtSecurityToken jwt = token as JwtSecurityToken;
@@ -633,7 +634,7 @@ namespace System.IdentityModel.Tokens
 
             if (null == inputString)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": inputString"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": inputString"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             SignatureProvider provider;
@@ -696,12 +697,12 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationParameters == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             JwtSecurityToken jwt = this.ReadToken(token) as JwtSecurityToken;
@@ -710,7 +711,7 @@ namespace System.IdentityModel.Tokens
 
             if (signatureBytes == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signatureBytes"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signatureBytes"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (signatureBytes.Length == 0)
@@ -847,7 +848,7 @@ namespace System.IdentityModel.Tokens
             //IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Calling into {0}", MethodBase.GetCurrentMethod()));
             if (jwt == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
@@ -924,12 +925,12 @@ namespace System.IdentityModel.Tokens
         {
             if (actor == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": actor"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": actor"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (actor.BootstrapContext == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": actor.BootstrapContex"), typeof(SecurityTokenException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": actor.BootstrapContex"), typeof(SecurityTokenException), EventLevel.Verbose);
 
             }
 

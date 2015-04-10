@@ -24,6 +24,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -51,18 +52,18 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("JsonWebKeySet.Constructor: Deserializing json string into json web keys.");
+                IdentityModelEventSource.Logger.WriteVerbose("Deserializing json string into json web keys.");
                 var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
                 _keys = jwebKeys._keys;
             }
             catch(Exception ex)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), ex);
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), EventLevel.Error, ex);
             }
         }
 
@@ -75,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (dictionary == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             object obj = null;
@@ -135,11 +136,11 @@ namespace Microsoft.IdentityModel.Protocols
                             }
                             catch (CryptographicException ex)
                             {
-                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), ex);
+                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, ex);
                             }
                             catch (FormatException fex)
                             {
-                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), fex);
+                                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, fex);
                             }
                         }
                     }
@@ -163,11 +164,11 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                         catch (CryptographicException ex)
                         {
-                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex);
+                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
                         }
                         catch (FormatException ex)
                         {
-                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), ex);
+                            LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
                         }
                     }
                 }

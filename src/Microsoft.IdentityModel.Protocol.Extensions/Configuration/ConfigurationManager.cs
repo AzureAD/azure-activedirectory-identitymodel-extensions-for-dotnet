@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.IdentityModel.Logging;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -97,17 +98,17 @@ namespace Microsoft.IdentityModel.Protocols
             if (!typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
 #endif
             {
-                LogHelper.LogError(typeof(T).FullName, typeof(NotImplementedException));
+                LogHelper.LogError(typeof(T).FullName, typeof(NotImplementedException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (docRetriever == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             _metadataAddress = metadataAddress;
@@ -126,7 +127,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumAutomaticRefreshInterval)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value), typeof(ArgumentOutOfRangeException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
                 }
                 _automaticRefreshInterval = value;
             }
@@ -142,7 +143,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumRefreshInterval)
                 {
-                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10106, MinimumRefreshInterval, value), typeof(ArgumentOutOfRangeException));
+                    LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10106, MinimumRefreshInterval, value), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
                 }
                 _refreshInterval = value;
             }
@@ -164,7 +165,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 return (IConfigurationRetriever<T>)new OpenIdConnectConfigurationRetriever();
             }
-            LogHelper.LogError(typeof(T).FullName, typeof(NotImplementedException));
+            LogHelper.LogError(typeof(T).FullName, typeof(NotImplementedException), EventLevel.Verbose);
             return null;
         }
 

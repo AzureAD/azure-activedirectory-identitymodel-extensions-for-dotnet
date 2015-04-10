@@ -18,6 +18,7 @@
 
 namespace System.IdentityModel.Tokens
 {
+    using System.Diagnostics.Tracing;
     using Collections.Generic;
     using Globalization;
     using Microsoft.IdentityModel.Logging;
@@ -51,12 +52,12 @@ namespace System.IdentityModel.Tokens
         {
             if (null == jwtEncodedString)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwtEncodedString"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwtEncodedString"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
@@ -83,27 +84,27 @@ namespace System.IdentityModel.Tokens
         {
             if (header == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (payload == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (rawSignature == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": rawSignature"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": rawSignature"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(rawHeader))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawHeader"), typeof(ArgumentException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawHeader"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(rawPayload))
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawPayload"), typeof(ArgumentException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, GetType() + ": rawPayload"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             this.header = header;
@@ -125,12 +126,12 @@ namespace System.IdentityModel.Tokens
         {
             if (header == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": header"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
             if (payload == null)
             {
-                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException));
+                LogHelper.LogError(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             this.header = header;
