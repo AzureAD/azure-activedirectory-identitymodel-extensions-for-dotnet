@@ -48,7 +48,7 @@ namespace System.IdentityModel.Tokens
 
             if (!validationParameters.ValidateAudience)
             {
-                IdentityModelEventSource.Logger.WriteInformation("ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.");
+                IdentityModelEventSource.Logger.WriteWarning("ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.");
                 return;
             }
 
