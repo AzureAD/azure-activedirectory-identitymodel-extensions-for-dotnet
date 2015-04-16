@@ -64,19 +64,20 @@ namespace System.IdentityModel.Test
             List<T> toMatch = new List<T>(t2);
             List<T> expectedToMatch = new List<T>(t1);
             List<KeyValuePair<T,T>> matchedTs = new List<KeyValuePair<T,T>>();
-            
+            Dictionary<string, object> localErrors = new Dictionary<string,object>();
+
             // helps debugging to see what didn't match
             List<T> notMatched = new List<T>();
-            foreach (var t in t1)
+            for (int j=0; j < expectedToMatch.Count; j++)
             {
                 numToMatch++;
                 bool matched = false;
                 for (int i = 0; i < toMatch.Count; i++)
                 {
-                    if (areEqual(t, toMatch[i], context))
+                    if (areEqual(expectedToMatch[j], toMatch[i], context))
                     {
                         numMatched++;
-                        matchedTs.Add(new KeyValuePair<T, T>(toMatch[i], t));
+                        matchedTs.Add(new KeyValuePair<T, T>(toMatch[i], expectedToMatch[j]));
                         matched = true;
                         toMatch.RemoveAt(i);
                         break;
@@ -85,8 +86,14 @@ namespace System.IdentityModel.Test
 
                 if (!matched)
                 {
-                    notMatched.Add(t);
+                    localErrors.Add("not matched: claim:" + j, expectedToMatch[j].ToString());
+                    notMatched.Add(expectedToMatch[j]);
                 }
+            }
+
+            if (localErrors.Count != 0)
+            {
+                context.Errors.Add(Guid.NewGuid().ToString()+t1.GetType(), localErrors);
             }
 
             return (toMatch.Count == 0 && numMatched == numToMatch && notMatched.Count == 0);
