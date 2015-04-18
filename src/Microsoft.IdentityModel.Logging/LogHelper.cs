@@ -12,10 +12,10 @@ namespace Microsoft.IdentityModel.Logging
         /// Logs an error using the event source logger and throws an exception if the throwException is set to true.
         /// </summary>
         /// <param name="message">message to log.</param>
-        /// <param name="exceptionType">Type of the exception to be thrown</param>
-        /// <param name="exception">Exception parameter to be passed to the exception thrown.</param>
+        /// <param name="exceptionType">Type of the exception to be thrown.</param>
+        /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="throwException">boolean to set whether to throw exception or not. Default is true.</param>
-        public static void Throw(string message, Type exceptionType, EventLevel logLevel, object exception = null, bool throwException = true)
+        public static void Throw(string message, Type exceptionType, EventLevel logLevel, Exception innerException = null, bool throwException = true)
         {
             if (logLevel == EventLevel.Error)
             {
@@ -28,7 +28,10 @@ namespace Microsoft.IdentityModel.Logging
 
             if (throwException)
             {
-                throw (Exception)Activator.CreateInstance(exceptionType, exception ?? message);
+                if (innerException != null)
+                    throw (Exception)Activator.CreateInstance(exceptionType, message, innerException);
+                else
+                    throw (Exception)Activator.CreateInstance(exceptionType, message);
             }
         }
     }

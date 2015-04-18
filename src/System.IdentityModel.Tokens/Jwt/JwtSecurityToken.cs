@@ -388,7 +388,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), typeof(ArgumentException), EventLevel.Error, ex);
             }
 
             try
@@ -403,7 +403,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException), EventLevel.Error, ex);
             }
 
             if (!string.IsNullOrEmpty(tokenParts[2]))
