@@ -112,6 +112,7 @@ namespace System.IdentityModel.Tokens
                 { "pwdexptime", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationtime" },
                 { "relyingpartytrustid", "http://schemas.microsoft.com/2012/01/requestcontext/claims/relyingpartytrustid" },
                 { "role", ClaimTypes.Role },
+                { "roles", ClaimTypes.Role },
                 { "upn", ClaimTypes.Upn },
                 { "winaccountname", ClaimTypes.WindowsAccountName },
             };
