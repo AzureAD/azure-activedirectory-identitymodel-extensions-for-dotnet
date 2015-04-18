@@ -347,10 +347,49 @@ namespace System.IdentityModel.Test
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_JsonClaims", errors);
         }
 
-        [Fact(DisplayName = "CreateAndValidateTokens: SubClaim - is used the identity, when ClaimsIdentity.Name is called.")]
-        public void SubClaim()
+        [Fact(DisplayName = "This test ensures that claims with the 'role' and 'roles' are mapped to ClaimTypes.Role.")]
+        public void CreateAndValidateTokens_RoleClaims()
         {
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+            TokenValidationParameters validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = KeyingMaterial.RsaSecurityKey_2048_Public,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+            };
+
+            string issuer = "https://gotjwt.com";
+            DateTime utcNow = DateTime.UtcNow;
+            DateTime expire = utcNow + TimeSpan.FromHours(1);
+            ClaimsIdentity subject = new ClaimsIdentity(claims: ClaimSets.RoleClaimsShortType(issuer, issuer));
+            JwtSecurityToken jwtToken = handler.CreateToken(issuer: issuer, signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;
+
+            SecurityToken securityToken;
+            ClaimsPrincipal principal = handler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
+            CheckForRoles(new string[] { "role1", "roles1" }, new string[] { "notrole1", "notrole2" }, principal);
+
+            ClaimsIdentity expectedIdentity =
+                new ClaimsIdentity(
+                    authenticationType: "Federation",
+                    claims: ClaimSets.RoleClaimsLongType(issuer, issuer)
+                    );
+
+            Claim claim = new Claim(type: JwtRegisteredClaimNames.Iss, value: issuer, valueType: ClaimValueTypes.String, issuer: issuer);
+            expectedIdentity.AddClaim(claim);
+
+            claim = new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expire).ToString(), valueType: "JSON", issuer: issuer);
+            claim.Properties.Add(JwtSecurityTokenHandler.JsonClaimTypeProperty, "System.Int32");
+            expectedIdentity.AddClaim(claim);
+
+            claim = new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(utcNow).ToString(), valueType: "JSON", issuer: issuer);
+            claim.Properties.Add(JwtSecurityTokenHandler.JsonClaimTypeProperty, "System.Int32");
+            expectedIdentity.AddClaim(claim);
+
+            CompareContext context = new CompareContext();
+            IdentityComparer.AreEqual<IEnumerable<Claim>>(principal.Claims, expectedIdentity.Claims, context);
+            Assert.True(context.Diffs.Count == 0);
         }
+
 
         private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)
         {
@@ -445,5 +484,26 @@ namespace System.IdentityModel.Test
                 Assert.NotEqual(identity.Name, names[i]);
             }
         }
+
+        /// <summary>
+        /// First role is expected, others are not.
+        /// </summary>
+        /// <param name="names"></param>
+        /// <param name="roles"></param>
+        private void CheckForRoles(string[] expectedRoles, string[] unexpectedRoles, ClaimsPrincipal principal, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
+        {
+            ClaimsIdentity identity = principal.Identity as ClaimsIdentity;
+            Assert.Equal(identity.RoleClaimType, expectedRoleClaimType);
+            for (int i = 1; i < expectedRoles.Length; i++)
+            {
+                Assert.True(principal.IsInRole(expectedRoles[i]));
+            }
+
+            for (int i = 1; i < unexpectedRoles.Length; i++)
+            {
+                Assert.False(principal.IsInRole(unexpectedRoles[i]));
+            }
+        }
+
     }
 }
