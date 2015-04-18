@@ -387,7 +387,6 @@ namespace System.IdentityModel.Test
 
             CompareContext context = new CompareContext();
             IdentityComparer.AreEqual<IEnumerable<Claim>>(principal.Claims, expectedIdentity.Claims, context);
-
             TestUtilities.AssertFailIfErrors("RoleClaims", context.Diffs);
         }
 
