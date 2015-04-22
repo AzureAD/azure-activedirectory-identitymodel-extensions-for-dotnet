@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-#define  _Verbose
+//#define  _Verbose
 
 using System.Globalization;
 using System.IdentityModel.Tokens;

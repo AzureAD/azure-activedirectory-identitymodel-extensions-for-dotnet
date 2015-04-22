@@ -382,8 +382,20 @@ namespace System.IdentityModel.Test
             foreach (string key in dictionary1.Keys)
             {
                 if (dictionary2.ContainsKey(key))
-                    if (dictionary1[key] == dictionary2[key])
+                {
+                    if (dictionary1[key] != dictionary2[key])
+                    {
+                        context.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key] + "', '" + dictionary2[key] + "'");
+                    }
+                    else
+                    {
                         numMatched++;
+                    }
+                }
+                else
+                {
+                    context.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
+                }
             }
 
             return numMatched == dictionary1.Count;
