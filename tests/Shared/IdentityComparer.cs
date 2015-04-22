@@ -383,7 +383,20 @@ namespace System.IdentityModel.Test
             {
                 if (dictionary2.ContainsKey(key))
                     if (dictionary1[key] == dictionary2[key])
-                        numMatched++;
+                    {
+                        if (dictionary1[key] != dictionary2[key])
+                        {
+                            context.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key] + "', '" + dictionary2[key] + "'");
+                        }
+                        else
+                        {
+                            numMatched++; numMatched++;
+                        }
+                    }
+                    else
+                    {
+                        context.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
+                    }
             }
 
             return numMatched == dictionary1.Count;
