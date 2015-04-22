@@ -390,13 +390,14 @@ namespace System.IdentityModel.Test
                         }
                         else
                         {
-                            numMatched++; numMatched++;
+                            numMatched++;
                         }
                     }
                     else
                     {
                         context.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
                     }
+
             }
 
             return numMatched == dictionary1.Count;
