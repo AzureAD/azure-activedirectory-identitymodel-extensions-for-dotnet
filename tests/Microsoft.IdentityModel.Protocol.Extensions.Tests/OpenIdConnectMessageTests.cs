@@ -268,6 +268,36 @@ namespace Microsoft.IdentityModel.Test
             if (!string.Equals(url, expected, StringComparison.Ordinal))
                 errors.Add("id: " + id + Environment.NewLine + "message.BuildRedirectUrl( != expected" + Environment.NewLine + Environment.NewLine + url + Environment.NewLine + Environment.NewLine + expected + Environment.NewLine);
         }
+
+        [Fact]
+        public void Extensibility()
+        {
+            var customOpenIdConnectMessage =
+                new CustomOpenIdConnectMessage()
+                {
+                    AuthenticationRequestUrl = Guid.NewGuid().ToString(),
+                    LogoutRequestUrl = Guid.NewGuid().ToString(),
+                };
+
+            Assert.True(customOpenIdConnectMessage.AuthenticationRequestUrl == customOpenIdConnectMessage.CreateAuthenticationRequestUrl(), "AuthenticationRequestUrl, CreateAuthenticationRequestUrl: " + customOpenIdConnectMessage.AuthenticationRequestUrl + ", " + customOpenIdConnectMessage.CreateAuthenticationRequestUrl());
+            Assert.True(customOpenIdConnectMessage.LogoutRequestUrl == customOpenIdConnectMessage.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + customOpenIdConnectMessage.LogoutRequestUrl + ", " + customOpenIdConnectMessage.CreateLogoutRequestUrl());
+        }
+
+        private class CustomOpenIdConnectMessage : OpenIdConnectMessage
+        {
+            public override string CreateAuthenticationRequestUrl()
+            {
+                return AuthenticationRequestUrl;
+            }
+
+            public override string CreateLogoutRequestUrl()
+            {
+                return LogoutRequestUrl;
+            }
+
+            public string AuthenticationRequestUrl { get; set; }
+            public string LogoutRequestUrl { get; set; }
+        }
     }
 }
 
