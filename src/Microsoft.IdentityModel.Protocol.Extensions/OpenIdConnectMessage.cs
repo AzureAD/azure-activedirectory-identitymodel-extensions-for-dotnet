@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-        public string CreateAuthenticationRequestUrl()
+        public virtual string CreateAuthenticationRequestUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Creates a query string using the using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
-        public string CreateLogoutRequestUrl()
+        public virtual string CreateLogoutRequestUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.LogoutRequest;

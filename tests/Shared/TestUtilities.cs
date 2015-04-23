@@ -75,11 +75,8 @@ namespace System.IdentityModel.Test
             }
 
             Type type = obj.GetType();
-            Console.WriteLine(string.Format("Testcase: '{0}', type: '{1}', Method: '{2}'.", testcase ?? "testcase is null", type, "CallAllPublicInstanceAndStaticPropertyGets"));
 
             // call get all public static properties of MyClass type
-
-
             PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
 
             // Touch each public property
