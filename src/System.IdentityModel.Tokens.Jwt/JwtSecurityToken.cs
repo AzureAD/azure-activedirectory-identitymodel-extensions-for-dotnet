@@ -417,6 +417,24 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), ex);
             }
 
+            // ensure signature is well-formed, GitIssue 103
+            if (!string.IsNullOrEmpty(tokenParts[2]))
+            {
+                try
+                {
+                    Base64UrlEncoder.Decode(tokenParts[2]);
+                }
+                catch (Exception ex)
+                {
+                    if (DiagnosticUtility.IsFatal(ex))
+                    {
+                        throw;
+                    }
+
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "signature", tokenParts[1], jwtEncodedString), ex);
+                }
+            }
+
             this.rawData = jwtEncodedString;
             this.rawHeader = tokenParts[0];
             this.rawPayload = tokenParts[1];
