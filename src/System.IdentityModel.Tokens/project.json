@@ -2,7 +2,7 @@
     "version": "5.0.0-*",
     "dependencies": {
 		"Newtonsoft.Json": "6.0.6",
-		"Microsoft.IdentityModel.Logging": "1.0.0-beta4-*"
+		"Microsoft.IdentityModel.Logging": "1.0.0-*"
     },
     "exclude": [
         "Saml\\SamlSecurityTokenHandler.cs",
