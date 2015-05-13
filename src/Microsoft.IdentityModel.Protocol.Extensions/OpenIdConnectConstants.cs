@@ -170,6 +170,7 @@ namespace Microsoft.IdentityModel.Protocols
         #pragma warning disable 1591
         public const string CodeIdToken = "code id_token";
         public const string IdToken = "id_token";
+        public const string CodeOnly = "code";
         #pragma warning restore 1591
     }
 
