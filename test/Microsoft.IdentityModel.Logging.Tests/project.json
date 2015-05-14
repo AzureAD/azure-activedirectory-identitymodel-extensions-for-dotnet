@@ -1,8 +1,8 @@
 ﻿{
     "version": "1.0.0-*",
     "dependencies": {
-        "Microsoft.IdentityModel.Logging": "1.0.0-beta4-*",
-        "System.IdentityModel.Tokens": "5.0.0-beta4-*",
+        "Microsoft.IdentityModel.Logging": "1.0.0-*",
+        "System.IdentityModel.Tokens": "5.0.0-*",
         "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
     "commands": {

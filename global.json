@@ -1,4 +1,4 @@
 {
-    "sources": [ "src", "tests" ],
-    "shared": "tests\\Shared"
+    "sources": [ "src", "test" ],
+    "shared": "test\\Shared"
 }

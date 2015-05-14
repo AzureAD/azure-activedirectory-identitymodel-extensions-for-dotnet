@@ -21,25 +21,6 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         public static IdentityModelEventSource Logger { get; }
 
-        public void Write(EventLevel level, string message)
-        {
-            switch (level)
-            {
-                case EventLevel.Critical: WriteCritical(message);
-                    break;
-                case EventLevel.Error: WriteError(message);
-                    break;
-                case EventLevel.Warning: WriteWarning(message);
-                    break;
-                case EventLevel.Informational: WriteInformation(message);
-                    break;
-                case EventLevel.Verbose: WriteVerbose(message);
-                    break;
-                default: LogHelper.Throw("Unknown log level.", typeof(ArgumentException), EventLevel.Error);
-                    break;
-            }
-        }
-
         [Event(1, Level = EventLevel.Verbose)]
         public void WriteVerbose(string message)
         {
@@ -85,8 +66,33 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        public void Write(EventLevel level, string message)
+        {
+            switch (level)
+            {
+                case EventLevel.Critical:
+                    WriteCritical(message);
+                    break;
+                case EventLevel.Error:
+                    WriteError(message);
+                    break;
+                case EventLevel.Warning:
+                    WriteWarning(message);
+                    break;
+                case EventLevel.Informational:
+                    WriteInformation(message);
+                    break;
+                case EventLevel.Verbose:
+                    WriteVerbose(message);
+                    break;
+                default:
+                    LogHelper.Throw("Unknown log level.", typeof(ArgumentException), EventLevel.Error);
+                    break;
+            }
+        }
+
         /// <summary>
-        /// Minimum log level to log events. Default is Informational.
+        /// Minimum log level to log events. Default is Warning.
         /// </summary>
         public static EventLevel LogLevel
         {
