@@ -5,18 +5,18 @@ VisualStudioVersion = 14.0.22717.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8905D2E3-4499-4A86-BF3E-F098F228DD59}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8905D2E3-4499-4A86-BF3E-F098F228DD59}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{FA4925AC-FDA5-470D-BC29-D857393E6D80}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "certs", "certs", "{1751FD49-8430-4046-9C16-1642A4A49CBA}"
 	ProjectSection(SolutionItems) = preProject
-		tests\Certs\SelfSigned1024_SHA1.pfx = tests\Certs\SelfSigned1024_SHA1.pfx
-		tests\Certs\SelfSigned1024_SHA256.pfx = tests\Certs\SelfSigned1024_SHA256.pfx
-		tests\Certs\SelfSigned2048_SHA256.pfx = tests\Certs\SelfSigned2048_SHA256.pfx
-		tests\Certs\SelfSigned2048_SHA256_Public.cer = tests\Certs\SelfSigned2048_SHA256_Public.cer
-		tests\Certs\SelfSigned2048_SHA384.pfx = tests\Certs\SelfSigned2048_SHA384.pfx
-		tests\Certs\SelfSigned2048_SHA512.pfx = tests\Certs\SelfSigned2048_SHA512.pfx
+		test\Certs\SelfSigned1024_SHA1.pfx = test\Certs\SelfSigned1024_SHA1.pfx
+		test\Certs\SelfSigned1024_SHA256.pfx = test\Certs\SelfSigned1024_SHA256.pfx
+		test\Certs\SelfSigned2048_SHA256.pfx = test\Certs\SelfSigned2048_SHA256.pfx
+		test\Certs\SelfSigned2048_SHA256_Public.cer = test\Certs\SelfSigned2048_SHA256_Public.cer
+		test\Certs\SelfSigned2048_SHA384.pfx = test\Certs\SelfSigned2048_SHA384.pfx
+		test\Certs\SelfSigned2048_SHA512.pfx = test\Certs\SelfSigned2048_SHA512.pfx
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.xproj", "{A0E7DD32-5189-439C-B460-5BA3B0561707}"
@@ -28,11 +28,11 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Pro
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Logging", "src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.xproj", "{FE248334-75AC-4F60-9409-42A28C7A39AA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "tests\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.xproj", "{B449C824-9D81-4588-A562-E61D9215C976}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "test\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.xproj", "{B449C824-9D81-4588-A562-E61D9215C976}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "tests\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.xproj", "{CC665B24-9531-41B9-93C1-EF7F425AB33C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocol.Extensions.Tests", "test\Microsoft.IdentityModel.Protocol.Extensions.Tests\Microsoft.IdentityModel.Protocol.Extensions.Tests.xproj", "{CC665B24-9531-41B9-93C1-EF7F425AB33C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Logging.Tests", "tests\Microsoft.IdentityModel.Logging.Tests\Microsoft.IdentityModel.Logging.Tests.xproj", "{7BB23627-58D2-41D5-B711-ACC5D7F6654E}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Logging.Tests", "test\Microsoft.IdentityModel.Logging.Tests\Microsoft.IdentityModel.Logging.Tests.xproj", "{7BB23627-58D2-41D5-B711-ACC5D7F6654E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

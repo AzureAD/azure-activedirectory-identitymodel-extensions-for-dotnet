@@ -1,7 +1,7 @@
 {
     "version": "2.0.0-*",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta4-*",
+        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-*",
         "Newtonsoft.Json": "6.0.6",
         "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
