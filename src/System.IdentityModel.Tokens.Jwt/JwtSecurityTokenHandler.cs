@@ -1113,7 +1113,7 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates the 'value' for the actor claim: { actort, 'value' }
+        /// Creates the 'value' for the actor claim: { actor, 'value' }
         /// </summary>
         /// <param name="actor"><see cref="ClaimsIdentity"/> as actor.</param>
         /// <returns><see cref="string"/> representing the actor.</returns>
