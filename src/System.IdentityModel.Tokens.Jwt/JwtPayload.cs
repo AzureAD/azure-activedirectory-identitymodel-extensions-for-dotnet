@@ -371,9 +371,30 @@ namespace System.IdentityModel.Tokens
                             }
                             else
                             {
-                                c = new Claim(claimType, JsonExtensions.SerializeToJson(keyValuePair.Value), JwtConstants.JsonClaimValueType, issuer, issuer);
-                                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = keyValuePair.Value.GetType().ToString();
-                                claims.Add(c);
+                                ArrayList arrayList = keyValuePair.Value as ArrayList;
+                                if (arrayList != null)
+                                {
+                                    foreach (var item in arrayList)
+                                    {
+                                        string str = item as string;
+                                        if (str != null)
+                                        {
+                                            claims.Add(new Claim(keyValuePair.Key, str, ClaimValueTypes.String, issuer, issuer));
+                                        }
+                                        else
+                                        {
+                                            c = new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(item), JwtConstants.JsonClaimValueType, issuer, issuer);
+                                            c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = item.GetType().ToString();
+                                            claims.Add(c);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    c = new Claim(claimType, JsonExtensions.SerializeToJson(keyValuePair.Value), JwtConstants.JsonClaimValueType, issuer, issuer);
+                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = keyValuePair.Value.GetType().ToString();
+                                    claims.Add(c);
+                                }
                             }
                         }
                     }
