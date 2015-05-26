@@ -149,8 +149,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.DuplicateTypes",
-                Claims = ClaimSets.DuplicateTypes(),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.DuplicateTypes(), null),
+                Claims = ClaimSets.DuplicateTypes(issuer, originalIssuer),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundClaimTypeTransform(ClaimSets.DuplicateTypes(issuer, originalIssuer), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap), null),
                 ExceptionType = null,
                 TokenValidationParameters = new TokenValidationParameters
                 {
@@ -168,7 +168,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
                 Claims = ClaimSets.Simple(issuer, originalIssuer),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), signingCredentials),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundClaimTypeTransform(ClaimSets.Simple(issuer, originalIssuer), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap), signingCredentials),
                 ExceptionType = null,
                 SigningCredentials = signingCredentials,
                 TokenValidationParameters = new TokenValidationParameters
@@ -186,7 +186,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 Case = "ClaimSets.Simple_simpleSigned_Symmetric",
                 Claims = ClaimSets.Simple(issuer, originalIssuer),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundTransform(ClaimSets.Simple(issuer, originalIssuer), JwtSecurityTokenHandler.OutboundClaimTypeMap), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
                 ExceptionType = null,
                 SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                 SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
@@ -248,11 +248,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            JwtSecurityTokenHandler.InboundClaimFilter.Add("aud");
-            JwtSecurityTokenHandler.InboundClaimFilter.Add("exp");
-            JwtSecurityTokenHandler.InboundClaimFilter.Add("iat");
-            JwtSecurityTokenHandler.InboundClaimFilter.Add("iss");
-            JwtSecurityTokenHandler.InboundClaimFilter.Add("nbf");
+            tokenHandler.InboundClaimFilter.Add("aud");
+            tokenHandler.InboundClaimFilter.Add("exp");
+            tokenHandler.InboundClaimFilter.Add("iat");
+            tokenHandler.InboundClaimFilter.Add("iss");
+            tokenHandler.InboundClaimFilter.Add("nbf");
 
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(encodedJwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, out validatedToken);
 
@@ -260,7 +260,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             if (!IdentityComparer.AreEqual<IEnumerable<Claim>>(claimsPrincipal.Claims, ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), context))
                 TestUtilities.AssertFailIfErrors("CreateAndValidateTokens: DuplicateClaims - roundtrips with duplicate claims", context.Diffs);
 
-            JwtSecurityTokenHandler.InboundClaimFilter.Clear();
+            tokenHandler.InboundClaimFilter.Clear();
         }
 
         [Fact(DisplayName = "CreateAndValidateTokens: JsonClaims - claims values are objects serailized as json, can be recognized and reconstituted.")]

@@ -54,15 +54,15 @@ namespace System.IdentityModel.Tokens.Jwt
         // Summary:
         //     The claim properties namespace.
         private const string Namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
-        private static IDictionary<string, string> inboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
-        private static IDictionary<string, string> outboundClaimTypeMap = ClaimTypeMapping.OutboundClaimTypeMap;
         private static string shortClaimTypeProperty = Namespace + "/ShortTypeName";
         private static string jsonClaimTypeProperty = Namespace + "/json_type";
-        private static ISet<string> inboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
         private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private Int32 _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
+        private IDictionary<string, string> _inboundClaimTypeMap;
+        private IDictionary<string, string> _outboundClaimTypeMap;
+        private ISet<string> _inboundClaimFilter;
 
 
         /// <summary>
@@ -70,15 +70,29 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public static readonly Int32 DefaultTokenLifetimeInMinutes = 60;
 
-        static JwtSecurityTokenHandler()
-        {
-        }
+        /// <summary>
+        /// Default claim type mapping for inbound claims.
+        /// </summary>
+        public static IDictionary<string, string> DefaultInboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
+
+        /// <summary>
+        /// Default claim type maping for outbound claims.
+        /// </summary>
+        public static IDictionary<string, string> DefaultOutboundClaimTypeMap = ClaimTypeMapping.OutboundClaimTypeMap;
+
+        /// <summary>
+        /// Default claim type filter list.
+        /// </summary>
+        public static ISet<string> DefaultInboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenHandler"/> class.
         /// </summary>
         public JwtSecurityTokenHandler()
         {
+            _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+            _outboundClaimTypeMap = new Dictionary<string, string>(DefaultOutboundClaimTypeMap);
+            _inboundClaimFilter = new HashSet<string>(DefaultInboundClaimFilter);
         }
 
         /// <summary>Gets or sets the <see cref="IDictionary{TKey, TValue}"/> used to map Inbound Cryptographic Algorithms.</summary>
@@ -137,15 +151,16 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="InboundClaimTypeMap"/> that is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
+        /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
         /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
+        /// <para>The default value is ClaimTypeMapping.InboundClaimTypeMap</para>
         /// </summary>
         /// <exception cref="ArgumentNullException">'value is null.</exception>
-        public static IDictionary<string, string> InboundClaimTypeMap
+        public IDictionary<string, string> InboundClaimTypeMap
         {
             get
             {
-                return inboundClaimTypeMap;
+                return _inboundClaimTypeMap;
             }
 
             set
@@ -155,21 +170,22 @@ namespace System.IdentityModel.Tokens.Jwt
                     LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
-                inboundClaimTypeMap = value;
+                _inboundClaimTypeMap = value;
             }
         }
 
         /// <summary>
-        /// <para>Gets or sets the <see cref="OutboundClaimTypeMap"/> that is used when creating a <see cref="JwtSecurityToken"/> from <see cref="Claim"/>(s).</para>
+        /// <para>Gets or sets the <see cref="OutboundClaimTypeMap"/> which is used when creating a <see cref="JwtSecurityToken"/> from <see cref="Claim"/>(s).</para>
         /// <para>The JSON claim 'name' value is set to <see cref="Claim.Type"/> after translating using this mapping.</para>
+        /// <para>The default value is ClaimTypeMapping.OutboundClaimTypeMap</para>
         /// </summary>
         /// <remarks>This mapping is applied only when using <see cref="JwtPayload.AddClaim"/> or <see cref="JwtPayload.AddClaims"/>. Adding values directly will not result in translation.</remarks>
         /// <exception cref="ArgumentNullException">'value is null.</exception>
-        public static IDictionary<string, string> OutboundClaimTypeMap
+        public IDictionary<string, string> OutboundClaimTypeMap
         {
             get
             {
-                return outboundClaimTypeMap;
+                return _outboundClaimTypeMap;
             }
 
             set
@@ -179,18 +195,20 @@ namespace System.IdentityModel.Tokens.Jwt
                     LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
-                outboundClaimTypeMap = value;
+                _outboundClaimTypeMap = value;
             }
         }
 
         /// <summary>Gets or sets the <see cref="ISet{String}"/> used to filter claims when populating a <see cref="ClaimsIdentity"/> claims form a <see cref="JwtSecurityToken"/>.
-        /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.</summary>
+        /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.
+        /// <para>The default value is ClaimTypeMapping.InboundClaimFliter</para>
+        /// </summary>
         /// <exception cref="ArgumentNullException">'value' is null.</exception>
-        public static ISet<string> InboundClaimFilter
+        public ISet<string> InboundClaimFilter
         {
             get
             {
-                return inboundClaimFilter;
+                return _inboundClaimFilter;
             }
 
             set
@@ -200,7 +218,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimFilter"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
-                inboundClaimFilter = value;
+                _inboundClaimFilter = value;
             }
         }
 
@@ -387,7 +405,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="signatureProvider">optional <see cref="SignatureProvider"/>.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
-        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para></remarks>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim</para>
+        /// </remarks>
         /// <para>If signautureProvider is not null, then it will be used to create the signature and <see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning( SecurityKey, string )"/> will not be called.</para>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
@@ -410,7 +431,8 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             IdentityModelEventSource.Logger.WriteVerbose("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.");
-            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires);
+            IEnumerable<Claim> subjectClaims = subject == null ? null : OutboundClaimTypeTransform(subject.Claims);
+            JwtPayload payload = new JwtPayload(issuer, audience, subjectClaims, notBefore, expires);
             JwtHeader header = new JwtHeader(signingCredentials);
 
             if (subject != null && subject.Actor != null)
@@ -437,6 +459,22 @@ namespace System.IdentityModel.Tokens.Jwt
 
             IdentityModelEventSource.Logger.WriteInformation("Creating security token from the header, payload and raw signature.");
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+        }
+
+        private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
+        {
+            foreach (Claim claim in claims)
+            {
+                string type = null;
+                if (_outboundClaimTypeMap.TryGetValue(claim.Type, out type))
+                {
+                    yield return new Claim(type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject);
+                }
+                else
+                {
+                    yield return claim;
+                }
+            }
         }
 
         /// <summary>
@@ -890,14 +928,14 @@ namespace System.IdentityModel.Tokens.Jwt
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
             foreach (Claim jwtClaim in jwt.Claims)
             {
-                if (InboundClaimFilter.Contains(jwtClaim.Type))
+                if (_inboundClaimFilter.Contains(jwtClaim.Type))
                 {
                     continue;
                 }
 
                 string claimType;
                 bool wasMapped = true;
-                if (!JwtSecurityTokenHandler.InboundClaimTypeMap.TryGetValue(jwtClaim.Type, out claimType))
+                if (!_inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out claimType))
                 {
                     claimType = jwtClaim.Type;
                     wasMapped = false;

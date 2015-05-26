@@ -425,10 +425,10 @@ namespace System.IdentityModel.Tokens.Tests
 
         public static Claim NewClaimWithShortType(string claimType, string claimValue, string claimValueType, string issuer, string originalIssuer)
         {
-            return new Claim(JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey(ClaimTypes.Country) ? JwtSecurityTokenHandler.OutboundClaimTypeMap[ClaimTypes.Country] : ClaimTypes.Country, claimValue, claimValueType, issuer, originalIssuer);
+            return new Claim(JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey(ClaimTypes.Country) ? JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[ClaimTypes.Country] : ClaimTypes.Country, claimValue, claimValueType, issuer, originalIssuer);
         }
 
-        public static IEnumerable<Claim> ActorClaimNotJwt( string issuer, string originalIssuer )
+        public static IEnumerable<Claim> ActorClaimNotJwt(string issuer, string originalIssuer )
         {
             return new List<Claim>()
             {
@@ -440,9 +440,9 @@ namespace System.IdentityModel.Tokens.Tests
             };
         }
 
-        public static IEnumerable<Claim> AllInboundShortClaimTypes( string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
+        public static IEnumerable<Claim> AllInboundShortClaimTypes(string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
         {
-            foreach ( KeyValuePair<string, string> pair in JwtSecurityTokenHandler.InboundClaimTypeMap )
+            foreach ( KeyValuePair<string, string> pair in JwtSecurityTokenHandler.DefaultInboundClaimTypeMap )
             {
                 yield return new Claim( pair.Key, pair.Value, ClaimValueTypes.String, issuer, originalIssuer );
             }
@@ -458,7 +458,7 @@ namespace System.IdentityModel.Tokens.Tests
 
         public static IEnumerable<Claim> ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
         {
-            foreach (KeyValuePair<string, string> pair in JwtSecurityTokenHandler.InboundClaimTypeMap)
+            foreach (KeyValuePair<string, string> pair in JwtSecurityTokenHandler.DefaultInboundClaimTypeMap)
             {
                 Claim claim = new Claim(pair.Value, pair.Value, ClaimValueTypes.String, issuer, originalIssuer);
                 claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, pair.Key));
@@ -495,6 +495,25 @@ namespace System.IdentityModel.Tokens.Tests
                 new Claim( ClaimTypes.HomePhone, "555.1212_2", ClaimValueTypes.String, issuer, originalIssuer ),
                 new Claim( ClaimTypes.Role, "Sales_2", ClaimValueTypes.String, issuer, originalIssuer )
             };
+        }
+
+        public static IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims, IDictionary<string, string> outboundClaimTypeMap)
+        {
+            foreach (Claim claim in claims)
+            {
+                string type = null;
+                if (outboundClaimTypeMap.TryGetValue(claim.Type, out type))
+                {
+                    Claim mappedClaim = new Claim(type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject);
+                    foreach (KeyValuePair<string, string> kv in claim.Properties)
+                    {
+                        mappedClaim.Properties.Add(kv);
+                    }
+                    yield return mappedClaim;
+                }
+                else
+                    yield return claim;
+            }
         }
 
         public static IEnumerable<Claim> ClaimsPlus( IEnumerable<Claim> claims = null, SigningCredentials signingCredential = null, DateTime? notBefore = null, DateTime? expires = null, string issuer = null, string originalIssuer = null, string audience = null )
@@ -544,9 +563,9 @@ namespace System.IdentityModel.Tokens.Tests
         public static Claim OutboundClaim( Claim claim )
         {
             Claim outboundClaim = claim;
-            if ( JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey( claim.Type ) )
+            if ( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey( claim.Type ) )
             {
-                outboundClaim = new Claim( JwtSecurityTokenHandler.OutboundClaimTypeMap[claim.Type], claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject );
+                outboundClaim = new Claim( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type], claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject );
                 foreach ( KeyValuePair< string, string > kv in claim.Properties )
                 {
                     outboundClaim.Properties.Add( kv );
@@ -563,13 +582,13 @@ namespace System.IdentityModel.Tokens.Tests
         /// <returns></returns>
         public static Claim InboundClaim( Claim claim )
         {
-            if ( JwtSecurityTokenHandler.OutboundClaimTypeMap.ContainsKey( claim.Type ) )
+            if ( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey( claim.Type ) )
             {
-                if ( JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( JwtSecurityTokenHandler.OutboundClaimTypeMap[claim.Type] ) )
+                if ( JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.ContainsKey( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type] ) )
                 {
                     if ( !claim.Properties.ContainsKey( JwtSecurityTokenHandler.ShortClaimTypeProperty ) )
                     {
-                        claim.Properties.Add( JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtSecurityTokenHandler.OutboundClaimTypeMap[claim.Type] );
+                        claim.Properties.Add( JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type] );
                     }
                 }
             }
