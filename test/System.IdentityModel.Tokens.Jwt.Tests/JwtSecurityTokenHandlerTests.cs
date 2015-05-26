@@ -247,185 +247,187 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Claim Type Mapping - Inbound and Outbound")]
         public void ClaimTypeMapping()
         {
-            Dictionary<string, string> inboundClaimTypeMap = new Dictionary<string, string>(JwtSecurityTokenHandler.InboundClaimTypeMap);
-            Dictionary<string, string> outboundClaimTypeMap = new Dictionary<string, string>(JwtSecurityTokenHandler.OutboundClaimTypeMap);
+            List<KeyValuePair<string, string>> aadStrings = new List<KeyValuePair<string, string>>();
+            aadStrings.Add(new KeyValuePair<string, string>("amr", "http://schemas.microsoft.com/claims/authnmethodsreferences"));
+            aadStrings.Add(new KeyValuePair<string, string>("deviceid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier"));
+            aadStrings.Add(new KeyValuePair<string, string>("family_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"));
+            aadStrings.Add(new KeyValuePair<string, string>("given_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"));
+            aadStrings.Add(new KeyValuePair<string, string>("idp", "http://schemas.microsoft.com/identity/claims/identityprovider"));
+            aadStrings.Add(new KeyValuePair<string, string>("oid", "http://schemas.microsoft.com/identity/claims/objectidentifier"));
+            aadStrings.Add(new KeyValuePair<string, string>("scp", "http://schemas.microsoft.com/identity/claims/scope"));
+            aadStrings.Add(new KeyValuePair<string, string>("tid", "http://schemas.microsoft.com/identity/claims/tenantid"));
+            aadStrings.Add(new KeyValuePair<string, string>("unique_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
+            aadStrings.Add(new KeyValuePair<string, string>("upn", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"));
 
-            try
+            foreach (var kv in aadStrings)
             {
-                List<KeyValuePair<string, string>> aadStrings = new List<KeyValuePair<string, string>>();
-                aadStrings.Add(new KeyValuePair<string, string>("amr", "http://schemas.microsoft.com/claims/authnmethodsreferences"));
-                aadStrings.Add(new KeyValuePair<string, string>("deviceid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier"));
-                aadStrings.Add(new KeyValuePair<string, string>("family_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"));
-                aadStrings.Add(new KeyValuePair<string, string>("given_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"));
-                aadStrings.Add(new KeyValuePair<string, string>("idp", "http://schemas.microsoft.com/identity/claims/identityprovider"));
-                aadStrings.Add(new KeyValuePair<string, string>("oid", "http://schemas.microsoft.com/identity/claims/objectidentifier"));
-                aadStrings.Add(new KeyValuePair<string, string>("scp", "http://schemas.microsoft.com/identity/claims/scope"));
-                aadStrings.Add(new KeyValuePair<string, string>("tid", "http://schemas.microsoft.com/identity/claims/tenantid"));
-                aadStrings.Add(new KeyValuePair<string, string>("unique_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
-                aadStrings.Add(new KeyValuePair<string, string>("upn", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"));
-
-                foreach (var kv in aadStrings)
-                {
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] == kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
-                }
-
-                List<KeyValuePair<string, string>> adfsStrings = new List<KeyValuePair<string, string>>();
-                adfsStrings.Add(new KeyValuePair<string, string>("pwdexptime", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationtime"));
-                adfsStrings.Add(new KeyValuePair<string, string>("pwdexpdays", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationdays"));
-                adfsStrings.Add(new KeyValuePair<string, string>("pwdchgurl", "http://schemas.microsoft.com/ws/2012/01/passwordchangeurl"));
-                adfsStrings.Add(new KeyValuePair<string, string>("clientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-ip"));
-                adfsStrings.Add(new KeyValuePair<string, string>("forwardedclientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip"));
-                adfsStrings.Add(new KeyValuePair<string, string>("clientapplication", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-application"));
-                adfsStrings.Add(new KeyValuePair<string, string>("clientuseragent", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-user-agent"));
-                adfsStrings.Add(new KeyValuePair<string, string>("endpointpath", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path"));
-                adfsStrings.Add(new KeyValuePair<string, string>("proxy", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy"));
-                adfsStrings.Add(new KeyValuePair<string, string>("relyingpartytrustid", "http://schemas.microsoft.com/2012/01/requestcontext/claims/relyingpartytrustid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("insidecorporatenetwork", "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork"));
-                adfsStrings.Add(new KeyValuePair<string, string>("isregistereduser", "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser"));
-                adfsStrings.Add(new KeyValuePair<string, string>("deviceowner", "http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner"));
-                adfsStrings.Add(new KeyValuePair<string, string>("deviceid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier"));
-                adfsStrings.Add(new KeyValuePair<string, string>("deviceregid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("devicedispname", "http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname"));
-                adfsStrings.Add(new KeyValuePair<string, string>("deviceosver", "http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion"));
-                adfsStrings.Add(new KeyValuePair<string, string>("deviceismanaged", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged"));
-                adfsStrings.Add(new KeyValuePair<string, string>("deviceostype", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype"));
-                adfsStrings.Add(new KeyValuePair<string, string>("auth_time", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationinstant"));
-                adfsStrings.Add(new KeyValuePair<string, string>("authmethod", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationmethod"));
-                adfsStrings.Add(new KeyValuePair<string, string>("email", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
-                adfsStrings.Add(new KeyValuePair<string, string>("given_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"));
-                adfsStrings.Add(new KeyValuePair<string, string>("unique_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
-                adfsStrings.Add(new KeyValuePair<string, string>("upn", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"));
-                adfsStrings.Add(new KeyValuePair<string, string>("commonname", "http://schemas.xmlsoap.org/claims/CommonName"));
-                adfsStrings.Add(new KeyValuePair<string, string>("adfs1email", "http://schemas.xmlsoap.org/claims/EmailAddress"));
-                adfsStrings.Add(new KeyValuePair<string, string>("group", "http://schemas.xmlsoap.org/claims/Group"));
-                adfsStrings.Add(new KeyValuePair<string, string>("adfs1upn", "http://schemas.xmlsoap.org/claims/UPN"));
-                adfsStrings.Add(new KeyValuePair<string, string>("role", "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"));
-                adfsStrings.Add(new KeyValuePair<string, string>("family_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"));
-                adfsStrings.Add(new KeyValuePair<string, string>("ppid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"));
-                adfsStrings.Add(new KeyValuePair<string, string>("nameid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
-                adfsStrings.Add(new KeyValuePair<string, string>("denyonlysid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/denyonlysid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("denyonlyprimarysid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/denyonlyprimarysid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("denyonlyprimarygroupsid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/denyonlyprimarygroupsid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("groupsid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("primarygroupsid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarygroupsid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("primarysid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"));
-                adfsStrings.Add(new KeyValuePair<string, string>("winaccountname", "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certapppolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/applicationpolicy"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certauthoritykeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/authoritykeyidentifier"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certbasicconstraints", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/basicconstraints"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certeku", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/eku"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certissuer", "http://schemas.microsoft.com/2012/12/certificatecontext/field/issuer"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certissuername", "http://schemas.microsoft.com/2012/12/certificatecontext/field/issuername"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certkeyusage", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/keyusage"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certnotafter", "http://schemas.microsoft.com/2012/12/certificatecontext/field/notafter"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certnotbefore", "http://schemas.microsoft.com/2012/12/certificatecontext/field/notbefore"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certpolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatepolicy"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certpublickey", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/rsa"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certrawdata", "http://schemas.microsoft.com/2012/12/certificatecontext/field/rawdata"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certsubjectaltname", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/san"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certserialnumber", "http://schemas.microsoft.com/ws/2008/06/identity/claims/serialnumber"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certsignaturealgorithm", "http://schemas.microsoft.com/2012/12/certificatecontext/field/signaturealgorithm"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certsubject", "http://schemas.microsoft.com/2012/12/certificatecontext/field/subject"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certsubjectkeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/subjectkeyidentifier"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certsubjectname", "http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certtemplateinformation", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplateinformation"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certtemplatename", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplatename"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certthumbprint", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/thumbprint"));
-                adfsStrings.Add(new KeyValuePair<string, string>("certx509version", "http://schemas.microsoft.com/2012/12/certificatecontext/field/x509version"));
-                adfsStrings.Add(new KeyValuePair<string, string>("acr", "http://schemas.microsoft.com/claims/authnclassreference"));
-                adfsStrings.Add(new KeyValuePair<string, string>("amr", "http://schemas.microsoft.com/claims/authnmethodsreferences"));
-
-
-                foreach (var kv in adfsStrings)
-                {
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: '" + kv.Key + "'");
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] == kv.Value, "Inbound mapping wrong: key '" + kv.Key + "' expected: " + JwtSecurityTokenHandler.InboundClaimTypeMap[kv.Key] + ", received: '" + kv.Value + "'");
-                }
-
-                var handler = new JwtSecurityTokenHandler();
-
-                List<Claim> expectedInboundClaimsMapped = new List<Claim>(
-                    ClaimSets.ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(
-                            IdentityUtilities.DefaultIssuer,
-                            IdentityUtilities.DefaultIssuer
-                            ));
-
-                var jwt = handler.CreateToken(
-                    issuer: IdentityUtilities.DefaultIssuer,
-                    audience: IdentityUtilities.DefaultAudience,
-                    subject: new ClaimsIdentity(
-                        ClaimSets.AllInboundShortClaimTypes(
-                            IdentityUtilities.DefaultIssuer,
-                            IdentityUtilities.DefaultIssuer)));
-
-                List<Claim> expectedInboundClaimsUnMapped = new List<Claim>(
-                        ClaimSets.AllInboundShortClaimTypes(
-                            IdentityUtilities.DefaultIssuer,
-                            IdentityUtilities.DefaultIssuer
-                          ));
-
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    RequireExpirationTime = false,
-                    RequireSignedTokens = false,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                };
-
-                JwtSecurityTokenHandler.InboundClaimFilter.Add("aud");
-                JwtSecurityTokenHandler.InboundClaimFilter.Add("exp");
-                JwtSecurityTokenHandler.InboundClaimFilter.Add("iat");
-                JwtSecurityTokenHandler.InboundClaimFilter.Add("iss");
-                JwtSecurityTokenHandler.InboundClaimFilter.Add("nbf");
-
-                // ValidateToken will map claims according to the InboundClaimTypeMap
-                RunClaimMappingVariation(jwt: jwt, tokenHandler: handler, validationParameters: validationParameters, expectedClaims: expectedInboundClaimsMapped, identityName: ClaimTypes.Name);
-
-                JwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
-                RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedInboundClaimsUnMapped, identityName: null);
-
-                // test that setting the NameClaimType override works.
-                List<Claim> claims = new List<Claim>()
-                {
-                    new Claim( ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ClaimTypes.Spn,       "spn", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( JwtRegisteredClaimNames.Sub,   "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( JwtRegisteredClaimNames.Prn,   "Principal1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( JwtRegisteredClaimNames.Sub,   "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( JwtRegisteredClaimNames.Prn,   "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( JwtRegisteredClaimNames.Sub,   "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                };
-
-                jwt = new JwtSecurityToken(issuer: Issuers.GotJwt, audience: Audiences.AuthFactors, claims: claims);
-                JwtSecurityTokenHandler.InboundClaimTypeMap = new Dictionary<string, string>()
-                {
-                    { JwtRegisteredClaimNames.Email,     "Mapped_" + JwtRegisteredClaimNames.Email },
-                    { JwtRegisteredClaimNames.GivenName, "Mapped_" + JwtRegisteredClaimNames.GivenName },
-                    { JwtRegisteredClaimNames.Prn,       "Mapped_" + JwtRegisteredClaimNames.Prn },
-                    { JwtRegisteredClaimNames.Sub,       "Mapped_" + JwtRegisteredClaimNames.Sub },
-                };
-
-                List<Claim> expectedClaims = new List<Claim>()
-                {
-                    new Claim( JwtRegisteredClaimNames.Iss, Issuers.GotJwt, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( JwtRegisteredClaimNames.Aud, Audiences.AuthFactors, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( ClaimTypes.Spn,   "spn", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Prn, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Prn, "Principal2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                    new Claim( "Mapped_" + JwtRegisteredClaimNames.Sub, "Subject3", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
-                };
+                Assert.True(JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: " + kv.Key);
+                Assert.True(JwtSecurityTokenHandler.DefaultInboundClaimTypeMap[kv.Key] == kv.Value, "Inbound mapping wrong: key " + kv.Key + " expected: " + JwtSecurityTokenHandler.DefaultInboundClaimTypeMap[kv.Key] + ", received: " + kv.Value);
             }
-            finally
+
+            List<KeyValuePair<string, string>> adfsStrings = new List<KeyValuePair<string, string>>();
+            adfsStrings.Add(new KeyValuePair<string, string>("pwdexptime", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationtime"));
+            adfsStrings.Add(new KeyValuePair<string, string>("pwdexpdays", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationdays"));
+            adfsStrings.Add(new KeyValuePair<string, string>("pwdchgurl", "http://schemas.microsoft.com/ws/2012/01/passwordchangeurl"));
+            adfsStrings.Add(new KeyValuePair<string, string>("clientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-ip"));
+            adfsStrings.Add(new KeyValuePair<string, string>("forwardedclientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip"));
+            adfsStrings.Add(new KeyValuePair<string, string>("clientapplication", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-application"));
+            adfsStrings.Add(new KeyValuePair<string, string>("clientuseragent", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-user-agent"));
+            adfsStrings.Add(new KeyValuePair<string, string>("endpointpath", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path"));
+            adfsStrings.Add(new KeyValuePair<string, string>("proxy", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy"));
+            adfsStrings.Add(new KeyValuePair<string, string>("relyingpartytrustid", "http://schemas.microsoft.com/2012/01/requestcontext/claims/relyingpartytrustid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("insidecorporatenetwork", "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork"));
+            adfsStrings.Add(new KeyValuePair<string, string>("isregistereduser", "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser"));
+            adfsStrings.Add(new KeyValuePair<string, string>("deviceowner", "http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner"));
+            adfsStrings.Add(new KeyValuePair<string, string>("deviceid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier"));
+            adfsStrings.Add(new KeyValuePair<string, string>("deviceregid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("devicedispname", "http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname"));
+            adfsStrings.Add(new KeyValuePair<string, string>("deviceosver", "http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion"));
+            adfsStrings.Add(new KeyValuePair<string, string>("deviceismanaged", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged"));
+            adfsStrings.Add(new KeyValuePair<string, string>("deviceostype", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype"));
+            adfsStrings.Add(new KeyValuePair<string, string>("auth_time", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationinstant"));
+            adfsStrings.Add(new KeyValuePair<string, string>("authmethod", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationmethod"));
+            adfsStrings.Add(new KeyValuePair<string, string>("email", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
+            adfsStrings.Add(new KeyValuePair<string, string>("given_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"));
+            adfsStrings.Add(new KeyValuePair<string, string>("unique_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
+            adfsStrings.Add(new KeyValuePair<string, string>("upn", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"));
+            adfsStrings.Add(new KeyValuePair<string, string>("commonname", "http://schemas.xmlsoap.org/claims/CommonName"));
+            adfsStrings.Add(new KeyValuePair<string, string>("adfs1email", "http://schemas.xmlsoap.org/claims/EmailAddress"));
+            adfsStrings.Add(new KeyValuePair<string, string>("group", "http://schemas.xmlsoap.org/claims/Group"));
+            adfsStrings.Add(new KeyValuePair<string, string>("adfs1upn", "http://schemas.xmlsoap.org/claims/UPN"));
+            adfsStrings.Add(new KeyValuePair<string, string>("role", "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"));
+            adfsStrings.Add(new KeyValuePair<string, string>("family_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"));
+            adfsStrings.Add(new KeyValuePair<string, string>("ppid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"));
+            adfsStrings.Add(new KeyValuePair<string, string>("nameid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
+            adfsStrings.Add(new KeyValuePair<string, string>("denyonlysid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/denyonlysid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("denyonlyprimarysid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/denyonlyprimarysid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("denyonlyprimarygroupsid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/denyonlyprimarygroupsid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("groupsid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("primarygroupsid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarygroupsid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("primarysid", "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"));
+            adfsStrings.Add(new KeyValuePair<string, string>("winaccountname", "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certapppolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/applicationpolicy"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certauthoritykeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/authoritykeyidentifier"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certbasicconstraints", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/basicconstraints"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certeku", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/eku"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certissuer", "http://schemas.microsoft.com/2012/12/certificatecontext/field/issuer"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certissuername", "http://schemas.microsoft.com/2012/12/certificatecontext/field/issuername"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certkeyusage", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/keyusage"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certnotafter", "http://schemas.microsoft.com/2012/12/certificatecontext/field/notafter"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certnotbefore", "http://schemas.microsoft.com/2012/12/certificatecontext/field/notbefore"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certpolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatepolicy"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certpublickey", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/rsa"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certrawdata", "http://schemas.microsoft.com/2012/12/certificatecontext/field/rawdata"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certsubjectaltname", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/san"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certserialnumber", "http://schemas.microsoft.com/ws/2008/06/identity/claims/serialnumber"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certsignaturealgorithm", "http://schemas.microsoft.com/2012/12/certificatecontext/field/signaturealgorithm"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certsubject", "http://schemas.microsoft.com/2012/12/certificatecontext/field/subject"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certsubjectkeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/subjectkeyidentifier"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certsubjectname", "http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certtemplateinformation", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplateinformation"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certtemplatename", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplatename"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certthumbprint", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/thumbprint"));
+            adfsStrings.Add(new KeyValuePair<string, string>("certx509version", "http://schemas.microsoft.com/2012/12/certificatecontext/field/x509version"));
+            adfsStrings.Add(new KeyValuePair<string, string>("acr", "http://schemas.microsoft.com/claims/authnclassreference"));
+            adfsStrings.Add(new KeyValuePair<string, string>("amr", "http://schemas.microsoft.com/claims/authnmethodsreferences"));
+
+            foreach (var kv in adfsStrings)
             {
-                JwtSecurityTokenHandler.InboundClaimTypeMap = inboundClaimTypeMap;
-                JwtSecurityTokenHandler.OutboundClaimTypeMap = inboundClaimTypeMap;
-                JwtSecurityTokenHandler.InboundClaimFilter.Clear();
+                Assert.True(JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.ContainsKey(kv.Key), "Inbound short type missing: '" + kv.Key + "'");
+                Assert.True(JwtSecurityTokenHandler.DefaultInboundClaimTypeMap[kv.Key] == kv.Value, "Inbound mapping wrong: key '" + kv.Key + "' expected: " + JwtSecurityTokenHandler.DefaultInboundClaimTypeMap[kv.Key] + ", received: '" + kv.Value + "'");
             }
+
+            var handler = new JwtSecurityTokenHandler();
+
+            List<Claim> expectedInboundClaimsMapped = new List<Claim>(
+                ClaimSets.ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(
+                        IdentityUtilities.DefaultIssuer,
+                        IdentityUtilities.DefaultIssuer
+                        ));
+
+            var jwt = handler.CreateToken(
+                issuer: IdentityUtilities.DefaultIssuer,
+                audience: IdentityUtilities.DefaultAudience,
+                subject: new ClaimsIdentity(
+                    ClaimSets.AllInboundShortClaimTypes(
+                        IdentityUtilities.DefaultIssuer,
+                        IdentityUtilities.DefaultIssuer)));
+
+            List<Claim> expectedInboundClaimsUnMapped = new List<Claim>(
+                    ClaimSets.AllInboundShortClaimTypes(
+                        IdentityUtilities.DefaultIssuer,
+                        IdentityUtilities.DefaultIssuer
+                        ));
+
+            var validationParameters = new TokenValidationParameters
+            {
+                RequireExpirationTime = false,
+                RequireSignedTokens = false,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+            };
+
+            handler.InboundClaimFilter.Add("aud");
+            handler.InboundClaimFilter.Add("exp");
+            handler.InboundClaimFilter.Add("iat");
+            handler.InboundClaimFilter.Add("iss");
+            handler.InboundClaimFilter.Add("nbf");
+
+            // ValidateToken will map claims according to the InboundClaimTypeMap
+            RunClaimMappingVariation(jwt: jwt, tokenHandler: handler, validationParameters: validationParameters, expectedClaims: expectedInboundClaimsMapped, identityName: ClaimTypes.Name);
+
+            handler.InboundClaimTypeMap.Clear();
+            RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedInboundClaimsUnMapped, identityName: null);
+
+            // test that setting the NameClaimType override works.
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim( JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                new Claim( ClaimTypes.Spn, "spn", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                new Claim( JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                new Claim( JwtRegisteredClaimNames.Prn, "Principal1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                new Claim( JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+            };
+
+
+            handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimFilter.Add("exp");
+            handler.InboundClaimFilter.Add("nbf");
+            handler.InboundClaimTypeMap = new Dictionary<string, string>()
+            {
+                { JwtRegisteredClaimNames.Email, "Mapped_" + JwtRegisteredClaimNames.Email },
+                { JwtRegisteredClaimNames.GivenName, "Mapped_" + JwtRegisteredClaimNames.GivenName },
+                { JwtRegisteredClaimNames.Prn, "Mapped_" + JwtRegisteredClaimNames.Prn },
+                { JwtRegisteredClaimNames.Sub, "Mapped_" + JwtRegisteredClaimNames.Sub },
+            };
+
+            jwt = handler.CreateToken(issuer: Issuers.GotJwt, audience: Audiences.AuthFactors, subject: new ClaimsIdentity(claims));
+
+            List<Claim> expectedClaims = new List<Claim>()
+            {
+                new Claim( JwtRegisteredClaimNames.Iss, Issuers.GotJwt, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                new Claim( JwtRegisteredClaimNames.Aud, Audiences.AuthFactors, ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+                new Claim( ClaimTypes.Spn, "spn", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt ),
+
+            };
+            Claim claim = null;
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt);
+            claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Email));
+            expectedClaims.Add(claim);
+
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt);
+            claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Sub));
+            expectedClaims.Add(claim);
+
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Prn, "Principal1", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt);
+            claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Prn));
+            expectedClaims.Add(claim);
+
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, Issuers.GotJwt, Issuers.GotJwt);
+            claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Sub));
+            expectedClaims.Add(claim);
+
+            RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedClaims, identityName: null);
         }
 
         private void RunClaimMappingVariation(JwtSecurityToken jwt, JwtSecurityTokenHandler tokenHandler, TokenValidationParameters validationParameters, IEnumerable<Claim> expectedClaims, string identityName)
@@ -444,27 +446,72 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 // if it was mapped, make sure the shortname is found in the mapping and equals the claim.Type
                 if (claim.Properties.ContainsKey(JwtSecurityTokenHandler.ShortClaimTypeProperty))
                 {
-                    Assert.True(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty]), "!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty] ): " + claim.Type);
+                    Assert.True(tokenHandler.InboundClaimTypeMap.ContainsKey(claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty]), "!JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty] ): " + claim.Type);
                 }
                 // there was no short property.
-                Assert.False(JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(claim.Type), "JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Type ), wasn't mapped claim.Type: " + claim.Type);
+                Assert.False(tokenHandler.InboundClaimTypeMap.ContainsKey(claim.Type), "JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey( claim.Type ), wasn't mapped claim.Type: " + claim.Type);
             }
 
             foreach (Claim claim in jwt.Claims)
             {
                 string claimType = claim.Type;
 
-                if (JwtSecurityTokenHandler.InboundClaimTypeMap.ContainsKey(claimType))
+                if (tokenHandler.InboundClaimTypeMap.ContainsKey(claimType))
                 {
-                    claimType = JwtSecurityTokenHandler.InboundClaimTypeMap[claim.Type];
+                    claimType = tokenHandler.InboundClaimTypeMap[claim.Type];
                 }
 
-                if (!JwtSecurityTokenHandler.InboundClaimFilter.Contains(claim.Type))
+                if (!tokenHandler.InboundClaimFilter.Contains(claim.Type))
                 {
                     Claim firstClaim = identity.FindFirst(claimType);
                     Assert.True(firstClaim != null, "Claim firstClaim = identity.FindFirst( claimType ), firstClaim == null. claim.Type: " + claim.Type + " claimType: " + claimType);
                 }
             }
+        }
+
+        [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Tests local instance claim type mapping and filtering")]
+        public void InstanceClaimMappingAndFiltering()
+        {
+            // testing if one handler overrides instance claim type map of another
+            JwtSecurityTokenHandler handler1 = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler handler2 = new JwtSecurityTokenHandler();
+            Assert.True(handler1.InboundClaimTypeMap.Count != 0, "handler1 should not have an empty inbound claim type map");
+            handler1.InboundClaimTypeMap.Clear();
+            Assert.True(handler1.InboundClaimTypeMap.Count == 0, "handler1 should have an empty inbound claim type map");
+            Assert.True(handler2.InboundClaimTypeMap.Count != 0, "handler2 should not have an empty inbound claim type map");
+
+            // Setup
+            var jwtClaim = new Claim("jwtClaim", "claimValue");
+            var internalClaim = new Claim("internalClaim", "claimValue");
+            var unwantedClaim = new Claim("unwantedClaim", "unwantedValue");
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimFilter = new HashSet<string>();
+            handler.InboundClaimTypeMap = new Dictionary<string, string>();
+            handler.OutboundClaimTypeMap = new Dictionary<string, string>();
+
+            handler.InboundClaimFilter.Add("unwantedClaim");
+            handler.InboundClaimTypeMap.Add("jwtClaim", "internalClaim");
+            handler.OutboundClaimTypeMap.Add("internalClaim", "jwtClaim");
+
+            // Test outgoing
+            var outgoingToken = handler.CreateToken(subject: new ClaimsIdentity(new Claim[] { internalClaim }));
+            var mappedClaim = System.Linq.Enumerable.FirstOrDefault(outgoingToken.Claims);
+            Assert.NotNull(mappedClaim);
+            Assert.Equal("jwtClaim", mappedClaim.Type);
+
+            // Test incoming
+            var incomingToken = handler.CreateToken(issuer: "Test Issuer", subject: new ClaimsIdentity(new Claim[] { jwtClaim, unwantedClaim }));
+            var validationParameters = new TokenValidationParameters
+            {
+                RequireSignedTokens = false,
+                ValidateAudience = false,
+                ValidateIssuer = false
+            };
+            SecurityToken token;
+            var identity = handler.ValidateToken(incomingToken.RawData, validationParameters, out token);
+            Assert.False(identity.HasClaim(c => c.Type == "unwantedClaim"));
+            Assert.False(identity.HasClaim(c => c.Type == "jwtClaim"));
+            Assert.True(identity.HasClaim("internalClaim", "claimValue"));
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Ensures that JwtSecurityTokenHandler defaults are as expected")]
