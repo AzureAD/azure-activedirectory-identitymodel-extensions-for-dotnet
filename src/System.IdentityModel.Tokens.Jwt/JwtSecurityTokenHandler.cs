@@ -63,6 +63,9 @@ namespace System.IdentityModel.Tokens.Jwt
         private SignatureProviderFactory signatureProviderFactory = new SignatureProviderFactory();
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private Int32 _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
+        private IDictionary<string, string> _inboundClaimTypeMap = inboundClaimTypeMap;
+        private IDictionary<string, string> _outboundClaimTypeMap = outboundClaimTypeMap;
+        private ISet<string> _inboundClaimFilter = inboundClaimFilter;
 
 
         /// <summary>
@@ -410,7 +413,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             IdentityModelEventSource.Logger.WriteVerbose("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.");
-            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires);
+            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires, _outboundClaimTypeMap);
             JwtHeader header = new JwtHeader(signingCredentials);
 
             if (subject != null && subject.Actor != null)
@@ -880,14 +883,14 @@ namespace System.IdentityModel.Tokens.Jwt
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
             foreach (Claim jwtClaim in jwt.Claims)
             {
-                if (InboundClaimFilter.Contains(jwtClaim.Type))
+                if (_inboundClaimFilter.Contains(jwtClaim.Type))
                 {
                     continue;
                 }
 
                 string claimType;
                 bool wasMapped = true;
-                if (!JwtSecurityTokenHandler.InboundClaimTypeMap.TryGetValue(jwtClaim.Type, out claimType))
+                if (!_inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out claimType))
                 {
                     claimType = jwtClaim.Type;
                     wasMapped = false;

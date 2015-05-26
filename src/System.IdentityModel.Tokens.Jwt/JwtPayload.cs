@@ -28,12 +28,14 @@ namespace System.IdentityModel.Tokens.Jwt
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Serialize not really supported.")]
     public class JwtPayload : Dictionary<string, object>
     {
+        private IDictionary<string, string> _outboundClaimTypeMap = JwtSecurityTokenHandler.OutboundClaimTypeMap;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with no claims. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// Creates a empty <see cref="JwtPayload"/>
         /// </summary>
         public JwtPayload()
-            : this(issuer: null, audience: null, claims: null, notBefore: null, expires: null)
+            : this(issuer: null, audience: null, claims: null, notBefore: null, expires: null, outboundClaimTypeMap: null)
         {
         }
 
@@ -42,7 +44,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="claims">the claims to add.</param>
         /// </summary>
         public JwtPayload(IEnumerable<Claim> claims)
-            : this(issuer: null, audience: null, claims: claims, notBefore: null, expires: null)
+            : this(issuer: null, audience: null, claims: claims, notBefore: null, expires: null, outboundClaimTypeMap: null)
         {
         }
 
@@ -54,10 +56,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
         /// <param name="notBefore">if notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
         /// <param name="expires">if expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
+        /// <param name="outboundClaimTypeMap">dictionary for performing claim type transformation, see <see cref="JwtSecurityTokenHandler.OutboundClaimTypeMap"/> for more info.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
         /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
-        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, IDictionary<string, string> outboundClaimTypeMap = null)
             : base(StringComparer.Ordinal)
         {
             if (expires.HasValue && notBefore.HasValue)
@@ -66,6 +69,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value));
                 }
+            }
+
+            if (outboundClaimTypeMap != null)
+            {
+                _outboundClaimTypeMap = outboundClaimTypeMap;
             }
 
             if (claims != null)
@@ -434,7 +442,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 string jsonClaimType = null;
-                if (!JwtSecurityTokenHandler.OutboundClaimTypeMap.TryGetValue(claim.Type, out jsonClaimType))
+                if (!_outboundClaimTypeMap.TryGetValue(claim.Type, out jsonClaimType))
                 {
                     jsonClaimType = claim.Type;
                 }
