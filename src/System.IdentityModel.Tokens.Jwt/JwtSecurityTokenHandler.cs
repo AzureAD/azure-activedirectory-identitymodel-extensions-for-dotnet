@@ -140,8 +140,9 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="InboundClaimTypeMap"/> that is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
+        /// Gets or sets the <see cref="InboundClaimTypeMap"/> that is the default for <see cref="InstanceInboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
         /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
+        /// <seealso cref="InstanceInboundClaimTypeMap"/>
         /// </summary>
         /// <exception cref="ArgumentNullException">'value is null.</exception>
         public static IDictionary<string, string> InboundClaimTypeMap
@@ -163,8 +164,9 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// <para>Gets or sets the <see cref="OutboundClaimTypeMap"/> that is used when creating a <see cref="JwtSecurityToken"/> from <see cref="Claim"/>(s).</para>
+        /// <para>Gets or sets the <see cref="OutboundClaimTypeMap"/> that is the default for <see cref="InstanceOutboundClaimTypeMap"/> wich is used when creating a <see cref="JwtSecurityToken"/> from <see cref="Claim"/>(s).</para>
         /// <para>The JSON claim 'name' value is set to <see cref="Claim.Type"/> after translating using this mapping.</para>
+        /// <seealso cref="InstanceOutboundClaimTypeMap"/>
         /// </summary>
         /// <remarks>This mapping is applied only when using <see cref="JwtPayload.AddClaim"/> or <see cref="JwtPayload.AddClaims"/>. Adding values directly will not result in translation.</remarks>
         /// <exception cref="ArgumentNullException">'value is null.</exception>
@@ -186,8 +188,10 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        /// <summary>Gets or sets the <see cref="ISet{String}"/> used to filter claims when populating a <see cref="ClaimsIdentity"/> claims form a <see cref="JwtSecurityToken"/>.
-        /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.</summary>
+        /// <summary>Gets or sets the <see cref="ISet{String}"/> that is the default for <see cref="InstanceInboundClaimFilter"/> used to filter claims when populating a <see cref="ClaimsIdentity"/> claims form a <see cref="JwtSecurityToken"/>.
+        /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.
+        /// <seealso cref="InstanceInboundClaimFilter"/>
+        /// </summary>
         /// <exception cref="ArgumentNullException">'value' is null.</exception>
         public static ISet<string> InboundClaimFilter
         {
@@ -206,6 +210,49 @@ namespace System.IdentityModel.Tokens.Jwt
                 inboundClaimFilter = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="InstanceInboundClaimTypeMap"/> that is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
+        /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
+        /// <seealso cref="InboundClaimTypeMap"/>
+        /// </summary>
+        /// <remarks>The default value is taken from <see cref="InboundClaimTypeMap"/> on instantiation.</remarks>
+        /// <exception cref="ArgumentNullException">'value is null.</exception>
+        public IDictionary<string, string> InstanceInboundClaimTypeMap
+        {
+            get { return _inboundClaimTypeMap; }
+            set { if (value == null) throw new ArgumentNullException("value"); _inboundClaimTypeMap = value; }
+        }
+
+
+        /// <summary>
+        /// <para>Gets or sets the <see cref="InstanceOutboundClaimTypeMap"/> that is used when creating a <see cref="JwtSecurityToken"/> from <see cref="Claim"/>(s).</para>
+        /// <para>The JSON claim 'name' value is set to <see cref="Claim.Type"/> after translating using this mapping.</para>
+        /// <seealso cref="OutboundClaimTypeMap"/>
+        /// </summary>
+        /// <remarks>
+        /// <para>This mapping is applied only when using <see cref="JwtPayload.AddClaim"/> or <see cref="JwtPayload.AddClaims"/>. Adding values directly will not result in translation.</para>
+        /// <para>The default value is taken from <see cref="OutboundClaimTypeMap"/> on instantiation.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">'value is null.</exception>
+        public IDictionary<string, string> InstanceOutboundClaimTypeMap
+        {
+            get { return _outboundClaimTypeMap; }
+            set { if (value == null) throw new ArgumentNullException("value"); _outboundClaimTypeMap = value; }
+        }
+
+        /// <summary>Gets or sets the <see cref="ISet{String}"/> used to filter claims when populating a <see cref="ClaimsIdentity"/> claims form a <see cref="JwtSecurityToken"/>.
+        /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.
+        /// <seealso cref="InboundClaimFilter"/>
+        /// </summary>
+        /// <remarks>The default value is taken from <see cref="InboundClaimFilter"/> on instantiation.</remarks>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
+        public ISet<string> InstanceInboundClaimFilter
+        {
+            get { return _inboundClaimFilter; }
+            set { if (value == null) throw new ArgumentNullException("value"); _inboundClaimFilter = value; }
+        }
+
 
         /// <summary>
         /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain the original JSON claim 'name' if a mapping occurred when the <see cref="Claim"/>(s) were created.

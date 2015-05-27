@@ -467,6 +467,45 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
+        [TestMethod]
+        [TestProperty("TestCaseID", "E3CD829B-6A19-4B6F-A33C-8EE1F8F6BCE7")]
+        [Description("Tests local instance claim type mapping and filtering")]
+        public void InstanceClaimMappingAndFiltering()
+        {
+            // Setup
+            var jwtClaim = new Claim("jwtClaim", "claimValue");
+            var internalClaim = new Claim("internalClaim", "claimValue");
+            var unwantedClaim = new Claim("unwantedClaim", "unwantedValue");
+            var handler = new JwtSecurityTokenHandler();
+            handler.InstanceInboundClaimFilter = new HashSet<string>();
+            handler.InstanceInboundClaimTypeMap = new Dictionary<string, string>();
+            handler.InstanceOutboundClaimTypeMap = new Dictionary<string, string>();
+
+            handler.InstanceInboundClaimFilter.Add("unwantedClaim");
+            handler.InstanceInboundClaimTypeMap.Add("jwtClaim", "internalClaim");
+            handler.InstanceOutboundClaimTypeMap.Add("internalClaim", "jwtClaim");
+
+            // Test outgoing
+            var outgoingToken = handler.CreateToken(subject: new ClaimsIdentity(new Claim[] { internalClaim }));
+            var mappedClaim = System.Linq.Enumerable.FirstOrDefault(outgoingToken.Claims);
+            Assert.IsNotNull(mappedClaim);
+            Assert.AreEqual("jwtClaim", mappedClaim.Type);
+
+            // Test incoming
+            var incomingToken = handler.CreateToken(issuer: "Test Issuer", subject: new ClaimsIdentity(new Claim[] { jwtClaim, unwantedClaim }));
+            var validationParameters = new TokenValidationParameters
+            {
+                RequireSignedTokens = false,
+                ValidateAudience = false,
+                ValidateIssuer = false
+            };
+            SecurityToken token;
+            var identity = handler.ValidateToken(incomingToken.RawData, validationParameters, out token);
+            Assert.IsFalse(identity.HasClaim(c => c.Type == "unwantedClaim"));
+            Assert.IsFalse(identity.HasClaim(c => c.Type == "jwtClaim"));
+            Assert.IsTrue(identity.HasClaim("internalClaim", "claimValue"));
+        }
+
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Ensures that JwtSecurityTokenHandler defaults are as expected")]
         public void Defaults()
         {
