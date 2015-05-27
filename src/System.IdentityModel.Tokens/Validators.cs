@@ -75,7 +75,7 @@ namespace System.IdentityModel.Tokens
                     {
                         if (string.Equals(audience, str, StringComparison.Ordinal))
                         {
-                            IdentityModelEventSource.Logger.WriteInformation(string.Format("Audience Validated. Audience: {0}", audience));
+                            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Audience Validated. Audience: {0}", audience));
                             return;
                         }
                     }
@@ -85,7 +85,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (string.Equals(audience, validationParameters.ValidAudience, StringComparison.Ordinal))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(string.Format("Audience Validated. Audience: {0}", audience));
+                        IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Audience Validated. Audience: {0}", audience));
                         return;
                     }
                 }
@@ -133,7 +133,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
             {
-                IdentityModelEventSource.Logger.WriteInformation(string.Format("Issuer Validated. Issuer: {0}", issuer));
+                IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Issuer Validated. Issuer: {0}", issuer));
                 return issuer;
             }
 
@@ -143,7 +143,7 @@ namespace System.IdentityModel.Tokens
                 {
                     if (string.Equals(str, issuer, StringComparison.Ordinal))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(string.Format("Issuer Validated. Issuer: {0}", issuer));
+                        IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Issuer Validated. Issuer: {0}", issuer));
                         return issuer;
                     }
                 }
