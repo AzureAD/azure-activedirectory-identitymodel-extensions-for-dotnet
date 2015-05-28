@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Logging
 {
@@ -66,8 +67,13 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
-        public void Write(EventLevel level, string message)
+        public void Write(EventLevel level, string message, Exception innerException)
         {
+            if (innerException != null)
+            {
+                message = String.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.ToString());
+            }
+
             switch (level)
             {
                 case EventLevel.Critical:

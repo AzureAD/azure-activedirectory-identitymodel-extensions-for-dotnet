@@ -361,7 +361,7 @@ namespace System.IdentityModel.Tokens
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                IdentityModelEventSource.Logger.WriteInformation(string.Format("Token string length greater than maximum length allowed. Token string length: {0}", tokenString.Length));
+                IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, "Token string length greater than maximum length allowed. Token string length: {0}", tokenString.Length));
                 return false;
             }
 
