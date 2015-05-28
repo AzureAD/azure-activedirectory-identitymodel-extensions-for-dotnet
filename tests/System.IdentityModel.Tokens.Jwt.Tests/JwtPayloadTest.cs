@@ -157,18 +157,18 @@ namespace System.IdentityModel.Test
 
         [TestMethod]
         [TestProperty("TestCaseID", "41b560fa-dddf-47cf-a8f0-b6f85e01b61e")]
-        [Description("Test claim array decomposition")]
-        public void JwtPayload_ClaimArrayDecomposition()
+        [Description("Test claim array decomposition in Mono")]
+        public void JwtPayload_Mono_ClaimArrayDecomposition()
         {
             List<string> errors = new List<string>();
+
             var jwtPayload = new JwtPayload();
+            jwtPayload["scope"] = new ArrayList() { "openid", "email", "profile" };
 
-            jwtPayload.AddClaim(new Claim("scope", "[\"openid\", \"email\", \"profile\"]"));
             int claimCount = ((IList<Claim>)jwtPayload.Claims).Count;
-
-            if (claimCount == 3)
+            if (claimCount != 3)
             {
-                errors.Add("!claimCount === 3");
+                errors.Add("!claimCount == 3");
             }
 
             TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
