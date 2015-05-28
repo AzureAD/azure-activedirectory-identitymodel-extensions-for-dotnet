@@ -67,6 +67,7 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        [NonEvent]
         public void Write(EventLevel level, string message, Exception innerException)
         {
             if (innerException != null)
