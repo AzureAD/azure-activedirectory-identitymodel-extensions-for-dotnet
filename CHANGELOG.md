@@ -19,19 +19,21 @@
 
 * **Microsoft.IdentityModel.Protocol.Extensions**
     * **Removed:**
-        * `TokenValidationParameters`:   
-            * No longer supports `SigningTokens`, only `SigningKeys`.
-            * `CertificateValidator` has been removed.
-            * `IssuerSigningToken` and `IssuerSigningTokens` have been removed.
+        * `SecurityTokenHandlerCollectionExtensions` class has been removed.
+        * `OpenIdConnectConfiguration.SigningTokens` has been removed.
         * `OpenIdConnectProtocolException.OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)` has been removed.
         * `OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(SerializationInfo info, StreamingContext context)` has been removed.
         * `OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(SerializationInfo info, StreamingContext context)` has been removed.
     * **Changed:**
         * Type of `ClientDecryptionTokens` has been changed from `ReadOnlyCollection<SecurityToken>` to `IList<SecurityToken>`.
-        * `OpenIdConnectConfiguration.SigningTokens` has been replaced by `OpenIdConnectConfiguration.SigningKeys`.
         * `JsonWebKey.KeyOps` OM changed from `string` to `IList<string>` as per specifications.
         * `JsonWebKeySet.GetSigningTokens()` has been replaced by `JsonWebKeySet.GetSigningKeys()`.
-* ** System.IdentityModel.Tokens**
+    * **Added:**
+        * `ErrorMessages` class. List of all messages that we log and/or throw.
+        * `Base64UrlConverter` class has been added. It provides APIs to read and write Json objects.
+        * Additional string  constants to `JsonWebKeyParameterNames`.
+        * `OpenIdConnectConfiguration Create(string json)` method has been added.
+* **System.IdentityModel.Tokens**
     * **Removed:**  
         * `SecurityTokenDescriptor` has been removed.
         * `SecurityKeyIdentifier` and `SecurityKeyIdentifierClause` have been dropped from the OM.
@@ -40,7 +42,11 @@
         * `SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(SerializationInfo info, StreamingContext context)` has been removed.
         * `SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(SerializationInfo info, StreamingContext context)` has been removed.
         * `SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(SerializationInfo info, StreamingContext context)` has been removed.
-        * Following APIs are removed from `JwtSecurityTokenHandler`:
+        * `TokenValidationParameters`:   
+            * No longer supports `SigningTokens`, only `SigningKeys`.
+            * `CertificateValidator` has been removed.
+            * `IssuerSigningToken` and `IssuerSigningTokens` have been removed.
+        * `JwtSecurityTokenHandler`:
             * public override bool CanReadToken(XmlReader reader)
             * public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
             * public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
@@ -60,7 +66,8 @@
         *  `X509AsymmetricSecurityKey` has been replaced with `X509SecurityKey`.
         *  `JwtSecurityToken.SecurityKeys` has been replaced by `JwtSecurityToken.SecurityKey`. The token now contains a single key
         *  `JwtSecurityTOken.ResolveIssuerSigningKey(string token, SecurityToken securityToken, SecurityKeyIdentifier keyIdentifier, TokenValidationParameters validationParameters)` has been replaced by `ResolveIssuerSigningKey(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)`
-        *  Taking a dependency on NewtonSoft resulted the type of the `Claim.Property[JwtSecurityTokenHandler.JsonClaimTypeProperty]` to change from `typeof(IDictionary<string, object>).ToString()` to `Newtonsoft.Json.Linq.JProperty`
+        *  Taking a dependency on NewtonSoft resulted the type of the `Claim.Property[JwtSecurityTokenHandler.JsonClaimTypeProperty]` to change from `typeof(IDictionary<string, object>).ToString()` to `Newtonsoft.Json.Linq.JProperty`.
+        *  `TokenValidationParameters.IssuerSigningKeyResolve`' method takes a `string kid` instead of `SecurityKeyIdentifier keyIdentifier` as parameter.
     *  **Added:**
         * Added properties `string Kid` and `string X5t` to `JwtHeader` class.
         * Added properties `DateTime ValidFrom` and `DateTime ValidTo` to `JwtPayload` class.
@@ -79,6 +86,8 @@
             * public class SecurityTokenValidationException
             * public class SigningCredentials
             * public class SymmetricSecurityKey
+            * public class SignatureVerificationFailedException
+            * public class AsymmetricSecurityKey
 
 
 * **NOTE:** We have not added full support for WsFederation in 5.0.0 yet. Following classes are not in the new version yet:
