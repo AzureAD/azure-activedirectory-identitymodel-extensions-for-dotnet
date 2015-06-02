@@ -16,73 +16,77 @@
 * **Logging:** Added Event Source based logging in Wilson. `IdentityModelEventSource` is the exposed event source handle.
 
 ## Breaking Changes
-* `TokenValidationPrameters` no longer supports SigningTokens, only SigningKeys.
-*  Taking a dependency on NewtonSoft resulted the type of the `Claim.Property[JwtSecurityTokenHandler.JsonClaimTypeProperty]` to change from `typeof(IDictionary<string, object>).ToString()` to `Newtonsoft.Json.Linq.JProperty`
-*  `SecurityTokenDescriptor` has been removed.
-*  `TokenValidationParameters.CertificateValidator` has been removed.
-*  `TokenValidationParameters.ClientDecryptionTokens` type has been changed from `ReadOnlyCollection<SecurityToken>` to `IList<SecurityToken>`.
-*  `TokenValidationParameters.IssuerSigningToken` and `IssuerSigningTokens` have been removed.
-*  `AsymmetricAlgorithm` has been replaced with `SignatureProvider`.
-*  `X509AsymmetricSecurityKey` has been replaced with `X509SecurityKey`.
-*  `SecurityKeyIdentifier` and `SecurityKeyIdentifierClause` have been dropped from the OM.
-*  `SecurityKeyIdentifier` and `SecurityKeyIdentifierClause` have been dropped from the OM.
-*  `JsonWebKey.KeyOps` OM change from `string` to `IList<string>` as per specifications.
-*  `JsonWebKeySet.GetSigningTokens()` has been replaced by `JsonWebKeySet.GetSigningKeys()`.
-*  `Microsoft.IdentityModel.Extensions.SecurityTokenHandlerCollectionExtensions` has been removed.
-*  `OpenIdConnectConfiguration.SigningTokens` has been replaced by `OpenIdConnectConfiguration.SigningKeys`.
-*  `OpenIdConnectProtocolException.OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)` has been removed.
-*  `OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(SerializationInfo info, StreamingContext context)` has been removed.
-*  `OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(SerializationInfo info, StreamingContext context)` has been removed.
 
-**NOTE**: We have not added full support for WsFederation in 5.0.0 yet. Following classes are not in the new version yet:
-* WsFederationConfiguration
-* WsFederationConfigurationRetriever
-* WsFederationMessage
-
-**NOTE**: Saml support has been moved from `Microsoft.IdentityModel.Tokens` to `System.IdentityModel.Tokens`. Following classes were moved:
-* Saml2SecurityTokenHandler
-* SamlConstants
-* SamlSecurityTokenHandler
-
-** System.IdentityModel.Tokens**
-* `ErrorMessages` class has been moved from Microsoft.IdentityModel.Tokens to System.IdentityModel.Tokens.
-* `JwtHeader` constructor: `JwtHeadet(SigningCredentials signingCredentials)` does not assign a default null value to `signingCredentials` if not passed.
-* `JwtHeader.SigningKeyIdentifier` has been removed.
-* Added properties `string Kid` and `string X5t` to `JwtHeader` class.
-* Added properties `DateTime ValidFrom` and `DateTime ValidTo` to `JwtPayload` class.
-* `JwtSecurityToken.SigningToken` has been removed, users should use `JwtSecurityToken.SigningKey`.
-* `JwtSecurityToken.SecurityKeys` has been replaced by `JwtSecurityToken.SecurityKey`. The token now contains a single key.
-* In `JwtSecurityTOken`, `ResolveIssuerSigningKey(string token, SecurityToken securityToken, SecurityKeyIdentifier keyIdentifier, TokenValidationParameters validationParameters)` has been replaced by `ResolveIssuerSigningKey(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)`
-* `SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(SerializationInfo info, StreamingContext context)` has been removed.
-* `SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(SerializationInfo info, StreamingContext context)` has been removed.
-* `SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(SerializationInfo info, StreamingContext context)` has been removed.
-* Following APIs are removed from `JwtSecurityTokenHandler`:
-    * public override bool CanReadToken(XmlReader reader)
-    * public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
-    * public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
-    * public override string[] GetTokenTypeIdentifiers()
-    * public override void LoadCustomConfiguration(XmlNodeList nodelist)
-    * public override SecurityToken ReadToken(XmlReader reader)
-    * public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
-    * public override void WriteToken(XmlWriter writer, SecurityToken token)
-* Classes Removed:
-    * `public class NamedKeyIssuerTokenResolver`
-    * `public class NamedKeySecurityKeyIdentifierClause`
-    * `public class NamedKeySecurityToken`
-* Classes Added:
-    * `public class RSACryptoServiceProviderProxy`
-    * `public class RsaSecurityKey`
-    * `public static class SecurityAlgorithms`
-    * `public abstract class SecurityKey`
-    * `public abstract class SecurityToken`
-    * `public class SecurityTokenException`
-    * `public class SecurityTokenExpiredException`
-    * `public abstract class SecurityTokenHandler`
-    * `public class SecurityTokenInvalidSignatureException`
-    * `public class SecurityTokenNotYetValidException`
-    * `public class SecurityTokenReplayDetectedException`
-    * `public class SecurityTokenValidationException`
-    * `public class SigningCredentials`
-    * `public class SymmetricSecurityKey`
+* **Microsoft.IdentityModel.Protocol.Extensions**
+    * **Removed:**
+        * `TokenValidationParameters`:   
+            * No longer supports `SigningTokens`, only `SigningKeys`.
+            * `CertificateValidator` has been removed.
+            * `IssuerSigningToken` and `IssuerSigningTokens` have been removed.
+        * `OpenIdConnectProtocolException.OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)` has been removed.
+        * `OpenIdConnectProtocolInvalidCHashException.OpenIdConnectProtocolInvalidCHashException(SerializationInfo info, StreamingContext context)` has been removed.
+        * `OpenIdConnectProtocolInvalidNonceException.OpenIdConnectProtocolInvalidNonceException(SerializationInfo info, StreamingContext context)` has been removed.
+    * **Changed:**
+        * Type of `ClientDecryptionTokens` has been changed from `ReadOnlyCollection<SecurityToken>` to `IList<SecurityToken>`.
+        * `OpenIdConnectConfiguration.SigningTokens` has been replaced by `OpenIdConnectConfiguration.SigningKeys`.
+        * `JsonWebKey.KeyOps` OM changed from `string` to `IList<string>` as per specifications.
+        * `JsonWebKeySet.GetSigningTokens()` has been replaced by `JsonWebKeySet.GetSigningKeys()`.
+* ** System.IdentityModel.Tokens**
+    * **Removed:**  
+        * `SecurityTokenDescriptor` has been removed.
+        * `SecurityKeyIdentifier` and `SecurityKeyIdentifierClause` have been dropped from the OM.
+        * `JwtHeader.SigningKeyIdentifier` has been removed.
+        * `JwtSecurityToken.SigningToken` has been removed, users should use `JwtSecurityToken.SigningKey`.
+        * `SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(SerializationInfo info, StreamingContext context)` has been removed.
+        * `SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(SerializationInfo info, StreamingContext context)` has been removed.
+        * `SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(SerializationInfo info, StreamingContext context)` has been removed.
+        * Following APIs are removed from `JwtSecurityTokenHandler`:
+            * public override bool CanReadToken(XmlReader reader)
+            * public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
+            * public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
+            * public override string[] GetTokenTypeIdentifiers()
+            * public override void LoadCustomConfiguration(XmlNodeList nodelist)
+            * public override SecurityToken ReadToken(XmlReader reader)
+            * public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
+            * public override void WriteToken(XmlWriter writer, SecurityToken token)
+        * Classes Removed:
+            * public class NamedKeyIssuerTokenResolver
+            * public class NamedKeySecurityKeyIdentifierClause
+            * public class NamedKeySecurityToken
+    * **Changed:**
+        * `ErrorMessages` class has been moved from Microsoft.IdentityModel.Tokens to System.IdentityModel.Tokens.
+        * `JwtHeader` constructor: `JwtHeadet(SigningCredentials signingCredentials)` does not assign a default null value to `signingCredentials` if not passed.
+        *  `AsymmetricAlgorithm` has been replaced with `SignatureProvider`.
+        *  `X509AsymmetricSecurityKey` has been replaced with `X509SecurityKey`.
+        *  `JwtSecurityToken.SecurityKeys` has been replaced by `JwtSecurityToken.SecurityKey`. The token now contains a single key
+        *  `JwtSecurityTOken.ResolveIssuerSigningKey(string token, SecurityToken securityToken, SecurityKeyIdentifier keyIdentifier, TokenValidationParameters validationParameters)` has been replaced by `ResolveIssuerSigningKey(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)`
+        *  Taking a dependency on NewtonSoft resulted the type of the `Claim.Property[JwtSecurityTokenHandler.JsonClaimTypeProperty]` to change from `typeof(IDictionary<string, object>).ToString()` to `Newtonsoft.Json.Linq.JProperty`
+    *  **Added:**
+        * Added properties `string Kid` and `string X5t` to `JwtHeader` class.
+        * Added properties `DateTime ValidFrom` and `DateTime ValidTo` to `JwtPayload` class.
+        * Classes Added:
+            * public class RSACryptoServiceProviderProxy
+            * public class RsaSecurityKey
+            * public static class SecurityAlgorithms
+            * public abstract class SecurityKey
+            * public abstract class SecurityToken
+            * public class SecurityTokenException
+            * public class SecurityTokenExpiredException
+            * public abstract class SecurityTokenHandler
+            * public class SecurityTokenInvalidSignatureException
+            * public class SecurityTokenNotYetValidException
+            * public class SecurityTokenReplayDetectedException
+            * public class SecurityTokenValidationException
+            * public class SigningCredentials
+            * public class SymmetricSecurityKey
 
 
+* **NOTE:** We have not added full support for WsFederation in 5.0.0 yet. Following classes are not in the new version yet:
+    * WsFederationConfiguration
+    * WsFederationConfigurationRetriever
+    * WsFederationMessage
+
+* **NOTE:** Saml classes has been moved from `Microsoft.IdentityModel.Tokens` to `System.IdentityModel.Tokens`. It is not fully supported yet. Following classes were moved:
+    * Saml2SecurityTokenHandler
+    * SamlConstants
+    * SamlSecurityTokenHandler
