@@ -415,8 +415,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Adds a number of <see cref="Claim"/> to the <see cref="JwtPayload"/> as JSON { name, value } pairs.
         /// </summary>
         /// <param name="claims">for each <see cref="Claim"/> a JSON pair { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
-        /// <remarks><para>Each <see cref="Claim"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in <see cref="JwtSecurityTokenHandler.OutboundClaimTypeMap"/>. Adding and removing to <see cref="JwtSecurityTokenHandler.OutboundClaimTypeMap"/> 
-        /// will affect the name component of the Json claim</para>
+        /// <remarks>
         /// <para>Any <see cref="Claim"/> in the <see cref="IEnumerable{Claim}"/> that is null, will be ignored.</para></remarks>
         /// <exception cref="ArgumentNullException">'claims' is null.</exception>
         public void AddClaims(IEnumerable<Claim> claims)

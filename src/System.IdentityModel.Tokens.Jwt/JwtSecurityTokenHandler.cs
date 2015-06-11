@@ -437,7 +437,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="signatureProvider">optional <see cref="SignatureProvider"/>.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
-        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para></remarks>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="InstanceOutboundClaimTypeMap"/>. Adding and removing to <see cref="InstanceOutboundClaimTypeMap"/> will affect the name component of the Json claim</para>
+        /// </remarks>
         /// <para>If signautureProvider is not null, then it will be used to create the signature and <see cref="System.IdentityModel.Tokens.SignatureProviderFactory.CreateForSigning( SecurityKey, string )"/> will not be called.</para>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
