@@ -460,7 +460,8 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             IdentityModelEventSource.Logger.WriteVerbose("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.");
-            JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires, _outboundClaimTypeMap);
+            IEnumerable<Claim> subjectClaims = subject == null ? null : OutboundTransform(subject.Claims);
+            JwtPayload payload = new JwtPayload(issuer, audience, subjectClaims, notBefore, expires);
             JwtHeader header = new JwtHeader(signingCredentials);
 
             if (subject != null && subject.Actor != null)
@@ -487,6 +488,22 @@ namespace System.IdentityModel.Tokens.Jwt
 
             IdentityModelEventSource.Logger.WriteInformation("Creating security token from the header, payload and raw signature.");
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+        }
+
+        private IEnumerable<Claim> OutboundTransform(IEnumerable<Claim> claims)
+        {
+            foreach (Claim claim in claims)
+            {
+                string type = claim.Type;
+                if (_outboundClaimTypeMap.TryGetValue(claim.Type, out type))
+                {
+                    yield return new Claim(type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject);
+                }
+                else
+                {
+                    yield return claim;
+                }
+            }
         }
 
         /// <summary>

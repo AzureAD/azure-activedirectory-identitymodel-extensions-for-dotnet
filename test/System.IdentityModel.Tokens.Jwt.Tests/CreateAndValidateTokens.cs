@@ -149,8 +149,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.DuplicateTypes",
-                Claims = ClaimSets.DuplicateTypes(),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.DuplicateTypes(), null),
+                Claims = ClaimSets.DuplicateTypes(issuer, originalIssuer),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundTransform(ClaimSets.DuplicateTypes(issuer, originalIssuer), JwtSecurityTokenHandler.OutboundClaimTypeMap), null),
                 ExceptionType = null,
                 TokenValidationParameters = new TokenValidationParameters
                 {
@@ -168,7 +168,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
                 Claims = ClaimSets.Simple(issuer, originalIssuer),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), signingCredentials),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundTransform(ClaimSets.Simple(issuer, originalIssuer), JwtSecurityTokenHandler.OutboundClaimTypeMap), signingCredentials),
                 ExceptionType = null,
                 SigningCredentials = signingCredentials,
                 TokenValidationParameters = new TokenValidationParameters
@@ -186,7 +186,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 Case = "ClaimSets.Simple_simpleSigned_Symmetric",
                 Claims = ClaimSets.Simple(issuer, originalIssuer),
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.Simple(issuer, originalIssuer), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundTransform(ClaimSets.Simple(issuer, originalIssuer), JwtSecurityTokenHandler.OutboundClaimTypeMap), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
                 ExceptionType = null,
                 SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                 SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,

@@ -497,6 +497,25 @@ namespace System.IdentityModel.Tokens.Tests
             };
         }
 
+        public static IEnumerable<Claim> OutboundTransform(IEnumerable<Claim> claims, IDictionary<string, string> outboundClaimTypeMap)
+        {
+            foreach (Claim claim in claims)
+            {
+                string type = null;
+                if (outboundClaimTypeMap.TryGetValue(claim.Type, out type))
+                {
+                    Claim mappedClaim = new Claim(type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject);
+                    foreach (KeyValuePair<string, string> kv in claim.Properties)
+                    {
+                        mappedClaim.Properties.Add(kv);
+                    }
+                    yield return mappedClaim;
+                }
+                else
+                    yield return claim;
+            }
+        }
+
         public static IEnumerable<Claim> ClaimsPlus( IEnumerable<Claim> claims = null, SigningCredentials signingCredential = null, DateTime? notBefore = null, DateTime? expires = null, string issuer = null, string originalIssuer = null, string audience = null )
         {
             string thisIssuer = issuer ?? ClaimsIdentity.DefaultIssuer;
