@@ -854,7 +854,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.Throw(ErrorMessages.IDX10221, typeof(ArgumentNullException), EventLevel.Error);
+                IdentityModelEventSource.Logger.WriteVerbose("Issuer is null or empty. Using runtime default for creating claims.");
             }
 
             IdentityModelEventSource.Logger.WriteInformation("Creating claims identity from the validated token.");
