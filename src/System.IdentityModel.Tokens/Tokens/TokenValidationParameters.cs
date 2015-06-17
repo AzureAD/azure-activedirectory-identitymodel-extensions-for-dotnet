@@ -471,6 +471,16 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets the boolean to control if the signature of the token will be validated during token validation.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool ValidateSignature
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets a string that represents a valid audience that will be used during token validation.
         /// </summary>
         public string ValidAudience

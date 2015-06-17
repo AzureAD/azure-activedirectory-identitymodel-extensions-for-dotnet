@@ -500,7 +500,15 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes), typeof(ArgumentException), EventLevel.Error);
             }
 
-            JwtSecurityToken jwt = this.ValidateSignature(securityToken, validationParameters);
+            JwtSecurityToken jwt = null;
+            if (validationParameters.ValidateSignature)
+            {
+                jwt = this.ValidateSignature(securityToken, validationParameters);
+            }
+            else
+            {
+                jwt = this.ReadToken(securityToken) as JwtSecurityToken;
+            }
 
             if (jwt.SigningKey != null)
             {
