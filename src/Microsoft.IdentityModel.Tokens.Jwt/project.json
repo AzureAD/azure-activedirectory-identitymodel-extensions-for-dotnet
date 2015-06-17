@@ -4,13 +4,6 @@
 		"Newtonsoft.Json": "6.0.6",
 		"Microsoft.IdentityModel.Logging": "1.0.0-*"
     },
-    "exclude": [
-        "Saml\\SamlSecurityTokenHandler.cs",
-        "Saml\\Saml2SecurityTokenHandler.cs",
-        "Saml\\SamlConstants.cs",
-        "Saml\\SecurityKeyResolver.cs",
-        "Tokens\\SecurityTokenHandlerCollectionExtensions.cs"
-    ],
     "frameworks": {
        "dnx451": {},
         "dnxcore50": {

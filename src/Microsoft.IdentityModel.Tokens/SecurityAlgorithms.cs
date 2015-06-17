@@ -49,5 +49,15 @@ namespace System.IdentityModel.Tokens
         public const string Sha256Digest = "http://www.w3.org/2001/04/xmlenc#sha256";
         public const string Sha512Digest = "http://www.w3.org/2001/04/xmlenc#sha512";
 
+        public const string ECDSA_SHA256 = "ES256";
+        public const string ECDSA_SHA384 = "ES384";
+        public const string ECDSA_SHA512 = "ES512";
+        public const string HMAC_SHA256 = "HS256";
+        public const string HMAC_SHA384 = "HS384";
+        public const string HMAC_SHA512 = "HS512";
+        public const string NONE = "none";
+        public const string RSA_SHA256 = "RS256";
+        public const string RSA_SHA384 = "RS384";
+        public const string RSA_SHA512 = "RS512";
     }
 }
