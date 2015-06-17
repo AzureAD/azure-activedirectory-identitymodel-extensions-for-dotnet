@@ -16,12 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     public class CompareContext
     {       

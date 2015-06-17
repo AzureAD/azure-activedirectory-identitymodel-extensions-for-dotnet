@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0-*",
+  "description": "Provides types that provide support for OpenIdConnect protocol.",
+  "dependencies": {
+    "Microsoft.IdentityModel.Logging": "1.0.0-*",
+    "Microsoft.IdentityModel.Tokens": "5.0.0-*",
+    "Microsoft.IdentityModel.Tokens.Jwt": "5.0.0-*",
+    "Newtonsoft.Json": "6.0.6"
+    },
+    "exclude": [
+      "WsFederation.cs",
+      "WsFederationMessage.cs",
+      "Configuration\\WsFederationConfiguration.cs",
+      "Configuration\\WsFederationConfigurationRetriever.cs"
+    ],
+    "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Net.Http": "",
+                "System.IO": "",
+                "System.Xml": ""
+            }
+        },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Collections.Specialized": "4.0.0-beta-*",
+                "System.Diagnostics.Contracts": "4.0.0-beta-*",
+                "System.Globalization": "4.0.10-beta-*",
+                "System.IO.FileSystem": "4.0.0-beta-*",
+                "System.Net.Http": "4.0.0-beta-*",
+                "System.Xml.ReaderWriter": "4.0.0-beta-*"
+            }
+        }
+    },
+    "compilationOptions": {
+        "allowUnsafe": false,
+        "warningsAsErrors": true
+    }
+}

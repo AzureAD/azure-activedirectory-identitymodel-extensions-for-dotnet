@@ -16,18 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
-#if SAML
-using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
-#endif
-
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// Main purpose of this code is to serve up Identities
@@ -98,15 +98,15 @@ namespace System.IdentityModel.Test
             return new JwtSecurityToken(header, payload);
         }
 
-#if INCLUDE_SAML
         public static string CreateSaml2Token()
         {
-            return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
+            throw new NotImplementedException();
+            //return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
         }
 
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor)
         {
-            return CreateSaml2Token(securityTokenDescriptor, new IMSaml2TokenHandler());
+            return CreateSaml2Token(securityTokenDescriptor, new Saml2SecurityTokenHandler());
         }
 
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
@@ -116,7 +116,8 @@ namespace System.IdentityModel.Test
 
         public static SamlSecurityToken CreateSamlSecurityToken()
         {
-            return CreateSamlSecurityToken(DefaultAsymmetricSecurityTokenDescriptor, new IMSamlTokenHandler());
+            throw new NotImplementedException();
+            //return CreateSamlSecurityToken(DefaultAsymmetricSecurityTokenDescriptor, new Saml2SecurityTokenHandler());
         }
 
         public static SamlSecurityToken CreateSamlSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
@@ -131,12 +132,13 @@ namespace System.IdentityModel.Test
 
         public static string CreateSamlToken()
         {
-            return CreateSamlToken(DefaultAsymmetricSecurityTokenDescriptor);
+            throw new NotImplementedException();
+            //return CreateSamlToken(DefaultAsymmetricSecurityTokenDescriptor);
         }
 
         public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor)
         {
-            return CreateToken(securityTokenDescriptor, new IMSamlTokenHandler());
+            return CreateToken(securityTokenDescriptor, new SamlSecurityTokenHandler());
         }
 
         public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
@@ -154,7 +156,7 @@ namespace System.IdentityModel.Test
             writer.Close();
             return sb.ToString();
         }
-#endif
+
         public const string DefaultAuthenticationType = "Federation";
 
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }

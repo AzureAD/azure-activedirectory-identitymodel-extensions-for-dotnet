@@ -16,11 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.IdentityModel.Tokens;
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     static public class KeyingMaterial
     {
