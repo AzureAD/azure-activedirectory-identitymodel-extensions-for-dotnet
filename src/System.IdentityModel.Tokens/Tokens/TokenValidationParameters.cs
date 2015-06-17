@@ -125,6 +125,7 @@ namespace System.IdentityModel.Tokens
             ValidAudiences = other.ValidAudiences;
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
+            ValidateSignature = other.ValidateSignature;
         }
 
         /// <summary>
@@ -140,6 +141,7 @@ namespace System.IdentityModel.Tokens
             ValidateIssuer = true;
             ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
+            ValidateSignature = true;
         }
 
         /// <summary>
@@ -473,7 +475,6 @@ namespace System.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the boolean to control if the signature of the token will be validated during token validation.
         /// </summary>
-        [DefaultValue(true)]
         public bool ValidateSignature
         {
             get;
