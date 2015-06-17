@@ -23,8 +23,11 @@ namespace System.IdentityModel.Tokens
         private SignatureProviderFactory _signatureProviderFactory = SignatureProviderFactory.Default;
 
         public abstract int KeySize { get; }
+
         public string KeyId { get; set; }
+
         public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
+
         public SignatureProviderFactory SignatureProviderFactory
         {
             get
