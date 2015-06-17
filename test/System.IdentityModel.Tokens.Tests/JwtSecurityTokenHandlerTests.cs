@@ -794,6 +794,15 @@ namespace System.IdentityModel.Test
             validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey>());
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:");
+            validationParameters = SignatureValidationParameters();
+            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
+
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters.ValidateSignature = false;
+            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
+
+
 #if SymmetricKeySuport
             // "Symmetric_256"
             expectedException = ExpectedException.NoExceptionExpected;
