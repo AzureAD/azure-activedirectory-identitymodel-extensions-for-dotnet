@@ -82,8 +82,8 @@ namespace Microsoft.IdentityModel.Protocols
             OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
-                doc = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
-                openIdConnectConfiguration.JsonWebKeySet = new JsonWebKeySet(doc);
+                string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
+                openIdConnectConfiguration.JsonWebKeySet = new JsonWebKeySet(keys);
                 foreach (SecurityToken token in openIdConnectConfiguration.JsonWebKeySet.GetSigningTokens())
                 {
                     openIdConnectConfiguration.SigningTokens.Add(token);
