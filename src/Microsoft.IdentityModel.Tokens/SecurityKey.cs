@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
     public abstract class SecurityKey
     {

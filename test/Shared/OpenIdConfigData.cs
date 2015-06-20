@@ -16,15 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Protocols;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.X509Certificates;
+    using Microsoft.IdentityModel.Protocols;
+
     public class OpenIdConfigData
     {
         static OpenIdConfigData()

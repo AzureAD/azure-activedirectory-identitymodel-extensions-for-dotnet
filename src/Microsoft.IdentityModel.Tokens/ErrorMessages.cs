@@ -18,7 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Error codes and messages

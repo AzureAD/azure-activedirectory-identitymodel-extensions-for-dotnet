@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     using System;
     using System.Collections.Generic;

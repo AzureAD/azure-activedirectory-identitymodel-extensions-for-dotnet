@@ -21,7 +21,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Protocols;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     public class CompareContext
     {       

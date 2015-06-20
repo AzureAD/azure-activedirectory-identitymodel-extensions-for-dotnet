@@ -22,7 +22,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// Used in extensibility tests to ensure that the same token flows through validation.

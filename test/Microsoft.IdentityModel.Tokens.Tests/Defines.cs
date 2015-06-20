@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace System.IdentityModel.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     public class Defines
     {

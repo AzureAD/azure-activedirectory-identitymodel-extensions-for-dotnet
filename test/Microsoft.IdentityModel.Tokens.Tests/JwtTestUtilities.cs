@@ -21,7 +21,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Xml;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// This class is used to define the construction of a JWT for testing purposes.

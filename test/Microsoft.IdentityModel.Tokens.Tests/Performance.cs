@@ -22,7 +22,7 @@ using System.Text;
 using System.Xml;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// This test is a good place to grook how to create tokens.

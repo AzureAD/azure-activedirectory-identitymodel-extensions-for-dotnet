@@ -16,10 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Diagnostics;
-
-namespace System.IdentityModel
+namespace Microsoft.IdentityModel
 {
+    using System;
+
     /// <summary>
     /// Helper class for adding DateTimes and Timespans.
     /// </summary>

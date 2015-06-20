@@ -16,10 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Security.Cryptography;
-
     public abstract class AsymmetricSecurityKey : SecurityKey
     {
         public abstract bool HasPrivateKey { get; }

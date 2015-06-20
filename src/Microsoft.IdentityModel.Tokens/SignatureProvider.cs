@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// This class defines the object model for types that provide signature services.

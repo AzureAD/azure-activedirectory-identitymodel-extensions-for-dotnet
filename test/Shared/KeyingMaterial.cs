@@ -20,7 +20,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     static public class KeyingMaterial
     {

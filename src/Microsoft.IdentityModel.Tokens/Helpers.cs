@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
     public static class Helpers
     {

@@ -3,7 +3,7 @@
     "description": "Provides types that provide support for OpenIdConnect protocol.",
     "dependencies": {
         "Newtonsoft.Json": "6.0.6",
-        "System.IdentityModel.Tokens": "5.0.0-*",
+        "Microsoft.IdentityModel.Tokens": "5.0.0-*",
         "Microsoft.IdentityModel.Logging":  "1.0.0-*"
     },
     "compile": [ "**\\*.cs", "..\\common\\*.cs" ],

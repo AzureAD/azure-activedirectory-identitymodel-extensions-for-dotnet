@@ -16,11 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
+    using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Security.Cryptography.X509Certificates;
 
     /// <summary>
     /// Initializes a new instance of <see cref="JwtHeader"/> which contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
