@@ -16,8 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
+    using System;
+
     public abstract class SecurityToken
     {
         public abstract string Id { get; }

@@ -16,16 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Security.Cryptography;
 
-	/// <summary>
-	/// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
-	/// </summary>
-	public class AsymmetricSignatureProvider : SignatureProvider
+    /// <summary>
+    /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
+    /// </summary>
+    public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool disposed;
         private RSACryptoServiceProvider rsaCryptoServiceProvider;

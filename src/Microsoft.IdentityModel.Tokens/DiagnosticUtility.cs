@@ -16,11 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel
+namespace Microsoft.IdentityModel
 {
-    using System.Reflection;
-    using System.Runtime.InteropServices;
-
     /// <summary>
     /// Provides common code for services to use in generating diagnostics and taking actions.
     /// </summary>

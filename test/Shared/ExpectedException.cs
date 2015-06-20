@@ -25,7 +25,7 @@ using System.Security.Cryptography;
 using System.Collections.Generic;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// When a test case throws an exception, this class helps to determine if the exception is as exptected.

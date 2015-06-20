@@ -21,7 +21,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// This class tests:

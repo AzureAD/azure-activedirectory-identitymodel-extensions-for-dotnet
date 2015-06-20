@@ -16,10 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
-
     /// <summary>
     /// Constants for Json Web tokens.
     /// </summary>

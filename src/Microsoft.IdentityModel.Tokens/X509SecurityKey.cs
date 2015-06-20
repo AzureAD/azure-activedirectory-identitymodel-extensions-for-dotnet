@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
+    using System;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.X509Certificates;
+
     /// <summary>
     /// Security key that allows access to cert
     /// </summary>

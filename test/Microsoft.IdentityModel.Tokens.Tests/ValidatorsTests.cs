@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// 

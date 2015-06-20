@@ -16,9 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Security.Claims;

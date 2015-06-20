@@ -19,7 +19,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// The purpose of this class is to ensure that we obtain an RsaCryptoServiceProvider that supports SHA-256 signatures.

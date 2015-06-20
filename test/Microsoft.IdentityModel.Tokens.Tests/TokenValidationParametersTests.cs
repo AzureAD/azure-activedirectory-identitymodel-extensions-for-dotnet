@@ -23,7 +23,7 @@ using System.Security.Claims;
 using System.Text;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     public class TokenValidationParametersTests
     {

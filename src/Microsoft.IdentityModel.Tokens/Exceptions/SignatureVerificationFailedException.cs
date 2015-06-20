@@ -16,9 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.IdentityModel.Tokens;
-
-namespace System.IdentityModel
+namespace Microsoft.IdentityModel.Tokens
 {
 #if DESKTOPNET45
         [Serializable]

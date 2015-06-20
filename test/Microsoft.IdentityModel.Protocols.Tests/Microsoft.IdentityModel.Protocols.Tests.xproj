@@ -14,7 +14,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AssemblyName>Microsoft.IdentityModel.Protocol.Extensions.Tests</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.Protocols.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <RootNamespace>Microsoft.IdentityModel.Tests</RootNamespace>

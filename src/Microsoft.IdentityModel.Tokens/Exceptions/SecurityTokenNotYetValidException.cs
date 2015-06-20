@@ -18,7 +18,7 @@
 
 using System;
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
 #if DESKTOPNET45
         [Serializable]

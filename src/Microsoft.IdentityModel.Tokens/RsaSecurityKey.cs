@@ -16,9 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Security.Cryptography;
+    using Security.Cryptography;
 
     public class RsaSecurityKey : AsymmetricSecurityKey
     {

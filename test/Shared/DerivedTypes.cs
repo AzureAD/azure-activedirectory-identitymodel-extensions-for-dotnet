@@ -19,7 +19,7 @@
 // This file contains derived types that are usefull across multiple handlers / protocols.
 
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     using Collections.Generic;
     using Security.Claims;

@@ -24,7 +24,7 @@ using Xunit;
 
 using Claim = System.Security.Claims.Claim;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     public class JwtPayloadTests
     {

@@ -22,7 +22,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     public class AudienceValidationTests
     {

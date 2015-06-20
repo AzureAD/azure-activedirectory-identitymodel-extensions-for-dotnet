@@ -27,7 +27,7 @@ using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHan
 using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 #endif
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// Main purpose of this code is to serve up Identities

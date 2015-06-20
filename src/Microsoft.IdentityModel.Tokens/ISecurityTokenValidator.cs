@@ -16,10 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Security.Claims;
-
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
+    using System;
+    using System.Security.Claims;
+
     /// <summary>
     /// ISecurityTokenValidator
     /// </summary>

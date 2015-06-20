@@ -16,14 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
+    using System;
     using System.Diagnostics.Tracing;
     using System.Globalization;
+    using System.IdentityModel;
     using System.Runtime.CompilerServices;
     using System.Security.Cryptography;
-    using Microsoft.IdentityModel.Logging;
+    using Logging;
 
 
     /// <summary>
