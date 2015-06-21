@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>

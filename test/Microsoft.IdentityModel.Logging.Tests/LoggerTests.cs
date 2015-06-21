@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.Tracing;
-using System.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Logging.Tests

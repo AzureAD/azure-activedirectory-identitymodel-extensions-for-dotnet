@@ -115,5 +115,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="token">A token of type <see cref="TokenType"/>.</param>
         public abstract void WriteToken(XmlWriter writer, SecurityToken token);
 
+        public abstract SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters);
     }
 }

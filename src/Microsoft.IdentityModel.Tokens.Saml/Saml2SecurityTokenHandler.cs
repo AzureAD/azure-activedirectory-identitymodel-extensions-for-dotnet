@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <returns>An instance of a <see cref="Saml2SecurityToken"/>.</returns>
-        public virtual SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
+        public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             if (reader == null)
             {

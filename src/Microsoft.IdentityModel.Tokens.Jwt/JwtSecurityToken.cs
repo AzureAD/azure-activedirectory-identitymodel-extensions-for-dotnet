@@ -21,9 +21,10 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
@@ -308,7 +309,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="SecurityKey"/> that signed this instance.
         /// </summary>
         /// <remarks><see cref="JwtSecurityTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
-        public SecurityKey SigningKey
+        public override SecurityKey SigningKey
         {
             get;
             set;

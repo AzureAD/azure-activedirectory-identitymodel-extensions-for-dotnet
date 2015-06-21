@@ -18,7 +18,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Provides common code for services to use in generating diagnostics and taking actions.
