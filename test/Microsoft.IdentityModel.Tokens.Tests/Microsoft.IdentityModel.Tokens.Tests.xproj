@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>b449c824-9d81-4588-a562-e61d9215c976</ProjectGuid>
+    <ProjectGuid>602480C3-D5C1-45DA-9B16-B83C7BCF8D5D</ProjectGuid>
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
@@ -35,11 +35,14 @@
     <Compile Include="..\Shared\ExpectedException.cs">
       <Link>Shared\ExpectedException.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\KeyingMaterial.cs">
-      <Link>Shared\KeyingMaterial.cs</Link>
+    <Compile Include="..\Shared\IdentityComparer.cs">
+      <Link>Shared\IdentityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\SecurityTokenDescriptor.cs">
-      <Link>Shared\SecurityTokenDescriptor.cs</Link>
+    <Compile Include="..\Shared\IdentityUtilities.cs">
+      <Link>IdentityUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\OpenIdConfigData.cs">
+      <Link>OpenIdConfigData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TestUtilities.cs">
       <Link>Shared\TestUtilities.cs</Link>
