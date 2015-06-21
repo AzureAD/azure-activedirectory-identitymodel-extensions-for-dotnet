@@ -33,8 +33,8 @@ namespace System.IdentityModel.Test
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 27)
-                Assert.True(false, "Number of properties has changed from 27 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 28)
+                Assert.True(false, "Number of properties has changed from 28 to: " + properties.Length + ", adjust tests");
 
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             SecurityKey issuerSigningKey2 = KeyingMaterial.RsaSecurityKey_2048;
@@ -73,6 +73,7 @@ namespace System.IdentityModel.Test
                 ValidAudiences = validAudiences,
                 ValidIssuer = validIssuer,
                 ValidIssuers = validIssuers,
+                ValidateSignature = false
             };
 
             Assert.True(object.ReferenceEquals(validationParametersInline.IssuerSigningKey, issuerSigningKey));
@@ -82,6 +83,7 @@ namespace System.IdentityModel.Test
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudience, validAudience));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudiences, validAudiences));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
+            Assert.False(validationParametersInline.ValidateSignature);
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
@@ -97,6 +99,7 @@ namespace System.IdentityModel.Test
             validationParametersSets.ValidAudiences = validAudiences;
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
+            validationParametersSets.ValidateSignature = false;
 
             Assert.True(IdentityComparer.AreEqual<TokenValidationParameters>(validationParametersInline, validationParametersSets));
 
@@ -117,8 +120,8 @@ namespace System.IdentityModel.Test
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 27)
-                Assert.True(false, "Number of public fields has changed from 27 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 28)
+                Assert.True(false, "Number of public fields has changed from 28 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -140,6 +143,7 @@ namespace System.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("ValidateSignature", new List<object>{true, false, true}),
                     },
                     Object = validationParameters,
                 };
