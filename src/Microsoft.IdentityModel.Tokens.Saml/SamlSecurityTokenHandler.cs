@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
         public override SecurityToken ReadToken(XmlReader reader)
         {
-            throw new NotSupportedException(ErrorMessages.IDX11003);
+            throw new NotImplementedException(ErrorMessages.IDX11003);
         }
 
 
@@ -217,9 +217,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="SamlSecurityToken"/> element.</param>
         /// <param name="validationParameters">Contains data and information needed for reading the securityToken.</param>
         /// <returns>An instance of a <see cref="SamlSecurityToken"/>.</returns>
-        public virtual SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
+        public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            return new SamlSecurityToken();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -421,8 +421,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
             {
-                _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, token);
-                return stringBuilder.ToString();
+                throw new NotImplementedException();
             }
         }
 

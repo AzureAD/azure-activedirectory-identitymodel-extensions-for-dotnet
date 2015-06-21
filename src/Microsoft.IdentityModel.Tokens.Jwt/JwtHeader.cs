@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     using System;
     using System.Collections.Generic;

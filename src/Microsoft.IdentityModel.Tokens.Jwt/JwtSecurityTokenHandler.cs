@@ -24,9 +24,10 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-07.
@@ -1019,6 +1020,31 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Serializes to XML a token of the type handled by this instance.
+        /// </summary>
+        /// <param name="writer">The XML writer.</param>
+        /// <param name="token">A token of type <see cref="TokenType"/>.</param>
+        public override void WriteToken(XmlWriter writer, SecurityToken token)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException("writer");
+            }
+
+            if (token == null)
+            {
+                throw new ArgumentNullException("token");
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

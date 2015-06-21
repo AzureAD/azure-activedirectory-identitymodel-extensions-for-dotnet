@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// Initializes a new instance of <see cref="JwtPayload"/> which contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.

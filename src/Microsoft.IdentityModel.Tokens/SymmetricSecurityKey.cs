@@ -18,6 +18,7 @@
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    using System;
     using System.Security.Cryptography;
 
     public class SymmetricSecurityKey : SecurityKey
