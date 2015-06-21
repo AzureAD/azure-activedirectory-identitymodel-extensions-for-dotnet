@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>4B448B99-EB37-4A89-9408-6BB3387829F9</ProjectGuid>
+    <ProjectGuid>0C7CDBE0-9335-481D-B471-963F7CC843AA</ProjectGuid>
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
@@ -14,7 +14,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AssemblyName>Microsoft.IdentityModel.Protocols.Tests</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.Tokens.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <RootNamespace>Microsoft.IdentityModel.Tests</RootNamespace>

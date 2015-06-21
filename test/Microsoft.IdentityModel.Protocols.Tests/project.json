@@ -6,26 +6,11 @@
         "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
     "compile": ["**\\*.cs", "..\\Shared\\*.cs"],
-    "exclude": [
-        "CrossTokenTests.cs",
-        "DerivedTypes.cs",
-        "Saml2SecurityTokenHandlerTests.cs",
-        "SamlSecurityTokenHandlerTests.cs",
-        "SecurityTokenHandlerCollectionExtensionsTests.cs",
-        "StaticConfigurationManagerTests.cs",
-        "WsFederationConfigurationRetrieverTests.cs",
-        "WsFederationConfigurationTests.cs",
-        "WsFederationConstantsTests.cs",
-        "WsFederationMessageTests.cs"
-    ],
     "commands": {
         "test": "xunit.runner.aspnet"
     },
     "frameworks": {
         "dnx451": {
-            "dependencies": {
-                "Shouldly": "1.1.1.1"
-            }
         }
     },
     "compilationOptions": {
