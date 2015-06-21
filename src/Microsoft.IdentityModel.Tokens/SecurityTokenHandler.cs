@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Xml;
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -28,6 +31,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         protected SecurityTokenHandler()
         {
+        }
+
+        public virtual SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -80,6 +93,11 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 
+        public virtual SecurityToken ReadToken(XmlReader reader)
+        {
+            return null;
+        }
+
         /// <summary>
         /// Serializes to string a token of the type handled by this instance.
         /// </summary>
@@ -91,12 +109,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Throws if a token is detected as being replayed.
-        /// Override this method in your derived class to detect replays.
+        /// Serializes to XML a token of the type handled by this instance.
         /// </summary>
-        /// <param name="token">The token to check for replay.</param>
-        protected virtual void DetectReplayedToken(SecurityToken token)
-        {
-        }
+        /// <param name="writer">The XML writer.</param>
+        /// <param name="token">A token of type <see cref="TokenType"/>.</param>
+        public abstract void WriteToken(XmlWriter writer, SecurityToken token);
+
     }
 }

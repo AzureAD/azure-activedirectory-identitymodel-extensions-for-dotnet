@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,26 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.IdentityModel.Tokens
 {
-    public abstract class SecurityToken
+    public class SecurityTokenDescriptor
     {
-        public abstract string Id { get; }
-        public abstract SecurityKey SecurityKey { get; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that signed this instance.
-        /// </summary>
-        /// <remarks><see cref="JwtSecurityTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
-        public abstract SecurityKey SigningKey
-        {
-            get;
-            set;
-        }
-
-        public abstract DateTime ValidFrom { get; }
-        public abstract DateTime ValidTo { get; }
     }
 }

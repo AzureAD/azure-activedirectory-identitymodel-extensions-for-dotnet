@@ -20,14 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
-using SamlHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
     /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator,
@@ -42,9 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { SamlTokenProfile11, OasisWssSamlTokenProfile11 };
 
-        // never set any properties on the handler.
-        private static SMSamlHandlerPrivate _smSamlHandlerPrivateNeverSetAnyProperties = new SMSamlHandlerPrivate();
-
+       
         /// <summary>
         /// Initializes an instance of <see cref="SamlSecurityTokenHandler"/>
         /// </summary>
@@ -144,43 +140,25 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentNullException("tokenDescriptor");
             }
 
-            return _smSamlHandlerPrivateNeverSetAnyProperties.CreateToken(tokenDescriptor);
+            return new SamlSecurityToken();
         }
 
-        /// <summary>
-        /// Creates the security securityToken reference when the securityToken is not attached to the message.
-        /// </summary>
-        /// <param name="token">The saml securityToken.</param>
-        /// <param name="attached">Boolean that indicates if a attached or unattached
-        /// reference needs to be created.</param>
-        /// <returns>A <see cref="SamlAssertionKeyIdentifierClause"/>.</returns>
-        public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
-        {
-            if (null == token)
-            {
-                throw new ArgumentNullException("token");
-            }
+        ///// <summary>
+        ///// Creates the security securityToken reference when the securityToken is not attached to the message.
+        ///// </summary>
+        ///// <param name="token">The saml securityToken.</param>
+        ///// <param name="attached">Boolean that indicates if a attached or unattached
+        ///// reference needs to be created.</param>
+        ///// <returns>A <see cref="SamlAssertionKeyIdentifierClause"/>.</returns>
+        //public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
+        //{
+        //    if (null == token)
+        //    {
+        //        throw new ArgumentNullException("token");
+        //    }
 
-            return token.CreateKeyIdentifierClause<SamlAssertionKeyIdentifierClause>();
-        }
-
-        /// <summary>
-        /// Gets the token type identifier(s) supported by this handler.
-        /// </summary>
-        /// <returns>A collection of strings that identify the tokens this instance can handle.</returns>
-        public override string[] GetTokenTypeIdentifiers()
-        {
-            return _tokenTypeIdentifiers;
-        }
-
-        /// <summary>
-        /// Not supported, use <see cref="TokenValidationParameters"/> when processing tokens.
-        /// </summary>
-        /// <exception cref="NotSupportedException"> use <see cref="TokenValidationParameters"/>. when processing tokens.</exception>
-        public override void LoadCustomConfiguration(XmlNodeList nodelist)
-        {
-            throw new NotSupportedException(ErrorMessages.IDX11004);
-        }
+        //    return token.CreateKeyIdentifierClause<SamlAssertionKeyIdentifierClause>();
+        //}
 
         /// <summary>
         /// Gets the securityToken type supported by this handler.
@@ -241,23 +219,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>An instance of a <see cref="SamlSecurityToken"/>.</returns>
         public virtual SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            return (new SamlHandler()
-            {
-                Configuration = new SecurityTokenHandlerConfiguration
-                {
-                    IssuerTokenResolver = new SecurityKeyResolver(string.Empty, validationParameters),
-                    MaxClockSkew = validationParameters.ClockSkew,
-                }
-            }).ReadToken(reader);
-        }
-
-        /// <summary>
-        /// Obsolete method, use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.
-        /// </summary>
-        /// <exception cref="NotSupportedException"> use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.</exception>
-        public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
-        {
-            throw new NotSupportedException(ErrorMessages.IDX11001);
+            return new SamlSecurityToken();
         }
 
         /// <summary>
@@ -287,13 +249,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
 
-            // Calling System.IdentityModel.Tokens.SamlSecurityTokenHandler requires Configuration and IssuerTokenResolver be set.
-            Configuration = new SecurityTokenHandlerConfiguration
-            {
-                IssuerTokenResolver = new SecurityKeyResolver(securityToken, validationParameters),
-                MaxClockSkew = validationParameters.ClockSkew,
-            };
-
             SamlSecurityToken samlToken;
             using (StringReader sr = new StringReader(securityToken))
             {
@@ -303,22 +258,17 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            if (samlToken.Assertion == null)
-            {
-                throw new ArgumentException(ErrorMessages.IDX10202);
-            }
-
-            if (samlToken.Assertion.SigningToken == null && validationParameters.RequireSignedTokens)
+            if (samlToken.SigningKey == null && validationParameters.RequireSignedTokens)
             {
                 throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
             }
 
             DateTime? notBefore = null;
             DateTime? expires = null;
-            if (samlToken.Assertion.Conditions != null)
+            if (samlToken.Conditions != null)
             {
-                notBefore = samlToken.Assertion.Conditions.NotBefore;
-                expires = samlToken.Assertion.Conditions.NotOnOrAfter;
+                notBefore = samlToken.Conditions.NotBefore;
+                expires = samlToken.Conditions.NotOnOrAfter;
             }
 
             Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
@@ -497,16 +447,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (samlSecurityToken == null)
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
-            }
-
-            _smSamlHandlerPrivateNeverSetAnyProperties.WriteToken(writer, token);
-        }
-
-        private class SMSamlHandlerPrivate : SamlHandler
-        {
-            public void ProcessStatmentPublic(IList<SamlStatement> statements, ClaimsIdentity subject, string issuer)
-            {
-                base.ProcessStatement(statements, subject, issuer);
             }
         }
     }

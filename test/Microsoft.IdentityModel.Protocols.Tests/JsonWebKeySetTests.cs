@@ -16,13 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Protocols;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Test;
-using System.IdentityModel.Tokens;
 using System.IO;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test

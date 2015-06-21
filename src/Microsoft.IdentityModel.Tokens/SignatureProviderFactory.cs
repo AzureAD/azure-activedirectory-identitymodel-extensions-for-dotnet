@@ -16,11 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Globalization;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-
     /// <summary>
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
     /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>

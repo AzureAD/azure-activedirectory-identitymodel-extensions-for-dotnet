@@ -18,10 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Protocols.WSTrust;
 using System.IO;
-using System.Web;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -43,7 +42,8 @@ namespace Microsoft.IdentityModel.Protocols
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
             if (!string.IsNullOrWhiteSpace(queryString))
             {
-                wsFederationMessage.SetParameters(HttpUtility.ParseQueryString(query: queryString));
+                // TODO replace HttpUtility
+                //wsFederationMessage.SetParameters(HttpUtility.ParseQueryString(query: queryString));
             } 
 
             return wsFederationMessage;

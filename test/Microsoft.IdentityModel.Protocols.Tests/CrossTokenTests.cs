@@ -17,14 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IdentityModel.Test;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
-using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
-using SMSaml2TokenHandler = System.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using SMSamlTokenHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {

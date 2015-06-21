@@ -19,15 +19,16 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+
     /// <summary>
     ///  Retrieves a populated <see cref="OpenIdConnectConfiguration"/> given an address.
     /// </summary>

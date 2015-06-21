@@ -18,7 +18,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {

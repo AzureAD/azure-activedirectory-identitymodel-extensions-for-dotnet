@@ -16,17 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Diagnostics.Tracing;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    using System;
-    using System.Diagnostics.Tracing;
-    using System.Globalization;
-    using System.IdentityModel;
-    using System.Runtime.CompilerServices;
-    using System.Security.Cryptography;
-    using Logging;
-
-
     /// <summary>
     /// Provides signing and verifying operations using a <see cref="SymmetricSecurityKey"/> and specifying an algorithm.
     /// </summary>

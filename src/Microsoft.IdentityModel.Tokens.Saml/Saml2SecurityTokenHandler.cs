@@ -20,15 +20,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IdentityModel.Selectors;
-using System.IdentityModel.Tokens;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
-using Saml2Handler = System.IdentityModel.Tokens.Saml2SecurityTokenHandler;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator,
@@ -43,23 +42,11 @@ namespace Microsoft.IdentityModel.Tokens
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { Saml2TokenProfile11, OasisWssSaml2TokenProfile11 };
 
-        // never set any properties on the handler.
-        private static SMSaml2HandlerPrivate _smSaml2HandlerPrivateNeverSetAnyProperties = new SMSaml2HandlerPrivate();
-
         /// <summary>
         /// Initializes a new instance of <see cref="Saml2SecurityTokenHandler"/>.
         /// </summary>
         public Saml2SecurityTokenHandler()
         {
-        }
-
-        /// <summary>
-        /// Gets the token type identifier(s) supported by this handler.
-        /// </summary>
-        /// <returns>A collection of strings that identify the tokens this instance can handle.</returns>
-        public override string[] GetTokenTypeIdentifiers()
-        {
-            return _tokenTypeIdentifiers;
         }
 
         /// <summary>
@@ -164,16 +151,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentException(ErrorMessages.IDX10221);
             }
 
-            Saml2Assertion assertion = samlToken.Assertion;
-            if (assertion == null)
-            {
-                throw new ArgumentException(ErrorMessages.IDX10202);
-            }
-
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
-            _smSaml2HandlerPrivateNeverSetAnyProperties.ProcessSamlSubjectPublic(samlToken.Assertion.Subject, identity, issuer);
-            _smSaml2HandlerPrivateNeverSetAnyProperties.ProcessStatmentPublic(samlToken.Assertion.Statements, identity, issuer);
-            return identity;
+            return new ClaimsIdentity();
         }
 
         /// <summary>
@@ -189,16 +167,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentNullException("tokenDescriptor");
             }
 
-            return _smSaml2HandlerPrivateNeverSetAnyProperties.CreateToken(tokenDescriptor);
-        }
-
-        /// <summary>
-        /// Not supported, use <see cref="TokenValidationParameters"/> when processing tokens.
-        /// </summary>
-        /// <exception cref="NotSupportedException"> use <see cref="TokenValidationParameters"/>. when processing tokens.</exception>
-        public override void LoadCustomConfiguration(XmlNodeList nodelist)
-        {
-            throw new NotSupportedException(ErrorMessages.IDX11004);
+            return new Saml2SecurityToken();
         }
 
         /// <summary>
@@ -263,23 +232,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentNullException("validationParameters");
             }
 
-            return (new Saml2Handler()
-            {
-                Configuration = new SecurityTokenHandlerConfiguration
-                {
-                    IssuerTokenResolver = new SecurityKeyResolver(string.Empty, validationParameters),
-                    MaxClockSkew = validationParameters.ClockSkew,
-                }
-            }).ReadToken(reader);
-        }
-
-        /// <summary>
-        /// Obsolete method, use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.
-        /// </summary>
-        /// <exception cref="NotSupportedException"> use <see cref="ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>.</exception>
-        public override ReadOnlyCollection<ClaimsIdentity> ValidateToken(SecurityToken token)
-        {
-            throw new NotSupportedException(ErrorMessages.IDX11000);
+            return new Saml2SecurityToken();
         }
 
         /// <summary>
@@ -315,34 +268,21 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                 {
-                    samlToken = (new Saml2Handler()
-                    {
-                        Configuration = new SecurityTokenHandlerConfiguration
-                        {
-                            IssuerTokenResolver = new SecurityKeyResolver(securityToken, validationParameters),
-                            MaxClockSkew = validationParameters.ClockSkew,
-                            ServiceTokenResolver = SecurityTokenResolver.CreateDefaultSecurityTokenResolver(validationParameters.ClientDecryptionTokens, true),
-                        }
-                    }).ReadToken(reader) as Saml2SecurityToken;
+                        samlToken = ReadToken(reader) as Saml2SecurityToken;
                 }
             }
 
-            if (samlToken.IssuerToken == null && validationParameters.RequireSignedTokens)
+            if (samlToken.SigningKey == null && validationParameters.RequireSignedTokens)
             {
                 throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
             }
 
-            if (samlToken.Assertion == null)
-            {
-                throw new ArgumentException(ErrorMessages.IDX10202);
-            }
-
             DateTime? notBefore = null;
             DateTime? expires = null;
-            if (samlToken.Assertion.Conditions != null)
+            if (samlToken.Conditions != null)
             {
-                notBefore = samlToken.Assertion.Conditions.NotBefore;
-                expires = samlToken.Assertion.Conditions.NotOnOrAfter;
+                notBefore = samlToken.Conditions.NotBefore;
+                expires = samlToken.Conditions.Expires;
             }
 
             Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
@@ -527,19 +467,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(writer, token);
-        }
-
-        private class SMSaml2HandlerPrivate : Saml2Handler
-        {
-            public void ProcessStatmentPublic(Collection<Saml2Statement> statements, ClaimsIdentity subject, string issuer)
-            {
-                base.ProcessStatement(statements, subject, issuer);
-            }
-
-            public void ProcessSamlSubjectPublic(Saml2Subject assertionSubject, ClaimsIdentity subject, string issuer)
-            {
-                base.ProcessSamlSubject(assertionSubject, subject, issuer);
-            }
         }
     }
 }

@@ -16,10 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.IdentityModel.Tokens;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test

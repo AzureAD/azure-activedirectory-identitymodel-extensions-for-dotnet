@@ -18,11 +18,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Extensions
 {

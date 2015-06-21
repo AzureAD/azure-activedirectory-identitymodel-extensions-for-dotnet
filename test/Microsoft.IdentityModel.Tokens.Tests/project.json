@@ -8,7 +8,7 @@
       "Microsoft.IdentityModel.Tokens.Saml": "5.0.0-*",
       "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
-    "compile": [ "**\\*.cs", "..\\Shared\\**\\*.cs" ],
+    "compile": [ "**\\*.cs" ],
     "commands": {
       "test": "xunit.runner.aspnet"
     },

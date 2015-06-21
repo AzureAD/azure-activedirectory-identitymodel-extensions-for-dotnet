@@ -16,16 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-
-#if SAML
-using IMSaml2TokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
-using IMSamlTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
-#endif
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -98,7 +94,6 @@ namespace Microsoft.IdentityModel.Test
             return new JwtSecurityToken(header, payload);
         }
 
-#if INCLUDE_SAML
         public static string CreateSaml2Token()
         {
             return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
@@ -154,7 +149,7 @@ namespace Microsoft.IdentityModel.Test
             writer.Close();
             return sb.ToString();
         }
-#endif
+
         public const string DefaultAuthenticationType = "Federation";
 
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }
