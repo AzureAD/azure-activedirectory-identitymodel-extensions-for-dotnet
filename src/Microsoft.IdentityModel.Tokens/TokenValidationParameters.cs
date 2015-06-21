@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
             RoleClaimType = other.RoleClaimType;
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
-            //TokenReplayCache = other.TokenReplayCache;
+            TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
             ValidateIssuer = other.ValidateIssuer;
@@ -414,11 +414,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that will be checked to help in detecting that a token has been 'seen' before.
         /// </summary>
-        //public ITokenReplayCache TokenReplayCache
-        //{
-        //    get;
-        //    set;
-        //}
+        public ITokenReplayCache TokenReplayCache
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="JwtSecurityToken.Actor"/> should be validated.

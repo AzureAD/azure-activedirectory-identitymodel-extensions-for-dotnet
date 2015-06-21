@@ -17,17 +17,15 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IdentityModel.Metadata;
-using System.IdentityModel.Tokens;
+using System.Diagnostics.Tracing;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using System.ServiceModel.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Diagnostics.Tracing;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {

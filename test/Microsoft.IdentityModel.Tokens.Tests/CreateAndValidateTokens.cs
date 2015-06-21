@@ -16,16 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IdentityModel.Tokens;
-using System.Text;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Test
 {
     public class CreateAndValidateTokens
     {

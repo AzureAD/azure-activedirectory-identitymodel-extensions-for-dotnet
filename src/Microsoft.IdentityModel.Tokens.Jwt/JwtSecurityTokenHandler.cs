@@ -16,17 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Globalization;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Logging;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Collections.Generic;
-    using System.Diagnostics.Tracing;
-    using System.Globalization;
-    using System.Security.Claims;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using Microsoft.IdentityModel.Logging;
-
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-07.
     /// </summary>
@@ -266,7 +267,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get { return true; }
         }
-
 
         /// <summary>
         /// Gets and sets the token lifetime in minutes.

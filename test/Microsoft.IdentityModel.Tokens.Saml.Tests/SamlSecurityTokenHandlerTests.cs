@@ -18,11 +18,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Test;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Xunit;
-using SamlSecurityTokenHandler = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -41,7 +40,7 @@ namespace Microsoft.IdentityModel.Test
         public void Defaults()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
-            Assert.IsTrue(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
+            Assert.True(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: GetSets")]
@@ -90,16 +89,16 @@ namespace Microsoft.IdentityModel.Test
         {
             // CanReadToken
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
-            Assert.IsFalse(CanReadToken(securityToken: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+            Assert.False(CanReadToken(securityToken: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
 
             string samlString = new string('S', TokenValidationParameters.DefaultMaximumTokenSizeInBytes + 1);
-            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+            Assert.False(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
 
             samlString = new string('S', TokenValidationParameters.DefaultMaximumTokenSizeInBytes);
-            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+            Assert.False(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
 
             samlString = IdentityUtilities.CreateSamlToken();
-            Assert.IsTrue(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+            Assert.True(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
         }
         private bool CanReadToken(string securityToken, SamlSecurityTokenHandler samlSecurityTokenHandler, ExpectedException expectedException)
         {
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.Test
 
             validIssuers.Add(IdentityUtilities.DefaultIssuer);
             string issuer = ValidateIssuer(IdentityUtilities.DefaultIssuer, new TokenValidationParameters { ValidIssuers = validIssuers }, samlToken, samlSecurityTokenHandler, ExpectedException.NoExceptionExpected);
-            Assert.IsTrue(issuer == IdentityUtilities.DefaultIssuer, "issuer mismatch");
+            Assert.True(issuer == IdentityUtilities.DefaultIssuer, "issuer mismatch");
 
             TokenValidationParameters validationParameters = new TokenValidationParameters
             {

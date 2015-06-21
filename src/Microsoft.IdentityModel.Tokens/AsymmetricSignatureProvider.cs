@@ -16,11 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Globalization;
+using System.Security.Cryptography;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Globalization;
-    using System.Security.Cryptography;
-
     /// <summary>
     /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
     /// </summary>

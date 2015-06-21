@@ -22,6 +22,7 @@ using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -338,7 +339,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
         {
-            TokenValidationParameters tvp = validationParameters.Clone() as TokenValidationParameters;
+            TokenValidationParameters tvp = validationParameters.Clone();
             TokenReplayCache replayCache =
                new TokenReplayCache()
                {

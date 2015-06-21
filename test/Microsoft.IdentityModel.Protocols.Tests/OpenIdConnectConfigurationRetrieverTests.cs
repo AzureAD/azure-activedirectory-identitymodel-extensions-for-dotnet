@@ -16,15 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Protocols;
 using System;
-using System.IdentityModel.Test;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using Microsoft.IdentityModel.Protocols;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test

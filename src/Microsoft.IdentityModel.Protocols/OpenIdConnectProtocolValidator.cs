@@ -21,10 +21,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {

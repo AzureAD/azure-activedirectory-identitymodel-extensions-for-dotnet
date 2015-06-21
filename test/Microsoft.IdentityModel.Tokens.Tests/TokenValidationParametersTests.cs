@@ -16,14 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Claims;
-using System.Text;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Test
 {
     public class TokenValidationParametersTests
     {

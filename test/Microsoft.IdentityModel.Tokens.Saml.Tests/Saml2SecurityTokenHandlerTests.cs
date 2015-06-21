@@ -18,11 +18,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Test;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
-using Saml2SecurityTokenHandler = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -41,7 +40,7 @@ namespace Microsoft.IdentityModel.Test
         public void Defaults()
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            Assert.IsTrue(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
+            Assert.True(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
         [Fact(DisplayName = "Saml2SecurityTokenHandlerTests: GetSets")]
@@ -64,16 +63,16 @@ namespace Microsoft.IdentityModel.Test
         {
             // CanReadToken
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            Assert.IsFalse(CanReadToken(securityToken: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+            Assert.False(CanReadToken(securityToken: null, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
 
             string samlString = new string('S', TokenValidationParameters.DefaultMaximumTokenSizeInBytes + 1);
-            Assert.IsFalse(CanReadToken(samlString, samlSecurityTokenHandler, ExpectedException.NoExceptionExpected));
+            Assert.False(CanReadToken(samlString, samlSecurityTokenHandler, ExpectedException.NoExceptionExpected));
 
             samlString = new string('S', TokenValidationParameters.DefaultMaximumTokenSizeInBytes);
             CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected);
 
             samlString = IdentityUtilities.CreateSamlToken();
-            Assert.IsFalse(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+            Assert.False(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
 
             samlString = IdentityUtilities.CreateSaml2Token();
             Assert.IsTrue(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
@@ -239,7 +238,7 @@ namespace Microsoft.IdentityModel.Test
             TokenValidationParameters validationParameters =
                 new TokenValidationParameters
                 {
-                    IssuerSigningToken = IdentityUtilities.DefaultAsymmetricSigningToken,
+                    IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey,
                     RequireExpirationTime = false,
                     RequireSignedTokens = false,
                     ValidIssuer = IdentityUtilities.DefaultIssuer,
@@ -325,27 +324,8 @@ namespace Microsoft.IdentityModel.Test
 
         private class DerivedSaml2SecurityToken : Saml2SecurityToken
         {
-            public Saml2Assertion SamlAssertion { get; set; }
-
             public DerivedSaml2SecurityToken()
-                : base(new DerivedSaml2Assertion(IdentityUtilities.DefaultIssuer))
             { }
-
-            public DerivedSaml2SecurityToken(Saml2Assertion samlAssertion)
-
-                : base(samlAssertion)
-            { }
-        }
-
-        private class DerivedSaml2Assertion : Saml2Assertion
-        {
-            public DerivedSaml2Assertion(string issuer)
-                : base(new Saml2NameIdentifier(issuer))
-            {
-                DerivedIssuer = issuer;
-            }
-
-            public string DerivedIssuer { get; set; }
         }
     }
 }

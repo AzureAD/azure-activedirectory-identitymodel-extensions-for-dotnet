@@ -19,11 +19,11 @@
 // This file contains derived types that are usefull across multiple handlers / protocols.
 
 
+using System.Collections.Generic;
+using System.Security.Claims;
+
 namespace Microsoft.IdentityModel.Test
 {
-    using Collections.Generic;
-    using Security.Claims;
-
 #if ASPNET50CORE
     /// <summary>
     /// 

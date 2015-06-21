@@ -16,11 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Globalization;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Diagnostics.Tracing;
-    using Microsoft.IdentityModel.Logging;
-
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
