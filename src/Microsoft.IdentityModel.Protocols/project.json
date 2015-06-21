@@ -7,11 +7,6 @@
         "Microsoft.IdentityModel.Logging":  "1.0.0-*"
     },
     "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
-    "exclude": [
-        "WsFederationMessage.cs",
-        "Configuration\\WsFederationConfiguration.cs",
-        "Configuration\\WsFederationConfigurationRetriever.cs"
-    ],
     "frameworks": {
         "dnx451": {
             "frameworkAssemblies": {
