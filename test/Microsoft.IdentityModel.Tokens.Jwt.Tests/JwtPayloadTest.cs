@@ -16,15 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Reflection;
-using System.Text;
+using System.Security.Claims;
 using Xunit;
 
-using Claim = System.Security.Claims.Claim;
-
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     public class JwtPayloadTests
     {

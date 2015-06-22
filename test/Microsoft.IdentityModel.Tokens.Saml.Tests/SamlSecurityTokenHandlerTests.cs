@@ -19,11 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Saml;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Saml.Test
 {
     /// <summary>
     /// 
