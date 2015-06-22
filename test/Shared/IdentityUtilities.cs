@@ -22,6 +22,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace Microsoft.IdentityModel.Test
 {
@@ -101,7 +104,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor)
         {
-            return CreateSaml2Token(securityTokenDescriptor, new IMSaml2TokenHandler());
+            return CreateSaml2Token(securityTokenDescriptor, new Saml2SecurityTokenHandler());
         }
 
         public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
@@ -111,7 +114,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static SamlSecurityToken CreateSamlSecurityToken()
         {
-            return CreateSamlSecurityToken(DefaultAsymmetricSecurityTokenDescriptor, new IMSamlTokenHandler());
+            return CreateSamlSecurityToken(DefaultAsymmetricSecurityTokenDescriptor, new Saml2SecurityTokenHandler());
         }
 
         public static SamlSecurityToken CreateSamlSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
@@ -131,7 +134,7 @@ namespace Microsoft.IdentityModel.Test
 
         public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor)
         {
-            return CreateToken(securityTokenDescriptor, new IMSamlTokenHandler());
+            return CreateToken(securityTokenDescriptor, new SamlSecurityTokenHandler());
         }
 
         public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)

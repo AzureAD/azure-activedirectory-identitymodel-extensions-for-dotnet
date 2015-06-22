@@ -16,9 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+
 namespace Microsoft.IdentityModel.Tokens
 {
     public class SecurityTokenDescriptor
     {
+        public DateTime? NotBefore { get; set; }
+        public DateTime? Expires { get; set; }
+        public SigningCredentials SigningCredentials { get; set; }
+        public IEnumerable<Claim> Claims { get; set; }
+        public String Issuer { get; set; }
+        public String Audience { get; set; }
     }
 }

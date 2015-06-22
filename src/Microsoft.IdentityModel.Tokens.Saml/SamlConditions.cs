@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
@@ -9,9 +10,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             get; set;
         }
 
-        DateTime? Expires
+        public DateTime? Expires
         {
             get; set;
         }
+
+        public IList<SamlCondition> Conditions { get; set; }
     }
 }

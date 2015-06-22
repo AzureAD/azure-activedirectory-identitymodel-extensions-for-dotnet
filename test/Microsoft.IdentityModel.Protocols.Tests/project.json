@@ -1,12 +1,14 @@
 {
     "version": "2.0.0-*",
     "dependencies": {
-        "Microsoft.IdentityModel.Protocols": "2.0.0-*",
-        "Microsoft.IdentityModel.Tokens" : "5.0.0-*",
-        "Newtonsoft.Json": "6.0.6",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+      "Microsoft.IdentityModel.Protocols": "2.0.0-*",
+      "Microsoft.IdentityModel.Tokens": "5.0.0-*",
+      "Microsoft.IdentityModel.Tokens.Jwt": "5.0.0-*",
+      "Microsoft.IdentityModel.Tokens.Saml" : "5.0.0-*",
+      "Newtonsoft.Json": "6.0.6",
+      "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
-    "compile": ["**\\*.cs"],
+    "compile": ["**\\*.cs", "..\\Shared\\**\\*.cs"],
     "commands": {
         "test": "xunit.runner.aspnet"
     },

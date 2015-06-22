@@ -44,5 +44,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         public SamlConditions Conditions { get; set; }
 
+        public override string Issuer
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Provides common code for services to use in generating diagnostics and taking actions.
     /// </summary>
-    internal static class DiagnosticUtility
+    public static class DiagnosticUtility
     {
         /// <summary>
         /// Returns true if the provided exception matches any of a list of hard system faults that should be allowed

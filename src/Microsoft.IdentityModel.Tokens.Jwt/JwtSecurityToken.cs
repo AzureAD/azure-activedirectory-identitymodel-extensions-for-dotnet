@@ -227,7 +227,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
         /// </summary>
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
-        public string Issuer
+        public override string Issuer
         {
             get { return this.payload.Iss; }
         }

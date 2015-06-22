@@ -16,13 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Test
 {
     /// <summary>
     /// This test is a good place to grook how to create tokens.
@@ -35,11 +35,12 @@ namespace Microsoft.IdentityModel.Test
             SecurityTokenDescriptor tokenDescriptor;
             tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Lifetime = new Lifetime( DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours( 24 ) ),
+                NotBefore = DateTimeOffset.UtcNow,
+                Expires = DateTimeOffset.UtcNow + TimeSpan.FromDays(1),
                 SigningCredentials = KeyingMaterial.AsymmetricSigningCreds_2048_RsaSha2_Sha2,
-                Subject = Subjects.Simple( Issuers.GotJwt, Issuers.GotJwtOriginal ),
-                TokenIssuerName = Issuers.GotJwt,
-                AppliesToAddress = Audiences.AuthFactors,
+                Claims = Subjects.Simple( Issuers.GotJwt, Issuers.GotJwtOriginal ),
+                Issuer = Issuers.GotJwt,
+                Audience = Audiences.AuthFactors,
             };
 
             Console.WriteLine( "\n====================\nAsymmetric" );
@@ -53,12 +54,13 @@ namespace Microsoft.IdentityModel.Test
             RunCreationTests( tokenDescriptor, 5000 );
 
             tokenDescriptor = new SecurityTokenDescriptor() 
-            { 
-                Lifetime = new Lifetime( DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours( 24 ) ),
+            {
+                NotBefore = DateTimeOffset.UtcNow,
+                Expires = DateTimeOffset.UtcNow + TimeSpan.FromDays(1),
                 SigningCredentials = KeyingMaterial.SymmetricSigningCreds_256_Sha2,
-                Subject = Subjects.Simple( Issuers.GotJwt, Issuers.GotJwtOriginal ),
-                TokenIssuerName = Issuers.GotJwt,
-                AppliesToAddress = Audiences.AuthFactors,
+                Claims = Subjects.Simple( Issuers.GotJwt, Issuers.GotJwtOriginal ),
+                Issuer = Issuers.GotJwt,
+                Audience = Audiences.AuthFactors,
             };
 
             Console.WriteLine( "\n================\nSymmetric" );
@@ -259,7 +261,7 @@ namespace Microsoft.IdentityModel.Test
         private void WriteJwts( SecurityTokenDescriptor tokenDescriptor, SignatureProvider signatureProvider )
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            JwtSecurityToken jwt = new JwtSecurityToken( tokenDescriptor.TokenIssuerName, tokenDescriptor.AppliesToAddress, tokenDescriptor.Subject.Claims, tokenDescriptor.Lifetime, tokenDescriptor.SigningCredentials );
+            JwtSecurityToken jwt = new JwtSecurityToken( tokenDescriptor.Issuer, tokenDescriptor.AppliesToAddress, tokenDescriptor.Subject.Claims, tokenDescriptor.Lifetime, tokenDescriptor.SigningCredentials );
             MemoryStream ms = new MemoryStream();
             XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter( ms );
             tokenHandler.WriteToken( writer, jwt );

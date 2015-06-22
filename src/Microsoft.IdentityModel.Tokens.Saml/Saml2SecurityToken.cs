@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -44,5 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get;
             set;
         }
+
+        public override string Issuer { get; }
     }
 }

@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Test;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Jwt.Test

@@ -26,6 +26,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -124,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw new ArgumentNullException("token");
             }
 
-            return token.CreateKeyIdentifierClause<Saml2AssertionKeyIdentifierClause>();
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -305,9 +306,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters.ValidateAudience)
             {
                 List<string> audiences = new List<string>();
-                if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.AudienceRestrictions != null)
+                if (samlToken.Conditions != null && samlToken.Conditions.AudienceRestrictions != null)
                 {
-                    foreach (Saml2AudienceRestriction restriction in samlToken.Assertion.Conditions.AudienceRestrictions)
+                    foreach (Saml2AudienceRestriction restriction in samlToken.Conditions.AudienceRestrictions)
                     {
                         if (restriction == null)
                         {
@@ -340,7 +341,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
             }
 
-            string issuer  = samlToken.Assertion.Issuer != null ? samlToken.Assertion.Issuer.Value : null;
+            string issuer = samlToken.Issuer;
             if (validationParameters.ValidateIssuer)
             {
                 if (validationParameters.IssuerValidator != null)
@@ -353,15 +354,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
             }
 
-            if (samlToken.IssuerToken != null)
+            if (samlToken.SigningKey != null)
             {
-                ValidateIssuerSecurityKey(samlToken.IssuerToken.SecurityKeys[0], samlToken, validationParameters);
+                ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             }
 
             ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                identity.BootstrapContext = new BootstrapContext(securityToken);
+                identity.BootstrapContext = securityToken;
             }
 
             validatedToken = samlToken;
@@ -438,8 +439,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
             {
-                _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(xmlWriter, token);
-                return stringBuilder.ToString();
+                throw new NotSupportedException();
             }
         }
 
@@ -466,7 +466,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
             }
 
-            _smSaml2HandlerPrivateNeverSetAnyProperties.WriteToken(writer, token);
+            throw new NotSupportedException();
         }
     }
 }

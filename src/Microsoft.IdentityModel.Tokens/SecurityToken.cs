@@ -35,6 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
             set;
         }
 
+        public abstract String Issuer { get; }
         public abstract DateTime ValidFrom { get; }
         public abstract DateTime ValidTo { get; }
     }

@@ -17,10 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     public static class Issuers
     {
