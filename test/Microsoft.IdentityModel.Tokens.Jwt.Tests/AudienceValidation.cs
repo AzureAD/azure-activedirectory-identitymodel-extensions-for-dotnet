@@ -17,12 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     public class AudienceValidationTests
     {

@@ -18,12 +18,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     /// <summary>
     /// This class is used to define the construction of a JWT for testing purposes.

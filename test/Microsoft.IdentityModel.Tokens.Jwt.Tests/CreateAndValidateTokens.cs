@@ -16,12 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     public class CreateAndValidateTokens
     {

@@ -18,11 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     /// <summary>
     /// Test some key extensibility scenarios

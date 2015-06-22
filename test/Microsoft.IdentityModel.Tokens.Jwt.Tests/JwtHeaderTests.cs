@@ -16,10 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.IdentityModel.Tokens;
+using System;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     /// <summary>
     /// 

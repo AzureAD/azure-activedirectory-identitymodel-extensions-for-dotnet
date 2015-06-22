@@ -18,13 +18,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
     /// <summary>
     /// Used in extensibility tests to ensure that the same token flows through validation.
