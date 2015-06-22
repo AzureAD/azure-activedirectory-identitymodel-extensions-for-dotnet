@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 

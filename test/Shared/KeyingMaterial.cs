@@ -17,10 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 
 namespace Microsoft.IdentityModel.Test
 {

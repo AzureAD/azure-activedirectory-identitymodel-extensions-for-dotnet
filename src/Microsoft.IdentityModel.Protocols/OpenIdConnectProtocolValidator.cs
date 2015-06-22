@@ -25,6 +25,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 
 namespace Microsoft.IdentityModel.Protocols
 {

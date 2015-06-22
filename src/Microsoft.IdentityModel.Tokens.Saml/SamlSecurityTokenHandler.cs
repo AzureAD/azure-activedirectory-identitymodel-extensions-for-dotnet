@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Security.Claims;
@@ -117,14 +116,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw new ArgumentException(ErrorMessages.IDX10221);
             }
 
-            if (samlToken.Assertion == null)
-            {
-                throw new ArgumentException(ErrorMessages.IDX10202);
-            }
-
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
-            _smSamlHandlerPrivateNeverSetAnyProperties.ProcessStatmentPublic(samlToken.Assertion.Statements, identity, issuer);
-            return identity;
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -268,7 +262,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (samlToken.Conditions != null)
             {
                 notBefore = samlToken.Conditions.NotBefore;
-                expires = samlToken.Conditions.NotOnOrAfter;
+                expires = samlToken.Conditions.Expires;
             }
 
             Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
@@ -291,9 +285,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (validationParameters.ValidateAudience)
             {
                 List<string> audiences = new List<string>();
-                if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.Conditions != null)
+                if (samlToken.Conditions != null && samlToken.Conditions.Conditions != null)
                 {
-                    foreach (SamlCondition condition in samlToken.Assertion.Conditions.Conditions)
+                    foreach (SamlCondition condition in samlToken.Conditions.Conditions)
                     {
                         SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
                         if (null == audienceRestriction)
@@ -322,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
 
             string issuer = null;
-            issuer = samlToken.Assertion.Issuer == null ? null : samlToken.Assertion.Issuer;
+            issuer = samlToken.Issuer == null ? null : samlToken.Issuer;
 
             if (validationParameters.ValidateIssuer)
             {
@@ -336,9 +330,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
 
-            if (samlToken.Assertion.SigningToken != null)
+            if (samlToken.SigningKey != null)
             {
-                ValidateIssuerSecurityKey(samlToken.Assertion.SigningToken.SecurityKeys[0], samlToken, validationParameters);
+                ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             }
 
             ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);

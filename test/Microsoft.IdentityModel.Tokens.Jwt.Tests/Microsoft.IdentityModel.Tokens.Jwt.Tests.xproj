@@ -17,7 +17,7 @@
     <AssemblyName>Microsoft.IdentityModel.Tokens.Jwt.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <RootNamespace>Microsoft.IdentityModel.Tests</RootNamespace>
+    <RootNamespace>Microsoft.IdentityModel.Tokens.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
@@ -25,29 +25,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProduceOutputsOnBuild>True</ProduceOutputsOnBuild>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\ClaimSets.cs">
-      <Link>Shared\ClaimSets.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\DerivedTypes.cs">
-      <Link>Shared\DerivedTypes.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ExpectedException.cs">
-      <Link>Shared\ExpectedException.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IdentityComparer.cs">
-      <Link>Shared\IdentityComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IdentityUtilities.cs">
-      <Link>IdentityUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\OpenIdConfigData.cs">
-      <Link>OpenIdConfigData.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TestUtilities.cs">
-      <Link>Shared\TestUtilities.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

@@ -16,7 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Test;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Test

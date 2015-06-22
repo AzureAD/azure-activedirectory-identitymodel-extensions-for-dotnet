@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Xml;
+using Microsoft.IdentityModel.Test;
 
 namespace Microsoft.IdentityModel.Tokens.Jwt.Test
 {
