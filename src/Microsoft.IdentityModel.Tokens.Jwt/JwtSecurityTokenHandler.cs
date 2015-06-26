@@ -504,7 +504,19 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             JwtSecurityToken jwt = null;
             if (validationParameters.ValidateSignature)
             {
-                jwt = this.ValidateSignature(securityToken, validationParameters);
+                if (validationParameters.SignatureValidator != null)
+                {
+                    jwt = validationParameters.SignatureValidator(token: securityToken, validationParameters: validationParameters);
+
+                    if (jwt == null)
+                    {
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10506, securityToken), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                    }
+                }
+                else
+                {
+                    jwt = this.ValidateSignature(securityToken, validationParameters);
+                }
             }
             else
             {
