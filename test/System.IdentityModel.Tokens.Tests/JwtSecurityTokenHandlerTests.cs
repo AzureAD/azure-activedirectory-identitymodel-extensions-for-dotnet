@@ -794,14 +794,30 @@ namespace System.IdentityModel.Test
             validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey>());
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
+            // signature missing, "ValidateSignature = true"
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:");
             validationParameters = SignatureValidationParameters();
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
 
+            // signature missing, ValidateSignature = false"
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters.ValidateSignature = false;
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
 
+            // custom signature validator
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters = SignatureValidationParameters();
+            validationParameters.SignatureValidator = IdentityUtilities.SignatureValidatorReturnsTokenAsIs;
+            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
+
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10506:");
+            validationParameters.SignatureValidator = ((token, parameters) => { return null; });
+            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
+
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters.ValidateSignature = false;
+            validationParameters.SignatureValidator = IdentityUtilities.SignatureValidatorThrows;
+            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 
 #if SymmetricKeySuport
             // "Symmetric_256"
