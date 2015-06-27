@@ -6,7 +6,13 @@
     "Microsoft.IdentityModel.Tokens": "5.0.0-*",
     "Microsoft.IdentityModel.Tokens.Jwt": "5.0.0-*",
     "Newtonsoft.Json": "6.0.6"
-  },
+    },
+    "exclude": [
+      "WsFederation.cs",
+      "WsFederationMessage.cs",
+      "Configuration\\WsFederationConfiguration.cs",
+      "Configuration\\WsFederationConfigurationRetriever.cs"
+    ],
     "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
     "frameworks": {
         "dnx451": {

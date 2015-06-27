@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Test;
 using Xunit;
 
@@ -772,12 +773,6 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Test
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_1024);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // Cyrano was generated from AAD 12-22-2014
-            JsonWebKeySet webKeySet = new JsonWebKeySet(OpenIdConfigData.CyranoJsonWebKeySet);
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKeys: webKeySet.GetSigningKeys());
-            TestUtilities.ValidateToken(EncodedJwts.Cyrano, validationParameters, tokenHandler, expectedException);
 
             // "Signature missing, just two parts",
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:");

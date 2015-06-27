@@ -24,6 +24,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols

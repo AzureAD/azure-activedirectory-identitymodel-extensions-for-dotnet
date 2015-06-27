@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                identity.BootstrapContext = new BootstrapContext(securityToken);
+                identity.BootstrapContext = securityToken;
             }
 
             validatedToken = samlToken;

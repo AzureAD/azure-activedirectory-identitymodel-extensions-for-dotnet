@@ -20,14 +20,14 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols")]
-[assembly: AssemblyDescription("Contains classes for OpenId Connect protocol.")]
+[assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens.Jwt")]
+[assembly: AssemblyDescription("Contains classes for Json Web Tokens.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols")]
+[assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens.Jwt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-[assembly: Guid("DDA17899-06A2-4DDF-A552-30A5EBF0E2B0")]
+[assembly: Guid("20A7CE07-5612-4F93-9D3E-F2DFF8CA19E2")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("5.0.0.0")]

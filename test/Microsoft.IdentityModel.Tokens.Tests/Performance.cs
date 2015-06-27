@@ -20,6 +20,10 @@ using System;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Test;
+using Microsoft.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Test
@@ -31,13 +35,15 @@ namespace Microsoft.IdentityModel.Tokens.Test
     {
         [Fact(DisplayName = "Performance tests for creating Jwts" )]
         public void Jwt_Performance()
-        {            
+        {
+            throw new NotImplementedException();
+#if POST_REFACTOR
             SecurityTokenDescriptor tokenDescriptor;
             tokenDescriptor = new SecurityTokenDescriptor()
             {
-                NotBefore = DateTimeOffset.UtcNow,
-                Expires = DateTimeOffset.UtcNow + TimeSpan.FromDays(1),
-                SigningCredentials = KeyingMaterial.AsymmetricSigningCreds_2048_RsaSha2_Sha2,
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                SigningCredentials = KeyingMaterial.RSASigningCreds_2048,
                 Claims = Subjects.Simple( Issuers.GotJwt, Issuers.GotJwtOriginal ),
                 Issuer = Issuers.GotJwt,
                 Audience = Audiences.AuthFactors,
@@ -46,8 +52,8 @@ namespace Microsoft.IdentityModel.Tokens.Test
             Console.WriteLine( "\n====================\nAsymmetric" );
             Console.WriteLine( "\n====================\nValidate\n" );
 
-            RunValidationTests( tokenDescriptor, KeyingMaterial.AsymmetricX509Token_2048, KeyingMaterial.AsymmetricKey_2048, 50, false );
-            RunValidationTests( tokenDescriptor, KeyingMaterial.AsymmetricX509Token_2048, KeyingMaterial.AsymmetricKey_2048, 5000, true );
+            RunValidationTests( tokenDescriptor, KeyingMaterial.RSASigningCreds_2048, KeyingMaterial.RSASigningCreds_2048, 50, false );
+            RunValidationTests( tokenDescriptor, KeyingMaterial.RSASigningCreds_2048, KeyingMaterial.RSASigningCreds_2048, 5000, true );
 
             Console.WriteLine( "\n====================\nCreate\n" );
             RunCreationTests( tokenDescriptor, 50, false );
@@ -55,8 +61,8 @@ namespace Microsoft.IdentityModel.Tokens.Test
 
             tokenDescriptor = new SecurityTokenDescriptor() 
             {
-                NotBefore = DateTimeOffset.UtcNow,
-                Expires = DateTimeOffset.UtcNow + TimeSpan.FromDays(1),
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
                 SigningCredentials = KeyingMaterial.SymmetricSigningCreds_256_Sha2,
                 Claims = Subjects.Simple( Issuers.GotJwt, Issuers.GotJwtOriginal ),
                 Issuer = Issuers.GotJwt,
@@ -71,10 +77,14 @@ namespace Microsoft.IdentityModel.Tokens.Test
             Console.WriteLine( "\n====================\nCreate\n" );
             RunCreationTests( tokenDescriptor, 100, false );
             RunCreationTests( tokenDescriptor, 10000 );
+#endif
         }
 
-        private void RunValidationTests( SecurityTokenDescriptor tokenDescriptor, SecurityToken securityToken, SecurityKey key, int iterations, bool display = true )
+        private void RunValidationTests( SecurityTokenDescriptor tokenDescriptor, SecurityKey key, int iterations, bool display = true )
         {
+            throw new NotImplementedException();
+
+#if POST_REFACTOR
             // Create jwts using wif
             // Create Saml2 tokens
             // Create Saml tokens
@@ -82,8 +92,8 @@ namespace Microsoft.IdentityModel.Tokens.Test
             DateTime started;
             string validating = "Validating, signed: '{0}', '{1}' Tokens. Time: '{2}'";
 
-            SetReturnSecurityTokenResolver str = new Test.SetReturnSecurityTokenResolver( securityToken, key );
-            
+
+           
             SecurityTokenHandlerConfiguration tokenHandlerConfiguration = new SecurityTokenHandlerConfiguration()
             {
                 IssuerTokenResolver = str,
@@ -102,7 +112,6 @@ namespace Microsoft.IdentityModel.Tokens.Test
             writer.Close();
             string tokenXml = sb.ToString();
 
-            samlTokenHandler.Configuration = tokenHandlerConfiguration;
             started = DateTime.UtcNow;
             for ( int i = 0; i < iterations; i++ )
             {
@@ -168,6 +177,7 @@ namespace Microsoft.IdentityModel.Tokens.Test
             {
                 Console.WriteLine( string.Format( validating, "JwtSecurityTokenHandle - ReadToken( reader ), ValidateToken( jwtToken.RawData )", iterations, DateTime.UtcNow - started ) );
             }
+#endif
         }
 
         private void RunCreationTests( SecurityTokenDescriptor tokenDescriptor, int iterations, bool display = true )
@@ -261,7 +271,7 @@ namespace Microsoft.IdentityModel.Tokens.Test
         private void WriteJwts( SecurityTokenDescriptor tokenDescriptor, SignatureProvider signatureProvider )
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            JwtSecurityToken jwt = new JwtSecurityToken( tokenDescriptor.Issuer, tokenDescriptor.AppliesToAddress, tokenDescriptor.Subject.Claims, tokenDescriptor.Lifetime, tokenDescriptor.SigningCredentials );
+            JwtSecurityToken jwt = tokenHandler.CreateToken(tokenDescriptor) as JwtSecurityToken;
             MemoryStream ms = new MemoryStream();
             XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter( ms );
             tokenHandler.WriteToken( writer, jwt );
@@ -270,12 +280,7 @@ namespace Microsoft.IdentityModel.Tokens.Test
         private void CreateJwts( SecurityTokenDescriptor tokenDescriptor, SignatureProvider signatureProvider )
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            tokenHandler.CreateToken( issuer: tokenDescriptor.TokenIssuerName,
-                                      audience: tokenDescriptor.AppliesToAddress,
-                                      subject: tokenDescriptor.Subject,
-                                      signingCredentials: tokenDescriptor.SigningCredentials,
-                                      signatureProvider: signatureProvider );
+            tokenHandler.CreateToken(tokenDescriptor);
         }
-
     }
 }
