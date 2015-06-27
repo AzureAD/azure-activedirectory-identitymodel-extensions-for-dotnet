@@ -23,6 +23,8 @@ namespace Microsoft.IdentityModel.Test
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.IdentityModel.Protocols;
+    using Tokens;
+    using Tokens.Jwt;
 
     public class OpenIdConfigData
     {

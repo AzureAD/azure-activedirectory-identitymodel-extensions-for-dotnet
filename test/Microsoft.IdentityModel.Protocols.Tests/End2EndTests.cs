@@ -20,6 +20,7 @@ using System;
 using System.Threading;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test

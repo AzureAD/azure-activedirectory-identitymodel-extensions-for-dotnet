@@ -18,6 +18,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Test;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Test

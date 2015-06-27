@@ -19,6 +19,7 @@
 using System;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Test
@@ -33,10 +34,8 @@ namespace Microsoft.IdentityModel.Test
         public void CrossToken_ValidateToken()
         {
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
-            IMSaml2TokenHandler imSaml2Handler = new IMSaml2TokenHandler();
-            IMSamlTokenHandler imSamlHandler = new IMSamlTokenHandler();
-            SMSaml2TokenHandler smSaml2Handler = new SMSaml2TokenHandler();
-            SMSamlTokenHandler smSamlHandler = new SMSamlTokenHandler();
+            Saml2TokenHandler saml2Handler = new Saml2TokenHandler();
+            SamlTokenHandler samlHandler = new SamlTokenHandler();
 
             JwtSecurityTokenHandler.InboundClaimFilter.Add("aud");
             JwtSecurityTokenHandler.InboundClaimFilter.Add("exp");
