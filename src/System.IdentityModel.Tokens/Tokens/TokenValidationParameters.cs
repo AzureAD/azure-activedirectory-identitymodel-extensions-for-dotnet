@@ -61,6 +61,13 @@ namespace System.IdentityModel.Tokens
     public delegate bool LifetimeValidator(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for SignatureValidator.
+    /// </summary>
+    /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed using 'JSON Web Signature' (JWS)</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    public delegate JwtSecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
     public class TokenValidationParameters
@@ -115,6 +122,7 @@ namespace System.IdentityModel.Tokens
             RoleClaimType = other.RoleClaimType;
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
+            SignatureValidator = other.SignatureValidator;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
@@ -125,6 +133,7 @@ namespace System.IdentityModel.Tokens
             ValidAudiences = other.ValidAudiences;
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
+            ValidateSignature = other.ValidateSignature;
         }
 
         /// <summary>
@@ -140,6 +149,7 @@ namespace System.IdentityModel.Tokens
             ValidateIssuer = true;
             ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
+            ValidateSignature = true;
         }
 
         /// <summary>
@@ -412,6 +422,15 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets a delegate that will be used to validate the signature of the token
+        /// </summary>
+        public SignatureValidator SignatureValidator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that will be checked to help in detecting that a token has been 'seen' before.
         /// </summary>
         public ITokenReplayCache TokenReplayCache
@@ -465,6 +484,15 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(false)]
         public bool ValidateIssuerSigningKey
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the boolean to control if the signature of the token will be validated during token validation.
+        /// </summary>
+        public bool ValidateSignature
         {
             get;
             set;

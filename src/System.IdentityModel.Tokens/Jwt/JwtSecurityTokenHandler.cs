@@ -500,7 +500,27 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes), typeof(ArgumentException), EventLevel.Error);
             }
 
-            JwtSecurityToken jwt = this.ValidateSignature(securityToken, validationParameters);
+            JwtSecurityToken jwt = null;
+            if (validationParameters.ValidateSignature)
+            {
+                if (validationParameters.SignatureValidator != null)
+                {
+                    jwt = validationParameters.SignatureValidator(token: securityToken, validationParameters: validationParameters);
+
+                    if (jwt == null)
+                    {
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10506, securityToken), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                    }
+                }
+                else
+                {
+                    jwt = this.ValidateSignature(securityToken, validationParameters);
+                }
+            }
+            else
+            {
+                jwt = this.ReadToken(securityToken) as JwtSecurityToken;
+            }
 
             if (jwt.SigningKey != null)
             {
@@ -853,7 +873,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.Throw(ErrorMessages.IDX10221, typeof(ArgumentNullException), EventLevel.Error);
+                IdentityModelEventSource.Logger.WriteVerbose("Issuer is null or empty. Using runtime default for creating claims.");
             }
 
             IdentityModelEventSource.Logger.WriteInformation("Creating claims identity from the validated token.");
