@@ -297,6 +297,17 @@ public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
         public static bool LifetimeValidatorThrows(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
         {
             throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
-        }        
+        }
+        
+        public static JwtSecurityToken SignatureValidatorReturnsTokenAsIs(string token, TokenValidationParameters validationParameters)
+        {
+            JwtSecurityToken jwt = new JwtSecurityToken(token);
+            return jwt;
+        }
+
+        public static JwtSecurityToken SignatureValidatorThrows(string token, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
+        }
     }
 }
