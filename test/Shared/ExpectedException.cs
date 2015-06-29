@@ -18,14 +18,14 @@
 
 //#define  _Verbose
 
-using System.Globalization;
-using System.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
     /// When a test case throws an exception, this class helps to determine if the exception is as exptected.
