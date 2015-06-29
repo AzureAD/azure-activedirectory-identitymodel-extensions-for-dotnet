@@ -506,7 +506,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             {
                 if (validationParameters.SignatureValidator != null)
                 {
-                    jwt = validationParameters.SignatureValidator(token: securityToken, validationParameters: validationParameters);
+                    jwt = validationParameters.SignatureValidator(token: securityToken, validationParameters: validationParameters) as JwtSecurityToken;
 
                     if (jwt == null)
                     {

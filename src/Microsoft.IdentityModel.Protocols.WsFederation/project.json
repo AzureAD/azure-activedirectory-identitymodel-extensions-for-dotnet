@@ -3,10 +3,16 @@
   "description": "Provides types that provide support for OpenIdConnect protocol.",
   "dependencies": {
     "Microsoft.IdentityModel.Logging": "1.0.0-*",
+    "Microsoft.IdentityModel.Protocols": "2.0.0-*",
     "Microsoft.IdentityModel.Tokens": "5.0.0-*",
     "Microsoft.IdentityModel.Tokens.Jwt": "5.0.0-*",
     "Newtonsoft.Json": "6.0.6"
     },
+    "exclude": [
+      "WsFederationMessage.cs",
+      "Configuration\\WsFederationConfiguration.cs",
+      "Configuration\\WsFederationConfigurationRetriever.cs"
+    ],
     "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
     "frameworks": {
         "dnx451": {

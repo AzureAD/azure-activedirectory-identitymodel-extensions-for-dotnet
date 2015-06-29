@@ -21,7 +21,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens")]
-[assembly: AssemblyDescription("Contains classes SecurityToken and SecurityKey processing.")]
+[assembly: AssemblyDescription("Support for SecurityTokens.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens")]
 [assembly: AssemblyTrademark("")]
