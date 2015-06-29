@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Test
         public bool BoolRetVal { get; set; }
         public IEnumerable<Claim> Claims { get; set; }
         public ClaimsPrincipal ClaimsPrincipal { get; set; }
-        public uint DefaultTokenLifetimeInMinutes { get; set; }
+        public int DefaultTokenLifetimeInMinutes { get; set; }
         public string EncodedString { get; set; }
         public IList<Exception> Exceptions { get; set; }
         public ExpectedException ExpectedException { get { return _expectedException; } set { _expectedException = value; } }
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Test
         public string Name { get; set; }
         public string NameClaimType { get; set; }
         public TimeSpan MaxClockSkew { get; set; }
-        public uint MaxTokenSizeInBytes { get; set; }
+        public int MaxTokenSizeInBytes { get; set; }
         public string OriginalIssuer { get; set; }
         public bool RequireExpirationTime { get; set; }
         public bool RequireSignedTokens { get; set; }

@@ -21,7 +21,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens.Saml")]
-[assembly: AssemblyDescription("Contains classes for Saml1 and Saml2 token processing.")]
+[assembly: AssemblyDescription("Support for Saml1 and Saml2 SecurityTokens.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens.Saml")]
 [assembly: AssemblyTrademark("")]

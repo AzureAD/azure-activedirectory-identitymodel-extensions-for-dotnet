@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Test
     /// </summary>
     public class PerformanceTests
     {
-        [Fact(DisplayName = "Performance tests for creating Jwts" )]
+        [Fact(DisplayName = "Performance tests for creating Jwts" , Skip = "Beta6")]
         public void Jwt_Performance()
         {
             throw new NotImplementedException();
