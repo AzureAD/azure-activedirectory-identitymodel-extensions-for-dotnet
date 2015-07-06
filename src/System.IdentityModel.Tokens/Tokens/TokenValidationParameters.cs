@@ -63,9 +63,9 @@ namespace System.IdentityModel.Tokens
     /// <summary>
     /// Definition for SignatureValidator.
     /// </summary>
-    /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed using 'JSON Web Signature' (JWS)</param>
+    /// <param name="token">A securityToken with a signature.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    public delegate JwtSecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
+    public delegate SecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
