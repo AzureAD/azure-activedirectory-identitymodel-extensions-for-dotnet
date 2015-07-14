@@ -1,17 +1,11 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-        "Newtonsoft.Json": "6.0.6",
         "Microsoft.IdentityModel.Logging": "1.0.0-*",
-        "Microsoft.IdentityModel.Tokens": "5.0.0-*"
+        "Microsoft.IdentityModel.Tokens": "5.0.0-*",
+        "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {
-        "net451": {
-            "frameworkAssemblies": {
-                "System.Runtime.Serialization": "",
-                "System.Xml": ""
-            }
-        },
         "dnx451": {
             "frameworkAssemblies": {
                 "System.Runtime.Serialization": "",
@@ -38,6 +32,12 @@
                 "System.Runtime.Serialization.Xml": "4.0.10-beta-*",
                 "System.Runtime.Serialization.Primitives": "4.0.10-beta-*",
                 "System.Xml.ReaderWriter": "4.0.10-beta-*"
+            }
+        },
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Runtime.Serialization": "",
+                "System.Xml": ""
             }
         }
     },

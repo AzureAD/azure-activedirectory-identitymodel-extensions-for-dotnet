@@ -4,13 +4,13 @@
     },
 
     "frameworks": {
-        "net451": { },
         "dnx451": { },
         "dnxcore50": {
             "dependencies": {
                 "System.Globalization": "4.0.10-beta-*",
                 "System.Diagnostics.Tracing": "4.0.20-beta-*"
             }
-        }
+        },
+        "net451": { }
     }
 }

@@ -9,11 +9,6 @@
     },
     "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
     "frameworks": {
-        "net451": {
-            "frameworkAssemblies": {
-                "System.Net.Http": ""
-            }
-        },
         "dnx451": {
             "frameworkAssemblies": {
                 "System.Net.Http": "",
@@ -30,7 +25,13 @@
                 "System.Net.Http": "4.0.0-beta-*",
                 "System.Xml.ReaderWriter": "4.0.0-beta-*"
             }
+        },
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Net.Http": ""
+            }
         }
+
     },
     "compilationOptions": {
         "allowUnsafe": false,
