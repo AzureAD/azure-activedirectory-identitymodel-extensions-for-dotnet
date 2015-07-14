@@ -1,12 +1,13 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-		"Newtonsoft.Json": "6.0.6",
-    "Microsoft.IdentityModel.Logging": "1.0.0-*",
-    "Microsoft.IdentityModel.Tokens": "5.0.0-*"
+        "Newtonsoft.Json": "6.0.6",
+        "Microsoft.IdentityModel.Logging": "1.0.0-*",
+        "Microsoft.IdentityModel.Tokens": "5.0.0-*"
     },
     "frameworks": {
-       "dnx451": {},
+        "net451": { },
+        "dnx451": { },
         "dnxcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",

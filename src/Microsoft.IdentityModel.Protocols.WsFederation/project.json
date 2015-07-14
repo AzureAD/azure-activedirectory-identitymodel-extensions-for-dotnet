@@ -15,6 +15,7 @@
     ],
     "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
     "frameworks": {
+        "net451": { },
         "dnx451": {
             "frameworkAssemblies": {
                 "System.Net.Http": "",
