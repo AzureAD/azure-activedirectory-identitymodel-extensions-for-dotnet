@@ -1,12 +1,12 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-		"Newtonsoft.Json": "6.0.6",
-    "Microsoft.IdentityModel.Logging": "1.0.0-*",
-    "Microsoft.IdentityModel.Tokens": "5.0.0-*"
+        "Microsoft.IdentityModel.Logging": "1.0.0-*",
+        "Microsoft.IdentityModel.Tokens": "5.0.0-*",
+        "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {
-       "dnx451": {},
+        "dnx451": { },
         "dnxcore50": {
             "dependencies": {
                 "System.Collections": "4.0.10-beta-*",
@@ -23,7 +23,8 @@
                 "System.Text.RegularExpressions": "4.0.10-beta-*",
                 "System.Threading": "4.0.10-beta-*"
             }
-        }
+        },
+        "net451": { }
     },
     "compilationOptions": {
         "allowUnsafe": false,
