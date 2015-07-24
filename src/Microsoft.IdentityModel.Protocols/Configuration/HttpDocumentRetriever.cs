@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.IdentityModel.Tokens;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -27,7 +28,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    internal class HttpDocumentRetriever : IDocumentRetriever
+    public class HttpDocumentRetriever : IDocumentRetriever
     {
         private readonly HttpClient _httpClient;
 

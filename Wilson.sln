@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23017.0
+VisualStudioVersion = 14.0.23114.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}"
 EndProject
@@ -25,23 +25,27 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Log
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Logging.Tests", "test\Microsoft.IdentityModel.Logging.Tests\Microsoft.IdentityModel.Logging.Tests.xproj", "{7BB23627-58D2-41D5-B711-ACC5D7F6654E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tokens.Jwt.Tests", "test\Microsoft.IdentityModel.Tokens.Jwt.Tests\Microsoft.IdentityModel.Tokens.Jwt.Tests.xproj", "{74BA9664-7B6E-4215-914A-6A901327202D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Jwt.Tests", "test\System.IdentityModel.Tokens.Jwt.Tests\System.IdentityModel.Tokens.Jwt.Tests.xproj", "{74BA9664-7B6E-4215-914A-6A901327202D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tokens.Saml.Tests", "test\Microsoft.IdentityModel.Tokens.Saml.Tests\Microsoft.IdentityModel.Tokens.Saml.Tests.xproj", "{0C7CDBE0-9335-481D-B471-963F7CC843AA}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Saml.Tests", "test\System.IdentityModel.Tokens.Saml.Tests\System.IdentityModel.Tokens.Saml.Tests.xproj", "{0C7CDBE0-9335-481D-B471-963F7CC843AA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tokens.Tests", "test\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.xproj", "{602480C3-D5C1-45DA-9B16-B83C7BCF8D5D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Tests", "test\System.IdentityModel.Tokens.Tests\System.IdentityModel.Tokens.Tests.xproj", "{602480C3-D5C1-45DA-9B16-B83C7BCF8D5D}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.xproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tokens", "src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.xproj", "{B682F592-2627-4BF6-91D7-6D6ACCB924D0}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens", "src\System.IdentityModel.Tokens\System.IdentityModel.Tokens.xproj", "{B682F592-2627-4BF6-91D7-6D6ACCB924D0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tokens.Jwt", "src\Microsoft.IdentityModel.Tokens.Jwt\Microsoft.IdentityModel.Tokens.Jwt.xproj", "{8F9882BB-3566-45C4-A144-28A85F51B25E}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Jwt", "src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.xproj", "{8F9882BB-3566-45C4-A144-28A85F51B25E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tokens.Saml", "src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.xproj", "{21A2EE25-8031-4E44-AA29-05D77CFD921B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "System.IdentityModel.Tokens.Saml", "src\System.IdentityModel.Tokens.Saml\System.IdentityModel.Tokens.Saml.xproj", "{21A2EE25-8031-4E44-AA29-05D77CFD921B}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols.WsFederation", "src\Microsoft.IdentityModel.Protocols.WsFederation\Microsoft.IdentityModel.Protocols.WsFederation.xproj", "{A8F0A3D1-FA93-4A59-9832-CC45D5375FA6}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols.WsFederation.Tests", "test\Microsoft.IdentityModel.Protocols.WsFederation.Tests\Microsoft.IdentityModel.Protocols.WsFederation.Tests.xproj", "{A769FC73-E1EE-48D7-9C37-AFB2926EAAEF}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols.OpenIdConnect", "src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.xproj", "{4B22E54A-CA65-4239-9B92-6F56B44BA079}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests", "test\Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests\Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests.xproj", "{69F54E38-ED15-4CCC-960D-02FEE7CB6A64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +101,14 @@ Global
 		{A769FC73-E1EE-48D7-9C37-AFB2926EAAEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A769FC73-E1EE-48D7-9C37-AFB2926EAAEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A769FC73-E1EE-48D7-9C37-AFB2926EAAEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B22E54A-CA65-4239-9B92-6F56B44BA079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B22E54A-CA65-4239-9B92-6F56B44BA079}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B22E54A-CA65-4239-9B92-6F56B44BA079}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B22E54A-CA65-4239-9B92-6F56B44BA079}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69F54E38-ED15-4CCC-960D-02FEE7CB6A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69F54E38-ED15-4CCC-960D-02FEE7CB6A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69F54E38-ED15-4CCC-960D-02FEE7CB6A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69F54E38-ED15-4CCC-960D-02FEE7CB6A64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,5 +126,7 @@ Global
 		{21A2EE25-8031-4E44-AA29-05D77CFD921B} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{A8F0A3D1-FA93-4A59-9832-CC45D5375FA6} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{A769FC73-E1EE-48D7-9C37-AFB2926EAAEF} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{4B22E54A-CA65-4239-9B92-6F56B44BA079} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
+		{69F54E38-ED15-4CCC-960D-02FEE7CB6A64} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 EndGlobal

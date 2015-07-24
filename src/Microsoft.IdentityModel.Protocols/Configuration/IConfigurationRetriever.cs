@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    internal interface IConfigurationRetriever<T>
+    public interface IConfigurationRetriever<T>
     {
         Task<T> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel);
     }

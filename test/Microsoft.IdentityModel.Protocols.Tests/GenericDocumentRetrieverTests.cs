@@ -18,7 +18,7 @@
 
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Protocols.Tests
 {
     /// <summary>
     /// 

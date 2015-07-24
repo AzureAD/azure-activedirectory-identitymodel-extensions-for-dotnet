@@ -22,7 +22,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
     /// Provides access to common WsFederation message parameters.

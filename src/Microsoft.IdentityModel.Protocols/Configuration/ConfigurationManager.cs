@@ -18,13 +18,13 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel;
+using System.IdentityModel.Tokens;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Net.Http;
 using Microsoft.IdentityModel.Logging;
-using System.Diagnostics.Tracing;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -70,8 +70,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// Instantiaties a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">the address to obtain configuration.</param>
-        public ConfigurationManager(string metadataAddress)
-            : this(metadataAddress, new GenericDocumentRetriever())
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever)
+            : this(metadataAddress, configRetriever, new GenericDocumentRetriever())
         {
         }
 
@@ -80,8 +80,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="metadataAddress">the address to obtain configuration.</param>
         /// <param name="httpClient">the client to use when obtaining configuration.</param>
-        public ConfigurationManager(string metadataAddress, HttpClient httpClient)
-            : this(metadataAddress, new HttpDocumentRetriever(httpClient))
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, HttpClient httpClient)
+            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(httpClient))
         {
         }
 
@@ -90,16 +90,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="metadataAddress">the address to obtain configuration.</param>
         /// <param name="docRetriever">the <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
-        public ConfigurationManager(string metadataAddress, IDocumentRetriever docRetriever)
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever)
         {
-#if WsFed
-            if (!typeof(T).Equals(typeof(WsFederationConfiguration)) && (!typeof(T).Equals(typeof(OpenIdConnectConfiguration))))
-#else
-            if (!typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
-#endif
-            {
-                LogHelper.Throw(typeof(T).FullName, typeof(NotImplementedException), EventLevel.Verbose);
-            }
+//#if WsFed
+//            if (!typeof(T).Equals(typeof(WsFederationConfiguration)) && (!typeof(T).Equals(typeof(OpenIdConnectConfiguration))))
+//#else
+//            if (!typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
+//#endif
+//            {
+//                LogHelper.Throw(typeof(T).FullName, typeof(NotImplementedException), EventLevel.Verbose);
+//            }
 
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             _metadataAddress = metadataAddress;
             _docRetriever = docRetriever;
-            _configRetriever = GetConfigurationRetriever();
+            _configRetriever = configRetriever;
             _refreshLock = new SemaphoreSlim(1);
         }
 
@@ -147,26 +147,6 @@ namespace Microsoft.IdentityModel.Protocols
                 }
                 _refreshInterval = value;
             }
-        }
-
-        /// <summary>
-        /// Gets the current <see cref="IConfigurationRetriever{T}"/> that is used to obtain configuration.
-        /// </summary>
-        /// <returns>Configuration of type T.</returns>
-        private static IConfigurationRetriever<T> GetConfigurationRetriever()
-        {
-#if WsFed
-            if (typeof(T).Equals(typeof(WsFederationConfiguration)))
-            {
-                return (IConfigurationRetriever<T>)new WsFederationConfigurationRetriever();
-            }
-#endif
-            if (typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
-            {
-                return (IConfigurationRetriever<T>)new OpenIdConnectConfigurationRetriever();
-            }
-            LogHelper.Throw(typeof(T).FullName, typeof(NotImplementedException), EventLevel.Verbose);
-            return null;
         }
 
         /// <summary>

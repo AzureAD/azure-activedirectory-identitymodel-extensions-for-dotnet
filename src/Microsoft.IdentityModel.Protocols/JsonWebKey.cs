@@ -16,12 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 using System.Diagnostics.Tracing;
+using System.Globalization;
+using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols
 {

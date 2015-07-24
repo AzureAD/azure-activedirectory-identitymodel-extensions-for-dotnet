@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.IdentityModel.Tokens;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
@@ -26,9 +27,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
     ///  Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.

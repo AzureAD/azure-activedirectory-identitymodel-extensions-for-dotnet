@@ -18,10 +18,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Protocols;
+using System.IdentityModel.Tokens.Tests;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Protocols.Tests
 {
     /// <summary>
     /// Tests for AuthenticationProtocolMessage.

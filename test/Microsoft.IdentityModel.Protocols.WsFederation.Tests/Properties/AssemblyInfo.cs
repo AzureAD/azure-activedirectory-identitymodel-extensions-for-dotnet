@@ -24,10 +24,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols.WsFederation.Tests")]
+[assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols.WsFederation.Test")]
 [assembly: AssemblyDescription("Tests for WsFederation.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols.WsFederation.Tests")]
+[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols.WsFederation.Test")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]

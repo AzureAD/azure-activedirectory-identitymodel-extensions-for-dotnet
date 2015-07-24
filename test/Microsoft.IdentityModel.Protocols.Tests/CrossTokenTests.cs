@@ -22,7 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Jwt;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Protcols.Test
 {
     /// <summary>
     /// The purpose of these tests are to ensure that Saml, Saml2 and Jwt handling 
@@ -59,14 +59,14 @@ namespace Microsoft.IdentityModel.Test
             ClaimsPrincipal smSaml2Principal = ValidateToken(smSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal smSamlPrincipal = ValidateToken(smSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSamlHandler, ExpectedException.NoExceptionExpected);
 
-            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(imSamlPrincipal,  imSaml2Principal, new CompareContext { IgnoreSubject = true }));
-            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSamlPrincipal,  imSaml2Principal, new CompareContext { IgnoreSubject = true }));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(imSamlPrincipal, imSaml2Principal, new CompareContext { IgnoreSubject = true }));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSamlPrincipal, imSaml2Principal, new CompareContext { IgnoreSubject = true }));
             Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSaml2Principal, imSaml2Principal, new CompareContext { IgnoreSubject = true }));
 
             // false = ignore type of objects, we expect all objects in the principal to be of same type (no derived types)
             // true = ignore subject, claims have a backpointer to their ClaimsIdentity.  Most of the time this will be different as we are comparing two different ClaimsIdentities.
             // true = ignore properties of claims, any mapped claims short to long for JWT's will have a property that represents the short type.
-            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(jwtPrincipal, imSaml2Principal, new CompareContext{IgnoreType = false, IgnoreSubject = true, IgnoreProperties=true}));
+            Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(jwtPrincipal, imSaml2Principal, new CompareContext { IgnoreType = false, IgnoreSubject = true, IgnoreProperties = true }));
 
             JwtSecurityTokenHandler.InboundClaimFilter.Clear();
         }

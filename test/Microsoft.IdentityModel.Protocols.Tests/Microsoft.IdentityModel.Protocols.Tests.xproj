@@ -17,7 +17,7 @@
     <AssemblyName>Microsoft.IdentityModel.Protocols.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <RootNamespace>Microsoft.IdentityModel.Tests</RootNamespace>
+    <RootNamespace>Microsoft.IdentityModel.Protocols.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>

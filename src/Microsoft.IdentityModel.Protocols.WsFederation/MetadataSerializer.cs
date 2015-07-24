@@ -1,4 +1,4 @@
-﻿namespace Microsoft.IdentityModel.Protocols
+﻿namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     public class MetadataSerializer
     {

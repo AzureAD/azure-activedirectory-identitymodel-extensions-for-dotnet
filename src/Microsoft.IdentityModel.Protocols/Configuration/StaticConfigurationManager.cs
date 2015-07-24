@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.IdentityModel.Tokens;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;

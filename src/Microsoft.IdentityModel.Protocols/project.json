@@ -1,13 +1,9 @@
 {
     "version": "2.0.0-*",
-    "description": "Provides types that provide support for OpenIdConnect protocol.",
+    "description": "Provides types that are common across different protocols.",
     "dependencies": {
-        "Microsoft.IdentityModel.Logging": "1.0.0-*",
-        "Microsoft.IdentityModel.Tokens": "5.0.0-*",
-        "Microsoft.IdentityModel.Tokens.Jwt": "5.0.0-*",
-        "Newtonsoft.Json": "6.0.6"
+        "System.IdentityModel.Tokens.Jwt": "5.0.0-*"
     },
-    "compile": [ "**\\*.cs", "..\\common\\*.cs" ],
     "frameworks": {
         "dnx451": {
             "frameworkAssemblies": {
@@ -23,7 +19,7 @@
                 "System.Globalization": "4.0.10-beta-*",
                 "System.IO.FileSystem": "4.0.0-beta-*",
                 "System.Net.Http": "4.0.0-beta-*",
-                "System.Xml.ReaderWriter": "4.0.0-beta-*"
+                "System.Xml.ReaderWriter": "4.0.10-beta-*"
             }
         },
         "net451": {

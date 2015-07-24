@@ -18,9 +18,9 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
     /// Contains WsFederation metadata that can be populated from a xml string.

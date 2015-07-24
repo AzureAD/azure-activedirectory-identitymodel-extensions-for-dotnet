@@ -16,10 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Protocols;
-using System;
-
-namespace Microsoft.IdentityModel.Test
+namespace Microsoft.IdentityModel.Protocols.Tests
 {
     public class MessageComparer
     {

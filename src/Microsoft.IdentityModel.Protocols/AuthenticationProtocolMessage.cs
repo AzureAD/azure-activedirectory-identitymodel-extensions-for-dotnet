@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 
