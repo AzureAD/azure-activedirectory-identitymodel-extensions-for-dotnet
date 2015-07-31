@@ -282,6 +282,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(customOpenIdConnectMessage.LogoutRequestUrl == customOpenIdConnectMessage.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + customOpenIdConnectMessage.LogoutRequestUrl + ", " + customOpenIdConnectMessage.CreateLogoutRequestUrl());
         }
 
+        [Fact(DisplayName = "OpenIdConnectMessageTests: Tests if _issuerAddress has '?'")]
+        public void OpenIdConnectMessage_IssuerAddressHasQuery()
+        {
+            List<string> errors = new List<string>();
+            var address = "http://gotJwt.onmicrosoft.com/?foo=bar";
+            var clientId = Guid.NewGuid().ToString();
+            var message = new OpenIdConnectMessage(address);
+
+            var url = message.BuildRedirectUrl();
+            Report("1", errors, url, address);
+
+            message.ClientId = clientId;
+            url = message.BuildRedirectUrl();
+            var expected = string.Format(CultureInfo.InvariantCulture, @"{0}&client_id={1}", address, clientId);
+
+            Report("2", errors, url, expected);
+        }
+
         private class CustomOpenIdConnectMessage : OpenIdConnectMessage
         {
             public override string CreateAuthenticationRequestUrl()
