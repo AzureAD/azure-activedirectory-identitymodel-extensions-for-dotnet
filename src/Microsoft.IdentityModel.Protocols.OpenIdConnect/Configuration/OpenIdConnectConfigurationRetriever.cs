@@ -90,10 +90,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 IdentityModelEventSource.Logger.WriteVerbose("Retrieving json web keys from " + openIdConnectConfiguration.JwksUri);
-                doc = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
+                string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
 
                 IdentityModelEventSource.Logger.WriteVerbose("Deserializing json web keys obtained from " + openIdConnectConfiguration.JwksUri);
-                openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(doc);
+                openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(keys);
                 foreach (SecurityKey key in openIdConnectConfiguration.JsonWebKeySet.GetSigningKeys())
                 {
                     openIdConnectConfiguration.SigningKeys.Add(key);
