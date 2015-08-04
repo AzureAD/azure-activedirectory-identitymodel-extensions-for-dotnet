@@ -676,9 +676,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 };
             TestUtilities.ValidateToken(jwt.RawData, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
 
+            // validating lifetime validator
             validationParameters.ValidateLifetime = false;
             validationParameters.LifetimeValidator = IdentityUtilities.LifetimeValidatorThrows;
             TestUtilities.ValidateToken(securityToken: jwt.RawData, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+
+            // validating issuer signing key validator
+            validationParameters = SignatureValidationParameters(IdentityUtilities.DefaultAsymmetricSigningKey);
+            validationParameters.ValidateIssuerSigningKey = true;
+            validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return true; };
+            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+
+            validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return false; };
+            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Bootstrap context is saved and is as expected")]

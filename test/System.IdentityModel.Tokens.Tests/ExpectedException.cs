@@ -224,6 +224,11 @@ namespace System.IdentityModel.Tokens.Tests
             return new ExpectedException(typeExpected: typeof(SecurityTokenValidationException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
 
+        public static ExpectedException SecurityTokenInvalidSigningKeyException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSigningKeyException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
         public string SubstringExpected { get; set; }
 
         public Type TypeExpected { get; set; }

@@ -42,6 +42,13 @@ namespace System.IdentityModel.Tokens
     public delegate SecurityKey IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for IssuerSigningKeyValidator.
+    /// </summary>
+    /// <param name="securityKey">The <see cref="SecurityKey"/> being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    public delegate bool IssuerSigningKeyValidator(SecurityKey securityKey, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Definition for IssuerValidator.
     /// </summary>
     /// <param name="issuer">The issuer to validate.</param>
@@ -282,9 +289,9 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
+        /// Gets or sets the delegate for validating the <see cref="SecurityKey"/> that is to be used for validating signed tokens. 
         /// </summary>
-        public Action<SecurityKey> IssuerSigningKeyValidator
+        public IssuerSigningKeyValidator IssuerSigningKeyValidator
         {
             get;
             set;

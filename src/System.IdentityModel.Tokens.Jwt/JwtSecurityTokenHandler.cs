@@ -522,9 +522,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 jwt = this.ReadToken(securityToken) as JwtSecurityToken;
             }
 
-            if (jwt.SigningKey != null)
+            if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
             {
-                this.ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                if (validationParameters.IssuerSigningKeyValidator != null)
+                {
+                    if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, validationParameters))
+                    {
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10232, jwt.SigningKey.ToString()), typeof(SecurityTokenInvalidSigningKeyException), EventLevel.Error);
+                    }
+                }
+                else
+                {
+                    this.ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                }
             }
 
             DateTime? notBefore = null;
@@ -795,7 +805,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         if (this.ValidateSignature(encodedBytes, signatureBytes, sk, mappedAlgorithm))
                         {
                             IdentityModelEventSource.Logger.WriteInformation("Security token has a valid signature.");
-                            jwt.SigningKey = securityKey;
+                            jwt.SigningKey = sk;
                             return jwt;
                         }
                     }
