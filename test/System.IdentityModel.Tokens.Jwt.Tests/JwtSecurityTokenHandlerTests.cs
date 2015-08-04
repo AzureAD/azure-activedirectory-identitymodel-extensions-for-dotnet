@@ -467,9 +467,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [TestMethod]
-        [TestProperty("TestCaseID", "E3CD829B-6A19-4B6F-A33C-8EE1F8F6BCE7")]
-        [Description("Tests local instance claim type mapping and filtering")]
+        [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Tests local instance claim type mapping and filtering")]
         public void InstanceClaimMappingAndFiltering()
         {
             // Setup
@@ -488,8 +486,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // Test outgoing
             var outgoingToken = handler.CreateToken(subject: new ClaimsIdentity(new Claim[] { internalClaim }));
             var mappedClaim = System.Linq.Enumerable.FirstOrDefault(outgoingToken.Claims);
-            Assert.IsNotNull(mappedClaim);
-            Assert.AreEqual("jwtClaim", mappedClaim.Type);
+            Assert.NotNull(mappedClaim);
+            Assert.Equal("jwtClaim", mappedClaim.Type);
 
             // Test incoming
             var incomingToken = handler.CreateToken(issuer: "Test Issuer", subject: new ClaimsIdentity(new Claim[] { jwtClaim, unwantedClaim }));
@@ -501,9 +499,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
             SecurityToken token;
             var identity = handler.ValidateToken(incomingToken.RawData, validationParameters, out token);
-            Assert.IsFalse(identity.HasClaim(c => c.Type == "unwantedClaim"));
-            Assert.IsFalse(identity.HasClaim(c => c.Type == "jwtClaim"));
-            Assert.IsTrue(identity.HasClaim("internalClaim", "claimValue"));
+            Assert.False(identity.HasClaim(c => c.Type == "unwantedClaim"));
+            Assert.False(identity.HasClaim(c => c.Type == "jwtClaim"));
+            Assert.True(identity.HasClaim("internalClaim", "claimValue"));
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Ensures that JwtSecurityTokenHandler defaults are as expected")]
