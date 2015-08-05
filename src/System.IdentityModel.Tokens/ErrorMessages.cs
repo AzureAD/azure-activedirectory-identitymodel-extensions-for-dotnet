@@ -155,6 +155,7 @@ namespace System.IdentityModel.Tokens
         public const string IDX10709 = "IDX10709: '{0}' is not well formed: '{1}'. The string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
         public const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
         public const string IDX10711 = "IDX10711: actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JWT";
+        public const string IDX10712 = "IDX10712: actor.BootstrapContext is null. Creating the token using actor.Claims.";
 
         // configuration retrieval errors
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";

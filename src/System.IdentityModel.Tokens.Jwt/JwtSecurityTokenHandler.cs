@@ -798,7 +798,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 StringBuilder keysAttempted = new StringBuilder();
 
                 // Try all keys since there is no keyidentifier
-                foreach (SecurityKey sk in GetAllKeys(token, jwt, kid, validationParameters))
+                foreach (SecurityKey sk in GetAllKeys(validationParameters))
                 {
                     try
                     {
@@ -832,7 +832,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private IEnumerable<SecurityKey> GetAllKeys(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
+        private IEnumerable<SecurityKey> GetAllKeys(TokenValidationParameters validationParameters)
         {
             IdentityModelEventSource.Logger.WriteInformation("Getting issuer signing keys from validaiton parameters.");
             if (validationParameters.IssuerSigningKey != null)
@@ -960,31 +960,32 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (actor.BootstrapContext == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": actor.BootstrapContex"), typeof(SecurityTokenException), EventLevel.Verbose);
-
+                IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10712, GetType() + ": actor.BootstrapContext"));
             }
-
-            string encodedJwt = actor.BootstrapContext as string;
-            if (encodedJwt != null)
+            else
             {
-                return encodedJwt;
+                string encodedJwt = actor.BootstrapContext as string;
+                if (encodedJwt != null)
+                {
+                    return encodedJwt;
+                }
+
+                JwtSecurityToken jwt = actor.BootstrapContext as JwtSecurityToken;
+                if (jwt != null)
+                {
+                    if (jwt.RawData != null)
+                    {
+                        return jwt.RawData;
+                    }
+                    else
+                    {
+                        return this.WriteToken(jwt);
+                    }
+                }
+                IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10711, GetType() + ": actor.BootstrapContext"));
             }
 
-            JwtSecurityToken jwt = actor.BootstrapContext as JwtSecurityToken;
-            if (jwt != null)
-            {
-                if (jwt.RawData != null)
-                {
-                    return jwt.RawData;
-                }
-                else
-                {
-                    return this.WriteToken(jwt);
-                }
-            }
-
-            LogHelper.Throw(ErrorMessages.IDX10711, typeof(SecurityTokenException), EventLevel.Error);
-            return null;
+            return this.WriteToken(new JwtSecurityToken(claims: actor.Claims));
         }
 
         /// <summary>
