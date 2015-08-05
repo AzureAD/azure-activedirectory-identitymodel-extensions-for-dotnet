@@ -193,12 +193,8 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         retrieveEx = ex;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10803, _metadataAddress ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
                     }
-                }
-
-                if (_currentConfiguration == null)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10803, _metadataAddress ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
                 }
 
                 // Stale metadata is better than no metadata
