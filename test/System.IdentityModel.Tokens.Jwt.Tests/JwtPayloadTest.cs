@@ -129,5 +129,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             int? expirationTime = jwtPayload.Exp;
             Assert.True(expirationTime == time, "expirationTime != time");
         }
+
+        [Fact(DisplayName = "JwtPayloadTests: test claim with null value")]
+        public void TestClaimWithNullValue()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+            jwtPayload.Add("testClaim", null);
+            List<Claim> claims = jwtPayload.Claims as List<Claim>;   // this should not throw
+        }
     }
 }

@@ -329,6 +329,12 @@ namespace System.IdentityModel.Tokens.Jwt
                 // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
                 foreach (KeyValuePair<string, object> keyValuePair in this)
                 {
+                    // do not add claims with null value
+                    if (keyValuePair.Value == null)
+                    {
+                        continue;
+                    }
+
                     string claimType = keyValuePair.Key;
                     string claimValue = keyValuePair.Value as string;
                     Claim c = null;
