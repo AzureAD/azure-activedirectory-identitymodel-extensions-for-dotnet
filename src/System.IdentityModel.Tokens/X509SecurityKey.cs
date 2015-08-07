@@ -31,7 +31,13 @@ namespace System.IdentityModel.Tokens
 
         public override int KeySize
         {
-            get { return PublicKey.Key.KeySize; }
+            get {
+#if DNXCORE50
+                return RSACertificateExtensions.GetRSAPublicKey(_certificate).KeySize;
+#else
+                return PublicKey.Key.KeySize;
+#endif
+            }
         }
 
         public AsymmetricAlgorithm PrivateKey
@@ -44,7 +50,11 @@ namespace System.IdentityModel.Tokens
                     {
                         if (!_privateKeyAvailabilityDetermined)
                         {
+#if DNXCORE50
+                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(_certificate);
+#else
                             _privateKey = _certificate.PrivateKey;
+#endif
                             _privateKeyAvailabilityDetermined = true;
                         }
                     }

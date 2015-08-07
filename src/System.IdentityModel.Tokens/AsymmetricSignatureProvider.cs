@@ -18,6 +18,7 @@
 
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace System.IdentityModel.Tokens
 {
@@ -101,7 +102,11 @@ namespace System.IdentityModel.Tokens
                 }
                 else
                 {
+#if DNXCORE50
+                    rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate) as RSACryptoServiceProvider;
+#else
                     rsa = x509Key.PublicKey.Key as RSACryptoServiceProvider;
+#endif
                 }
 
                 rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);

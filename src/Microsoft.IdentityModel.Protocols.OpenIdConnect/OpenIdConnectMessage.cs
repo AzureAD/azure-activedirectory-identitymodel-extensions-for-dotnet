@@ -22,7 +22,6 @@ using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect

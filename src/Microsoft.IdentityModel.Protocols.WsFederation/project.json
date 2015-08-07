@@ -19,12 +19,12 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Collections.Specialized": "4.0.0-beta-*",
-                "System.Diagnostics.Contracts": "4.0.0-beta-*",
-                "System.Globalization": "4.0.10-beta-*",
-                "System.IO.FileSystem": "4.0.0-beta-*",
-                "System.Net.Http": "4.0.0-beta-*",
-                "System.Xml.ReaderWriter": "4.0.0-beta-*"
+                "System.Collections.Specialized": "4.0.1-beta-*",
+                "System.Diagnostics.Contracts": "4.0.1-beta-*",
+                "System.Globalization": "4.0.11-beta-*",
+                "System.IO.FileSystem": "4.0.1-beta-*",
+                "System.Net.Http": "4.0.1-beta-*",
+                "System.Xml.ReaderWriter": "4.0.1-beta-*"
             }
         },
         "net451": { }
