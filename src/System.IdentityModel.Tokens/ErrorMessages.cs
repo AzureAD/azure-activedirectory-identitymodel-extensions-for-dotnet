@@ -156,6 +156,10 @@ namespace System.IdentityModel.Tokens
         public const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
         public const string IDX10711 = "IDX10711: actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JWT";
         public const string IDX10712 = "IDX10712: actor.BootstrapContext is null. Creating the token using actor.Claims.";
+        public const string IDX10713 = "IDX10713: Creating actor value using actor.BootstrapContext(as string)";
+        public const string IDX10714 = "IDX10714: Creating actor value using actor.BootstrapContext.rawData";
+        public const string IDX10715 = "IDX10715: Creating actor value by writing the JwtSecurityToken created from actor.BootstrapContext";
+
 
         // configuration retrieval errors
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
