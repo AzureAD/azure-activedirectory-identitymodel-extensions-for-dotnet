@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetadataString, OpenIdConfigData.OpenIdConnectConfiguration1, ExpectedException.NoExceptionExpected);
         }
 
-        private OpenIdConnectConfiguration RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)
+        private void RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)
         {
             bool exceptionHit = false;
 
@@ -75,8 +75,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
-
-            return openIdConnectConfiguration;
         }
 
         [Fact(DisplayName = "OpenIdConnectMetadataTests: Defaults")]
@@ -143,6 +141,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 errors.AddRange(context.Diffs);
 
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
+        }
+
+        [Fact(DisplayName = "OpenIdConnectConfigurationTests: Testing OpenIdConnectConfiguration.Write")]
+        public void Write()
+        {
+            string compareToJson = OpenIdConfigData.OpenIdConnectMetadataString;
+            OpenIdConnectConfiguration configuration = OpenIdConnectConfiguration.Create(compareToJson);
+            string deserializedJson = OpenIdConnectConfiguration.Write(configuration);
+            Assert.True(deserializedJson.Equals(compareToJson, StringComparison.OrdinalIgnoreCase), "not equal");
         }
     }
 }

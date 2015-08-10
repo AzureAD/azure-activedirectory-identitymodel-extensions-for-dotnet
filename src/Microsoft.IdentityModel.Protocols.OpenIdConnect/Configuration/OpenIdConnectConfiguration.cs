@@ -43,15 +43,36 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
         }
 
-        static public OpenIdConnectConfiguration Create(string json)
+        /// <summary>
+        /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
+        /// </summary>
+        /// <param name="json">json string representing the configuration.</param>
+        /// <returns><see cref="OpenIdConnectConfiguration"/> object representing the configuration.</returns>
+        public static OpenIdConnectConfiguration Create(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteInformation("Deserializing json into OpenIdConnectConfiguration object");
+            IdentityModelEventSource.Logger.WriteVerbose("Deserializing json into OpenIdConnectConfiguration object");
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
+        }
+
+        /// <summary>
+        /// Serializes the <see cref="OpenIdConnectConfiguration"/> object to a json string.
+        /// </summary>
+        /// <param name="configuration"><see cref="OpenIdConnectConfiguration"/> object to serialize.</param>
+        /// <returns>json string representing the configuration object.</returns>
+        public static string Write(OpenIdConnectConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
+            }
+
+            IdentityModelEventSource.Logger.WriteVerbose("Serializing OpenIdConfiguration object to json string");
+            return JsonConvert.SerializeObject(configuration);
         }
 
         /// <summary>
