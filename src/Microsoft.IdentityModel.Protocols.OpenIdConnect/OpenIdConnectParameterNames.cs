@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string PostLogoutRedirectUri = "post_logout_redirect_uri";
         public const string Prompt = "prompt";
         public const string RedirectUri = "redirect_uri";
+        public const string RefreshToken = "refresh_token";
         public const string RequestUri = "request_uri";
         public const string Resource = "resource";
         public const string ResponseMode = "response_mode";

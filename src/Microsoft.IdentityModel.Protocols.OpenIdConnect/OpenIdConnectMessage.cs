@@ -389,9 +389,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets or sets 'refresh_token'.
+        /// </summary>
+        public string RefreshToken
+        {
+            get { return GetParameter(OpenIdConnectParameterNames.RefreshToken); }
+            set { SetParameter(OpenIdConnectParameterNames.RefreshToken, value); }
+        }
+
+        /// <summary>
         /// Gets or set the request type for this message
         /// </summary>
-        /// <remarks>This is helpful when sending differnt messages through a common routine, when extra parameters need to be set or checked.</remarks>
+        /// <remarks>This is helpful when sending different messages through a common routine, when extra parameters need to be set or checked.</remarks>
         public OpenIdConnectRequestType RequestType
         {
             get;
