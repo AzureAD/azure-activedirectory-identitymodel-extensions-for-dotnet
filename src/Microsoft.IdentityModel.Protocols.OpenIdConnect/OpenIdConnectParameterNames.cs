@@ -67,9 +67,3 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 #pragma warning restore 1591
     }
 }
-
-
-
-
-
-
