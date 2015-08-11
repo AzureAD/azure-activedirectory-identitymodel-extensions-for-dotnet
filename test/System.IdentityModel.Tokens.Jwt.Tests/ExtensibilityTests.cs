@@ -156,7 +156,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
 
             // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = ExpectedException.SignatureVerificationFailedException(innerTypeExpected: typeof(InvalidOperationException), substringExpected: "IDX10503:");
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(innerTypeExpected: typeof(InvalidOperationException), substringExpected: "IDX10503:");
             RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, expectedException);
 
             // inbound is mapped Hmac

@@ -215,7 +215,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                      subject: claimsIdentity,
                      signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials);
 
-            claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorSymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.SignatureVerificationFailedException(innerTypeExpected: typeof(InvalidOperationException)));
+            claimsPrincipal = RunActorVariation(jwtToken.RawData, jwtActorSymmetric, validationParameters, validationParameters, tokendHandler, ExpectedException.SecurityTokenInvalidSignatureException(innerTypeExpected: typeof(InvalidOperationException)));
 
             // Will succeed be validation is off
             validationParameters.ValidateActor = false;
@@ -829,7 +829,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
             // "BinaryKey 56Bits",
-            expectedException = ExpectedException.SignatureVerificationFailedException( innerTypeExpected: typeof(ArgumentOutOfRangeException), substringExpected: "IDX10503:");
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException( innerTypeExpected: typeof(ArgumentOutOfRangeException), substringExpected: "IDX10503:");
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_256);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
 #endif
