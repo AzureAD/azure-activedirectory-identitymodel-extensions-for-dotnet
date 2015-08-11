@@ -23,10 +23,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// </summary>
     public static class OpenIdConnectScopes
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         public const string OpenId = "openid";
         public const string OpenIdProfile = "openid profile";
         public const string UserImpersonation = "user_impersonation";
-        #pragma warning restore 1591
+#pragma warning restore 1591
     }
 }

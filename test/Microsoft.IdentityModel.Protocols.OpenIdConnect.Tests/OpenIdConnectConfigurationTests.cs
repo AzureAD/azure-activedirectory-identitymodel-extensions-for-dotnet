@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Tests;
+using System.Reflection;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -27,9 +28,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// <summary>
     /// 
     /// </summary>
-    public class OpenIdConnectMetadataTests
+    public class OpenIdConnectConfigurationTests
     {
-        [Fact(DisplayName = "OpenIdConnectMetadataTests: Constructors")]
+        [Fact(DisplayName = "OpenIdConnectConfigurationTests: Constructors")]
         public void Constructors()
         {
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
@@ -77,30 +78,74 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectMetadataTests: Defaults")]
+        [Fact(DisplayName = "OpenIdConnectConfigurationTests: Defaults")]
         public void Defaults()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
-            Assert.Null(configuration.AuthorizationEndpoint);
-            Assert.Null(configuration.EndSessionEndpoint);
-            Assert.Null(configuration.Issuer);
-            Assert.Null(configuration.JwksUri);
-            Assert.Null(configuration.TokenEndpoint);
+            Assert.NotNull(configuration.AcrValuesSupported);
+            Assert.NotNull(configuration.ClaimsSupported);
+            Assert.NotNull(configuration.ClaimsLocalesSupported);
+            Assert.NotNull(configuration.ClaimTypesSupported);
+            Assert.NotNull(configuration.DisplayValuesSupported);
+            Assert.NotNull(configuration.GrantTypesSupported);
+            Assert.NotNull(configuration.IdTokenEncryptionAlgValuesSupported);
+            Assert.NotNull(configuration.IdTokenEncryptionEncValuesSupported);
+            Assert.NotNull(configuration.IdTokenSigningAlgValuesSupported);
+            Assert.NotNull(configuration.RequestObjectEncryptionAlgValuesSupported);
+            Assert.NotNull(configuration.RequestObjectEncryptionEncValuesSupported);
+            Assert.NotNull(configuration.RequestObjectSigningAlgValuesSupported);
+            Assert.NotNull(configuration.ResponseModesSupported);
+            Assert.NotNull(configuration.ResponseTypesSupported);
+            Assert.NotNull(configuration.ScopesSupported);
             Assert.NotNull(configuration.SigningKeys);
+            Assert.NotNull(configuration.SubjectTypesSupported);
+            Assert.NotNull(configuration.TokenEndpointAuthMethodsSupported);
+            Assert.NotNull(configuration.TokenEndpointAuthSigningAlgValuesSupported);
+            Assert.NotNull(configuration.UILocalesSupported);
+            Assert.NotNull(configuration.UserInfoEndpointEncryptionAlgValuesSupported);
+            Assert.NotNull(configuration.UserInfoEndpointEncryptionEncValuesSupported);
+            Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
         }
 
-        [Fact(DisplayName = "OpenIdConnectMetadataTests: GetSets")]
+        [Fact(DisplayName = "OpenIdConnectConfigurationTests: GetSets")]
         public void GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
-            TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectMetadata_GetSets");
+            Type type = typeof(OpenIdConnectConfiguration);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 39)
+                Assert.True(false, "Number of properties has changed from 39 to: " + properties.Length + ", adjust tests");
 
-            List<string> methods = new List<string> { "AuthorizationEndpoint", "EndSessionEndpoint", "Issuer", "JwksUri", "TokenEndpoint", "UserInfoEndpoint" };
-            List<string> errors = new List<string>();
-            foreach(string method in methods)
-            {
-                TestUtilities.GetSet(configuration, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() }, errors);
-            }
+            TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
+
+            GetSetContext context =
+                new GetSetContext
+                {
+                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                        {
+                            new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{false, true, false}),
+                            new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("Issuer",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{null, new JsonWebKeySet()}),
+                            new KeyValuePair<string, List<object>>("OpPolicyUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("OpTosUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("RegistrationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("RequireRequestUriRegistration", new List<object>{false, true, true}),
+                            new KeyValuePair<string, List<object>>("RequestParameterSupported", new List<object>{false, true, false}),
+                            new KeyValuePair<string, List<object>>("RequestUriParameterSupported", new List<object>{false, true, true}),
+                            new KeyValuePair<string, List<object>>("ServiceDocumentation", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("UserInfoEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        },
+
+                    Object = configuration,
+                };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", context.Errors);
 
             string authorization_Endpoint = Guid.NewGuid().ToString();
             string end_Session_Endpoint = Guid.NewGuid().ToString();
@@ -121,6 +166,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.Cert_1024));
             configuration.SigningKeys.Add(new X509SecurityKey(KeyingMaterial.DefaultCert_2048));
 
+            List<string> errors = new List<string>();
+
             if (!string.Equals(configuration.AuthorizationEndpoint, authorization_Endpoint))
                 errors.Add("");
 
@@ -136,9 +183,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (!string.Equals(configuration.TokenEndpoint, token_Endpoint))
                 errors.Add("");
 
-            CompareContext context = new CompareContext();
-            if (!IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys, context))
-                errors.AddRange(context.Diffs);
+            CompareContext compareContext = new CompareContext();
+            if (!IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys, compareContext))
+                errors.AddRange(compareContext.Diffs);
 
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
         }
@@ -146,10 +193,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact(DisplayName = "OpenIdConnectConfigurationTests: Testing OpenIdConnectConfiguration.Write")]
         public void Write()
         {
-            string compareToJson = OpenIdConfigData.OpenIdConnectMetadataString;
-            OpenIdConnectConfiguration configuration = OpenIdConnectConfiguration.Create(compareToJson);
-            string deserializedJson = OpenIdConnectConfiguration.Write(configuration);
-            Assert.True(deserializedJson.Equals(compareToJson, StringComparison.OrdinalIgnoreCase), "not equal");
+            string compareToJson = OpenIdConfigData.OpenIdConnectMetadataCompleteString;
+            string deserializedJson = OpenIdConnectConfiguration.Write(OpenIdConnectConfiguration.Create(compareToJson));
+            Assert.True(deserializedJson.Equals(compareToJson, StringComparison.OrdinalIgnoreCase), "Deserialized json: " + deserializedJson + " does not match with the original json: " + compareToJson);
         }
     }
 }
