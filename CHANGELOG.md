@@ -108,3 +108,5 @@
             * public class SymmetricSecurityKey
             * public class SignatureVerificationFailedException
             * public class AsymmetricSecurityKey
+* **Others:**
+    *  Replaced `JavaScriptSerializer` by Json.Net serializer. Deserializing `int` results in an `Int64` object by default instead of `Int32`.
