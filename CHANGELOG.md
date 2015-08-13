@@ -5,10 +5,17 @@
 
 * **[Issue 43](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/43):** Fixed the error message thrown in case of invalid nonce exception.
 * **[Issue 51](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/51):** `AuthenticationProtocolMessage.BuildFormPost` html is not correct.
+* **[Issue 95](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/95):** Replacing the static claimType maps on `JwtSecurityTokenHandler` by instances ([PR 219](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/219)).
 * **[Issue 103](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/103):** Fixing exception thrown in case of invalid signature of token ([PR 104](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/104)).
 * **[Issue 122](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/122):** Mapping `roles` to `ClaimTypes.Role` ([PR 139](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/139)).
 * **[Issue 135](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/135):** `OpenIdConnectMessage.CreateAuthenticationRequestUrl` and `CreateLogoutRequestUrl` are made virtual ([PR 141](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/141)). 
-* **[Issue 149](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/149):** Renaming the tests folder to "test" so that build tools can find and run the tests.([PR 148](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/148)).
+* **[Issue 136](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/136):** If a `JwtPayload` has a claim with null value, it will be dropped from the `ClaimsIdentity` and not throw the null exception ([PR 211](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/211)).
+* **[Issue 137](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/137):** Not adding '?' delimiter if the endpoint URL already has one ([PR 207](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/207)).
+* **[Issue 149](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/149):** Renaming the tests folder to "test" so that build tools can find and run the tests ([PR 148](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/148)).
+* **[Issue 174](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/174):** Calling IssuerSigningKeyValidator delegate if set by the user ([PR 207](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/207)).
+* **[Issue 176](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/176):** Adding `OpenIdConnectConfiguration.Write` method to serialize `OpenIdConnectConfiguration` object back to JSON ([PR 218](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/218)).
+* **[Issue 183](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/183):** Fixing the "double" await causing a deadlock in `HttpDocumentRetriever.cs` ([PR 207](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/207)).
+* **[Issue 201](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/201):** Adding comments to `TokenValidationParameters` to explain what each property intends to do and possible security implications of turning off the default validation ([PR 217](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/217)).
 
 
 ## Features
@@ -19,7 +26,16 @@
 ## Breaking Changes
 
 * **NOTE:** We have not added support for WsFederation and Saml in this version yet.
-* **Microsoft.IdentityModel.Protocol.Extensions**
+* **Refactoring**
+    * `Microsoft.IdentityModel.Protocol.Extensions` is refactored into:
+        * **Microsoft.IdentityModel.Protocol**: Includes protocol agnostic classes, e.g. `ConfigurationManager`.
+        * **Microsoft.IdentityModel.Protocols.OpenIdConnect**: Includes OpenIdConnect specific support like `OpenIdConnectMessage`, `OpenIdConnectConfiguration`, `OpenIdConnectProtocolValidation` etc.
+        * **Microsoft.IdentityModel.Protocols.WsFederation**: Includes stubs for `WsFederation` support.
+    * `System.IdentityModel.Tokens` is refactored into:
+        * **System.IdentityModel.Tokens**: Includes support for crypto operations and other classes that are not token format specific e.g. `TokenValidationParameters`.
+        * **System.IdentityModel.Tokens.Jwt**: Includes classes for handling jwt tokens like `JwtSecurityTokenHandler`.
+        * **System.IdentityModel.Tokens.Saml**: Includes stubs for handling Saml tokens.
+* **Microsoft.IdentityModel.Protocol.Extensions** (now refactored as detailed above)
     * **Removed:**
         * `SecurityTokenHandlerCollectionExtensions` class has been replaced by `IList<ISecurityTokenValidator>`.
         * `OpenIdConnectConfiguration.SigningTokens`: The model has been redesigned to specify only keys for crypto operattion.
@@ -36,7 +52,7 @@
         * public class `Base64UrlEncoder`. It provides APIs to read and write Json objects.
         * `JsonWebKeyParameterNames` now has more members to support Elliptic and RSA public/private keys as per https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-37.
         * `OpenIdConnectConfiguration Create(string json)`.
-* **System.IdentityModel.Tokens**
+* **System.IdentityModel.Tokens** (now refactored as detailed above)
     * **Removed:**  
         * `SecurityTokenDescriptor`. Temporarily removed while redesiging. We have an issue tracking this: [#80](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/80)
         * Following properties are removed because `kid` property is added to `JwtHeader` class:
@@ -74,6 +90,7 @@
     *  **Added:**
         * Added properties `string Kid` and `string X5t` to `JwtHeader` class.
         * Added properties `DateTime ValidFrom` and `DateTime ValidTo` to `JwtPayload` class.
+        * Added `SignatureValidator` delegate and `ValidateSignature` flag to `TokenValidationParameters`.
         * Classes Added:
             * public class RSACryptoServiceProviderProxy
             * public class RsaSecurityKey
