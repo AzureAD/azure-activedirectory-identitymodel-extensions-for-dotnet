@@ -28,7 +28,9 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    // Works for local files, http https
+    /// <summary>
+    /// Retrieves metadata information from the given address. Loads data from external endpoints (using HttpClient) and local files.
+    /// </summary>
     public class GenericDocumentRetriever : IDocumentRetriever
     {
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)

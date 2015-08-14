@@ -28,6 +28,9 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// Retrieves metadata information using HttpClient.
+    /// </summary>
     public class HttpDocumentRetriever : IDocumentRetriever
     {
         private readonly HttpClient _httpClient;
