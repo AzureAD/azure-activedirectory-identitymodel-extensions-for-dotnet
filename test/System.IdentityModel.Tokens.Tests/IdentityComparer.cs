@@ -21,6 +21,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System.Security.Cryptography;
 
 namespace System.IdentityModel.Tokens.Tests
 {
@@ -410,7 +411,6 @@ namespace System.IdentityModel.Tokens.Tests
                 matchingFailures.Add(StringDiff("jsonWebkey1.Alg != jsonWebkey2.Alg", jsonWebkey1.Alg, jsonWebkey2.Alg));
             }
 
-
             if (!string.Equals(jsonWebkey1.Kid, jsonWebkey2.Kid, context.StringComparison))
             {
                 matchingFailures.Add(StringDiff("jsonWebkey1.Kid != jsonWebkey2.Kid", jsonWebkey1.Kid, jsonWebkey2.Kid));
@@ -439,6 +439,11 @@ namespace System.IdentityModel.Tokens.Tests
             if (!AreEnumsEqual<string>(jsonWebkey1.X5c, jsonWebkey2.X5c, context, AreStringsEqual))
             {
                 matchingFailures.Add("jsonWebkey1.X5c != jsonWebkey2.X5c");
+            }
+
+            if (!AreEnumsEqual<string>(jsonWebkey1.KeyOps, jsonWebkey2.KeyOps, context, AreStringsEqual))
+            {
+                matchingFailures.Add("jsonWebkey1.KeyOps != jsonWebkey2.KeyOps");
             }
 
             if (matchingFailures.Count > 0)
@@ -588,14 +593,14 @@ namespace System.IdentityModel.Tokens.Tests
             }
 
             RsaSecurityKey rsaKey = securityKey1 as RsaSecurityKey;
-            //if (rsaKey != null)
-            //{
-            //    RSA rsa1 = (rsaKey.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
-            //    RSA rsa2 = ((securityKey2 as RsaSecurityKey).GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
+//            if (rsaKey != null)
+//            {
+//                RSA rsa1 = (rsaKey.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
+//                RSA rsa2 = ((securityKey2 as RsaSecurityKey).GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
 
-            //    if (!string.Equals(rsa1.ToXmlString(false), rsa2.ToXmlString(false), StringComparison.Ordinal))
-            //        return false;
-            //}
+//                if (!string.Equals(rsa1.ToXmlString(false), rsa2.ToXmlString(false), StringComparison.Ordinal))
+//                    return false;
+//            }
 
             return true;
         }
