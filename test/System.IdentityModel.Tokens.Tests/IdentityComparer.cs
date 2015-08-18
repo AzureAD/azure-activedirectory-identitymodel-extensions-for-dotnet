@@ -201,6 +201,16 @@ namespace System.IdentityModel.Tokens.Tests
 
         private static bool AreBytesEqual(byte[] bytes1, byte[] bytes2)
         {
+            if (bytes1 == null && bytes2 == null)
+            {
+                return true;
+            }
+
+            if (bytes1 == null || bytes2 == null)
+            {
+                return false;
+            }
+
             if (bytes1.Length != bytes2.Length)
             {
                 return false;
@@ -592,15 +602,42 @@ namespace System.IdentityModel.Tokens.Tests
                     return false;
             }
 
-            RsaSecurityKey rsaKey = securityKey1 as RsaSecurityKey;
-//            if (rsaKey != null)
-//            {
-//                RSA rsa1 = (rsaKey.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
-//                RSA rsa2 = ((securityKey2 as RsaSecurityKey).GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, false)) as RSA;
+            RsaSecurityKey rsaKey1 = securityKey1 as RsaSecurityKey;
+            if (rsaKey1 != null)
+            {
+                RsaSecurityKey rsaKey2 = securityKey2 as RsaSecurityKey;
+                if (!AreRsaParametersEqual(rsaKey1.Parameters, rsaKey2.Parameters))
+                    return false;
+            }
 
-//                if (!string.Equals(rsa1.ToXmlString(false), rsa2.ToXmlString(false), StringComparison.Ordinal))
-//                    return false;
-//            }
+            return true;
+        }
+
+        private static bool AreRsaParametersEqual(RSAParameters rsaParameters1, RSAParameters rsaParameters2)
+        {
+            if (!AreBytesEqual(rsaParameters1.D, rsaParameters2.D))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.DP, rsaParameters2.DP))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.DQ, rsaParameters2.DQ))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.Exponent, rsaParameters2.Exponent))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.InverseQ, rsaParameters2.InverseQ))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.Modulus, rsaParameters2.Modulus))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.P, rsaParameters2.P))
+                return false;
+
+            if (!AreBytesEqual(rsaParameters1.Q, rsaParameters2.Q))
+                return false;
 
             return true;
         }
