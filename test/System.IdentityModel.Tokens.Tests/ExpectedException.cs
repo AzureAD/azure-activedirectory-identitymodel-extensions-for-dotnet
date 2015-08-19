@@ -121,7 +121,7 @@ namespace System.IdentityModel.Tokens.Tests
 
             if (exception.InnerException != null && InnerTypeExpected == null)
             {
-                HandleError("exception.InnerException != null && expectedException.InnterTypeExpected == null.\nexception.InnerException: " + exception.InnerException, errors);
+                HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null.\nexception.InnerException: " + exception.InnerException, errors);
                 return;
             }
 

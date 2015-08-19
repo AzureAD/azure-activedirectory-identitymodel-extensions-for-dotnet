@@ -38,12 +38,12 @@ namespace System.IdentityModel.Tokens.Tests
     public static class IdentityUtilities
     {
         /// <summary>
-        /// Computes the CHash per 
+        /// Computes the OIDC hash for a claim. Used for creating c_hash and at_hash claims
         /// </summary>
-        /// <param name="authorizationCode"></param>
+        /// <param name="item"></param>
         /// <param name="algorithm"></param>
         /// <returns></returns>
-        public static string CreateCHash(string authorizationCode, string algorithm)
+        public static string CreateHashClaim(string item, string algorithm)
         {
             HashAlgorithm hashAlgorithm = null;
             switch (algorithm)
@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens.Tests
                     throw new ArgumentOutOfRangeException("Hash algorithm not known: " + algorithm);
             }
 
-            byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(authorizationCode));
+            byte[] hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(item));
             return Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
         }
 
