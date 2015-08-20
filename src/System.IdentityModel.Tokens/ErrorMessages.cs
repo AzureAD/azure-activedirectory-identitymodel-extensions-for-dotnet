@@ -72,6 +72,19 @@ namespace System.IdentityModel.Tokens
         public const string IDX10230 = "IDX10230: Lifetime validation failed. Delegate returned false, securitytoken: '{0}'.";
         public const string IDX10231 = "IDX10231: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
         public const string IDX10232 = "IDX10232: IssuerSigningKey validation failed. Delegate returned false, securityKey: '{0}'.";
+        public const string IDX10233 = "IDX10233: ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.";
+        public const string IDX10234 = "IDX10244: Audience Validated.Audience: '{0}'";
+        public const string IDX10235 = "IDX10235: ValidateIssuer property on ValidationParamaters is set to false. Exiting without validating the issuer.";
+        public const string IDX10236 = "IDX10236: Issuer Validated.Issuer: '{0}'";
+        public const string IDX10237 = "IDX10237: ValidateIssuerSigningKey property on ValidationParamaters is set to false. Exiting without validating the issuer signing key.";
+        public const string IDX10238 = "IDX10238: ValidateLifetime property on ValidationParamaters is set to false. Exiting without validating the lifetime.";
+        public const string IDX10239 = "IDX10239: Lifetime of the token is validated.";
+        public const string IDX10240 = "IDX10240: No token replay is detected.";
+        public const string IDX10241 = "IDX10241: Security token validated. token: '{0}'.";
+        public const string IDX10242 = "IDX10242: Security token: '{0}' has a valid signature.";
+        public const string IDX10243 = "IDX10243: Reading issuer signing keys from validaiton parameters.";
+        public const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims.";
+        public const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
 
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
@@ -105,6 +118,19 @@ namespace System.IdentityModel.Tokens
         public const string IDX10330 = "IDX10330: The 'at_hash' claim did not validate.";
         public const string IDX10331 = "IDX10331: The OpenIdConnectProtocolValidationContext.IdToken == null, but OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken != null, which indicates that the 'id_token' in the OpenIdConnect Response was not validated. Validate the 'id_token' and set 'OpenIdConnectProtocolValidationContext.IdToken' property with the validated JwtSecurityToken.";
         public const string IDX10332 = "IDX10332: The OpenIdConnectProtocolValidationContext.State is null and RequireState is true.";
+        public const string IDX10333 = "IDX10333: Generating nonce for openIdConnect message.";
+        public const string IDX10334 = "IDX10334: Validating hash of OIDC protocol message. Expected: '{0}'.";
+        public const string IDX10335 = "IDX10335: Validating 'c_hash' using id_token and code.";
+        public const string IDX10336 = "IDX10336: validationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.";
+        public const string IDX10337 = "IDX10337: validationContext.ProtocolMessage.Code is null, there is no 'code' in the OpenIdConnect Response to validate.";
+        public const string IDX10338 = "IDX10338: There is no 'id_token' in the OpenIdConnect Response to validate to against the 'code'.";
+        public const string IDX10339 = "IDX10339: Validating 'at_hash' using id_token and token.";
+        public const string IDX10340 = "IDX10340: validationContext.ProtocolMessage.token is null, there is no 'token' in the OpenIdConnect Response to validate.";
+        public const string IDX10341 = "IDX10341: There is no 'id_token' in the OpenIdConnect Response to validate to against the 'token'.";
+        public const string IDX10342 = "IDX10342: validating nonce with the nonce claim found in the id_token.";
+        public const string IDX10343 = "IDX10343: The is no 'id_token' in message to validate against 'nonce'.";
+        public const string IDX10344 = "IDX10344: validationContext.Nonce is null, there is no 'nonce' in the OpenIdConnect Response to validate.";
+
 
         // SecurityTokenHandler messages
         public const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
@@ -150,6 +176,10 @@ namespace System.IdentityModel.Tokens
         public const string IDX10639 = "IDX10639: Cannot created the SignatureProvider, the algorithm is not supported: '{0}'.";
         public const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         public const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
+        public const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
+        public const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
+        public const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
+        public const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
 
         // JWT specific errors
         public const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.\nInnerException: '{2}'.";
@@ -168,7 +198,14 @@ namespace System.IdentityModel.Tokens
         public const string IDX10713 = "IDX10713: Creating actor value using actor.BootstrapContext(as string)";
         public const string IDX10714 = "IDX10714: Creating actor value using actor.BootstrapContext.rawData";
         public const string IDX10715 = "IDX10715: Creating actor value by writing the JwtSecurityToken created from actor.BootstrapContext";
-
+        public const string IDX10716 = "IDX10716: Decoding token: '{0}' into header, payload and signature.";
+        public const string IDX10717 = "IDX10717: Deserializing header: '{0}' from the token.";
+        public const string IDX10718 = "IDX10718: Deserializing payload: '{0}' from the token.";
+        public const string IDX10719 = "IDX10719: Token string length greater than maximum length allowed. Token string length: {0}";
+        public const string IDX10720 = "IDX10720: Token string does not match the token format: header.payload.signature";
+        public const string IDX10721 = "IDX10721: Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.";
+        public const string IDX10722 = "IDX10722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
+        public const string IDX10723 = "IDX10723: Adding the signature: '{0}' to the token";
 
         // configuration retrieval errors
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
@@ -176,6 +213,19 @@ namespace System.IdentityModel.Tokens
         public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
         public const string IDX10803 = "IDX10803: Unable to create to obtain configuration from: '{0}'.";
         public const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
+        public const string IDX10805 = "IDX10805: Obtaining information from metadata endpoint: '{0}'";
+        public const string IDX10806 = "IDX10806: Deserializing json string into json web keys.";
+        public const string IDX10807 = "IDX10807: Adding signing keys into the configuration object.";
+        public const string IDX10808 = "IDX10808: Deserializing json into OpenIdConnectConfiguration object: '{0}'.";
+        public const string IDX10809 = "IDX10809: Serializing OpenIdConfiguration object to json string.";
+        public const string IDX10810 = "IDX10810: Initializing an instance of OpenIdConnectConfiguration from a dictionary.";
+        public const string IDX10811 = "IDX10811: Deserializing the string: '{0}' obtained from metadata endpoint into openIdConnectConfiguration object.";
+        public const string IDX10812 = "IDX10812: Retrieving json web keys from: '{0}'.";
+        public const string IDX10813 = "IDX10813: Deserializing json web keys: '{0}'.";
+
+        // wsfederation messages
+        public const string IDX10900 = "IDX10900: Building wsfederation message from query string: '{0}'.";
+        public const string IDX10901 = "IDX10901: Building wsfederation message from uri: '{0}'.";
 
         // NotSupported Exceptions
         public const string IDX11000 = "IDX11000: This method is not supported to validate a 'saml2token' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";

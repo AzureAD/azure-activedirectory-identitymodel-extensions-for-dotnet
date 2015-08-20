@@ -133,7 +133,7 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(ErrorMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
             }
 
-            IdentityModelEventSource.Logger.WriteInformation("Creating signature using the input");
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10642, input.ToString()));
             return this.keyedHash.ComputeHash(input);
         }
 
@@ -181,7 +181,7 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(ErrorMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
             }
 
-            IdentityModelEventSource.Logger.WriteInformation("Comparing the signature created over the input with the token signature");
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10643, input.ToString()));
             return AreEqual(signature, this.keyedHash.ComputeHash(input));
         }
 

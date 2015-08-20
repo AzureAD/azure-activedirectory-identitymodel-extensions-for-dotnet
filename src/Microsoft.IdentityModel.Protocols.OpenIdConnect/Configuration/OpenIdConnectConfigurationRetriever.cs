@@ -85,14 +85,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             string doc = await retriever.GetDocumentAsync(address, cancel);
 
-            IdentityModelEventSource.Logger.WriteVerbose("Deserializing the string obtained from metadata endpoint into openIdConnectConfiguration object.");
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10811, doc));
             OpenIdConnectConfiguration openIdConnectConfiguration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Retrieving json web keys from " + openIdConnectConfiguration.JwksUri);
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10812, openIdConnectConfiguration.JwksUri));
                 string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
 
-                IdentityModelEventSource.Logger.WriteVerbose("Deserializing json web keys obtained from " + openIdConnectConfiguration.JwksUri);
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10813, openIdConnectConfiguration.JwksUri));
                 openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(keys);
                 foreach (SecurityKey key in openIdConnectConfiguration.JsonWebKeySet.GetSigningKeys())
                 {

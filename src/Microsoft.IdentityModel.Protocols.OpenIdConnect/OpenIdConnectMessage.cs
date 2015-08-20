@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (nameValueCollection == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning("namevaluecollection is null");
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": nameValueCollection"));
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (parameters == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning("parameters key-value pairs enumeration is null");
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameters key-value pairs"));
                 return;
             }
 
