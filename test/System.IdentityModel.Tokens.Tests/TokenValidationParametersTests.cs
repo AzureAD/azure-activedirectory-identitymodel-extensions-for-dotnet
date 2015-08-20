@@ -17,13 +17,11 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Claims;
-using System.Text;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace System.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {

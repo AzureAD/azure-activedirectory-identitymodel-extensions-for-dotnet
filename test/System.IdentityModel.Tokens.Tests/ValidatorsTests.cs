@@ -17,10 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace System.IdentityModel.Tokens.Tests
 {
     /// <summary>
     /// 

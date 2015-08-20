@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace System.IdentityModel.Tests
+﻿namespace System.IdentityModel.Tokens.Tests
 {
     public class Defines
     {

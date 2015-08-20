@@ -1,33 +1,36 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-		"Newtonsoft.Json": "6.0.6",
-		"Microsoft.IdentityModel.Logging": "1.0.0-*"
+        "Microsoft.IdentityModel.Logging": "1.0.0-*",
+        "Newtonsoft.Json": "6.0.6"
     },
-    "exclude": [
-        "Saml\\SamlSecurityTokenHandler.cs",
-        "Saml\\Saml2SecurityTokenHandler.cs",
-        "Saml\\SamlConstants.cs",
-        "Saml\\SecurityKeyResolver.cs",
-        "Tokens\\SecurityTokenHandlerCollectionExtensions.cs"
-    ],
     "frameworks": {
-       "dnx451": {},
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Runtime.Serialization": "",
+                "System.Xml": ""
+            }
+        },
         "dnxcore50": {
             "dependencies": {
-                "System.Collections": "4.0.10-beta-*",
-                "System.Diagnostics.Tools": "4.0.0-beta-*",
-                "System.Globalization": "4.0.10-beta-*",
-                "System.IO": "4.0.10-beta-*",
-                "System.Runtime.Extensions": "4.0.10-beta-*",
-                "System.Runtime.InteropServices": "4.0.20-beta-*",
-                "System.Security.Claims": "4.0.0-beta-*",
-                "System.Security.Cryptography.Hashing.Algorithms": "4.0.0-beta-*",
-                "System.Security.Cryptography.RSA": "4.0.0-beta-*",
+                "System.Collections": "4.0.11-beta-*",
+                "System.Diagnostics.Tools": "4.0.1-beta-*",
+                "System.Globalization": "4.0.11-beta-*",
+                "System.IO": "4.0.11-beta-*",
+                "System.Runtime.Extensions": "4.0.11-beta-*",
+                "System.Runtime.InteropServices": "4.0.21-beta-*",
+                "System.Security.Claims": "4.0.1-beta-*",
+                "System.Security.Cryptography.Algorithms": "4.0.0-beta-*",
                 "System.Security.Cryptography.X509Certificates": "4.0.0-beta-*",
-                "System.Security.Principal": "4.0.0-beta-*",
-                "System.Text.RegularExpressions": "4.0.10-beta-*",
-                "System.Threading": "4.0.10-beta-*"
+                "System.Security.Principal": "4.0.1-beta-*",
+                "System.Text.RegularExpressions": "4.0.11-beta-*",
+                "System.Threading": "4.0.11-beta-*",
+                "System.Xml.ReaderWriter": "4.0.11-beta-*"
+            }
+        },
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Xml": ""
             }
         }
     },

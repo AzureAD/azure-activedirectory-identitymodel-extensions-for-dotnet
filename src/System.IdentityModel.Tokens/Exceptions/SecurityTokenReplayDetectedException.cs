@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-
 namespace System.IdentityModel.Tokens
 {
 #if DESKTOPNET45

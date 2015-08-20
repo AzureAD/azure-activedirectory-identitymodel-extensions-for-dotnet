@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>b449c824-9d81-4588-a562-e61d9215c976</ProjectGuid>
+    <ProjectGuid>602480C3-D5C1-45DA-9B16-B83C7BCF8D5D</ProjectGuid>
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
@@ -17,7 +17,7 @@
     <AssemblyName>System.IdentityModel.Tokens.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <RootNamespace>System.IdentityModel.Tests</RootNamespace>
+    <RootNamespace>System.IdentityModel.Tokens.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
@@ -25,26 +25,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <ProduceOutputsOnBuild>True</ProduceOutputsOnBuild>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\ClaimSets.cs">
-      <Link>Shared\ClaimSets.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\DerivedTypes.cs">
-      <Link>Shared\DerivedTypes.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ExpectedException.cs">
-      <Link>Shared\ExpectedException.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\KeyingMaterial.cs">
-      <Link>Shared\KeyingMaterial.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\SecurityTokenDescriptor.cs">
-      <Link>Shared\SecurityTokenDescriptor.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TestUtilities.cs">
-      <Link>Shared\TestUtilities.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

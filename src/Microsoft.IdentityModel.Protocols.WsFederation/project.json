@@ -1,0 +1,36 @@
+{
+    "version": "2.0.0-*",
+    "description": "Provides types that provide support for WsFederation protocol.",
+    "dependencies": {
+        "Microsoft.IdentityModel.Protocols": "2.0.0-*"
+    },
+    "exclude": [
+        "WsFederationMessage.cs",
+        "Configuration\\WsFederationConfiguration.cs",
+        "Configuration\\WsFederationConfigurationRetriever.cs"
+    ],
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.IO": "",
+                "System.Net.Http": "",
+                "System.Xml": ""
+            }
+        },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Collections.Specialized": "4.0.1-beta-*",
+                "System.Diagnostics.Contracts": "4.0.1-beta-*",
+                "System.Globalization": "4.0.11-beta-*",
+                "System.IO.FileSystem": "4.0.1-beta-*",
+                "System.Net.Http": "4.0.1-beta-*",
+                "System.Xml.ReaderWriter": "4.0.11-beta-*"
+            }
+        },
+        "net451": { }
+    },
+    "compilationOptions": {
+        "allowUnsafe": false,
+        "warningsAsErrors": true
+    }
+}

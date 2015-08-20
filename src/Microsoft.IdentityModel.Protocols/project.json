@@ -1,0 +1,36 @@
+{
+    "version": "2.0.0-*",
+    "description": "Provides types that are common across different protocols.",
+    "dependencies": {
+        "System.IdentityModel.Tokens.Jwt": "5.0.0-*"
+    },
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.IO": "",
+                "System.Net.Http": "",
+                "System.Xml": ""
+            }
+        },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Collections.Specialized": "4.0.1-beta-*",
+                "System.Diagnostics.Contracts": "4.0.1-beta-*",
+                "System.Globalization": "4.0.11-beta-*",
+                "System.IO.FileSystem": "4.0.1-beta-*",
+                "System.Net.Http": "4.0.1-beta-*",
+                "System.Xml.ReaderWriter": "4.0.11-beta-*"
+            }
+        },
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Net.Http": ""
+            }
+        }
+
+    },
+    "compilationOptions": {
+        "allowUnsafe": false,
+        "warningsAsErrors": true
+    }
+}

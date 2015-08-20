@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace System.IdentityModel.Tokens
 {
     /// <summary>

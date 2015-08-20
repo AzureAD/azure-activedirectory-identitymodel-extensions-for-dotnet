@@ -16,11 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Globalization;
+using System.Text;
+
 namespace System.IdentityModel.Tokens
 {
-    using System.Globalization;
-    using System.Text;
-
     /// <summary>
     /// Encodes and Decodes strings as Base64Url encoding.
     /// </summary>
@@ -125,7 +125,7 @@ namespace System.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw new FormatException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX14700, str));
+                    throw new FormatException(string.Format(CultureInfo.InvariantCulture, "IDX14700: Unable to decode: '{0}' as Base64url encoded string.", str));
             }
 
             return Convert.FromBase64String(str);

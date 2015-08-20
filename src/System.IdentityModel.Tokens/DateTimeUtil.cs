@@ -16,14 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Diagnostics;
-
-namespace System.IdentityModel
+namespace System.IdentityModel.Tokens
 {
     /// <summary>
     /// Helper class for adding DateTimes and Timespans.
     /// </summary>
-    internal static class DateTimeUtil
+    public static class DateTimeUtil
     {
         /// <summary>
         /// Add a DateTime and a TimeSpan.

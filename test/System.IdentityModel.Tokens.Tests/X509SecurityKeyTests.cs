@@ -16,11 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace System.IdentityModel.Tokens.Tests
 {
     public class X509SecurityKeyTests
     {

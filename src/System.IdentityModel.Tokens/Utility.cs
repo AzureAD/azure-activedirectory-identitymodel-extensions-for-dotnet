@@ -16,11 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel
-{
-    using System.Collections.Generic;
-    using System.Text;
+using System.Collections.Generic;
+using System.Text;
 
+namespace System.IdentityModel.Tokens
+{
     internal static class Utility
     {
         public const string Empty = "empty";

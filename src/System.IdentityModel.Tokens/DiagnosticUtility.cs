@@ -16,15 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace System.IdentityModel
+namespace System.IdentityModel.Tokens
 {
-    using System.Reflection;
-    using System.Runtime.InteropServices;
-
     /// <summary>
     /// Provides common code for services to use in generating diagnostics and taking actions.
     /// </summary>
-    internal static class DiagnosticUtility
+    public static class DiagnosticUtility
     {
         /// <summary>
         /// Returns true if the provided exception matches any of a list of hard system faults that should be allowed

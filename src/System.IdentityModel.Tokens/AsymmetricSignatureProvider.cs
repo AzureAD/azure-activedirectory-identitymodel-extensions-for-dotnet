@@ -16,16 +16,16 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+
 namespace System.IdentityModel.Tokens
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.Security.Cryptography;
-
-	/// <summary>
-	/// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
-	/// </summary>
-	public class AsymmetricSignatureProvider : SignatureProvider
+    /// <summary>
+    /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
+    /// </summary>
+    public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool disposed;
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
@@ -102,7 +102,11 @@ namespace System.IdentityModel.Tokens
                 }
                 else
                 {
+#if DNXCORE50
+                    rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate) as RSACryptoServiceProvider;
+#else
                     rsa = x509Key.PublicKey.Key as RSACryptoServiceProvider;
+#endif
                 }
 
                 rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
@@ -123,22 +127,22 @@ namespace System.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaSha1Signature:
                     return "SHA1";
 
-                case JwtAlgorithms.ECDSA_SHA256:
-                case JwtAlgorithms.HMAC_SHA256:
-                case JwtAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.ECDSA_SHA256:
+                case SecurityAlgorithms.HMAC_SHA256:
+                case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return "SHA256";
 
-                case JwtAlgorithms.ECDSA_SHA384:
-                case JwtAlgorithms.HMAC_SHA384:
-                case JwtAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.ECDSA_SHA384:
+                case SecurityAlgorithms.HMAC_SHA384:
+                case SecurityAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return "SHA384";
 
                 case SecurityAlgorithms.RsaSha512Signature:
-                case JwtAlgorithms.RSA_SHA512:
-                case JwtAlgorithms.ECDSA_SHA512:
-                case JwtAlgorithms.HMAC_SHA512:
+                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.ECDSA_SHA512:
+                case SecurityAlgorithms.HMAC_SHA512:
                     return "SHA512";
 
                 default:
@@ -188,15 +192,15 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case JwtAlgorithms.ECDSA_SHA256:
-                case JwtAlgorithms.ECDSA_SHA384:
-                case JwtAlgorithms.ECDSA_SHA512:
-                case JwtAlgorithms.HMAC_SHA256:
-                case JwtAlgorithms.HMAC_SHA384:
-                case JwtAlgorithms.HMAC_SHA512:
-                case JwtAlgorithms.RSA_SHA256:
-                case JwtAlgorithms.RSA_SHA384:
-                case JwtAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.ECDSA_SHA256:
+                case SecurityAlgorithms.ECDSA_SHA384:
+                case SecurityAlgorithms.ECDSA_SHA512:
+                case SecurityAlgorithms.HMAC_SHA256:
+                case SecurityAlgorithms.HMAC_SHA384:
+                case SecurityAlgorithms.HMAC_SHA512:
+                case SecurityAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha1Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:

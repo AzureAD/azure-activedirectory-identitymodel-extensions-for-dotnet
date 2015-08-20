@@ -18,7 +18,7 @@
 
 using System.Security.Claims;
 
-namespace System.IdentityModel.Test
+namespace System.IdentityModel.Tokens.Tests
 {
     public static class Subjects
     {

@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace System.IdentityModel.Tokens
 {
     /// <summary>
@@ -73,15 +71,16 @@ namespace System.IdentityModel.Tokens
         public const string IDX10229 = "IDX10229: TokenValidationParameters.TokenReplayCache was unable to add the securityToken: '{0}'.";
         public const string IDX10230 = "IDX10230: Lifetime validation failed. Delegate returned false, securitytoken: '{0}'.";
         public const string IDX10231 = "IDX10231: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
+        public const string IDX10232 = "IDX10232: IssuerSigningKey validation failed. Delegate returned false, securityKey: '{0}'.";
 
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
         public const string IDX10301 = "IDX10301: The 'nonce' found in the jwt token did not match the expected nonce.\nexpected: '{0}'\nfound in jwt: '{1}'.\njwt: '{2}'.";
         public const string IDX10303 = "IDX10303: The 'c_hash' claim was null or an empty string, jwt: '{0}'.";
-        public const string IDX10304 = "IDX10304: The c_hash: '{0}' in the jwt did not validate with the authorizationCode: '{1}', algorithm: '{2}', jwt: '{3}'.";
-        public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a .Net hashAlgorithm, jwt: '{1}'. See inner exception for details.\nPossible solution is to ensure that the algorithm specified in the 'JwtHeader' is understood by .Net. You can make additions to the OpenIdConnectProtocolValidationParameters.AlgorithmMap to map algorithms from the 'Jwt' space to .Net. In .Net you can also make use of 'CryptoConfig' to map algorithms.";
-        public const string IDX10307 = "IDX10307: The algorithm: '{0}' specified in the jwt header resulted in a hashAlgorithm that was null,  jwt: '{1}'.";
-        public const string IDX10308 = "IDX10308: The 'c_hash' claim was not found in the jwt and validationContext.AuthorizationCode was not null therefore expected. jwt: '{0}'.";
+        public const string IDX10304 = "IDX10304: The hash claim: '{0}' in the id_token did not validate with against: '{1}', algorithm: '{2}'.";
+        public const string IDX10306 = "IDX10306: The algorithm: '{0}' specified in the jwt header was unable to create a .Net hashAlgorithm. See inner exception for details.\nPossible solution is to ensure that the algorithm specified in the 'JwtHeader' is understood by .Net. You can make additions to the OpenIdConnectProtocolValidationParameters.AlgorithmMap to map algorithms from the 'Jwt' space to .Net. In .Net you can also make use of 'CryptoConfig' to map algorithms.";
+        public const string IDX10307 = "IDX10307: The algorithm: '{0}' specified in the jwt header is not suported.";
+        public const string IDX10308 = "IDX10308: The 'c_hash' claim was not found in the id_token, but a 'code' was in the OpenIdConnectMessage, id_token: '{0}'";
         public const string IDX10309 = "IDX10309: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
         public const string IDX10310 = "IDX10310: OpenIdConnectProtocol requires the jwt token to have a  valid 'aud' claim, jwt: '{0}'.";
         public const string IDX10311 = "IDX10311: RequireNonce is 'true' (default) but validationContext.Nonce is null. A nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'.";
@@ -94,9 +93,18 @@ namespace System.IdentityModel.Tokens
         public const string IDX10318 = "IDX10318: The 'nonce' timestamp could not be converted to a positive integer (greater than 0).\ntimestamp: '{0}'\nnonce: '{1}'.";
         public const string IDX10319 = "IDX10319: The 'nonce' claim contains only whitespace, jwt: '{0}'.";
         public const string IDX10320 = "IDX10320: The 'nonce' timestamp: '{0}', could not be converted to a DateTime using DateTime.FromBinary({0}).\nThe value must be between: '{1}' and '{2}'.";
-        public const string IDX10321 = "IDX10321: Ahe 'nonce' timestamp: '{0}', could not be converted to a DateTime using DateTime.FromBinary({0}).\nThe value must be between: '{1}' and '{2}'.";
+        public const string IDX10321 = "IDX10321: The 'nonce' timestamp: '{0}', could not be converted to a DateTime using DateTime.FromBinary({0}).\nThe value must be between: '{1}' and '{2}'.";
         public const string IDX10322 = "IDX10322: RequireNonce is 'true' (default) but the jwt did not contain a 'nonce' claim. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'.\n jwt: '{0}'.";
         public const string IDX10323 = "IDX10323: RequireNonce is 'false' (default is 'true') OpenIdConnectProtocolValidationContext.Nonce was NOT null, but the jwt did not contain a 'nonce' claim.\nOpenIdConnectProtocolValidationContext.Nonce: '{0}'\njwt: '{1}'.";
+        public const string IDX10324 = "IDX10324: The 'at_hash' claim was not found in the 'id_token', but a 'token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        public const string IDX10325 = "IDX10325: The 'at_hash' claim was not a string in the 'id_token', but a 'token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        public const string IDX10326 = "IDX10326: The 'c_hash' claim was not a string in the 'id_token', but a 'code' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        public const string IDX10327 = "IDX10327: The OpenIdConnect Request contained 'state', but the Response does not contain 'state'.";
+        public const string IDX10328 = "IDX10328: The 'state' parameter in the message: '{0}', does not equal the 'state' in the context: '{1}'.";
+        public const string IDX10329 = "IDX10329: The 'c_hash claim did not validate.";
+        public const string IDX10330 = "IDX10330: The 'at_hash' claim did not validate.";
+        public const string IDX10331 = "IDX10331: The OpenIdConnectProtocolValidationContext.IdToken == null, but OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken != null, which indicates that the 'id_token' in the OpenIdConnect Response was not validated. Validate the 'id_token' and set 'OpenIdConnectProtocolValidationContext.IdToken' property with the validated JwtSecurityToken.";
+        public const string IDX10332 = "IDX10332: The OpenIdConnectProtocolValidationContext.State is null and RequireState is true.";
 
         // SecurityTokenHandler messages
         public const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
@@ -156,6 +164,11 @@ namespace System.IdentityModel.Tokens
         public const string IDX10709 = "IDX10709: '{0}' is not well formed: '{1}'. The string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
         public const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
         public const string IDX10711 = "IDX10711: actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JWT";
+        public const string IDX10712 = "IDX10712: actor.BootstrapContext is null. Creating the token using actor.Claims.";
+        public const string IDX10713 = "IDX10713: Creating actor value using actor.BootstrapContext(as string)";
+        public const string IDX10714 = "IDX10714: Creating actor value using actor.BootstrapContext.rawData";
+        public const string IDX10715 = "IDX10715: Creating actor value by writing the JwtSecurityToken created from actor.BootstrapContext";
+
 
         // configuration retrieval errors
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";

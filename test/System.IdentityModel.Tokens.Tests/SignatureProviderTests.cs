@@ -17,11 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
-using System.Security.Cryptography;
+using System.IdentityModel.Tokens.Jwt;
 using Xunit;
 
-namespace System.IdentityModel.Test
+namespace System.IdentityModel.Tokens.Tests
 {
     /// <summary>
     /// This class tests:
