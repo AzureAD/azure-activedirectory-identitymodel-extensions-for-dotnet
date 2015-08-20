@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Deserializing json string into json web keys.");
+                IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10806);
                 var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
                 _keys = jwebKeys._keys;
             }

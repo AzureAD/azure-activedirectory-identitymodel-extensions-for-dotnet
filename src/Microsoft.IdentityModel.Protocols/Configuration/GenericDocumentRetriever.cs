@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
+                    IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10805, address));
                     using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelPendingRequests()))
                     {
                         return await client.GetStringAsync(address).ConfigureAwait(false);

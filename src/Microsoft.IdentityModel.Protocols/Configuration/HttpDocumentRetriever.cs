@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10805, address));
                 HttpResponseMessage response = _httpClient.GetAsync(address, cancel).Result;
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);

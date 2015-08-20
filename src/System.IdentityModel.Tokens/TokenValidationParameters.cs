@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens
 {
@@ -291,6 +292,7 @@ namespace System.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10245, securityToken));
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 

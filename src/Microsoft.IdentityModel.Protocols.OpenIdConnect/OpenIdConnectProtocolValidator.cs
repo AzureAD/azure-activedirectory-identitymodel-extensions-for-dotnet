@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <para>for example: 635410359229176103.MjQxMzU0ODUtMTdiNi00NzAwLWE4MjYtNTE4NGExYmMxNTNlZmRkOGU4NjctZjQ5OS00MWIyLTljNTEtMjg3NmM0NzI4ZTc5</para></remarks>
         public virtual string GenerateNonce()
         {
-            IdentityModelEventSource.Logger.WriteVerbose("Generating nonce for openIdConnect message.");
+            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10333);
             string nonce = Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString() + Guid.NewGuid().ToString()));
             if (RequireTimeStampInNonce)
             {
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolException">if expected value does not equal the hashed value.</exception>
         private void ValidateHash(string expectedValue, string hashItem, string algorithm)
         {
-            IdentityModelEventSource.Logger.WriteInformation("Validating hash of OIDC protocol message.");
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10334, expectedValue));
             using (var hashAlgorithm = GetHashAlgorithm(algorithm))
             {
                 var hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(hashItem));
@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the <see cref="OpenIdConnectProtocolValidationContext.IdToken"/> is null and <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken"/> != null. This indicates the 'id_token' was not validated.</exception> 
         protected virtual void ValidateCHash(OpenIdConnectProtocolValidationContext validationContext)
         {
-            IdentityModelEventSource.Logger.WriteInformation("Validating 'c_hash' using id_token and code.");
+            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10335);
             if (validationContext == null)
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
@@ -350,19 +350,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (validationContext.ProtocolMessage == null)
             {
-                IdentityModelEventSource.Logger.WriteInformation("validationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10336);
                 return;
             }
 
             if (string.IsNullOrEmpty(validationContext.ProtocolMessage.Code))
             {
-                IdentityModelEventSource.Logger.WriteInformation("validationContext.ProtocolMessage.Code is null, there is no 'code' in the OpenIdConnect Response to validate.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10337);
                 return;
             }
 
             if (validationContext.IdToken == null && string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken))
             {
-                IdentityModelEventSource.Logger.WriteInformation("There is no 'id_token' in the OpenIdConnect Response to validate to against the 'code'.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10338);
                 return;
             }
 
@@ -404,7 +404,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">if the <see cref="OpenIdConnectProtocolValidationContext.IdToken"/> is null and <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken"/> != null. This indicates the id_token was not validated.</exception> 
         protected virtual void ValidateAtHash(OpenIdConnectProtocolValidationContext validationContext)
         {
-            IdentityModelEventSource.Logger.WriteInformation("Validating 'at_hash' using id_token and token.");
+            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10339);
             if (validationContext == null)
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
@@ -412,19 +412,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (validationContext.ProtocolMessage == null)
             {
-                IdentityModelEventSource.Logger.WriteInformation("validationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10336);
                 return;
             }
 
             if (validationContext.ProtocolMessage.Token == null)
             {
-                IdentityModelEventSource.Logger.WriteInformation("validationContext.ProtocolMessage.Token is null, there is no 'token' in the OpenIdConnect Response to validate.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10340);
                 return;
             }
 
             if (validationContext.IdToken == null && string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken))
             {
-                IdentityModelEventSource.Logger.WriteInformation("There is no 'id_token' in the OpenIdConnect Response to validate against the 'token'.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10341);
                 return;
             }
 
@@ -469,7 +469,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the 'id_token'.</para></remarks>
         protected virtual void ValidateNonce(OpenIdConnectProtocolValidationContext validationContext)
         {
-            IdentityModelEventSource.Logger.WriteInformation("validating nonce with the nonce claim found in the id_token.");
+            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10342);
 
             if (validationContext == null)
             {
@@ -478,7 +478,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (validationContext.IdToken == null)
             {
-                IdentityModelEventSource.Logger.WriteInformation("The is no 'id_token' in message to validate against nonce.");
+                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10343);
                 return;
             }
 
@@ -501,7 +501,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else if (validationContext.Nonce == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning("validationContext.Nonce is null");
+                IdentityModelEventSource.Logger.WriteWarning(ErrorMessages.IDX10344);
                 return;
             }
 

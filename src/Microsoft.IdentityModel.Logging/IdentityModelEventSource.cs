@@ -1,4 +1,22 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 
@@ -7,6 +25,7 @@ namespace Microsoft.IdentityModel.Logging
     /// <summary>
     /// Event source based logger to log different events.
     /// </summary>
+    [EventSource(Name = "Microsoft.IdentityModel.EventSource")]
     public class IdentityModelEventSource : EventSource
     {
         private static EventLevel _logLevel;
@@ -25,7 +44,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(1, Level = EventLevel.Verbose)]
         public void WriteVerbose(string message)
         {
-            if (_logLevel >= EventLevel.Verbose)
+            message = PrepareMessage(message, EventLevel.Verbose);
+
+            if (IsEnabled() && _logLevel >= EventLevel.Verbose)
             {
                 WriteEvent(1, message);
             }
@@ -34,7 +55,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(2, Level = EventLevel.Informational)]
         public void WriteInformation(string message)
         {
-            if (_logLevel >= EventLevel.Informational)
+            message = PrepareMessage(message, EventLevel.Informational);
+
+            if (IsEnabled() && _logLevel >= EventLevel.Informational)
             {
                 WriteEvent(2, message);
             }
@@ -43,7 +66,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(3, Level = EventLevel.Warning)]
         public void WriteWarning(string message)
         {
-            if (_logLevel >= EventLevel.Warning)
+            message = PrepareMessage(message, EventLevel.Warning);
+
+            if (IsEnabled() && _logLevel >= EventLevel.Warning)
             {
                 WriteEvent(3, message);
             }
@@ -52,7 +77,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(4, Level = EventLevel.Error)]
         public void WriteError(string message)
         {
-            if (_logLevel >= EventLevel.Error)
+            message = PrepareMessage(message, EventLevel.Error);
+
+            if (IsEnabled() && _logLevel >= EventLevel.Error)
             {
                 WriteEvent(4, message);
             }
@@ -61,7 +88,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(5, Level = EventLevel.Critical)]
         public void WriteCritical(string message)
         {
-            if (_logLevel >= EventLevel.Error)
+            message = PrepareMessage(message, EventLevel.Critical);
+
+            if (IsEnabled() && _logLevel >= EventLevel.Error)
             {
                 WriteEvent(5, message);
             }
@@ -111,6 +140,18 @@ namespace Microsoft.IdentityModel.Logging
             {
                 _logLevel = value;
             }
+        }
+
+        private string PrepareMessage(string message, EventLevel level)
+        {
+            if (message == null)
+            {
+                return message;
+            }
+
+            string currentTimeStamp = DateTime.Now.ToString();
+            message = string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), currentTimeStamp, message);
+            return message;
         }
     }
 }

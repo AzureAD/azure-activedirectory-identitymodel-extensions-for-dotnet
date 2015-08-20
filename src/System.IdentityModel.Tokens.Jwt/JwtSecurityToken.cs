@@ -359,7 +359,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
         internal void Decode(string jwtEncodedString)
         {
-            IdentityModelEventSource.Logger.WriteInformation("Decoding token into header, payload and signature.");
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10716, jwtEncodedString));
             string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
             if (tokenParts.Length != 3)
             {
@@ -368,7 +368,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Deserializing header from the token");
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10717, tokenParts[0]));
                 this.header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
@@ -393,7 +393,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Deserializing payload from the token");
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10718, tokenParts[1]));
                 this.payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
             }
             catch (Exception ex)

@@ -1,4 +1,22 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies, Inc.
+// All Rights Reserved
+// Apache License 2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -27,7 +45,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             catch (Exception ex)
             {
                 Assert.Equal(ex.GetType(), typeof(ArgumentNullException));
-                Assert.Contains("securityToken' cannot be a 'null' or an empty string.", listener.TraceBuffer);
+                Assert.Contains("IDX10000: The parameter 'System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler: securityToken' cannot be a 'null' or an empty string.", listener.TraceBuffer);
             }
         }
 
@@ -35,7 +53,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void LogMessage()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.LogLevel = EventLevel.Warning;
+            IdentityModelEventSource.LogLevel = EventLevel.Verbose;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             TokenValidationParameters validationParameters = new TokenValidationParameters()
@@ -45,7 +63,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             // This should log a warning about not validating the audience
             Validators.ValidateAudience(null, null, validationParameters);
-            Assert.Contains("ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.", listener.TraceBuffer);
+            Assert.Contains("IDX10233: ", listener.TraceBuffer);
         }
 
         [Fact(DisplayName = "LoggerTests : TestLogLevel")]
@@ -59,15 +77,15 @@ namespace Microsoft.IdentityModel.Logging.Tests
             handler.CreateToken();
 
             // This is Informational level message. Should be there in the trace buffer since default log level is informational.
-            Assert.Contains("Creating security token from the header, payload and raw signature.", listener.TraceBuffer);
+            Assert.Contains("IDX10722: ", listener.TraceBuffer);
             // This is Verbose level message. Should not be there in the trace buffer.
-            Assert.DoesNotContain("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.", listener.TraceBuffer);
+            Assert.DoesNotContain("IDX10721: ", listener.TraceBuffer);
 
             // Setting log level to verbose so that all messages are logged.
             IdentityModelEventSource.LogLevel = EventLevel.Verbose;
             handler.CreateToken();
-            Assert.Contains("Creating security token from the header, payload and raw signature.", listener.TraceBuffer);
-            Assert.Contains("Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.", listener.TraceBuffer);
+            Assert.Contains("IDX10722: ", listener.TraceBuffer);
+            Assert.Contains("IDX10721: ", listener.TraceBuffer);
 
         }
     }

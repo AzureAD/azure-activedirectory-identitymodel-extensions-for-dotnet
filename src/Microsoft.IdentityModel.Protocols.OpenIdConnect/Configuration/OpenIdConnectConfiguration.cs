@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose("Deserializing json into OpenIdConnectConfiguration object");
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10808, json));
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose("Serializing OpenIdConfiguration object to json string");
+            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
         }
 
@@ -118,7 +118,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         private void Copy(OpenIdConnectConfiguration config)
         {
-            IdentityModelEventSource.Logger.WriteVerbose("Copying openIdConnect configuration object.");
             _acrValuesSupported = config._acrValuesSupported;
             AuthorizationEndpoint = config.AuthorizationEndpoint;
             CheckSessionIframe = config.CheckSessionIframe;
@@ -172,7 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose("Initializing an instance of OpenIdConnectConfiguration from a dictionary.");
+            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10810);
 
             object obj = null;
             string str = null;
