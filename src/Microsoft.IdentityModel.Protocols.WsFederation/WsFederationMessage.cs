@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks>If 'queryString' is null or whitespace, a default <see cref="WsFederationMessage"/> is returned. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromQueryString(string queryString)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10900, queryString));
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10900, queryString));
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
             if (!string.IsNullOrWhiteSpace(queryString))
             {
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10901, uri.ToString()));
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10901, uri.ToString()));
             if (uri != null && uri.Query.Length > 1)
             {
                 return WsFederationMessage.FromQueryString(uri.Query.Substring(1));
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (wsFederationMessage == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "wsfederationMessage"));
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "wsfederationMessage"));
                 return;
             }
 
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (parameters == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "parameters"));
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "parameters"));
                 return;
             }
 
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (Wresult == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "wresult"));
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "wresult"));
                 return null;
             }
 

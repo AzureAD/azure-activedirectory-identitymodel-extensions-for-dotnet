@@ -76,12 +76,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (retriever == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             WsFederationConfiguration configuration = new WsFederationConfiguration();
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     {
                         if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
                         {
-                            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10807);
+                            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10807);
                             foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
                             {
                                 X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;

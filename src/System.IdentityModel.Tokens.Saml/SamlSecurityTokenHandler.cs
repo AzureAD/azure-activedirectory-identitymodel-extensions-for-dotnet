@@ -112,7 +112,7 @@ namespace System.IdentityModel.Tokens.Saml
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                throw new ArgumentException(ErrorMessages.IDX10221);
+                throw new ArgumentException(LogMessages.IDX10221);
             }
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
@@ -176,7 +176,7 @@ namespace System.IdentityModel.Tokens.Saml
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)));
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)));
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -190,7 +190,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
         public override SecurityToken ReadToken(string tokenString)
         {
-            throw new NotSupportedException(ErrorMessages.IDX11007);
+            throw new NotSupportedException(LogMessages.IDX11007);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
         public override SecurityToken ReadToken(XmlReader reader)
         {
-            throw new NotImplementedException(ErrorMessages.IDX11003);
+            throw new NotImplementedException(LogMessages.IDX11003);
         }
 
 
@@ -239,7 +239,7 @@ namespace System.IdentityModel.Tokens.Saml
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
 
             SamlSecurityToken samlToken;
@@ -253,7 +253,7 @@ namespace System.IdentityModel.Tokens.Saml
 
             if (samlToken.SigningKey == null && validationParameters.RequireSignedTokens)
             {
-                throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
+                throw new SecurityTokenValidationException(LogMessages.IDX10213);
             }
 
             DateTime? notBefore = null;
@@ -272,7 +272,7 @@ namespace System.IdentityModel.Tokens.Saml
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
-                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, securityToken));
+                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken));
                     }
                 }
                 else
@@ -305,7 +305,7 @@ namespace System.IdentityModel.Tokens.Saml
                 {
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
-                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, securityToken));
+                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken));
                     }
                 }
                 else
@@ -407,7 +407,7 @@ namespace System.IdentityModel.Tokens.Saml
             SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
             }
 
 
@@ -438,7 +438,7 @@ namespace System.IdentityModel.Tokens.Saml
             SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
             }
         }
     }

@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (other == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": other"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": other"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (KeyValuePair<string, string> keyValue in other.Parameters)
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (nameValueCollection == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": nameValueCollection"));
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": nameValueCollection"));
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (parameters == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": parameters key-value pairs"));
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameters key-value pairs"));
                 return;
             }
 

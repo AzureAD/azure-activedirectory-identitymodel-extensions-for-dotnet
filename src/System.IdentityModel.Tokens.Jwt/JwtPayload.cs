@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (notBefore >= expires)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value));
                 }
             }
 
@@ -631,12 +631,12 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10700, key, dateValue ?? "<null>", ex));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, key, dateValue ?? "<null>", ex));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10701, key, dateValue ?? "<null>", ex));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10701, key, dateValue ?? "<null>", ex));
                 }
 
                 throw;

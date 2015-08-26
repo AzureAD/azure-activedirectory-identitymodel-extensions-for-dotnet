@@ -70,10 +70,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10808, json));
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10808, json));
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
         }
 
@@ -86,10 +86,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (configuration == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10809);
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if(string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             OpenIdConnectConfiguration config = Create(json);
@@ -168,10 +168,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (dictionary == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10810);
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10810);
 
             object obj = null;
             string str = null;

@@ -92,23 +92,14 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="docRetriever">the <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever)
         {
-//#if WsFed
-//            if (!typeof(T).Equals(typeof(WsFederationConfiguration)) && (!typeof(T).Equals(typeof(OpenIdConnectConfiguration))))
-//#else
-//            if (!typeof(T).Equals(typeof(OpenIdConnectConfiguration)))
-//#endif
-//            {
-//                LogHelper.Throw(typeof(T).FullName, typeof(NotImplementedException), EventLevel.Verbose);
-//            }
-
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (docRetriever == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             _metadataAddress = metadataAddress;
@@ -127,7 +118,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumAutomaticRefreshInterval)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10107, MinimumAutomaticRefreshInterval, value), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
                 }
                 _automaticRefreshInterval = value;
             }
@@ -143,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (value < MinimumRefreshInterval)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10106, MinimumRefreshInterval, value), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10106, MinimumRefreshInterval, value), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
                 }
                 _refreshInterval = value;
             }
@@ -193,7 +184,7 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         retrieveEx = ex;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10803, _metadataAddress ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, _metadataAddress ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
                     }
                 }
 

@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (configuration == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             _configuration = configuration;

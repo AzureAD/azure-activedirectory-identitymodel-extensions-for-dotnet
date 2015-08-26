@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (dictionary == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             object obj = null;
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": KeyOps"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": KeyOps"), typeof(ArgumentNullException), EventLevel.Verbose);
 
                 foreach (string keyOp in value)
                     _keyops.Add(keyOp);
@@ -380,7 +380,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": X5c"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": X5c"), typeof(ArgumentNullException), EventLevel.Verbose);
 
                 foreach (string clause in value)
                     _certificateClauses.Add(clause);

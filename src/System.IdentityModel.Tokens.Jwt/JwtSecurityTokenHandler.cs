@@ -115,7 +115,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundAlgorithmMap"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "InboundAlgorithmMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 inboundAlgorithmMap = value;
@@ -143,7 +143,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundAlgorithmMap"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "OutboundAlgorithmMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 outboundAlgorithmMap = value;
@@ -167,7 +167,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "InboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _inboundClaimTypeMap = value;
@@ -192,7 +192,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "OutboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "OutboundClaimTypeMap"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _outboundClaimTypeMap = value;
@@ -215,7 +215,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "InboundClaimFilter"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "InboundClaimFilter"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 _inboundClaimFilter = value;
@@ -238,7 +238,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "ShortClaimTypeProperty"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "ShortClaimTypeProperty"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 shortClaimTypeProperty = value;
@@ -261,7 +261,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "JsonClaimTypeProperty"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "JsonClaimTypeProperty"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 jsonClaimTypeProperty = value;
@@ -301,7 +301,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value < 1)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10104, value.ToString(CultureInfo.InvariantCulture)), typeof(ArgumentOutOfRangeException), EventLevel.Error);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10104, value.ToString(CultureInfo.InvariantCulture)), typeof(ArgumentOutOfRangeException), EventLevel.Error);
                 }
 
                 _defaultTokenLifetimeInMinutes = value;
@@ -328,7 +328,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value < 1)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)), typeof(ArgumentOutOfRangeException), EventLevel.Verbose);
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -352,7 +352,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (value == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, "SignatureProviderFactory"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, "SignatureProviderFactory"), typeof(ArgumentNullException), EventLevel.Verbose);
                 }
 
                 this.signatureProviderFactory = value;
@@ -374,18 +374,18 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (tokenString == null)
             {
-               LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "tokenstring"), typeof(ArgumentNullException), EventLevel.Verbose);
+               LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "tokenstring"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10719, tokenString.Length));
+                IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10719, tokenString.Length));
                 return false;
             }
 
             if (!Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex))
             {
-                IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10720);
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
                 return false;
             }
 
@@ -418,7 +418,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (notBefore >= expires)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value), typeof(ArgumentException), EventLevel.Error);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value), typeof(ArgumentException), EventLevel.Error);
                 }
             }
 
@@ -430,7 +430,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 notBefore = now;
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10721);
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721);
             IEnumerable<Claim> subjectClaims = subject == null ? null : OutboundClaimTypeTransform(subject.Claims);
             JwtPayload payload = new JwtPayload(issuer, audience, subjectClaims, notBefore, expires);
             JwtHeader header = new JwtHeader(signingCredentials);
@@ -448,16 +448,16 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (signatureProvider != null)
             {
-                IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10644);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10644);
                 rawSignature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, null, null, signatureProvider));
             }
             else if (signingCredentials != null)
             {
-                IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10645);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10645);
                 rawSignature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, signingCredentials.SigningKey, signingCredentials.SignatureAlgorithm, signatureProvider));
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10722, rawHeader, rawPayload, rawSignature));
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10722, rawHeader, rawPayload, rawSignature));
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
         }
 
@@ -491,17 +491,17 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (tokenString == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, tokenString.Length, this.MaximumTokenSizeInBytes), typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, tokenString.Length, this.MaximumTokenSizeInBytes), typeof(ArgumentException), EventLevel.Error);
             }
 
             if (!this.CanReadToken(tokenString))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10708, GetType(), tokenString), typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10708, GetType(), tokenString), typeof(ArgumentException), EventLevel.Error);
             }
 
             return new JwtSecurityToken(tokenString);
@@ -521,17 +521,17 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (string.IsNullOrWhiteSpace(securityToken))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": securityToken"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": securityToken"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationParameters == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes), typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes), typeof(ArgumentException), EventLevel.Error);
             }
 
             JwtSecurityToken jwt = null;
@@ -543,7 +543,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                     if (jwt == null)
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10506, securityToken), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, securityToken), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
                     }
                 }
                 else
@@ -562,7 +562,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, validationParameters))
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10232, jwt.SigningKey.ToString()), typeof(SecurityTokenInvalidSigningKeyException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey.ToString()), typeof(SecurityTokenInvalidSigningKeyException), EventLevel.Error);
                     }
                 }
                 else
@@ -590,7 +590,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, jwt.ToString()), typeof(SecurityTokenInvalidLifetimeException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, jwt.ToString()), typeof(SecurityTokenInvalidLifetimeException), EventLevel.Error);
                     }
                 }
                 else
@@ -605,7 +605,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, jwt.ToString()), typeof(SecurityTokenInvalidAudienceException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, jwt.ToString()), typeof(SecurityTokenInvalidAudienceException), EventLevel.Error);
                     }
                 }
                 else
@@ -639,7 +639,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 identity.BootstrapContext = securityToken;
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture,  ErrorMessages.IDX10241, securityToken));
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture,  LogMessages.IDX10241, securityToken));
             validatedToken = jwt;
             return new ClaimsPrincipal(identity);
         }
@@ -658,13 +658,13 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (token == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"),typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": token"),typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             JwtSecurityToken jwt = token as JwtSecurityToken;
             if (jwt == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()), typeof(ArgumentNullException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()), typeof(ArgumentNullException), EventLevel.Error);
             }
 
             string signature = string.Empty;
@@ -675,7 +675,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 signature = Base64UrlEncoder.Encode(this.CreateSignature(signingInput, jwt.SigningCredentials.SigningKey, jwt.SigningCredentials.SignatureAlgorithm));
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10723, signature));
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, signature));
             return string.Concat(signingInput, ".", signature);
         }
 
@@ -694,7 +694,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (null == inputString)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": inputString"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": inputString"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             SignatureProvider provider;
@@ -707,7 +707,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 provider = SignatureProviderFactory.CreateForSigning(key, algorithm);
                 if (provider == null)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10635, SignatureProviderFactory.GetType(), typeof(SignatureProvider), key == null ? "<null>" : key.GetType().ToString(), algorithm == null ? "<null>" : algorithm), typeof(InvalidProgramException), EventLevel.Error);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10635, SignatureProviderFactory.GetType(), typeof(SignatureProvider), key == null ? "<null>" : key.GetType().ToString(), algorithm == null ? "<null>" : algorithm), typeof(InvalidProgramException), EventLevel.Error);
                 }
 
                 byte[] bytes = provider.Sign(Encoding.UTF8.GetBytes(inputString));
@@ -728,7 +728,7 @@ namespace System.IdentityModel.Tokens.Jwt
 #endif
             if (signatureProvider == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10636, key == null ? "Null" : key.ToString(), algorithm == null ? "Null" : algorithm), typeof(InvalidOperationException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10636, key == null ? "Null" : key.ToString(), algorithm == null ? "Null" : algorithm), typeof(InvalidOperationException), EventLevel.Error);
             }
 
             return signatureProvider.Verify(encodedBytes, signature);
@@ -753,12 +753,12 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": token"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (validationParameters == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             JwtSecurityToken jwt = this.ReadToken(token) as JwtSecurityToken;
@@ -767,7 +767,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (signatureBytes == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signatureBytes"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": signatureBytes"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (signatureBytes.Length == 0)
@@ -776,7 +776,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     return jwt;
                 }
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10504, jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10504, jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
             }
 
             string mappedAlgorithm = jwt.Header.Alg;
@@ -805,17 +805,17 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10242, token));
+                        IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10242, token));
                         jwt.SigningKey = securityKey;
                         return jwt;
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10502, CreateKeyString(securityKey), ex.ToString(), jwt.ToString()),typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10502, CreateKeyString(securityKey), ex.ToString(), jwt.ToString()),typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
                 }
 
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10501, CreateKeyString(securityKey), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10501, CreateKeyString(securityKey), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
             }
             else
             {
@@ -830,7 +830,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         if (this.ValidateSignature(encodedBytes, signatureBytes, sk, mappedAlgorithm))
                         {
-                            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10242, token));
+                            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10242, token));
                             jwt.SigningKey = sk;
                             return jwt;
                         }
@@ -853,14 +853,14 @@ namespace System.IdentityModel.Tokens.Jwt
                     keysAttempted.AppendLine(CreateKeyString(sk));
                 }
 
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
             }
             return null;
         }
 
         private IEnumerable<SecurityKey> GetAllKeys(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation(ErrorMessages.IDX10243);
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10243);
             if (validationParameters.IssuerSigningKey != null)
                 yield return validationParameters.IssuerSigningKey;
 
@@ -878,7 +878,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (securityKey == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "securityKey"));
+                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityKey"));
                 return "null";
             }
             else
@@ -903,12 +903,12 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (jwt == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": jwt"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                IdentityModelEventSource.Logger.WriteVerbose(ErrorMessages.IDX10244);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10244);
             }
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
@@ -931,7 +931,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (identity.Actor != null)
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10710, JwtRegisteredClaimNames.Actort, jwtClaim.Value), typeof(InvalidOperationException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10710, JwtRegisteredClaimNames.Actort, jwtClaim.Value), typeof(InvalidOperationException), EventLevel.Error);
                     }
 
                     if (this.CanReadToken(jwtClaim.Value))
@@ -979,7 +979,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (actor == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": actor"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": actor"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (actor.BootstrapContext != null)
@@ -987,7 +987,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 string encodedJwt = actor.BootstrapContext as string;
                 if (encodedJwt != null)
                 {
-                    IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10713, GetType() + ": actor.BootstrapContext"));
+                    IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10713, GetType() + ": actor.BootstrapContext"));
                     return encodedJwt;
                 }
 
@@ -996,19 +996,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (jwt.RawData != null)
                     {
-                        IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10714, GetType() + ": actor.BootstrapContext"));
+                        IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10714, GetType() + ": actor.BootstrapContext"));
                         return jwt.RawData;
                     }
                     else
                     {
-                        IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10715, GetType() + ": actor.BootstrapContext"));
+                        IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10715, GetType() + ": actor.BootstrapContext"));
                         return this.WriteToken(jwt);
                     }
                 }
-                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10711, GetType() + ": actor.BootstrapContext"));
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10711, GetType() + ": actor.BootstrapContext"));
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10712, GetType() + ": actor.BootstrapContext"));
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10712, GetType() + ": actor.BootstrapContext"));
             return this.WriteToken(new JwtSecurityToken(claims: actor.Claims));
         }
 
