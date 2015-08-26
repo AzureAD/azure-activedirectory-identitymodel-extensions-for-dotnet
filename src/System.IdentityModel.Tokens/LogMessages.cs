@@ -19,14 +19,14 @@
 namespace System.IdentityModel.Tokens
 {
     /// <summary>
-    /// Error codes and messages
+    /// Log messages and codes
     /// </summary>
-    public static class ErrorMessages
+    public static class LogMessages
     {
         #pragma warning disable 1591
         // general
-        public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty string.";
-        public const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty string.";
+        public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
+        public const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty object.";
         public const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
 
         // protperties, configuration 

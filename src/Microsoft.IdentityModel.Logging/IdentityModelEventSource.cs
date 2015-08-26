@@ -44,10 +44,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(1, Level = EventLevel.Verbose)]
         public void WriteVerbose(string message)
         {
-            message = PrepareMessage(message, EventLevel.Verbose);
-
             if (IsEnabled() && _logLevel >= EventLevel.Verbose)
             {
+                message = PrepareMessage(message, EventLevel.Verbose);
                 WriteEvent(1, message);
             }
         }
@@ -55,10 +54,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(2, Level = EventLevel.Informational)]
         public void WriteInformation(string message)
         {
-            message = PrepareMessage(message, EventLevel.Informational);
-
             if (IsEnabled() && _logLevel >= EventLevel.Informational)
             {
+                message = PrepareMessage(message, EventLevel.Informational);
                 WriteEvent(2, message);
             }
         }
@@ -66,10 +64,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(3, Level = EventLevel.Warning)]
         public void WriteWarning(string message)
         {
-            message = PrepareMessage(message, EventLevel.Warning);
-
             if (IsEnabled() && _logLevel >= EventLevel.Warning)
             {
+                message = PrepareMessage(message, EventLevel.Warning);
                 WriteEvent(3, message);
             }
         }
@@ -77,10 +74,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(4, Level = EventLevel.Error)]
         public void WriteError(string message)
         {
-            message = PrepareMessage(message, EventLevel.Error);
-
             if (IsEnabled() && _logLevel >= EventLevel.Error)
             {
+                message = PrepareMessage(message, EventLevel.Error);
                 WriteEvent(4, message);
             }
         }
@@ -88,10 +84,9 @@ namespace Microsoft.IdentityModel.Logging
         [Event(5, Level = EventLevel.Critical)]
         public void WriteCritical(string message)
         {
-            message = PrepareMessage(message, EventLevel.Critical);
-
-            if (IsEnabled() && _logLevel >= EventLevel.Error)
+            if (IsEnabled() && _logLevel >= EventLevel.Critical)
             {
+                message = PrepareMessage(message, EventLevel.Critical);
                 WriteEvent(5, message);
             }
         }
@@ -149,9 +144,7 @@ namespace Microsoft.IdentityModel.Logging
                 return message;
             }
 
-            string currentTimeStamp = DateTime.Now.ToString();
-            message = string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), currentTimeStamp, message);
-            return message;
+            return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
         }
     }
 }

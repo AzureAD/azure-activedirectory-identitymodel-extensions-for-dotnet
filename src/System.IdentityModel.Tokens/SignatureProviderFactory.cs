@@ -68,7 +68,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value < AbsoluteMinimumSymmetricKeySizeInBits)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10628, AbsoluteMinimumSymmetricKeySizeInBits));
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10628, AbsoluteMinimumSymmetricKeySizeInBits));
                 }
 
                 minimumSymmetricKeySizeInBits = value;
@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value < AbsoluteMinimumAsymmetricKeySizeInBitsForSigning)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10613, AbsoluteMinimumAsymmetricKeySizeInBitsForSigning));
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10613, AbsoluteMinimumAsymmetricKeySizeInBitsForSigning));
                 }
 
                 minimumAsymmetricKeySizeInBitsForSigning = value;
@@ -112,7 +112,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value < AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10627, AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying));
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10627, AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying));
                 }
 
                 minimumAsymmetricKeySizeInBitsForVerifying = value;
@@ -218,7 +218,7 @@ namespace System.IdentityModel.Tokens
 
             if (string.IsNullOrWhiteSpace(algorithm))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10002, "algorithm "));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10002, "algorithm "));
             }
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
@@ -228,13 +228,13 @@ namespace System.IdentityModel.Tokens
                 {
                     if (asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForSigning)
                     {
-                        throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigning));
+                        throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigning));
                     }
                 }
 
                 if (asymmetricKey.KeySize < MinimumAsymmetricKeySizeInBitsForVerifying)
                 {
-                    throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifying));
+                    throw new ArgumentOutOfRangeException("key.KeySize", asymmetricKey.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifying));
                 }
 
                 return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures);
@@ -245,13 +245,13 @@ namespace System.IdentityModel.Tokens
             {
                 if (symmetricKey.KeySize < MinimumSymmetricKeySizeInBits)
                 {
-                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), MinimumSymmetricKeySizeInBits));
+                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), MinimumSymmetricKeySizeInBits));
                 }
 
                 return new SymmetricSignatureProvider(symmetricKey, algorithm);
             }
 
-            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10600, typeof(SignatureProvider).ToString(), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType()));
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10600, typeof(SignatureProvider).ToString(), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType()));
         }
     }
 }

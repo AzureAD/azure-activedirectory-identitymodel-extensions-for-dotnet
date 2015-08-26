@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Tests;
 using System.Security.Claims;
 using Xunit;
 
@@ -49,6 +50,7 @@ namespace System.IdentityModel.Tokens.Saml.Tests
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
+        /*
         [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Protected")]
         public void Protected()
         {
@@ -306,6 +308,6 @@ namespace System.IdentityModel.Tokens.Saml.Tests
             {
                 return base.ValidateIssuer(issuer, samlToken, validationParameters);
             }
-        }
+        } */
     }
 }

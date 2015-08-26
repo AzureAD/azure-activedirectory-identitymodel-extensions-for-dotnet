@@ -1,10 +1,9 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+        "System.IdentityModel.Tokens.Tests": "5.0.0-*"
     },
     "exclude": [
-        "SamlSecurityTokenHandlerTests.cs",
         "Saml2SecurityTokenHandlerTests.cs"
     ],
     "commands": {

@@ -20,6 +20,8 @@ using System;
 using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Tests;
+using System.IO;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Logging.Tests
@@ -45,7 +47,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             catch (Exception ex)
             {
                 Assert.Equal(ex.GetType(), typeof(ArgumentNullException));
-                Assert.Contains("IDX10000: The parameter 'System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler: securityToken' cannot be a 'null' or an empty string.", listener.TraceBuffer);
+                Assert.Contains("IDX10000: The parameter 'System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler: securityToken' cannot be a 'null' or an empty object.", listener.TraceBuffer);
             }
         }
 
@@ -53,7 +55,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void LogMessage()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.LogLevel = EventLevel.Verbose;
+            IdentityModelEventSource.LogLevel = EventLevel.Warning;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             TokenValidationParameters validationParameters = new TokenValidationParameters()
@@ -88,6 +90,107 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Contains("IDX10721: ", listener.TraceBuffer);
 
         }
+
+        [Fact(DisplayName = "LoggerTests: Test TextWriterEventListener")]
+        public void TextWriterEventListenerLogging()
+        {
+            IdentityModelEventSource.LogLevel = EventLevel.Informational;
+            using (TextWriterEventListener listener = new TextWriterEventListener("testLog.txt"))
+            {
+                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
+
+                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                JwtSecurityToken jwt = tokenHandler.CreateToken(
+                    IdentityUtilities.DefaultIssuer,
+                    IdentityUtilities.DefaultAudience,
+                    ClaimSets.DefaultClaimsIdentity,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow + TimeSpan.FromHours(1),
+                    IdentityUtilities.DefaultAsymmetricSigningCredentials);
+
+
+                TokenValidationParameters validationParameters =
+                    new TokenValidationParameters()
+                    {
+                        IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey,
+                        ValidAudience = IdentityUtilities.DefaultAudience,
+                        ValidIssuer = IdentityUtilities.DefaultIssuer,
+                    };
+                SecurityToken securityToken;
+                tokenHandler.ValidateToken(jwt.RawData, validationParameters, out securityToken);
+            }
+
+            string logText = File.ReadAllText("testLog.txt");
+            Assert.Contains("IDX10239: ", logText);
+            Assert.Contains("IDX10244: ", logText);
+            Assert.Contains("IDX10240: ", logText);
+            Assert.Contains("IDX10236: ", logText);
+            Assert.Contains("IDX10245: ", logText);
+
+            File.Delete("testLog.txt");
+        }
+
+        [Fact(DisplayName = "LoggerTests: Test TextWriterEventListener with access denied to file.")]
+        public void TextListenerCantAccessFileToWrite()
+        {
+            SampleListener listener = new SampleListener();
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
+
+            // default log file cannot be accessed because it is in use. Should throw an IO exception.
+            FileStream fileStream = File.Create(TextWriterEventListener.DefaultLogFileName);
+            Assert.Throws<IOException>(() => { new TextWriterEventListener();  });
+            Assert.Contains("MIML11001: ", listener.TraceBuffer);
+            fileStream.Dispose();
+            File.Delete(TextWriterEventListener.DefaultLogFileName);
+
+            // file specified by user cannot be accessed.
+            string fileName = "testLog.txt";
+            fileStream = File.Create(fileName);
+            FileInfo fileInfo = new FileInfo(fileName);
+            fileInfo.IsReadOnly = true;
+            Assert.Throws<UnauthorizedAccessException>(() => { new TextWriterEventListener(fileName); });
+            fileInfo.IsReadOnly = false;
+            fileStream.Dispose();
+            File.Delete(fileName);
+
+        }
+        [Fact(DisplayName = "LoggerTests: Testing TextWriterEventListener Constructors ")]
+        public void TextWriterEventListenerConstructors()
+        {
+            // using defaults
+            using (TextWriterEventListener listener = new TextWriterEventListener())
+            {
+                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
+                IdentityModelEventSource.Logger.WriteWarning("This is a warning!");
+            }
+            string logText = File.ReadAllText(TextWriterEventListener.DefaultLogFileName);
+            Assert.Contains("This is a warning!", logText);
+            File.Delete(TextWriterEventListener.DefaultLogFileName);
+
+            // passing custom file path
+            using (TextWriterEventListener listener = new TextWriterEventListener("testLog.txt"))
+            {
+                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
+                IdentityModelEventSource.Logger.WriteWarning("This is a warning for custom file path!");
+            }
+            logText = File.ReadAllText("testLog.txt");
+            Assert.Contains("This is a warning for custom file path!", logText);
+            File.Delete("testLog.txt");
+
+            // using StreamWriter
+            StreamWriter streamWriter = new StreamWriter("testLog.txt", true);
+            using (TextWriterEventListener listener = new TextWriterEventListener(streamWriter))
+            {
+                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
+                IdentityModelEventSource.Logger.WriteWarning("This is a warning for streamwriter!");
+            }
+            streamWriter.Dispose();
+            logText = File.ReadAllText("testLog.txt");
+            Assert.Contains("This is a warning for streamwriter!", logText);
+            File.Delete("testLog.txt");
+        }
+
+
     }
 
     class SampleListener : EventListener

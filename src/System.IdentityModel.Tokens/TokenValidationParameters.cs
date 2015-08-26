@@ -246,7 +246,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value < TimeSpan.Zero)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10100, value));
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10100, value));
                 }
 
                 _clockSkew = value;
@@ -292,7 +292,7 @@ namespace System.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10245, securityToken));
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10245, securityToken));
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 
@@ -381,7 +381,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentException(ErrorMessages.IDX10102);
+                    throw new ArgumentException(LogMessages.IDX10102);
                 }
 
                 _nameClaimType = value;
@@ -406,7 +406,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentException(ErrorMessages.IDX10103);
+                    throw new ArgumentException(LogMessages.IDX10103);
                 }
 
                 _roleClaimType = value;

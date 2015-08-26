@@ -1,7 +1,7 @@
 ﻿{
     "version": "1.0.0-*",
     "dependencies": {
-        "System.IdentityModel.Tokens.Jwt": "5.0.0-*",
+        "System.IdentityModel.Tokens.Tests": "5.0.0-*",
         "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
     "commands": {

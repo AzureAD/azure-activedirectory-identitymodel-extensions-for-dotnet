@@ -50,17 +50,17 @@ namespace System.IdentityModel.Tokens
         {
             if (key == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (!IsSupportedAlgorithm(algorithm))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
             }
 
             if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
             }
 
             this.keyedHash = GetKeyedHashAlgorithm(algorithm);
@@ -76,7 +76,7 @@ namespace System.IdentityModel.Tokens
                     throw;
                 }
 
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException), EventLevel.Error);
             }
         }
 
@@ -89,14 +89,14 @@ namespace System.IdentityModel.Tokens
         {
             if (string.IsNullOrWhiteSpace(algorithm))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             switch (algorithm)
             {
                 default:
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException), EventLevel.Error);
                         return null;
                     }
             }
@@ -115,12 +115,12 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10624), typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10624), typeof(ArgumentException), EventLevel.Error);
             }
 
             if (this.disposed)
@@ -130,10 +130,10 @@ namespace System.IdentityModel.Tokens
 
             if (this.keyedHash == null)
             {
-                LogHelper.Throw(ErrorMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10642, input.ToString()));
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10642, input.ToString()));
             return this.keyedHash.ComputeHash(input);
         }
 
@@ -153,22 +153,22 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (signature == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
             {
-                LogHelper.Throw(ErrorMessages.IDX10625, typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10625, typeof(ArgumentException), EventLevel.Error);
             }
 
             if (signature.Length == 0)
             {
-                LogHelper.Throw(ErrorMessages.IDX10626, typeof(ArgumentException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10626, typeof(ArgumentException), EventLevel.Error);
             }
 
             if (this.disposed)
@@ -178,10 +178,10 @@ namespace System.IdentityModel.Tokens
 
             if (this.keyedHash == null)
             {
-                LogHelper.Throw(ErrorMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10643, input.ToString()));
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10643, input.ToString()));
             return AreEqual(signature, this.keyedHash.ComputeHash(input));
         }
 

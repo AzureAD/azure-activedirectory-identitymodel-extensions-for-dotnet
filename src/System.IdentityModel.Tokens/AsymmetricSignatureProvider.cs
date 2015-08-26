@@ -63,24 +63,24 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentNullException("key");
 
             if (!IsSupportedAlgorithm(algorithm))
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm ?? "null"));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"));
 
             if (willCreateSignatures)
             {
                 if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning)
                 {
-                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10631, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning));
+                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigning));
                 }
 
                 if (!key.HasPrivateKey)
                 {
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10638, key.ToString()));
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10638, key.ToString()));
                 }
             }
 
             if (key.KeySize < SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying)
             {
-                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10630, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
+                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
             hash = GetHashAlgorithm(algorithm);
@@ -114,7 +114,7 @@ namespace System.IdentityModel.Tokens
                 return;
             }
 
-            throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10641, key.ToString()));
+            throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()));
         }
 
         protected virtual string GetHashAlgorithm(string algorithm)
@@ -146,7 +146,7 @@ namespace System.IdentityModel.Tokens
                     return "SHA512";
 
                 default:
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm));
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
             }
         }
 
@@ -181,7 +181,7 @@ namespace System.IdentityModel.Tokens
                     return SHA512.Create();
 
                 default:
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10640, algorithm));
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
             }
         }
 #endif
@@ -231,7 +231,7 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(ErrorMessages.IDX10624);
+                throw new ArgumentException(LogMessages.IDX10624);
             }
 
             if (this.disposed)
@@ -274,12 +274,12 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(ErrorMessages.IDX10625);
+                throw new ArgumentException(LogMessages.IDX10625);
             }
 
             if (signature.Length == 0)
             {
-                throw new ArgumentException(ErrorMessages.IDX10626);
+                throw new ArgumentException(LogMessages.IDX10626);
             }
 
             if (this.disposed)
@@ -289,7 +289,7 @@ namespace System.IdentityModel.Tokens
 
             if (this.hash == null)
             {
-                throw new InvalidOperationException(ErrorMessages.IDX10621);
+                throw new InvalidOperationException(LogMessages.IDX10621);
             }
 
             if (rsaCryptoServiceProvider != null)
