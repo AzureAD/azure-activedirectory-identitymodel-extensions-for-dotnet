@@ -33,12 +33,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public OpenIdConnectProtocolValidationContext() {}
 
         /// <summary>
-        /// Gets or sets the 'code' to validate.
-        /// </summary>
-        /// Obsolete - Will be removed in beta8, the Property: ProtocolMessage will have the 'code'
-        public string AuthorizationCode { get; set; }
-
-        /// <summary>
         /// Gets or sets the 'client_id'.
         /// </summary>
         public string ClientId { get; set; }
@@ -59,8 +53,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string State { get; set; }
 
         /// <summary>
-        /// Gets or sets a validated id_token.
+        /// Gets or sets the response received from userinfo_endpoint.
         /// </summary>
-        public JwtSecurityToken IdToken { get; set; }
+        public JwtSecurityToken UserInfoEndpointResponse { get; set; }
+
+        /// <summary>
+        /// This id_token is assumed to have audience, issuer, lifetime and signature validated.
+        /// </summary>
+        public JwtSecurityToken ValidatedIdToken { get; set; }
     }
 }

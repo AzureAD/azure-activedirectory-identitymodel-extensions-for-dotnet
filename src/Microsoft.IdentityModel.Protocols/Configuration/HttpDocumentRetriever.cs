@@ -34,9 +34,9 @@ namespace Microsoft.IdentityModel.Protocols
     public class HttpDocumentRetriever : IDocumentRetriever
     {
         private readonly HttpClient _httpClient;
+        private bool _requireHttps;
 
-        public HttpDocumentRetriever()
-            : this(new HttpClient())
+        public HttpDocumentRetriever() : this(new HttpClient())
         {
         }
 
@@ -47,6 +47,16 @@ namespace Microsoft.IdentityModel.Protocols
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": httpClient"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
             _httpClient = httpClient;
+            _requireHttps = true;
+        }
+
+        /// <summary>
+        /// Requires Https secure channel for sending requests.. This is turned ON by default for security reasons. It is RECOMMENDED that you do not allow retrieval from http addresses by default.
+        /// </summary>
+        public bool RequireHttps
+        {
+            get { return _requireHttps; }
+            set { _requireHttps = value; }
         }
 
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
@@ -55,6 +65,12 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
+
+            if (!Utility.IsHttps(address) && RequireHttps)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10108, address), typeof(ArgumentException), EventLevel.Error);
+            }
+
             try
             {
                 IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, address));

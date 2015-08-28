@@ -38,7 +38,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration);
             
             await GetConfigurationFromHttpAsync(string.Empty, expectedException: ExpectedException.ArgumentNullException());
-            await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
+            await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.ArgumentException("IDX10108:"));
+            await GetConfigurationFromHttpAsync(OpenIdConfigData.HttpsBadUri, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
         }
 
         [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromFile")]
@@ -57,6 +58,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // jwt_uri points to bad formated JSON
             configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
+
+            // reading form a file that does not exist
+            configuration = await GetConfigurationAsync("FileDoesNotExist.json", expectedException: ExpectedException.IOException(inner: typeof(ArgumentException)));
+
         }
 
         [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromText")]
@@ -121,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(uri, new HttpClient(), CancellationToken.None);
+                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(uri, CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -142,7 +147,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(uri, CancellationToken.None);
+                openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(uri, new FileDocumentRetriever(), CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -186,7 +191,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync("primary",
-                    new TestDocumentRetriever(primaryDocument, new GenericDocumentRetriever()), CancellationToken.None);
+                    new TestDocumentRetriever(primaryDocument, new FileDocumentRetriever()), CancellationToken.None);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)

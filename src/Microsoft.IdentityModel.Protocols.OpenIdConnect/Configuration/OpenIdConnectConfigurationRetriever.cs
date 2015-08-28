@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return GetAsync(address, new GenericDocumentRetriever(), cancel);
+            return GetAsync(address, new HttpDocumentRetriever(), cancel);
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return GetAsync(address, new GenericDocumentRetriever(), cancel);
+            return GetAsync(address, new HttpDocumentRetriever(), cancel);
         }
 
         /// <summary>

@@ -199,7 +199,10 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
-            TraceBuffer += eventData.Payload[0] + "\n";
+            if (eventData != null && eventData.Payload.Count > 0)
+            {
+                TraceBuffer += eventData.Payload[0] + "\n";
+            }
         }
     }
 }

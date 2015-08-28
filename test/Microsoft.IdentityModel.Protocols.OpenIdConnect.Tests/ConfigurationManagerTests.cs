@@ -43,7 +43,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact(DisplayName = "ConfigurationManagerTests: GetSets")]
         public void GetSets()
         {
-            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever());
+            FileDocumentRetriever docRetriever = new FileDocumentRetriever();
+            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 2)
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(object.ReferenceEquals(configuration, configuration2));
 
             // AutomaticRefreshInterval should pick up new bits.
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever());
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             TestUtilities.SetField(configManager, "_automaticRefreshInterval", TimeSpan.FromMilliseconds(1));
             configuration = configManager.GetConfigurationAsync().Result;
             Thread.Sleep(1);
@@ -88,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.False(object.ReferenceEquals(configuration, configuration2));
 
             // RefreshInterval is set to MaxValue
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever());
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             configuration = configManager.GetConfigurationAsync().Result;
             configManager.RefreshInterval = TimeSpan.MaxValue;
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
@@ -97,7 +98,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(object.ReferenceEquals(configuration, configuration2));
 
             // Refresh should have no effect
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever());
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             configuration = configManager.GetConfigurationAsync().Result;
             configManager.RefreshInterval = TimeSpan.FromHours(10);
             configManager.RequestRefresh();
@@ -106,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(object.ReferenceEquals(configuration, configuration2));
 
             // Refresh should force pickup of new config
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever());
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             configuration = configManager.GetConfigurationAsync().Result;
             TestUtilities.SetField(configManager, "_refreshInterval", TimeSpan.FromMilliseconds(1));
             Thread.Sleep(1);
@@ -126,13 +127,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact(DisplayName = "ConfigurationManagerTests: Publics")]
         public void Publics()
         {
-            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever());
+            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             OpenIdConnectConfiguration config = configManager.GetConfigurationAsync(CancellationToken.None).Result;
-        }
-
-        private void RunConfigTest(ConfigurationManager<OpenIdConnectConfiguration> configManager, ExpectedException ee )
-        {
-
         }
     }
 }

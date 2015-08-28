@@ -209,6 +209,11 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string CHash = "c_hash";
 
         /// <summary>
+        /// http://openid.net/specs/openid-connect-core-1_0.html#CodeIDToken
+        /// </summary>
+        public const string AtHash = "at_hash";
+
+        /// <summary>
         /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
         /// </summary>
         public const string Email = "email";

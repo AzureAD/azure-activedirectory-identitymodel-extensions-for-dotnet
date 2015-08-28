@@ -25,7 +25,7 @@ using System.Security.Cryptography;
 
 namespace System.IdentityModel.Tokens.Tests
 {
-#if ASPNET50CORE
+#if DNXCORE50
     /// <summary>
     /// 
     /// </summary>

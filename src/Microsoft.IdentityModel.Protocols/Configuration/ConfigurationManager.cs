@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="metadataAddress">the address to obtain configuration.</param>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever)
-            : this(metadataAddress, configRetriever, new GenericDocumentRetriever())
+            : this(metadataAddress, configRetriever, new HttpDocumentRetriever())
         {
         }
 
