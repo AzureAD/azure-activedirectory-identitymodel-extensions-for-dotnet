@@ -829,6 +829,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_1024);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
+            // "kid" is not present, but an "x5t" is present.
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_2048);
+            JwtSecurityToken jwt =
+                new JwtSecurityToken
+                (
+                    issuer: Issuers.GotJwt,
+                    audience: Audiences.AuthFactors,
+                    claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
+                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(10),
+                    notBefore: DateTime.UtcNow
+                );
+            jwt.Header[JwtHeaderParameterNames.Kid] = null;
+            jwt.Header[JwtHeaderParameterNames.X5t] = KeyingMaterial.DefaultCert_2048.Thumbprint;
+            TestUtilities.ValidateToken(tokenHandler.WriteToken(jwt), validationParameters, tokenHandler, expectedException);
+
             // "Signature missing, just two parts",
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:");
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);

@@ -120,34 +120,26 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Gets the key identifier for the security key used to sign the token
+        /// </summary>
         public string Kid
         {
             get
             {
-                string kid = GetStandardClaim(JwtHeaderParameterNames.Kid);
-                if (string.IsNullOrWhiteSpace(kid))
-                {
-                    kid = GetStandardClaim(JwtHeaderParameterNames.X5t);
-                }
-
-                return kid;
-            }
-            set
-            {
+                return GetStandardClaim(JwtHeaderParameterNames.Kid);
             }
         }
 
+        /// <summary>
+        /// Gets the thhumbprint of the certificate used to sign the token
+        /// </summary>
         public string X5t
         {
             get
             {
                 return GetStandardClaim(JwtHeaderParameterNames.X5t);
             }
-            set
-            {
-                Kid = GetStandardClaim(JwtHeaderParameterNames.X5t);
-            }
-
         }
 
         internal string GetStandardClaim(string claimType)
