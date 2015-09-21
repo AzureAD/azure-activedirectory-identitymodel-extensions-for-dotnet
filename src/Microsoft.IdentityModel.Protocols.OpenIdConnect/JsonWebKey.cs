@@ -24,7 +24,7 @@ using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/draft-ietf-jose-json-web-key-37.

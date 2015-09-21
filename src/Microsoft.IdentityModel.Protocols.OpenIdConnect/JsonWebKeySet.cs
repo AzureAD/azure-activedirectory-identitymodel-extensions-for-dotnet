@@ -26,7 +26,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
