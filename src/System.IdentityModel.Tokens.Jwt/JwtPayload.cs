@@ -133,12 +133,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
         /// </summary>
-        /// <remarks>If the 'auth_time' claim is not found, null is returned.</remarks>
-        public string AuthTime
+        /// <remarks>If the 'auth_time' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
+        public int? AuthTime
         {
             get
             {
-                return this.GetStandardClaim(JwtRegisteredClaimNames.AuthTime);
+                return this.GetIntClaim(JwtRegisteredClaimNames.AuthTime);
             }
         }
 

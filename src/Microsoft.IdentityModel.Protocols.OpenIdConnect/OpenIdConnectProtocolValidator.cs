@@ -381,7 +381,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 if (RequireAmr && string.IsNullOrWhiteSpace(idToken.Payload.Amr))
                     LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10316, idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
-                if (RequireAuthTime && string.IsNullOrWhiteSpace(idToken.Payload.AuthTime))
+                if (RequireAuthTime && !(idToken.Payload.AuthTime.HasValue))
                     LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10317, idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
 
                 if (RequireAzp && string.IsNullOrWhiteSpace(idToken.Payload.Azp))
