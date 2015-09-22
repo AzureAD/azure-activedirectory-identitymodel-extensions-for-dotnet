@@ -119,14 +119,14 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'amr' claim { amr, 'value' }.
+        /// Gets the 'value' of the 'amr' claim { amr, 'value' } as list of strings.
         /// </summary>
-        /// <remarks>If the 'amr' claim is not found, null is returned.</remarks>
-        public string Amr
+        /// <remarks>If the 'amr' claim is not found, an empty enumerable is returned.</remarks>
+        public IList<string> Amr
         {
             get
             {
-                return this.GetStandardClaim(JwtRegisteredClaimNames.Amr);
+                return this.GetIListClaims(JwtRegisteredClaimNames.Amr);
             }
         }
 
@@ -150,44 +150,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                List<string> audiences = new List<string>();
-
-                object value = null;
-                if (!TryGetValue(JwtRegisteredClaimNames.Aud, out value))
-                {
-                    return audiences;
-                }
-
-                string str = value as string;
-                if (str != null)
-                {
-                    audiences.Add(str);
-                    return audiences;
-                }
-
-                // Audiences must be an array of string;
-                IEnumerable<object> values = value as IEnumerable<object>;
-                if (values != null)
-                {
-                    foreach (var item in values)
-                    {
-                        str = item as string;
-                        if (str != null)
-                        {
-                            audiences.Add(str);
-                        }
-                        else
-                        {
-                            audiences.Add(item.ToString());
-                        }
-                    }
-                }
-                else
-                {
-                    audiences.Add(JsonExtensions.SerializeToJson(value));
-                }
-
-                return audiences;
+                return this.GetIListClaims(JwtRegisteredClaimNames.Aud);
             }
         }
 
@@ -588,6 +551,40 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             return retval;
+        }
+
+        internal IList<string> GetIListClaims(string claimType)
+        {
+            List<string> claimValues = new List<string>();
+
+            object value = null;
+            if (!TryGetValue(claimType, out value))
+            {
+                return claimValues;
+            }
+
+            string str = value as string;
+            if (str != null)
+            {
+                claimValues.Add(str);
+                return claimValues;
+            }
+
+            // values must be an enumeration of strings;
+            IEnumerable<object> values = value as IEnumerable<object>;
+            if (values != null)
+            {
+                foreach (var item in values)
+                {
+                    claimValues.Add(item.ToString());
+                }
+            }
+            else
+            {
+                claimValues.Add(JsonExtensions.SerializeToJson(value));
+            }
+
+            return claimValues;
         }
 
         /// <summary>

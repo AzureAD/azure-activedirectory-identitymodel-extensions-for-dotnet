@@ -551,7 +551,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 validator,
                 new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10317:")
                 );
-            validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.AuthTime, "authTime"));
+            validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.AuthTime, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
 
             // multiple 'aud' but no 'azp' claim. no exception thrown, warning logged
             validatedIdToken.Payload[JwtRegisteredClaimNames.Aud] = new List<string> { "abc", "xyz"};
