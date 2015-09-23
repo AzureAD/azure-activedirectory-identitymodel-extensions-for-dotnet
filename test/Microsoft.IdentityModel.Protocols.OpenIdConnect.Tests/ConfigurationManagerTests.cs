@@ -70,6 +70,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"));
             TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
             TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
+        }
+
+        [Fact(DisplayName = "ConfigurationManagerTests: Publics")]
+        public void Publics()
+        {
+            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
+            OpenIdConnectConfiguration config = configManager.GetConfigurationAsync(CancellationToken.None).Result;
+        }
+
+        [Fact]
+        public void GetConfiguration()
+        {
+            FileDocumentRetriever docRetriever = new FileDocumentRetriever();
+            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
 
             // AutomaticRefreshInterval interval should return same config.
             OpenIdConnectConfiguration configuration = configManager.GetConfigurationAsync().Result;
@@ -122,13 +136,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configuration = configManager.GetConfigurationAsync().Result;
             Assert.True(object.ReferenceEquals(configuration, configuration2));
             Assert.True(IdentityComparer.AreEqual<OpenIdConnectConfiguration>(configuration, configuration2));
-        }
 
-        [Fact(DisplayName = "ConfigurationManagerTests: Publics")]
-        public void Publics()
-        {
-            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
-            OpenIdConnectConfiguration config = configManager.GetConfigurationAsync(CancellationToken.None).Result;
+            // get configuration from http address, should throw
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever());
+            ExpectedException ee = new ExpectedException(typeof(InvalidOperationException), "IDX10803:", typeof(ArgumentException));
+            try
+            {
+                configuration = configManager.GetConfigurationAsync().Result;
+                ee.ProcessNoException();
+            }
+            catch (AggregateException ex)
+            {
+                ex.Handle((x) =>
+                {
+                    ee.ProcessException(x);
+                    return true;
+                });
+            }
         }
     }
 }

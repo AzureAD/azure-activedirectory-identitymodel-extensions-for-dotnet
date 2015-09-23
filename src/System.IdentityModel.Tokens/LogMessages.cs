@@ -211,7 +211,7 @@ namespace System.IdentityModel.Tokens
         public const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
         public const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
         public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
-        public const string IDX10803 = "IDX10803: Unable to create to obtain configuration from: '{0}'.";
+        public const string IDX10803 = "IDX10803: Unable to obtain configuration from: '{0}'. Inner Exception: '{1}'.";
         public const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
         public const string IDX10805 = "IDX10805: Obtaining information from metadata endpoint: '{0}'";
         public const string IDX10806 = "IDX10806: Deserializing json string into json web keys.";

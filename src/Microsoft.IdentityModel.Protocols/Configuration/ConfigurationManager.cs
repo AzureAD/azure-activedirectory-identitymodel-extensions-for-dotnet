@@ -167,7 +167,6 @@ namespace Microsoft.IdentityModel.Protocols
             await _refreshLock.WaitAsync(cancel);
             try
             {
-                Exception retrieveEx = null;
                 if (_syncAfter <= now)
                 {
                     try
@@ -182,9 +181,8 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                     catch (Exception ex)
                     {
-                        retrieveEx = ex;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, _metadataAddress ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
+                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, _metadataAddress ?? "null", ex.Message), typeof(InvalidOperationException), EventLevel.Error, ex);
                     }
                 }
 
