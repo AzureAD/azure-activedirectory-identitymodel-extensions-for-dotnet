@@ -147,6 +147,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
             catch (AggregateException ex)
             {
+                // this should throw, because last configuration retrived was null
+                Assert.Throws<AggregateException>(() => configuration = configManager.GetConfigurationAsync().Result);
+
                 ex.Handle((x) =>
                 {
                     ee.ProcessException(x);
