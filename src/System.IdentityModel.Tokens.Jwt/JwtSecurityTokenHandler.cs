@@ -787,74 +787,53 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
             string kid = jwt.Header.Kid;
-            SecurityKey securityKey = null;
+            IEnumerable<SecurityKey> securityKeys = null;
 
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
-                securityKey = validationParameters.IssuerSigningKeyResolver(token, jwt, kid, validationParameters);
+                securityKeys = validationParameters.IssuerSigningKeyResolver(token, jwt, kid, validationParameters);
             }
             else
             {
-                securityKey = ResolveIssuerSigningKey(token, jwt, validationParameters);
+                var securityKey = ResolveIssuerSigningKey(token, jwt, validationParameters);
+                if (securityKey != null)
+                {
+                    securityKeys = new List<SecurityKey> { securityKey };
+                }
             }
 
-            // if the security key is resolved, try just the one key
-            if (securityKey != null)
-            { 
-                try
-                {
-                    if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
-                    {
-                        IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10242, token));
-                        jwt.SigningKey = securityKey;
-                        return jwt;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10502, CreateKeyString(securityKey), ex.ToString(), jwt.ToString()),typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
-                }
-
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10501, CreateKeyString(securityKey), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
-            }
-            else
+            if (securityKeys == null)
             {
-                Exception firstException = null;
+                // Try all keys since there is no keyidentifier
+                securityKeys = GetAllKeys(token, jwt, kid, validationParameters);
+            }
+
+            // try the keys
+            if (securityKeys != null)
+            {
                 StringBuilder exceptionStrings = new StringBuilder();
                 StringBuilder keysAttempted = new StringBuilder();
 
-                // Try all keys since there is no keyidentifier
-                foreach (SecurityKey sk in GetAllKeys(token, jwt, kid, validationParameters))
+                foreach (SecurityKey securityKey in securityKeys)
                 {
                     try
                     {
-                        if (this.ValidateSignature(encodedBytes, signatureBytes, sk, mappedAlgorithm))
+                        if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
                         {
                             IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10242, token));
-                            jwt.SigningKey = sk;
+                            jwt.SigningKey = securityKey;
                             return jwt;
                         }
                     }
                     catch (Exception ex)
                     {
-                        if (DiagnosticUtility.IsFatal(ex))
-                        {
-                            throw;
-                        }
-
-                        if (firstException == null)
-                        {
-                            firstException = ex;
-                        }
-
                         exceptionStrings.AppendLine(ex.ToString());
                     }
-
-                    keysAttempted.AppendLine(CreateKeyString(sk));
+                    keysAttempted.AppendLine(CreateKeyString(securityKey));
                 }
-
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
             }
+
             return null;
         }
 
@@ -878,7 +857,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (securityKey == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityKey"));
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityKey"));
                 return "null";
             }
             else
