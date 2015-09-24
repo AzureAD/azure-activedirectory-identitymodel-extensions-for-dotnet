@@ -187,7 +187,13 @@ namespace Microsoft.IdentityModel.Protocols
                 }
 
                 // Stale metadata is better than no metadata
-                return _currentConfiguration;
+                if (_currentConfiguration != null)
+                    return _currentConfiguration;
+                else
+                {
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, _metadataAddress ?? "null", ""), typeof(InvalidOperationException), EventLevel.Error);
+                    return null;
+                }
             }
             finally
             {
