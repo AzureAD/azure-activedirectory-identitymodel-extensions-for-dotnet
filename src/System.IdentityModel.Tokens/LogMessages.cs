@@ -139,8 +139,6 @@ namespace System.IdentityModel.Tokens
 
         // SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. Unable to resolve SecurityKeyIdentifier: '{0}', \ntoken: '{1}'.";
-        public const string IDX10501 = "IDX10501: Signature validation failed. Key tried: '{0}'.\ntoken: '{1}'";
-        public const string IDX10502 = "IDX10502: Signature validation failed. Key tried: '{0}'.\nException caught:\n '{1}'.\ntoken: '{2}'";
         public const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
         public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'";
         public const string IDX10505 = "IDX10505: Unable to validate signature. The 'Delegate' specified on TokenValidationParameters, returned a null SecurityKey.\nSecurityKeyIdentifier: '{0}'\nToken: '{1}'.";
