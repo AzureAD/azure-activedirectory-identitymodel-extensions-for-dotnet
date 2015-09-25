@@ -1062,7 +1062,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         if (signingKey != null && string.Equals(signingKey.KeyId, kid, StringComparison.Ordinal))
                         {
-                            return validationParameters.IssuerSigningKey;
+                            return signingKey;
                         }
                     }
                 }
@@ -1081,7 +1081,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
                         {
-                            return validationParameters.IssuerSigningKey;
+                            return signingKey;
                         }
                     }
                 }

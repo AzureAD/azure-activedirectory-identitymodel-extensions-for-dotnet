@@ -26,7 +26,8 @@
                 "System.Security.Principal": "4.0.1-beta-*",
                 "System.Text.RegularExpressions": "4.0.11-beta-*",
                 "System.Threading": "4.0.11-beta-*",
-                "System.Xml.ReaderWriter": "4.0.11-beta-*"
+                "System.Xml.ReaderWriter": "4.0.11-beta-*",
+                "System.Security.Cryptography.Cng": "4.0.0-beta-*"
             }
         },
         "net451": {
