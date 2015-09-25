@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             RequireAuthTime = false;
             RequireAzp = false;
             RequireNonce = true;
-            RequireStateValidation = true;
+            RequireState = true;
             RequireSub = false;
             RequireTimeStampInNonce = true;
         }
@@ -163,10 +163,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool RequireNonce { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating if a 'state' validation is required.
+        /// Gets or sets a value indicating if a 'state' is required.
         /// </summary>
         [DefaultValue(true)]
-        public bool RequireStateValidation { get; set; }
+        public bool RequireState { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if a 'sub' claim is required.
@@ -683,19 +683,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             // if state is missing, but not required just return. Otherwise process it.
-            if (!RequireStateValidation && string.IsNullOrEmpty(validationContext.State) && string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
+            if (!RequireState && string.IsNullOrEmpty(validationContext.State) && string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10341);
                 return;
             }
             else if (string.IsNullOrEmpty(validationContext.State))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10329, RequireStateValidation.ToString()), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10329, RequireState.ToString()), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
             }
             else if (string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
             {
                 // 'state' was sent, but message does not contain 'state'
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10330, RequireStateValidation.ToString()), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10330, RequireState.ToString()), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
             }
 
             if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State, StringComparison.Ordinal))

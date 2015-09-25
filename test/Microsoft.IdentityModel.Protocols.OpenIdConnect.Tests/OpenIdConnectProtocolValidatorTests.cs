@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new KeyValuePair<string, List<object>>("RequireNonce", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("RequireSub", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireTimeStampInNonce", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("RequireStateValidation", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("RequireState", new List<object>{true, false, true}),
                     },
                     Object = validationParameters,
                 };
@@ -304,7 +304,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 }
             };
 
-            // 'RequireStateValidation' is true but no state passed in validationContext
+            // 'RequireState' is true but no state passed in validationContext
             ValidateAuthenticationResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -312,7 +312,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
 
             // turn off state validation but message.State is not null
-            protocolValidator.RequireStateValidation = false;
+            protocolValidator.RequireState = false;
             ValidateAuthenticationResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
 
             // turn on state validation and add valid state
-            protocolValidator.RequireStateValidation = true;
+            protocolValidator.RequireState = true;
             protocolValidationContext.State = validState;
             ValidateAuthenticationResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
 
@@ -407,7 +407,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateAuthenticationResponse")]
         public void ValidateAuthenticationResponse()
         {
-            var validator = new PublicOpenIdConnectProtocolValidator { RequireStateValidation = false };
+            var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
                 ProtocolMessage = new OpenIdConnectMessage()
@@ -466,7 +466,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of IdToken")]
         public void ValidateIdToken()
         {
-            var validator = new PublicOpenIdConnectProtocolValidator { RequireStateValidation = false };
+            var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
                 ProtocolMessage = new OpenIdConnectMessage()
@@ -1069,13 +1069,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 var dataset = new TheoryData<OpenIdConnectProtocolValidationContext, PublicOpenIdConnectProtocolValidator, ExpectedException>();
                 var validator = new PublicOpenIdConnectProtocolValidator();
-                var validatorRequireStateFalse = new PublicOpenIdConnectProtocolValidator { RequireStateValidation = false };
+                var validatorRequireStateFalse = new PublicOpenIdConnectProtocolValidator { RequireState = false };
                 var state1 = Guid.NewGuid().ToString();
                 var state2 = Guid.NewGuid().ToString();
 
                 // validationContext is null
                 dataset.Add(null, validator, ExpectedException.ArgumentNullException());
-                // validationContext does not contain state and RequireStateValidation is true
+                // validationContext does not contain state and RequireState is true
                 dataset.Add(
                     new OpenIdConnectProtocolValidationContext
                     {
@@ -1084,7 +1084,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     validator,
                     new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10329:")
                 );
-                // validationContext does not contain state and RequireStateValidation is false
+                // validationContext does not contain state and RequireState is false
                 dataset.Add(
                     new OpenIdConnectProtocolValidationContext
                     {

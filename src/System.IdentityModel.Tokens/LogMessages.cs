@@ -117,8 +117,8 @@ namespace System.IdentityModel.Tokens
         public const string IDX10326 = "IDX10326: The 'nonce' timestamp could not be converted to a positive integer (greater than 0).\ntimestamp: '{0}'\nnonce: '{1}'.";
         public const string IDX10327 = "IDX10327: The 'nonce' timestamp: '{0}', could not be converted to a DateTime using DateTime.FromBinary({0}).\nThe value must be between: '{1}' and '{2}'.";
         public const string IDX10328 = "IDX10328: Generating nonce for openIdConnect message.";
-        public const string IDX10329 = "IDX10329: RequireStateValidation is '{0}' but the OpenIdConnectProtocolValidationContext.State is null. State cannot be validated.";
-        public const string IDX10330 = "IDX10330: RequireStateValidation is '{0}', the OpenIdConnect Request contained 'state', but the Response does not contain 'state'.";
+        public const string IDX10329 = "IDX10329: RequireState is '{0}' but the OpenIdConnectProtocolValidationContext.State is null. State cannot be validated.";
+        public const string IDX10330 = "IDX10330: RequireState is '{0}', the OpenIdConnect Request contained 'state', but the Response does not contain 'state'.";
         public const string IDX10331 = "IDX10331: The 'state' parameter in the message: '{0}', does not equal the 'state' in the context: '{1}'.";
         public const string IDX10332 = "IDX10332: OpenIdConnectProtocolValidationContext.ValidatedIdToken is null. There is no 'id_token' to validate against.";
         public const string IDX10333 = "IDX10333: OpenIdConnectProtocolValidationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.";
@@ -129,7 +129,7 @@ namespace System.IdentityModel.Tokens
         public const string IDX10338 = "IDX10338: Subject claim present in 'id_token': '{0}' does not match the claim received from UserInfo Endpoint: '{1}'.";
         public const string IDX10339 = "IDX10339: The 'id_token' contains multiple audiences but 'azp' claim is missing.";
         public const string IDX10340 = "IDX10340: The 'id_token' contains 'azp' claim but its value is not equal to Client Id. 'azp': '{0}'. clientId: '{1}'.";
-        public const string IDX10341 = "IDX10341: 'RequireStateValidation' = false, OpenIdConnectProtocolValidationContext.State is null and there is no 'state' in the OpenIdConnect response to validate.";
+        public const string IDX10341 = "IDX10341: 'RequireState' = false, OpenIdConnectProtocolValidationContext.State is null and there is no 'state' in the OpenIdConnect response to validate.";
 
 
         // SecurityTokenHandler messages
