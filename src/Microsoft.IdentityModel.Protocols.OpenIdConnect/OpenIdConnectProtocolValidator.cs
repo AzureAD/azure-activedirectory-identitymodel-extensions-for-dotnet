@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (validationContext.ValidatedIdToken == null)
             {
-                LogHelper.Throw(LogMessages.IDX10331, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
 
             // 'refresh_token' should not be returned from 'authorization_endpoint'. http://tools.ietf.org/html/rfc6749#section-4.2.2.
@@ -269,7 +269,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (validationContext.ValidatedIdToken == null)
             {
-                LogHelper.Throw(LogMessages.IDX10331, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
 
             ValidateIdToken(validationContext);

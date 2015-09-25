@@ -435,7 +435,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateAuthenticationResponse(
                 protocolValidationContext,
                 validator,
-                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10331:")
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:")
                 );
 
             // 'refresh_token' should not be present in the response received from Authorization Endpoint
