@@ -29,7 +29,7 @@ namespace System.IdentityModel.Tokens
     {
         private bool disposed;
 #if DNXCORE50
-        private RSACng rsaCng;
+        private RSA rsaCng;
         private HashAlgorithmName hash;
 #else
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
@@ -109,11 +109,11 @@ namespace System.IdentityModel.Tokens
 #if DNXCORE50
                 if (willCreateSignatures)
                 {
-                    rsaCng = RSACertificateExtensions.GetRSAPrivateKey(x509Key.Certificate) as RSACng;
+                    rsaCng = RSACertificateExtensions.GetRSAPrivateKey(x509Key.Certificate);
                 }
                 else
                 {
-                    rsaCng = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate) as RSACng;
+                    rsaCng = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
                 }
                 return;
 #else
