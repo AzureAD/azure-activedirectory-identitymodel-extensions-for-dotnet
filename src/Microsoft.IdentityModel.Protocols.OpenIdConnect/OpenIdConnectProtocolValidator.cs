@@ -261,8 +261,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
 
-            // both 'id_token' and 'token' are required
-            if (string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken) || string.IsNullOrEmpty(validationContext.ProtocolMessage.Token))
+            // both 'id_token' and 'access_token' are required
+            if (string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken) || string.IsNullOrEmpty(validationContext.ProtocolMessage.AccessToken))
             {
                 LogHelper.Throw(LogMessages.IDX10336, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
@@ -547,7 +547,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
 
-            if (validationContext.ProtocolMessage.Token == null)
+            if (validationContext.ProtocolMessage.AccessToken == null)
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10310);
                 return;
@@ -567,7 +567,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                ValidateHash(atHash, validationContext.ProtocolMessage.Token, validationContext.ValidatedIdToken.Header.Alg);
+                ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validationContext.ValidatedIdToken.Header.Alg);
             }
             catch (OpenIdConnectProtocolException ex)
             {

@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             ValidateAuthenticationResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
 
-            // no 'token' in the message
+            // no 'access_token' in the message
             ValidateTokenResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 protocolValidator,
                 new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10307:")
                 );
-            // no 'token' in the message
+            // no 'access_token' in the message
             ValidateTokenResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // adding chash claim
             protocolValidationContext.ValidatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.CHash, cHashClaim));
             ValidateAuthenticationResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
-            // no 'token' in the message
+            // no 'access_token' in the message
             ValidateTokenResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -228,13 +228,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     IdToken = Guid.NewGuid().ToString(),
                     State = validState,
                     Code = validCode,
-                    Token = validAccessToken
+                    AccessToken = validAccessToken
                 },
                 Nonce = validNonce,
                 State = validState
             };
 
-            // token present, but no atHash claim
+            // access_token present, but no atHash claim
             ValidateAuthenticationResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -268,13 +268,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     IdToken = Guid.NewGuid().ToString(),
                     State = validState,
-                    Token = validAccessToken
+                    AccessToken = validAccessToken
                 },
                 Nonce = validNonce,
                 State = validState
             };
 
-            // token present, but no atHash claim
+            // access_token present, but no atHash claim
             ValidateAuthenticationResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             protocolValidationContext.State = validState;
             ValidateAuthenticationResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
 
-            // absence of 'id_token' and 'token'
+            // absence of 'id_token' and 'access_token'
             ValidateTokenResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -344,12 +344,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 ProtocolMessage = new OpenIdConnectMessage
                 {
                     State = validState,
-                    Token = validAccessToken
+                    AccessToken = validAccessToken
                 },
                 State = validState
             };
 
-            // token present, but no 'id_token'
+            // access_token present, but no 'id_token'
             ValidateAuthenticationResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     State = validState,
                     Code = validCode,
-                    Token = validAccessToken
+                    AccessToken = validAccessToken
                 },
                 State = validState
             };
@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // code present, but no 'id_token'
             ValidateAuthenticationResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
 
-            // 'code' and 'token' present but no 'id_token'
+            // 'code' and 'access_token' present but no 'id_token'
             ValidateTokenResponse(
                 protocolValidationContext,
                 protocolValidator,
@@ -973,7 +973,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ProtocolMessage = new OpenIdConnectMessage
                         {
                             IdToken = Guid.NewGuid().ToString(),
-                            Token = token
+                            AccessToken = token
                         }
                     },
                     validator,
@@ -988,7 +988,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {
                         ProtocolMessage = new OpenIdConnectMessage
                         {
-                            Token = token,
+                            AccessToken = token,
                         }
                     },
                     validator,
@@ -1004,7 +1004,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {
                         ProtocolMessage = new OpenIdConnectMessage
                         {
-                            Token = token,
+                            AccessToken = token,
                         }
                     },
                     validator,
@@ -1020,7 +1020,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {
                         ProtocolMessage = new OpenIdConnectMessage
                         {
-                            Token = Guid.NewGuid().ToString(),
+                            AccessToken = Guid.NewGuid().ToString(),
                         }
                     },
                     validator,
@@ -1036,7 +1036,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {
                         ProtocolMessage = new OpenIdConnectMessage
                         {
-                            Token = Guid.NewGuid().ToString(),
+                            AccessToken = Guid.NewGuid().ToString(),
                         }
                     },
                     validator,

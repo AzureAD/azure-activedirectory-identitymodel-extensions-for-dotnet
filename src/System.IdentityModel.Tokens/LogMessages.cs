@@ -97,10 +97,10 @@ namespace System.IdentityModel.Tokens
         public const string IDX10306 = "IDX10306: The 'c_hash' claim was not a string in the 'id_token', but a 'code' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         public const string IDX10307 = "IDX10307: The 'c_hash' claim was not found in the id_token, but a 'code' was in the OpenIdConnectMessage, id_token: '{0}'";
         public const string IDX10308 = "IDX10308: 'Azp' claim exist in the 'id_token' but 'ciient_id' is null. Cannot validate the 'azp' claim.";
-        public const string IDX10309 = "IDX10309: Validating 'at_hash' using id_token and token.";
-        public const string IDX10310 = "IDX10310: OpenIdConnectProtocolValidationContext.ProtocolMessage.token is null, there is no 'token' in the OpenIdConnect Response to validate.";
-        public const string IDX10311 = "IDX10311: The 'at_hash' claim was not a string in the 'id_token', but a 'token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
-        public const string IDX10312 = "IDX10312: The 'at_hash' claim was not found in the 'id_token', but a 'token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        public const string IDX10309 = "IDX10309: Validating 'at_hash' using id_token and access_token.";
+        public const string IDX10310 = "IDX10310: OpenIdConnectProtocolValidationContext.ProtocolMessage.AccessToken is null, there is no 'token' in the OpenIdConnect Response to validate.";
+        public const string IDX10311 = "IDX10311: The 'at_hash' claim was not a string in the 'id_token', but an 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        public const string IDX10312 = "IDX10312: The 'at_hash' claim was not found in the 'id_token', but a 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         public const string IDX10313 = "IDX10313: The id_token: '{0}' is not valid. Please see exception for more details. exception: '{1}'.";
         public const string IDX10314 = "IDX10314: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
         public const string IDX10315 = "IDX10315: RequireAcr is 'true' (default is 'false') but jwt.PayLoad.Acr is 'null or whitespace', jwt: '{0}'.";
@@ -124,7 +124,7 @@ namespace System.IdentityModel.Tokens
         public const string IDX10333 = "IDX10333: OpenIdConnectProtocolValidationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.";
         public const string IDX10334 = "IDX10334: Both 'id_token' and 'code' are null in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Authorization Endpoint. Cannot process the message.";
         public const string IDX10335 = "IDX10335: 'refresh_token' cannot be present in a response message received from Authorization Endpoint.";
-        public const string IDX10336 = "IDX10336: Both 'id_token' and 'token' should be present in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Token Endpoint. Cannot process the message.";
+        public const string IDX10336 = "IDX10336: Both 'id_token' and 'access_token' should be present in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Token Endpoint. Cannot process the message.";
         public const string IDX10337 = "IDX10337: OpenIdConnectProtocolValidationContext.UserInfoEndpointResponse is null, there is no OpenIdConnect Response to validate.";
         public const string IDX10338 = "IDX10338: Subject claim present in 'id_token': '{0}' does not match the claim received from UserInfo Endpoint: '{1}'.";
         public const string IDX10339 = "IDX10339: The 'id_token' contains multiple audiences but 'azp' claim is missing.";
