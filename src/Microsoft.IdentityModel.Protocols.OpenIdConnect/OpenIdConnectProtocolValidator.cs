@@ -77,6 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             RequireState = true;
             RequireSub = false;
             RequireTimeStampInNonce = true;
+            RequireStateValidation = true;
         }
 
         /// <summary>
@@ -167,6 +168,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [DefaultValue(true)]
         public bool RequireState { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating if validation of 'state' is turned on or off.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool RequireStateValidation { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if a 'sub' claim is required.
@@ -672,6 +679,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolInvalidStateException">if 'state' in the context does not match the state in the message.</exception>
         protected virtual void ValidateState(OpenIdConnectProtocolValidationContext validationContext)
         {
+            if (!RequireStateValidation)
+            {
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10342);
+                return;
+            }
+
             if (validationContext == null)
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);

@@ -25,8 +25,6 @@ using System.IdentityModel.Tokens.Tests;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -59,8 +57,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectProtocolValidator validationParameters = new OpenIdConnectProtocolValidator();
             Type type = typeof(OpenIdConnectProtocolValidator);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 9)
-                Assert.True(true, "Number of properties has changed from 9 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 10)
+                Assert.True(true, "Number of properties has changed from 10 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -76,6 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new KeyValuePair<string, List<object>>("RequireSub", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireTimeStampInNonce", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("RequireState", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("RequireStateValidation", new List<object>{true, false, true}),
                     },
                     Object = validationParameters,
                 };
@@ -1070,6 +1069,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 var dataset = new TheoryData<OpenIdConnectProtocolValidationContext, PublicOpenIdConnectProtocolValidator, ExpectedException>();
                 var validator = new PublicOpenIdConnectProtocolValidator();
                 var validatorRequireStateFalse = new PublicOpenIdConnectProtocolValidator { RequireState = false };
+                var validatorRequireStateValidationFalse = new PublicOpenIdConnectProtocolValidator { RequireStateValidation = false };
                 var state1 = Guid.NewGuid().ToString();
                 var state2 = Guid.NewGuid().ToString();
 
@@ -1128,6 +1128,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     validator,
                     new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10331:")
+                );
+
+                // state mismatch but RequireStateValidation is false
+                dataset.Add(
+                    new OpenIdConnectProtocolValidationContext()
+                    {
+                        State = state1,
+                        ProtocolMessage = new OpenIdConnectMessage
+                        {
+                            State = state2
+                        }
+                    },
+                    validatorRequireStateValidationFalse,
+                    ExpectedException.NoExceptionExpected
                 );
                 return dataset;
             }

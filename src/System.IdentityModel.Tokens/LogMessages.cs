@@ -130,6 +130,7 @@ namespace System.IdentityModel.Tokens
         public const string IDX10339 = "IDX10339: The 'id_token' contains multiple audiences but 'azp' claim is missing.";
         public const string IDX10340 = "IDX10340: The 'id_token' contains 'azp' claim but its value is not equal to Client Id. 'azp': '{0}'. clientId: '{1}'.";
         public const string IDX10341 = "IDX10341: 'RequireState' = false, OpenIdConnectProtocolValidationContext.State is null and there is no 'state' in the OpenIdConnect response to validate.";
+        public const string IDX10342 = "IDX10342: 'RequireStateValidation' = false, not validating the state.";
 
 
         // SecurityTokenHandler messages
