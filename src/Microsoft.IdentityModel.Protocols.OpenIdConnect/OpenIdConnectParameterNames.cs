@@ -59,7 +59,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string SessionState = "session_state";
         public const string State = "state";
         public const string TargetLinkUri = "target_link_uri";
-        public const string Token = "token";
         public const string TokenType = "token_type";
         public const string UiLocales = "ui_locales";
         public const string UserId = "user_id";

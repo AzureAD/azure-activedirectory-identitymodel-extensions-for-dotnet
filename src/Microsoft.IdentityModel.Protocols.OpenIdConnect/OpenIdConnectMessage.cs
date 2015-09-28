@@ -480,15 +480,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Gets or sets 'token'.
-        /// </summary>
-        public string Token
-        {
-            get { return GetParameter(OpenIdConnectParameterNames.Token); }
-            set { SetParameter(OpenIdConnectParameterNames.Token, value); }
-        }
-
-        /// <summary>
         /// Gets or sets the value for the token endpoint.
         /// </summary>
         public string TokenEndpoint { get; set; }
