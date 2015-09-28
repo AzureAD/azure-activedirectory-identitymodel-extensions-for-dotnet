@@ -106,28 +106,23 @@ namespace System.IdentityModel.Tokens
             if (x509Key != null)
             {
                 RSACryptoServiceProvider rsa = null;
-#if DNXCORE50
-                if (willCreateSignatures)
-                {
-                    rsa = RSACertificateExtensions.GetRSAPrivateKey(x509Key.Certificate) as RSACryptoServiceProvider;
-                }
-                else
-                {
-                    rsaCng = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
-                    return;
-                }
-#else
                 if (willCreateSignatures)
                 {
                     rsa = x509Key.PrivateKey as RSACryptoServiceProvider;
+                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
                 }
+#if DNXCORE50
+                else
+                {
+                    rsaCng = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
+                }
+#else
                 else
                 {
                     rsa = x509Key.PublicKey.Key as RSACryptoServiceProvider;
+                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
                 }
-
 #endif
-                rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
                 return;
             }
 
