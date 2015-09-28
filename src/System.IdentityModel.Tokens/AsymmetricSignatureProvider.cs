@@ -34,8 +34,8 @@ namespace System.IdentityModel.Tokens
 #else
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
         private HashAlgorithm hash;
-        private RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
 #endif
+        private RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
@@ -105,19 +105,18 @@ namespace System.IdentityModel.Tokens
             X509SecurityKey x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
-
+                RSACryptoServiceProvider rsa = null;
 #if DNXCORE50
                 if (willCreateSignatures)
                 {
-                    rsaCng = RSACertificateExtensions.GetRSAPrivateKey(x509Key.Certificate);
+                    rsa = RSACertificateExtensions.GetRSAPrivateKey(x509Key.Certificate) as RSACryptoServiceProvider;
                 }
                 else
                 {
                     rsaCng = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
+                    return;
                 }
-                return;
 #else
-                RSACryptoServiceProvider rsa = null;
                 if (willCreateSignatures)
                 {
                     rsa = x509Key.PrivateKey as RSACryptoServiceProvider;
@@ -126,9 +125,10 @@ namespace System.IdentityModel.Tokens
                 {
                     rsa = x509Key.PublicKey.Key as RSACryptoServiceProvider;
                 }
+
+#endif
                 rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
                 return;
-#endif
             }
 
             throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()));
@@ -258,6 +258,8 @@ namespace System.IdentityModel.Tokens
 #if DNXCORE50
             if (rsaCng != null)
                 return rsaCng.SignData(input, hash, RSASignaturePadding.Pkcs1);
+            else if (rsaCryptoServiceProviderProxy != null)
+                return rsaCryptoServiceProviderProxy.SignData(input, hash.Name);
 #else
             if (rsaCryptoServiceProvider != null)
                 return rsaCryptoServiceProvider.SignData(input, hash);
@@ -315,6 +317,8 @@ namespace System.IdentityModel.Tokens
 #if DNXCORE50
             if (rsaCng != null)
                 return rsaCng.VerifyData(input, signature, hash, RSASignaturePadding.Pkcs1);
+            else if (rsaCryptoServiceProviderProxy != null)
+                return rsaCryptoServiceProviderProxy.VerifyData(input, hash.Name, signature);
 #else
             if (rsaCryptoServiceProvider != null)
                 return rsaCryptoServiceProvider.VerifyData(input, hash, signature);
@@ -336,14 +340,6 @@ namespace System.IdentityModel.Tokens
                 if (disposing)
                 {
                     this.disposed = true;
-
-#if POST_RC
-                    if (hash != null)
-                    {
-                        hash.Dispose();
-                        hash = null;
-                    }
-#endif
                 }
             }
         }

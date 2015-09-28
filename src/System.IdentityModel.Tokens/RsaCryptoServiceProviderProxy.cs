@@ -39,6 +39,11 @@ namespace System.IdentityModel.Tokens
 
         public RSACryptoServiceProviderProxy(RSACryptoServiceProvider rsa)
         {
+            if (rsa == null)
+            {
+                return;
+            }
+
             //
             // If the provider does not understand SHA256, 
             // replace it with one that does.
