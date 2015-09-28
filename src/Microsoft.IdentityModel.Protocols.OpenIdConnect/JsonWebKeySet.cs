@@ -68,36 +68,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="JsonWebKey"/>.
-        /// </summary>
-        /// <param name="dictionary">a dictionary containing a 'Keys' element which is a Dictionary of JsonWebKeys.</param>
-        /// <exception cref="ArgumentNullException">if 'dictionary' is null.</exception>
-        public JsonWebKeySet(IDictionary<string, object> dictionary)
-        {
-            if (dictionary == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-
-            object obj = null;
-            if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
-            {
-                LogHelper.Throw(LogMessages.IDX10800, typeof(ArgumentException), EventLevel.Error);
-            }
-
-            List<object> keys = obj as List<object>;
-            if (keys != null)
-            {
-                foreach (var key in keys)
-                {
-                    Dictionary<string, object> dic = key as Dictionary<string, object>;
-                    if (dic != null)
-                        _keys.Add(new JsonWebKey(dic));
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets the <see cref="IList{JsonWebKey}"/>.
         /// </summary>       
         public IList<JsonWebKey> Keys
