@@ -142,6 +142,7 @@ namespace System.IdentityModel.Tokens
         public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'";
         public const string IDX10505 = "IDX10505: Unable to validate signature. The 'Delegate' specified on TokenValidationParameters, returned a null SecurityKey.\nSecurityKeyIdentifier: '{0}'\nToken: '{1}'.";
         public const string IDX10506 = "IDX10506: Signature validation failed. The 'Delegate' specified on TokenValidationParameters returned null SecurityToken, token: '{0}'.";
+        public const string IDX10507 = "IDX10507: Cannot create RSACryptoServiceProviderProxy since the input RSACryptoServiceProvider object is null.";
 
         // Crypto Errors
         public const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type: '{4}'.";

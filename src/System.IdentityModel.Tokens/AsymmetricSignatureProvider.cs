@@ -29,7 +29,7 @@ namespace System.IdentityModel.Tokens
     {
         private bool disposed;
 #if DNXCORE50
-        private RSA rsaCng;
+        private RSA rsa;
         private HashAlgorithmName hash;
 #else
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
@@ -93,8 +93,8 @@ namespace System.IdentityModel.Tokens
             if (rsaKey != null)
             {
 #if DNXCORE50
-                rsaCng = new RSACng();
-                (rsaCng as RSA).ImportParameters(rsaKey.Parameters);
+                rsa = new RSACng();
+                (rsa as RSA).ImportParameters(rsaKey.Parameters);
 #else
                 rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                 (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
@@ -105,22 +105,31 @@ namespace System.IdentityModel.Tokens
             X509SecurityKey x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
-                RSACryptoServiceProvider rsa = null;
+#if DNXCORE50
                 if (willCreateSignatures)
                 {
-                    rsa = x509Key.PrivateKey as RSACryptoServiceProvider;
-                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
+                    RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
+                    if (rsaCsp != null)
+                    {
+                        rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
+                    }
+                    else
+                    {
+                        rsa = x509Key.PrivateKey as RSA;
+                    }
                 }
-#if DNXCORE50
                 else
                 {
-                    rsaCng = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
+                    rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
                 }
 #else
+                if (willCreateSignatures)
+                {
+                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
+                }
                 else
                 {
-                    rsa = x509Key.PublicKey.Key as RSACryptoServiceProvider;
-                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsa);
+                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
                 }
 #endif
                 return;
@@ -251,8 +260,8 @@ namespace System.IdentityModel.Tokens
                 throw new ObjectDisposedException(GetType().ToString());
             }
 #if DNXCORE50
-            if (rsaCng != null)
-                return rsaCng.SignData(input, hash, RSASignaturePadding.Pkcs1);
+            if (rsa != null)
+                return rsa.SignData(input, hash, RSASignaturePadding.Pkcs1);
             else if (rsaCryptoServiceProviderProxy != null)
                 return rsaCryptoServiceProviderProxy.SignData(input, hash.Name);
 #else
@@ -310,8 +319,8 @@ namespace System.IdentityModel.Tokens
                 throw new InvalidOperationException(LogMessages.IDX10621);
             }
 #if DNXCORE50
-            if (rsaCng != null)
-                return rsaCng.VerifyData(input, signature, hash, RSASignaturePadding.Pkcs1);
+            if (rsa != null)
+                return rsa.VerifyData(input, signature, hash, RSASignaturePadding.Pkcs1);
             else if (rsaCryptoServiceProviderProxy != null)
                 return rsaCryptoServiceProviderProxy.VerifyData(input, hash.Name, signature);
 #else

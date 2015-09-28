@@ -18,6 +18,7 @@
 
 using System;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens
 {
@@ -41,6 +42,7 @@ namespace System.IdentityModel.Tokens
         {
             if (rsa == null)
             {
+                LogHelper.Throw(LogMessages.IDX10507, typeof(ArgumentException));
                 return;
             }
 
