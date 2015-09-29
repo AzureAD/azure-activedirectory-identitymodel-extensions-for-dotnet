@@ -26,7 +26,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
@@ -52,48 +52,18 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Deserializing json string into json web keys.");
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806);
                 var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
                 _keys = jwebKeys._keys;
             }
             catch(Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, json), typeof(ArgumentException), EventLevel.Error, ex);
-            }
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="JsonWebKey"/>.
-        /// </summary>
-        /// <param name="dictionary">a dictionary containing a 'Keys' element which is a Dictionary of JsonWebKeys.</param>
-        /// <exception cref="ArgumentNullException">if 'dictionary' is null.</exception>
-        public JsonWebKeySet(IDictionary<string, object> dictionary)
-        {
-            if (dictionary == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-
-            object obj = null;
-            if (!dictionary.TryGetValue(JsonWebKeyParameterNames.Keys, out obj))
-            {
-                LogHelper.Throw(ErrorMessages.IDX10800, typeof(ArgumentException), EventLevel.Error);
-            }
-
-            List<object> keys = obj as List<object>;
-            if (keys != null)
-            {
-                foreach (var key in keys)
-                {
-                    Dictionary<string, object> dic = key as Dictionary<string, object>;
-                    if (dic != null)
-                        _keys.Add(new JsonWebKey(dic));
-                }
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10804, json), typeof(ArgumentException), EventLevel.Error, ex);
             }
         }
 
@@ -136,11 +106,11 @@ namespace Microsoft.IdentityModel.Protocols
                             }
                             catch (CryptographicException ex)
                             {
-                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, ex);
+                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, ex);
                             }
                             catch (FormatException fex)
                             {
-                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, fex);
+                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, fex);
                             }
                         }
                     }
@@ -164,11 +134,11 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                         catch (CryptographicException ex)
                         {
-                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
+                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
                         }
                         catch (FormatException ex)
                         {
-                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
+                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
                         }
                     }
                 }

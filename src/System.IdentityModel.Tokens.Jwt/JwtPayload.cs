@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (notBefore >= expires)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value, notBefore.Value));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value));
                 }
             }
 
@@ -119,26 +119,26 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'amr' claim { amr, 'value' }.
+        /// Gets the 'value' of the 'amr' claim { amr, 'value' } as list of strings.
         /// </summary>
-        /// <remarks>If the 'amr' claim is not found, null is returned.</remarks>
-        public string Amr
+        /// <remarks>If the 'amr' claim is not found, an empty enumerable is returned.</remarks>
+        public IList<string> Amr
         {
             get
             {
-                return this.GetStandardClaim(JwtRegisteredClaimNames.Amr);
+                return this.GetIListClaims(JwtRegisteredClaimNames.Amr);
             }
         }
 
         /// <summary>
         /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
         /// </summary>
-        /// <remarks>If the 'auth_time' claim is not found, null is returned.</remarks>
-        public string AuthTime
+        /// <remarks>If the 'auth_time' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
+        public int? AuthTime
         {
             get
             {
-                return this.GetStandardClaim(JwtRegisteredClaimNames.AuthTime);
+                return this.GetIntClaim(JwtRegisteredClaimNames.AuthTime);
             }
         }
 
@@ -150,44 +150,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                List<string> audiences = new List<string>();
-
-                object value = null;
-                if (!TryGetValue(JwtRegisteredClaimNames.Aud, out value))
-                {
-                    return audiences;
-                }
-
-                string str = value as string;
-                if (str != null)
-                {
-                    audiences.Add(str);
-                    return audiences;
-                }
-
-                // Audiences must be an array of string;
-                IEnumerable<object> values = value as IEnumerable<object>;
-                if (values != null)
-                {
-                    foreach (var item in values)
-                    {
-                        str = item as string;
-                        if (str != null)
-                        {
-                            audiences.Add(str);
-                        }
-                        else
-                        {
-                            audiences.Add(item.ToString());
-                        }
-                    }
-                }
-                else
-                {
-                    audiences.Add(JsonExtensions.SerializeToJson(value));
-                }
-
-                return audiences;
+                return this.GetIListClaims(JwtRegisteredClaimNames.Aud);
             }
         }
 
@@ -590,6 +553,40 @@ namespace System.IdentityModel.Tokens.Jwt
             return retval;
         }
 
+        internal IList<string> GetIListClaims(string claimType)
+        {
+            List<string> claimValues = new List<string>();
+
+            object value = null;
+            if (!TryGetValue(claimType, out value))
+            {
+                return claimValues;
+            }
+
+            string str = value as string;
+            if (str != null)
+            {
+                claimValues.Add(str);
+                return claimValues;
+            }
+
+            // values must be an enumeration of strings;
+            IEnumerable<object> values = value as IEnumerable<object>;
+            if (values != null)
+            {
+                foreach (var item in values)
+                {
+                    claimValues.Add(item.ToString());
+                }
+            }
+            else
+            {
+                claimValues.Add(JsonExtensions.SerializeToJson(value));
+            }
+
+            return claimValues;
+        }
+
         /// <summary>
         /// Gets the DateTime using the number of seconds from 1970-01-01T0:0:0Z (UTC)
         /// </summary>
@@ -631,12 +628,12 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10700, key, dateValue ?? "<null>", ex));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, key, dateValue ?? "<null>", ex));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10701, key, dateValue ?? "<null>", ex));
+                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10701, key, dateValue ?? "<null>", ex));
                 }
 
                 throw;

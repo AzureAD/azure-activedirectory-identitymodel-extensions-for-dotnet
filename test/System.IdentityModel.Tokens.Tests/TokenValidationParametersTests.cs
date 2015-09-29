@@ -60,7 +60,7 @@ namespace System.IdentityModel.Tokens.Tests
             {
                 AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue,
                 IssuerSigningKey = issuerSigningKey,
-                IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey; },
+                IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey }; },
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
                 LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue,
@@ -87,7 +87,7 @@ namespace System.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
             validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
-            validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return issuerSigningKey2; };
+            validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey2 }; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
             validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue;

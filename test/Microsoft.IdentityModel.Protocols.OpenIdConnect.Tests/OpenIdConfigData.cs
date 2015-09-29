@@ -250,8 +250,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public static string AADCommonUrl = "https://login.windows.net/common/.well-known/openid-configuration";
         public static string CyranoJsonWebKeySet;
-        public static string BadUri = "_____NoSuchfile____";     
-   
+        public static string BadUri = "_____NoSuchfile____";
+        public static string HttpsBadUri = "https://_____NoSuchfile____";
+
         // Keys
 
         public static string JsonWebKeyFromPing =

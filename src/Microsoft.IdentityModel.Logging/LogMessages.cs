@@ -16,10 +16,22 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Protocols.WsFederation
+namespace Microsoft.IdentityModel.Logging
 {
-    public class MetadataSerializer
+    /// <summary>
+    /// Log messages and codes for Microsoft.IdentityModel.Logging
+    /// </summary>
+    internal static class LogMessages
     {
-        public X509CertificateValidationMode CertificateValidationMode { get; set; }
+#pragma warning disable 1591
+        // general
+        internal const string MIML10000 = "MIML10000: The parameter '{0}' cannot be a 'null' or an empty object.";
+        internal const string MIML10001 = "MIML10001: The property value '{0}' cannot be a 'null' or an empty object.";
+
+        // logging
+        internal const string MIML11000 = "MIML11000: eventData.Payload is null or empty. Not logging any messages.";
+        internal const string MIML11001 = "MIML11001: Cannot create the fileStream or StreamWriter to write logs. Exception: {0}";
+#pragma warning restore 1591
+
     }
 }

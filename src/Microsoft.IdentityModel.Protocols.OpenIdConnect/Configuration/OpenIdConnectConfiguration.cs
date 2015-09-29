@@ -70,10 +70,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose("Deserializing json into OpenIdConnectConfiguration object");
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10808, json));
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
         }
 
@@ -86,10 +86,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (configuration == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose("Serializing OpenIdConfiguration object to json string");
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if(string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             OpenIdConnectConfiguration config = Create(json);
@@ -118,7 +118,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         private void Copy(OpenIdConnectConfiguration config)
         {
-            IdentityModelEventSource.Logger.WriteVerbose("Copying openIdConnect configuration object.");
             _acrValuesSupported = config._acrValuesSupported;
             AuthorizationEndpoint = config.AuthorizationEndpoint;
             CheckSessionIframe = config.CheckSessionIframe;
@@ -158,77 +157,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _userinfoEncryptionAlgValuesSupported = config._userinfoEncryptionAlgValuesSupported;
             _userinfoEncryptionEncValuesSupported = config._userinfoEncryptionEncValuesSupported;
             _userinfoSigningAlgValuesSupported = config._userinfoSigningAlgValuesSupported;
-        }
-
-        /// <summary>
-        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from an <see cref="IDictionary{TKey, TValue}"/> string.
-        /// </summary>
-        /// <param name="dictionary">a <see cref="IDictionary{TKey, TValue}"/>json containing the configuration data.</param>
-        /// <exception cref="ArgumentNullException">if 'dictionary' is null.</exception>
-        public OpenIdConnectConfiguration(IDictionary<string, object> dictionary)
-        {
-            if (dictionary == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-
-            IdentityModelEventSource.Logger.WriteVerbose("Initializing an instance of OpenIdConnectConfiguration from a dictionary.");
-
-            object obj = null;
-            string str = null;
-            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.AuthorizationEndpoint, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    AuthorizationEndpoint = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.CheckSessionIframe, out obj))
-            {
-                str = dictionary[OpenIdProviderMetadataNames.CheckSessionIframe] as string;
-                if (str != null)
-                {
-                    CheckSessionIframe = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.EndSessionEndpoint, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    EndSessionEndpoint = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.Issuer, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    Issuer = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.JwksUri, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    JwksUri = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.TokenEndpoint, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    TokenEndpoint = str;
-                }
-            }
         }
 
         /// <summary>

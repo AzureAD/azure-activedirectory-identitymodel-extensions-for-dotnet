@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens
 {
@@ -40,7 +41,7 @@ namespace System.IdentityModel.Tokens
     /// <param name="kid">a key identifier. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A <see cref="SecurityKey"/> to use when validating a signature.</returns>
-    public delegate SecurityKey IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
+    public delegate IEnumerable<SecurityKey> IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for IssuerSigningKeyValidator.
@@ -245,7 +246,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (value < TimeSpan.Zero)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10100, value));
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10100, value));
                 }
 
                 _clockSkew = value;
@@ -291,6 +292,7 @@ namespace System.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
+            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10245, securityToken));
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 
@@ -379,7 +381,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentException(ErrorMessages.IDX10102);
+                    throw new ArgumentException(LogMessages.IDX10102);
                 }
 
                 _nameClaimType = value;
@@ -404,7 +406,7 @@ namespace System.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentException(ErrorMessages.IDX10103);
+                    throw new ArgumentException(LogMessages.IDX10103);
                 }
 
                 _roleClaimType = value;

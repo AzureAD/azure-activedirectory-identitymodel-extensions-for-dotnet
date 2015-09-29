@@ -35,16 +35,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();
             Type type = typeof(OpenIdConnectProtocolValidationContext);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 2)
-                Assert.True(true, "Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 6)
+                Assert.True(true, "Number of properties has changed from 6 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>> 
                     { 
-                        new KeyValuePair<string, List<object>>("AuthorizationCode", new List<object>{(string)null, "AuthorizationCode", "AuthorizationCode_AuthorizationCode"}),
-                        new KeyValuePair<string, List<object>>("Nonce", new List<object>{(string)null, "Nonce", "Nonce_Nonce"}),                            
+                        new KeyValuePair<string, List<object>>("State", new List<object>{(string)null, "AuthorizationCode", "AuthorizationCode_AuthorizationCode"}),
+                        new KeyValuePair<string, List<object>>("Nonce", new List<object>{(string)null, "Nonce", "Nonce_Nonce"}),
                     },
                     Object = validationContext,
                 };

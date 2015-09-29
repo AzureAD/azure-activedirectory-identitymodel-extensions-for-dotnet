@@ -57,7 +57,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 { "adfs1email", "http://schemas.xmlsoap.org/claims/EmailAddress" },
                 { "adfs1upn", "http://schemas.xmlsoap.org/claims/UPN" },
                 { "amr", "http://schemas.microsoft.com/claims/authnmethodsreferences" },
-                { "auth_time", ClaimTypes.AuthenticationInstant },
                 { "authmethod", ClaimTypes.AuthenticationMethod },
                 { "certapppolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/applicationpolicy" },
                 { "certauthoritykeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/authoritykeyidentifier" },

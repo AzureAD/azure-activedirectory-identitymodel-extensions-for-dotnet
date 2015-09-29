@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <returns>A populated <see cref="OpenIdConnectConfiguration"/> instance.</returns>
         public static Task<OpenIdConnectConfiguration> GetAsync(string address, CancellationToken cancel)
         {
-            return GetAsync(address, new GenericDocumentRetriever(), cancel);
+            return GetAsync(address, new HttpDocumentRetriever(), cancel);
         }
 
         /// <summary>
@@ -75,24 +75,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (retriever == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             string doc = await retriever.GetDocumentAsync(address, cancel);
 
-            IdentityModelEventSource.Logger.WriteVerbose("Deserializing the string obtained from metadata endpoint into openIdConnectConfiguration object.");
+            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10811, doc));
             OpenIdConnectConfiguration openIdConnectConfiguration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
-                IdentityModelEventSource.Logger.WriteVerbose("Retrieving json web keys from " + openIdConnectConfiguration.JwksUri);
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10812, openIdConnectConfiguration.JwksUri));
                 string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
 
-                IdentityModelEventSource.Logger.WriteVerbose("Deserializing json web keys obtained from " + openIdConnectConfiguration.JwksUri);
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10813, openIdConnectConfiguration.JwksUri));
                 openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(keys);
                 foreach (SecurityKey key in openIdConnectConfiguration.JsonWebKeySet.GetSigningKeys())
                 {

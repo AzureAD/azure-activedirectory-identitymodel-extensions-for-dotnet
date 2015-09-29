@@ -24,7 +24,7 @@ using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/draft-ietf-jose-json-web-key-37.
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
@@ -91,156 +91,6 @@ namespace Microsoft.IdentityModel.Protocols
             this.X5u = key.X5u;
             this.X = key.X;
             this.Y = key.Y;
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="JsonWebKey"/>.
-        /// </summary>
-        /// <param name="dictionary"> that contains JSON Web Key parameters.</param>
-        public JsonWebKey(IDictionary<string, object> dictionary)
-        {
-            if (dictionary == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": dictionary"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-
-            object obj = null;
-            string str = null;
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Alg, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    Alg = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Crv, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    Crv = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.D, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    D = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.DP, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    DP = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.E, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    E = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.KeyOps, out obj))
-            {
-                IList<string> opts = obj as IList<string>;
-                if (opts != null)
-                {
-                    KeyOps = opts;
-                }
-                else
-                {
-                    str = obj as string;
-                    if (str != null)
-                    {
-                        _keyops.Add(str);
-                    }
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Kid, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    Kid = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Kty, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    Kty = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.N, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    N = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5c, out obj))
-            {
-                List<object> jclauses = obj as List<object>;
-                if (jclauses != null)
-                {
-                    foreach (var clause in jclauses)
-                    {
-                        _certificateClauses.Add(clause.ToString());
-                    }
-                }
-                else
-                {
-                    str = obj as string;
-                    if (str != null)
-                    {
-                        _certificateClauses.Add(str);
-                    }
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5t, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    X5t = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.X5u, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    X5u = str;
-                }
-            }
-
-            if (dictionary.TryGetValue(JsonWebKeyParameterNames.Use, out obj))
-            {
-                str = obj as string;
-                if (str != null)
-                {
-                    Use = str;
-                }
-            }
         }
 
         /// <summary>
@@ -301,7 +151,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": KeyOps"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": KeyOps"), typeof(ArgumentNullException), EventLevel.Verbose);
 
                 foreach (string keyOp in value)
                     _keyops.Add(keyOp);
@@ -380,7 +230,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10001, GetType() + ": X5c"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": X5c"), typeof(ArgumentNullException), EventLevel.Verbose);
 
                 foreach (string clause in value)
                     _certificateClauses.Add(clause);

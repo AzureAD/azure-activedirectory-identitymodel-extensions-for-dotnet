@@ -21,7 +21,7 @@ using System.Text;
 
 namespace System.IdentityModel.Tokens
 {
-    internal static class Utility
+    public static class Utility
     {
         public const string Empty = "empty";
         public const string Null = "null";
@@ -64,6 +64,38 @@ namespace System.IdentityModel.Tokens
             }
 
             return sb.ToString();
+        }
+
+        public static bool IsHttps(string address)
+        {
+            if (string.IsNullOrEmpty(address))
+            {
+                return false;
+            }
+
+            try
+            {
+                Uri uri = new Uri(address);
+                return IsHttps(new Uri(address));
+            }
+            catch (UriFormatException)
+            {
+                return false;
+            }
+
+        }
+
+        public static bool IsHttps(Uri uri)
+        {
+            if (uri == null)
+            {
+                return false;
+            }
+#if DNXCORE50
+            return uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase); //Uri.UriSchemeHttps is internal in dnxcore
+#else
+            return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+#endif
         }
     }
 }

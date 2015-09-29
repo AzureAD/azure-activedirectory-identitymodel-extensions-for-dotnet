@@ -29,40 +29,32 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Retrieves metadata information from the given address. Loads data from external endpoints (using HttpClient) and local files.
+    /// Reads a local file from the disk.
     /// </summary>
-    public class GenericDocumentRetriever : IDocumentRetriever
+    public class FileDocumentRetriever : IDocumentRetriever
     {
+        public FileDocumentRetriever() { }
+
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             try
             {
-                using (HttpClient client = new HttpClient())
+                if (File.Exists(address))
                 {
-                    IdentityModelEventSource.Logger.WriteVerbose("Obtaining information from metadata endpoint: " + address);
-                    using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelPendingRequests()))
-                    {
-                        return await client.GetStringAsync(address).ConfigureAwait(false);
-                    }
+                    return await Task.FromResult(File.ReadAllText(address));
                 }
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10814, address), typeof(ArgumentException), EventLevel.Error);
             }
             catch (Exception ex)
             {
-                if (File.Exists(address))
-                {
-                    return File.ReadAllText(address);
-                }
-                else
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
-                    return null;
-                }
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
             }
+            return null;
         }
     }
 }

@@ -285,7 +285,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             adfsStrings.Add(new KeyValuePair<string, string>("deviceosver", "http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion"));
             adfsStrings.Add(new KeyValuePair<string, string>("deviceismanaged", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged"));
             adfsStrings.Add(new KeyValuePair<string, string>("deviceostype", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype"));
-            adfsStrings.Add(new KeyValuePair<string, string>("auth_time", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationinstant"));
             adfsStrings.Add(new KeyValuePair<string, string>("authmethod", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationmethod"));
             adfsStrings.Add(new KeyValuePair<string, string>("email", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
             adfsStrings.Add(new KeyValuePair<string, string>("given_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"));
@@ -828,6 +827,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_1024);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts")), validationParameters, tokenHandler, expectedException);
+
+            // "kid" is not present, but an "x5t" is present.
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_2048);
+            JwtSecurityToken jwt =
+                new JwtSecurityToken
+                (
+                    issuer: Issuers.GotJwt,
+                    audience: Audiences.AuthFactors,
+                    claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
+                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(10),
+                    notBefore: DateTime.UtcNow
+                );
+            jwt.Header[JwtHeaderParameterNames.Kid] = null;
+            jwt.Header[JwtHeaderParameterNames.X5t] = KeyingMaterial.DefaultCert_2048.Thumbprint;
+            TestUtilities.ValidateToken(tokenHandler.WriteToken(jwt), validationParameters, tokenHandler, expectedException);
 
             // "Signature missing, just two parts",
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:");

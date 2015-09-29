@@ -41,9 +41,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // null string, nothing to add
             RunJsonWebKeySetTest((string)null, null, ExpectedException.ArgumentNullException());
 
-            // null dictionary, nothing to add
-            RunJsonWebKeySetTest((IDictionary<string, object>)null, null, ExpectedException.ArgumentNullException(), false);
-
             RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
             RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:", inner: typeof(JsonReaderException)));
         }
@@ -93,24 +90,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             JsonWebKeySet jsonWebKeys = null;
             try
             {
-                if (obj is string)
+                if (obj is string || asString)
                 {
                     jsonWebKeys = new JsonWebKeySet(obj as string);
-                }
-                else if (obj is IDictionary<string, object>)
-                {
-                    jsonWebKeys = new JsonWebKeySet(obj as IDictionary<string, object>);
-                }
-                else
-                {
-                    if (asString)
-                    {
-                        jsonWebKeys = new JsonWebKeySet(obj as string);
-                    }
-                    else
-                    {
-                        jsonWebKeys = new JsonWebKeySet(obj as IDictionary<string, object>);
-                    }
                 }
                 expectedException.ProcessNoException();
             }

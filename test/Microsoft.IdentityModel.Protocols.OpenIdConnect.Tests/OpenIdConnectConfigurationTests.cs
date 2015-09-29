@@ -34,7 +34,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void Constructors()
         {
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
-            RunOpenIdConnectConfigurationTest((IDictionary<string, object>)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
             RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetadataString, OpenIdConfigData.OpenIdConnectConfiguration1, ExpectedException.NoExceptionExpected);
         }
 
@@ -45,24 +44,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
             try
             {
-                if (obj is string)
+                if (obj is string || asString)
                 {
                     openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as string);
-                }
-                else if (obj is IDictionary<string, object>)
-                {
-                    openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
-                }
-                else
-                {
-                    if (asString)
-                    {
-                        openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as string);
-                    }
-                    else
-                    {
-                        openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as IDictionary<string, object>);
-                    }
                 }
                 expectedException.ProcessNoException();
             }

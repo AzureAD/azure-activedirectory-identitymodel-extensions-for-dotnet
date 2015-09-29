@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols
         private static string ToBase64UrlString( byte[] input )
         {
             if ( input == null )
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "Base64UrlConverter.ToBase64UrlString: input"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Base64UrlConverter.ToBase64UrlString: input"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             return Convert.ToBase64String( input ).TrimEnd( '=' ).Replace( '+', '-' ).Replace( '/', '_' );
         }
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
         private static byte[] FromBase64UrlString( string input )
         {
             if ( string.IsNullOrEmpty( input ) )
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10000, "Base64UrlConverter.FromBase64UrlString: input"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Base64UrlConverter.FromBase64UrlString: input"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             return Convert.FromBase64String( Pad( input.Replace( '-', '+' ).Replace( '_', '/' ) ) );
         }

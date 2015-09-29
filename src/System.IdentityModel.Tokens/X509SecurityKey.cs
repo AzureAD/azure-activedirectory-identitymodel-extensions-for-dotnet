@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens
 
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
-            if (string.IsNullOrWhiteSpace("algorithm"))
+            if (string.IsNullOrWhiteSpace(algorithm))
                 throw new ArgumentNullException("algorithm");
 
             if (verifyOnly)

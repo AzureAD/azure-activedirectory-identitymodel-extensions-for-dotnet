@@ -47,6 +47,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Assert.True(false, "jwtPayload.Aud should be empty");
             }
 
+            Assert.True(jwtPayload.Amr != null, "jwtPayload.Amr should not be null");
+            foreach (string audience in jwtPayload.Amr)
+            {
+                Assert.True(false, "jwtPayload.Amr should be empty");
+            }
+
             Assert.True(jwtPayload.ValidFrom == DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
             Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
@@ -69,8 +75,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     { 
                         new KeyValuePair<string, List<object>>("Actort", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Acr", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("Amr", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("AuthTime", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("AuthTime", new List<object>{(string)null, 10, 12 }),
                         new KeyValuePair<string, List<object>>("Azp", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("CHash", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Exp", new List<object>{(string)null, 1, 0 }),
@@ -99,6 +104,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 jwtPayload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, aud));
             }
 
+            // multiple amrs
+            var amrs = new Newtonsoft.Json.Linq.JArray("amr1", "amr2", "amr3");
+            foreach (var amr in amrs)
+            {
+                jwtPayload.AddClaim(new Claim(JwtRegisteredClaimNames.Amr, amr.ToString()));
+            }
+
             string encodedPayload = jwtPayload.Base64UrlEncode();
             var deserializedPayload = JwtPayload.Base64UrlDeserialize(encodedPayload);
 
@@ -110,6 +122,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             if (!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Aud, IdentityUtilities.DefaultAudiences))
             {
                 errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Aud, IdentityUtilities.DefaultAudiences)");
+            }
+
+            if (!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Amr, amrs.ToObject<List<string>>()))
+            {
+                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(jwtPayload.Amr, amrs)");
             }
 
             TestUtilities.AssertFailIfErrors("JwtPalyoad_Claims", errors);
