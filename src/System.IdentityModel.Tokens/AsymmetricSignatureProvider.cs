@@ -345,6 +345,13 @@ namespace System.IdentityModel.Tokens
                 {
                     this.disposed = true;
                 }
+#if !DNXCORE50
+                if (hash != null)
+                {
+                    hash.Dispose();
+                    hash = null;
+                }
+#endif
             }
         }
     }
