@@ -25,6 +25,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using System.Threading;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -383,7 +384,14 @@ namespace System.IdentityModel.Tokens.Jwt
                 return false;
             }
 
-            if (!Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex))
+            // Quick fix prior to beta8, will add configuration in RC
+            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
+            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            {
+                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromSeconds(2));
+            }
+
+            if( !regex.IsMatch(tokenString))
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
                 return false;
