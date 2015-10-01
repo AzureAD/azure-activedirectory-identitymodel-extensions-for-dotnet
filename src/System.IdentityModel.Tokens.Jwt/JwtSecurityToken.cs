@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Logging;
+using System.Threading;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -60,7 +61,14 @@ namespace System.IdentityModel.Tokens.Jwt
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException), EventLevel.Verbose);
             }
 
-            if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex))
+            // Quick fix prior to beta8, will add configuration in RC
+            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
+            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            {
+                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromSeconds(2));
+            }
+
+            if (!regex.IsMatch(jwtEncodedString))
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
             }
