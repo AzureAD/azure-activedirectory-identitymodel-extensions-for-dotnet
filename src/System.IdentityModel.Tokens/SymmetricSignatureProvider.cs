@@ -82,7 +82,19 @@ namespace System.IdentityModel.Tokens
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
-            return false;
+            if (string.IsNullOrWhiteSpace(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.HmacSha1Signature:
+                case SecurityAlgorithms.HmacSha256Signature:
+                    return true;
+
+                default:
+                    return false;
+            }
+
         }
 
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
@@ -94,6 +106,10 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.HmacSha1Signature:
+                    return new HMACSHA1();
+                case SecurityAlgorithms.HmacSha256Signature:
+                    return new HMACSHA256();
                 default:
                     {
                         LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException), EventLevel.Error);

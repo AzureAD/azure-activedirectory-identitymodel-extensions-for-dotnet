@@ -48,7 +48,16 @@ namespace System.IdentityModel.Tokens
 
         public override SignatureProvider GetSignatureProvider(string algorithm, bool forSigning)
         {
-            return null;
+            var factory = this.SignatureProviderFactory ?? SignatureProviderFactory.Default;
+
+            if (forSigning)
+            {
+                return factory.CreateForSigning(this, algorithm);
+            }
+            else
+            {
+                return factory.CreateForVerifying(this, algorithm);
+            }
         }
 
         public virtual byte[] Key
