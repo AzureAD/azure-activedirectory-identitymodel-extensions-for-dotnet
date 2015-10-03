@@ -133,27 +133,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 #endif
 
-#if SymmetricKeySuport
-        [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
-        public void SymmetricSignatureProvider_Extensibility()
-        {
-            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            string newAlgorithmValue = "bobsYourUncle";
-
-            string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, newAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
-            JwtSecurityToken jwt = handler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2) as JwtSecurityToken;
-            ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
-
-            // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(innerTypeExpected: typeof(InvalidOperationException), substringExpected: "IDX10503:");
-            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, expectedException);
-
-            // inbound is mapped Hmac
-            originalAlgorithmValue = ReplaceAlgorithm(newAlgorithmValue, SecurityAlgorithms.HmacSha256Signature, JwtSecurityTokenHandler.InboundAlgorithmMap);
-            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, ExpectedException.NoExceptionExpected);
-            ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
-        }
-#endif
         private void RunAlgorithmMappingTest(string jwt, TokenValidationParameters validationParameters, JwtSecurityTokenHandler handler, ExpectedException expectedException)
         {
             try

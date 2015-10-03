@@ -164,7 +164,7 @@ namespace System.IdentityModel.Tokens.Tests
         public static SignatureProvider  DefaultAsymmetricSignatureProvider = SignatureProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RSA_SHA256);
 
         public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; } }
-        
+        public static SecurityKey DefaultSymmetricSigningKey {  get { return KeyingMaterial.DefaultSymmetricSecurityKey_256;  } }
         public static ClaimsPrincipal DefaultClaimsPrincipal 
         { 
             get 
@@ -211,14 +211,12 @@ namespace System.IdentityModel.Tokens.Tests
         public static SecurityKey NotDefaultSigningKey = KeyingMaterial.RsaSecurityKey_2048;
 
 
-#if SymmetricKeySuport
         public static string DefaultSymmetricJwt
         {
-            get { return DefaultJwt(KeyingMaterial.DefaulgSymmetricSecurityKey); }
+            get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2)); }
         }
-#endif
 
-public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
+        public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
@@ -230,7 +228,7 @@ public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
                     issuedAt: securityTokenDescriptor.IssuedAt,
                     issuer: securityTokenDescriptor.Issuer,
                     subject: new ClaimsIdentity(securityTokenDescriptor.Claims),
-                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2
+                    signingCredentials: securityTokenDescriptor.SigningCredentials
                     ));
         }
 
@@ -253,12 +251,11 @@ public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
             get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }
         }
 
-#if SymmetricKeySuport
         public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
         {
-            get { return DefaultTokenValidationParameters(KeyingMaterial.DefaultSymmetricSigningKey); }
+            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningKey); }
         }
-#endif
+
         public static TokenValidationParameters DefaultTokenValidationParameters(SecurityKey key)
         {
             return new TokenValidationParameters

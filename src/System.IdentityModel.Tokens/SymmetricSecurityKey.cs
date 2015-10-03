@@ -55,9 +55,14 @@ namespace System.IdentityModel.Tokens
             get { return _keySize; }
         }
 
-        public override SignatureProvider GetSignatureProvider(string algorithm, bool forSigning)
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
-            return null;
+            var factory = this.SignatureProviderFactory ?? SignatureProviderFactory.Default;
+
+            if (verifyOnly)
+                return factory.CreateForVerifying(this, algorithm);
+            else
+                return factory.CreateForSigning(this, algorithm);
         }
 
         public virtual byte[] Key

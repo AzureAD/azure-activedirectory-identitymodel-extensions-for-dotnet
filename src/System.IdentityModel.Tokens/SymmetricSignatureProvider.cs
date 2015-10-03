@@ -67,7 +67,7 @@ namespace System.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("key");
 
             if (!IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10640, (algorithm ?? "null"));
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10640, (algorithm ?? "null"));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
                 throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
@@ -98,7 +98,7 @@ namespace System.IdentityModel.Tokens
             set
             {
                 if (value < DefaultMinimumSymmetricKeySizeInBits)
-                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits);
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits);
 
                 _minimumSymmetricKeySizeInBits = value;
             }
@@ -106,7 +106,22 @@ namespace System.IdentityModel.Tokens
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
-            return false;
+            if (string.IsNullOrWhiteSpace(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.HMAC_SHA256:
+                case SecurityAlgorithms.HMAC_SHA384:
+                case SecurityAlgorithms.HMAC_SHA512:
+                    return true;
+                default:
+                    return false;
+            }
+
         }
 
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
@@ -116,6 +131,15 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HMAC_SHA256:
+                    return new HMACSHA256();
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HMAC_SHA384:
+                    return new HMACSHA384();
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.HMAC_SHA512:
+                    return new HMACSHA512();
                 default:
                     throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
             }

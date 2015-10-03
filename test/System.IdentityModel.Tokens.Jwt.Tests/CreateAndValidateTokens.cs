@@ -272,28 +272,31 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             RunRoundTrip(createAndValidateParams, handler);
 
-#if SymmetricKeySuport
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.Simple_simpleSigned_Symmetric",
-                CompareTo = IdentityUtilities.CreateJwtSecurityToken(issuer, originalIssuer, ClaimSets.OutboundTransform(ClaimSets.Simple(issuer, originalIssuer), JwtSecurityTokenHandler.OutboundClaimTypeMap), KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
+                CompareTo = IdentityUtilities.CreateJwtSecurityToken(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience, 
+                ClaimSets.OutboundClaimTypeTransform(ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap), 
+                nbf, expires, nbf, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
                 ExceptionType = null,
                 SecurityTokenDescriptor = new SecurityTokenDescriptor
                 {
-                    Claims = ClaimSets.Simple(issuer, originalIssuer),
+                    Claims = ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
+                    SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                    Expires = expires,
+                    NotBefore = nbf,
+                    Issuer = IdentityUtilities.DefaultIssuer,
+                    Audience = IdentityUtilities.DefaultAudience
                 },
-                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
                 TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = false,
+                    ValidAudience = IdentityUtilities.DefaultAudience,
                     IssuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
-                    ValidIssuer = issuer,
+                    ValidIssuer = IdentityUtilities.DefaultIssuer,
                 }
             };
 
             RunRoundTrip(createAndValidateParams, handler);
-#endif
         }
 
         private void RunRoundTrip(CreateAndValidateParams createandValidateParams, JwtSecurityTokenHandler handler)

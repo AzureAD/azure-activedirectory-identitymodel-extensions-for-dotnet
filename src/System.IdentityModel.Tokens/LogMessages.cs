@@ -82,7 +82,7 @@ namespace System.IdentityModel.Tokens
         internal const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than: '{0}'.";
         internal const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
-        internal const string IDX10634 = "IDX10634: KeyedHashAlgorithm.Key = SymmetricSecurityKey.GetSymmetricKey() threw.\n\nSymmetricSecurityKey: '{0}'\nSignatureAlgorithm: '{1}' check to make sure the SignatureAlgorithm is supported.";
+        internal const string IDX10634 = "IDX10634: KeyedHashAlgorithm.Key = SymmetricSecurityKey.Key threw.\n\nSymmetricSecurityKey: '{0}'\nSignatureAlgorithm: '{1}' check to make sure the SignatureAlgorithm is supported.";
         internal const string IDX10638 = "IDX10638: Cannot created the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         internal const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         internal const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
