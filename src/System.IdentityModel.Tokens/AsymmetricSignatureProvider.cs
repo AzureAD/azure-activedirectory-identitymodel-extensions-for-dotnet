@@ -16,9 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens
 {
@@ -31,6 +33,7 @@ namespace System.IdentityModel.Tokens
 #if DNXCORE50
         private RSA rsa;
         private HashAlgorithmName hash;
+        private ECDsa ecdsaCng;
 #else
         private RSACryptoServiceProvider rsaCryptoServiceProvider;
         private HashAlgorithm hash;
@@ -60,7 +63,7 @@ namespace System.IdentityModel.Tokens
         public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "AsymmetricSignatureProvider.key"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             if (!IsSupportedAlgorithm(algorithm))
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"));
@@ -83,92 +86,14 @@ namespace System.IdentityModel.Tokens
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying));
             }
 
+            bool algorithmResolved = false;
 #if DNXCORE50
-            hash = GetHashAlgorithmName(algorithm);
+            algorithmResolved = ResolveDotNetCoreAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
 #else
-            hash = GetHashAlgorithm(algorithm);
+            algorithmResolved = ResolveDotNetDesktopAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
 #endif
-            RsaSecurityKey rsaKey = key as RsaSecurityKey;
-
-            if (rsaKey != null)
-            {
-#if DNXCORE50
-                rsa = new RSACng();
-                (rsa as RSA).ImportParameters(rsaKey.Parameters);
-#else
-                rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
-#endif
-                return;    
-            }
-
-            X509SecurityKey x509Key = key as X509SecurityKey;
-            if (x509Key != null)
-            {
-#if DNXCORE50
-                if (willCreateSignatures)
-                {
-                    RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
-                    if (rsaCsp != null)
-                    {
-                        rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
-                    }
-                    else
-                    {
-                        rsa = x509Key.PrivateKey as RSA;
-                    }
-                }
-                else
-                {
-                    rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
-                }
-#else
-                if (willCreateSignatures)
-                {
-                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
-                }
-                else
-                {
-                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
-                }
-#endif
-                return;
-            }
-
-            throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()));
-        }
-
-        protected virtual HashAlgorithm GetHashAlgorithm(string algorithm)
-        {
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw new ArgumentNullException("algorithm");
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha1Signature:
-                    return SHA1.Create();
-
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.HMAC_SHA256:
-                case SecurityAlgorithms.RSA_SHA256:
-                case SecurityAlgorithms.RsaSha256Signature:
-                    return SHA256.Create();
-
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.HMAC_SHA384:
-                case SecurityAlgorithms.RSA_SHA384:
-                case SecurityAlgorithms.RsaSha384Signature:
-                    return SHA384.Create();
-
-                case SecurityAlgorithms.RsaSha512Signature:
-                case SecurityAlgorithms.RSA_SHA512:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.HMAC_SHA512:
-                    return SHA512.Create();
-
-                default:
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
-            }
+            if (!algorithmResolved)
+                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()));
         }
 
 #if DNXCORE50
@@ -203,6 +128,112 @@ namespace System.IdentityModel.Tokens
                 default:
                     throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
             }
+        }
+
+        private bool ResolveDotNetCoreAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            hash = GetHashAlgorithmName(algorithm);
+            RsaSecurityKey rsaKey = key as RsaSecurityKey;
+
+            if (rsaKey != null)
+            {
+                rsa = new RSACng();
+                (rsa as RSA).ImportParameters(rsaKey.Parameters);
+                return true;    
+            }
+
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                if (willCreateSignatures)
+                {
+                    RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
+                    if (rsaCsp != null)
+                    {
+                        rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
+                    }
+                    else
+                    {
+                        rsa = x509Key.PrivateKey as RSA;
+                    }
+                }
+                else
+                {
+                    rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
+                }
+                return true;
+            }
+
+            ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
+            if (ecdsaKey != null)
+            {
+                ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
+                return true;
+            }
+            return false;
+        }
+#else
+        protected virtual HashAlgorithm GetHashAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "GetHashAlgorithm.algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha1Signature:
+                    return SHA1.Create();
+
+                case SecurityAlgorithms.ECDSA_SHA256:
+                case SecurityAlgorithms.HMAC_SHA256:
+                case SecurityAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.RsaSha256Signature:
+                    return SHA256.Create();
+
+                case SecurityAlgorithms.ECDSA_SHA384:
+                case SecurityAlgorithms.HMAC_SHA384:
+                case SecurityAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.RsaSha384Signature:
+                    return SHA384.Create();
+
+                case SecurityAlgorithms.RsaSha512Signature:
+                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.ECDSA_SHA512:
+                case SecurityAlgorithms.HMAC_SHA512:
+                    return SHA512.Create();
+
+                default:
+                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
+            }
+        }
+
+        private bool ResolveDotNetDesktopAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            hash = GetHashAlgorithm(algorithm);
+
+            RsaSecurityKey rsaKey = key as RsaSecurityKey;
+
+            if (rsaKey != null)
+            {
+                rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                return true;
+            }
+
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                if (willCreateSignatures)
+                {
+                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
+                }
+                else
+                {
+                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
+                }
+                return true;
+            }
+
+            return false;
         }
 #endif
 
@@ -247,7 +278,7 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                throw new ArgumentNullException("input");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Sign.input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
@@ -264,6 +295,8 @@ namespace System.IdentityModel.Tokens
                 return rsa.SignData(input, hash, RSASignaturePadding.Pkcs1);
             else if (rsaCryptoServiceProviderProxy != null)
                 return rsaCryptoServiceProviderProxy.SignData(input, hash.Name);
+            else if (ecdsaCng != null)
+                return ecdsaCng.SignData(input, hash);
 #else
             if (rsaCryptoServiceProvider != null)
                 return rsaCryptoServiceProvider.SignData(input, hash);
@@ -291,7 +324,7 @@ namespace System.IdentityModel.Tokens
         {
             if (input == null)
             {
-                throw new ArgumentNullException("input");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Verify.input"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (signature == null)
@@ -323,6 +356,8 @@ namespace System.IdentityModel.Tokens
                 return rsa.VerifyData(input, signature, hash, RSASignaturePadding.Pkcs1);
             else if (rsaCryptoServiceProviderProxy != null)
                 return rsaCryptoServiceProviderProxy.VerifyData(input, hash.Name, signature);
+            else if (ecdsaCng != null)
+                return ecdsaCng.VerifyData(input, signature, hash);
 #else
             if (rsaCryptoServiceProvider != null)
                 return rsaCryptoServiceProvider.VerifyData(input, hash, signature);
