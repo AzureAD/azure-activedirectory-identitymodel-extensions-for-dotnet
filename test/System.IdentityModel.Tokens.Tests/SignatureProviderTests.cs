@@ -51,9 +51,9 @@ namespace System.IdentityModel.Tokens.Tests
             // Key size checks
             FactoryCreateFor("Siging:    - AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
 
-            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = 2048;
+            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap[SecurityAlgorithms.RsaSha256Signature] = 2048;
             FactoryCreateFor("Verifying: - AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
-            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
+            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap[SecurityAlgorithms.RsaSha256Signature] = 1024;
 
 #if SymmetricKeySuport
             SignatureProviderFactory.MinimumSymmetricKeySizeInBits = 512;
@@ -340,7 +340,7 @@ namespace System.IdentityModel.Tokens.Tests
             List<string> errors = new List<string>();
 
             // Asymmetric
-            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10631:"), errors);
+            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10630:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, ExpectedException.NoExceptionExpected, errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", ExpectedException.ArgumentException(substringExpected: "IDX10640:"), errors);
