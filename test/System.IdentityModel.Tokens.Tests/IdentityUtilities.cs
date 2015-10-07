@@ -151,7 +151,9 @@ namespace System.IdentityModel.Tokens.Tests
             XmlWriter writer = XmlWriter.Create(sb);
             tokenHandler.WriteToken(writer, securityToken);
             writer.Flush();
+#if !DNXCORE50
             writer.Close();
+#endif
             return sb.ToString();
         }
 

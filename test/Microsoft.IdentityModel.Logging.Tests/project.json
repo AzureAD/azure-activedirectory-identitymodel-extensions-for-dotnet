@@ -8,9 +8,7 @@
         "test": "xunit.runner.aspnet"
     },
     "frameworks": {
-        "dnx451": {
-            "dependencies": {
-            }
-        }
+        "dnx451": { },
+        "dnxcore50": { }
     }
 }
