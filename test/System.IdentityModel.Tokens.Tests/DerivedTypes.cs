@@ -20,15 +20,13 @@
 
 
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace System.IdentityModel.Tokens.Tests
 {
 #if DNXCORE50
-    /// <summary>
-    /// 
-    /// </summary>
     public class DerivedClaim : Claim
     {
         string _dataString;
@@ -60,12 +58,6 @@ namespace System.IdentityModel.Tokens.Tests
         public DerivedClaim(BinaryReader reader, ClaimsIdentity subject)
             : base(reader, subject)
         {
-
-            Logger.LogInformation("DerivedClaim.ctor... base.SerializeName: " + base.SerializeName ?? "null");
-            Logger.LogInformation("DerivedClaim.ctor... SerializeName: " + SerializeName ?? "null");
-            if (string.IsNullOrWhiteSpace(base.SerializeName))
-                return;
-
             _dataString = reader.ReadString();
             Int32 cb = reader.ReadInt32();
             if (cb > 0)
@@ -98,16 +90,6 @@ namespace System.IdentityModel.Tokens.Tests
             }
         }
 
-        protected override string SerializeName
-        {
-            get { return "Derived"; }
-        }
-
-        public string SerializedName
-        {
-            get { return SerializeName; }
-        }
-
         public override Claim Clone()
         {
             return Clone((ClaimsIdentity)null);
@@ -121,7 +103,6 @@ namespace System.IdentityModel.Tokens.Tests
         public override void WriteTo(IO.BinaryWriter writer)
         {
             base.WriteTo(writer);
-            Logger.LogInformation("SerializeName: " + SerializeName);
             writer.Write(_dataString);
             if (_dataBytes == null || _dataBytes.Length == 0)
             {
@@ -206,17 +187,7 @@ namespace System.IdentityModel.Tokens.Tests
 
         protected override Claim CreateClaim(BinaryReader reader)
         {
-            DerivedClaim dc = new DerivedClaim(reader, this);
-            if (string.IsNullOrWhiteSpace(dc.SerializedName))
-            {
-                Logger.LogInformation(" return (dc as Claim).Clone(this);");
-                return (dc as Claim).Clone(this);
-            }
-            else
-            {
-                Logger.LogInformation(" return dc;");
-                return dc;
-            }
+            return new DerivedClaim(reader, this);
         }
     }
 

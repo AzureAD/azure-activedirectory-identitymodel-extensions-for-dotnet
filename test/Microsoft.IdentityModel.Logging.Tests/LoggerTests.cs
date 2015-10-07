@@ -178,7 +178,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
             File.Delete("testLog.txt");
 
             // using StreamWriter
-            StreamWriter streamWriter = new StreamWriter("testLog.txt", true);
+            Stream fileStream = new FileStream("testLog.txt", FileMode.OpenOrCreate, FileAccess.Write);
+            StreamWriter streamWriter = new StreamWriter(fileStream);
             using (TextWriterEventListener listener = new TextWriterEventListener(streamWriter))
             {
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);

@@ -653,7 +653,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new JwtSecurityToken
                 (
                     audience: IdentityUtilities.DefaultAudience,
+#if DNXCORE50
+                    // Temporary until https://github.com/dotnet/corefx/issues/3667 is fixed
+                    claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, " ") },
+#else
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, string.Empty) },
+#endif
                     issuer: IdentityUtilities.DefaultIssuer,
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
