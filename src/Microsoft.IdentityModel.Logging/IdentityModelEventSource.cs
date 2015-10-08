@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Logging
                     WriteVerbose(message);
                     break;
                 default:
-                    LogHelper.Throw("Unknown log level.", typeof(ArgumentException), EventLevel.Error);
+                    WriteError(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML11002, level.ToString()));
                     break;
             }
         }

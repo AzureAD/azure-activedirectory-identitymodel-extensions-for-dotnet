@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Logging
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML10000);
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML11000);
                 return;
             }
 
