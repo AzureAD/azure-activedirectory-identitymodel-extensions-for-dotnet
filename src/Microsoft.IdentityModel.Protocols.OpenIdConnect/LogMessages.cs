@@ -76,6 +76,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10340 = "IDX10340: The 'id_token' contains 'azp' claim but its value is not equal to Client Id. 'azp': '{0}'. clientId: '{1}'.";
         internal const string IDX10341 = "IDX10341: 'RequireState' = false, OpenIdConnectProtocolValidationContext.State is null and there is no 'state' in the OpenIdConnect response to validate.";
         internal const string IDX10342 = "IDX10342: 'RequireStateValidation' = false, not validating the state.";
+        internal const string IDX10343 = "IDX10343: Unable to parse response from UserInfo endpoint: '{0}'";
+        internal const string IDX10344 = "IDX10344: OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken is null, no id_token present to validate userinfo response against.";
 
         // configuration retrieval errors
         internal const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";

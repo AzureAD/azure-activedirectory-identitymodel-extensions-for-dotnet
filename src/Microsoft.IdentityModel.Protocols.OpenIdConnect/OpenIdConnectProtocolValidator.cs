@@ -26,6 +26,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -305,12 +306,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            // no 'response' is recieved or 'id_token' in the response is null 
-            if (validationContext.ProtocolMessage == null || string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken))
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
-
             if (validationContext.UserInfoEndpointResponse == null)
             {
                 LogHelper.Throw(LogMessages.IDX10337, typeof(OpenIdConnectProtocolException), EventLevel.Error);
@@ -321,12 +316,30 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
 
-            string idTokenSubject = validationContext.ValidatedIdToken.Payload.Sub;
-            string userInfoSubject = validationContext.UserInfoEndpointResponse.Payload.Sub;
-
-            if (!string.Equals(idTokenSubject, userInfoSubject, StringComparison.Ordinal))
+            JwtSecurityToken userInfoResponse = new JwtSecurityToken();
+            try
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10338, idTokenSubject, userInfoSubject), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                // if user info response is a signed jwt token
+                string[] tokenParts = validationContext.UserInfoEndpointResponse.Split('.');
+                if (tokenParts != null && tokenParts.Length == 3)
+                {
+                    userInfoResponse = new JwtSecurityToken(validationContext.UserInfoEndpointResponse);
+                }
+                else
+                {
+                    // if the response is not a signed jwt, it should be json
+                    userInfoResponse = new JwtSecurityToken(new JwtHeader(), JwtPayload.Deserialize(validationContext.UserInfoEndpointResponse));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10343, validationContext.UserInfoEndpointResponse), typeof(OpenIdConnectProtocolException), EventLevel.Error, ex);
+            }
+
+            if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, userInfoResponse.Payload.Sub, StringComparison.Ordinal))
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10338, validationContext.ValidatedIdToken.Payload.Sub, userInfoResponse.Payload.Sub), typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
         }
 
@@ -431,25 +444,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 switch (algorithm)
                 {
-                    case SecurityAlgorithms.RsaSha1Signature:
-                        return SHA1.Create();
-
+                    case SecurityAlgorithms.SHA256:
                     case SecurityAlgorithms.ECDSA_SHA256:
                     case SecurityAlgorithms.HMAC_SHA256:
                     case SecurityAlgorithms.RSA_SHA256:
                     case SecurityAlgorithms.RsaSha256Signature:
+                    case SecurityAlgorithms.PS256:
                         return SHA256.Create();
 
+                    case SecurityAlgorithms.SHA384:
                     case SecurityAlgorithms.ECDSA_SHA384:
                     case SecurityAlgorithms.HMAC_SHA384:
                     case SecurityAlgorithms.RSA_SHA384:
                     case SecurityAlgorithms.RsaSha384Signature:
+                    case SecurityAlgorithms.PS384:
                         return SHA384.Create();
 
+                    case SecurityAlgorithms.SHA512:
                     case SecurityAlgorithms.RsaSha512Signature:
                     case SecurityAlgorithms.RSA_SHA512:
                     case SecurityAlgorithms.ECDSA_SHA512:
                     case SecurityAlgorithms.HMAC_SHA512:
+                    case SecurityAlgorithms.PS512:
                         return SHA512.Create();
                 }
 

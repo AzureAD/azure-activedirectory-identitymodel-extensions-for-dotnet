@@ -25,6 +25,7 @@ using System.IdentityModel.Tokens.Tests;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -123,6 +124,78 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 ee.ProcessException(ex);
             }
         }
+
+        private void ValidateUserInfoResponse(OpenIdConnectProtocolValidationContext context, OpenIdConnectProtocolValidator validator, ExpectedException ee)
+        {
+            try
+            {
+                validator.ValidateUserInfoResponse(context);
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: validate userinfo endpoint response")]
+        public void ValidateUserInfoResponse()
+        {
+            var protocolValidator = new OpenIdConnectProtocolValidator
+            {
+                RequireTimeStampInNonce = false,
+                RequireStateValidation = false,
+                RequireNonce = false
+            };
+            var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
+            var jwt = CreateValidatedIdToken();
+            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
+            var userInfoResponseJson = @"{ ""sub"": ""sub""}";
+            var userInfoResponseJsonInvalidSub = @"{ ""sub"": ""sub1""}";
+            var stringJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            var protocolValidationContext = new OpenIdConnectProtocolValidationContext();
+
+            // validationContext is null
+            ValidateUserInfoResponse(null, validator, ExpectedException.ArgumentNullException());
+
+            // validationContext.UserInfoEndpointResponse is null
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10337:")
+                );
+
+            // validationContext.validatedIdToken is null
+            protocolValidationContext.UserInfoEndpointResponse = "response";
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:")
+                );
+
+            // invalid userinfor response
+            protocolValidationContext.ValidatedIdToken = jwt;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10343:", typeof(JsonReaderException))
+                );
+
+            // unmatching "sub" claim
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJsonInvalidSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10338:")
+                );
+
+            // validation passes
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson;
+            ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
+            protocolValidationContext.UserInfoEndpointResponse = stringJwt;
+            ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
+        }
+
 
         [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateOpenIdConnectMessageWithIdTokenOnly")]
         public void ValidateMessageWithIdToken()

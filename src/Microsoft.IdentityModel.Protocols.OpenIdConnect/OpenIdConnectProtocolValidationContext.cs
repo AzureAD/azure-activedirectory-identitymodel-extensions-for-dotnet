@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or sets the response received from userinfo_endpoint.
         /// </summary>
-        public JwtSecurityToken UserInfoEndpointResponse { get; set; }
+        public string UserInfoEndpointResponse { get; set; }
 
         /// <summary>
         /// This id_token is assumed to have audience, issuer, lifetime and signature validated.
