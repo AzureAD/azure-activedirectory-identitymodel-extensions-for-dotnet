@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -103,7 +104,7 @@ namespace System.IdentityModel.Tokens.Tests
         {
             Type type = obj.GetType();
             FieldInfo fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            return  fieldInfo.GetValue(obj);
+            return fieldInfo.GetValue(obj);
         }
 
         /// <summary>
@@ -316,7 +317,7 @@ namespace System.IdentityModel.Tokens.Tests
                 Assert.True(false, "property 'set' is not found: " + property + ", type: " + type.ToString());
             }
         }
-  
+
         public static ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)
         {
             ClaimsPrincipal retVal = null;
@@ -355,7 +356,7 @@ namespace System.IdentityModel.Tokens.Tests
             TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
         }
 
-        public static void AssertEqual(string testid, object obj1, object obj2,  Func<object, object, CompareContext, bool> areEqual, CompareContext cc)
+        public static void AssertEqual(string testid, object obj1, object obj2, Func<object, object, CompareContext, bool> areEqual, CompareContext cc)
         {
             areEqual(obj1, obj2, cc);
         }
@@ -372,6 +373,19 @@ namespace System.IdentityModel.Tokens.Tests
 
                 Assert.True(false, sb.ToString());
             }
+        }
+
+        public static byte[] HexToByteArray(string hexString)
+        {
+            byte[] bytes = new byte[hexString.Length / 2];
+
+            for (int i = 0; i < hexString.Length; i += 2)
+            {
+                string s = hexString.Substring(i, 2);
+                bytes[i / 2] = byte.Parse(s, NumberStyles.HexNumber, null);
+            }
+
+            return bytes;
         }
     }
 }

@@ -38,9 +38,6 @@ namespace System.IdentityModel.Tokens
             { SecurityAlgorithms.ECDSA_SHA256, 256 },
             { SecurityAlgorithms.ECDSA_SHA384, 256 },
             { SecurityAlgorithms.ECDSA_SHA512, 256 },
-            { SecurityAlgorithms.HMAC_SHA256, 256 },
-            { SecurityAlgorithms.HMAC_SHA384, 256 },
-            { SecurityAlgorithms.HMAC_SHA512, 256 },
             { SecurityAlgorithms.RSA_SHA256, 2048 },
             { SecurityAlgorithms.RSA_SHA384, 2048 },
             { SecurityAlgorithms.RSA_SHA512, 2048 },
@@ -58,9 +55,6 @@ namespace System.IdentityModel.Tokens
             { SecurityAlgorithms.ECDSA_SHA256, 256 },
             { SecurityAlgorithms.ECDSA_SHA384, 256 },
             { SecurityAlgorithms.ECDSA_SHA512, 256 },
-            { SecurityAlgorithms.HMAC_SHA256, 256 },
-            { SecurityAlgorithms.HMAC_SHA384, 256 },
-            { SecurityAlgorithms.HMAC_SHA512, 256 },
             { SecurityAlgorithms.RSA_SHA256, 1024 },
             { SecurityAlgorithms.RSA_SHA384, 1024 },
             { SecurityAlgorithms.RSA_SHA512, 1024 },
@@ -255,23 +249,13 @@ namespace System.IdentityModel.Tokens
         {
             if (willCreateSignatures)
             {
-                if (!MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm))
-                {
-                    // should we throw?
-                }
-
-                if (key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
                 {
                     throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigningMap));
                 }
             }
 
-            if (!MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm))
-            {
-                // should we throw?
-            }
-
-            if (key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
+            if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
             {
                 throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifyingMap));
             }

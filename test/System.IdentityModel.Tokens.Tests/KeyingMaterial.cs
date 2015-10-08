@@ -107,6 +107,15 @@ namespace System.IdentityModel.Tokens.Tests
             RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
             RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
             RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
+
+            //ecdsa
+            byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
+            byte[] ecdsa384KeyBlob = TestUtilities.HexToByteArray("45435334300000009dc6bb9cdc8dac31e3db6e6b5f58f8e3a304e5c08e632705ca9a236f1134646dca526b89f7ea98653962f4a781f2fc9bf479a2d627561b1269548050e6d2c388018b837f4ceba8ee7fe2eefea67c8418ad1e84f60c1309385e573ea5183e9ae8b6d5308a78da207c6e556af2053983321a5f8ac057b787089ee783c99093b9f2afb2f9a1e9a560ad3095b9667aa699fa");
+            byte[] ecdsa521KeyBlob = TestUtilities.HexToByteArray("454353364200000001f9f06ea4e00fd3fecc1753af7983b43cb9b692941ee6364616c9c4168845fce804beca7aa23d0a5049910db45dfb61112f4cb02e93ff62af1be203ad248dd70952015ddc31d1ad7411ca5996b8b76a40ea65f286c665225114bec8557365aa4bc79358f8c68b873cb76a1c86a5a394185d8eeb9602b8b968db1e4ac49b7cc51f83c7170055ad9b0b2d0d5d2306a66bf87a256a3739696121eb131e64ae61991ea23db99b397c32df95efb0cb284147a929c65e9f671073ca3c7a084cb9211dceb06c987277");
+
+            ECDsa256Key = new ECDsaSecurityKey(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa384Key = new ECDsaSecurityKey(ecdsa384KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa521Key = new ECDsaSecurityKey(ecdsa521KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
         }
 
         // .../Certs/SelfSigned1024_SHA1.pfx
@@ -205,6 +214,11 @@ namespace System.IdentityModel.Tokens.Tests
         public static SigningCredentials RSASigningCreds_2048_Public;
         public static SigningCredentials RSASigningCreds_4096;
         public static SigningCredentials RSASigningCreds_4096_Public;
+
+        // ECDSA Cng security keys
+        public static readonly ECDsaSecurityKey ECDsa256Key;
+        public static readonly ECDsaSecurityKey ECDsa384Key;
+        public static readonly ECDsaSecurityKey ECDsa521Key;
 
 #if SymmetricKeySuport
         public static string DefaultSymmetricKeyEncoded_256                    ="Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";

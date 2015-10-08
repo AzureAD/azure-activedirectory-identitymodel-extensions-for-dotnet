@@ -146,9 +146,9 @@ namespace System.IdentityModel.Tokens.Tests
             if (TypeExpected != null)
             {
                 if (errors != null)
-                    errors.Add("exceptedException.TypeExpected != null: " + TypeExpected);
+                    errors.Add("expectedException.TypeExpected != null: " + TypeExpected);
                 else
-                    Assert.True(false, "exceptedException.TypeExpected != null: '" + TypeExpected);
+                    Assert.True(false, "expectedException.TypeExpected != null: '" + TypeExpected);
             }
         }
 
