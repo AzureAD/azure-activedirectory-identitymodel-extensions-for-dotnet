@@ -420,7 +420,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="algorithm">string representing the hash algorithm</param>
         /// <returns><see cref="HashAlgorithm"/> corresponding to the input string 'algorithm'</returns>
-        private HashAlgorithm GetHashAlgorithm(string algorithm)
+        public virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
             if (algorithm == null)
             {
@@ -431,11 +431,26 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 switch (algorithm)
                 {
-                    case "SHA256":
-                    case JwtAlgorithms.RSA_SHA256:
-                    case JwtAlgorithms.ECDSA_SHA256:
-                    case JwtAlgorithms.HMAC_SHA256:
+                    case SecurityAlgorithms.RsaSha1Signature:
+                        return SHA1.Create();
+
+                    case SecurityAlgorithms.ECDSA_SHA256:
+                    case SecurityAlgorithms.HMAC_SHA256:
+                    case SecurityAlgorithms.RSA_SHA256:
+                    case SecurityAlgorithms.RsaSha256Signature:
                         return SHA256.Create();
+
+                    case SecurityAlgorithms.ECDSA_SHA384:
+                    case SecurityAlgorithms.HMAC_SHA384:
+                    case SecurityAlgorithms.RSA_SHA384:
+                    case SecurityAlgorithms.RsaSha384Signature:
+                        return SHA384.Create();
+
+                    case SecurityAlgorithms.RsaSha512Signature:
+                    case SecurityAlgorithms.RSA_SHA512:
+                    case SecurityAlgorithms.ECDSA_SHA512:
+                    case SecurityAlgorithms.HMAC_SHA512:
+                        return SHA512.Create();
                 }
 
             }
@@ -445,7 +460,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10302, algorithm), typeof(OpenIdConnectProtocolException), EventLevel.Error);
-
             return null;
         }
 
