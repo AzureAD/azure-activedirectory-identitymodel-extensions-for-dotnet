@@ -154,16 +154,19 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.SHA256:
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return HashAlgorithmName.SHA256;
 
+                case SecurityAlgorithms.SHA384:
                 case SecurityAlgorithms.ECDSA_SHA384:
                 case SecurityAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return HashAlgorithmName.SHA384;
 
+                case SecurityAlgorithms.SHA512:
                 case SecurityAlgorithms.ECDSA_SHA512:
                 case SecurityAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha512Signature:
@@ -224,16 +227,19 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.SHA256:
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return SHA256.Create();
 
+                case SecurityAlgorithms.SHA384:
                 case SecurityAlgorithms.ECDSA_SHA384:
                 case SecurityAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return SHA384.Create();
 
+                case SecurityAlgorithms.SHA512:
                 case SecurityAlgorithms.ECDSA_SHA512:
                 case SecurityAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha512Signature:
@@ -282,6 +288,9 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.SHA256:
+                case SecurityAlgorithms.SHA384:
+                case SecurityAlgorithms.SHA512
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.ECDSA_SHA384:
                 case SecurityAlgorithms.ECDSA_SHA512:
