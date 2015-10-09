@@ -28,24 +28,18 @@ namespace System.IdentityModel.Tokens
         public const string Aes256KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
         public const string DesEncryption = "http://www.w3.org/2001/04/xmlenc#des-cbc";
 
-        public const string DsaSha1Signature = "http://www.w3.org/2000/09/xmldsig#dsa-sha1";
-
         public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";
         public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
-        public const string HmacSha1Signature = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
 
-        public const string Psha1KeyDerivation = "http://schemas.xmlsoap.org/ws/2005/02/sc/dk/p_sha1";
         public const string Ripemd160Digest = "http://www.w3.org/2001/04/xmlenc#ripemd160";
         public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
-        public const string RsaSha1Signature = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         public const string RsaSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
         public const string RsaSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
         public const string RsaSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
         public const string RsaV15KeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
 
-        public const string Sha1Digest = "http://www.w3.org/2000/09/xmldsig#sha1";
         public const string Sha256Digest = "http://www.w3.org/2001/04/xmlenc#sha256";
         public const string Sha512Digest = "http://www.w3.org/2001/04/xmlenc#sha512";
 

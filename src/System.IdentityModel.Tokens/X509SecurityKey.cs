@@ -99,22 +99,6 @@ namespace System.IdentityModel.Tokens
                 return SignatureProviderFactory.CreateForSigning(this, algorithm);
         }
 
-        //public HashAlgorithm GetHashAlgorithmForSignature(string algorithm)
-        //{
-        //    if (string.IsNullOrEmpty(algorithm))
-        //        throw new ArgumentNullException("algorithm");
-
-        //    switch (algorithm)
-        //    {
-        //        case SecurityAlgorithms.RsaSha1Signature:
-        //            return SHA1.Create();
-        //        case SecurityAlgorithms.RsaSha256Signature:
-        //            return SHA256.Create();
-        //        default:
-        //            throw new CryptographicException("UnsupportedAlgorithmForCryptoOperation: " + algorithm);
-        //    }
-        //}
-
         public override bool HasPrivateKey
         {
             get

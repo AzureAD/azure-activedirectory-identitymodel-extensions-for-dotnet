@@ -48,9 +48,6 @@ namespace System.IdentityModel.Tokens.Tests
             HashAlgorithm hashAlgorithm = null;
             switch (algorithm)
             {
-                case "SHA1":
-                    hashAlgorithm = SHA1.Create();
-                    break;
                 case "SHA256":
                     hashAlgorithm = SHA256.Create();
                     break;

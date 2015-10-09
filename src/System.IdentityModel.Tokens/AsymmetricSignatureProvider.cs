@@ -88,13 +88,10 @@ namespace System.IdentityModel.Tokens
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw new ArgumentNullException("algorithm");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "GetHashAlgorithmName.algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.RsaSha1Signature:
-                    return HashAlgorithmName.SHA1;
-
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
@@ -165,9 +162,6 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.RsaSha1Signature:
-                    return SHA1.Create();
-
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
@@ -232,7 +226,6 @@ namespace System.IdentityModel.Tokens
                 case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RSA_SHA512:
-                case SecurityAlgorithms.RsaSha1Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
                 case SecurityAlgorithms.RsaSha512Signature:

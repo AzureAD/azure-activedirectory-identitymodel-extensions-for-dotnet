@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             SigningCredentials rsaSigningCredentials =
                 new SigningCredentials(
                     KeyingMaterial.RsaSecurityKey_2048,
-                    SecurityAlgorithms.RsaSha1Signature,
+                    SecurityAlgorithms.RsaSha256Signature,
                     SecurityAlgorithms.Sha256Digest
                     );
 

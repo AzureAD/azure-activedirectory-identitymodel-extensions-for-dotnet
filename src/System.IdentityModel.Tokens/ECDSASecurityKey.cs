@@ -37,9 +37,9 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ECDsaSecurityKey.blob"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            if (string.IsNullOrEmpty(blobFormat.Format))
+            if (blobFormat == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ECDsaSecurityKey.blobFormat.Format"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ECDsaSecurityKey.blobFormat"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             _cngKey = CngKey.Import(blob, blobFormat);

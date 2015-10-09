@@ -41,7 +41,6 @@ namespace System.IdentityModel.Tokens
             { SecurityAlgorithms.RSA_SHA256, 2048 },
             { SecurityAlgorithms.RSA_SHA384, 2048 },
             { SecurityAlgorithms.RSA_SHA512, 2048 },
-            { SecurityAlgorithms.RsaSha1Signature, 2048 },
             { SecurityAlgorithms.RsaSha256Signature, 2048 },
             { SecurityAlgorithms.RsaSha384Signature, 2048 },
             { SecurityAlgorithms.RsaSha512Signature, 2048 }
@@ -58,7 +57,6 @@ namespace System.IdentityModel.Tokens
             { SecurityAlgorithms.RSA_SHA256, 1024 },
             { SecurityAlgorithms.RSA_SHA384, 1024 },
             { SecurityAlgorithms.RSA_SHA512, 1024 },
-            { SecurityAlgorithms.RsaSha1Signature, 1024 },
             { SecurityAlgorithms.RsaSha256Signature, 1024 },
             { SecurityAlgorithms.RsaSha384Signature, 1024 },
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
