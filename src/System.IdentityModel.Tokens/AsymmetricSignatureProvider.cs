@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -39,6 +41,40 @@ namespace System.IdentityModel.Tokens
         private HashAlgorithm hash;
 #endif
         private RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
+        private IReadOnlyDictionary<string, int> minimumAsymmetricKeySizeInBitsForSigningMap;
+        private IReadOnlyDictionary<string, int> minimumAsymmetricKeySizeInBitsForVerifyingMap;
+
+        /// <summary>
+        /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
+        /// </summary>
+        public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>()
+        {
+            { SecurityAlgorithms.ECDSA_SHA256, 256 },
+            { SecurityAlgorithms.ECDSA_SHA384, 256 },
+            { SecurityAlgorithms.ECDSA_SHA512, 256 },
+            { SecurityAlgorithms.RSA_SHA256, 2048 },
+            { SecurityAlgorithms.RSA_SHA384, 2048 },
+            { SecurityAlgorithms.RSA_SHA512, 2048 },
+            { SecurityAlgorithms.RsaSha256Signature, 2048 },
+            { SecurityAlgorithms.RsaSha384Signature, 2048 },
+            { SecurityAlgorithms.RsaSha512Signature, 2048 }
+        };
+
+        /// <summary>
+        /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when verifying signatures.
+        /// </summary>
+        public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>()
+        {
+            { SecurityAlgorithms.ECDSA_SHA256, 256 },
+            { SecurityAlgorithms.ECDSA_SHA384, 256 },
+            { SecurityAlgorithms.ECDSA_SHA512, 256 },
+            { SecurityAlgorithms.RSA_SHA256, 1024 },
+            { SecurityAlgorithms.RSA_SHA384, 1024 },
+            { SecurityAlgorithms.RSA_SHA512, 1024 },
+            { SecurityAlgorithms.RsaSha256Signature, 1024 },
+            { SecurityAlgorithms.RsaSha384Signature, 1024 },
+            { SecurityAlgorithms.RsaSha512Signature, 1024 }
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
@@ -68,7 +104,10 @@ namespace System.IdentityModel.Tokens
             if (!IsSupportedAlgorithm(algorithm))
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"));
 
-            SignatureProviderFactory.ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
+            minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
+            minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
+
+            ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             if (willCreateSignatures && !key.HasPrivateKey)
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10638, key.ToString()));
@@ -83,6 +122,29 @@ namespace System.IdentityModel.Tokens
             if (!algorithmResolved)
                 throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()));
         }
+
+        /// <summary>
+        /// Gets the mapping from algorithm to the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for creating signatures.
+        /// </summary>
+        public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForSigningMap
+        {
+            get
+            {
+                return minimumAsymmetricKeySizeInBitsForSigningMap;
+            }
+        }
+
+        /// <summary>
+        /// Gets the mapping from algorithm to the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for verifying signatures.
+        /// </summary>
+        public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForVerifyingMap
+        {
+            get
+            {
+                return minimumAsymmetricKeySizeInBitsForVerifyingMap;
+            }
+        }
+
 
 #if DNXCORE50
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
@@ -276,7 +338,7 @@ namespace System.IdentityModel.Tokens
                 return rsaCryptoServiceProviderProxy.SignData(input, hash);
 #endif
 
-            throw new InvalidOperationException("Crypto not supported");
+            throw new InvalidOperationException(LogMessages.IDX10644);
         }
 
         /// <summary>
@@ -337,7 +399,29 @@ namespace System.IdentityModel.Tokens
                 return rsaCryptoServiceProviderProxy.VerifyData(input, hash, signature);
 #endif
 
-            throw new InvalidOperationException("Crypto not supported");
+            throw new InvalidOperationException(LogMessages.IDX10644);
+        }
+
+        /// <summary>
+        /// Validates that the asymmetric key size is more than the allowed minimum
+        /// </summary>
+        /// <param name="key">asymmetric key to validate</param>
+        /// <param name="algorithm">algorithm for which this key will be used</param>
+        /// <param name="willCreateSignatures">whether they key will be used for creating signatures</param>
+        public void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            if (willCreateSignatures)
+            {
+                if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                {
+                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigningMap));
+                }
+            }
+
+            if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
+            {
+                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifyingMap));
+            }
         }
 
         /// <summary>

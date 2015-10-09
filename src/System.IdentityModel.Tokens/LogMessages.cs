@@ -79,6 +79,7 @@ namespace System.IdentityModel.Tokens
         internal const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
         internal const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
         internal const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
+        internal const string IDX10644 = "IDX10644: Crypto operation not supported.";
 
 #pragma warning restore 1591
 

@@ -51,7 +51,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return (_blobFormat.Format == "ECCPRIVATEBLOB" || _blobFormat.Format == "PRIVATEBLOB");
+                return (_blobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || _blobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format);
             }
         }
 
@@ -59,7 +59,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return (_blobFormat.Format == "ECCPUBLICBLOB" || _blobFormat.Format == "PUBLICBLOB");
+                return (HasPrivateKey || _blobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || _blobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format);
             }
         }
 

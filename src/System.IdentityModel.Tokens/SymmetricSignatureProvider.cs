@@ -35,6 +35,13 @@ namespace System.IdentityModel.Tokens
         private KeyedHashAlgorithm keyedHash;
 
         /// <summary>
+        /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
+        /// </summary>
+        public static readonly int DefaultMinimumSymmetricKeySizeInBits = 128;
+
+        private int minimumSymmetricKeySizeInBits = DefaultMinimumSymmetricKeySizeInBits;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SymmetricSecurityKey"/> to create and / or verify signatures over a array of bytes.
         /// </summary>
         /// <param name="key">The <see cref="SymmetricSecurityKey"/> used for signing.</param>
@@ -58,9 +65,9 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
             }
 
-            if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
+            if (key.KeySize < MinimumSymmetricKeySizeInBits)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
             }
 
             this.keyedHash = GetKeyedHashAlgorithm(algorithm);
@@ -77,6 +84,28 @@ namespace System.IdentityModel.Tokens
                 }
 
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException), EventLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum <see cref="SymmetricSecurityKey"/>.KeySize"/>.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumSymmetricKeySizeInBits"/>.</exception>
+        public int MinimumSymmetricKeySizeInBits
+        {
+            get
+            {
+                return minimumSymmetricKeySizeInBits;
+            }
+
+            set
+            {
+                if (value < DefaultMinimumSymmetricKeySizeInBits)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits));
+                }
+
+                minimumSymmetricKeySizeInBits = value;
             }
         }
 

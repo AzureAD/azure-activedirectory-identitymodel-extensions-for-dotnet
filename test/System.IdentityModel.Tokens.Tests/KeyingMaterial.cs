@@ -116,6 +116,9 @@ namespace System.IdentityModel.Tokens.Tests
             ECDsa256Key = new ECDsaSecurityKey(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
             ECDsa384Key = new ECDsaSecurityKey(ecdsa384KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
             ECDsa521Key = new ECDsaSecurityKey(ecdsa521KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa256Key_Public = new ECDsaSecurityKey(ECDsa256Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa384Key_Public = new ECDsaSecurityKey(ECDsa384Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa521Key_Public = new ECDsaSecurityKey(ECDsa521Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
         }
 
         // .../Certs/SelfSigned1024_SHA256.pfx
@@ -210,6 +213,9 @@ namespace System.IdentityModel.Tokens.Tests
         public static readonly ECDsaSecurityKey ECDsa256Key;
         public static readonly ECDsaSecurityKey ECDsa384Key;
         public static readonly ECDsaSecurityKey ECDsa521Key;
+        public static readonly ECDsaSecurityKey ECDsa256Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa384Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa521Key_Public;
 
 #if SymmetricKeySuport
         public static string DefaultSymmetricKeyEncoded_256                    ="Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
