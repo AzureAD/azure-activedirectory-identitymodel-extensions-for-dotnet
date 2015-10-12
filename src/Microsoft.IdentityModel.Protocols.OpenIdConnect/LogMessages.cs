@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10334 = "IDX10334: Both 'id_token' and 'code' are null in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Authorization Endpoint. Cannot process the message.";
         internal const string IDX10335 = "IDX10335: 'refresh_token' cannot be present in a response message received from Authorization Endpoint.";
         internal const string IDX10336 = "IDX10336: Both 'id_token' and 'access_token' should be present in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Token Endpoint. Cannot process the message.";
-        internal const string IDX10337 = "IDX10337: OpenIdConnectProtocolValidationContext.UserInfoEndpointResponse is null, there is no OpenIdConnect Response to validate.";
+        internal const string IDX10337 = "IDX10337: OpenIdConnectProtocolValidationContext.UserInfoEndpointResponse is null or empty, there is no OpenIdConnect Response to validate.";
         internal const string IDX10338 = "IDX10338: Subject claim present in 'id_token': '{0}' does not match the claim received from UserInfo Endpoint: '{1}'.";
         internal const string IDX10339 = "IDX10339: The 'id_token' contains multiple audiences but 'azp' claim is missing.";
         internal const string IDX10340 = "IDX10340: The 'id_token' contains 'azp' claim but its value is not equal to Client Id. 'azp': '{0}'. clientId: '{1}'.";
@@ -78,6 +78,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10342 = "IDX10342: 'RequireStateValidation' = false, not validating the state.";
         internal const string IDX10343 = "IDX10343: Unable to parse response from UserInfo endpoint: '{0}'";
         internal const string IDX10344 = "IDX10344: OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken is null, no id_token present to validate userinfo response against.";
+        internal const string IDX10345 = "IDX10345: OpenIdConnectProtocolValidationContext.UserInfoEndpointResponse does not contain a 'sub' claim, cannot validate.";
+        internal const string IDX10346 = "IDX10346: OpenIdConnectProtocolValidationContext.ValidatedIdToken does not contain a 'sub' claim, cannot validate.";
 
         // configuration retrieval errors
         internal const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";

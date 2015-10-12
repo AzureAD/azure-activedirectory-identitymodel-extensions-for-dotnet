@@ -148,11 +148,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 RequireNonce = false
             };
             var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
-            var jwt = CreateValidatedIdToken();
-            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
+            var jwtWithNoSub = CreateValidatedIdToken();
+            var jwtWithSub = CreateValidatedIdToken();
+            jwtWithSub.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
+            var stringJwt = new JwtSecurityTokenHandler().WriteToken(jwtWithSub);
+
             var userInfoResponseJson = @"{ ""sub"": ""sub""}";
             var userInfoResponseJsonInvalidSub = @"{ ""sub"": ""sub1""}";
-            var stringJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            var userInfoResponseJson2 = @"{ ""tid"":""cdc690f9 - b6b8 - 4023 - 813a - bae7143d1f87"",""oid"":""991fb93e - 7400 - 47aa - bdaa - a5f5ea6b5669"",""upn"":""testuser @Tratcheroutlook.onmicrosoft.com"",""sub"":""sub"",""given_name"":""test"",""family_name"":""user"",""name"":""test user""}";
+            var userInfoResponseJsonWithNoSub = @"{ ""tid"":""cdc690f9 - b6b8 - 4023 - 813a - bae7143d1f87"",""oid"":""991fb93e - 7400 - 47aa - bdaa - a5f5ea6b5669"",""upn"":""testuser @Tratcheroutlook.onmicrosoft.com"",""given_name"":""test"",""family_name"":""user"",""name"":""test user""}";
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext();
 
             // validationContext is null
@@ -173,16 +177,34 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:")
                 );
 
-            // invalid userinfor response
-            protocolValidationContext.ValidatedIdToken = jwt;
+            // invalid userinfo response
+            protocolValidationContext.ValidatedIdToken = jwtWithSub;
             ValidateUserInfoResponse(
                 protocolValidationContext,
                 validator,
                 new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10343:", typeof(JsonReaderException))
                 );
 
+            // 'sub' missing in userinfo response
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJsonWithNoSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10345:")
+                );
+
+            // 'sub' missing in validated jwt token
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson2;
+            protocolValidationContext.ValidatedIdToken = jwtWithNoSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10346:")
+                );
+
             // unmatching "sub" claim
             protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJsonInvalidSub;
+            protocolValidationContext.ValidatedIdToken = jwtWithSub;
             ValidateUserInfoResponse(
                 protocolValidationContext,
                 validator,
@@ -193,6 +215,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson;
             ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
             protocolValidationContext.UserInfoEndpointResponse = stringJwt;
+            ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson2;
             ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
         }
 

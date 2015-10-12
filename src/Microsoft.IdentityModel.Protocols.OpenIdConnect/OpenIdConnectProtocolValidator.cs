@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            if (validationContext.UserInfoEndpointResponse == null)
+            if (string.IsNullOrEmpty(validationContext.UserInfoEndpointResponse))
             {
                 LogHelper.Throw(LogMessages.IDX10337, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
@@ -316,30 +316,41 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
 
-            JwtSecurityToken userInfoResponse = new JwtSecurityToken();
+            string sub = string.Empty;
             try
             {
-                // if user info response is a signed jwt token
-                string[] tokenParts = validationContext.UserInfoEndpointResponse.Split('.');
-                if (tokenParts != null && tokenParts.Length == 3)
+                // if user info response is a jwt token
+                var handler = new JwtSecurityTokenHandler();
+                if (handler.CanReadToken(validationContext.UserInfoEndpointResponse))
                 {
-                    userInfoResponse = new JwtSecurityToken(validationContext.UserInfoEndpointResponse);
+                    var token = handler.ReadToken(validationContext.UserInfoEndpointResponse) as JwtSecurityToken;
+                    sub = token.Payload.Sub;
                 }
                 else
                 {
-                    // if the response is not a signed jwt, it should be json
-                    userInfoResponse = new JwtSecurityToken(new JwtHeader(), JwtPayload.Deserialize(validationContext.UserInfoEndpointResponse));
+                    // if the response is not a jwt, it should be json
+                    var payload = JwtPayload.Deserialize(validationContext.UserInfoEndpointResponse);
+                    sub = payload.Sub;
                 }
-
             }
             catch (Exception ex)
             {
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10343, validationContext.UserInfoEndpointResponse), typeof(OpenIdConnectProtocolException), EventLevel.Error, ex);
             }
 
-            if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, userInfoResponse.Payload.Sub, StringComparison.Ordinal))
+            if (string.IsNullOrEmpty(sub))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10338, validationContext.ValidatedIdToken.Payload.Sub, userInfoResponse.Payload.Sub), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                LogHelper.Throw(LogMessages.IDX10345, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+            }
+
+            if (string.IsNullOrEmpty(validationContext.ValidatedIdToken.Payload.Sub))
+            {
+                LogHelper.Throw(LogMessages.IDX10346, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+            }
+
+            if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, sub, StringComparison.Ordinal))
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10338, validationContext.ValidatedIdToken.Payload.Sub, sub), typeof(OpenIdConnectProtocolException), EventLevel.Error);
             }
         }
 
