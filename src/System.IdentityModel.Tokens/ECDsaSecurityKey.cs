@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -26,10 +25,6 @@ namespace System.IdentityModel.Tokens
 {
     public class ECDsaSecurityKey : AsymmetricSecurityKey
     {
-        private byte[] _blob;
-        private CngKeyBlobFormat _blobFormat;
-        private CngKey _cngKey;
-
         public ECDsaSecurityKey(byte[] blob, CngKeyBlobFormat blobFormat)
         {
             if (blob == null)
@@ -42,16 +37,15 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ECDsaSecurityKey.blobFormat"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
-            _cngKey = CngKey.Import(blob, blobFormat);
-            _blob = blob;
-            _blobFormat = blobFormat;
+            CngKey = CngKey.Import(blob, blobFormat);
+            BlobFormat = blobFormat;
         }
 
         public override bool HasPrivateKey
         {
             get
             {
-                return (_blobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || _blobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format);
+                return (BlobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format);
             }
         }
 
@@ -59,7 +53,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return (HasPrivateKey || _blobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || _blobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format);
+                return (HasPrivateKey || BlobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format);
             }
         }
 
@@ -71,35 +65,21 @@ namespace System.IdentityModel.Tokens
                 return SignatureProviderFactory.CreateForSigning(this, algorithm);
         }
 
-        public byte[] Blob
-        {
-            get
-            {
-                return _blob;
-            }
-        }
+        /// <summary>
+        /// <see cref="CngKeyBlobFormat"/> used to initialize the <see cref="CngKey"/>
+        /// </summary>
+        public CngKeyBlobFormat BlobFormat { get; private set; }
 
-        public CngKeyBlobFormat BlobFormat
-        {
-            get
-            {
-                return _blobFormat;
-            }
-        }
-
-        public CngKey CngKey
-        {
-            get
-            {
-                return _cngKey;
-            }
-        }
+        /// <summary>
+        /// <see cref="CngKey"/> that will be used for signing/verifying operations.
+        /// </summary>
+        public CngKey CngKey { get; private set; }
 
         public override int KeySize
         {
             get
             {
-                return _cngKey.KeySize;
+                return CngKey.KeySize;
             }
         }
     }

@@ -33,16 +33,17 @@ namespace System.IdentityModel.Tokens
     {
         private bool disposed;
 #if DNXCORE50
-        private RSA rsa;
-        private HashAlgorithmName hash;
-        private ECDsa ecdsaCng;
+        private RSA _rsa;
+        private HashAlgorithmName _hashAlgorithm;
+        private ECDsa _ecdsaCng;
 #else
-        private RSACryptoServiceProvider rsaCryptoServiceProvider;
-        private HashAlgorithm hash;
+        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
+        private string _hashAlgorithm;
+        private ECDsaCng _ecdsaCng;
 #endif
-        private RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
-        private IReadOnlyDictionary<string, int> minimumAsymmetricKeySizeInBitsForSigningMap;
-        private IReadOnlyDictionary<string, int> minimumAsymmetricKeySizeInBitsForVerifyingMap;
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+        private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
+        private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
         /// <summary>
         /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
@@ -102,25 +103,22 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "AsymmetricSignatureProvider.key"), typeof(ArgumentNullException), EventLevel.Verbose);
 
             if (!IsSupportedAlgorithm(algorithm))
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"), typeof(ArgumentException));
 
-            minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
-            minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
+            _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
+            _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             if (willCreateSignatures && !key.HasPrivateKey)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10638, key.ToString()));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10638, key.ToString()), typeof(InvalidOperationException));
             }
 
-            bool algorithmResolved = false;
 #if DNXCORE50
-            algorithmResolved = ResolveDotNetCoreAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            ResolveDotNetCoreAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
 #else
-            algorithmResolved = ResolveDotNetDesktopAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            ResolveDotNetDesktopAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
 #endif
-            if (!algorithmResolved)
-                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()));
         }
 
         /// <summary>
@@ -130,7 +128,7 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return minimumAsymmetricKeySizeInBitsForSigningMap;
+                return _minimumAsymmetricKeySizeInBitsForSigningMap;
             }
         }
 
@@ -141,10 +139,9 @@ namespace System.IdentityModel.Tokens
         {
             get
             {
-                return minimumAsymmetricKeySizeInBitsForVerifyingMap;
+                return _minimumAsymmetricKeySizeInBitsForVerifyingMap;
             }
         }
-
 
 #if DNXCORE50
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
@@ -171,22 +168,22 @@ namespace System.IdentityModel.Tokens
                 case SecurityAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha512Signature:
                     return HashAlgorithmName.SHA512;
-
-                default:
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
             }
+
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException));
+            return new HashAlgorithmName(null);
         }
 
-        private bool ResolveDotNetCoreAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        private void ResolveDotNetCoreAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
         {
-            hash = GetHashAlgorithmName(algorithm);
+            _hashAlgorithm = GetHashAlgorithmName(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
 
             if (rsaKey != null)
             {
-                rsa = new RSACng();
-                (rsa as RSA).ImportParameters(rsaKey.Parameters);
-                return true;    
+                _rsa = new RSACng();
+                (_rsa as RSA).ImportParameters(rsaKey.Parameters);
+                return;
             }
 
             X509SecurityKey x509Key = key as X509SecurityKey;
@@ -197,30 +194,32 @@ namespace System.IdentityModel.Tokens
                     RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
                     if (rsaCsp != null)
                     {
-                        rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
+                        _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
                     }
                     else
                     {
-                        rsa = x509Key.PrivateKey as RSA;
+                        _rsa = x509Key.PrivateKey as RSA;
                     }
                 }
                 else
                 {
-                    rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
+                    _rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
                 }
-                return true;
+                return;
             }
 
             ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
             if (ecdsaKey != null)
             {
-                ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
-                return true;
+                _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
+                return;
             }
-            return false;
+
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()), typeof(ArgumentOutOfRangeException));
+            return;
         }
 #else
-        protected virtual HashAlgorithm GetHashAlgorithm(string algorithm)
+        protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "GetHashAlgorithm.algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
@@ -231,36 +230,35 @@ namespace System.IdentityModel.Tokens
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.RSA_SHA256:
                 case SecurityAlgorithms.RsaSha256Signature:
-                    return SHA256.Create();
+                    return SecurityAlgorithms.SHA256;
 
                 case SecurityAlgorithms.SHA384:
                 case SecurityAlgorithms.ECDSA_SHA384:
                 case SecurityAlgorithms.RSA_SHA384:
                 case SecurityAlgorithms.RsaSha384Signature:
-                    return SHA384.Create();
+                    return SecurityAlgorithms.SHA384;
 
                 case SecurityAlgorithms.SHA512:
                 case SecurityAlgorithms.ECDSA_SHA512:
                 case SecurityAlgorithms.RSA_SHA512:
                 case SecurityAlgorithms.RsaSha512Signature:
-                    return SHA512.Create();
-
-                default:
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm));
+                    return SecurityAlgorithms.SHA512;
             }
+
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException));
+            return null;
         }
 
-        private bool ResolveDotNetDesktopAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        private void ResolveDotNetDesktopAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
         {
-            hash = GetHashAlgorithm(algorithm);
-
+            _hashAlgorithm = GetHashAlgorithmString(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
 
             if (rsaKey != null)
             {
-                rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
-                return true;
+                _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                return;
             }
 
             X509SecurityKey x509Key = key as X509SecurityKey;
@@ -268,16 +266,25 @@ namespace System.IdentityModel.Tokens
             {
                 if (willCreateSignatures)
                 {
-                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
                 }
                 else
                 {
-                    rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
                 }
-                return true;
+                return;
             }
 
-            return false;
+            ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
+            if (ecdsaKey != null)
+            {
+                _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
+                _ecdsaCng.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                return;
+            }
+
+            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key.ToString()), typeof(ArgumentOutOfRangeException));
+            return;
         }
 #endif
 
@@ -290,7 +297,7 @@ namespace System.IdentityModel.Tokens
             {
                 case SecurityAlgorithms.SHA256:
                 case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.SHA512
+                case SecurityAlgorithms.SHA512:
                 case SecurityAlgorithms.ECDSA_SHA256:
                 case SecurityAlgorithms.ECDSA_SHA384:
                 case SecurityAlgorithms.ECDSA_SHA512:
@@ -326,28 +333,31 @@ namespace System.IdentityModel.Tokens
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(LogMessages.IDX10624);
+                LogHelper.Throw(LogMessages.IDX10624, typeof(ArgumentException));
             }
 
             if (this.disposed)
             {
-                throw new ObjectDisposedException(GetType().ToString());
+                LogHelper.Throw(GetType().ToString(), typeof(ObjectDisposedException));
             }
-#if DNXCORE50
-            if (rsa != null)
-                return rsa.SignData(input, hash, RSASignaturePadding.Pkcs1);
-            else if (rsaCryptoServiceProviderProxy != null)
-                return rsaCryptoServiceProviderProxy.SignData(input, hash.Name);
-            else if (ecdsaCng != null)
-                return ecdsaCng.SignData(input, hash);
-#else
-            if (rsaCryptoServiceProvider != null)
-                return rsaCryptoServiceProvider.SignData(input, hash);
-            else if (rsaCryptoServiceProviderProxy != null)
-                return rsaCryptoServiceProviderProxy.SignData(input, hash);
-#endif
 
-            throw new InvalidOperationException(LogMessages.IDX10644);
+#if DNXCORE50
+            if (_rsa != null)
+                return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+            else if (_rsaCryptoServiceProviderProxy != null)
+                return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm.Name);
+            else if (_ecdsaCng != null)
+                return _ecdsaCng.SignData(input, _hashAlgorithm);
+#else
+            if (_rsaCryptoServiceProvider != null)
+                return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
+            else if (_rsaCryptoServiceProviderProxy != null)
+                return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
+            else if (_ecdsaCng != null)
+                return _ecdsaCng.SignData(input);
+#endif
+            LogHelper.Throw(LogMessages.IDX10644, typeof(InvalidOperationException));
+            return null;
         }
 
         /// <summary>
@@ -372,43 +382,47 @@ namespace System.IdentityModel.Tokens
 
             if (signature == null)
             {
-                throw new ArgumentNullException("signature");
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Verify.signature"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             if (input.Length == 0)
             {
-                throw new ArgumentException(LogMessages.IDX10625);
+                LogHelper.Throw(LogMessages.IDX10625, typeof(ArgumentException));
             }
 
             if (signature.Length == 0)
             {
-                throw new ArgumentException(LogMessages.IDX10626);
+                LogHelper.Throw(LogMessages.IDX10626, typeof(ArgumentException));
             }
 
             if (this.disposed)
             {
-                throw new ObjectDisposedException(GetType().ToString());
+                LogHelper.Throw(GetType().ToString(), typeof(ObjectDisposedException));
             }
 
-            if (this.hash == null)
+            if (_hashAlgorithm == null)
             {
-                throw new InvalidOperationException(LogMessages.IDX10621);
+                LogHelper.Throw(LogMessages.IDX10621, typeof(InvalidOperationException));
             }
+
 #if DNXCORE50
-            if (rsa != null)
-                return rsa.VerifyData(input, signature, hash, RSASignaturePadding.Pkcs1);
-            else if (rsaCryptoServiceProviderProxy != null)
-                return rsaCryptoServiceProviderProxy.VerifyData(input, hash.Name, signature);
-            else if (ecdsaCng != null)
-                return ecdsaCng.VerifyData(input, signature, hash);
+            if (_rsa != null)
+                return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+            else if (_rsaCryptoServiceProviderProxy != null)
+                return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm.Name, signature);
+            else if (_ecdsaCng != null)
+                return _ecdsaCng.VerifyData(input, signature, _hashAlgorithm);
 #else
-            if (rsaCryptoServiceProvider != null)
-                return rsaCryptoServiceProvider.VerifyData(input, hash, signature);
-            else if (rsaCryptoServiceProviderProxy != null)
-                return rsaCryptoServiceProviderProxy.VerifyData(input, hash, signature);
+            if (_rsaCryptoServiceProvider != null)
+                return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
+            else if (_rsaCryptoServiceProviderProxy != null)
+                return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
+            else if (_ecdsaCng != null)
+                return _ecdsaCng.VerifyData(input, signature);
 #endif
 
-            throw new InvalidOperationException(LogMessages.IDX10644);
+            LogHelper.Throw(LogMessages.IDX10644, typeof(InvalidOperationException));
+            return false;
         }
 
         /// <summary>
@@ -423,13 +437,13 @@ namespace System.IdentityModel.Tokens
             {
                 if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
                 {
-                    throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigningMap));
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key.GetType(), MinimumAsymmetricKeySizeInBitsForSigningMap, key.KeySize), typeof(ArgumentOutOfRangeException));
                 }
             }
 
             if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
             {
-                throw new ArgumentOutOfRangeException("key.KeySize", key.KeySize, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifyingMap));
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key.GetType(), MinimumAsymmetricKeySizeInBitsForVerifyingMap, key.KeySize), typeof(ArgumentOutOfRangeException));
             }
         }
 
@@ -445,13 +459,6 @@ namespace System.IdentityModel.Tokens
                 {
                     this.disposed = true;
                 }
-#if !DNXCORE50
-                if (hash != null)
-                {
-                    hash.Dispose();
-                    hash = null;
-                }
-#endif
             }
         }
     }

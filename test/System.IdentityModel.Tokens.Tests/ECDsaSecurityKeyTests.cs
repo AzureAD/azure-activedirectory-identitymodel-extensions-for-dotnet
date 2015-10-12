@@ -27,8 +27,10 @@ namespace System.IdentityModel.Tokens.Tests
         [Fact(DisplayName = "ECDsaSecurityKeyTests: Constructor")]
         public void Constructor()
         {
+            // null blob
             ECDsaSecurityKeyConstructor(null, null, new ExpectedException(typeof(ArgumentNullException), "ECDsaSecurityKey.blob"));
             byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
+            // null blob format
             ECDsaSecurityKeyConstructor(ecdsa256KeyBlob, null, new ExpectedException(typeof(ArgumentNullException), "ECDsaSecurityKey.blobFormat"));
             ECDsaSecurityKeyConstructor(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob, ExpectedException.NoExceptionExpected);
 
