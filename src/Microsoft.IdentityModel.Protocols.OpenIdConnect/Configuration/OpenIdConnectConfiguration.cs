@@ -128,12 +128,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _displayValuesSupported = config._displayValuesSupported;
             EndSessionEndpoint = config.EndSessionEndpoint;
             _grantTypesSupported = config._grantTypesSupported;
+            HttpLogoutSupported = config.HttpLogoutSupported;
             _idTokenEncryptionAlgValuesSupported = config._idTokenEncryptionAlgValuesSupported;
             _idTokenEncryptionEncValuesSupported = config._idTokenEncryptionEncValuesSupported;
             _idTokenSigningAlgValuesSupported = config._idTokenSigningAlgValuesSupported;
             Issuer = config.Issuer;
             JwksUri = config.JwksUri;
             JsonWebKeySet = config.JsonWebKeySet;
+            LogoutSessionSupported = config.LogoutSessionSupported;
             OpPolicyUri = config.OpPolicyUri;
             OpTosUri = config.OpTosUri;
             RegistrationEndpoint = config.RegistrationEndpoint;
@@ -256,6 +258,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Boolean value specifying whether the OP supports HTTP-based logout. Default is false.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.HttpLogoutSupported, Required = Required.Default)]
+        public bool HttpLogoutSupported { get; set; }
+
+        /// <summary>
         /// Gets the collection of 'id_token_encryption_alg_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IdTokenEncryptionAlgValuesSupported, Required = Required.Default)]
@@ -307,6 +315,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the <see cref="JsonWebKeySet"/>
         /// </summary>
         public JsonWebKeySet JsonWebKeySet {get; set;}
+
+        /// <summary>
+        /// Boolean value specifying whether the OP can pass a sid (session ID) query parameter to identify the RP session at the OP when the logout_uri is used. Dafault Value is false.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.LogoutSessionSupported, Required = Required.Default)]
+        public bool LogoutSessionSupported { get; set; }
 
         /// <summary>
         /// Gets or sets the 'op_policy_uri'

@@ -35,12 +35,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string Discovery = ".well-known/openid-configuration";
         public const string DisplayValuesSupported = "display_values_supported";
         public const string EndSessionEndpoint = "end_session_endpoint";
+        public const string HttpLogoutSupported = "http_logout_supported";
         public const string GrantTypesSupported = "grant_types_supported";
         public const string IdTokenEncryptionAlgValuesSupported = "id_token_encryption_alg_values_supported";
         public const string IdTokenEncryptionEncValuesSupported = "id_token_encryption_enc_values_supported";
         public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
         public const string JwksUri = "jwks_uri";
         public const string Issuer = "issuer";
+        public const string LogoutSessionSupported = "logout_session_supported";
         public const string MicrosoftMultiRefreshToken = "microsoft_multi_refresh_token";
         public const string OpPolicyUri = "op_policy_uri";
         public const string OpTosUri = "op_tos_uri";

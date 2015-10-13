@@ -97,8 +97,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 39)
-                Assert.True(false, "Number of properties has changed from 39 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 41)
+                Assert.True(false, "Number of properties has changed from 41 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -111,9 +111,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{false, true, false}),
                             new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{false, true, true}),
                             new KeyValuePair<string, List<object>>("Issuer",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{null, new JsonWebKeySet()}),
+                            new KeyValuePair<string, List<object>>("LogoutSessionSupported", new List<object>{false, true, true}),
                             new KeyValuePair<string, List<object>>("OpPolicyUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("OpTosUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("RegistrationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
