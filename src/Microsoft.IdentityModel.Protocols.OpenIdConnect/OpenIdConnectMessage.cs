@@ -21,8 +21,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -74,8 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (nameValueCollection == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": nameValueCollection"));
-                return;
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": nameValueCollection"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (var key in nameValueCollection.AllKeys)
@@ -95,8 +94,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (parameters == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameters key-value pairs"));
-                return;
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (KeyValuePair<string, string[]> keyValue in parameters)
@@ -111,6 +109,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="json">the json object from which the instance is created.</param>
+        public OpenIdConnectMessage(JObject json)
+        {
+            if (json == null)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectMessage.json"), typeof(ArgumentNullException), EventLevel.Verbose);
+            }
+
+            foreach (var pair in json)
+            {
+                JToken value;
+                if (json.TryGetValue(pair.Key, out value))
+                {
+                    SetParameter(pair.Key, value.ToString());
                 }
             }
         }

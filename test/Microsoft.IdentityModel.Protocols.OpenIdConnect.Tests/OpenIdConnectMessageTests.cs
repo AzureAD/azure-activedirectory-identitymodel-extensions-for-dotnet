@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Tests;
 using System.Reflection;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -47,6 +48,25 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 expectedException.ProcessException(exception);
             }
+
+            expectedException = ExpectedException.NoExceptionExpected;
+            try
+            {
+                string json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}";
+                openIdConnectMessage = new OpenIdConnectMessage(JObject.Parse(json));
+                expectedException.ProcessNoException();
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception);
+            }
+            Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
+            Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
+            Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
+            Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
+
+            // test with an empty JObject
+            openIdConnectMessage = new OpenIdConnectMessage(new JObject());
         }
 
         [Fact(DisplayName = "OpenIdConnectMessageTests: Defaults")]
