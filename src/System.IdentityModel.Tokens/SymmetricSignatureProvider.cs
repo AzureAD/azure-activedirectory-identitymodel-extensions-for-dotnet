@@ -87,7 +87,6 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.HmacSha1Signature:
                 case SecurityAlgorithms.HmacSha256Signature:
                     return true;
 
@@ -106,8 +105,6 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.HmacSha1Signature:
-                    return new HMACSHA1();
                 case SecurityAlgorithms.HmacSha256Signature:
                     return new HMACSHA256();
                 default:
