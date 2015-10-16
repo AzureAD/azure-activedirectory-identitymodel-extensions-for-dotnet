@@ -88,8 +88,9 @@ namespace System.IdentityModel.Tokens
             switch (algorithm)
             {
                 case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HmacSha512Signature:
                     return true;
-
                 default:
                     return false;
             }
@@ -107,6 +108,10 @@ namespace System.IdentityModel.Tokens
             {
                 case SecurityAlgorithms.HmacSha256Signature:
                     return new HMACSHA256();
+                case SecurityAlgorithms.HmacSha384Signature:
+                    return new HMACSHA384();
+                case SecurityAlgorithms.HmacSha512Signature:
+                    return new HMACSHA512();
                 default:
                     {
                         LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException), EventLevel.Error);

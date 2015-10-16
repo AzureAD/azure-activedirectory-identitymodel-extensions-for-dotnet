@@ -34,6 +34,8 @@ namespace System.IdentityModel.Tokens
         public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
         public const string HmacSha1Signature = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
+        public const string HmacSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha384";
+        public const string HmacSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 
         public const string Psha1KeyDerivation = "http://schemas.xmlsoap.org/ws/2005/02/sc/dk/p_sha1";
         public const string Ripemd160Digest = "http://www.w3.org/2001/04/xmlenc#ripemd160";
