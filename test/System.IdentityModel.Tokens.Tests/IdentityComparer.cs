@@ -716,11 +716,11 @@ namespace System.IdentityModel.Tokens.Tests
             if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKey, validationParameters2.IssuerSigningKey, context, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKey");
 
-            //if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKeyResolver, validationParameters2.IssuerSigningKeyResolver, context, AreSecurityKeysEqual))
-            //    matchingFailures.Add("IssuerSigningKeyRetriever");
-
             if (!AreEnumsEqual<SecurityKey>(validationParameters1.IssuerSigningKeys, validationParameters2.IssuerSigningKeys, context, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKeys");
+
+            if ((validationParameters1.IssuerSigningKeyResolver == null && validationParameters2.IssuerSigningKeyResolver != null) || (validationParameters1.IssuerSigningKeyResolver != null && validationParameters2.IssuerSigningKeyResolver == null))
+                matchingFailures.Add("IssuerSigningKeyResolver");
 
             if ((validationParameters1.IssuerSigningKeyValidator == null && validationParameters2.IssuerSigningKeyValidator != null) || (validationParameters1.IssuerSigningKeyValidator != null && validationParameters2.IssuerSigningKeyValidator == null))
                 matchingFailures.Add("IssuerSigningKeyValidator");
@@ -730,6 +730,9 @@ namespace System.IdentityModel.Tokens.Tests
 
             if ((validationParameters1.LifetimeValidator == null && validationParameters2.LifetimeValidator != null) || (validationParameters1.LifetimeValidator != null && validationParameters2.LifetimeValidator == null))
                 matchingFailures.Add("LifetimeValidator");
+
+            if ((validationParameters1.SignatureValidator == null && validationParameters2.SignatureValidator != null) || (validationParameters1.SignatureValidator != null && validationParameters2.SignatureValidator == null))
+                matchingFailures.Add("SignatureValidator");
 
             if (validationParameters1.NameClaimType != validationParameters2.NameClaimType)
                 matchingFailures.Add("NameClaimType");

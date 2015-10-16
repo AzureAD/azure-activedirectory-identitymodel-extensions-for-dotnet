@@ -839,9 +839,11 @@ namespace System.IdentityModel.Tokens.Jwt
                     }
                     keysAttempted.AppendLine(CreateKeyString(securityKey));
                 }
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                if (keysAttempted.Length > 0)
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                else
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10500), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
             }
-
             return null;
         }
 

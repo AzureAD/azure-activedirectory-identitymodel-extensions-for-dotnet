@@ -735,6 +735,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return false; };
             TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
+
+            // validating issuer signing key resolver
+            validationParameters = SignatureValidationParameters();
+            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"));
+            validationParameters.IssuerSigningKeyResolver = (token, idToken, kid, parameters) => { return new List<SecurityKey> { IdentityUtilities.DefaultAsymmetricSigningKey }; };
+            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Bootstrap context is saved and is as expected")]
@@ -918,9 +924,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             string jwt = (tokenHandler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials) as JwtSecurityToken).RawData;
             TokenValidationParameters validationParameters = new TokenValidationParameters() { IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey, ValidateAudience = false, ValidateLifetime = false };
             
-            // ValidateIssuer == true
-
-            // validIssuer null, validIssuers null
+            // ValidateIssuer == true, validIssuer null, validIssuers null
             ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10204");
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
 
