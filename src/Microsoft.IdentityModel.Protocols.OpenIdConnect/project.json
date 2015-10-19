@@ -9,7 +9,8 @@
         "dnxcore50": {
             "dependencies": {
                 "System.Diagnostics.Tracing": "4.0.21-beta-*",
-                "System.Globalization": "4.0.11-beta-*"
+                "System.Globalization": "4.0.11-beta-*",
+                "System.Dynamic.Runtime": "4.0.11-beta-*"
             }
         },
         "net451": { }
