@@ -39,6 +39,7 @@ namespace System.IdentityModel.Tokens
     public class AsymmetricSignatureProvider : SignatureProvider
     {
 #if DNXCORE50
+        private bool _disposeRsa;
         private ECDsa _ecdsaCng;
         private HashAlgorithmName _hashAlgorithm;
         private RSA _rsa;
@@ -188,6 +189,7 @@ namespace System.IdentityModel.Tokens
             {
                 _rsa = new RSACng();
                 (_rsa as RSA).ImportParameters(rsaKey.Parameters);
+                _disposeRsa = true;
                 return;
             }
 
@@ -429,9 +431,22 @@ namespace System.IdentityModel.Tokens
         {
             if (!_disposed)
             {
+                _disposed = true;
+
                 if (disposing)
                 {
-                    _disposed = true;
+#if DNXCORE50
+                    if (_rsa != null && _disposeRsa)
+                        _rsa.Dispose();
+#else
+                    if (_rsaCryptoServiceProvider != null)
+                        _rsaCryptoServiceProvider.Dispose();
+#endif
+                    if (_ecdsaCng != null)
+                        _ecdsaCng.Dispose();
+
+                    if (_rsaCryptoServiceProviderProxy != null)
+                        _rsaCryptoServiceProviderProxy.Dispose();
                 }
             }
         }
