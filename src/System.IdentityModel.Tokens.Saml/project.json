@@ -1,5 +1,6 @@
 {
     "version": "5.0.0-*",
+    "description": "Includes types that provide support for Saml tokens.",
     "dependencies": {
         "System.IdentityModel.Tokens": "5.0.0-*"
     },

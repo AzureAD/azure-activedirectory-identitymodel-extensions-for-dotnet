@@ -1,8 +1,7 @@
 ﻿{
     "version": "1.0.0-*",
-    "dependencies": {
-    },
-
+    "description": "Includes Event Source based logging support.",
+    "dependencies": { },
     "frameworks": {
         "dnx451": { },
         "dnxcore50": {
@@ -14,5 +13,9 @@
             }
         },
         "net451": { }
+    },
+    "compilationOptions": {
+        "allowUnsafe": false,
+        "warningsAsErrors": true
     }
 }
