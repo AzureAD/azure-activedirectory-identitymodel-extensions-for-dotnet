@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -107,16 +116,19 @@ namespace System.IdentityModel.Tokens.Tests
             RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
             RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
             RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-        }
 
-        // .../Certs/SelfSigned1024_SHA1.pfx
-        // password: SelfSigned1024_SHA1
-        public static string SelfSigned1024_SHA1 = @"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";
-        public static string SelfSigned1024_SHA1_Public = "MIICRTCCAbKgAwIBAgIQ1Oe7zrx8sLhBt9A8ZwkbJTAJBgUrDgMCHQUAMDExLzAtBgNVBAMeJgBTAGUAbABmAFMAaQBnAG4AZQBkADEAMAAyADQAXwBTAEgAQQAxMB4XDTE0MTIyNjE1MjYzNloXDTM5MTIzMTIzNTk1OVowMTEvMC0GA1UEAx4mAFMAZQBsAGYAUwBpAGcAbgBlAGQAMQAwADIANABfAFMASABBADEwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALYRgjPGn3XEYszItyRNIYequfWNX1lVmwRZP4cvd4WfRi8UbqWeSqLap5TPYeorCX69d8UywkAj/hnXqLZDCsHyjQX7U7Ej4o3eIXy1vzZmNYfokaAFjqE8qPnrIirPFZW4Obc1cBReRAMXspoXtS1LCwLhb8PMOJ4f40RfncF9AgMBAAGjZjBkMGIGA1UdAQRbMFmAECSNmSZfNtHWcA36SBtjLx+hMzAxMS8wLQYDVQQDHiYAUwBlAGwAZgBTAGkAZwBuAGUAZAAxADAAMgA0AF8AUwBIAEEAMYIQ1Oe7zrx8sLhBt9A8ZwkbJTAJBgUrDgMCHQUAA4GBAAi+D7RBUnrCFLzMAKLrlK2jUOdwq22j0QbEIaoWyR8aYwrqUYa+c0qtxa9zjyfYRJXBO1vstvVMtDTvPJ1RifwuA05iKo5aofBXpUg/cKa7q2/gXPHrz4S4q8QkUynWksILaNbqSuXyGd8HmWOMhNZ9nDVq01rq0upRrB4F6t2i";
-        public static X509Certificate2 CertSelfSigned1024_SHA1 = new X509Certificate2(Convert.FromBase64String(SelfSigned1024_SHA1), "SelfSigned1024_SHA1", X509KeyStorageFlags.PersistKeySet);
-        public static X509SecurityKey X509SecurityKeySelfSigned1024_SHA1 = new X509SecurityKey(CertSelfSigned1024_SHA1);
-        public static X509Certificate2 CertSelfSigned1024_SHA1_Public = new X509Certificate2(Convert.FromBase64String(SelfSigned1024_SHA1_Public), "SelfSigned1024_SHA1");
-        public static X509SecurityKey X509SecurityKeySelfSigned1024_SHA1_Public = new X509SecurityKey(CertSelfSigned1024_SHA1);
+            //ecdsa
+            byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
+            byte[] ecdsa384KeyBlob = TestUtilities.HexToByteArray("45435334300000009dc6bb9cdc8dac31e3db6e6b5f58f8e3a304e5c08e632705ca9a236f1134646dca526b89f7ea98653962f4a781f2fc9bf479a2d627561b1269548050e6d2c388018b837f4ceba8ee7fe2eefea67c8418ad1e84f60c1309385e573ea5183e9ae8b6d5308a78da207c6e556af2053983321a5f8ac057b787089ee783c99093b9f2afb2f9a1e9a560ad3095b9667aa699fa");
+            byte[] ecdsa521KeyBlob = TestUtilities.HexToByteArray("454353364200000001f9f06ea4e00fd3fecc1753af7983b43cb9b692941ee6364616c9c4168845fce804beca7aa23d0a5049910db45dfb61112f4cb02e93ff62af1be203ad248dd70952015ddc31d1ad7411ca5996b8b76a40ea65f286c665225114bec8557365aa4bc79358f8c68b873cb76a1c86a5a394185d8eeb9602b8b968db1e4ac49b7cc51f83c7170055ad9b0b2d0d5d2306a66bf87a256a3739696121eb131e64ae61991ea23db99b397c32df95efb0cb284147a929c65e9f671073ca3c7a084cb9211dceb06c987277");
+
+            ECDsa256Key = new ECDsaSecurityKey(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa384Key = new ECDsaSecurityKey(ecdsa384KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa521Key = new ECDsaSecurityKey(ecdsa521KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa256Key_Public = new ECDsaSecurityKey(ECDsa256Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa384Key_Public = new ECDsaSecurityKey(ECDsa384Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa521Key_Public = new ECDsaSecurityKey(ECDsa521Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+        }
 
         // .../Certs/SelfSigned1024_SHA256.pfx
         // password: SelfSigned1024_SHA256
@@ -206,6 +218,14 @@ namespace System.IdentityModel.Tokens.Tests
         public static SigningCredentials RSASigningCreds_4096;
         public static SigningCredentials RSASigningCreds_4096_Public;
 
+        // ECDSA Cng security keys
+        public static readonly ECDsaSecurityKey ECDsa256Key;
+        public static readonly ECDsaSecurityKey ECDsa384Key;
+        public static readonly ECDsaSecurityKey ECDsa521Key;
+        public static readonly ECDsaSecurityKey ECDsa256Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa384Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa521Key_Public;
+
 #if SymmetricKeySuport
         public static string DefaultSymmetricKeyEncoded_256                    ="Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256                      = Convert.FromBase64String( DefaultSymmetricKeyEncoded_256 );
@@ -221,7 +241,6 @@ namespace System.IdentityModel.Tokens.Tests
 
         // These signingCreds have algorithms and hashs that are not supported
         public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha2      = new SigningCredentials( DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );
-        public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha1      = new SigningCredentials( DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha1Digest );
         public static SigningCredentials SymmetricSigningCreds_2048RSA_H256_Sha2    = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256Digest );
 #endif
 

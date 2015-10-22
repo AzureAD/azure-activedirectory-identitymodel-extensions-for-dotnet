@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -119,26 +128,26 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'amr' claim { amr, 'value' }.
+        /// Gets the 'value' of the 'amr' claim { amr, 'value' } as list of strings.
         /// </summary>
-        /// <remarks>If the 'amr' claim is not found, null is returned.</remarks>
-        public string Amr
+        /// <remarks>If the 'amr' claim is not found, an empty enumerable is returned.</remarks>
+        public IList<string> Amr
         {
             get
             {
-                return this.GetStandardClaim(JwtRegisteredClaimNames.Amr);
+                return this.GetIListClaims(JwtRegisteredClaimNames.Amr);
             }
         }
 
         /// <summary>
         /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
         /// </summary>
-        /// <remarks>If the 'auth_time' claim is not found, null is returned.</remarks>
-        public string AuthTime
+        /// <remarks>If the 'auth_time' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
+        public int? AuthTime
         {
             get
             {
-                return this.GetStandardClaim(JwtRegisteredClaimNames.AuthTime);
+                return this.GetIntClaim(JwtRegisteredClaimNames.AuthTime);
             }
         }
 
@@ -150,44 +159,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                List<string> audiences = new List<string>();
-
-                object value = null;
-                if (!TryGetValue(JwtRegisteredClaimNames.Aud, out value))
-                {
-                    return audiences;
-                }
-
-                string str = value as string;
-                if (str != null)
-                {
-                    audiences.Add(str);
-                    return audiences;
-                }
-
-                // Audiences must be an array of string;
-                IEnumerable<object> values = value as IEnumerable<object>;
-                if (values != null)
-                {
-                    foreach (var item in values)
-                    {
-                        str = item as string;
-                        if (str != null)
-                        {
-                            audiences.Add(str);
-                        }
-                        else
-                        {
-                            audiences.Add(item.ToString());
-                        }
-                    }
-                }
-                else
-                {
-                    audiences.Add(JsonExtensions.SerializeToJson(value));
-                }
-
-                return audiences;
+                return this.GetIListClaims(JwtRegisteredClaimNames.Aud);
             }
         }
 
@@ -588,6 +560,40 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             return retval;
+        }
+
+        internal IList<string> GetIListClaims(string claimType)
+        {
+            List<string> claimValues = new List<string>();
+
+            object value = null;
+            if (!TryGetValue(claimType, out value))
+            {
+                return claimValues;
+            }
+
+            string str = value as string;
+            if (str != null)
+            {
+                claimValues.Add(str);
+                return claimValues;
+            }
+
+            // values must be an enumeration of strings;
+            IEnumerable<object> values = value as IEnumerable<object>;
+            if (values != null)
+            {
+                foreach (var item in values)
+                {
+                    claimValues.Add(item.ToString());
+                }
+            }
+            else
+            {
+                claimValues.Add(JsonExtensions.SerializeToJson(value));
+            }
+
+            return claimValues;
         }
 
         /// <summary>

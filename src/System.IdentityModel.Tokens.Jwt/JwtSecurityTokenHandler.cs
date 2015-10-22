@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
@@ -25,6 +34,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using System.Threading;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -383,7 +393,14 @@ namespace System.IdentityModel.Tokens.Jwt
                 return false;
             }
 
-            if (!Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex))
+            // Quick fix prior to beta8, will add configuration in RC
+            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
+            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            {
+                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromSeconds(2));
+            }
+
+            if( !regex.IsMatch(tokenString))
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
                 return false;
@@ -787,78 +804,59 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
             string kid = jwt.Header.Kid;
-            SecurityKey securityKey = null;
+            IEnumerable<SecurityKey> securityKeys = null;
 
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
-                securityKey = validationParameters.IssuerSigningKeyResolver(token, jwt, kid, validationParameters);
+                securityKeys = validationParameters.IssuerSigningKeyResolver(token, jwt, kid, validationParameters);
             }
             else
             {
-                securityKey = ResolveIssuerSigningKey(token, jwt, kid, validationParameters);
+                var securityKey = ResolveIssuerSigningKey(token, jwt, validationParameters);
+                if (securityKey != null)
+                {
+                    securityKeys = new List<SecurityKey> { securityKey };
+                }
             }
 
-            // if the security key is resolved, try just the one key
-            if (securityKey != null)
-            { 
-                try
-                {
-                    if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
-                    {
-                        IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10242, token));
-                        jwt.SigningKey = securityKey;
-                        return jwt;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10502, CreateKeyString(securityKey), ex.ToString(), jwt.ToString()),typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
-                }
-
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10501, CreateKeyString(securityKey), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
-            }
-            else
+            if (securityKeys == null)
             {
-                Exception firstException = null;
+                // Try all keys since there is no keyidentifier
+                securityKeys = GetAllKeys(token, jwt, kid, validationParameters);
+            }
+
+            // try the keys
+            if (securityKeys != null)
+            {
                 StringBuilder exceptionStrings = new StringBuilder();
                 StringBuilder keysAttempted = new StringBuilder();
 
-                // Try all keys since there is no keyidentifier
-                foreach (SecurityKey sk in GetAllKeys(token, jwt, kid, validationParameters))
+                foreach (SecurityKey securityKey in securityKeys)
                 {
                     try
                     {
-                        if (this.ValidateSignature(encodedBytes, signatureBytes, sk, mappedAlgorithm))
+                        if (this.ValidateSignature(encodedBytes, signatureBytes, securityKey, mappedAlgorithm))
                         {
                             IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10242, token));
-                            jwt.SigningKey = sk;
+                            jwt.SigningKey = securityKey;
                             return jwt;
                         }
                     }
                     catch (Exception ex)
                     {
-                        if (DiagnosticUtility.IsFatal(ex))
-                        {
-                            throw;
-                        }
-
-                        if (firstException == null)
-                        {
-                            firstException = ex;
-                        }
-
                         exceptionStrings.AppendLine(ex.ToString());
                     }
-
-                    keysAttempted.AppendLine(CreateKeyString(sk));
+                    keysAttempted.AppendLine(CreateKeyString(securityKey));
                 }
-
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                if (keysAttempted.Length > 0)
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString()), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
+                else
+                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10500), typeof(SecurityTokenInvalidSignatureException), EventLevel.Error);
             }
             return null;
         }
 
-        private IEnumerable<SecurityKey> GetAllKeys(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
+        private IEnumerable<SecurityKey> GetAllKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10243);
             if (validationParameters.IssuerSigningKey != null)
@@ -878,7 +876,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (securityKey == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityKey"));
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityKey"));
                 return "null";
             }
             else
@@ -1019,7 +1017,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
-        protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual void ValidateAudience(IEnumerable<string> audiences, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAudience(audiences, securityToken, validationParameters);
         }
@@ -1032,7 +1030,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
-        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
         }
@@ -1045,7 +1043,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>The issuer to use when creating the <see cref="Claim"/>(s) in the <see cref="ClaimsIdentity"/>.</returns>
         /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
-        protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual string ValidateIssuer(string issuer, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
         }
@@ -1059,8 +1057,55 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
+        protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
+            if (validationParameters == null)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationParameters"), typeof(ArgumentNullException), EventLevel.Verbose);
+            }
+            if (securityToken == null)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": securityToken"), typeof(ArgumentNullException), EventLevel.Verbose);
+            }
+
+            if (!string.IsNullOrEmpty(securityToken.Header.Kid))
+            {
+                string kid = securityToken.Header.Kid;
+                if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, StringComparison.Ordinal))
+                {
+                    return validationParameters.IssuerSigningKey;
+                }
+                if (validationParameters.IssuerSigningKeys != null)
+                {
+                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, StringComparison.Ordinal))
+                        {
+                            return signingKey;
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(securityToken.Header.X5t))
+            {
+                string x5t = securityToken.Header.X5t;
+                if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, StringComparison.Ordinal))
+                {
+                    return validationParameters.IssuerSigningKey;
+                }
+                if (validationParameters.IssuerSigningKeys != null)
+                {
+                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
+                        {
+                            return signingKey;
+                        }
+                    }
+                }
+            }
+
             return null;
         }
 
@@ -1071,7 +1116,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> to validate.</param>
         /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
         /// <remarks>If the <see cref="JwtSecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using <see cref="TokenValidationParameters.CertificateValidator"/>.</remarks>
-        protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
         }

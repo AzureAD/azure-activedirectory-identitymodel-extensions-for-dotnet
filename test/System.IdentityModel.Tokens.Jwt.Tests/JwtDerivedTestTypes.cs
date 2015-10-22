@@ -1,20 +1,29 @@
-//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -87,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return new DerivedJwtSecurityToken(jwtEncodedString);
         }
 
-        protected override void ValidateAudience(IEnumerable<string> audiences, SecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override void ValidateAudience(IEnumerable<string> audiences, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             Assert.NotNull(derivedJwt);
@@ -95,7 +104,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             base.ValidateAudience(audiences, jwt, validationParameters);
         }
 
-        protected override string ValidateIssuer(string issuer, SecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override string ValidateIssuer(string issuer, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             Assert.NotNull(derivedJwt);
@@ -103,7 +112,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return base.ValidateIssuer(issuer, jwt, validationParameters);
         }
 
-        protected override void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected override void ValidateIssuerSecurityKey(SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = securityToken as DerivedJwtSecurityToken;
             Assert.NotNull(derivedJwt);
@@ -111,7 +120,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             base.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
         }
 
-        protected override void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken jwt, TokenValidationParameters validationParameters)
+        protected override void ValidateLifetime(DateTime? notBefore, DateTime? expires, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = jwt as DerivedJwtSecurityToken;
             Assert.NotNull(derivedJwt);
@@ -151,7 +160,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             base.ValidateLifetime(DateTime.UtcNow, DateTime.UtcNow, jwt, validationParameters);
         }
 
-        public void ValidateSigningTokenPublic(SecurityKey securityKey, SecurityToken jwt, TokenValidationParameters validationParameters)
+        public void ValidateSigningTokenPublic(SecurityKey securityKey, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             base.ValidateIssuerSecurityKey(securityKey, jwt, validationParameters);
         }

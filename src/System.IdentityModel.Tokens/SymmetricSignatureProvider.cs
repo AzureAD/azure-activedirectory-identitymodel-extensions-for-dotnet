@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Diagnostics.Tracing;
 using System.Globalization;
@@ -33,6 +42,13 @@ namespace System.IdentityModel.Tokens
         private static byte[] bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
         private bool disposed;
         private KeyedHashAlgorithm keyedHash;
+
+        /// <summary>
+        /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
+        /// </summary>
+        public static readonly int DefaultMinimumSymmetricKeySizeInBits = 128;
+
+        private int minimumSymmetricKeySizeInBits = DefaultMinimumSymmetricKeySizeInBits;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SymmetricSecurityKey"/> to create and / or verify signatures over a array of bytes.
@@ -58,9 +74,9 @@ namespace System.IdentityModel.Tokens
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
             }
 
-            if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
+            if (key.KeySize < MinimumSymmetricKeySizeInBits)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
             }
 
             this.keyedHash = GetKeyedHashAlgorithm(algorithm);
@@ -77,6 +93,28 @@ namespace System.IdentityModel.Tokens
                 }
 
                 LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException), EventLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum <see cref="SymmetricSecurityKey"/>.KeySize"/>.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumSymmetricKeySizeInBits"/>.</exception>
+        public int MinimumSymmetricKeySizeInBits
+        {
+            get
+            {
+                return minimumSymmetricKeySizeInBits;
+            }
+
+            set
+            {
+                if (value < DefaultMinimumSymmetricKeySizeInBits)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits));
+                }
+
+                minimumSymmetricKeySizeInBits = value;
             }
         }
 

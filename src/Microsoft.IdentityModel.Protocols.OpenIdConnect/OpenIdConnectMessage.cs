@@ -1,28 +1,37 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -74,8 +83,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (nameValueCollection == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": nameValueCollection"));
-                return;
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": nameValueCollection"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (var key in nameValueCollection.AllKeys)
@@ -95,8 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (parameters == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameters key-value pairs"));
-                return;
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameters"), typeof(ArgumentNullException), EventLevel.Verbose);
             }
 
             foreach (KeyValuePair<string, string[]> keyValue in parameters)
@@ -111,6 +118,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="json">the json object from which the instance is created.</param>
+        public OpenIdConnectMessage(JObject json)
+        {
+            if (json == null)
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectMessage.json"), typeof(ArgumentNullException), EventLevel.Verbose);
+            }
+
+            foreach (var pair in json)
+            {
+                JToken value;
+                if (json.TryGetValue(pair.Key, out value))
+                {
+                    SetParameter(pair.Key, value.ToString());
                 }
             }
         }
@@ -477,15 +505,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             get { return GetParameter(OpenIdConnectParameterNames.TargetLinkUri); }
             set { SetParameter(OpenIdConnectParameterNames.TargetLinkUri, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets 'token'.
-        /// </summary>
-        public string Token
-        {
-            get { return GetParameter(OpenIdConnectParameterNames.Token); }
-            set { SetParameter(OpenIdConnectParameterNames.Token, value); }
         }
 
         /// <summary>

@@ -1,20 +1,29 @@
-//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Tests;
@@ -285,7 +294,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             adfsStrings.Add(new KeyValuePair<string, string>("deviceosver", "http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion"));
             adfsStrings.Add(new KeyValuePair<string, string>("deviceismanaged", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged"));
             adfsStrings.Add(new KeyValuePair<string, string>("deviceostype", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype"));
-            adfsStrings.Add(new KeyValuePair<string, string>("auth_time", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationinstant"));
             adfsStrings.Add(new KeyValuePair<string, string>("authmethod", "http://schemas.microsoft.com/ws/2008/06/identity/claims/authenticationmethod"));
             adfsStrings.Add(new KeyValuePair<string, string>("email", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
             adfsStrings.Add(new KeyValuePair<string, string>("given_name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"));
@@ -736,6 +744,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return false; };
             TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
+
+            // validating issuer signing key resolver
+            validationParameters = SignatureValidationParameters();
+            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"));
+            validationParameters.IssuerSigningKeyResolver = (token, idToken, kid, parameters) => { return new List<SecurityKey> { IdentityUtilities.DefaultAsymmetricSigningKey }; };
+            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 
         [Fact( DisplayName = "JwtSecurityTokenHandlerTests: Bootstrap context is saved and is as expected")]
@@ -747,15 +761,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.SaveSigninToken = false;
             string jwt = IdentityUtilities.DefaultAsymmetricJwt;
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
-            object context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext;
+            var context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as string;
             Assert.Null(context);
 
             validationParameters.SaveSigninToken = true;            
             claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
-            context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext;
+            context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as string;
             Assert.NotNull(context);
 
-            //Assert.True(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context.Token, validationParameters, out validatedToken)));
+            Assert.True(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context, validationParameters, out validatedToken)));
         }
 
 
@@ -829,18 +843,35 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_1024);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
+            // "kid" is not present, but an "x5t" is present.
+            expectedException = ExpectedException.NoExceptionExpected;
+            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_2048);
+            JwtSecurityToken jwt =
+                new JwtSecurityToken
+                (
+                    issuer: Issuers.GotJwt,
+                    audience: Audiences.AuthFactors,
+                    claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
+                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                    expires: DateTime.UtcNow + TimeSpan.FromHours(10),
+                    notBefore: DateTime.UtcNow
+                );
+            jwt.Header[JwtHeaderParameterNames.Kid] = null;
+            jwt.Header[JwtHeaderParameterNames.X5t] = KeyingMaterial.DefaultCert_2048.Thumbprint;
+            TestUtilities.ValidateToken(tokenHandler.WriteToken(jwt), validationParameters, tokenHandler, expectedException);
+
             // "Signature missing, just two parts",
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:");
             validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
 
             // "SigningKey and SigningKeys both null",
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:");
             validationParameters = SignatureValidationParameters();
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
             // "SigningKeys empty",
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:");
             validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey>());
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
 
@@ -902,9 +933,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             string jwt = (tokenHandler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials) as JwtSecurityToken).RawData;
             TokenValidationParameters validationParameters = new TokenValidationParameters() { IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey, ValidateAudience = false, ValidateLifetime = false };
             
-            // ValidateIssuer == true
-
-            // validIssuer null, validIssuers null
+            // ValidateIssuer == true, validIssuer null, validIssuers null
             ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10204");
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
 

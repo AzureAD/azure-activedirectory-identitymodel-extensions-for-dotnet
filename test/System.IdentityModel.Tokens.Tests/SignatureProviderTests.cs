@@ -1,23 +1,33 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Tests
@@ -47,13 +57,10 @@ namespace System.IdentityModel.Tokens.Tests
             // Private keys missing
             FactoryCreateFor("Siging:    - SecurityKey without private key", KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"));
             FactoryCreateFor("Verifying: - SecurityKey without private key", KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.NoExceptionExpected);
+            FactoryCreateFor("Siging:    - SecurityKey without private key", KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.ECDSA_SHA256, factory, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"));
 
             // Key size checks
             FactoryCreateFor("Siging:    - AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-
-            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = 2048;
-            FactoryCreateFor("Verifying: - AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10631:"));
-            SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifying = SignatureProviderFactory.AbsoluteMinimumAsymmetricKeySizeInBitsForVerifying;
 
 #if SymmetricKeySuport
             SignatureProviderFactory.MinimumSymmetricKeySizeInBits = 512;
@@ -103,8 +110,6 @@ namespace System.IdentityModel.Tokens.Tests
 
         private void FactoryCreateFor(string testcase, SecurityKey key, string algorithm, SignatureProviderFactory factory, ExpectedException expectedException)
         {
-            Console.WriteLine(string.Format("Testcase: '{0}'", testcase));
-
             try
             {
                 if (testcase.StartsWith("Siging"))
@@ -135,6 +140,8 @@ namespace System.IdentityModel.Tokens.Tests
             AsymmetricConstructorVariation("Signing:  - Creates with no errors", privateKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
             AsymmetricConstructorVariation("Verifying: - Creates with no errors (Private Key)", privateKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
             AsymmetricConstructorVariation("Verifying: - Creates with no errors (Public Key)", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Signing:  - Creates with no errors", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.ECDSA_SHA256, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Verifying: - Creates with no errors (Public Key)", KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.ECDSA_SHA256, expectedException: ExpectedException.NoExceptionExpected);
 
             // null, empty algorithm digest
             AsymmetricConstructorVariation("Signing:   - NUll key", null, sha2SignatureAlgorithm, expectedException: ExpectedException.ArgumentNullException());
@@ -142,20 +149,23 @@ namespace System.IdentityModel.Tokens.Tests
             AsymmetricConstructorVariation("Signing:   - SignatureAlorithm == whitespace", privateKey, "    ", expectedException: ExpectedException.ArgumentException("IDX10640:"));
 
             // No Private keys
-            AsymmetricConstructorVariation("Signing:   - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.InvalidOperationException());
+            AsymmetricConstructorVariation("Signing:   - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.InvalidOperationException("IDX10638:"));
             AsymmetricConstructorVariation("Verifying: - SecurityKey without private key", publicKey, sha2SignatureAlgorithm, expectedException: ExpectedException.NoExceptionExpected);
 
             // Signature algorithm not supported
             AsymmetricConstructorVariation("Signing:   - SignatureAlgorithm not supported", KeyingMaterial.X509SecurityKey_1024, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.ArgumentException(substringExpected: "IDX10640"));
             AsymmetricConstructorVariation("Verifying: - SignatureAlgorithm not supported", KeyingMaterial.DefaultX509Key_Public_2048, "SecurityAlgorithms.RsaSha256Signature", expectedException: ExpectedException.ArgumentException(substringExpected: "IDX10640"));
 
-            Console.WriteLine("Test missing: key.GetHashAlgorithmForSignature( signingCredentials.SignatureAlgorithm );");
+            AsymmetricConstructorVariation("Signing:  - Creates with no errors", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.ECDSA_SHA256, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Verifying: - Creates with no errors (Private Key)", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.ECDSA_SHA256, expectedException: ExpectedException.NoExceptionExpected);
+            AsymmetricConstructorVariation("Verifying: - Creates with no errors (Private Key)", KeyingMaterial.ECDsa384Key_Public, SecurityAlgorithms.ECDSA_SHA384, expectedException: ExpectedException.NoExceptionExpected);
+
+            // no private key
+            AsymmetricConstructorVariation("Signing: - no private key", KeyingMaterial.ECDsa521Key_Public, SecurityAlgorithms.ECDSA_SHA512, expectedException: ExpectedException.InvalidOperationException("IDX10638:"));
         }
 
         private void AsymmetricConstructorVariation(string testcase, AsymmetricSecurityKey key, string algorithm, ExpectedException expectedException)
         {
-
-            Console.WriteLine(string.Format("Testcase: '{0}'", testcase));
 
             AsymmetricSignatureProvider provider = null;
             try
@@ -243,13 +253,9 @@ namespace System.IdentityModel.Tokens.Tests
                     JwtAlgorithms.ECDSA_SHA256,
                     JwtAlgorithms.ECDSA_SHA384,
                     JwtAlgorithms.ECDSA_SHA512,
-                    JwtAlgorithms.HMAC_SHA256,
-                    JwtAlgorithms.HMAC_SHA384,
-                    JwtAlgorithms.HMAC_SHA512,
                     JwtAlgorithms.RSA_SHA256,
                     JwtAlgorithms.RSA_SHA384,
                     JwtAlgorithms.RSA_SHA512,
-                    SecurityAlgorithms.RsaSha1Signature,
                     SecurityAlgorithms.RsaSha256Signature,
                     SecurityAlgorithms.RsaSha384Signature,
                     SecurityAlgorithms.RsaSha512Signature })
@@ -274,19 +280,15 @@ namespace System.IdentityModel.Tokens.Tests
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
-            byte[] signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha1Signature, rawBytes);
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            // wrong hash
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-            // wrong key
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, null, null, ExpectedException.ArgumentNullException(), errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[1], null, ExpectedException.ArgumentNullException(), errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[0], new byte[1], ExpectedException.ArgumentException("IDX10625:"), errors, false);
+            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[1], new byte[0], ExpectedException.ArgumentException("IDX10626:"), errors, false);
 
-            signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes);
+            var signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             // wrong hash
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             // wrong key
@@ -296,7 +298,6 @@ namespace System.IdentityModel.Tokens.Tests
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
             // wrong hash
-            SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha1Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
             // wrong key
@@ -308,6 +309,21 @@ namespace System.IdentityModel.Tokens.Tests
 
             signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, rawBytes);
             SignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+
+            //ecdsa
+            signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.ECDSA_SHA256, rawBytes);
+            SignatureProviders_Verify_Variation(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.ECDSA_SHA256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            SignatureProviders_Verify_Variation(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.ECDSA_SHA256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            // wrong key
+            SignatureProviders_Verify_Variation(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.ECDSA_SHA384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+#if DNXCORE50
+            SignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.ECDSA_SHA384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+#else
+            SignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.ECDSA_SHA384, rawBytes, signature, new ExpectedException(typeof(CryptographicException)), errors, false);
+#endif
+
+            signature = GetSignature(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.ECDSA_SHA384, rawBytes);
+            SignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.ECDSA_SHA384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
 
             TestUtilities.AssertFailIfErrors("SignatureProviders_Verify", errors);
         }
@@ -324,7 +340,7 @@ namespace System.IdentityModel.Tokens.Tests
             {
                 AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(key, algorithm);
                 if (provider.Verify(rawBytes, signature) != shouldSignatureSucceed)
-                    errors.Add("SignatureProvider.Verify did note return expected: " + shouldSignatureSucceed + " , algorithm: " + algorithm);
+                    errors.Add("SignatureProvider.Verify did not return expected: " + shouldSignatureSucceed + " , algorithm: " + algorithm);
 
                 ee.ProcessNoException(errors);
             }
@@ -340,10 +356,13 @@ namespace System.IdentityModel.Tokens.Tests
             List<string> errors = new List<string>();
 
             // Asymmetric
-            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10631:"), errors);
+            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, ExpectedException.ArgumentException("IDX10624:"), errors, new byte[0]);
+            SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10630:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, ExpectedException.NoExceptionExpected, errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"), errors);
             SignatureProviders_Sign_Variation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", ExpectedException.ArgumentException(substringExpected: "IDX10640:"), errors);
+            SignatureProviders_Sign_Variation(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.ECDSA_SHA256, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"), errors);
+
 #if SymmetricKeySuport
             // Symmetric
             SignatureProviders_Sign_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException(substringExpected: "IDX10640:"), errors);
@@ -391,15 +410,16 @@ namespace System.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("SignatureProviders_Sign", errors);
         }
 
-        private void SignatureProviders_Sign_Variation(AsymmetricSecurityKey key, string algorithm, ExpectedException ee, List<string> errors)
+        private void SignatureProviders_Sign_Variation(AsymmetricSecurityKey key, string algorithm, ExpectedException ee, List<string> errors, byte[] input = null)
         {
             try
             {
                 Random r = new Random();
                 AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(key, algorithm, true);
-                byte[] bytesin = new byte[1024];
-                r.NextBytes(bytesin);
-                byte[] signature = provider.Sign(bytesin);
+                if (input == null)
+                    input = new byte[1024];
+                r.NextBytes(input);
+                byte[] signature = provider.Sign(input);
                 ee.ProcessNoException(errors);
             }
             catch (Exception ex)
@@ -425,24 +445,6 @@ namespace System.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact(DisplayName = "AsymmetricSignatureProvider: Publics")]
-        public void AsymmetricSignatureProvider_Publics()
-        {
-            AsymmetricSignatureProvider_Variations(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
-        }
-
-        private void AsymmetricSignatureProvider_Variations(AsymmetricSecurityKey key, string algorithm)
-        {
-            AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(key, algorithm);
-            SignatureProvider_SignVariation(provider, null, null, ExpectedException.ArgumentNullException());
-            SignatureProvider_SignVariation(provider, new byte[0], null, ExpectedException.ArgumentException("IDX10624:"));
-            SignatureProvider_SignVariation(provider, new byte[1], null, ExpectedException.NoExceptionExpected);
-
-            SignatureProvider_VerifyVariation(provider, null, null, ExpectedException.ArgumentNullException());
-            SignatureProvider_VerifyVariation(provider, new byte[1], null, ExpectedException.ArgumentNullException());
-            SignatureProvider_VerifyVariation(provider, new byte[0], new byte[1], ExpectedException.ArgumentException("IDX10625:"));
-            SignatureProvider_VerifyVariation(provider, new byte[1], new byte[0], ExpectedException.ArgumentException("IDX10626:"));
-        }
 
 #if SymmetricKeySuport
         [Fact(DisplayName = "SymmetricSignatureProvider: Constructor")]
@@ -493,9 +495,7 @@ namespace System.IdentityModel.Tokens.Tests
                 expectedException.ProcessException(ex);
             }
         }
-#endif
 
-#if SymmetricKeySuport
         [Fact(DisplayName = "SymmetricSignatureProvider: Publics")]
         public void SymmetricSignatureProvider_Publics()
         {
@@ -515,7 +515,7 @@ namespace System.IdentityModel.Tokens.Tests
             SignatureProvider_SignVariation(provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
             SignatureProvider_VerifyVariation(provider, new byte[1], new byte[1], ExpectedException.ObjectDisposedException);
         }
-#endif
+                
         private void SignatureProvider_VerifyVariation(SignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedException)
         {
             try
@@ -529,7 +529,7 @@ namespace System.IdentityModel.Tokens.Tests
             }
         }
 
-        private void SignatureProvider_SignVariation(SignatureProvider provider, byte[] bytes, byte[] signature, ExpectedException expectedException)
+        private void SignatureProvider_SignVariation(SignatureProvider provider, byte[] bytes, ExpectedException expectedException)
         {
             try
             {
@@ -541,5 +541,6 @@ namespace System.IdentityModel.Tokens.Tests
                 expectedException.ProcessException(ex);
             }
         }
+#endif
     }
 }
