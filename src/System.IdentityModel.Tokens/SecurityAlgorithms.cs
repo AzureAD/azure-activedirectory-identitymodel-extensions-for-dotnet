@@ -40,6 +40,8 @@ namespace System.IdentityModel.Tokens
         public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";
         public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
+        public const string HmacSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha384";
+        public const string HmacSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 
         public const string Ripemd160Digest = "http://www.w3.org/2001/04/xmlenc#ripemd160";
         public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
