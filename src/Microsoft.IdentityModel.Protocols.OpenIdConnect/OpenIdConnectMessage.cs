@@ -40,13 +40,26 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
-        public OpenIdConnectMessage() : this(string.Empty) {}
+        public OpenIdConnectMessage() { }
 
         /// <summary>
-        /// Initializes an instance of <see cref="OpenIdConnectMessage"/> class with a specific issuerAddress.
+        /// Initializes an instance of <see cref="OpenIdConnectMessage"/> class with a json string.
         /// </summary>
-        public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) 
+        public OpenIdConnectMessage(string json)
         {
+            if (string.IsNullOrEmpty(json))
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+
+            try
+            {
+                JObject jsonObject = JObject.Parse(json);
+                SetJsonParameters(jsonObject);
+            }
+            catch
+            {
+                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10106, json), typeof(ArgumentException), EventLevel.Verbose);
+            }
+
         }
 
         /// <summary>
@@ -118,6 +131,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="json">the json object from which the instance is created.</param>
         public OpenIdConnectMessage(JObject json)
+        {
+            SetJsonParameters(json);
+        }
+
+        private void SetJsonParameters(JObject json)
         {
             if (json == null)
                 throw LogHelper.LogArgumentNullException("json");
