@@ -53,14 +53,6 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="AuthenticationProtocolMessage"/> class with a specific issuerAddress.
-        /// </summary>
-        protected AuthenticationProtocolMessage(string issuerAddress)
-        {
-            IssuerAddress = issuerAddress;
-        }
-
-        /// <summary>
         /// Builds a form post using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>html with head set to 'Title', body containing a hiden from with action = IssuerAddress.</returns>

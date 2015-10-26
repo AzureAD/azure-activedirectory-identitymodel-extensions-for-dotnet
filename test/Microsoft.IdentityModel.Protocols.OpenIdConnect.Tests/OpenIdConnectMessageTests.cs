@@ -45,12 +45,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
             Assert.Equal(openIdConnectMessage.IssuerAddress, string.Empty);
-            openIdConnectMessage = new OpenIdConnectMessage("http://www.got.jwt.com");
+            openIdConnectMessage = new OpenIdConnectMessage() { IssuerAddress = "http://www.got.jwt.com" };
             Assert.Equal(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
-            ExpectedException expectedException = ExpectedException.ArgumentNullException("IssuerAddress");
+            ExpectedException expectedException = ExpectedException.NoExceptionExpected;
+            string json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}";
             try
             {
-                openIdConnectMessage = new OpenIdConnectMessage((string)null);
+                openIdConnectMessage = new OpenIdConnectMessage(json);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -58,10 +59,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 expectedException.ProcessException(exception);
             }
 
+            Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
+            Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
+            Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
+            Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
+
             expectedException = ExpectedException.NoExceptionExpected;
             try
             {
-                string json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}";
                 openIdConnectMessage = new OpenIdConnectMessage(JObject.Parse(json));
                 expectedException.ProcessNoException();
             }
@@ -69,6 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 expectedException.ProcessException(exception);
             }
+
             Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
             Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
             Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
@@ -227,7 +233,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Report("2", errors, url, expected);
 
             // IssuerAddress only
-            message = new OpenIdConnectMessage(issuerAddress);
+            message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
             message.ResponseMode = OpenIdConnectResponseModes.FormPost;
             message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
             message.Scope = OpenIdConnectScopes.OpenIdProfile;
@@ -250,7 +256,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Report("5", errors, url, expected);
 
             // IssuerAdderss, Redirect_uri, Response
-            message = new OpenIdConnectMessage(issuerAddress);
+            message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
             message.ResponseMode = OpenIdConnectResponseModes.FormPost;
             message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
             message.Scope = OpenIdConnectScopes.OpenIdProfile;
@@ -262,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Report("6", errors, url, expected);
 
             // IssuerAdderss, Redirect_uri, Response, customParam
-            message = new OpenIdConnectMessage(issuerAddress);
+            message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
             message.ResponseMode = OpenIdConnectResponseModes.FormPost;
             message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
             message.Scope = OpenIdConnectScopes.OpenIdProfile;
@@ -316,7 +322,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             List<string> errors = new List<string>();
             var address = "http://gotJwt.onmicrosoft.com/?foo=bar";
             var clientId = Guid.NewGuid().ToString();
-            var message = new OpenIdConnectMessage(address);
+            var message = new OpenIdConnectMessage() { IssuerAddress = address };
 
             var url = message.BuildRedirectUrl();
             Report("1", errors, url, address);
