@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Logging
 
         public override void Dispose()
         {
-            if (_disposeStreamWriter)
+            if (_disposeStreamWriter && _streamWriter != null)
             {
                 _streamWriter.Flush();
                 _streamWriter.Dispose();

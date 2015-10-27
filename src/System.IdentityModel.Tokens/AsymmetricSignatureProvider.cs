@@ -38,7 +38,7 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     public class AsymmetricSignatureProvider : SignatureProvider
     {
-#if DNXCORE50
+#if DOTNET5_4
         private bool _disposeRsa;
         private ECDsa _ecdsaCng;
         private HashAlgorithmName _hashAlgorithm;
@@ -120,7 +120,7 @@ namespace System.IdentityModel.Tokens
             if (willCreateSignatures && !key.HasPrivateKey)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
-#if DNXCORE50
+#if DOTNET5_4
             ResolveDotNetCoreAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
 #else
             ResolveDotNetDesktopAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
@@ -149,7 +149,7 @@ namespace System.IdentityModel.Tokens
             }
         }
 
-#if DNXCORE50
+#if DOTNET5_4
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -336,7 +336,7 @@ namespace System.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
-#if DNXCORE50
+#if DOTNET5_4
             if (_rsa != null)
                 return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
             else if (_rsaCryptoServiceProviderProxy != null)
@@ -387,7 +387,7 @@ namespace System.IdentityModel.Tokens
             if (_hashAlgorithm == null)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10621, "signature");
 
-#if DNXCORE50
+#if DOTNET5_4
             if (_rsa != null)
                 return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
             else if (_rsaCryptoServiceProviderProxy != null)
@@ -435,7 +435,7 @@ namespace System.IdentityModel.Tokens
 
                 if (disposing)
                 {
-#if DNXCORE50
+#if DOTNET5_4
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();
 #else

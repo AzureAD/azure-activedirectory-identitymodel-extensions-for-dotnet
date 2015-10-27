@@ -100,7 +100,7 @@ namespace System.IdentityModel.Tokens
             {
                 return false;
             }
-#if DNXCORE50
+#if DOTNET5_4
             return uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase); //Uri.UriSchemeHttps is internal in dnxcore
 #else
             return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);

@@ -1,1 +1,0 @@
-ERROR: Exception in Command Processing for EventSource Microsoft.IdentityModel.EventSource: Unsupported type Object[] in event source.

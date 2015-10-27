@@ -10,14 +10,7 @@
         "Configuration\\WsFederationConfigurationRetriever.cs"
     ],
     "frameworks": {
-        "dnx451": {
-            "frameworkAssemblies": {
-                "System.IO": "",
-                "System.Net.Http": "",
-                "System.Xml": ""
-            }
-        },
-        "dnxcore50": {
+        "dotnet5.4": {
             "dependencies": {
                 "System.Collections.Specialized": "4.0.1-beta-*",
                 "System.Diagnostics.Contracts": "4.0.1-beta-*",

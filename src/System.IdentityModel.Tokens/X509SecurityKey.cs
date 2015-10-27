@@ -58,7 +58,7 @@ namespace System.IdentityModel.Tokens
         public override int KeySize
         {
             get {
-#if DNXCORE50
+#if DOTNET5_4
                 return RSACertificateExtensions.GetRSAPublicKey(_certificate).KeySize;
 #else
                 return PublicKey.Key.KeySize;
@@ -76,7 +76,7 @@ namespace System.IdentityModel.Tokens
                     {
                         if (!_privateKeyAvailabilityDetermined)
                         {
-#if DNXCORE50
+#if DOTNET5_4
                             _privateKey = RSACertificateExtensions.GetRSAPrivateKey(_certificate);
 #else
                             _privateKey = _certificate.PrivateKey;
