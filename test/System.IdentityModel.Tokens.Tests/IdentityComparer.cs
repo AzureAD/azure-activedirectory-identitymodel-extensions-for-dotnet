@@ -45,14 +45,27 @@ namespace System.IdentityModel.Tokens.Tests
             IgnoreSubject = true;
             StringComparison = System.StringComparison.Ordinal;
         }
+
+        public CompareContext(CompareContext other)
+        {
+            ExpectRawData = other.ExpectRawData;
+            IgnoreClaimsIdentityType = other.IgnoreClaimsIdentityType;
+            IgnoreClaimsPrincipalType = other.IgnoreClaimsPrincipalType;
+            IgnoreClaimType = other.IgnoreClaimType;
+            IgnoreProperties = other.IgnoreProperties;
+            IgnoreSubject = other.IgnoreSubject;
+            IgnoreType = other.IgnoreType;
+            StringComparison = other.StringComparison;
+        }
+
         public List<string> Diffs { get { return _diffs; } }
         public bool ExpectRawData { get; set; }
-        public bool IgnoreProperties { get; set; }
-        public bool IgnoreSubject { get; set; }
-        public bool IgnoreType { get; set; }
         public bool IgnoreClaimsIdentityType { get; set; }
         public bool IgnoreClaimsPrincipalType { get; set; }
         public bool IgnoreClaimType { get; set; }
+        public bool IgnoreProperties { get; set; }
+        public bool IgnoreSubject { get; set; }
+        public bool IgnoreType { get; set; }
         public StringComparison StringComparison { get; set; }
         public string Title { get; set; }
     }
@@ -89,7 +102,7 @@ namespace System.IdentityModel.Tokens.Tests
 
             int numMatched = 0;
             int numToMatch = toMatch.Count;
-
+            CompareContext localContext = new CompareContext(context);
             List<KeyValuePair<T,T>> matchedTs = new List<KeyValuePair<T,T>>();
             
             // helps debugging to see what didn't match
@@ -99,7 +112,7 @@ namespace System.IdentityModel.Tokens.Tests
                 bool matched = false;
                 for (int i = 0; i < toMatch.Count; i++)
                 {
-                    if (areEqual(t, toMatch[i], context))
+                    if (areEqual(t, toMatch[i], localContext))
                     {
                         numMatched++;
                         matchedTs.Add(new KeyValuePair<T, T>(toMatch[i], t));
@@ -136,6 +149,9 @@ namespace System.IdentityModel.Tokens.Tests
                     }
                 }
             }
+
+            if (notMatched.Count != 0)
+                context.Diffs.AddRange(localContext.Diffs);
 
             return (notMatched.Count == 0);
         }
@@ -545,27 +561,27 @@ namespace System.IdentityModel.Tokens.Tests
             return true;
         }
 
-        public static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuraiton2, CompareContext context)
+        public static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuration2, CompareContext context)
         {
-            if (!string.Equals(configuration1.AuthorizationEndpoint, configuraiton2.AuthorizationEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.AuthorizationEndpoint, configuration2.AuthorizationEndpoint, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.CheckSessionIframe, configuraiton2.CheckSessionIframe, context.StringComparison))
+            if (!string.Equals(configuration1.CheckSessionIframe, configuration2.CheckSessionIframe, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.EndSessionEndpoint, configuraiton2.EndSessionEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.EndSessionEndpoint, configuration2.EndSessionEndpoint, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.Issuer, configuraiton2.Issuer, context.StringComparison))
+            if (!string.Equals(configuration1.Issuer, configuration2.Issuer, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.JwksUri, configuraiton2.JwksUri, context.StringComparison))
+            if (!string.Equals(configuration1.JwksUri, configuration2.JwksUri, context.StringComparison))
                 return false;
 
-            if (!AreEnumsEqual<SecurityKey>(configuration1.SigningKeys, configuraiton2.SigningKeys, context, AreSecurityKeysEqual))
+            if (!AreEnumsEqual(configuration1.SigningKeys, configuration2.SigningKeys, context, AreSecurityKeysEqual))
                 return false;
 
-            if (!string.Equals(configuration1.TokenEndpoint, configuraiton2.TokenEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.TokenEndpoint, configuration2.TokenEndpoint, context.StringComparison))
                 return false;
 
             return true;
@@ -667,14 +683,11 @@ namespace System.IdentityModel.Tokens.Tests
             if (cred1.GetType() != cred2.GetType())
                 return false;
 
-            if (!string.Equals(cred1.DigestAlgorithm, cred2.DigestAlgorithm, context.StringComparison))
-                return false;
-
-            if (!string.Equals(cred1.SignatureAlgorithm, cred2.SignatureAlgorithm, context.StringComparison))
+            if (!string.Equals(cred1.Algorithm, cred2.Algorithm, context.StringComparison))
                 return false;
 
             // SigningKey, null match and type
-            if (!AreEqual<SecurityKey>(cred1.SigningKey, cred2.SigningKey, context, AreSecurityKeysEqual))
+            if (!AreEqual(cred1.Key, cred2.Key, context, AreSecurityKeysEqual))
                 return false;
 
             return true;

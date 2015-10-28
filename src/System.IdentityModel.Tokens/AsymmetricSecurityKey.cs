@@ -30,6 +30,7 @@ namespace System.IdentityModel.Tokens
     public abstract class AsymmetricSecurityKey : SecurityKey
     {
         public abstract bool HasPrivateKey { get; }
+
         public abstract bool HasPublicKey { get; }
     }
 }

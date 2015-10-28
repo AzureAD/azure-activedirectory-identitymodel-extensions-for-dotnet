@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10310 = "IDX10310: OpenIdConnectProtocolValidationContext.ProtocolMessage.AccessToken is null, there is no 'token' in the OpenIdConnect Response to validate.";
         internal const string IDX10311 = "IDX10311: The 'at_hash' claim was not a string in the 'id_token', but an 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         internal const string IDX10312 = "IDX10312: The 'at_hash' claim was not found in the 'id_token', but a 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
-        internal const string IDX10313 = "IDX10313: The id_token: '{0}' is not valid. Please see exception for more details. exception: '{1}'.";
+        internal const string IDX10313 = "IDX10313: The id_token: '{0}' is not valid. Please see exception for more details.";
         internal const string IDX10314 = "IDX10314: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
         internal const string IDX10315 = "IDX10315: RequireAcr is 'true' (default is 'false') but jwt.PayLoad.Acr is 'null or whitespace', jwt: '{0}'.";
         internal const string IDX10316 = "IDX10316: RequireAmr is 'true' (default is 'false') but jwt.PayLoad.Amr is 'null or whitespace', jwt: '{0}'.";
@@ -89,6 +89,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10344 = "IDX10344: OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken is null, no id_token present to validate userinfo response against.";
         internal const string IDX10345 = "IDX10345: OpenIdConnectProtocolValidationContext.UserInfoEndpointResponse does not contain a 'sub' claim, cannot validate.";
         internal const string IDX10346 = "IDX10346: OpenIdConnectProtocolValidationContext.ValidatedIdToken does not contain a 'sub' claim, cannot validate.";
+        internal const string IDX10347 = "IDX10347: Validating the 'c_hash' failed, see inner exception.";
+        internal const string IDX10348 = "IDX10348: Validating the 'at_hash' failed, see inner exception.";
 
         // configuration retrieval errors
         internal const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";

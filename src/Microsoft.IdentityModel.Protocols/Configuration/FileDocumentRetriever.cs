@@ -25,15 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System;
-using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.IO;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -47,23 +43,19 @@ namespace Microsoft.IdentityModel.Protocols
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("address");
 
             try
             {
                 if (File.Exists(address))
-                {
                     return await Task.FromResult(File.ReadAllText(address));
-                }
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10814, address), typeof(ArgumentException), EventLevel.Error);
+
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10814, address);
             }
             catch (Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10804, address), typeof(IOException), EventLevel.Error, ex);
+                throw LogHelper.LogException<IOException>(ex, LogMessages.IDX10804, address);
             }
-            return null;
         }
     }
 }

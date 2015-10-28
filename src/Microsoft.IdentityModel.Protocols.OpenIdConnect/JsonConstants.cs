@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
     /// <summary>
     /// Constants for JsonWebKeyUse (sec 4.2)
-    /// http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27#section-4
+    /// http://tools.ietf.org/html/rfc7517#section-4
     /// </summary>
     public static class JsonWebKeyUseNames
     {
@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
     /// <summary>
     /// Constants for JsonWebAlgorithms  "kty" Key Type (sec 6.1)
-    /// http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-27#section-6.1
+    /// http://tools.ietf.org/html/rfc7518#section-6.1
     /// </summary>
     public static class JsonWebAlgorithmsKeyTypes
     {

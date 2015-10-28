@@ -27,7 +27,6 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IO;
 
 namespace Microsoft.IdentityModel.Logging
@@ -42,6 +41,9 @@ namespace Microsoft.IdentityModel.Logging
 
         public readonly static string DefaultLogFileName = "IdentityModelLogs.txt";
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="TextWriterEventListener"/> that writes logs to text file.
+        /// </summary>
         public TextWriterEventListener()
         {
             try
@@ -52,35 +54,34 @@ namespace Microsoft.IdentityModel.Logging
             }
             catch (Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML11001, ex.Message), ex.GetType(), EventLevel.Error, ex.InnerException);
+                LogHelper.LogException<InvalidOperationException>(ex, LogMessages.MIML11001);
+                throw ex;
             }
         }
 
         /// <summary>
-        /// Constructor for TextWriterEventListener.
+        /// Initializes a new instance of <see cref="TextWriterEventListener"/> that writes logs to text file.
         /// </summary>
-        /// <param name="filePath">location of the file where all log messages will be written.</param>
+        /// <param name="filePath">location of the file where log messages will be written.</param>
         public TextWriterEventListener(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10000, GetType() + ": filePath"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("filePath");
+
             Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
             _streamWriter = new StreamWriter(fileStream);
             _streamWriter.AutoFlush = true;
         }
 
         /// <summary>
-        /// Constructor for TextWriterEventListener.
+        /// Initializes a new instance of <see cref="TextWriterEventListener"/> that writes logs to text file.
         /// </summary>
-        /// <param name="streamWriter">StreamWriter that writes log messages.</param>
+        /// <param name="streamWriter">StreamWriter where logs will be written.</param>
         public TextWriterEventListener(StreamWriter streamWriter)
         {
             if (streamWriter == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10000, GetType() + ": streamWriter"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("streamWriter");
+
             _streamWriter = streamWriter;
             _disposeStreamWriter = false;
         }
@@ -88,9 +89,7 @@ namespace Microsoft.IdentityModel.Logging
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             if (eventData == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10000, GetType() + ": eventData"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("eventData");
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {
@@ -111,6 +110,7 @@ namespace Microsoft.IdentityModel.Logging
                 _streamWriter.Flush();
                 _streamWriter.Dispose();
             }
+
             base.Dispose();
         }
     }

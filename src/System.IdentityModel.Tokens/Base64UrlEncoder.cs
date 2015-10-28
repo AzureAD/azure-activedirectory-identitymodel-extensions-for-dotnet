@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
+using Microsoft.IdentityModel.Logging;
 using System.Text;
 
 namespace System.IdentityModel.Tokens
@@ -36,7 +36,7 @@ namespace System.IdentityModel.Tokens
     public static class Base64UrlEncoder
     {
         private static char base64PadCharacter = '=';
-        private static string doubleBase64PadCharacter = string.Format(CultureInfo.InvariantCulture, "{0}{0}", base64PadCharacter);
+        private static string doubleBase64PadCharacter = "==";
         private static char base64Character62 = '+';
         private static char base64Character63 = '/';
         private static char base64UrlCharacter62 = '-';
@@ -53,9 +53,7 @@ namespace System.IdentityModel.Tokens
         public static string Encode(string arg)
         {
             if (null == arg)
-            {
-                throw new ArgumentNullException(arg);
-            }
+                throw LogHelper.LogArgumentNullException("arg");
 
             return Encode(Encoding.UTF8.GetBytes(arg));
         }
@@ -72,6 +70,9 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray, int offset, int length)
         {
+            if (inArray == null)
+                throw LogHelper.LogArgumentNullException("inArray");
+
             string s = Convert.ToBase64String(inArray, offset, length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
             s = s.Replace(base64Character62, base64UrlCharacter62);  // 62nd char of encoding
@@ -89,10 +90,8 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray)
         {
-            if (inArray==null)
-            {
-                throw new ArgumentNullException("inArray");
-            }
+            if (inArray == null)
+                throw LogHelper.LogArgumentNullException("inArray");
 
             string s = Convert.ToBase64String(inArray, 0, inArray.Length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
@@ -134,7 +133,7 @@ namespace System.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw new FormatException(string.Format(CultureInfo.InvariantCulture, "IDX14700: Unable to decode: '{0}' as Base64url encoded string.", str));
+                    throw LogHelper.LogException<FormatException>("IDX14700: Unable to decode: '{0}' as Base64url encoded string.", str);
             }
 
             return Convert.FromBase64String(str);

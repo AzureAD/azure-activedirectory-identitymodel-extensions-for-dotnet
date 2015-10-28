@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
@@ -115,14 +115,10 @@ namespace System.IdentityModel.Tokens.Saml
         protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
-            {
-                throw new ArgumentNullException("samlToken");
-            }
+                throw LogHelper.LogArgumentNullException("samlToken");
 
             if (string.IsNullOrWhiteSpace(issuer))
-            {
-                throw new ArgumentException(LogMessages.IDX10221);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10221);
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
 
@@ -138,11 +134,9 @@ namespace System.IdentityModel.Tokens.Saml
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
-            {
-                throw new ArgumentNullException("tokenDescriptor");
-            }
+                throw LogHelper.LogArgumentNullException("tokenDescriptor");
 
-            return new SamlSecurityToken();
+            throw new NotImplementedException();
         }
 
         ///// <summary>
@@ -174,7 +168,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// Gets and sets the maximum size in bytes, that a will be processed.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public Int32 MaximumTokenSizeInBytes
+        public int MaximumTokenSizeInBytes
         {
             get
             {
@@ -185,7 +179,7 @@ namespace System.IdentityModel.Tokens.Saml
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)));
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10101, value);
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -237,19 +231,14 @@ namespace System.IdentityModel.Tokens.Saml
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-            {
-                throw new ArgumentNullException("securityToken");
-            }
+                throw LogHelper.LogArgumentNullException("securityToken");
+
 
             if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes);
 
             SamlSecurityToken samlToken;
             using (StringReader sr = new StringReader(securityToken))
@@ -281,7 +270,7 @@ namespace System.IdentityModel.Tokens.Saml
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
-                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken));
+                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, securityToken);
                     }
                 }
                 else
@@ -314,7 +303,7 @@ namespace System.IdentityModel.Tokens.Saml
                 {
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
-                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken));
+                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, securityToken);
                     }
                 }
                 else
@@ -415,10 +404,7 @@ namespace System.IdentityModel.Tokens.Saml
 
             SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
-            }
-
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
@@ -446,9 +432,9 @@ namespace System.IdentityModel.Tokens.Saml
 
             SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
+
+            throw new NotImplementedException();
         }
     }
 }

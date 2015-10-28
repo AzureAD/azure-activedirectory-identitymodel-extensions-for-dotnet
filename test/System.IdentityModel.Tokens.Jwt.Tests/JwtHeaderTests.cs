@@ -43,10 +43,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void Defaults()
         {
             JwtHeader jwtHeader = new JwtHeader();
-            Assert.False(jwtHeader.ContainsValue(JwtConstants.HeaderType), "jwtHeader.ContainsValue( JwtConstants.HeaderType )");
-            Assert.False(jwtHeader.ContainsValue(JwtHeaderParameterNames.Typ), "jwtHeader.ContainsValue( JwtConstans.ReservedHeaderParameters.Type )");
-            Assert.False(jwtHeader.ContainsKey(JwtHeaderParameterNames.Alg), "!jwtHeader.ContainsKey( JwtHeaderParameterNames.Algorithm )");
-            Assert.True(jwtHeader.Alg == null, "jwtHeader.SignatureAlgorithm == null");
+            Assert.True(jwtHeader.Typ == JwtConstants.HeaderType, "jwtHeader.ContainsValue( JwtConstants.HeaderType )");
+            Assert.True(jwtHeader.Alg == JwtAlgorithms.NONE, "jwtHeader.SignatureAlgorithm == null");
             Assert.True(jwtHeader.SigningCredentials == null, "jwtHeader.SigningCredentials != null");
             Assert.True(jwtHeader.Kid == null, "jwtHeader.Kid == null");
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");

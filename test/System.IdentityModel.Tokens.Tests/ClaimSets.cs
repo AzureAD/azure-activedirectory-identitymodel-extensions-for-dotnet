@@ -382,6 +382,11 @@ namespace System.IdentityModel.Tokens.Tests
             }
         }
 
+        public static List<Claim> RoleClaimsShortType()
+        {
+            return RoleClaimsShortType(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+        }
+
         public static List<Claim> RoleClaimsShortType(string issuer, string originalIssuer)
         {
             return new List<Claim>()
@@ -389,6 +394,11 @@ namespace System.IdentityModel.Tokens.Tests
                 new Claim( "role", "role1", ClaimValueTypes.String, issuer, originalIssuer),
                 new Claim( "roles", "roles1", ClaimValueTypes.String, issuer, originalIssuer),
             };
+        }
+
+        public static List<Claim> RoleClaimsLongType()
+        {
+            return RoleClaimsLongType(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
         }
 
         public static List<Claim> RoleClaimsLongType(string issuer, string originalIssuer)

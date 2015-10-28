@@ -26,8 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Net.Http;

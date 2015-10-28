@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Saml;
@@ -157,7 +158,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 throw new ArgumentException(LogMessages.IDX10221);
             }
 
-            return new ClaimsIdentity();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -173,7 +174,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 throw new ArgumentNullException("tokenDescriptor");
             }
 
-            return new Saml2SecurityToken();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -191,7 +192,7 @@ namespace System.IdentityModel.Tokens.Saml2
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)));
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture));
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -229,16 +230,12 @@ namespace System.IdentityModel.Tokens.Saml2
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+                throw LogHelper.LogArgumentNullException("reader");
 
             if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
-            return new Saml2SecurityToken();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -255,18 +252,14 @@ namespace System.IdentityModel.Tokens.Saml2
         {
             validatedToken = null;
             if (string.IsNullOrWhiteSpace(securityToken))
-            {
-                throw new ArgumentNullException("securityToken");
-            }
+                throw LogHelper.LogArgumentNullException("securityToken");
 
             if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes);
             }
 
             Saml2SecurityToken samlToken;
@@ -299,7 +292,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
-                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken));
+                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, securityToken);
                     }
                 }
                 else
@@ -337,7 +330,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 {
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
-                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken));
+                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, securityToken);
                     }
                 }
                 else
@@ -430,16 +423,11 @@ namespace System.IdentityModel.Tokens.Saml2
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-            {
-                throw new ArgumentNullException("token");
-            }
+                throw LogHelper.LogArgumentNullException("token");
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType()));
-            }
-
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType());
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
@@ -456,20 +444,14 @@ namespace System.IdentityModel.Tokens.Saml2
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+                throw LogHelper.LogArgumentNullException("writer");
 
             if (token == null)
-            {
-                throw new ArgumentNullException("token");
-            }
+                throw LogHelper.LogArgumentNullException("token");
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
 
             throw new NotSupportedException();
         }

@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Logging
 
         // logging
         internal const string MIML11000 = "MIML11000: eventData.Payload is null or empty. Not logging any messages.";
-        internal const string MIML11001 = "MIML11001: Cannot create the fileStream or StreamWriter to write logs. Exception: {0}";
+        internal const string MIML11001 = "MIML11001: Cannot create the fileStream or StreamWriter to write logs. See inner exception.";
         internal const string MIML11002 = "MIML11002: Unknown log level: {0}.";
 #pragma warning restore 1591
 

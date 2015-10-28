@@ -30,14 +30,14 @@ using Newtonsoft.Json;
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Definition for a delegate that can be set on <see cref="JsonExtensions.Serializer"/> to control serialization of objects into JSON.
+    /// Delegate that can be set on <see cref="JsonExtensions.Serializer"/> to control serialization of objects into JSON.
     /// </summary>
     /// <param name="obj">Object to serialize</param>
     /// <returns>The serialized object.</returns>
     public delegate string Serializer(object obj);
 
     /// <summary>
-    /// Definition for a delegate that can be set on <see cref="JsonExtensions.Deserializer"/> to control deserialization JSON into objects.
+    /// Delegate that can be set on <see cref="JsonExtensions.Deserializer"/> to control deserialization JSON into objects.
     /// </summary>
     /// <param name="obj">JSON to deserialize.</param>
     /// <param name="targetType">type expected.</param>

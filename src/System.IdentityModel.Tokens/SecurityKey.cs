@@ -37,6 +37,16 @@ namespace System.IdentityModel.Tokens
 
         public string KeyId { get; set; }
 
+        public SignatureProvider GetSignatureProviderForSigning(string algorithm)
+        {
+            return GetSignatureProvider(algorithm, false);
+        }
+
+        public SignatureProvider GetSignatureProviderForValidating(string algorithm)
+        {
+            return GetSignatureProvider(algorithm, true);
+        }
+
         public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
 
         public SignatureProviderFactory SignatureProviderFactory

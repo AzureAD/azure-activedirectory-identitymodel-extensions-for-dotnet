@@ -25,22 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
-    /// <remarks>provides support for http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27 </remarks>
+    /// <remarks>provides support for http://tools.ietf.org/html/rfc7517.</remarks>
     public class JsonWebKeySet
     {
         private List<JsonWebKey> _keys = new List<JsonWebKey>();
@@ -60,9 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public JsonWebKeySet(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("json");
 
             try
             {
@@ -72,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch(Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10804, json), typeof(ArgumentException), EventLevel.Error, ex);
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10804, json);
             }
         }
 
@@ -115,11 +111,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             }
                             catch (CryptographicException ex)
                             {
-                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, ex);
+                                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10802, webKey.X5c[0]);
                             }
                             catch (FormatException fex)
                             {
-                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, fex);
+                                throw LogHelper.LogException<InvalidOperationException>(fex, LogMessages.IDX10802, webKey.X5c[0]);
                             }
                         }
                     }
@@ -143,11 +139,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         }
                         catch (CryptographicException ex)
                         {
-                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
+                            throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10801, webKey.E, webKey.N);
                         }
                         catch (FormatException ex)
                         {
-                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
+                            throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10801, webKey.E, webKey.N);
                         }
                     }
                 }

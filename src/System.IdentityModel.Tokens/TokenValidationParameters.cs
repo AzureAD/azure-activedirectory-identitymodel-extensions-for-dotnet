@@ -27,7 +27,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 
@@ -254,9 +253,7 @@ namespace System.IdentityModel.Tokens
             set
             {
                 if (value < TimeSpan.Zero)
-                {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10100, value));
-                }
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10100, value);
 
                 _clockSkew = value;
             }
@@ -301,7 +298,7 @@ namespace System.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10245, securityToken));
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10245, securityToken);
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 
@@ -389,9 +386,7 @@ namespace System.IdentityModel.Tokens
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentException(LogMessages.IDX10102);
-                }
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10102);
 
                 _nameClaimType = value;
             }
@@ -414,9 +409,7 @@ namespace System.IdentityModel.Tokens
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentException(LogMessages.IDX10103);
-                }
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10103);
 
                 _roleClaimType = value;
             }

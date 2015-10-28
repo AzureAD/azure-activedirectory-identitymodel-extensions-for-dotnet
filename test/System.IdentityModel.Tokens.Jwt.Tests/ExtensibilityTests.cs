@@ -133,25 +133,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 #endif
 
-        [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
-        public void AsymmetricSignatureProvider_Extensibility()
-        {
-            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            string newAlgorithmValue = "bobsYourUncle";
-
-            string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, newAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
-            JwtSecurityToken jwt = handler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2) as JwtSecurityToken;
-            ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, originalAlgorithmValue, JwtSecurityTokenHandler.OutboundAlgorithmMap);
-            // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
-            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
-            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, expectedException);
-
-            // "bobsYourUncle" is mapped to RsaSha256
-            originalAlgorithmValue = ReplaceAlgorithm(newAlgorithmValue, SecurityAlgorithms.RsaSha256Signature, JwtSecurityTokenHandler.InboundAlgorithmMap);
-            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, ExpectedException.NoExceptionExpected);
-            ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtSecurityTokenHandler.InboundAlgorithmMap);
-        }
-
 #if SymmetricKeySuport
         [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
         public void SymmetricSignatureProvider_Extensibility()

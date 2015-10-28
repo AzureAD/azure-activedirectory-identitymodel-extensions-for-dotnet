@@ -694,21 +694,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateIdToken(validatedIdToken, protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
 
             // validating the delegate
-            IdTokenValidator idTokenValidatorThrows = ((jwt, context) => { throw new OpenIdConnectProtocolException(); });
+            IdTokenValidator idTokenValidatorThrows = ((jwt, context) => { throw new InvalidOperationException("Validator"); });
             IdTokenValidator idTokenValidatorReturns = ((jwt, context) => { return; });
             IdTokenValidator idTokenValidatorValidateAcr =
                 ((jwt, context) =>
                 {
                     JwtSecurityToken jwtSecurityToken = jwt as JwtSecurityToken;
                     if (jwtSecurityToken.Payload.Acr != "acr")
-                        throw new OpenIdConnectProtocolException();
+                        throw new InvalidOperationException();
                 });
             validator.IdTokenValidator = idTokenValidatorThrows;
             ValidateIdToken(
                 validatedIdToken,
                 protocolValidationContext,
                 validator,
-                new ExpectedException(typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10313:", typeof(InvalidOperationException))
                 );
 
             validator.IdTokenValidator = idTokenValidatorReturns;
@@ -814,7 +814,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithSignatureChash1,
                 validationContext,
                 protocolValidator,
-                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException))
                 );
 
             // valid code
@@ -842,14 +842,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithEmptyCHash,
                 validationContext,
                 protocolValidator,
-                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException))
                 );
             // algorithm mismatch. header.alg is 'None'.
             ValidateCHash(
                 jwtWithCHash1,
                 validationContext,
                 protocolValidator,
-                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10302:", typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException))
                 );
 
             // make sure default alg works.
@@ -1118,7 +1118,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         }
                     },
                     validator,
-                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10348:", typeof(OpenIdConnectProtocolException))
                 );
                 dataset.Add(
                     new JwtSecurityToken
@@ -1134,7 +1134,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         }
                     },
                     validator,
-                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10348:", typeof(OpenIdConnectProtocolException))
                 );
                 dataset.Add(
                     new JwtSecurityToken

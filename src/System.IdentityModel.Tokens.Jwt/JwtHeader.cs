@@ -31,66 +31,43 @@ namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// Initializes a new instance of <see cref="JwtHeader"/> which contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
-    /// The member names within the JWT Header are referred to as Header Parameter Names. 
+    /// The member names within the JWT Header are referred to as Header Parameter Names.
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Serialize not really supported.")]
     public class JwtHeader : Dictionary<string, object>
     {
-        private SigningCredentials signingCredentials;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
-            : base(StringComparer.Ordinal)
+            : this(null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JwtHeader"/> class. With the Header Parameters as follows: 
-        /// <para>{ { typ, JWT }, { alg, Mapped( <see cref="System.IdentityModel.Tokens.SigningCredentials.SignatureAlgorithm"/> } }
-        /// See: Algorithm Mapping below.</para>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
-        /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be or were used to sign the <see cref="JwtSecurityToken"/>.</param>
-        /// <remarks>
-        /// <para>For each <see cref="SecurityKeyIdentifierClause"/> in signingCredentials.SigningKeyIdentifier</para>
-        /// <para>if the clause  is a <see cref="NamedKeySecurityKeyIdentifierClause"/> Header Parameter { clause.Name, clause.Id } will be added.</para>
-        /// <para>For example, if clause.Name == 'kid' and clause.Id == 'SecretKey99'. The JSON object { kid, SecretKey99 } would be added.</para>
-        /// <para>In addition, if the <see cref="SigningCredentials"/> is a <see cref="X509SigningCredentials"/> the JSON object { x5t, Base64UrlEncoded( <see cref="X509Certificate.GetCertHashString()"/> } will be added.</para>
-        /// <para>This simplifies the common case where a X509Certificate is used.</para>
-        /// <para>================= </para>
-        /// <para>Algorithm Mapping</para>
-        /// <para>================= </para>
-        /// <para><see cref="System.IdentityModel.Tokens.SigningCredentials.SignatureAlgorithm"/> describes the algorithm that is discoverable by the CLR runtime.</para>
-        /// <para>The  { alg, 'value' } placed in the header reflects the JWT specification.</para>
-        /// <see cref="JwtSecurityTokenHandler.OutboundAlgorithmMap"/> contains a signature mapping where the 'value' above will be translated according to this mapping.
-        /// <para>Current mapping is:</para>
-        /// <para>&#160;&#160;&#160;&#160;'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' => 'RS256'</para>
-        /// <para>&#160;&#160;&#160;&#160;'http://www.w3.org/2001/04/xmldsig-more#hmac-sha256' => 'HS256'</para>
-        /// </remarks>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON</param>
+        /// <exception cref="ArgumentNullException">if 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials)
             : base(StringComparer.Ordinal)
         {
-            this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
-
-            if (signingCredentials != null)
+            if (signingCredentials == null)
             {
-                this.signingCredentials = signingCredentials;
-
-                string algorithm = signingCredentials.SignatureAlgorithm;
-                if (JwtSecurityTokenHandler.OutboundAlgorithmMap.ContainsKey(signingCredentials.SignatureAlgorithm))
-                {
-                    algorithm = JwtSecurityTokenHandler.OutboundAlgorithmMap[algorithm];
-                }
-
-                this[JwtHeaderParameterNames.Alg] = algorithm;
-                this[JwtHeaderParameterNames.Kid] = signingCredentials.SigningKey.KeyId;
+                this[JwtHeaderParameterNames.Alg] = SecurityAlgorithms.NONE;
             }
             else
             {
-                this[JwtHeaderParameterNames.Alg] = JwtAlgorithms.NONE;
+                this[JwtHeaderParameterNames.Alg] = signingCredentials.Algorithm;
+                if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
+                    this[JwtHeaderParameterNames.Kid] = signingCredentials.Key.KeyId;
             }
+
+            this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
+            SigningCredentials = signingCredentials;
         }
 
         /// <summary>
@@ -111,10 +88,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>This value may be null.</remarks>
         public SigningCredentials SigningCredentials
         {
-            get
-            {
-                return this.signingCredentials;
-            }
+            get; private set;
         }
 
         /// <summary>
@@ -167,7 +141,6 @@ namespace System.IdentityModel.Tokens.Jwt
 
             return null;
         }
-
 
         /// <summary>
         /// Serializes this instance to JSON.

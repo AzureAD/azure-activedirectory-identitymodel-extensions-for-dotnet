@@ -401,6 +401,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler = new JwtSecurityTokenHandler();
             handler.InboundClaimFilter.Add("exp");
             handler.InboundClaimFilter.Add("nbf");
+            handler.InboundClaimFilter.Add("iat");
             handler.InboundClaimTypeMap = new Dictionary<string, string>()
             {
                 { JwtRegisteredClaimNames.Email, "Mapped_" + JwtRegisteredClaimNames.Email },
@@ -503,9 +504,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // Test outgoing
             var outgoingToken = handler.CreateToken(subject: new ClaimsIdentity(new Claim[] { internalClaim }));
-            var mappedClaim = System.Linq.Enumerable.FirstOrDefault(outgoingToken.Claims);
-            Assert.NotNull(mappedClaim);
-            Assert.Equal("jwtClaim", mappedClaim.Type);
+            var wasClaimMapped = System.Linq.Enumerable.Contains<Claim>(outgoingToken.Claims, jwtClaim, new ClaimComparer());
+            Assert.True(wasClaimMapped);
 
             // Test incoming
             var incomingToken = handler.CreateToken(issuer: "Test Issuer", subject: new ClaimsIdentity(new Claim[] { jwtClaim, unwantedClaim }));
@@ -529,8 +529,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Assert.True(handler.CanValidateToken, "!handler.CanValidateToken");
             Assert.True(handler.CanWriteToken, "!handler.CanWriteToken");
-            Assert.True(handler.SignatureProviderFactory != null, "handler.SignatureProviderFactory == null");
             Assert.True(handler.TokenType == typeof(JwtSecurityToken), "handler.TokenType != typeof(JwtSecurityToken)");
+            Assert.True(handler.SetDefaultTimesOnTokenCreation);
         }
 
 #if JWT_XML
@@ -704,15 +704,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                                         tokenHandler,
                                         ExpectedException.NoExceptionExpected);
 #endif
-
             JwtSecurityToken jwt = tokenHandler.CreateToken(
                 IdentityUtilities.DefaultIssuer,
                 IdentityUtilities.DefaultAudience,
                 ClaimSets.DefaultClaimsIdentity,
                 DateTime.UtcNow,
                 DateTime.UtcNow + TimeSpan.FromHours(1),
+                DateTime.UtcNow + TimeSpan.FromHours(1),
                 IdentityUtilities.DefaultAsymmetricSigningCredentials);
-
 
             TokenValidationParameters validationParameters =
                 new TokenValidationParameters()
@@ -891,7 +890,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.SignatureValidator = IdentityUtilities.SignatureValidatorReturnsTokenAsIs;
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10506:");
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10505:");
             validationParameters.SignatureValidator = ((token, parameters) => { return null; });
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 
@@ -1040,6 +1039,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.ValidateAudience = false;
             validationParameters.AudienceValidator = IdentityUtilities.AudienceValidatorThrows;
             TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+        }
+
+        class ClaimComparer : IEqualityComparer<Claim>
+        {
+            public bool Equals(Claim x, Claim y)
+            {
+                if (x.Type == y.Type && x.Value == y.Value)
+                    return true;
+
+                return false;
+            }
+
+            public int GetHashCode(Claim obj)
+            {
+                throw new NotImplementedException();
+            }
         }
     }    
 }

@@ -25,11 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
-using System.Globalization;
+using Microsoft.IdentityModel.Logging;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens
 {
@@ -119,7 +117,7 @@ namespace System.IdentityModel.Tokens
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             if (verifyOnly)
                 return SignatureProviderFactory.CreateForVerifying(this, algorithm);

@@ -25,13 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -43,10 +40,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="input">The byte array to convert</param>
         /// <returns>The Base64Url encoded form of the input</returns>
-        private static string ToBase64UrlString( byte[] input )
+        private static string ToBase64UrlString(byte[] input)
         {
-            if ( input == null )
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Base64UrlConverter.ToBase64UrlString: input"), typeof(ArgumentNullException), EventLevel.Verbose);
+            if (input == null)
+                throw LogHelper.LogArgumentNullException("input");
 
             return Convert.ToBase64String( input ).TrimEnd( '=' ).Replace( '+', '-' ).Replace( '/', '_' );
         }
@@ -56,10 +53,10 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="input">The Base64Url encoded string</param>
         /// <returns>The byte array represented by the enconded string</returns>
-        private static byte[] FromBase64UrlString( string input )
+        private static byte[] FromBase64UrlString(string input)
         {
-            if ( string.IsNullOrEmpty( input ) )
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "Base64UrlConverter.FromBase64UrlString: input"), typeof(ArgumentNullException), EventLevel.Verbose);
+            if (string.IsNullOrEmpty(input))
+                throw LogHelper.LogArgumentNullException("input");
 
             return Convert.FromBase64String( Pad( input.Replace( '-', '+' ).Replace( '_', '/' ) ) );
         }

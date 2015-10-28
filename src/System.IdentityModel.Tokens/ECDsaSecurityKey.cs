@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -37,14 +35,10 @@ namespace System.IdentityModel.Tokens
         public ECDsaSecurityKey(byte[] blob, CngKeyBlobFormat blobFormat)
         {
             if (blob == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ECDsaSecurityKey.blob"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("blob");
 
             if (blobFormat == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ECDsaSecurityKey.blobFormat"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("blobFormat");
 
             CngKey = CngKey.Import(blob, blobFormat);
             BlobFormat = blobFormat;

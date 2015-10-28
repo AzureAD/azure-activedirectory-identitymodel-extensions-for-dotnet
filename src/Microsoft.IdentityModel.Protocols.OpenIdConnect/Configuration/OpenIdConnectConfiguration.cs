@@ -25,14 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -78,11 +75,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static OpenIdConnectConfiguration Create(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectConfiguration.Create: json"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("json");
 
-            IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10808, json));
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10808, json);
             return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
         }
 
@@ -94,9 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "OpenIdConnectConfiguration.Write: configuration"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("configuration");
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
@@ -117,9 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public OpenIdConnectConfiguration(string json)
         {
             if(string.IsNullOrWhiteSpace(json))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("json");
 
             OpenIdConnectConfiguration config = Create(json);
             Copy(config);

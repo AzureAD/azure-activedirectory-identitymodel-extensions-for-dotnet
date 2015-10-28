@@ -37,6 +37,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
         internal const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty object.";
         internal const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
+        internal const string IDX10003 = "IDX10003: The parameter '{0}' cannot be 'null'.";
 
         // properties, configuration 
         internal const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
@@ -50,7 +51,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10241 = "IDX10241: Security token validated. token: '{0}'.";
         internal const string IDX10242 = "IDX10242: Security token: '{0}' has a valid signature.";
         internal const string IDX10243 = "IDX10243: Reading issuer signing keys from validaiton parameters.";
-        internal const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims.";
+        internal const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
 
         // SecurityTokenHandler messages
         internal const string IDX10401 = "IDX10401: Expires: '{0}' must be after NotBefore: '{1}'.";
@@ -59,7 +60,9 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10500 = "IDX10500: Signature validation failed. There are no security keys to use to validate the signature";
         internal const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
         internal const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'";
-        internal const string IDX10506 = "IDX10506: Signature validation failed. The 'Delegate' specified on TokenValidationParameters returned null SecurityToken, token: '{0}'.";
+        internal const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
+        internal const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
+        internal const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
 
         // Crypto Errors
         internal const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
@@ -68,8 +71,8 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
 
         // JWT specific errors
-        internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.\nInnerException: '{2}'.";
-        internal const string IDX10701 = "IDX10701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range. \nInnerException: '{2}'.";
+        internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
+        internal const string IDX10701 = "IDX10701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range.";
         internal const string IDX10702 = "IDX10702: Jwt header type specified, must be '{0}' or '{1}'.  Type received: '{2}'.";
         internal const string IDX10703 = "IDX10703: Unable to decode the '{0}': '{1}' as Base64url encoded string. jwtEncodedString: '{2}'.";
         internal const string IDX10704 = "IDX10704: Cannot set inner IssuerTokenResolver to self.";
@@ -89,9 +92,8 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10718 = "IDX10718: Deserializing payload: '{0}' from the token.";
         internal const string IDX10719 = "IDX10719: Token string length greater than maximum length allowed. Token string length: {0}";
         internal const string IDX10720 = "IDX10720: Token string does not match the token format: header.payload.signature";
-        internal const string IDX10721 = "IDX10721: Creating payload and header from the passed parameters including issuer, audience, signing credentials and others.";
+        internal const string IDX10721 = "IDX10721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX10722 = "IDX10722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
-        internal const string IDX10723 = "IDX10723: Adding the signature: '{0}' to the token";
 
 #pragma warning restore 1591
 
