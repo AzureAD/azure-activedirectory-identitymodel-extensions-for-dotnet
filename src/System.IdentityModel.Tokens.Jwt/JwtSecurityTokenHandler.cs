@@ -285,7 +285,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
             if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromSeconds(2));
+                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
             }
 
             if( !regex.IsMatch(tokenString))
