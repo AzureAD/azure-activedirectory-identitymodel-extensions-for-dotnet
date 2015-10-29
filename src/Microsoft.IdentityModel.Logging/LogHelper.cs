@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Logging
                 message = format;
 
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
-                IdentityModelEventSource.Logger.Write(eventLevel, innerException, message, args);
+                IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
 
             if (innerException != null)
                 return (T)Activator.CreateInstance(typeof(T), message, innerException);
