@@ -49,21 +49,25 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
             ExpectedException expectedException = ExpectedException.NoExceptionExpected;
             string json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}";
-            try
-            {
-                openIdConnectMessage = new OpenIdConnectMessage(json);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                expectedException.ProcessException(exception);
-            }
+            string badJson = @"{""response_mode"":""responseMode"";""respone_mode"":""badResponeMode""}";
 
+            // null stirng json
+            expectedException = ExpectedException.ArgumentNullException();
+            TestJsonStringConstructor((string)null, expectedException);
+
+            // bad string json
+            expectedException = ExpectedException.ArgumentException("IDX10106");
+            TestJsonStringConstructor(badJson, expectedException);
+
+            // no exception, well-formed json
+            expectedException = ExpectedException.NoExceptionExpected;
+            openIdConnectMessage = TestJsonStringConstructor(json, expectedException);
             Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
             Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
             Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
             Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
 
+            // no exception, using JObject ctor
             expectedException = ExpectedException.NoExceptionExpected;
             try
             {
@@ -82,6 +86,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // test with an empty JObject
             openIdConnectMessage = new OpenIdConnectMessage(new JObject());
+        }
+
+        private OpenIdConnectMessage TestJsonStringConstructor(string json, ExpectedException expectedException)
+        {
+            OpenIdConnectMessage openIdConnectMessage = null;
+
+            try
+            {
+                openIdConnectMessage = new OpenIdConnectMessage(json);
+                expectedException.ProcessNoException();
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception);
+            }
+
+            return openIdConnectMessage;
         }
 
         [Fact(DisplayName = "OpenIdConnectMessageTests: Defaults")]

@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -48,16 +49,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public OpenIdConnectMessage(string json)
         {
             if (string.IsNullOrEmpty(json))
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
+                throw LogHelper.LogArgumentNullException("json");
 
             try
             {
-                JObject jsonObject = JObject.Parse(json);
-                SetJsonParameters(jsonObject);
+                SetJsonParameters(JObject.Parse(json));
             }
             catch
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10106, json), typeof(ArgumentException), EventLevel.Verbose);
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10106, json);
             }
 
         }
