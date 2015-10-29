@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -37,6 +38,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact(DisplayName = "JwtHeaderTests: Constructors")]
         public void Constructors()
         {
+            var header1 = new JwtHeader();
+            var header2 = new JwtHeader(null);
+
+            var context = new CompareContext();
+            IdentityComparer.AreEqual<JwtHeader>(header1, header2, context);
+            TestUtilities.AssertFailIfErrors("JwtHeaderTests.Constructors", context.Diffs);
         }
 
         [Fact(DisplayName = "JwtHeaderTests: Defaults")]

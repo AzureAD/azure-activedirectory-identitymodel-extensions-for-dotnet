@@ -194,6 +194,8 @@ namespace System.IdentityModel.Tokens.Tests
                 return AreEqual<JsonWebKey>(t1 as JsonWebKey, t2 as JsonWebKey, context, AreJsonWebKeysEqual);
             else if (t1 is JsonWebKeySet)
                 return AreEqual<JsonWebKeySet>(t1 as JsonWebKeySet, t2 as JsonWebKeySet, context, AreJsonWebKeySetsEqual);
+            else if (t1 is JwtHeader)
+                return AreEqual<JwtHeader>(t1 as JwtHeader, t2 as JwtHeader, context, AreJwtHeadersEqual);
             else if (t1 is JwtPayload)
                 return AreEqual<JwtPayload>(t1 as JwtPayload, t2 as JwtPayload, context, AreJwtPayloadsEqual);
             else if (t1 is JwtSecurityToken)
@@ -392,6 +394,68 @@ namespace System.IdentityModel.Tokens.Tests
             return diffs.Count == 0;
         }
 
+        public static bool AreDictionariesEqual(IDictionary<string, object> dictionary1, IDictionary<string, object> dictionary2, CompareContext context)
+        {
+            if (dictionary1 == null && dictionary2 == null)
+                return true;
+
+            if (dictionary1 == null)
+            {
+                context.Diffs.Add("(dictionary1 == null && dictionary2 != null)");
+                return false;
+            }
+
+            if (dictionary2 == null)
+            {
+                context.Diffs.Add("(dictionary1 != null && dictionary2 == null)");
+                return false;
+            }
+
+            if (dictionary1.Count != dictionary2.Count)
+            {
+                context.Diffs.Add("(dictionary1.Count != dictionary2.Count: " + dictionary1.Count + ", " + dictionary2.Count);
+                return false;
+            }
+
+            int numMatched = 0;
+            foreach (string key in dictionary1.Keys)
+            {
+                if (dictionary2.ContainsKey(key))
+                {
+                    if (dictionary1[key].GetType() != dictionary2[key].GetType())
+                    {
+                        context.Diffs.Add("dictionary1[key].GetType() != dictionary2[key].GetType(), key: '" + key + "' value1.GetType(), value2.GetType(): '" + dictionary1[key].GetType().ToString() + "', '" + dictionary2[key].GetType().ToString() + "'");
+                        continue;
+                    }
+
+                    // for now just typing strings, should expand types.
+                    var str1 = dictionary1[key] as string;
+                    var str2 = dictionary2[key] as string;
+                    if (str1 != null && str2 != null)
+                    {
+                        if (!str1.Equals(str2, StringComparison.Ordinal))
+                        {
+                            context.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key] + "', '" + dictionary2[key] + "'");
+                            continue;
+                        }
+                    }
+                    else if (dictionary1[key] != dictionary2[key])
+                    {
+                        context.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key].ToString() + "', '" + dictionary2[key].ToString() + "'");
+                        continue;
+                    }
+
+                    numMatched++;
+                }
+                else
+                {
+                    context.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
+                }
+            }
+
+            return numMatched == dictionary1.Count;
+        }
+
         public static bool AreDictionariesEqual(IDictionary<string, string> dictionary1, IDictionary<string, string> dictionary2, CompareContext context)
         {
             if (dictionary1 == null && dictionary2 == null)
@@ -502,12 +566,28 @@ namespace System.IdentityModel.Tokens.Tests
 
         public static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
         {
-            if (header1.Count != header2.Count)
+            if (header1 == null && header2 == null)
+                return true;
+
+            if (header1 == null)
             {
+                context.Diffs.Add("header1 == null, header2 != null");
                 return false;
             }
 
-            return true;
+            if (header2 == null)
+            {
+                context.Diffs.Add("header1 != null, header2 == null");
+                return false;
+            }
+
+            if (header1.Count != header2.Count)
+            {
+                context.Diffs.Add("(header1.Count != header2.Count: " + header1.Count + ", " + header2.Count);
+                return false;
+            }
+
+            return AreDictionariesEqual(header1, header2, context);
         }
 
         public static bool AreJwtPayloadsEqual(JwtPayload payload1, JwtPayload payload2, CompareContext context)

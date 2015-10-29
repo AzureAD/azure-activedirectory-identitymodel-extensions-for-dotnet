@@ -80,7 +80,7 @@ namespace System.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, algorithm, key);
+                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, key, (algorithm ?? "null"));
             }
         }
 

@@ -285,7 +285,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
             if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromSeconds(2));
+                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
             }
 
             if( !regex.IsMatch(tokenString))
@@ -367,8 +367,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private JwtSecurityToken CreateJwt(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
-            // if not set, use defaults
-            if (SetDefaultTimesOnTokenCreation && (!expires.HasValue || !issuedAt.HasValue || !notBefore.HasValue))
+            if (SetDefaultTimesOnTokenCreation)
             {
                 DateTime now = DateTime.UtcNow;
                 if (!expires.HasValue)

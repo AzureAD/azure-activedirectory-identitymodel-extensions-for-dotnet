@@ -133,7 +133,7 @@ namespace System.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw LogHelper.LogException<FormatException>("IDX14700: Unable to decode: '{0}' as Base64url encoded string.", str);
+                    throw LogHelper.LogException<FormatException>(LogMessages.IDX14700, str);
             }
 
             return Convert.FromBase64String(str);
