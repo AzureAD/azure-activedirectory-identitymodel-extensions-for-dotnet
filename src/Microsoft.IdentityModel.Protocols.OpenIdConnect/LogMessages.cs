@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         // properties, configuration 
         internal const string IDX10105 = "IDX10105: NonceLifetime must be greater than zero. value: '{0}'";
-        internal const string IDX10106 = "IDX10106: Error in deserializing json: '{0}' into Newtonsoft.JObject.";
+        internal const string IDX10106 = "IDX10106: Error in deserializing to json: '{0}'";
 
         // protocol validation
         internal const string IDX10300 = "IDX10300: The hash claim: '{0}' in the id_token did not validate with against: '{1}', algorithm: '{2}'.";
