@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// This code is licensed under the MIT License.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -102,7 +111,7 @@ namespace System.IdentityModel.Tokens.Tests
                 new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
                 new Claim( ClaimTypes.Role, "Sales", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer ),
-                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer ),
+                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-S�bastien", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer ),
                 new Claim( "role", "role1", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
                 new Claim( "roles", "roles1", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
 
@@ -110,42 +119,42 @@ namespace System.IdentityModel.Tokens.Tests
 
             _globalClaims = new List<Claim>()
             {
-                new Claim("Arabic", @"الراي", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Turkish1", @"ığIŞiĞİşçöÇÖ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Turkish2", @"ĞİşÖ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Chinese1", @"阿洛哈", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Chinese2", @"洛矶", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Japanese1", @"アロハ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Japanese2", @"ロッキー<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA1", @"㐖㐗㐘㐙㐚㐛㐜㐝㐞㐟㐠㐡㐢㐣㐤㐥㐦㐧㐨㐩㐪㐫㐬㐭㐮㐯㐰㐱", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA2", @"㱍㱎㱏㱐㱑㱒㱓㱔㱕㱖㱗㱘㱙㱚㱛㱜㱝㱞㱟㱠㱡㱢㱣㱤㱥㱦㱧㱨㱩㱪㱫㱬㱭㱮㱯㱰㱱㱲㱳㱴㱵㱶㱷", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA3", @"䐧䐨䐩䐪䐫䐬䐭䐮䐯䐰䐱䐲䐳䐴䐵䐶䐷䐸䐹䐺䐻䐼䐽䐾䐿䑀䑁䑂", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA4", @"䝰䝱䝲䝳䝴䝵䝶䝷䝸䝹䝺䝻䝼䝽䝾䝿䞀䞁䞂䞃䞄䞅䞆䞇䞈䞉䞊䞋䞌䞍䞎䞏䞐䞑䞒䞓䞔䞕䞖䞗䞘䞙䞚䞛䞜䞝䞞䞟䞠䞡䞢䞣䞤䞥䞦䞧䞨䞩䞪䞫䞬䞭䞮䞯䞰䞱䞲䞳䞴䞵䞶䞷䞸䞹䞺䞻䞼䞽䞾䞿䟀䟁䟂䟃䟄䟅䟆䟇䟈䟉䟊䟋䟌䟍䟎䟏䟐䟑䟒䟓䟔䟕䟖䟗䟘䟙䟚䟛䟜䟝䟞䟟䟠䟡䟢䟣䟤", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA4", @"䱘䱙䱚䱛䱜䱝䱞䱟䱠䱡䱢䱣䱤䱥䱦䱧䱨䱩䱪䱫䱬䱭䱮䱯䱰䱱䱲䱳䱴䱵䱶䱷䱸䱹䱺䱻䱼䱽䱾䱿䲀䲁䲂䲃䲄䲅䲆䲇䲈䲉䲊䲋䲌䲍䲎䲏䲐䲑䲒䲓䲔䲕䲖䲗䲘䲙䲚䲛䲜䲝䲞䲟䲠䲡䲢䲣䲤䲥䲦䲧䲨䲩䲪䲫䲬䲭䲮䲯䲰䲱䲲䲳䲴䲵䲶䲷䲸䲹䲺䲻䲼䲽䲾䲿䳀䳁䳂䳃䳄䳅䳆䳇䳈䳉䳊䳋䳌䳍䳎䳏䳐䳑䳒䳓䳔䳕䳖䳗䳘䳙䳚䳛䳜䳝䳞䳟䳠䳡䳢䳣䳤䳥䳦䳧䳨䳩䳪䳫䳬䳭䳮䳯䳰䳱䳲䳳䳴䳵䳶䳷䳸䳹䳺䳻䳼䳽䳾䳿䴀䴁䴂䴃䴄䴅䴆䴇䴈䴉䴊䴋䴌䴍䴎䴏䴐䴑䴒䴓䴔䴕䴖䴗䴘䴙䴚䴛䴜䴝䴞䴟䴠䴡䴢䴣䴤䴥䴦䴧䴨䴩䴪䴫䴬䴭䴮䴯䴰䴱䴲䴳䴴䴵䴶䴷䴸䴹䴺䴻䴼䴽䴾䴿䵀䵁䵂䵃䵄䵅䵆䵇䵈䵉䵊䵋䵌䵍䵎䵏䵐䵑䵒䵓䵔䵕䵖䵗䵘䵙䵚䵛䵜䵝䵞䵟䵠䵡䵢䵣䵤䵥䵦䵧䵨䵩䵪䵫䵬䵭䵮䵯䵰䵱䵲䵳䵴䵵䵶䵷䵸䵹䵺䵻䵼䵽䵾䵿䶀䶁䶂䶃䶄䶅䶆䶇䶈䶉䶊䶋䶌䶍䶎䶏䶐䶑䶒䶓䶔䶕䶖䶗䶘䶙䶚䶛䶜䶝䶞䶟䶠䶡䶢䶣䶤䶥䶦䶧", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB1", @"𠘣𠘤𠘥𠘦𠘧𠘨𠘩𠘪𠘫𠘬𠘭𠘮𠘯𠘰𠘱𠘲𠘳𠘴𠘵𠘶𠘷𠘸𠘹𠘺𠘻𠘼𠘽𠘾𠘿𠙀", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB2", @"𥀿𥁀𥁁𥁂𥁃𥁄𥁅𥁆𥁇𥁈𥁉𥁊𥁋𥁌𥁍𥁎𥁏", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB3", @"𡴥𡴦𡴧𡴨𡴩𡴪𡴫𡴬𡴭𡴮𡴯𡴰𡴱𡴲𡴳𡴴𡴵𡴶𡴷𡴸𡴹𡴺", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB4", @"𧴒𧴓𧴔𧴕𧴖𧴗𧴘𧴙𧴚𧴛𧴜𧴝𧴞𧴟𧴠𧴡𧴢𧴣𧴤𧴥𧴦𧴧𧴨𧴩𧴪𧴫𧴬𧴭𧴮𧴯𧴰𧴱𧴲𧴳𧴴𧴵𧴶𧴷𧴸𧴹𧴺𧴻𧴼𧴽𧴾𧴿𧵀𧵁𧵂𧵃𧵄𧵅𧵆𧵇𧵈𧵉𧵊𧵋𧵌𧵍𧵎𧵏𧵐𧵑<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB5", @"𪚶𪚷𪚸𪚹𪚺𪚻𪚼𪚽𪚾𪚿𪛀𪛁𪛂𪛃𪛄𪛅𪛆𪛇𪛈𪛉𪛊𪛋𪛌𪛍𪛎𪛏𪛐𪛑𪛒𪛓𪛔𪛕𪛖", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars1", @"𠣁𩥺𨍝𦴿𥜢𤄅𢫨𡓋𪖄𨽧𧥉𦌬𤴏𣛲𢃕𠪸𩭰𨕓𦼶𥤙𤋼𢳟𡛁𠂤𩅝𧭀𦔣𤼆𣣩𢋋𠲮𩵧𨝊𧄭𥬐𤓲𢻕𡢸𠊛𩍔𧴷𦜙𥃼𣫟𢓂𠺥𩽞𨥁𧌣𥴆𤛩𣃌𡪯𠒒𩕊𧼭𦤐𥋳𣳖𢚹𡂜𪅔𨬷𧔚𥻽𤣠𣋃𡲥𠚈𩝁𨄤𦬇𥓪𣻌𢢯𡊒𪍋𨴮𧜑𦃴𤫖𣒹𡺜𠡿𩤸𨌛𦳽𥛠𤃃𢪦𡒉𪕂𨼥𧤇𦋪𤳍𣚰𢂓𠩶𩬮", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars2", @"𧊅𥱨𤙋𣀮𡨐𠏳𩒬𧺏𦡲𥉕𣰷𢘚𠿽𪂶𨪙𧑼𥹞𤡁𣈤𡰇𠗪𩚣𨂆𦩨𥑋𣸮𢠑𡇴𪊭𨲏𧙲𦁕𤨸𣐛𡷾𠟡𩢙𨉼𦱟𥙂𤀥𢨈𡏪𪒣𨺆𧡩𦉌𤰯𣘑𡿴𠧗𩪐𨑳𦹖𥠹𤈛𢯾𡗡𪚚𩁽𧩠𦑂𤸥𣠈𢇫𠯎𩲇𨙪𧁌𥨯𤐒𢷵𡟘𠆻𩉳𧱖𦘹𥀜𣧿𢏢𠷄𩹽𨡠𧉃𥰦𤘉𢿬𡧎𠎱𩑪𧹍𦠰𥈓𣯵𢗘𠾻𪁴𨩗𧐺𥸜", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars3", @"𢽵𡥘𠌺𩏳𧷖𦞹𥆜𣭿𢕡𠽄𩿽𨧠𧏃𥶦𤞉𣅫𡭎𠔱𩗪𧿍𦦰𥎒𣵵𢝘𡄻𪇴𨯗𧖹𥾜𤥿𣍢𡵅𠜨𩟡𨇃𦮦𥖉𣽬𢥏𡌲𪏪𨷍𧞰𦆓𤭶𣕙𡼼𠤞𩧗𨎺𦶝𥞀𤅣𢭅𡔨𪗡𨿄𧦧𦎊𤵬𣝏𢄲𠬕𩯎𨖱𦾔𥥶𤍙𢴼𡜟𠄂𩆻𧮝𦖀𤽣𣥆𢌩𠴌𩷅𨞧𧆊𥭭𤕐𢼳𡤖𠋸𩎱𧶔𦝷𥅚𣬽𢔟𠼂𩾻𨦞𧎁𥵤𤝇𣄩𡬌", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars4", @"𥮦a𨟠z𠵄4𣥿M𦖹f𩇳N𡝘g𤎒S𦿌l𩰇T𢅫m𤶥Y𧧟r𪘚Y𢭾E𥞸K𡅠7𣶚P𦧔i𩘏P𡭳i𤞭U𧏨n𪀢)𢖆B𥇁G𠭨3𣞢L𦏝e𩀗M𡕻9𤆶R𦷰k𩨪S𡾏l𤯉X𧠃q𪐾X𢦢D𥗜]𨈖v𠝻1𣎵J𥿯c𨰪K𡆎7𣷈P𦨃i𩘽Q𡮡i", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars5", @"𡘻9𤉵R𦺯k𩫪S𢁎l𤲈X𧣃q𪓽Y𢩡E𥚜J𡁃gtOyYeqMY9E6𣱽O𦢸h𩓲P𡩖i𤚑U𧋋n𩼅)𢑪A𥂤Z𧳞s𠉂y𦋀e𨻺L𡑞8𤂙Q𦳓j𩤍R𡹲k𥏞𦧻𨀘𩘵𠕼𡮚𣆷𤟔𥷱𧐎𨨫W𧛦p𪌡X𢢅D𥒿]𨃺v𠙞1𣊘I𥻓b𨬍J𡁱6𣲬O𦣦h𩔠P𡪄i𤚿U𧋹n𩼳)𢒘B𥃒Z𧴌s", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates1", @"𣏚𣏟𣑑𣑥𣕚", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates2", @"𠀋𠂢𠂤𠌫𠍱", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates3", @"𠦝𠦝𠦝𠦝𠦝", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates4", @"𡽶𤹪𦥑𧸐𨑕", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Arabic", @"?????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Turkish1", @"igISiGIs����", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Turkish2", @"GIs�", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Chinese1", @"???", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Chinese2", @"??", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Japanese1", @"???", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("Japanese2", @"????<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtA1", @"????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtA2", @"???????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtA3", @"????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtA4", @"?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtA4", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtB1", @"????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtB2", @"??????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtB3", @"????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtB4", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("ExtB5", @"??????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("EnteringIntlChars1", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("EnteringIntlChars2", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("EnteringIntlChars3", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("EnteringIntlChars4", @"??a??z??4??M??f??N??g??S??l??T??m??Y??r??Y??E??K??7??P??i??P??i??U??n??)??B??G??3??L??e??M??9??R??k??S??l??X??q??X??D??]??v??1??J??c??K??7??P??i??Q??i", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("EnteringIntlChars5", @"??9??R??k??S??l??X??q??Y??E??J??gtOyYeqMY9E6??O??h??P??i??U??n??)??A??Z??s??y??e??L??8??Q??j??R??k??????????????????????W??p??X??D??]??v??1??I??b??J??6??O??h??P??i??U??n??)??B??Z??s", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("CommonSurrogates1", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("CommonSurrogates2", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("CommonSurrogates3", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("CommonSurrogates4", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
                 new Claim("STBSample1", @"!#)6=@Aa}~<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample2", @"啊齄丂狛狜隣郎隣兀﨩ˊ▇█〞〡￤℡㈱‐ー﹡﹢﹫、〓ⅰⅹ⒈€㈠㈩ⅠⅫ！￣ぁんァヶΑ︴АЯаяāɡㄅㄩ─╋︵﹄︻︱︳︴ⅰⅹɑɡ〇〾⿻⺁䜣€", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample3", @"㐀㒣㕴㕵㙉㙊䵯䵰䶴䶵", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample4", @"𠀀𠀁𠀂𠀃𪛑𪛒𪛓𪛔𪛕𪛖", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample5", @"᠀᠐᠙ᠠᡷᢀᡨᡩᡪᡫ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample6", @"ༀཇཉཪཱྋ྾࿌࿏ྼྙ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample7", @"ꀀꒌꂋꂌꂍꂎꂔꂕ꒐꓆", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample8", @"،؟ئبتجدرشعەﭖﭙﯓﯿﺉﺒﻺﻼ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample9", @"ᥐᥥᥦᥧᥨᥭᥰᥱᥲᥴ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample10", @"ᄓᄕᇬᇌᇜᇱㄱㅣ가힝", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample2", @"??????????�?�?????-?????????�????!???????????ag??-???????????g???????�", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample3", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample4", @"????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample5", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample6", @"???????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample7", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample8", @"???????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample9", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
+                new Claim("STBSample10", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
 
             };
 
@@ -373,6 +382,11 @@ namespace System.IdentityModel.Tokens.Tests
             }
         }
 
+        public static List<Claim> RoleClaimsShortType()
+        {
+            return RoleClaimsShortType(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+        }
+
         public static List<Claim> RoleClaimsShortType(string issuer, string originalIssuer)
         {
             return new List<Claim>()
@@ -380,6 +394,11 @@ namespace System.IdentityModel.Tokens.Tests
                 new Claim( "role", "role1", ClaimValueTypes.String, issuer, originalIssuer),
                 new Claim( "roles", "roles1", ClaimValueTypes.String, issuer, originalIssuer),
             };
+        }
+
+        public static List<Claim> RoleClaimsLongType()
+        {
+            return RoleClaimsLongType(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
         }
 
         public static List<Claim> RoleClaimsLongType(string issuer, string originalIssuer)
@@ -406,7 +425,7 @@ namespace System.IdentityModel.Tokens.Tests
                 new Claim( ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, issuer, originalIssuer ),
                 new Claim( ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, issuer, originalIssuer),
                 new Claim( ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer, originalIssuer ),
-                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer, originalIssuer ),
+                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-S�bastien", ClaimValueTypes.String, issuer, originalIssuer ),
             };
         }
 
@@ -419,7 +438,7 @@ namespace System.IdentityModel.Tokens.Tests
                 NewClaimWithShortType(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, issuer, originalIssuer ),
                 NewClaimWithShortType(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, issuer, originalIssuer),
                 NewClaimWithShortType(ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer, originalIssuer ),
-                NewClaimWithShortType(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer, originalIssuer ),
+                NewClaimWithShortType(ClaimsIdentity.DefaultNameClaimType, "Jean-S�bastien", ClaimValueTypes.String, issuer, originalIssuer ),
             };
         }
 

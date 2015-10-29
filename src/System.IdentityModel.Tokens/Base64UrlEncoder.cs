@@ -1,22 +1,31 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-using System.Globalization;
+using Microsoft.IdentityModel.Logging;
 using System.Text;
 
 namespace System.IdentityModel.Tokens
@@ -27,7 +36,7 @@ namespace System.IdentityModel.Tokens
     public static class Base64UrlEncoder
     {
         private static char base64PadCharacter = '=';
-        private static string doubleBase64PadCharacter = string.Format(CultureInfo.InvariantCulture, "{0}{0}", base64PadCharacter);
+        private static string doubleBase64PadCharacter = "==";
         private static char base64Character62 = '+';
         private static char base64Character63 = '/';
         private static char base64UrlCharacter62 = '-';
@@ -44,9 +53,7 @@ namespace System.IdentityModel.Tokens
         public static string Encode(string arg)
         {
             if (null == arg)
-            {
-                throw new ArgumentNullException(arg);
-            }
+                throw LogHelper.LogArgumentNullException("arg");
 
             return Encode(Encoding.UTF8.GetBytes(arg));
         }
@@ -63,6 +70,9 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray, int offset, int length)
         {
+            if (inArray == null)
+                throw LogHelper.LogArgumentNullException("inArray");
+
             string s = Convert.ToBase64String(inArray, offset, length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
             s = s.Replace(base64Character62, base64UrlCharacter62);  // 62nd char of encoding
@@ -80,10 +90,8 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray)
         {
-            if (inArray==null)
-            {
-                throw new ArgumentNullException("inArray");
-            }
+            if (inArray == null)
+                throw LogHelper.LogArgumentNullException("inArray");
 
             string s = Convert.ToBase64String(inArray, 0, inArray.Length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
@@ -125,7 +133,7 @@ namespace System.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw new FormatException(string.Format(CultureInfo.InvariantCulture, "IDX14700: Unable to decode: '{0}' as Base64url encoded string.", str));
+                    throw LogHelper.LogException<FormatException>(LogMessages.IDX14700, str);
             }
 
             return Convert.FromBase64String(str);

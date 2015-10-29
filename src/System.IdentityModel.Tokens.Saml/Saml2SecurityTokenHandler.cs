@@ -1,21 +1,31 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// This code is licensed under the MIT License.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Saml;
@@ -148,7 +158,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 throw new ArgumentException(LogMessages.IDX10221);
             }
 
-            return new ClaimsIdentity();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -164,7 +174,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 throw new ArgumentNullException("tokenDescriptor");
             }
 
-            return new Saml2SecurityToken();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -182,7 +192,7 @@ namespace System.IdentityModel.Tokens.Saml2
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture)));
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture));
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -220,16 +230,12 @@ namespace System.IdentityModel.Tokens.Saml2
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
+                throw LogHelper.LogArgumentNullException("reader");
 
             if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
-            return new Saml2SecurityToken();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -246,18 +252,14 @@ namespace System.IdentityModel.Tokens.Saml2
         {
             validatedToken = null;
             if (string.IsNullOrWhiteSpace(securityToken))
-            {
-                throw new ArgumentNullException("securityToken");
-            }
+                throw LogHelper.LogArgumentNullException("securityToken");
 
             if (validationParameters == null)
-            {
-                throw new ArgumentNullException("validationParameters");
-            }
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes);
             }
 
             Saml2SecurityToken samlToken;
@@ -290,7 +292,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
-                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken));
+                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, securityToken);
                     }
                 }
                 else
@@ -328,7 +330,7 @@ namespace System.IdentityModel.Tokens.Saml2
                 {
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
-                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken));
+                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, securityToken);
                     }
                 }
                 else
@@ -421,16 +423,11 @@ namespace System.IdentityModel.Tokens.Saml2
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-            {
-                throw new ArgumentNullException("token");
-            }
+                throw LogHelper.LogArgumentNullException("token");
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType()));
-            }
-
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType());
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
@@ -447,20 +444,14 @@ namespace System.IdentityModel.Tokens.Saml2
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
+                throw LogHelper.LogArgumentNullException("writer");
 
             if (token == null)
-            {
-                throw new ArgumentNullException("token");
-            }
+                throw LogHelper.LogArgumentNullException("token");
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(SamlSecurityToken), token.GetType()));
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
 
             throw new NotSupportedException();
         }

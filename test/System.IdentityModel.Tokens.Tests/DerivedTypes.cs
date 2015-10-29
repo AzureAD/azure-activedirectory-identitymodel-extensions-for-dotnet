@@ -1,34 +1,41 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 // This file contains derived types that are usefull across multiple handlers / protocols.
 
 
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace System.IdentityModel.Tokens.Tests
 {
 #if DNXCORE50
-    /// <summary>
-    /// 
-    /// </summary>
     public class DerivedClaim : Claim
     {
         string _dataString;
@@ -60,12 +67,6 @@ namespace System.IdentityModel.Tokens.Tests
         public DerivedClaim(BinaryReader reader, ClaimsIdentity subject)
             : base(reader, subject)
         {
-
-            Logger.LogInformation("DerivedClaim.ctor... base.SerializeName: " + base.SerializeName ?? "null");
-            Logger.LogInformation("DerivedClaim.ctor... SerializeName: " + SerializeName ?? "null");
-            if (string.IsNullOrWhiteSpace(base.SerializeName))
-                return;
-
             _dataString = reader.ReadString();
             Int32 cb = reader.ReadInt32();
             if (cb > 0)
@@ -98,16 +99,6 @@ namespace System.IdentityModel.Tokens.Tests
             }
         }
 
-        protected override string SerializeName
-        {
-            get { return "Derived"; }
-        }
-
-        public string SerializedName
-        {
-            get { return SerializeName; }
-        }
-
         public override Claim Clone()
         {
             return Clone((ClaimsIdentity)null);
@@ -121,7 +112,6 @@ namespace System.IdentityModel.Tokens.Tests
         public override void WriteTo(IO.BinaryWriter writer)
         {
             base.WriteTo(writer);
-            Logger.LogInformation("SerializeName: " + SerializeName);
             writer.Write(_dataString);
             if (_dataBytes == null || _dataBytes.Length == 0)
             {
@@ -206,17 +196,7 @@ namespace System.IdentityModel.Tokens.Tests
 
         protected override Claim CreateClaim(BinaryReader reader)
         {
-            DerivedClaim dc = new DerivedClaim(reader, this);
-            if (string.IsNullOrWhiteSpace(dc.SerializedName))
-            {
-                Logger.LogInformation(" return (dc as Claim).Clone(this);");
-                return (dc as Claim).Clone(this);
-            }
-            else
-            {
-                Logger.LogInformation(" return dc;");
-                return dc;
-            }
+            return new DerivedClaim(reader, this);
         }
     }
 

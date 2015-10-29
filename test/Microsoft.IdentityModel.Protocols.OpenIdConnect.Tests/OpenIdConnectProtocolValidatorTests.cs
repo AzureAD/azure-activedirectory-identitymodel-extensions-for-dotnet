@@ -1,20 +1,29 @@
-//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -25,6 +34,7 @@ using System.IdentityModel.Tokens.Tests;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -123,6 +133,102 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 ee.ProcessException(ex);
             }
         }
+
+        private void ValidateUserInfoResponse(OpenIdConnectProtocolValidationContext context, OpenIdConnectProtocolValidator validator, ExpectedException ee)
+        {
+            try
+            {
+                validator.ValidateUserInfoResponse(context);
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: validate userinfo endpoint response")]
+        public void ValidateUserInfoResponse()
+        {
+            var protocolValidator = new OpenIdConnectProtocolValidator
+            {
+                RequireTimeStampInNonce = false,
+                RequireStateValidation = false,
+                RequireNonce = false
+            };
+            var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
+            var jwtWithNoSub = CreateValidatedIdToken();
+            var jwtWithSub = CreateValidatedIdToken();
+            jwtWithSub.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
+            var stringJwt = new JwtSecurityTokenHandler().WriteToken(jwtWithSub);
+
+            var userInfoResponseJson = @"{ ""sub"": ""sub""}";
+            var userInfoResponseJsonInvalidSub = @"{ ""sub"": ""sub1""}";
+            var userInfoResponseJson2 = @"{ ""tid"":""cdc690f9 - b6b8 - 4023 - 813a - bae7143d1f87"",""oid"":""991fb93e - 7400 - 47aa - bdaa - a5f5ea6b5669"",""upn"":""testuser @Tratcheroutlook.onmicrosoft.com"",""sub"":""sub"",""given_name"":""test"",""family_name"":""user"",""name"":""test user""}";
+            var userInfoResponseJsonWithNoSub = @"{ ""tid"":""cdc690f9 - b6b8 - 4023 - 813a - bae7143d1f87"",""oid"":""991fb93e - 7400 - 47aa - bdaa - a5f5ea6b5669"",""upn"":""testuser @Tratcheroutlook.onmicrosoft.com"",""given_name"":""test"",""family_name"":""user"",""name"":""test user""}";
+            var protocolValidationContext = new OpenIdConnectProtocolValidationContext();
+
+            // validationContext is null
+            ValidateUserInfoResponse(null, validator, ExpectedException.ArgumentNullException());
+
+            // validationContext.UserInfoEndpointResponse is null
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10337:")
+                );
+
+            // validationContext.validatedIdToken is null
+            protocolValidationContext.UserInfoEndpointResponse = "response";
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:")
+                );
+
+            // invalid userinfo response
+            protocolValidationContext.ValidatedIdToken = jwtWithSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10343:", typeof(JsonReaderException))
+                );
+
+            // 'sub' missing in userinfo response
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJsonWithNoSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10345:")
+                );
+
+            // 'sub' missing in validated jwt token
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson2;
+            protocolValidationContext.ValidatedIdToken = jwtWithNoSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10346:")
+                );
+
+            // unmatching "sub" claim
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJsonInvalidSub;
+            protocolValidationContext.ValidatedIdToken = jwtWithSub;
+            ValidateUserInfoResponse(
+                protocolValidationContext,
+                validator,
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10338:")
+                );
+
+            // validation passes
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson;
+            ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
+            protocolValidationContext.UserInfoEndpointResponse = stringJwt;
+            ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
+            protocolValidationContext.UserInfoEndpointResponse = userInfoResponseJson2;
+            ValidateUserInfoResponse(protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
+        }
+
 
         [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateOpenIdConnectMessageWithIdTokenOnly")]
         public void ValidateMessageWithIdToken()
@@ -588,21 +694,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateIdToken(validatedIdToken, protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
 
             // validating the delegate
-            IdTokenValidator idTokenValidatorThrows = ((jwt, context) => { throw new OpenIdConnectProtocolException(); });
+            IdTokenValidator idTokenValidatorThrows = ((jwt, context) => { throw new InvalidOperationException("Validator"); });
             IdTokenValidator idTokenValidatorReturns = ((jwt, context) => { return; });
             IdTokenValidator idTokenValidatorValidateAcr =
                 ((jwt, context) =>
                 {
                     JwtSecurityToken jwtSecurityToken = jwt as JwtSecurityToken;
                     if (jwtSecurityToken.Payload.Acr != "acr")
-                        throw new OpenIdConnectProtocolException();
+                        throw new InvalidOperationException();
                 });
             validator.IdTokenValidator = idTokenValidatorThrows;
             ValidateIdToken(
                 validatedIdToken,
                 protocolValidationContext,
                 validator,
-                new ExpectedException(typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10313:", typeof(InvalidOperationException))
                 );
 
             validator.IdTokenValidator = idTokenValidatorReturns;
@@ -653,7 +759,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new JwtSecurityToken
                 (
                     audience: IdentityUtilities.DefaultAudience,
+#if DNXCORE50
+                    // Temporary until https://github.com/dotnet/corefx/issues/3667 is fixed
+                    claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, " ") },
+#else
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, string.Empty) },
+#endif
                     issuer: IdentityUtilities.DefaultIssuer,
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
@@ -703,7 +814,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithSignatureChash1,
                 validationContext,
                 protocolValidator,
-                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException))
                 );
 
             // valid code
@@ -731,14 +842,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithEmptyCHash,
                 validationContext,
                 protocolValidator,
-                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException))
                 );
             // algorithm mismatch. header.alg is 'None'.
             ValidateCHash(
                 jwtWithCHash1,
                 validationContext,
                 protocolValidator,
-                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10302:", typeof(OpenIdConnectProtocolException))
+                new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException))
                 );
 
             // make sure default alg works.
@@ -1007,7 +1118,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         }
                     },
                     validator,
-                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10348:", typeof(OpenIdConnectProtocolException))
                 );
                 dataset.Add(
                     new JwtSecurityToken
@@ -1023,7 +1134,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         }
                     },
                     validator,
-                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10300:", typeof(OpenIdConnectProtocolException))
+                    new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10348:", typeof(OpenIdConnectProtocolException))
                 );
                 dataset.Add(
                     new JwtSecurityToken

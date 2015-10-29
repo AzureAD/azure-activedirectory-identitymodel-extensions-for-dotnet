@@ -1,35 +1,40 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Represents a Json Web Key as defined in http://tools.ietf.org/html/draft-ietf-jose-json-web-key-37.
+    /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
     /// </summary>
-
     [JsonObject]
     public class JsonWebKey
     {
@@ -39,15 +44,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private IList<string> _keyops = new List<string>();
 
         /// <summary>
+        /// Returns a new instance of <see cref="JsonWebKey"/>.
+        /// </summary>
+        /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
+        /// <returns><see cref="JsonWebKey"/></returns>
+        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
+        static public JsonWebKey Create(string json)
+        {
+            if (string.IsNullOrEmpty(json))
+                throw LogHelper.LogArgumentNullException("json");
+
+            return JsonConvert.DeserializeObject<JsonWebKey>(json);
+        }
+
+        /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKey"/>.
         /// </summary>
         public JsonWebKey()
         {
-        }
-
-        static public JsonWebKey Create(string json)
-        {
-            return JsonConvert.DeserializeObject<JsonWebKey>(json);
         }
 
         /// <summary>
@@ -57,9 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public JsonWebKey(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("json");
 
             var key = JsonConvert.DeserializeObject<JsonWebKey>(json);
             Copy(key);
@@ -75,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             this.E = key.E;
             this.K = key.K;
             if (key.KeyOps != null)
-                this._keyops = new List<string>(key.KeyOps);
+                _keyops = new List<string>(key.KeyOps);
             this.Kid = key.Kid;
             this.Kty = key.Kty;
             this.N = key.N;
@@ -85,7 +97,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             this.QI = key.QI;
             this.Use = key.Use;
             if (key.X5c != null)
-                this._certificateClauses = new List<string>(key.X5c);
+                _certificateClauses = new List<string>(key.X5c);
             this.X5t = key.X5t;
             this.X5tS256 = key.X5tS256;
             this.X5u = key.X5u;
@@ -151,7 +163,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             set
             {
                 if (value == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": KeyOps"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "KeyOps");
 
                 foreach (string keyOp in value)
                     _keyops.Add(keyOp);
@@ -230,7 +242,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             set
             {
                 if (value == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": X5c"), typeof(ArgumentNullException), EventLevel.Verbose);
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "X5c");
 
                 foreach (string clause in value)
                     _certificateClauses.Add(clause);

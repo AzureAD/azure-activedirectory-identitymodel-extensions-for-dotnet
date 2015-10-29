@@ -1,18 +1,11 @@
 {
     "version": "5.0.0-*",
+    "description": "Includes types that provide support for Saml tokens.",
     "dependencies": {
         "System.IdentityModel.Tokens": "5.0.0-*"
     },
     "frameworks": {
-        "dnx451": {
-            "frameworkAssemblies": {
-                "System.Runtime.Serialization": "",
-                "System.Security": "",
-                "System.Xml": "",
-                "System.Xml.Linq": ""
-            }
-        },
-        "dnxcore50": {
+        "dotnet5.4": {
             "dependencies": {
                 "System.Collections": "4.0.11-beta-*",
                 "System.Diagnostics.Tools": "4.0.1-beta-*",

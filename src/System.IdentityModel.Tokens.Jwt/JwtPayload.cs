@@ -1,21 +1,31 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
@@ -46,6 +56,12 @@ namespace System.IdentityModel.Tokens.Jwt
         {
         }
 
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
+           : this(issuer, audience, claims, notBefore, expires, null)
+        {
+
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// </summary>
@@ -54,44 +70,39 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
         /// <param name="notBefore">if notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
         /// <param name="expires">if expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
+        /// <param name="issuedAt">if issuedAt.HasValue is 'true' a { iat, 'value' } claim is added.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
         /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
-        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
         {
-            if (expires.HasValue && notBefore.HasValue)
-            {
-                if (notBefore >= expires)
-                {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value));
-                }
-            }
-
-            if (claims != null)
-            {
-                this.AddClaims(claims);
-            }
-
-            if (!string.IsNullOrWhiteSpace(issuer))
-            {
-                this[JwtRegisteredClaimNames.Iss] = issuer;
-            }
-
-            if (!string.IsNullOrWhiteSpace(audience))
-            {
-                this[JwtRegisteredClaimNames.Aud] = audience;
-            }
-
             if (expires.HasValue)
             {
+                if (notBefore.HasValue)
+                {
+                    if (notBefore.Value >= expires.Value)
+                    {
+                        throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10401, expires.Value, notBefore.Value);
+                    }
+
+                    this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
+                }
+
                 this[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(expires.Value.ToUniversalTime());
             }
 
-            if (notBefore.HasValue)
-            {
-                this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
-            }
+            if (issuedAt.HasValue)
+                this[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(issuedAt.Value.ToUniversalTime());
+
+            if (claims != null)
+                AddClaims(claims);
+
+            if (!string.IsNullOrEmpty(issuer))
+                this[JwtRegisteredClaimNames.Iss] = issuer;
+
+            if (!string.IsNullOrEmpty(audience))
+                this[JwtRegisteredClaimNames.Aud] = audience;
         }
 
         /// <summary>
@@ -314,7 +325,14 @@ namespace System.IdentityModel.Tokens.Jwt
                         {
                             foreach(var item in values)
                             {
-                                claims.Add(new Claim(keyValuePair.Key, item.ToString()));
+                                if (item.Type == Newtonsoft.Json.Linq.JTokenType.String)
+                                    claims.Add(new Claim(keyValuePair.Key, item.ToString(), ClaimValueTypes.String, issuer, issuer));
+                                else
+                                {
+                                    c = new Claim(keyValuePair.Key, item.ToString(), JwtConstants.JsonClaimValueType, issuer, issuer);
+                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = item.GetType().ToString();
+                                    claims.Add(c);
+                                }
                             }
                             continue;
                         }
@@ -628,12 +646,12 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, key, dateValue ?? "<null>", ex));
+                    throw LogHelper.LogException<SecurityTokenException>(ex, LogMessages.IDX10700, key, (dateValue ?? "<null>"));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10701, key, dateValue ?? "<null>", ex));
+                    throw LogHelper.LogException<SecurityTokenException>(ex, LogMessages.IDX10701, key, (dateValue ?? "<null>"));
                 }
 
                 throw;

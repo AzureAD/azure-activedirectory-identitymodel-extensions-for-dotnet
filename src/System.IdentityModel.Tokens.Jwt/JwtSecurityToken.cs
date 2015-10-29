@@ -1,27 +1,34 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+﻿//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
-using Microsoft.IdentityModel.Logging;
 using System.Threading;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -31,14 +38,6 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public class JwtSecurityToken : SecurityToken
     {
-        private JwtHeader header;
-        private string id;
-        private JwtPayload payload;
-        private string rawData;
-        private string rawHeader;
-        private string rawPayload;
-        private string rawSignature = string.Empty;
-
         /// <summary>
         /// Initializes a new instance of <see cref="JwtSecurityToken"/> from a string in JWS Compact serialized format.
         /// </summary>
@@ -52,28 +51,22 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(string jwtEncodedString)
         {
             if (null == jwtEncodedString)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": jwtEncodedString"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("jwtEncodedString");
 
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10002, GetType() + ": jwtEncodedString"), typeof(ArgumentException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10002, "jwtEncodedString");
 
             // Quick fix prior to beta8, will add configuration in RC
             var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
             if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromSeconds(2));
+                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
             }
 
             if (!regex.IsMatch(jwtEncodedString))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
 
-            this.Decode(jwtEncodedString);
+            Decode(jwtEncodedString);
         }
 
         /// <summary>
@@ -91,36 +84,27 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
         {
             if (header == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("header");
 
             if (payload == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-
-            if (rawSignature == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": rawSignature"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("payload");
 
             if (string.IsNullOrWhiteSpace(rawHeader))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10002, GetType() + ": rawHeader"), typeof(ArgumentException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10002, "rawHeader");
 
             if (string.IsNullOrWhiteSpace(rawPayload))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10002, GetType() + ": rawPayload"), typeof(ArgumentException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10002, "rawPayload");
 
-            this.header = header;
-            this.payload = payload;
-            this.rawData = string.Concat(rawHeader, ".", rawPayload, ".", rawSignature);
-            this.rawHeader = rawHeader;
-            this.rawPayload = rawPayload;
-            this.rawSignature = rawSignature;
+            if (rawSignature == null)
+                throw LogHelper.LogArgumentNullException("rawSignature");
+
+            Header = header;
+            Payload = payload;
+            RawData = string.Concat(rawHeader, ".", rawPayload, ".", rawSignature);
+
+            RawHeader = rawHeader;
+            RawPayload = rawPayload;
+            RawSignature = rawSignature;
         }
 
         /// <summary>
@@ -133,17 +117,14 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(JwtHeader header, JwtPayload payload)
         {
             if (header == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": header"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("header");
 
             if (payload == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": payload"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("payload");
 
-            this.header = header;
-            this.payload = payload;
+            Header = header;
+            Payload = payload;
+            RawSignature = string.Empty;
         }
 
         /// <summary>
@@ -161,13 +142,12 @@ namespace System.IdentityModel.Tokens.Jwt
             if (expires.HasValue && notBefore.HasValue)
             {
                 if (notBefore >= expires)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value), typeof(ArgumentException), EventLevel.Error);
-                }
+                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10401, expires.Value, notBefore.Value);
             }
 
-            this.payload = new JwtPayload(issuer: issuer, audience: audience, claims: claims, notBefore: notBefore, expires: expires);
-            this.header = new JwtHeader(signingCredentials);
+            Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
+            Header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials);
+            RawSignature = string.Empty;
         }
 
         /// <summary>
@@ -176,7 +156,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return this.payload.Actort; }
+            get { return Payload.Actort; }
         }
 
         /// <summary>
@@ -185,7 +165,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'audience' claim is not found, enumeration will be empty.</remarks>
         public IEnumerable<string> Audiences
         {
-            get { return this.payload.Aud; }
+            get { return Payload.Aud; }
         }
 
         /// <summary>
@@ -194,7 +174,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get { return this.payload.Claims; }
+            get { return Payload.Claims; }
         }
 
         /// <summary>
@@ -202,7 +182,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public virtual string EncodedHeader
         {
-            get { return this.header.Base64UrlEncode(); }
+            get { return Header.Base64UrlEncode(); }
         }
 
         /// <summary>
@@ -210,16 +190,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public virtual string EncodedPayload
         {
-            get { return this.payload.Base64UrlEncode(); }
+            get { return Payload.Base64UrlEncode(); }
         }
 
         /// <summary>
         /// Gets the <see cref="JwtHeader"/> associated with this instance.
         /// </summary>
-        public JwtHeader Header
-        {
-            get { return this.header; }
-        }
+        public JwtHeader Header { get; private set; }
 
         /// <summary>
         /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
@@ -227,7 +204,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
         public override string Id
         {
-            get { return this.payload.Jti; }
+            get { return Payload.Jti; }
         }
 
         /// <summary>
@@ -236,56 +213,41 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public override string Issuer
         {
-            get { return this.payload.Iss; }
+            get { return Payload.Iss; }
         }
 
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
         /// </summary>
-        public JwtPayload Payload
-        {
-            get { return this.payload; }
-        }
+        public JwtPayload Payload { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawData
-        {
-            get { return this.rawData; }
-        }
+        public string RawData { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawHeader
-        {
-            get { return this.rawHeader; }
-        }
+        public string RawHeader { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawPayload
-        {
-            get { return this.rawPayload; }
-        }
+        public string RawPayload { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawSignature
-        {
-            get { return this.rawSignature; }
-        }
+        public string RawSignature { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/>s for this instance.
@@ -301,7 +263,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>if there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
-            get { return this.header.Alg; }
+            get { return Header.Alg; }
         }
 
         /// <summary>
@@ -309,18 +271,14 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get { return this.header.SigningCredentials; }
+            get { return Header.SigningCredentials; }
         }
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that signed this instance.
         /// </summary>
         /// <remarks><see cref="JwtSecurityTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
-        public override SecurityKey SigningKey
-        {
-            get;
-            set;
-        }
+        public override SecurityKey SigningKey { get; set; }
 
         /// <summary>
         /// Gets "value" of the 'subject' claim { sub, 'value' }.
@@ -328,10 +286,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
         public string Subject
         {
-            get
-            {
-                return this.payload.Sub;
-            }
+            get { return Payload.Sub; }
         }
 
         /// <summary>
@@ -340,7 +295,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom
         {
-            get { return this.payload.ValidFrom; }
+            get { return Payload.ValidFrom; }
         }
 
         /// <summary>
@@ -349,16 +304,16 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidTo
         {
-            get { return this.payload.ValidTo; }
+            get { return Payload.ValidTo; }
         }
 
         /// <summary>
-        /// Decodes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
+        /// Serializes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
         /// </summary>
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this.header.SerializeToJson(), this.payload.SerializeToJson());
+            return Header.SerializeToJson() + "." + Payload.SerializeToJson();
         }
 
         /// <summary>
@@ -367,51 +322,37 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
         internal void Decode(string jwtEncodedString)
         {
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10716, jwtEncodedString));
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, jwtEncodedString);
             string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
             if (tokenParts.Length != 3)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType() + ": jwtEncodedString", jwtEncodedString), typeof(ArgumentException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10717, tokenParts[0]));
-                this.header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10717, tokenParts[0]);
+                Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
 
                 // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
-                string type = this.header.Typ;
+                string type = Header.Typ;
                 if (type != null)
                 {
                     if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
-                    {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type), typeof(SecurityTokenException), EventLevel.Error);
-                    }
+                        throw LogHelper.LogException<SecurityTokenException>(LogMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type);
                 }
             }
             catch (Exception ex)
             {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
-
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), typeof(ArgumentException), EventLevel.Error, ex);
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString);
             }
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10718, tokenParts[1]));
-                this.payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
+                Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
             }
             catch (Exception ex)
             {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
-
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), typeof(ArgumentException), EventLevel.Error, ex);
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString);
             }
 
             if (!string.IsNullOrEmpty(tokenParts[2]))
@@ -422,24 +363,14 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    if (DiagnosticUtility.IsFatal(ex))
-                    {
-                        throw;
-                    }
-
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "signature", tokenParts[2], jwtEncodedString), typeof(ArgumentException), EventLevel.Error, ex);
+                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "signature", tokenParts[2], jwtEncodedString);
                 }
             }
 
-            this.rawData = jwtEncodedString;
-            this.rawHeader = tokenParts[0];
-            this.rawPayload = tokenParts[1];
-            this.rawSignature = tokenParts[2];
-        }
-
-        internal void SetId(string id)
-        {
-            this.id = id;
+            RawData = jwtEncodedString;
+            RawHeader = tokenParts[0];
+            RawPayload = tokenParts[1];
+            RawSignature = tokenParts[2];
         }
     }
 }

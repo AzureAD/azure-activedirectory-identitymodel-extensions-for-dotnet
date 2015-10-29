@@ -1,23 +1,30 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -29,10 +36,17 @@ namespace System.IdentityModel.Tokens
     /// </summary>
     public class SymmetricSignatureProvider : SignatureProvider
     {
-        private static byte[] bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-        private static byte[] bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
-        private bool disposed;
-        private KeyedHashAlgorithm keyedHash;
+        private static byte[] s_bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+        private static byte[] s_bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+        private bool _disposed;
+        private KeyedHashAlgorithm _keyedHash;
+
+        /// <summary>
+        /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
+        /// </summary>
+        public static readonly int DefaultMinimumSymmetricKeySizeInBits = 128;
+
+        private int _minimumSymmetricKeySizeInBits = DefaultMinimumSymmetricKeySizeInBits;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SymmetricSecurityKey"/> to create and / or verify signatures over a array of bytes.
@@ -47,36 +61,46 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetKeyedHashAlgorithm"/> returns null.</exception>
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetSymmetricKey"/> throws.</exception>
         public SymmetricSignatureProvider(SymmetricSecurityKey key, string algorithm)
+            : base(key, algorithm)
         {
             if (key == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": key"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("key");
 
             if (!IsSupportedAlgorithm(algorithm))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm ?? "null"), typeof(InvalidOperationException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10640, (algorithm ?? "null"));
 
-            if (key.KeySize < SignatureProviderFactory.MinimumSymmetricKeySizeInBits)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, key.GetType(), SignatureProviderFactory.MinimumSymmetricKeySizeInBits + ", KeySize: " + key.KeySize), typeof(ArgumentOutOfRangeException), EventLevel.Error);
-            }
+            if (key.KeySize < MinimumSymmetricKeySizeInBits)
+                throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
 
-            this.keyedHash = GetKeyedHashAlgorithm(algorithm);
+            _keyedHash = GetKeyedHashAlgorithm(algorithm);
 
             try
             {
-                this.keyedHash.Key = key.Key;
+                _keyedHash.Key = key.Key;
             }
             catch (Exception ex)
             {
-                if (DiagnosticUtility.IsFatal(ex))
-                {
-                    throw;
-                }
+                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, key, (algorithm ?? "null"));
+            }
+        }
 
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, algorithm, key, ex), typeof(InvalidOperationException), EventLevel.Error);
+        /// <summary>
+        /// Gets or sets the minimum <see cref="SymmetricSecurityKey"/>.KeySize"/>.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">'value' is smaller than <see cref="AbsoluteMinimumSymmetricKeySizeInBits"/>.</exception>
+        public int MinimumSymmetricKeySizeInBits
+        {
+            get
+            {
+                return _minimumSymmetricKeySizeInBits;
+            }
+
+            set
+            {
+                if (value < DefaultMinimumSymmetricKeySizeInBits)
+                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits);
+
+                _minimumSymmetricKeySizeInBits = value;
             }
         }
 
@@ -88,17 +112,12 @@ namespace System.IdentityModel.Tokens
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": algorithm"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             switch (algorithm)
             {
                 default:
-                    {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm), typeof(ArgumentOutOfRangeException), EventLevel.Error);
-                        return null;
-                    }
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
             }
         }
 
@@ -114,27 +133,20 @@ namespace System.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("input");
 
             if (input.Length == 0)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10624), typeof(ArgumentException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10624);
 
-            if (this.disposed)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, typeof(SymmetricSignatureProvider).ToString()), typeof(ObjectDisposedException), EventLevel.Error);
-            }
+            if (_disposed)
+                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
-            if (this.keyedHash == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
-            }
+            if (_keyedHash == null)
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10642, input.ToString()));
-            return this.keyedHash.ComputeHash(input);
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10642, input);
+
+            return _keyedHash.ComputeHash(input);
         }
 
         /// <summary>
@@ -152,37 +164,25 @@ namespace System.IdentityModel.Tokens
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": input"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("input");
 
             if (signature == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": signature"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("signature");
 
             if (input.Length == 0)
-            {
-                LogHelper.Throw(LogMessages.IDX10625, typeof(ArgumentException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625);
 
             if (signature.Length == 0)
-            {
-                LogHelper.Throw(LogMessages.IDX10626, typeof(ArgumentException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626);
 
-            if (this.disposed)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, typeof(SymmetricSignatureProvider).ToString()), typeof(ObjectDisposedException), EventLevel.Error);
-            }
+            if (_disposed)
+                throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
 
-            if (this.keyedHash == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10623, typeof(InvalidOperationException), EventLevel.Error);
-            }
+            if (_keyedHash == null)
+                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10623);
 
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10643, input.ToString()));
-            return AreEqual(signature, this.keyedHash.ComputeHash(input));
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
+            return AreEqual(signature, _keyedHash.ComputeHash(input));
         }
 
         #region IDisposable Members
@@ -193,16 +193,16 @@ namespace System.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected override void Dispose(bool disposing)
         {
-            if (!this.disposed)
+            if (!_disposed)
             {
-                this.disposed = true;
+                _disposed = true;
 
                 if (disposing)
                 {
-                    if (this.keyedHash != null)
+                    if (_keyedHash != null)
                     {
-                        this.keyedHash.Dispose();
-                        this.keyedHash = null;
+                        _keyedHash.Dispose();
+                        _keyedHash = null;
                     }
                 }
             }
@@ -232,8 +232,8 @@ namespace System.IdentityModel.Tokens
             if (((null == a) || (null == b))
             || (a.Length != b.Length))
             {
-                a1 = bytesA; 
-                a2 = bytesB;
+                a1 = s_bytesA; 
+                a2 = s_bytesB;
             }
             else
             {

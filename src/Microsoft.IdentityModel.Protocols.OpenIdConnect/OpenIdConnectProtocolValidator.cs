@@ -1,31 +1,39 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -126,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10105, value), typeof(ArgumentOutOfRangeException), EventLevel.Error);
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10105, value);
                 }
 
                 _nonceLifetime = value;
@@ -206,22 +214,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateAuthenticationResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             // no 'response' is recieved or 'id_token' in the response is null 
             if (validationContext.ProtocolMessage == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10333);
 
             if (string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken))
             {
                 // if 'code' is also not present, then throw.
                 if (string.IsNullOrEmpty(validationContext.ProtocolMessage.Code))
                 {
-                    LogHelper.Throw(LogMessages.IDX10334, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10334);
                 }
                 else
                 {
@@ -231,15 +235,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             if (validationContext.ValidatedIdToken == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10332);
 
             // 'refresh_token' should not be returned from 'authorization_endpoint'. http://tools.ietf.org/html/rfc6749#section-4.2.2.
             if (!string.IsNullOrEmpty(validationContext.ProtocolMessage.RefreshToken))
-            {
-                LogHelper.Throw(LogMessages.IDX10335, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10335);
 
             ValidateState(validationContext);
             ValidateIdToken(validationContext);
@@ -258,26 +258,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateTokenResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             // no 'response' is recieved 
             if (validationContext.ProtocolMessage == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10333);
 
             // both 'id_token' and 'access_token' are required
             if (string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken) || string.IsNullOrEmpty(validationContext.ProtocolMessage.AccessToken))
-            {
-                LogHelper.Throw(LogMessages.IDX10336, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10336);
 
             if (validationContext.ValidatedIdToken == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10332);
 
             ValidateIdToken(validationContext);
             ValidateNonce(validationContext);
@@ -301,33 +293,44 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateUserInfoResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
-            // no 'response' is recieved or 'id_token' in the response is null 
-            if (validationContext.ProtocolMessage == null || string.IsNullOrEmpty(validationContext.ProtocolMessage.IdToken))
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
-
-            if (validationContext.UserInfoEndpointResponse == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10337, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+            if (string.IsNullOrEmpty(validationContext.UserInfoEndpointResponse))
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10337);
 
             if (validationContext.ValidatedIdToken == null)
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10332);
+
+            string sub = string.Empty;
+            try
             {
-                LogHelper.Throw(LogMessages.IDX10332, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                // if user info response is a jwt token
+                var handler = new JwtSecurityTokenHandler();
+                if (handler.CanReadToken(validationContext.UserInfoEndpointResponse))
+                {
+                    var token = handler.ReadToken(validationContext.UserInfoEndpointResponse) as JwtSecurityToken;
+                    sub = token.Payload.Sub;
+                }
+                else
+                {
+                    // if the response is not a jwt, it should be json
+                    var payload = JwtPayload.Deserialize(validationContext.UserInfoEndpointResponse);
+                    sub = payload.Sub;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(ex, LogMessages.IDX10343, validationContext.UserInfoEndpointResponse);
             }
 
-            string idTokenSubject = validationContext.ValidatedIdToken.Payload.Sub;
-            string userInfoSubject = validationContext.UserInfoEndpointResponse.Payload.Sub;
+            if (string.IsNullOrEmpty(sub))
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10345);
 
-            if (!string.Equals(idTokenSubject, userInfoSubject, StringComparison.Ordinal))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10338, idTokenSubject, userInfoSubject), typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+            if (string.IsNullOrEmpty(validationContext.ValidatedIdToken.Payload.Sub))
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10346);
+
+            if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, sub, StringComparison.Ordinal))
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10338, validationContext.ValidatedIdToken.Payload.Sub, sub);
         }
 
         /// <summary>
@@ -337,15 +340,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         protected virtual void ValidateIdToken(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext.ValidatedIdToken"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             // if user sets the custom validator, we call the delegate. The default checks for multiple audiences and azp are not executed.
             if (this.IdTokenValidator != null)
@@ -354,9 +352,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 {
                     this.IdTokenValidator(validationContext.ValidatedIdToken, validationContext);
                 }
-                catch (OpenIdConnectProtocolException ex)
+                catch (Exception ex)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10313, validationContext.ValidatedIdToken, ex.Message), ex.GetType(), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(ex, LogMessages.IDX10313, validationContext.ValidatedIdToken);
                 }
                 return;
             }
@@ -366,33 +364,33 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                 // required claims
                 if (idToken.Payload.Aud.Count == 0)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken);
 
                 if (!idToken.Payload.Exp.HasValue)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken);
 
                 if (!idToken.Payload.Iat.HasValue)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken);
 
                 if (idToken.Payload.Iss == null)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken);
 
                 // sub is optional by default
                 if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Payload.Sub)))
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken);
 
                 // optional claims
                 if (RequireAcr && string.IsNullOrWhiteSpace(idToken.Payload.Acr))
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10315, idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10315, idToken);
 
                 if (RequireAmr && idToken.Payload.Amr.Count == 0)
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10316, idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10316, idToken);
 
                 if (RequireAuthTime && !(idToken.Payload.AuthTime.HasValue))
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10317, idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10317, idToken);
 
                 if (RequireAzp && string.IsNullOrWhiteSpace(idToken.Payload.Azp))
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10318, idToken), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10318, idToken);
 
                 // if multiple audiences are present in the id_token, 'azp' claim should be present
                 if (idToken.Payload.Aud.Count > 1 && string.IsNullOrEmpty(idToken.Payload.Azp))
@@ -405,11 +403,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 {
                     if (string.IsNullOrEmpty(validationContext.ClientId))
                     {
-                        LogHelper.Throw(LogMessages.IDX10308, typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                        throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10308);
                     }
                     else if (!string.Equals(idToken.Payload.Azp, validationContext.ClientId, StringComparison.Ordinal))
                     {
-                        LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10340, idToken.Payload.Azp, validationContext.ClientId), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                        throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10340, idToken.Payload.Azp, validationContext.ClientId);
                     }
                 }
             }
@@ -420,7 +418,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="algorithm">string representing the hash algorithm</param>
         /// <returns><see cref="HashAlgorithm"/> corresponding to the input string 'algorithm'</returns>
-        private HashAlgorithm GetHashAlgorithm(string algorithm)
+        public virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
             if (algorithm == null)
             {
@@ -431,22 +429,38 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 switch (algorithm)
                 {
-                    case "SHA256":
-                    case JwtAlgorithms.RSA_SHA256:
-                    case JwtAlgorithms.ECDSA_SHA256:
-                    case JwtAlgorithms.HMAC_SHA256:
+                    case SecurityAlgorithms.SHA256:
+                    case SecurityAlgorithms.ECDSA_SHA256:
+                    case SecurityAlgorithms.HMAC_SHA256:
+                    case SecurityAlgorithms.RSA_SHA256:
+                    case SecurityAlgorithms.RsaSha256Signature:
+                    case SecurityAlgorithms.PS256:
                         return SHA256.Create();
+
+                    case SecurityAlgorithms.SHA384:
+                    case SecurityAlgorithms.ECDSA_SHA384:
+                    case SecurityAlgorithms.HMAC_SHA384:
+                    case SecurityAlgorithms.RSA_SHA384:
+                    case SecurityAlgorithms.RsaSha384Signature:
+                    case SecurityAlgorithms.PS384:
+                        return SHA384.Create();
+
+                    case SecurityAlgorithms.SHA512:
+                    case SecurityAlgorithms.RsaSha512Signature:
+                    case SecurityAlgorithms.RSA_SHA512:
+                    case SecurityAlgorithms.ECDSA_SHA512:
+                    case SecurityAlgorithms.HMAC_SHA512:
+                    case SecurityAlgorithms.PS512:
+                        return SHA512.Create();
                 }
 
             }
             catch (Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10301, algorithm), typeof(OpenIdConnectProtocolException), EventLevel.Error, ex);
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(ex, LogMessages.IDX10301, algorithm);
             }
 
-            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10302, algorithm), typeof(OpenIdConnectProtocolException), EventLevel.Error);
-
-            return null;
+            throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10302, algorithm);
         }
 
         /// <summary>
@@ -458,14 +472,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolException">if expected value does not equal the hashed value.</exception>
         private void ValidateHash(string expectedValue, string hashItem, string algorithm)
         {
-            IdentityModelEventSource.Logger.WriteInformation(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10303, expectedValue));
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10303, expectedValue);
             using (var hashAlgorithm = GetHashAlgorithm(algorithm))
             {
                 var hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(hashItem));
                 var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
                 if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10300, expectedValue, hashItem, algorithm), typeof(OpenIdConnectProtocolException), EventLevel.Error);
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10300, expectedValue, hashItem, algorithm);
                 }
             }
         }
@@ -484,19 +498,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10304);
 
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext.ValidatedIdToken"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             if (validationContext.ProtocolMessage == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10333);
 
             if (string.IsNullOrEmpty(validationContext.ProtocolMessage.Code))
             {
@@ -507,13 +515,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             object cHashClaim;
             if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.CHash, out cHashClaim))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10307, validationContext.ValidatedIdToken), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidCHashException>(LogMessages.IDX10307, validationContext.ValidatedIdToken);
             }
 
             var chash = cHashClaim as string;
             if (chash == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10306, validationContext.ValidatedIdToken), typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidCHashException>(LogMessages.IDX10306, validationContext.ValidatedIdToken);
             }
 
             try
@@ -522,7 +530,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch(OpenIdConnectProtocolException ex)
             {
-                LogHelper.Throw(ex.Message, typeof(OpenIdConnectProtocolInvalidCHashException), EventLevel.Error, ex);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidCHashException>(ex, LogMessages.IDX10347);
             }
         }
 
@@ -540,19 +548,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10309);
 
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext.ValidatedIdToken"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             if (validationContext.ProtocolMessage == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10333);
 
             if (validationContext.ProtocolMessage.AccessToken == null)
             {
@@ -562,15 +564,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             object atHashClaim;
             if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.AtHash, out atHashClaim))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10312, validationContext.ValidatedIdToken), typeof(OpenIdConnectProtocolInvalidAtHashException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidAtHashException>(LogMessages.IDX10312, validationContext.ValidatedIdToken);
 
             var atHash = atHashClaim as string;
             if (atHash == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10311, validationContext.ValidatedIdToken), typeof(OpenIdConnectProtocolInvalidAtHashException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidAtHashException>(LogMessages.IDX10311, validationContext.ValidatedIdToken);
 
             try
             {
@@ -578,7 +576,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch (OpenIdConnectProtocolException ex)
             {
-                LogHelper.Throw(ex.Message, typeof(OpenIdConnectProtocolInvalidAtHashException), EventLevel.Error, ex);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidAtHashException>(ex, LogMessages.IDX10348);
             }
         }
 
@@ -598,16 +596,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10319);
 
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext.ValidatedIdToken"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
-            string nonceFoundInJwt = validationContext.ValidatedIdToken.Payload.Nonce;
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
+            string nonceFoundInJwt = validationContext.ValidatedIdToken.Payload.Nonce;
             if (!RequireNonce && string.IsNullOrEmpty(validationContext.Nonce) && string.IsNullOrEmpty(nonceFoundInJwt))
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10322);
@@ -615,26 +609,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else if (string.IsNullOrEmpty(validationContext.Nonce))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10320, RequireNonce.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(LogMessages.IDX10320, RequireNonce.ToString());
 
             }
             else if (string.IsNullOrEmpty(nonceFoundInJwt))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10323, RequireNonce.ToString(), validationContext.ValidatedIdToken), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(LogMessages.IDX10323, RequireNonce.ToString(), validationContext.ValidatedIdToken);
             }
 
             if (!string.Equals(nonceFoundInJwt, validationContext.Nonce, StringComparison.Ordinal))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(LogMessages.IDX10321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken);
 
             if (RequireTimeStampInNonce)
             {
                 int endOfTimestamp = nonceFoundInJwt.IndexOf('.');
                 if (endOfTimestamp == -1)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10325, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
-                }
+                    throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(LogMessages.IDX10325, validationContext.Nonce);
 
                 string timestamp = nonceFoundInJwt.Substring(0, endOfTimestamp);
                 DateTime nonceTime = new DateTime(1979, 1, 1);          // initializing to some value otherwise it gives an error
@@ -645,13 +635,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10326, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error, ex);
+                    throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(ex, LogMessages.IDX10326, timestamp, validationContext.Nonce);
                 }
 
                 if (ticks <= 0)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10326, timestamp, validationContext.Nonce), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
-                }
+                    throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(LogMessages.IDX10326, timestamp, validationContext.Nonce);
 
                 try
                 {
@@ -659,14 +647,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch(Exception ex)
                 {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10327, timestamp, System.DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), System.DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error, ex);
+                    throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(ex, LogMessages.IDX10327, timestamp, DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture));
                 }
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10324, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString()), typeof(OpenIdConnectProtocolInvalidNonceException), EventLevel.Error);
-                }
+                    throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(LogMessages.IDX10324, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString());
             }
         }
 
@@ -686,14 +672,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             if (validationContext == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": validationContext"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ProtocolMessage == null)
-            {
-                LogHelper.Throw(LogMessages.IDX10333, typeof(OpenIdConnectProtocolException), EventLevel.Error);
-            }
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10333);
 
             // if state is missing, but not required just return. Otherwise process it.
             if (!RequireState && string.IsNullOrEmpty(validationContext.State) && string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
@@ -703,17 +685,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else if (string.IsNullOrEmpty(validationContext.State))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10329, RequireState.ToString()), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidStateException>(LogMessages.IDX10329, RequireState);
             }
             else if (string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
             {
                 // 'state' was sent, but message does not contain 'state'
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10330, RequireState.ToString()), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidStateException>(LogMessages.IDX10330, RequireState.ToString());
             }
 
             if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State, StringComparison.Ordinal))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10331, validationContext.State, validationContext.ProtocolMessage.State), typeof(OpenIdConnectProtocolInvalidStateException), EventLevel.Error);
+                throw LogHelper.LogException<OpenIdConnectProtocolInvalidStateException>(LogMessages.IDX10331, validationContext.State, validationContext.ProtocolMessage.State);
             }
         }
     }

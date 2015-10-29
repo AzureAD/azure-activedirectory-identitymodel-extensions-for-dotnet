@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// This code is licensed under the MIT License.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Diagnostics.Tracing;
@@ -28,12 +37,14 @@ namespace Microsoft.IdentityModel.Logging
     [EventSource(Name = "Microsoft.IdentityModel.EventSource")]
     public class IdentityModelEventSource : EventSource
     {
-        private static EventLevel _logLevel;
-
         static IdentityModelEventSource()
         {
             Logger = new IdentityModelEventSource();
-            _logLevel = EventLevel.Warning;
+        }
+
+        private IdentityModelEventSource()
+        {
+            LogLevel = EventLevel.Warning;
         }
 
         /// <summary>
@@ -41,83 +52,172 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         public static IdentityModelEventSource Logger { get; }
 
+        [Event(6, Level = EventLevel.LogAlways)]
+        public void WriteAlways(string message)
+        {
+            if (IsEnabled())
+            {
+                message = PrepareMessage(EventLevel.LogAlways, message);
+                WriteEvent(6, message);
+            }
+        }
+
+        [NonEvent]
+        public void WriteAlways(string message, params object[] args)
+        {
+            if (IsEnabled())
+            {
+                if (args != null)
+                    WriteAlways(string.Format(CultureInfo.InvariantCulture, message, args));
+                else
+                    WriteAlways(message);
+            }
+        }
+
         [Event(1, Level = EventLevel.Verbose)]
         public void WriteVerbose(string message)
         {
-            if (IsEnabled() && _logLevel >= EventLevel.Verbose)
+            if (IsEnabled() && LogLevel >= EventLevel.Verbose)
             {
-                message = PrepareMessage(message, EventLevel.Verbose);
+                message = PrepareMessage(EventLevel.Verbose, message);
                 WriteEvent(1, message);
+            }
+        }
+
+        [NonEvent]
+        public void WriteVerbose(string message, params object[] args)
+        {
+            if (IsEnabled() && LogLevel >= EventLevel.Verbose)
+            {
+                if (args != null)
+                    WriteVerbose(string.Format(CultureInfo.InvariantCulture, message, args));
+                else
+                    WriteVerbose(message);
             }
         }
 
         [Event(2, Level = EventLevel.Informational)]
         public void WriteInformation(string message)
         {
-            if (IsEnabled() && _logLevel >= EventLevel.Informational)
+            if (IsEnabled() && LogLevel >= EventLevel.Informational)
             {
-                message = PrepareMessage(message, EventLevel.Informational);
+                message = PrepareMessage(EventLevel.Informational, message);
                 WriteEvent(2, message);
+            }
+        }
+
+        [NonEvent]
+        public void WriteInformation(string message, params object[] args)
+        {
+            if (IsEnabled() && LogLevel >= EventLevel.Informational)
+            {
+                if (args != null)
+                    WriteInformation(string.Format(CultureInfo.InvariantCulture, message, args));
+                else
+                    WriteInformation(message);
             }
         }
 
         [Event(3, Level = EventLevel.Warning)]
         public void WriteWarning(string message)
         {
-            if (IsEnabled() && _logLevel >= EventLevel.Warning)
+            if (IsEnabled() && LogLevel >= EventLevel.Warning)
             {
-                message = PrepareMessage(message, EventLevel.Warning);
+                message = PrepareMessage(EventLevel.Warning, message);
                 WriteEvent(3, message);
             }
+        }
+
+        [NonEvent]
+        public void WriteWarning(string message, params object[] args)
+        {
+            if (args != null)
+                WriteWarning(string.Format(CultureInfo.InvariantCulture, message, args));
+            else
+                WriteWarning(message);
         }
 
         [Event(4, Level = EventLevel.Error)]
         public void WriteError(string message)
         {
-            if (IsEnabled() && _logLevel >= EventLevel.Error)
+            if (IsEnabled() && LogLevel >= EventLevel.Error)
             {
-                message = PrepareMessage(message, EventLevel.Error);
+                message = PrepareMessage(EventLevel.Error, message);
                 WriteEvent(4, message);
+            }
+        }
+
+        [NonEvent]
+        public void WriteError(string message, params object[] args)
+        {
+            if (IsEnabled() && LogLevel >= EventLevel.Error)
+            {
+                if (args != null)
+                    WriteError(string.Format(CultureInfo.InvariantCulture, message, args));
+                else
+                    WriteError(message);
             }
         }
 
         [Event(5, Level = EventLevel.Critical)]
         public void WriteCritical(string message)
         {
-            if (IsEnabled() && _logLevel >= EventLevel.Critical)
+            if (IsEnabled() && LogLevel >= EventLevel.Critical)
             {
-                message = PrepareMessage(message, EventLevel.Critical);
+                message = PrepareMessage(EventLevel.Critical, message);
                 WriteEvent(5, message);
             }
         }
 
         [NonEvent]
-        public void Write(EventLevel level, string message, Exception innerException)
+        public void WriteCritical(string message, params object[] args)
+        {
+            if (IsEnabled() && LogLevel >= EventLevel.Critical)
+            {
+                if (args != null)
+                    WriteCritical(string.Format(CultureInfo.InvariantCulture, message, args));
+                else
+                    WriteCritical(message);
+            }
+        }
+
+        [NonEvent]
+        public void Write(EventLevel level, Exception innerException, string message)
+        {
+            Write(level, innerException, message, null);
+        }
+
+        [NonEvent]
+        public void Write(EventLevel level, Exception innerException, string message, params object[] args)
         {
             if (innerException != null)
             {
-                message = String.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.ToString());
+                message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
             }
 
             switch (level)
             {
+                case EventLevel.LogAlways:
+                    WriteAlways(message, args);
+                    break;
                 case EventLevel.Critical:
-                    WriteCritical(message);
+                    WriteCritical(message, args);
                     break;
                 case EventLevel.Error:
-                    WriteError(message);
+                    WriteError(message, args);
                     break;
                 case EventLevel.Warning:
-                    WriteWarning(message);
+                    WriteWarning(message, args);
                     break;
                 case EventLevel.Informational:
-                    WriteInformation(message);
+                    WriteInformation(message, args);
                     break;
                 case EventLevel.Verbose:
-                    WriteVerbose(message);
+                    WriteVerbose(message, args);
                     break;
                 default:
-                    LogHelper.Throw("Unknown log level.", typeof(ArgumentException), EventLevel.Error);
+                    WriteError(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML11002, level));
+                    WriteError(message, args);
                     break;
             }
         }
@@ -125,24 +225,19 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Minimum log level to log events. Default is Warning.
         /// </summary>
-        public static EventLevel LogLevel
+        public EventLevel LogLevel
         {
-            get
-            {
-                return _logLevel;
-            }
-            set
-            {
-                _logLevel = value;
-            }
+            get; set;
         }
 
-        private string PrepareMessage(string message, EventLevel level)
+        private string PrepareMessage(EventLevel level, string message, params object[] args)
         {
             if (message == null)
-            {
-                return message;
-            }
+                return string.Empty;
+
+            if (args != null)
+                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), 
+                    string.Format(CultureInfo.InvariantCulture, message, args));
 
             return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
         }

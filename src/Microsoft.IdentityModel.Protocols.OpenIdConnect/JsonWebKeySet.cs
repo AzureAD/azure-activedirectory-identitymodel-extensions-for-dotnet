@@ -1,37 +1,44 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
-    /// <remarks>provides support for http://tools.ietf.org/html/draft-ietf-jose-json-web-key-27 </remarks>
+    /// <remarks>provides support for http://tools.ietf.org/html/rfc7517.</remarks>
     public class JsonWebKeySet
     {
         private List<JsonWebKey> _keys = new List<JsonWebKey>();
@@ -51,9 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public JsonWebKeySet(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": json"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("json");
 
             try
             {
@@ -63,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch(Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10804, json), typeof(ArgumentException), EventLevel.Error, ex);
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10804, json);
             }
         }
 
@@ -106,11 +111,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             }
                             catch (CryptographicException ex)
                             {
-                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, ex);
+                                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10802, webKey.X5c[0]);
                             }
                             catch (FormatException fex)
                             {
-                                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), typeof(InvalidOperationException), EventLevel.Error, fex);
+                                throw LogHelper.LogException<InvalidOperationException>(fex, LogMessages.IDX10802, webKey.X5c[0]);
                             }
                         }
                     }
@@ -134,11 +139,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         }
                         catch (CryptographicException ex)
                         {
-                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
+                            throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10801, webKey.E, webKey.N);
                         }
                         catch (FormatException ex)
                         {
-                            LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), typeof(InvalidOperationException), EventLevel.Error, ex);
+                            throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10801, webKey.E, webKey.N);
                         }
                     }
                 }

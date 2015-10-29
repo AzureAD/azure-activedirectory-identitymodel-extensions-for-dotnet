@@ -1,24 +1,32 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// This code is licensed under the MIT License.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IO;
 
 namespace Microsoft.IdentityModel.Logging
@@ -33,6 +41,9 @@ namespace Microsoft.IdentityModel.Logging
 
         public readonly static string DefaultLogFileName = "IdentityModelLogs.txt";
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="TextWriterEventListener"/> that writes logs to text file.
+        /// </summary>
         public TextWriterEventListener()
         {
             try
@@ -43,35 +54,34 @@ namespace Microsoft.IdentityModel.Logging
             }
             catch (Exception ex)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML11001, ex.Message), ex.GetType(), EventLevel.Error, ex.InnerException);
+                LogHelper.LogException<InvalidOperationException>(ex, LogMessages.MIML11001);
+                throw ex;
             }
         }
 
         /// <summary>
-        /// Constructor for TextWriterEventListener.
+        /// Initializes a new instance of <see cref="TextWriterEventListener"/> that writes logs to text file.
         /// </summary>
-        /// <param name="filePath">location of the file where all log messages will be written.</param>
+        /// <param name="filePath">location of the file where log messages will be written.</param>
         public TextWriterEventListener(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10000, GetType() + ": filePath"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("filePath");
+
             Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
             _streamWriter = new StreamWriter(fileStream);
             _streamWriter.AutoFlush = true;
         }
 
         /// <summary>
-        /// Constructor for TextWriterEventListener.
+        /// Initializes a new instance of <see cref="TextWriterEventListener"/> that writes logs to text file.
         /// </summary>
-        /// <param name="streamWriter">StreamWriter that writes log messages.</param>
+        /// <param name="streamWriter">StreamWriter where logs will be written.</param>
         public TextWriterEventListener(StreamWriter streamWriter)
         {
             if (streamWriter == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10000, GetType() + ": streamWriter"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("streamWriter");
+
             _streamWriter = streamWriter;
             _disposeStreamWriter = false;
         }
@@ -79,13 +89,11 @@ namespace Microsoft.IdentityModel.Logging
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             if (eventData == null)
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10000, GetType() + ": eventData"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+                throw LogHelper.LogArgumentNullException("eventData");
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML10000);
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML11000);
                 return;
             }
 
@@ -97,11 +105,12 @@ namespace Microsoft.IdentityModel.Logging
 
         public override void Dispose()
         {
-            if (_disposeStreamWriter)
+            if (_disposeStreamWriter && _streamWriter != null)
             {
                 _streamWriter.Flush();
                 _streamWriter.Dispose();
             }
+
             base.Dispose();
         }
     }

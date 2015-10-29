@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -48,9 +57,6 @@ namespace System.IdentityModel.Tokens.Tests
             HashAlgorithm hashAlgorithm = null;
             switch (algorithm)
             {
-                case "SHA1":
-                    hashAlgorithm = SHA1.Create();
-                    break;
                 case "SHA256":
                     hashAlgorithm = SHA256.Create();
                     break;
@@ -78,21 +84,13 @@ namespace System.IdentityModel.Tokens.Tests
 
         public static string CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
-            var handler = new JwtSecurityTokenHandler();
-            return handler.WriteToken(handler.CreateToken(
-                issuer: tokenDescriptor.Issuer,
-                audience: tokenDescriptor.Audience,
-                expires: tokenDescriptor.Expires,
-                notBefore: tokenDescriptor.NotBefore,
-                signingCredentials: tokenDescriptor.SigningCredentials,
-                subject: new ClaimsIdentity(tokenDescriptor.Claims)
-                ) as JwtSecurityToken);
+            return (new JwtSecurityTokenHandler()).CreateJwt(tokenDescriptor);
         }
 
-        public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string originalIssuer, IEnumerable<Claim> claims, SigningCredentials signingCredentials)
+        public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
         {
-            JwtPayload payload = new JwtPayload(issuer, "urn:uri", claims, DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromHours(10));
-            JwtHeader header = new JwtHeader(signingCredentials);
+            JwtPayload payload = new JwtPayload(issuer, audience, claims, nbf, exp, iat);
+            JwtHeader header = (signingCredentials != null) ? new JwtHeader(signingCredentials) : new JwtHeader();
             return new JwtSecurityToken(header, payload);
         }
 
@@ -151,7 +149,9 @@ namespace System.IdentityModel.Tokens.Tests
             XmlWriter writer = XmlWriter.Create(sb);
             tokenHandler.WriteToken(writer, securityToken);
             writer.Flush();
+#if !DNXCORE50
             writer.Close();
+#endif
             return sb.ToString();
         }
 
@@ -160,7 +160,9 @@ namespace System.IdentityModel.Tokens.Tests
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }
         public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
 
-        public static SigningCredentials DefaultAsymmetricSigningCredentials { get { return KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2; } }
+        public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
+        public static SignatureProvider  DefaultAsymmetricSignatureProvider = SignatureProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RSA_SHA256);
+
         public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; } }
         
         public static ClaimsPrincipal DefaultClaimsPrincipal 
@@ -225,9 +227,10 @@ public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
                     audience: securityTokenDescriptor.Audience,
                     expires: securityTokenDescriptor.Expires,
                     notBefore: securityTokenDescriptor.NotBefore,
+                    issuedAt: securityTokenDescriptor.IssuedAt,
                     issuer: securityTokenDescriptor.Issuer,
                     subject: new ClaimsIdentity(securityTokenDescriptor.Claims),
-                    signingCredentials: securityTokenDescriptor.SigningCredentials                    
+                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2
                     ));
         }
 
@@ -237,11 +240,11 @@ public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
             return new SecurityTokenDescriptor
             {
                 Audience = DefaultAudience,
-                SigningCredentials = signingCredentials,
                 Claims = ClaimSets.DefaultClaims,
                 Issuer = DefaultIssuer,
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                SigningCredentials = signingCredentials
             };
         }
 

@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -85,7 +94,6 @@ namespace System.IdentityModel.Tokens.Tests
                     Modulus = Base64UrlEncoder.DecodeBytes("vfPmqjbDDsT_xnh5CfnR97GirbRASP3rKyUlLOpytrkkWtNSD2S0ovnFlW5H4E9OiGusUpeJYD6HmAY5VSafWKC0qVEAvFIT_Fs6j8kJ3kiGsJc9Q-jktds06nvUMn1I-qxmLI7flw0khko6LCi6nTrBrPQ_XlQLYGS0C6-wkyCn0qqB6zsvX8kEElE7bEka0RkWzBVIWsVKkllajBNEeUVvAmy4KvmbFxXDlleNDXsJcETyo3-GmpaevrAr7ryIOOZuUQfkA8Hd-rb-lVkOkk2M-SChNlW8zNeyCksjp0LOF6r8SDf0fgnsKWsQ7qN2_Ltuvmd1X_HMIfdOmhi5Y6W6WnzWacO-jqbTb1k37bASbj2ViYB5-puTfEABzc12KN2mLRTA2TqhmYhy-9EPeDWdXsJwXKP1gtBrxXGFyEzuD4Y8lRYetY0RI5IJc8SoeUauJu75kNxUp-ffteIqP-uhG-E-BcFxIj_YfmI8Yui_XHU7OwDHTBdXk-ahBE7l-kvI-KN2hFcO1DIYK-c2no7fv1CXW8Lz-w7XWl54jn2MyKx4PnTUYT8langL6ZW3xux2wLrnbGwnIisWNWh0ih2ggKiiLCiOxJM9bwA-VbFSyihb3vWs-i4RAQtUwkvV6-8nyZv-SMcI9B7LuziJohnp_gIJZ8FIvtjoJHfGrZk"),
                     P = Base64UrlEncoder.DecodeBytes("z3zVMYG1_TWwnNs99hyMJI9xs1zrwbV_STv9cqpaBxgPIHqpDyoG68a_VZF2RfuYLKT9ksEfLmgDeBPuM_vwBXSUApRqQo46WOpYUaDTcQJUJcspYQENQDkvtMGTuZQd6wrfGksDkUgnuZZ2CAKjN6vzGGlUkLJ9eEihbVTsCcYpp1sSK_J5HZCu0MZcnEU4oMbWKRHHApkQC8TJkutRw1XjY6s_ABj7M2W2D9CIO-CnUaXxmh21JNaJ2zP0nK1cfWgzvIikVoey7FKbGbOoIBnVf9AZUAVfclBLWI3wfUUVod_1lwLA07-7kvQ6SCEiHpsep3RwONcYJJH3vD3WlQ"),
                     Q = Base64UrlEncoder.DecodeBytes("6l2EkIkJDFV_djyTFdpYbjrmg1lIRa1_oFF1925M0aDAEeJncRYkBOyupE9Ni6vHSTlRGN7I3Vs6V72Jnt_wpKqxz0qdhUseO89_JaqQE65euYq1QyeAjnHg64q4PcLYmBDub9Hn6y0xkTzkMCOUe5ZNGeosb5LW4qQVGyXnyeg9PmwFrBjQwr_Na6-1VrS2HCqzxvQWkOuJdjt3XB4ODXUnze9G-8nx8d2Cb9hC2qT4QxTPCq25i0n2DvIcRs_pD6RyNPg7EYOSH2Alc1vVzj7aYW9Plx69rIrtIFxH0ZwHsHua-AjDg7IZLK_Ghc3RV-9nTPEA2_6q_A_oOvfN9Q"),
-
                 };
 
             RsaParameters_4096_Public =
@@ -97,26 +105,29 @@ namespace System.IdentityModel.Tokens.Tests
 
             RsaSecurityKey_1024 = new RsaSecurityKey(RsaParameters_1024);
             RsaSecurityKey_1024_Public = new RsaSecurityKey(RsaParameters_1024_Public);
-            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048);
+            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048) { KeyId = Guid.NewGuid().ToString() };
             RsaSecurityKey_2048_Public = new RsaSecurityKey(RsaParameters_2048_Public);
             RsaSecurityKey_4096 = new RsaSecurityKey(RsaParameters_4096);
             RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
-            RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-            RSASigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-            RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-            RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-            RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
-        }
+            RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RSA_SHA256);
+            RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
 
-        // .../Certs/SelfSigned1024_SHA1.pfx
-        // password: SelfSigned1024_SHA1
-        public static string SelfSigned1024_SHA1 = @"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";
-        public static string SelfSigned1024_SHA1_Public = "MIICRTCCAbKgAwIBAgIQ1Oe7zrx8sLhBt9A8ZwkbJTAJBgUrDgMCHQUAMDExLzAtBgNVBAMeJgBTAGUAbABmAFMAaQBnAG4AZQBkADEAMAAyADQAXwBTAEgAQQAxMB4XDTE0MTIyNjE1MjYzNloXDTM5MTIzMTIzNTk1OVowMTEvMC0GA1UEAx4mAFMAZQBsAGYAUwBpAGcAbgBlAGQAMQAwADIANABfAFMASABBADEwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALYRgjPGn3XEYszItyRNIYequfWNX1lVmwRZP4cvd4WfRi8UbqWeSqLap5TPYeorCX69d8UywkAj/hnXqLZDCsHyjQX7U7Ej4o3eIXy1vzZmNYfokaAFjqE8qPnrIirPFZW4Obc1cBReRAMXspoXtS1LCwLhb8PMOJ4f40RfncF9AgMBAAGjZjBkMGIGA1UdAQRbMFmAECSNmSZfNtHWcA36SBtjLx+hMzAxMS8wLQYDVQQDHiYAUwBlAGwAZgBTAGkAZwBuAGUAZAAxADAAMgA0AF8AUwBIAEEAMYIQ1Oe7zrx8sLhBt9A8ZwkbJTAJBgUrDgMCHQUAA4GBAAi+D7RBUnrCFLzMAKLrlK2jUOdwq22j0QbEIaoWyR8aYwrqUYa+c0qtxa9zjyfYRJXBO1vstvVMtDTvPJ1RifwuA05iKo5aofBXpUg/cKa7q2/gXPHrz4S4q8QkUynWksILaNbqSuXyGd8HmWOMhNZ9nDVq01rq0upRrB4F6t2i";
-        public static X509Certificate2 CertSelfSigned1024_SHA1 = new X509Certificate2(Convert.FromBase64String(SelfSigned1024_SHA1), "SelfSigned1024_SHA1", X509KeyStorageFlags.PersistKeySet);
-        public static X509SecurityKey X509SecurityKeySelfSigned1024_SHA1 = new X509SecurityKey(CertSelfSigned1024_SHA1);
-        public static X509Certificate2 CertSelfSigned1024_SHA1_Public = new X509Certificate2(Convert.FromBase64String(SelfSigned1024_SHA1_Public), "SelfSigned1024_SHA1");
-        public static X509SecurityKey X509SecurityKeySelfSigned1024_SHA1_Public = new X509SecurityKey(CertSelfSigned1024_SHA1);
+            //ecdsa
+            byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
+            byte[] ecdsa384KeyBlob = TestUtilities.HexToByteArray("45435334300000009dc6bb9cdc8dac31e3db6e6b5f58f8e3a304e5c08e632705ca9a236f1134646dca526b89f7ea98653962f4a781f2fc9bf479a2d627561b1269548050e6d2c388018b837f4ceba8ee7fe2eefea67c8418ad1e84f60c1309385e573ea5183e9ae8b6d5308a78da207c6e556af2053983321a5f8ac057b787089ee783c99093b9f2afb2f9a1e9a560ad3095b9667aa699fa");
+            byte[] ecdsa521KeyBlob = TestUtilities.HexToByteArray("454353364200000001f9f06ea4e00fd3fecc1753af7983b43cb9b692941ee6364616c9c4168845fce804beca7aa23d0a5049910db45dfb61112f4cb02e93ff62af1be203ad248dd70952015ddc31d1ad7411ca5996b8b76a40ea65f286c665225114bec8557365aa4bc79358f8c68b873cb76a1c86a5a394185d8eeb9602b8b968db1e4ac49b7cc51f83c7170055ad9b0b2d0d5d2306a66bf87a256a3739696121eb131e64ae61991ea23db99b397c32df95efb0cb284147a929c65e9f671073ca3c7a084cb9211dceb06c987277");
+
+            ECDsa256Key = new ECDsaSecurityKey(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa384Key = new ECDsaSecurityKey(ecdsa384KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa521Key = new ECDsaSecurityKey(ecdsa521KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
+            ECDsa256Key_Public = new ECDsaSecurityKey(ECDsa256Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa384Key_Public = new ECDsaSecurityKey(ECDsa384Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa521Key_Public = new ECDsaSecurityKey(ECDsa521Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+        }
 
         // .../Certs/SelfSigned1024_SHA256.pfx
         // password: SelfSigned1024_SHA256
@@ -159,30 +170,30 @@ namespace System.IdentityModel.Tokens.Tests
         public const string X509Data_AAD_Public =@"MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng";
         public static X509Certificate2 Cert_AAD_Public = new X509Certificate2(Convert.FromBase64String(X509Data_AAD_Public));
         public static X509SecurityKey X509SecurityKey_AAD_Public = new X509SecurityKey(Cert_AAD_Public);
-        public static SigningCredentials X509SigningCreds_AAD_Public = new SigningCredentials(X509SecurityKey_AAD_Public, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
+        public static SigningCredentials X509SigningCreds_AAD_Public = new SigningCredentials(X509SecurityKey_AAD_Public, SecurityAlgorithms.RsaSha256Signature);
 
         public const string X509Data_LocalSts =  @"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";
         public static X509Certificate2 Cert_LocalSts = new X509Certificate2( Convert.FromBase64String( X509Data_LocalSts ), CertPassword, X509KeyStorageFlags.MachineKeySet );
         public static X509SecurityKey X509SecurityKey_LocalSts = new X509SecurityKey( Cert_LocalSts );
-        public static SigningCredentials X509SigningCreds_LocalSts  = new SigningCredentials(X509SecurityKey_LocalSts, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
+        public static SigningCredentials X509SigningCreds_LocalSts  = new SigningCredentials(X509SecurityKey_LocalSts, SecurityAlgorithms.RsaSha256Signature);
 
         // 1024 bit RSA
         public const string X509Data_1024 = @"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";
         public static X509Certificate2 Cert_1024 = new X509Certificate2( Convert.FromBase64String( X509Data_1024 ), CertPassword, X509KeyStorageFlags.MachineKeySet );
         public static X509SecurityKey X509SecurityKey_1024 = new X509SecurityKey( Cert_1024 );
-        public static SigningCredentials X509SigningCreds_1024_RsaSha2_Sha2  = new SigningCredentials(X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );
+        public static SigningCredentials X509SigningCreds_1024_RsaSha2_Sha2  = new SigningCredentials(X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
 
         // 2048 bit RSA
         public const string DefaultX509Data_2048 = @"MIIKHAIBAzCCCdwGCSqGSIb3DQEHAaCCCc0EggnJMIIJxTCCBf4GCSqGSIb3DQEHAaCCBe8EggXrMIIF5zCCBeMGCyqGSIb3DQEMCgECoIIE/jCCBPowHAYKKoZIhvcNAQwBAzAOBAivxX2ENGkqRwICB9AEggTYFn22METHTeg0HaAP8Abvg7vjXbyVReMNsR0dBiY0waqF69lXGECwKMZL75biisgxx2y16ek2n/jIidyB/3pQwJLXr8DeIcRguiUi3edMaBel8fOOUbg4CpeHiLmEriKf/g1p1d7uLz5cGGpNKgAI5Xe9eYoisF06UnS+Sg9l4Z6FFs14YvkTRpn/QhllN0Oshy0TxaQtA6EylZPZ3QetvcS3Cl4BjXey0Q1vn6Cm7S1xP8HwBQ2uJRMzYeACFnDCwrASMxaNhIKhGJIfHwxzk/peuJix91wjCOPx6R1JTZRpSMKcyg8I/MO4CfII0wzutBpxGRjq5zQTkeg5nfJgye66RLxbDsyA2YMsEDGkQWbRVGRVq/R0d3MTt2b/mY6nmhbGSY24suHjY05A67BBTURjCO1u9fXFrvdaq+WrcEtjcdo75DWfOzCqtxQ2nRaA6qF48CX8LF6GX05meTug5Zl7Cixa8jOw+M88OxM2R0TayAV6AxO/hBTFq5WcLmHl/gGcjLY8ypWj3i8HB3akQYUoqV/mCwILhdQwfG/E8UcjRA5yplWRnz346RA7NJ/Ae84VY4hR7Fxrgam765uLl063GAQhW+M3lctJL3Xooo7rduXeVL6RDQhYdz6cOkEIyyH+4ftArhesgGUECQxQTibWiXeLTQbJfc/g4+BG4iQTBgl599LjfR044THpH20y3gNm2bYe8VAcJgVrwlQOgFQAGAVLSQKFNvznHPfWGPFMuK1xfsNVdaTugOE9YGQv16CDcCJMTgeYqVPXm9Hq1TKL7nqRR3FqkNCaE1aMn2v3TOmv4TuCfepe+CxR5WFJin06PMjaBibUTQ520H1eIudjUJSN5VQ+Rfh05HQVagBPT4dkcjLNZtKPZJSNC72HhEdxLO1+s12mLN2ZdBtbPVBfXHtrfHrXYVhk1vcvztoA6Wq92Z9x+ZMlJZuhXk45xWsH/dL4H0S+f/keakpLSCRB9zBdXMhyixSN3gyE/YHcbc6XHuIdhMDOEDwINmZJBG29FTrG7F2QUrPfRLlRYLD3xgDJHH/p2BgpGyAN3FlwSQjhNW6UCLTsKl24qaDVwJ60+9SpypJbJra0o3l+6gc4CxGuLY9TBR6jrSToaE476uyyoYWUn2hCzlOOtedd6hGZQECh8fh5rf93nfhCQghKtUakdjSJUW8XWSnouv+Z5dNoYlqflkGQ/AfCkWj3jgO+MYLriJVf5tDxcYyj+trfV7HWI3GgL4fPXsrc740/AesDUrf+JqK36Hm2s3GQe9eqeUg9+ohxVY5QO3QBkUMbvaMHqlXYo0EbW91SyLZQBlcx97q9YFkAtwp3311hoP2bl7+N/T5XMw1EoA89GutLkzIVuE+AQk94eEcIJwmjb9pYKl58tZLlqfDBS6sV+j95Dh83dwMG+8gRCwS8qFYRyXO0UVcjWPv/qeHVEEorgyhJveLrjimdEzheFlQrBit8YAS+akXOBVQC4QQ42biCWsz2qO1sQIMZndN6dVke88Br7Ilh9UJ0qojXR0mc6BPUKl3Zh9d32WyFbKm3Qj6AS2vnmkZCdjBO9PTT5oY/j17ClLTshps2B5ruysXotcrGNjuOhPE05fkYUFzknfSv7HhrjMvQYQNulHxGijTvksey1NedbDGB0TATBgkqhkiG9w0BCRUxBgQEAQAAADBbBgkqhkiG9w0BCRQxTh5MAHsAMwA1AEEAQgBFADcAOQBBAC0AOQA3ADIAQwAtADQAOAAxAEYALQA4AEIAMQA3AC0AQQBDADAAOQAxAEEANwAwADgAQwA2AEYAfTBdBgkrBgEEAYI3EQExUB5OAE0AaQBjAHIAbwBzAG8AZgB0ACAAUwB0AHIAbwBuAGcAIABDAHIAeQBwAHQAbwBnAHIAYQBwAGgAaQBjACAAUAByAG8AdgBpAGQAZQByMIIDvwYJKoZIhvcNAQcGoIIDsDCCA6wCAQAwggOlBgkqhkiG9w0BBwEwHAYKKoZIhvcNAQwBBjAOBAg6DCoLVPw6qAICB9CAggN4Xykvk2tPB1lZ00HE84x0B0384ZMGb8UgjGbjr7fMnSMUXDgHijcevFNmdeP/II/Ltd+F73MbEsaA1d1CEH72cPk4wdoDsgrTt/Fg9xL+jja9HB35HuitgmLsfF1NJ6NdPZZK+0yfvlIKbz/MmKRrGfAwNuWtOVU3bnOv0myfXmfLg5O4mp/JdHJ5kjG4O81nUq6+OCyFbARuDVkrlIZbLO1ck3TPA7Dd2a8ujayY8mtFzMBrGV7U5LJH1V/LprpEA1dZmqt3kmXdLvIwSzNUub23wJDFWc0wQZ2/CJp33RiulZIe9na5bj7S0adOj/Jloot0V9Rxf46sevvsMM/M9rQXVAz0rquwW2o4yRUJxQgajntn75/Dridu+hj++j+Nq5Fs3pII5yjv517YzTZihoWB1xhO9yZhmMUq6OtJQFgQlB9YQTvCvleeC0AoU2lRZ5dvyrzxEMFEbHN72vG7Sps5vyyz/joF1RVNZw/hP4/hoFGuGcIFkI3Dsz+JSi0iZEqgmAaq2LUihT2rx40r49aSCU1VXs7DDnBLhh3w20Z1hx2IQmc2wp0YGKSbQDjA4hItRG6xXapMrlizaIp0LzWtmgV+qRbZN39xvXOkc0kITFdbyWILA04WgNwGeAlwtiSeO+C2c/EVXFOLOH+ibJ/OCUexw6yDTtIBqsk8oUCTMvJNNKguJCC2pSEKPhH606HAnuYTbWqUxY9GWK6wNIFAJaQnHD2pprq9j4va69qq0xy9rn7pfiEB7GeGlRb7QtOd5myfG1SZ5S/oP0Pnx+G6tA1Xkx8vMVeZhzH128+zApqVLd/xtMGJ24RlTgViyJsN1Z5k77Ces5YdwTZjAnJ6kyMbiVhZIpwzlKiJ23Aq00RpinF7ZvzPK0L3RDWbahU1eM98zhokRW3c5dKKBEAGePzyCVUnyoCCBpLUWkSXhL58Qm6Us1IfsoiYGnE/YtWwpArHXqndDnArrqTECUxf4VAqZ3Sj3CDRQN54aLBPgllNB2VjzmS4qKbyT7VP1HkxAbE5B1PRLqKCSzgeIJTMpGbHkaacz9Kme+O99d6OOdLr2OyogX5g6FkEc32n+lwnDww5VgbfdLV8JBjgS1WeEQk2UgJqXzwlNEjLvtX6RReLljUi7QLDeEaC2WKJFGnRlbX0JYL+ugggUY5UhXnJ6BvYv6P2MDcwHzAHBgUrDgMCGgQUPN6zb4ZCGV3dy3+JzgHFLCrHlGIEFNnQRFK67cH21VJ27RcK5qgEvQfh";
         public static X509Certificate2 DefaultCert_2048 = new X509Certificate2( Convert.FromBase64String( DefaultX509Data_2048 ), CertPassword, X509KeyStorageFlags.MachineKeySet );
         public static X509SecurityKey DefaultX509Key_2048 = new X509SecurityKey( DefaultCert_2048 );
-        public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2  = new SigningCredentials(DefaultX509Key_2048, SecurityAlgorithms.RsaSha256Signature, "foo");
+        public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2  = new SigningCredentials(DefaultX509Key_2048, SecurityAlgorithms.RsaSha256Signature);
         public static X509Certificate2 DefaultAsymmetricCert_2048 = new X509Certificate2( Convert.FromBase64String( DefaultX509Data_2048 ), CertPassword, X509KeyStorageFlags.MachineKeySet );
 
         public static string DefaultX509Data_Public_2048 = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
         public static X509Certificate2 DefaultCert_Public_2048 = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_Public_2048));
         public static X509SecurityKey DefaultX509Key_Public_2048 = new X509SecurityKey(DefaultCert_Public_2048);
-        public static SigningCredentials DefaultX509SigningCreds_Public_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_Public_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
+        public static SigningCredentials DefaultX509SigningCreds_Public_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_Public_2048, SecurityAlgorithms.RsaSha256Signature);
 
         // RSA securityKey
         public static RSAParameters RsaParameters_1024;
@@ -206,6 +217,14 @@ namespace System.IdentityModel.Tokens.Tests
         public static SigningCredentials RSASigningCreds_4096;
         public static SigningCredentials RSASigningCreds_4096_Public;
 
+        // ECDSA Cng security keys
+        public static readonly ECDsaSecurityKey ECDsa256Key;
+        public static readonly ECDsaSecurityKey ECDsa384Key;
+        public static readonly ECDsaSecurityKey ECDsa521Key;
+        public static readonly ECDsaSecurityKey ECDsa256Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa384Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa521Key_Public;
+
 #if SymmetricKeySuport
         public static string DefaultSymmetricKeyEncoded_256                    ="Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256                      = Convert.FromBase64String( DefaultSymmetricKeyEncoded_256 );
@@ -221,7 +240,6 @@ namespace System.IdentityModel.Tokens.Tests
 
         // These signingCreds have algorithms and hashs that are not supported
         public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha2      = new SigningCredentials( DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest );
-        public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha1      = new SigningCredentials( DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha1Digest );
         public static SigningCredentials SymmetricSigningCreds_2048RSA_H256_Sha2    = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256Digest );
 #endif
 

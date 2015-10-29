@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -55,121 +64,121 @@ namespace System.IdentityModel.Tokens.Jwt
     }
 
     /// <summary>
-    /// List of algorithms see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+    /// List of algorithms see: http://tools.ietf.org/html/rfc7518#section-3
     /// </summary>
     public struct JwtAlgorithms
     {
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string ECDSA_SHA256    = "ES256";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string ECDSA_SHA384    = "ES384";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string ECDSA_SHA512    = "ES512";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string HMAC_SHA256     = "HS256";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string HMAC_SHA384     = "HS384";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string HMAC_SHA512     = "HS512";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string NONE            = "none";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string RSA_SHA256      = "RS256";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string RSA_SHA384      = "RS384";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-26#section-3
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string RSA_SHA512      = "RS512";
     }
 
     /// <summary>
-    /// List of header parameter names see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5.
+    /// List of header parameter names see: http://tools.ietf.org/html/rfc7519#section-5.
     /// </summary>
     public struct JwtHeaderParameterNames
     {
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Alg = "alg";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Cty = "cty";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Kid = "kid";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Jku = "jku";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Jwk = "jwk";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Typ = "typ";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string X5c = "x5c";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string X5t = "x5t";
 
         /// <summary>
-        /// see: http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-5
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string X5u = "x5u";
     }
     
     /// <summary>
     /// List of registered claims from different sources
-    /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+    /// http://tools.ietf.org/html/rfc7519#section-4
     /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
     /// </summary>
     public struct JwtRegisteredClaimNames
     {
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Actort = "actort";
 
@@ -184,7 +193,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Amr = "amr";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Aud = "aud";
 
@@ -199,12 +208,12 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Azp = "azp";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Birthdate = "birthdate";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string CHash = "c_hash";
 
@@ -214,82 +223,82 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string AtHash = "at_hash";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Email = "email";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Exp = "exp";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Gender = "gender";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string FamilyName = "family_name";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string GivenName = "given_name";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Iat = "iat";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Iss = "iss";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Jti = "jti";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string NameId = "nameid";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Nonce = "nonce";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Nbf = "nbf";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Prn = "prn";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Sub = "sub";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Typ = "typ";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string UniqueName = "unique_name";
 
         /// <summary>
-        /// http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-20#section-4
+        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Website = "website";
     }

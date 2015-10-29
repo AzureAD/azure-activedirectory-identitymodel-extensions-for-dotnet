@@ -1,23 +1,33 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// This code is licensed under the MIT License.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Tests;
@@ -28,34 +38,82 @@ namespace Microsoft.IdentityModel.Logging.Tests
 {
     public class LoggerTests
     {
-
         [Fact(DisplayName = "LoggerTests : LogMessageAndThrowException")]
         public void LogMessageAndThrowException()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.LogLevel = EventLevel.Verbose;             // since null parameters exceptions are logged at Verbose level
+            // since null parameters exceptions are logged at Verbose level
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Verbose;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
-
+            var guid = Guid.NewGuid().ToString();
             try
             {
-                JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-                SecurityToken token;
-
-                // This should log an error and throw null argument exception.
-                handler.ValidateToken(null, null, out token);
+                throw LogHelper.LogException<ArgumentNullException>(guid);
             }
             catch (Exception ex)
             {
                 Assert.Equal(ex.GetType(), typeof(ArgumentNullException));
-                Assert.Contains("IDX10000: The parameter 'System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler: securityToken' cannot be a 'null' or an empty object.", listener.TraceBuffer);
+                Assert.Contains(guid, listener.TraceBuffer);
             }
+        }
+
+        [Fact(DisplayName = "LogHelper.LogException")]
+        public void LogException()
+        {
+            var messageWithParams = Guid.NewGuid().ToString() + "{0}";
+            var guid1 = Guid.NewGuid().ToString();
+            var guid2 = Guid.NewGuid().ToString();
+            var guid3 = Guid.NewGuid().ToString();
+            var guid4 = Guid.NewGuid().ToString();
+            var guid5 = Guid.NewGuid().ToString();
+
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Critical;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Critical);
+
+            // default logs at Error
+            var exception = LogHelper.LogException<ArgumentException>(guid1);
+            Assert.Equal(exception.GetType(), typeof(ArgumentException));
+            Assert.True(string.IsNullOrEmpty(listener.TraceBuffer));
+            Assert.Contains(guid1, exception.Message);
+
+            listener = new SampleListener();
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
+
+            exception = LogHelper.LogException<ArgumentException>(guid1);
+            Assert.Equal(exception.GetType(), typeof(ArgumentException));
+            Assert.Contains(guid1, exception.Message);
+
+            exception = LogHelper.LogException<ArgumentException>(messageWithParams, guid2);
+            Assert.Contains(guid2, exception.Message);
+            Assert.Equal(exception.GetType(), typeof(ArgumentException));
+
+            exception = LogHelper.LogException<ArgumentException>(EventLevel.Error, messageWithParams, guid3);
+            Assert.Contains(guid3, exception.Message);
+
+            exception = LogHelper.LogException<ArgumentException>(EventLevel.Error, new NotSupportedException(), messageWithParams, guid4);
+            Assert.Contains(guid4, exception.Message);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal(exception.InnerException.GetType(), typeof(NotSupportedException));
+
+            exception = LogHelper.LogException<ArgumentException>(EventLevel.Informational, new NotSupportedException(), messageWithParams, guid5);
+            Assert.Contains(guid5, exception.Message);
+            Assert.NotNull(exception.InnerException);
+            Assert.Equal(exception.InnerException.GetType(), typeof(NotSupportedException));
+
+            Assert.Contains(guid1, listener.TraceBuffer);
+            Assert.Contains(guid2, listener.TraceBuffer);
+            Assert.Contains(guid3, listener.TraceBuffer);
+            Assert.Contains(guid4, listener.TraceBuffer);
+            Assert.DoesNotContain(guid5, listener.TraceBuffer);
         }
 
         [Fact(DisplayName = "LogggerTests : LogMessage")]
         public void LogMessage()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.LogLevel = EventLevel.Warning;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
             TokenValidationParameters validationParameters = new TokenValidationParameters()
@@ -68,66 +126,45 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Contains("IDX10233: ", listener.TraceBuffer);
         }
 
-        [Fact(DisplayName = "LoggerTests : TestLogLevel")]
+        [Fact]
         public void TestLogLevel()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.LogLevel = EventLevel.Informational;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Informational;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
 
-            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            handler.CreateToken();
+            var guid1 = Guid.NewGuid().ToString();
+            var guid2 = Guid.NewGuid().ToString();
+            IdentityModelEventSource.Logger.WriteVerbose(guid1);
+            IdentityModelEventSource.Logger.WriteInformation(guid2);
 
-            // This is Informational level message. Should be there in the trace buffer since default log level is informational.
-            Assert.Contains("IDX10722: ", listener.TraceBuffer);
-            // This is Verbose level message. Should not be there in the trace buffer.
-            Assert.DoesNotContain("IDX10721: ", listener.TraceBuffer);
-
-            // Setting log level to verbose so that all messages are logged.
-            IdentityModelEventSource.LogLevel = EventLevel.Verbose;
-            handler.CreateToken();
-            Assert.Contains("IDX10722: ", listener.TraceBuffer);
-            Assert.Contains("IDX10721: ", listener.TraceBuffer);
-
+            Assert.DoesNotContain(guid1, listener.TraceBuffer);
+            Assert.Contains(guid2, listener.TraceBuffer);
         }
 
-        [Fact(DisplayName = "LoggerTests: Test TextWriterEventListener")]
+        [Fact]
         public void TextWriterEventListenerLogging()
         {
-            IdentityModelEventSource.LogLevel = EventLevel.Informational;
-            using (TextWriterEventListener listener = new TextWriterEventListener("testLog.txt"))
+            var filename = Guid.NewGuid().ToString() + ".txt";
+            var guid1 = Guid.NewGuid().ToString();
+            var guid2 = Guid.NewGuid().ToString();
+            var guid3 = Guid.NewGuid().ToString();
+
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Verbose;
+            using (TextWriterEventListener listener = new TextWriterEventListener(filename))
             {
-                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
-
-                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-                JwtSecurityToken jwt = tokenHandler.CreateToken(
-                    IdentityUtilities.DefaultIssuer,
-                    IdentityUtilities.DefaultAudience,
-                    ClaimSets.DefaultClaimsIdentity,
-                    DateTime.UtcNow,
-                    DateTime.UtcNow + TimeSpan.FromHours(1),
-                    IdentityUtilities.DefaultAsymmetricSigningCredentials);
-
-
-                TokenValidationParameters validationParameters =
-                    new TokenValidationParameters()
-                    {
-                        IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey,
-                        ValidAudience = IdentityUtilities.DefaultAudience,
-                        ValidIssuer = IdentityUtilities.DefaultIssuer,
-                    };
-                SecurityToken securityToken;
-                tokenHandler.ValidateToken(jwt.RawData, validationParameters, out securityToken);
+                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
+                IdentityModelEventSource.Logger.WriteInformation(guid1);
+                IdentityModelEventSource.Logger.WriteVerbose(guid2);
+                IdentityModelEventSource.Logger.WriteCritical(guid3);
             }
 
-            string logText = File.ReadAllText("testLog.txt");
-            Assert.Contains("IDX10239: ", logText);
-            Assert.Contains("IDX10244: ", logText);
-            Assert.Contains("IDX10240: ", logText);
-            Assert.Contains("IDX10236: ", logText);
-            Assert.Contains("IDX10245: ", logText);
+            string logText = File.ReadAllText(filename);
+            Assert.DoesNotContain(guid2, logText);
+            Assert.Contains(guid1, logText);
+            Assert.Contains(guid3, logText);
 
-            File.Delete("testLog.txt");
+            File.Delete(filename);
         }
 
         [Fact(DisplayName = "LoggerTests: Test TextWriterEventListener with access denied to file.")]
@@ -178,7 +215,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
             File.Delete("testLog.txt");
 
             // using StreamWriter
-            StreamWriter streamWriter = new StreamWriter("testLog.txt", true);
+            Stream fileStream = new FileStream("testLog.txt", FileMode.OpenOrCreate, FileAccess.Write);
+            StreamWriter streamWriter = new StreamWriter(fileStream);
             using (TextWriterEventListener listener = new TextWriterEventListener(streamWriter))
             {
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
@@ -189,8 +227,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Contains("This is a warning for streamwriter!", logText);
             File.Delete("testLog.txt");
         }
-
-
     }
 
     class SampleListener : EventListener

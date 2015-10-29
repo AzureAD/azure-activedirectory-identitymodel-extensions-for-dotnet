@@ -1,13 +1,35 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -107,13 +129,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="parameter">The parameter name.</param>
         /// <returns>The value of the parameter or null if the parameter does not exists.</returns>
-        /// <exception cref="ArgumentException">parameter is null</exception>
+        /// <exception cref="ArgumentNullException">parameter is null</exception>
         public virtual string GetParameter(string parameter)
         {
-            if (String.IsNullOrEmpty(parameter))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+            if (string.IsNullOrEmpty(parameter))
+                throw LogHelper.LogArgumentNullException("parameter");
 
             string value = null;
             _parameters.TryGetValue(parameter, out value);
@@ -133,9 +153,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": IssuerAddress"), typeof(ArgumentNullException), EventLevel.Verbose);
-                }
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "IssuerAddress");
 
                 _issuerAddress = value;
             }
@@ -166,9 +184,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": PostTitle"), typeof(ArgumentNullException), EventLevel.Verbose);
-                }
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "PostTitle");
 
                 _postTitle = value;
             }
@@ -181,15 +197,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// <exception cref="ArgumentNullException">if 'parameter' is null or empty.</exception>
         public virtual void RemoveParameter(string parameter)
         {
-            if (String.IsNullOrEmpty(parameter))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+            if (string.IsNullOrEmpty(parameter))
+                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "parameter");
 
             if (_parameters.ContainsKey(parameter))
-            {
                 _parameters.Remove(parameter);
-            }
         }
 
         /// <summary>
@@ -198,20 +210,15 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="parameter">The parameter name.</param>
         /// <param name="value">The value to be assigned to parameter.</param>
         /// <exception cref="ArgumentNullException">if 'parameterName' is null or empty.</exception>
-        /// <remarks>If null is passed as value and a parameter exists, that parameter is removed.</remarks>
+        /// <remarks>If null is passed as value and the parameter exists, that parameter is removed.</remarks>
         public void SetParameter(string parameter, string value) 
         {
-            if (String.IsNullOrEmpty(parameter))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": parameter"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+            if (string.IsNullOrEmpty(parameter))
+                throw LogHelper.LogArgumentNullException("parameter");
 
             if (value == null)
             {
-                if (_parameters.ContainsKey(parameter))
-                {
-                    _parameters.Remove(parameter);
-                }
+                RemoveParameter(parameter);
             }
             else
             {
@@ -248,9 +255,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": ScriptButtonText"), typeof(ArgumentNullException), EventLevel.Verbose);
-                }
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "ScriptButtonText");
 
                 _scriptButtonText = value;
             }
@@ -270,9 +275,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                {
-                    LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10001, GetType() + ": ScriptDisabledText"), typeof(ArgumentNullException), EventLevel.Verbose);
-                }
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "ScriptDisabledText");
 
                 _scriptDisabledText = value;
             }

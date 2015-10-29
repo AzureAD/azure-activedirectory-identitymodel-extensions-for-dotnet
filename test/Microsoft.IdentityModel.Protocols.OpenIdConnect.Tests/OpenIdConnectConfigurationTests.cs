@@ -1,20 +1,29 @@
-//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -97,8 +106,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 39)
-                Assert.True(false, "Number of properties has changed from 39 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 41)
+                Assert.True(false, "Number of properties has changed from 41 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -111,9 +120,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{false, true, false}),
                             new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{false, true, true}),
                             new KeyValuePair<string, List<object>>("Issuer",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{null, new JsonWebKeySet()}),
+                            new KeyValuePair<string, List<object>>("LogoutSessionSupported", new List<object>{false, true, true}),
                             new KeyValuePair<string, List<object>>("OpPolicyUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("OpTosUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("RegistrationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),

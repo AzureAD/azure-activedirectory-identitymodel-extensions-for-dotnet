@@ -1,20 +1,29 @@
-﻿//-----------------------------------------------------------------------
-// Copyright (c) Microsoft Open Technologies, Inc.
-// All Rights Reserved
-// Apache License 2.0
+//------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -36,14 +45,27 @@ namespace System.IdentityModel.Tokens.Tests
             IgnoreSubject = true;
             StringComparison = System.StringComparison.Ordinal;
         }
+
+        public CompareContext(CompareContext other)
+        {
+            ExpectRawData = other.ExpectRawData;
+            IgnoreClaimsIdentityType = other.IgnoreClaimsIdentityType;
+            IgnoreClaimsPrincipalType = other.IgnoreClaimsPrincipalType;
+            IgnoreClaimType = other.IgnoreClaimType;
+            IgnoreProperties = other.IgnoreProperties;
+            IgnoreSubject = other.IgnoreSubject;
+            IgnoreType = other.IgnoreType;
+            StringComparison = other.StringComparison;
+        }
+
         public List<string> Diffs { get { return _diffs; } }
         public bool ExpectRawData { get; set; }
-        public bool IgnoreProperties { get; set; }
-        public bool IgnoreSubject { get; set; }
-        public bool IgnoreType { get; set; }
         public bool IgnoreClaimsIdentityType { get; set; }
         public bool IgnoreClaimsPrincipalType { get; set; }
         public bool IgnoreClaimType { get; set; }
+        public bool IgnoreProperties { get; set; }
+        public bool IgnoreSubject { get; set; }
+        public bool IgnoreType { get; set; }
         public StringComparison StringComparison { get; set; }
         public string Title { get; set; }
     }
@@ -80,7 +102,7 @@ namespace System.IdentityModel.Tokens.Tests
 
             int numMatched = 0;
             int numToMatch = toMatch.Count;
-
+            CompareContext localContext = new CompareContext(context);
             List<KeyValuePair<T,T>> matchedTs = new List<KeyValuePair<T,T>>();
             
             // helps debugging to see what didn't match
@@ -90,7 +112,7 @@ namespace System.IdentityModel.Tokens.Tests
                 bool matched = false;
                 for (int i = 0; i < toMatch.Count; i++)
                 {
-                    if (areEqual(t, toMatch[i], context))
+                    if (areEqual(t, toMatch[i], localContext))
                     {
                         numMatched++;
                         matchedTs.Add(new KeyValuePair<T, T>(toMatch[i], t));
@@ -127,6 +149,9 @@ namespace System.IdentityModel.Tokens.Tests
                     }
                 }
             }
+
+            if (notMatched.Count != 0)
+                context.Diffs.AddRange(localContext.Diffs);
 
             return (notMatched.Count == 0);
         }
@@ -169,6 +194,8 @@ namespace System.IdentityModel.Tokens.Tests
                 return AreEqual<JsonWebKey>(t1 as JsonWebKey, t2 as JsonWebKey, context, AreJsonWebKeysEqual);
             else if (t1 is JsonWebKeySet)
                 return AreEqual<JsonWebKeySet>(t1 as JsonWebKeySet, t2 as JsonWebKeySet, context, AreJsonWebKeySetsEqual);
+            else if (t1 is JwtHeader)
+                return AreEqual<JwtHeader>(t1 as JwtHeader, t2 as JwtHeader, context, AreJwtHeadersEqual);
             else if (t1 is JwtPayload)
                 return AreEqual<JwtPayload>(t1 as JwtPayload, t2 as JwtPayload, context, AreJwtPayloadsEqual);
             else if (t1 is JwtSecurityToken)
@@ -367,6 +394,68 @@ namespace System.IdentityModel.Tokens.Tests
             return diffs.Count == 0;
         }
 
+        public static bool AreDictionariesEqual(IDictionary<string, object> dictionary1, IDictionary<string, object> dictionary2, CompareContext context)
+        {
+            if (dictionary1 == null && dictionary2 == null)
+                return true;
+
+            if (dictionary1 == null)
+            {
+                context.Diffs.Add("(dictionary1 == null && dictionary2 != null)");
+                return false;
+            }
+
+            if (dictionary2 == null)
+            {
+                context.Diffs.Add("(dictionary1 != null && dictionary2 == null)");
+                return false;
+            }
+
+            if (dictionary1.Count != dictionary2.Count)
+            {
+                context.Diffs.Add("(dictionary1.Count != dictionary2.Count: " + dictionary1.Count + ", " + dictionary2.Count);
+                return false;
+            }
+
+            int numMatched = 0;
+            foreach (string key in dictionary1.Keys)
+            {
+                if (dictionary2.ContainsKey(key))
+                {
+                    if (dictionary1[key].GetType() != dictionary2[key].GetType())
+                    {
+                        context.Diffs.Add("dictionary1[key].GetType() != dictionary2[key].GetType(), key: '" + key + "' value1.GetType(), value2.GetType(): '" + dictionary1[key].GetType().ToString() + "', '" + dictionary2[key].GetType().ToString() + "'");
+                        continue;
+                    }
+
+                    // for now just typing strings, should expand types.
+                    var str1 = dictionary1[key] as string;
+                    var str2 = dictionary2[key] as string;
+                    if (str1 != null && str2 != null)
+                    {
+                        if (!str1.Equals(str2, StringComparison.Ordinal))
+                        {
+                            context.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key] + "', '" + dictionary2[key] + "'");
+                            continue;
+                        }
+                    }
+                    else if (dictionary1[key] != dictionary2[key])
+                    {
+                        context.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key].ToString() + "', '" + dictionary2[key].ToString() + "'");
+                        continue;
+                    }
+
+                    numMatched++;
+                }
+                else
+                {
+                    context.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
+                }
+            }
+
+            return numMatched == dictionary1.Count;
+        }
+
         public static bool AreDictionariesEqual(IDictionary<string, string> dictionary1, IDictionary<string, string> dictionary2, CompareContext context)
         {
             if (dictionary1 == null && dictionary2 == null)
@@ -477,12 +566,28 @@ namespace System.IdentityModel.Tokens.Tests
 
         public static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
         {
-            if (header1.Count != header2.Count)
+            if (header1 == null && header2 == null)
+                return true;
+
+            if (header1 == null)
             {
+                context.Diffs.Add("header1 == null, header2 != null");
                 return false;
             }
 
-            return true;
+            if (header2 == null)
+            {
+                context.Diffs.Add("header1 != null, header2 == null");
+                return false;
+            }
+
+            if (header1.Count != header2.Count)
+            {
+                context.Diffs.Add("(header1.Count != header2.Count: " + header1.Count + ", " + header2.Count);
+                return false;
+            }
+
+            return AreDictionariesEqual(header1, header2, context);
         }
 
         public static bool AreJwtPayloadsEqual(JwtPayload payload1, JwtPayload payload2, CompareContext context)
@@ -536,27 +641,27 @@ namespace System.IdentityModel.Tokens.Tests
             return true;
         }
 
-        public static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuraiton2, CompareContext context)
+        public static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuration2, CompareContext context)
         {
-            if (!string.Equals(configuration1.AuthorizationEndpoint, configuraiton2.AuthorizationEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.AuthorizationEndpoint, configuration2.AuthorizationEndpoint, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.CheckSessionIframe, configuraiton2.CheckSessionIframe, context.StringComparison))
+            if (!string.Equals(configuration1.CheckSessionIframe, configuration2.CheckSessionIframe, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.EndSessionEndpoint, configuraiton2.EndSessionEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.EndSessionEndpoint, configuration2.EndSessionEndpoint, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.Issuer, configuraiton2.Issuer, context.StringComparison))
+            if (!string.Equals(configuration1.Issuer, configuration2.Issuer, context.StringComparison))
                 return false;
 
-            if (!string.Equals(configuration1.JwksUri, configuraiton2.JwksUri, context.StringComparison))
+            if (!string.Equals(configuration1.JwksUri, configuration2.JwksUri, context.StringComparison))
                 return false;
 
-            if (!AreEnumsEqual<SecurityKey>(configuration1.SigningKeys, configuraiton2.SigningKeys, context, AreSecurityKeysEqual))
+            if (!AreEnumsEqual(configuration1.SigningKeys, configuration2.SigningKeys, context, AreSecurityKeysEqual))
                 return false;
 
-            if (!string.Equals(configuration1.TokenEndpoint, configuraiton2.TokenEndpoint, context.StringComparison))
+            if (!string.Equals(configuration1.TokenEndpoint, configuration2.TokenEndpoint, context.StringComparison))
                 return false;
 
             return true;
@@ -658,14 +763,11 @@ namespace System.IdentityModel.Tokens.Tests
             if (cred1.GetType() != cred2.GetType())
                 return false;
 
-            if (!string.Equals(cred1.DigestAlgorithm, cred2.DigestAlgorithm, context.StringComparison))
-                return false;
-
-            if (!string.Equals(cred1.SignatureAlgorithm, cred2.SignatureAlgorithm, context.StringComparison))
+            if (!string.Equals(cred1.Algorithm, cred2.Algorithm, context.StringComparison))
                 return false;
 
             // SigningKey, null match and type
-            if (!AreEqual<SecurityKey>(cred1.SigningKey, cred2.SigningKey, context, AreSecurityKeysEqual))
+            if (!AreEqual(cred1.Key, cred2.Key, context, AreSecurityKeysEqual))
                 return false;
 
             return true;
@@ -716,11 +818,11 @@ namespace System.IdentityModel.Tokens.Tests
             if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKey, validationParameters2.IssuerSigningKey, context, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKey");
 
-            //if (!AreEqual<SecurityKey>(validationParameters1.IssuerSigningKeyResolver, validationParameters2.IssuerSigningKeyResolver, context, AreSecurityKeysEqual))
-            //    matchingFailures.Add("IssuerSigningKeyRetriever");
-
             if (!AreEnumsEqual<SecurityKey>(validationParameters1.IssuerSigningKeys, validationParameters2.IssuerSigningKeys, context, AreSecurityKeysEqual))
                 matchingFailures.Add("IssuerSigningKeys");
+
+            if ((validationParameters1.IssuerSigningKeyResolver == null && validationParameters2.IssuerSigningKeyResolver != null) || (validationParameters1.IssuerSigningKeyResolver != null && validationParameters2.IssuerSigningKeyResolver == null))
+                matchingFailures.Add("IssuerSigningKeyResolver");
 
             if ((validationParameters1.IssuerSigningKeyValidator == null && validationParameters2.IssuerSigningKeyValidator != null) || (validationParameters1.IssuerSigningKeyValidator != null && validationParameters2.IssuerSigningKeyValidator == null))
                 matchingFailures.Add("IssuerSigningKeyValidator");
@@ -730,6 +832,9 @@ namespace System.IdentityModel.Tokens.Tests
 
             if ((validationParameters1.LifetimeValidator == null && validationParameters2.LifetimeValidator != null) || (validationParameters1.LifetimeValidator != null && validationParameters2.LifetimeValidator == null))
                 matchingFailures.Add("LifetimeValidator");
+
+            if ((validationParameters1.SignatureValidator == null && validationParameters2.SignatureValidator != null) || (validationParameters1.SignatureValidator != null && validationParameters2.SignatureValidator == null))
+                matchingFailures.Add("SignatureValidator");
 
             if (validationParameters1.NameClaimType != validationParameters2.NameClaimType)
                 matchingFailures.Add("NameClaimType");
