@@ -24,6 +24,8 @@
     },
     "compilationOptions": {
         "allowUnsafe": false,
-        "warningsAsErrors": true
+        "warningsAsErrors": true,
+        "delaySign": true,
+        "keyFile": "../../build/35MSSharedLib1024.snk"
     }
 }
