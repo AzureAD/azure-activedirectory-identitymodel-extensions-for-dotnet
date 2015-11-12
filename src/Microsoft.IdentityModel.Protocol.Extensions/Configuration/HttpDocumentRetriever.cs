@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             try
             {
-                HttpResponseMessage response = _httpClient.GetAsync(address, cancel).Result;
+                HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }

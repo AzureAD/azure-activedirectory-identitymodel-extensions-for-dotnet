@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             WsFederationConfiguration configuration = new WsFederationConfiguration();
 
-            string document = await retriever.GetDocumentAsync(address, cancel);
+            string document = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
 
             using (XmlReader metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {
