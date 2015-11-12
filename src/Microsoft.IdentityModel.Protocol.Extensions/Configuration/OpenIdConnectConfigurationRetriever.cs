@@ -78,11 +78,11 @@ namespace Microsoft.IdentityModel.Protocols
                 throw new ArgumentNullException("retriever");
             }
 
-            string doc = await retriever.GetDocumentAsync(address, cancel);
+            string doc = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
             OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
-                string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
+                string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel).ConfigureAwait(false);
                 openIdConnectConfiguration.JsonWebKeySet = new JsonWebKeySet(keys);
                 foreach (SecurityToken token in openIdConnectConfiguration.JsonWebKeySet.GetSigningTokens())
                 {
