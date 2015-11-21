@@ -57,11 +57,14 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (signingCredentials == null)
             {
-                this[JwtHeaderParameterNames.Alg] = SecurityAlgorithms.NONE;
+                this[JwtHeaderParameterNames.Alg] = JwtAlgorithms.NONE;
             }
             else
             {
-                this[JwtHeaderParameterNames.Alg] = signingCredentials.Algorithm;
+                string algorithm;
+                if (OutboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out algorithm))
+                    this[JwtHeaderParameterNames.Alg] = algorithm;
+
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
                     this[JwtHeaderParameterNames.Kid] = signingCredentials.Key.KeyId;
             }
@@ -69,6 +72,45 @@ namespace System.IdentityModel.Tokens.Jwt
             this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
             SigningCredentials = signingCredentials;
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/> used to map
+        /// the JWA identifiers with the corresponding security algorithms.
+        /// </summary>
+        public static IDictionary<string, string> InboundAlgorithmMap { get; } = new Dictionary<string, string>
+        {
+            [JwtAlgorithms.ECDSA_SHA256] = SecurityAlgorithms.EcdsaSha256Signature,
+            [JwtAlgorithms.ECDSA_SHA384] = SecurityAlgorithms.EcdsaSha384Signature,
+            [JwtAlgorithms.ECDSA_SHA512] = SecurityAlgorithms.EcdsaSha512Signature,
+
+            [JwtAlgorithms.HMAC_SHA256] = SecurityAlgorithms.HmacSha256Signature,
+            [JwtAlgorithms.HMAC_SHA384] = SecurityAlgorithms.HmacSha384Signature,
+            [JwtAlgorithms.HMAC_SHA512] = SecurityAlgorithms.HmacSha512Signature,
+
+            [JwtAlgorithms.RSA_SHA256] = SecurityAlgorithms.RsaSha256Signature,
+            [JwtAlgorithms.RSA_SHA384] = SecurityAlgorithms.RsaSha384Signature,
+            [JwtAlgorithms.RSA_SHA512] = SecurityAlgorithms.RsaSha512Signature
+        };
+
+        /// <summary>
+        /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/>
+        /// used to map the security algorithms with their JWA identifier.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
+        public static IDictionary<string, string> OutboundAlgorithmMap { get; } = new Dictionary<string, string>
+        {
+            [SecurityAlgorithms.EcdsaSha256Signature] = JwtAlgorithms.ECDSA_SHA256,
+            [SecurityAlgorithms.EcdsaSha384Signature] = JwtAlgorithms.ECDSA_SHA384,
+            [SecurityAlgorithms.EcdsaSha512Signature] = JwtAlgorithms.ECDSA_SHA512,
+
+            [SecurityAlgorithms.HmacSha256Signature] = JwtAlgorithms.HMAC_SHA256,
+            [SecurityAlgorithms.HmacSha384Signature] = JwtAlgorithms.HMAC_SHA384,
+            [SecurityAlgorithms.HmacSha512Signature] = JwtAlgorithms.HMAC_SHA512,
+
+            [SecurityAlgorithms.RsaSha256Signature] = JwtAlgorithms.RSA_SHA256,
+            [SecurityAlgorithms.RsaSha384Signature] = JwtAlgorithms.RSA_SHA384,
+            [SecurityAlgorithms.RsaSha512Signature] = JwtAlgorithms.RSA_SHA512
+        };
 
         /// <summary>
         /// Gets the signature algorithm that was used to create the signature.

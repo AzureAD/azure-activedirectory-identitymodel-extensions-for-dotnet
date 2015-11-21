@@ -58,12 +58,9 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>()
         {
-            { SecurityAlgorithms.ECDSA_SHA256, 256 },
-            { SecurityAlgorithms.ECDSA_SHA384, 256 },
-            { SecurityAlgorithms.ECDSA_SHA512, 256 },
-            { SecurityAlgorithms.RSA_SHA256, 2048 },
-            { SecurityAlgorithms.RSA_SHA384, 2048 },
-            { SecurityAlgorithms.RSA_SHA512, 2048 },
+            { SecurityAlgorithms.EcdsaSha256Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha384Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha512Signature, 256 },
             { SecurityAlgorithms.RsaSha256Signature, 2048 },
             { SecurityAlgorithms.RsaSha384Signature, 2048 },
             { SecurityAlgorithms.RsaSha512Signature, 2048 }
@@ -74,12 +71,9 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>()
         {
-            { SecurityAlgorithms.ECDSA_SHA256, 256 },
-            { SecurityAlgorithms.ECDSA_SHA384, 256 },
-            { SecurityAlgorithms.ECDSA_SHA512, 256 },
-            { SecurityAlgorithms.RSA_SHA256, 1024 },
-            { SecurityAlgorithms.RSA_SHA384, 1024 },
-            { SecurityAlgorithms.RSA_SHA512, 1024 },
+            { SecurityAlgorithms.EcdsaSha256Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha384Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha512Signature, 256 },
             { SecurityAlgorithms.RsaSha256Signature, 1024 },
             { SecurityAlgorithms.RsaSha384Signature, 1024 },
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
@@ -158,21 +152,15 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.SHA256:
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.EcdsaSha256Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return HashAlgorithmName.SHA256;
 
-                case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.EcdsaSha384Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return HashAlgorithmName.SHA384;
 
-                case SecurityAlgorithms.SHA512:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.EcdsaSha512Signature:
                 case SecurityAlgorithms.RsaSha512Signature:
                     return HashAlgorithmName.SHA512;
             }
@@ -232,23 +220,17 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.SHA256:
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.EcdsaSha256Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
-                    return SecurityAlgorithms.SHA256;
+                    return nameof(SHA256);
 
-                case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.EcdsaSha384Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
-                    return SecurityAlgorithms.SHA384;
+                    return nameof(SHA384);
 
-                case SecurityAlgorithms.SHA512:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.EcdsaSha512Signature:
                 case SecurityAlgorithms.RsaSha512Signature:
-                    return SecurityAlgorithms.SHA512;
+                    return nameof(SHA512);
             }
 
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
@@ -296,15 +278,9 @@ namespace System.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.SHA256:
-                case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.SHA512:
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.RSA_SHA256:
-                case SecurityAlgorithms.RSA_SHA384:
-                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.EcdsaSha512Signature:
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
                 case SecurityAlgorithms.RsaSha512Signature:
