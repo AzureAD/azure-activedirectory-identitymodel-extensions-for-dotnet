@@ -87,14 +87,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10000, "retriever");
             }
 
-            string doc = await retriever.GetDocumentAsync(address, cancel);
+            string doc = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10811, doc);
             OpenIdConnectConfiguration openIdConnectConfiguration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10812, openIdConnectConfiguration.JwksUri);
-                string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel);
+                string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel).ConfigureAwait(false);
 
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10813, openIdConnectConfiguration.JwksUri);
                 openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(keys);
