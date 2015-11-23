@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols
             try
             {
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10805, address);
-                HttpResponseMessage response = _httpClient.GetAsync(address, cancel).Result;
+                HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
