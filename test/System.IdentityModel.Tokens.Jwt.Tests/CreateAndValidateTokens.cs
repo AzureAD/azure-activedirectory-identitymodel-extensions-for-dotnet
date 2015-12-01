@@ -227,6 +227,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Audience = IdentityUtilities.DefaultAudience,
                     Claims = ClaimSets.OutboundClaimTypeTransform(ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap),
                     Expires = expires,
+                    IssuedAt = nbf,
                     Issuer = IdentityUtilities.DefaultIssuer,
                     NotBefore = nbf,
                 },
@@ -256,6 +257,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Audience = IdentityUtilities.DefaultAudience,
                     Claims = ClaimSets.OutboundClaimTypeTransform(ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap),
                     Expires = expires,
+                    IssuedAt = nbf,
                     Issuer = IdentityUtilities.DefaultIssuer,
                     NotBefore = nbf,
                     SigningCredentials = signingCredentials
