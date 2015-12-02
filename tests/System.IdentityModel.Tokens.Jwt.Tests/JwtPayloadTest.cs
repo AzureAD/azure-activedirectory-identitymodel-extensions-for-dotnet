@@ -18,6 +18,7 @@
 
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Reflection;
@@ -128,7 +129,7 @@ namespace System.IdentityModel.Test
         [TestMethod]
         [TestProperty( "TestCaseID", "4D8369F1-8846-41C2-89C9-3827955032A6" )]
         [Description( "Test claims as objects" )]
-        public void JwtPalyoad_Claims()
+        public void JwtPayload_Claims()
         {
             List<string> errors = new List<string>();
             var jwtPayload = new JwtPayload();
@@ -156,9 +157,28 @@ namespace System.IdentityModel.Test
         }
 
         [TestMethod]
+        [TestProperty("TestCaseID", "41b560fa-dddf-47cf-a8f0-b6f85e01b61e")]
+        [Description("Test claim array decomposition in Mono")]
+        public void JwtPayload_Mono_ClaimArrayDecomposition()
+        {
+            List<string> errors = new List<string>();
+
+            var jwtPayload = new JwtPayload();
+            jwtPayload["scope"] = new ArrayList() { "openid", "email", "profile" };
+
+            int claimCount = ((IList<Claim>)jwtPayload.Claims).Count;
+            if (claimCount != 3)
+            {
+                errors.Add("!claimCount == 3");
+            }
+
+            TestUtilities.AssertFailIfErrors(MethodInfo.GetCurrentMethod().Name, errors);
+        }
+
+        [TestMethod]
         [TestProperty( "TestCaseID", "F443747C-5AA1-406D-B0FE-53152CA92DA3" )]
         [Description( "Tests adding non-strings as 'exp'" )]
-        public void JwtPalyoad_ObjectClaims()
+        public void JwtPayload_ObjectClaims()
         {
             JwtPayload jwtPayload = new JwtPayload();
             int? time = 10000;

@@ -318,6 +318,26 @@ namespace Microsoft.IdentityModel.Test
             Assert.IsNotNull(msg);
         }
 
+        [TestMethod]
+        [TestProperty("TestCaseID", "6C252073-6EDC-4743-B1AA-0863A297855A")]
+        [Description("Tests: If _issuerAddress has '?'")]
+        public void OpenIdConnectMessage_IssuerAddressHasQuery()
+        {
+            List<string> errors = new List<string>();
+            var address = "http://gotJwt.onmicrosoft.com/?foo=bar";
+            var clientId = Guid.NewGuid().ToString();
+            var message = new OpenIdConnectMessage(address);
+
+            var url = message.BuildRedirectUrl();
+            Report("1", errors, url, address);
+
+            message.ClientId = clientId;
+            url = message.BuildRedirectUrl();
+            var expected = string.Format(CultureInfo.InvariantCulture, @"{0}&client_id={1}", address, clientId);
+
+            Report("2", errors, url, expected);
+        }
+
         private void Report(string id, List<string> errors, string url, string expected)
         {
             if (!string.Equals(url, expected, StringComparison.Ordinal))
