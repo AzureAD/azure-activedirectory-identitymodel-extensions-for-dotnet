@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
@@ -187,7 +188,11 @@ namespace System.IdentityModel.Tokens
 
             if (rsaKey != null)
             {
-                _rsa = new RSACng();
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    _rsa = new RSACng();
+                else
+                    _rsa = new RSAOpenSsl();
+
                 (_rsa as RSA).ImportParameters(rsaKey.Parameters);
                 _disposeRsa = true;
                 return;
