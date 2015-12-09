@@ -133,6 +133,45 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 #endif
 
+        [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (AsymmetricSignatureProvider)")]
+        public void AsymmetricSignatureProvider_Extensibility()
+        {
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+            string newAlgorithmValue = "bobsYourUncle";
+
+            string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, newAlgorithmValue, JwtHeader.OutboundAlgorithmMap);
+            JwtSecurityToken jwt = handler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2) as JwtSecurityToken;
+            ReplaceAlgorithm(SecurityAlgorithms.RsaSha256Signature, originalAlgorithmValue, JwtHeader.OutboundAlgorithmMap);
+            // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
+            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, expectedException);
+
+            // "bobsYourUncle" is mapped to RsaSha256
+            originalAlgorithmValue = ReplaceAlgorithm(newAlgorithmValue, SecurityAlgorithms.RsaSha256Signature, JwtHeader.InboundAlgorithmMap);
+            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, handler, ExpectedException.NoExceptionExpected);
+            ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtHeader.InboundAlgorithmMap);
+        }
+
+        [Fact(DisplayName = "ExtensibilityTests: Algorithm names can be mapped inbound and outbound (SymmetricSignatureProvider)")]
+        public void SymmetricSignatureProvider_Extensibility()
+        {
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+            string newAlgorithmValue = "bobsYourUncle";
+
+            string originalAlgorithmValue = ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, newAlgorithmValue, JwtHeader.OutboundAlgorithmMap);
+            JwtSecurityToken jwt = handler.CreateToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2) as JwtSecurityToken;
+            ReplaceAlgorithm(SecurityAlgorithms.HmacSha256Signature, originalAlgorithmValue, JwtHeader.OutboundAlgorithmMap);
+
+            // outbound mapped algorithm is "bobsYourUncle", inbound map will not find this
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10640:");
+            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, expectedException);
+
+            // inbound is mapped Hmac
+            originalAlgorithmValue = ReplaceAlgorithm(newAlgorithmValue, SecurityAlgorithms.HmacSha256Signature, JwtHeader.InboundAlgorithmMap);
+            RunAlgorithmMappingTest(jwt.RawData, IdentityUtilities.DefaultSymmetricTokenValidationParameters, handler, ExpectedException.NoExceptionExpected);
+            ReplaceAlgorithm(newAlgorithmValue, originalAlgorithmValue, JwtHeader.InboundAlgorithmMap);
+        }
+
         private void RunAlgorithmMappingTest(string jwt, TokenValidationParameters validationParameters, JwtSecurityTokenHandler handler, ExpectedException expectedException)
         {
             try

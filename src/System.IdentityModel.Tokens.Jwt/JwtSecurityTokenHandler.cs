@@ -659,6 +659,12 @@ namespace System.IdentityModel.Tokens.Jwt
                     return jwt;
             }
 
+            var algorithm = jwt.Header.Alg;
+
+            // If the algorithm cannot be resolved, used the 'alg' claim as-is.
+            if (!string.IsNullOrEmpty(jwt.Header.Alg) && !JwtHeader.InboundAlgorithmMap.TryGetValue(jwt.Header.Alg, out algorithm))
+                algorithm = jwt.Header.Alg;
+
             byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(jwt.RawSignature);
 
             // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
@@ -693,7 +699,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        if (ValidateSignature(encodedBytes, signatureBytes, securityKey, jwt.Header.Alg))
+                        if (ValidateSignature(encodedBytes, signatureBytes, securityKey, algorithm))
                         {
                             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10242, token);
                             jwt.SigningKey = securityKey;

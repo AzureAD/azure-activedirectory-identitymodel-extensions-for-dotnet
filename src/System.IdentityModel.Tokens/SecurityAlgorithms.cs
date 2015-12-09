@@ -39,33 +39,36 @@ namespace System.IdentityModel.Tokens
 
         public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";
         public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
+
+        // See https://tools.ietf.org/html/rfc6931#section-2.2.2
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
         public const string HmacSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha384";
         public const string HmacSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 
         public const string Ripemd160Digest = "http://www.w3.org/2001/04/xmlenc#ripemd160";
         public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
+
+        // See https://tools.ietf.org/html/rfc6931#section-2.3.2
         public const string RsaSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
         public const string RsaSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
         public const string RsaSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
         public const string RsaV15KeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
 
-        public const string ECDSA_SHA256 = "ES256";
-        public const string ECDSA_SHA384 = "ES384";
-        public const string ECDSA_SHA512 = "ES512";
-        public const string HMAC_SHA256 = "HS256";
-        public const string HMAC_SHA384 = "HS384";
-        public const string HMAC_SHA512 = "HS512";
-        public const string NONE = "none";
-        public const string RSA_SHA256 = "RS256";
-        public const string RSA_SHA384 = "RS384";
-        public const string RSA_SHA512 = "RS512";
-        public const string SHA256 = "SHA256";
-        public const string SHA384 = "SHA384";
-        public const string SHA512 = "SHA512";
-        public const string PS256 = "PS256";
-        public const string PS384 = "PS384";
-        public const string PS512 = "PS512";
+        // See http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/#sec-SHA256
+        // and https://tools.ietf.org/html/rfc6931#section-2.1.3
+        public const string Sha256Digest = "http://www.w3.org/2001/04/xmlenc#sha256";
+        public const string Sha384Digest = "http://www.w3.org/2001/04/xmldsig-more#sha384";
+        public const string Sha512Digest = "http://www.w3.org/2001/04/xmlenc#sha512";
+
+        // See https://tools.ietf.org/html/rfc6931#section-2.3.6
+        public const string EcdsaSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
+        public const string EcdsaSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384";
+        public const string EcdsaSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512";
+
+        // See https://tools.ietf.org/html/rfc6931#section-2.3.10
+        public const string RsaSsaPssSha256Signature = "http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1";
+        public const string RsaSsaPssSha384Signature = "http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1";
+        public const string RsaSsaPssSha512Signature = "http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1";
     }
 }

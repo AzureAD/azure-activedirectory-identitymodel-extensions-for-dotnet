@@ -429,28 +429,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 switch (algorithm)
                 {
-                    case SecurityAlgorithms.SHA256:
-                    case SecurityAlgorithms.ECDSA_SHA256:
-                    case SecurityAlgorithms.HMAC_SHA256:
-                    case SecurityAlgorithms.RSA_SHA256:
-                    case SecurityAlgorithms.RsaSha256Signature:
-                    case SecurityAlgorithms.PS256:
+                    case JwtAlgorithms.ECDSA_SHA256:
+                    case JwtAlgorithms.HMAC_SHA256:
+                    case JwtAlgorithms.RSASSA_PSS_SHA256:
+                    case JwtAlgorithms.RSA_SHA256:
                         return SHA256.Create();
 
-                    case SecurityAlgorithms.SHA384:
-                    case SecurityAlgorithms.ECDSA_SHA384:
-                    case SecurityAlgorithms.HMAC_SHA384:
-                    case SecurityAlgorithms.RSA_SHA384:
-                    case SecurityAlgorithms.RsaSha384Signature:
-                    case SecurityAlgorithms.PS384:
+                    case JwtAlgorithms.ECDSA_SHA384:
+                    case JwtAlgorithms.HMAC_SHA384:
+                    case JwtAlgorithms.RSASSA_PSS_SHA384:
+                    case JwtAlgorithms.RSA_SHA384:
                         return SHA384.Create();
 
-                    case SecurityAlgorithms.SHA512:
-                    case SecurityAlgorithms.RsaSha512Signature:
-                    case SecurityAlgorithms.RSA_SHA512:
-                    case SecurityAlgorithms.ECDSA_SHA512:
-                    case SecurityAlgorithms.HMAC_SHA512:
-                    case SecurityAlgorithms.PS512:
+                    case JwtAlgorithms.ECDSA_SHA512:
+                    case JwtAlgorithms.HMAC_SHA512:
+                    case JwtAlgorithms.RSASSA_PSS_SHA512:
+                    case JwtAlgorithms.RSA_SHA512:
                         return SHA512.Create();
                 }
 

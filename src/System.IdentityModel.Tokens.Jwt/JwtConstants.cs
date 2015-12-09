@@ -117,6 +117,21 @@ namespace System.IdentityModel.Tokens.Jwt
         /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
         public const string RSA_SHA512      = "RS512";
+
+        /// <summary>
+        /// see: https://tools.ietf.org/html/rfc7518#section-3.5
+        /// </summary>
+        public const string RSASSA_PSS_SHA256 = "PS256";
+
+        /// <summary>
+        /// see: https://tools.ietf.org/html/rfc7518#section-3.5
+        /// </summary>
+        public const string RSASSA_PSS_SHA384 = "PS384";
+
+        /// <summary>
+        /// see: https://tools.ietf.org/html/rfc7518#section-3.5
+        /// </summary>
+        public const string RSASSA_PSS_SHA512 = "PS512";
     }
 
     /// <summary>

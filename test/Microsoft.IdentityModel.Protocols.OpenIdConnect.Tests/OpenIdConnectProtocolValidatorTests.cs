@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var cHashClaim = IdentityUtilities.CreateHashClaim(validCode, "SHA256");
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = JwtAlgorithms.RSA_SHA256;
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -323,7 +323,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.CHash, cHashClaim));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = JwtAlgorithms.RSA_SHA256;
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -364,7 +364,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var atHashClaim = IdentityUtilities.CreateHashClaim(validAccessToken, "SHA256");
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = JwtAlgorithms.RSA_SHA256;
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
