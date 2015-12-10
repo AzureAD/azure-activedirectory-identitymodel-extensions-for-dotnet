@@ -284,6 +284,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Claims = ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
                     SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                     Expires = expires,
+                    IssuedAt = nbf,
                     NotBefore = nbf,
                     Issuer = IdentityUtilities.DefaultIssuer,
                     Audience = IdentityUtilities.DefaultAudience
@@ -312,6 +313,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 audience: tokenDescriptor.Audience,
                 expires: tokenDescriptor.Expires,
                 notBefore: tokenDescriptor.NotBefore,
+                issuedAt: tokenDescriptor.IssuedAt,
                 subject: new ClaimsIdentity(tokenDescriptor.Claims),
                 signingCredentials: createandValidateParams.SecurityTokenDescriptor.SigningCredentials ) as JwtSecurityToken;
 
