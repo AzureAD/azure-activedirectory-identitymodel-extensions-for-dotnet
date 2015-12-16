@@ -27,6 +27,7 @@
 
 using System;
 using System.IdentityModel.Tokens.Tests;
+using System.IO;
 using System.Threading;
 using Xunit;
 
@@ -37,11 +38,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class FileDocumentRetrieverTests
     {
-        private void GetDocument(string address, IDocumentRetriever docRetriever, ExpectedException ee)
+        private void GetDocument(string address, IDocumentRetriever docRetriever, CancellationToken token, ExpectedException ee)
         {
             try
             {
-                string doc = docRetriever.GetDocumentAsync(address, CancellationToken.None).Result;
+                string doc = docRetriever.GetDocumentAsync(address, token).Result;
                 ee.ProcessNoException();
             }
             catch (AggregateException ex)
@@ -54,13 +55,13 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             }
         }
 
-        [Fact(DisplayName = "FileDocumentRetrieverTests: Publics")]
-        public void Publics()
+        [Fact(DisplayName = "FileDocumentRetrieverTests: GetDocuments")]
+        public void GetDocuments()
         {
             FileDocumentRetriever docRetriever = new FileDocumentRetriever();
-            GetDocument(null, docRetriever, ExpectedException.ArgumentNullException());
-            GetDocument("OpenIdConnectMetadata.json", docRetriever, ExpectedException.IOException("IDX10804:", typeof(ArgumentException), "IDX10814:"));
-            GetDocument("project.json", docRetriever, ExpectedException.NoExceptionExpected);
+            GetDocument(null, docRetriever, CancellationToken.None, ExpectedException.ArgumentNullException());
+            GetDocument("OpenIdConnectMetadata.json", docRetriever, CancellationToken.None, ExpectedException.IOException("IDX10804:", typeof(FileNotFoundException), "IDX10814:"));
+            GetDocument("project.json", docRetriever, CancellationToken.None, ExpectedException.NoExceptionExpected);
         }
     }
 }

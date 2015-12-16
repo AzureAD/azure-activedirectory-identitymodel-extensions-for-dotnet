@@ -42,9 +42,10 @@ namespace System.IdentityModel.Tokens.Tests
     {
         public ExpectedException(Type typeExpected = null, string substringExpected = null, Type innerTypeExpected = null)
         {
-            TypeExpected = typeExpected;
-            SubstringExpected = substringExpected;
+            IgnoreInnerException = false;
             InnerTypeExpected = innerTypeExpected;
+            SubstringExpected = substringExpected;
+            TypeExpected = typeExpected;
         }
 
         public static ExpectedException ArgumentException(string substringExpected = null, Type inner = null)
@@ -65,8 +66,6 @@ namespace System.IdentityModel.Tokens.Tests
         {
             return new ExpectedException(typeExpected: typeof(CryptographicException), substringExpected: substringExpected, innerTypeExpected: inner);
         }
-
-        public Type InnerTypeExpected { get; set; }
 
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
         {
@@ -96,8 +95,6 @@ namespace System.IdentityModel.Tokens.Tests
 
         public void ProcessException(Exception exception, List<string> errors = null)
         {
-            string err;
-
             if (TypeExpected == null && InnerTypeExpected != null)
             {
                 HandleError("(TypeExpected == null && InnerTypeExpected != null. TypeExpected == null && InnerTypeExpected != null.", errors);
@@ -140,9 +137,9 @@ namespace System.IdentityModel.Tokens.Tests
                 return;
             }
 
-            if ((InnerTypeExpected != null) && (exception.InnerException.GetType() != InnerTypeExpected ))
+            if ((InnerTypeExpected != null) && (exception.InnerException.GetType() != InnerTypeExpected ) && !IgnoreInnerException)
             {
-                err = "exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected;
+                HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
             }
 
 #if _Verbose
@@ -232,6 +229,10 @@ namespace System.IdentityModel.Tokens.Tests
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSigningKeyException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
+
+        public bool IgnoreInnerException { get; set; }
+
+        public Type InnerTypeExpected { get; set; }
 
         public string SubstringExpected { get; set; }
 
