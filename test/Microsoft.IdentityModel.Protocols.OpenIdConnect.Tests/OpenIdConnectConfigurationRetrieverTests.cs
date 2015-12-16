@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             
             await GetConfigurationFromHttpAsync(string.Empty, expectedException: ExpectedException.ArgumentNullException());
             await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.ArgumentException("IDX10108:"));
-            await GetConfigurationFromHttpAsync(OpenIdConfigData.HttpsBadUri, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
+            await GetConfigurationFromHttpAsync(OpenIdConfigData.HttpsBadUri, expectedException: ExpectedException.IOException(inner: typeof(HttpRequestException)));
         }
 
         [Fact(DisplayName = "OpenIdConnectConfigurationRetrieverTests: FromFile")]
@@ -66,10 +66,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationWithKeys1, cc));
 
             // jwt_uri points to bad formated JSON
-            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(InvalidOperationException)));
+            configuration = await GetConfigurationAsync(OpenIdConfigData.OpenIdConnectMetadataJsonWebKeySetBadUriFile, expectedException: ExpectedException.IOException(inner: typeof(FileNotFoundException)));
 
             // reading form a file that does not exist
-            configuration = await GetConfigurationAsync("FileDoesNotExist.json", expectedException: ExpectedException.IOException(inner: typeof(ArgumentException)));
+            configuration = await GetConfigurationAsync("FileDoesNotExist.json", expectedException: ExpectedException.IOException(inner: typeof(FileNotFoundException)));
 
         }
 
@@ -110,9 +110,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 errors.Add("!IdentityComparer.AreEqual(configuration, OpenIdConfigData.OpenIdConnectConfigurationSingleX509Data1, context)");
                 errors.AddRange(context.Diffs);
                 context.Diffs.Clear();
-            }        
+            }
 
-            await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadX509DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(CryptographicException)));
+            // dnx 5.0 throws a different exception
+            // 5.0 - Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException
+            // 4.5.1 - System.Security.Cryptography.CryptographicException
+            // for now turn off checking for inner
+            var ee = ExpectedException.InvalidOperationException(inner: typeof(CryptographicException));
+            ee.IgnoreInnerException = true;
+            await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadX509DataString, expectedException: ee);
             await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(FormatException)));
 
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfigurationRetrieverTests: FromText", errors);

@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -38,8 +38,17 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class FileDocumentRetriever : IDocumentRetriever
     {
-        public FileDocumentRetriever() { }
+        public FileDocumentRetriever()
+        { }
 
+        /// <summary>
+        /// Reads a document using <see cref="FileStream"/>.
+        /// </summary>
+        /// <param name="address">Fully qualified path to a file.</param>
+        /// <param name="cancel"><see cref="CancellationToken"/> not used.</param>
+        /// <returns>UTF8 decoding of bytes in the file.</returns>
+        /// <exception cref="ArgumentNullException">if address is null or whitespace.</exception>
+        /// <exception cref="IOException">with inner expection containing the original exception.</exception>
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
@@ -47,10 +56,10 @@ namespace Microsoft.IdentityModel.Protocols
 
             try
             {
-                if (File.Exists(address))
-                    return await Task.FromResult(File.ReadAllText(address));
-
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10814, address);
+                using (var reader = File.OpenText(address))
+                {
+                    return await reader.ReadToEndAsync().ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
