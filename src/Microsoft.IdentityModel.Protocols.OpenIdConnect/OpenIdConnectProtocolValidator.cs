@@ -475,7 +475,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10303, expectedValue);
             using (var hashAlgorithm = GetHashAlgorithm(algorithm))
             {
-                var hashBytes = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(hashItem));
+                var hashBytes = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(hashItem));
                 var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
                 if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
                 {
