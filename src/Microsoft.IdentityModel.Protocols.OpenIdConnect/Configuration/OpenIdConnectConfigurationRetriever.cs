@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;

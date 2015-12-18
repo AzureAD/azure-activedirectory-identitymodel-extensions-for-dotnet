@@ -30,7 +30,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
+namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.

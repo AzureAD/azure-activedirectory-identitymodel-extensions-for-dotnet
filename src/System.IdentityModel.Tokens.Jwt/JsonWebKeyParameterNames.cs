@@ -28,38 +28,36 @@
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// Names for Json Web Key Values
     /// </summary>
-    public static class JwtConstants
+    public static class JsonWebKeyParameterNames
     {
-        /// <summary>
-        /// Short header type.
-        /// </summary>
-        public const string HeaderType = "JWT";
-
-        /// <summary>
-        /// Long header type.
-        /// </summary>
-        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
-
-        /// <summary>
-        /// Short token type.
-        /// </summary>
-        public const string TokenType = "JWT";
-
-        /// <summary>
-        /// Long token type.
-        /// </summary>
-        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
-
-        /// <summary>
-        /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
-        /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
-
-        /// <summary>
-        /// When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.
-        /// </summary>
-        public const string JsonClaimValueType = "JSON";
+#pragma warning disable 1591
+        public const string Alg = "alg";
+        public const string Crv = "crv";
+        public const string D = "d";
+        public const string DP = "dp";
+        public const string DQ = "dq";
+        public const string E = "e";
+        public const string K = "k";
+        public const string KeyOps = "key_ops";
+        public const string Keys = "keys";
+        public const string Kid = "kid";
+        public const string Kty = "kty";
+        public const string N = "n";
+        public const string Oth = "oth";
+        public const string P = "p";
+        public const string Q = "q";
+        public const string R = "r";
+        public const string T = "t";
+        public const string QI = "qi";
+        public const string Use = "use";
+        public const string X5c = "x5c";
+        public const string X5t = "x5t";
+        public const string X5tS256 = "x5t#S256";
+        public const string X5u = "x5u";
+        public const string X = "x";
+        public const string Y = "y";
+#pragma warning restore 1591
     }
 }

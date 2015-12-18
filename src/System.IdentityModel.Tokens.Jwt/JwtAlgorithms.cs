@@ -28,38 +28,58 @@
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// List of algorithms see: http://tools.ietf.org/html/rfc7518#section-3
     /// </summary>
-    public static class JwtConstants
+    public struct JwtAlgorithms
     {
         /// <summary>
-        /// Short header type.
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
-        public const string HeaderType = "JWT";
+        public const string ECDSA_SHA256    = "ES256";
 
         /// <summary>
-        /// Long header type.
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
-        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
+        public const string ECDSA_SHA384    = "ES384";
 
         /// <summary>
-        /// Short token type.
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
-        public const string TokenType = "JWT";
+        public const string ECDSA_SHA512    = "ES512";
 
         /// <summary>
-        /// Long token type.
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
-        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
+        public const string HMAC_SHA256     = "HS256";
 
         /// <summary>
-        /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        public const string HMAC_SHA384     = "HS384";
 
         /// <summary>
-        /// When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
         /// </summary>
-        public const string JsonClaimValueType = "JSON";
+        public const string HMAC_SHA512     = "HS512";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
+        /// </summary>
+        public const string NONE            = "none";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
+        /// </summary>
+        public const string RSA_SHA256      = "RS256";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
+        /// </summary>
+        public const string RSA_SHA384      = "RS384";
+
+        /// <summary>
+        /// see: http://tools.ietf.org/html/rfc7518#section-3
+        /// </summary>
+        public const string RSA_SHA512      = "RS512";
     }
 }

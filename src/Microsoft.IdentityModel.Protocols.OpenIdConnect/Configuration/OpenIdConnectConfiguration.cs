@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;

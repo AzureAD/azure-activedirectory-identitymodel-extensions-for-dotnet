@@ -27,10 +27,11 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
+namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     /// <summary>
     /// 

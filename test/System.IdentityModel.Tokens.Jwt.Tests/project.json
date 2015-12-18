@@ -1,7 +1,8 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-        "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*"
+        "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
+        "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests":  "2.0.0-*"
     },
     "commands": {
         "test": "xunit.runner.aspnet"

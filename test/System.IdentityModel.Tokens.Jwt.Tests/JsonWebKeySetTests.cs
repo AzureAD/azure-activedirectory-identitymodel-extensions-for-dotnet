@@ -28,12 +28,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
+// since we are in the System ns, we need to map to M.IM.Tokens
+using Key = Microsoft.IdentityModel.Tokens.SecurityKey;
+
+namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     /// <summary>
     /// 
@@ -67,17 +71,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             GetSigningKeys(OpenIdConfigData.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
         }
 
-        private void GetSigningKeys(string webKeySetString, List<SecurityKey> expectedKeys, ExpectedException expectedException)
+        private void GetSigningKeys(string webKeySetString, List<Key> expectedKeys, ExpectedException expectedException)
         {
 
             JsonWebKeySet webKeySet = new JsonWebKeySet(webKeySetString);
             try
             {
-                IList<SecurityKey> keys = webKeySet.GetSigningKeys();
+                IList<Key> keys = webKeySet.GetSigningKeys();
                 expectedException.ProcessNoException();
                 if (expectedKeys != null)
                 {
-                    Assert.True(IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(keys, expectedKeys));
+                    Assert.True(IdentityComparer.AreEqual<IEnumerable<Key>>(keys, expectedKeys));
                 }
             }
             catch (Exception ex)

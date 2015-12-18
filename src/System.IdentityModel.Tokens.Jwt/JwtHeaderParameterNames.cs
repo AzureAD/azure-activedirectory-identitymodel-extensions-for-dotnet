@@ -28,38 +28,53 @@
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// List of header parameter names see: http://tools.ietf.org/html/rfc7519#section-5.
     /// </summary>
-    public static class JwtConstants
+    public struct JwtHeaderParameterNames
     {
         /// <summary>
-        /// Short header type.
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
-        public const string HeaderType = "JWT";
+        public const string Alg = "alg";
 
         /// <summary>
-        /// Long header type.
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
-        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
+        public const string Cty = "cty";
 
         /// <summary>
-        /// Short token type.
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
-        public const string TokenType = "JWT";
+        public const string Kid = "kid";
 
         /// <summary>
-        /// Long token type.
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
-        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
+        public const string Jku = "jku";
 
         /// <summary>
-        /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        public const string Jwk = "jwk";
 
         /// <summary>
-        /// When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
-        public const string JsonClaimValueType = "JSON";
+        public const string Typ = "typ";
+
+        /// <summary>
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
+        /// </summary>
+        public const string X5c = "x5c";
+
+        /// <summary>
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
+        /// </summary>
+        public const string X5t = "x5t";
+
+        /// <summary>
+        /// see:http://tools.ietf.org/html/rfc7519#section-5
+        /// </summary>
+        public const string X5u = "x5u";
     }
 }
