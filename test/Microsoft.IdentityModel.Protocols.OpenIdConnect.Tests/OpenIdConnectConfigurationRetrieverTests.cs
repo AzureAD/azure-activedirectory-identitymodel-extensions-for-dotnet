@@ -27,12 +27,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Tests;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests

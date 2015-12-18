@@ -28,12 +28,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.IdentityModel.Tokens.Tests;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
 

@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tokens;
+
 namespace System.IdentityModel.Tokens.Saml
 {
     public class SamlSecurityToken : SecurityToken

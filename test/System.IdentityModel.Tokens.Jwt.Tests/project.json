@@ -1,15 +1,19 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-        "System.IdentityModel.Tokens.Tests": "5.0.0-*"
+        "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*"
     },
     "commands": {
         "test": "xunit.runner.aspnet"
     },
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {
+          "frameworkAssemblies": {
+            "System.IdentityModel": "4.0.0.0"
+          }
+        },
         "dnxcore50": { }
-    },
+      },
     "compilationOptions": {
         "allowUnsafe": false,
         "warningsAsErrors": true

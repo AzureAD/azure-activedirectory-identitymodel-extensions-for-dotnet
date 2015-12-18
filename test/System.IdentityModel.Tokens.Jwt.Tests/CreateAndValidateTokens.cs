@@ -25,12 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IdentityModel.Tokens.Tests;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
+
+// since we are in the System ns, we need to map to M.IM.Tokens
+using SigningCreds = Microsoft.IdentityModel.Tokens.SigningCredentials;
+using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
+using TokenDescriptor = Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -44,7 +49,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             public Type ExceptionType { get; set; }
 
-            public SecurityTokenDescriptor SecurityTokenDescriptor { get; set; }
+            public TokenDescriptor SecurityTokenDescriptor { get; set; }
 
             public TokenValidationParameters TokenValidationParameters { get; set; }
         }
@@ -76,7 +81,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false,
                 };
 
-            SecurityToken validatedSecurityToken = null;
+            Token validatedSecurityToken = null;
             var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
 
             JwtSecurityToken validatedJwt = validatedSecurityToken as JwtSecurityToken;
@@ -123,7 +128,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             X509SecurityKey validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
 
             // make sure we can still validate with existing logic.
-            SigningCredentials signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256Signature);
+            var signingCredentials = new SigningCreds(signingKey, SecurityAlgorithms.RsaSha256Signature);
             header = new JwtHeader(signingCredentials);
             header.Add(JwtHeaderParameterNames.X5c, x5cs);
             jwtToken = new JwtSecurityToken(header, payload);
@@ -191,7 +196,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             createParams.Add(new CreateAndValidateParams
             {
-                SecurityTokenDescriptor = new SecurityTokenDescriptor
+                SecurityTokenDescriptor = new TokenDescriptor
                 {
                     Audience = IdentityUtilities.DefaultAudience,
                     Claims = ClaimSets.DefaultClaims,
@@ -222,7 +227,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ClaimSets.OutboundClaimTypeTransform(ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), 
                     JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap), nbf, expires, nbf, null),
                 ExceptionType = null,
-                SecurityTokenDescriptor = new SecurityTokenDescriptor
+                SecurityTokenDescriptor = new TokenDescriptor
                 {
                     Audience = IdentityUtilities.DefaultAudience,
                     Claims = ClaimSets.OutboundClaimTypeTransform(ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap),
@@ -241,8 +246,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
 
             RunRoundTrip(createAndValidateParams, handler);
-            SigningCredentials signingCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature);
-            X509SecurityKey verifyingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
+            var signingCredentials = new SigningCreds(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature);
+            var verifyingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
             createAndValidateParams = new CreateAndValidateParams
             {
                 Case = "ClaimSets.Simple_simpleSigned_Asymmetric",
@@ -252,7 +257,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ClaimSets.OutboundClaimTypeTransform(ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
                     JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap), nbf, expires, nbf, signingCredentials),
                 ExceptionType = null,
-                SecurityTokenDescriptor = new SecurityTokenDescriptor
+                SecurityTokenDescriptor = new TokenDescriptor
                 {
                     Audience = IdentityUtilities.DefaultAudience,
                     Claims = ClaimSets.OutboundClaimTypeTransform(ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap),
@@ -279,7 +284,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ClaimSets.OutboundClaimTypeTransform(ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap), 
                 nbf, expires, nbf, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2),
                 ExceptionType = null,
-                SecurityTokenDescriptor = new SecurityTokenDescriptor
+                SecurityTokenDescriptor = new TokenDescriptor
                 {
                     Claims = ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
                     SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
@@ -302,12 +307,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         private void RunRoundTrip(CreateAndValidateParams createandValidateParams, JwtSecurityTokenHandler handler)
         {
-            SecurityToken validatedToken;
+            Token validatedToken;
             string jwt = handler.WriteToken(createandValidateParams.CompareTo);
             ClaimsPrincipal principal = handler.ValidateToken(jwt, createandValidateParams.TokenValidationParameters, out validatedToken);
 
             // create from security descriptor
-            SecurityTokenDescriptor tokenDescriptor = createandValidateParams.SecurityTokenDescriptor;
+            TokenDescriptor tokenDescriptor = createandValidateParams.SecurityTokenDescriptor;
             JwtSecurityToken token = handler.CreateToken(
                 issuer: tokenDescriptor.Issuer,
                 audience: tokenDescriptor.Audience,
@@ -325,9 +330,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact(DisplayName = "CreateAndValidateTokens: DuplicateClaims - roundtrips with duplicate claims")]
         public void DuplicateClaims()
         {
-            SecurityToken validatedToken;
+            Token validatedToken;
             string encodedJwt = IdentityUtilities.CreateJwtSecurityToken(
-                new SecurityTokenDescriptor
+                new TokenDescriptor
                 { 
                     Audience = IdentityUtilities.DefaultAudience,
                     Claims = ClaimSets.DuplicateTypes(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
@@ -380,7 +385,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false,
                 };
 
-            SecurityToken validatedJwt = null;
+            Token validatedJwt = null;
             var claimsPrincipal = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedJwt);
             var context = CompareContext.Default;
             context.Title = "1";
@@ -415,7 +420,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             encodedJwt = jwtHandler.WriteToken(jwtWithEntity);
             JwtSecurityToken jwtRead = jwtHandler.ReadToken(encodedJwt) as JwtSecurityToken;
 
-            SecurityToken validatedToken;
+            Token validatedToken;
             var cp = jwtHandler.ValidateToken(jwtRead.RawData, validationParameters, out validatedToken);
             Claim jsonClaim = cp.FindFirst(typeof(Entity).ToString());
             if (jsonClaim == null)
@@ -449,7 +454,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             ClaimsIdentity subject = new ClaimsIdentity(claims: ClaimSets.RoleClaimsShortType());
             JwtSecurityToken jwtToken = handler.CreateToken(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience, subject, utcNow, expire, utcNow) as JwtSecurityToken;
 
-            SecurityToken securityToken;
+            Token securityToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
             CheckForRoles(new string[] { "role1", "roles1" }, new string[] { "notrole1", "notrole2" }, principal);
             ClaimsIdentity expectedIdentity =
@@ -478,12 +483,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors("RoleClaims", context.Diffs);
         }
 
-        private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)
+        private static string NameClaimTypeDelegate(Token jwt, string issuer)
         {
             return _nameClaimTypeForDelegate;
         }
 
-        private static string RoleClaimTypeDelegate(SecurityToken jwt, string issuer)
+        private static string RoleClaimTypeDelegate(Token jwt, string issuer)
         {
             return _roleClaimTypeForDelegate;
         }
@@ -527,7 +532,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.NameClaimTypeRetriever = NameClaimTypeDelegate;
             validationParameters.RoleClaimTypeRetriever = RoleClaimTypeDelegate;
 
-            SecurityToken validatedToken;
+            Token validatedToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             CheckNamesAndRole(new string[] { delegateName, defaultName, validationParameterName }, new string[] { delegateRole, defaultRole, validationParameterRole }, principal, _nameClaimTypeForDelegate, _roleClaimTypeForDelegate);
 

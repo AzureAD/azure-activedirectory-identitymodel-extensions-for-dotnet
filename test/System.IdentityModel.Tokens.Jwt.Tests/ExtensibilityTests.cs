@@ -26,8 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
+
+// since we are in the System ns, we need to map to M.IM.Tokens
+using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -71,7 +75,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             try
             {
-                SecurityToken validatedToken;
+                Token validatedToken;
                 handler.ValidateToken(jwt, validationParameters, out validatedToken);
                 if ((handler.Jwt as DerivedJwtSecurityToken) == null)
                     errors.Add("(handler.Jwt as DerivedJwtSecurityToken) == null");
@@ -137,7 +141,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             try
             {
-                SecurityToken validatedToken;
+                Token validatedToken;
                 handler.ValidateToken(jwt, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }

@@ -1,0 +1,25 @@
+{
+    "version": "5.0.0-*",
+    "dependencies": {
+        "Newtonsoft.Json": "6.0.6",
+        "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-*",
+        "System.IdentityModel.Tokens.Saml": "5.0.0-*",
+        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+    },
+    "commands": {
+        "test": "xunit.runner.aspnet"
+    },
+    "frameworks": {
+        "dnx451": { },
+        "dnxcore50": {
+          "dependencies": {
+              "System.IO": "4.0.11-beta-*",
+              "System.Reflection.TypeExtensions": "4.1.0-beta-*"
+          }
+        }
+    },
+    "compilationOptions": {
+        "allowUnsafe": false,
+        "warningsAsErrors": true
+    }
+}

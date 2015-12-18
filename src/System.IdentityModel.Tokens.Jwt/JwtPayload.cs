@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Tokens.Jwt
 {

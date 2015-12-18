@@ -27,7 +27,13 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
+
+// since we are in the System ns, we need to map to M.IM.Tokens
+using Key = Microsoft.IdentityModel.Tokens.SecurityKey;
+using SigningCreds = Microsoft.IdentityModel.Tokens.SigningCredentials;
+using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -42,7 +48,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Init();
         }
 
-        public DerivedJwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? expires = null, DateTime? notbefore = null, SigningCredentials signingCredentials = null)
+        public DerivedJwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? expires = null, DateTime? notbefore = null, SigningCreds signingCredentials = null)
             : base(issuer, audience, claims, expires, notbefore, signingCredentials)
         {
             Init();
@@ -90,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public JwtSecurityToken Jwt { get; set; }
 
-        public override SecurityToken ReadToken(string jwtEncodedString)
+        public override Token ReadToken(string jwtEncodedString)
         {
             ReadTokenCalled = true;
             return new DerivedJwtSecurityToken(jwtEncodedString);
@@ -112,7 +118,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return base.ValidateIssuer(issuer, jwt, validationParameters);
         }
 
-        protected override void ValidateIssuerSecurityKey(SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected override void ValidateIssuerSecurityKey(Key securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = securityToken as DerivedJwtSecurityToken;
             Assert.NotNull(derivedJwt);
@@ -137,7 +143,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return Jwt;
         }
 
-        public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out Token validatedToken)
         {
             return base.ValidateToken(securityToken, validationParameters, out validatedToken);
         }
@@ -160,7 +166,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             base.ValidateLifetime(DateTime.UtcNow, DateTime.UtcNow, jwt, validationParameters);
         }
 
-        public void ValidateSigningTokenPublic(SecurityKey securityKey, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        public void ValidateSigningTokenPublic(Key securityKey, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             base.ValidateIssuerSecurityKey(securityKey, jwt, validationParameters);
         }

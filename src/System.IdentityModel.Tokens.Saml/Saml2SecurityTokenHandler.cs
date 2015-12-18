@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Saml;
@@ -33,6 +32,8 @@ using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Tokens.Saml2
 {
@@ -46,7 +47,7 @@ namespace System.IdentityModel.Tokens.Saml2
         internal const string Saml2TokenProfile11 = "urn:oasis:names:tc:SAML:2.0:assertion";
         internal const string OasisWssSaml2TokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0";
 
-        private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { Saml2TokenProfile11, OasisWssSaml2TokenProfile11 };
 
         /// <summary>

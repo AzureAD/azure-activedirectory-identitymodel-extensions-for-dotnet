@@ -28,8 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
 

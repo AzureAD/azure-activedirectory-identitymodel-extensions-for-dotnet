@@ -26,9 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Tests;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
+
+using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -65,7 +68,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var handler = new JwtSecurityTokenHandler();
             var jwt = handler.WriteToken(jwtToken);
 
-            SecurityToken validatedJwt = null;
+            Token validatedJwt = null;
             var claimsPrincipal = handler.ValidateToken(jwt, validationParameters, out validatedJwt);
             var audiences = (validatedJwt as JwtSecurityToken).Audiences;
             var jwtAudiences = jwtToken.Audiences;

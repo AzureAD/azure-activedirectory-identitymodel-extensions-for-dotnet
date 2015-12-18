@@ -27,11 +27,8 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using System.Globalization;
-using System.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.IdentityModel.Tokens.Tests;
 using System.IO;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Logging.Tests

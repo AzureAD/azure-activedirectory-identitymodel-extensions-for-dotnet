@@ -1,7 +1,7 @@
 {
     "version": "5.0.0-*",
     "dependencies": {
-        "System.IdentityModel.Tokens.Tests": "5.0.0-*"
+        "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*"
     },
     "exclude": [
         "Saml2SecurityTokenHandlerTests.cs"

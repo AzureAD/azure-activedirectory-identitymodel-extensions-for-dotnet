@@ -26,9 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Tests;
 using System.Security.Claims;
 using System.Xml;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
+
+// since we are in the System ns, we need to map to M.IM.Tokens
+using SigningCreds = Microsoft.IdentityModel.Tokens.SigningCredentials;
+using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
+using TokenDescriptor = Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -77,13 +83,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public bool RequireExpirationTime { get; set; }
         public bool RequireSignedTokens { get; set; }
         public string RoleClaimType { get; set; }
-        public SecurityToken SecurityToken { get; set; }
-        public SecurityTokenDescriptor SecurityTokenDescriptor { get; set; }
+        public Token SecurityToken { get; set; }
+        public TokenDescriptor SecurityTokenDescriptor { get; set; }
         public byte[] Signature { get; set; }
         public SignatureProviderFactory SignatureProviderFactory { get; set; }
-        public SigningCredentials SigningCredentials { get; set; }
+        public SigningCreds SigningCredentials { get; set; }
         public string SigningInput { get; set; }
-        public SecurityToken SigningToken { get; set; }
+        public Token SigningToken { get; set; }
         public Type TokenType { get; set; }
         public string[] TokenTypeIdentifiers { get; set; }
         public TokenValidationParameters TokenValidationParameters { get; set; }

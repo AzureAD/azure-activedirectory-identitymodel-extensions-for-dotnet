@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using System.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
