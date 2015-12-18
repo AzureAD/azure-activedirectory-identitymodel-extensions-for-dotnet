@@ -27,54 +27,72 @@
 
 using System;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     public class RsaSecurityKey : AsymmetricSecurityKey
     {
-        private RSAParameters _rsaParamaeters;
-
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
             // must have private or public key
-            bool hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null;
-            bool hasPublicKey = rsaParameters.Exponent != null && rsaParameters.Modulus != null;
-            if (!hasPrivateKey && !hasPublicKey)
+            HasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null;
+            HasPublicKey = rsaParameters.Exponent != null && rsaParameters.Modulus != null;
+            if (!HasPrivateKey && !HasPublicKey)
             {
-                throw new ArgumentException("no public or private key material found");
+                throw LogHelper.LogException<ArgumentException>("No public or private key material found");
             }
 
-            _rsaParamaeters = rsaParameters;
+            Parameters = rsaParameters;
         }
+
+        public RsaSecurityKey(RSA rsa)
+        {
+            if (rsa == null)
+                throw LogHelper.LogArgumentNullException("rsa");
+
+            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
+            if (rsaCsp != null)
+            {
+                HasPrivateKey = !rsaCsp.PublicOnly;
+            }
+            else
+            {
+                // fake signing to determine if the rsa instance has the private key or not is a costly operation especially in case of HSM. We return true by default in that case, it will fail later at the time of signing or decrypting.
+                HasPrivateKey = true;
+            }
+            HasPublicKey = true;
+            Rsa = rsa;
+        }
+
+        public override bool HasPrivateKey { get; }
+
+        public override bool HasPublicKey { get; }
 
         public override int KeySize
         {
             get
             {
+                if (Rsa != null)
+                    return Rsa.KeySize;
                 if (HasPublicKey)
-                    return _rsaParamaeters.Modulus.Length * 8;
+                    return Parameters.Modulus.Length * 8;
                 else if (HasPrivateKey)
-                    return _rsaParamaeters.D.Length * 8;
+                    return Parameters.D.Length * 8;
                 else
                     return 0;
             }
         }
 
-        public override bool HasPrivateKey
-        {
-            get
-            {
-                return !(_rsaParamaeters.D == null || _rsaParamaeters.DP == null || _rsaParamaeters.DQ == null || _rsaParamaeters.P == null || _rsaParamaeters.Q == null);
-            }
-        }
+        /// <summary>
+        /// <see cref="RSAParameters"/> used to initialize the key.
+        /// </summary>
+        public RSAParameters Parameters { get; private set; }
 
-        public override bool HasPublicKey
-        {
-            get
-            {
-                return !(_rsaParamaeters.Exponent == null || _rsaParamaeters.Modulus == null);
-            }
-        }
+        /// <summary>
+        /// <see cref="RSA"/> instance used to initialize the key.
+        /// </summary>
+        public RSA Rsa { get; private set; }
 
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
@@ -82,14 +100,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return SignatureProviderFactory.CreateForVerifying(this, algorithm);
             else
                 return SignatureProviderFactory.CreateForSigning(this, algorithm);
-        }
-
-        public RSAParameters Parameters
-        {
-            get
-            {
-                return _rsaParamaeters;
-            }
         }
     }
 }

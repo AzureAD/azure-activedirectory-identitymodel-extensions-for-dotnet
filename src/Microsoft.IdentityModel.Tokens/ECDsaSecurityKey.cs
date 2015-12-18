@@ -42,30 +42,20 @@ namespace Microsoft.IdentityModel.Tokens
 
             CngKey = CngKey.Import(blob, blobFormat);
             BlobFormat = blobFormat;
+            HasPrivateKey = BlobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format;
+            HasPublicKey = HasPrivateKey || BlobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format;
         }
 
-        public override bool HasPrivateKey
+        public ECDsaSecurityKey(ECDsa ecdsa)
         {
-            get
-            {
-                return (BlobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format);
-            }
-        }
+            if (ecdsa == null)
+                throw LogHelper.LogArgumentNullException("ecdsa");
 
-        public override bool HasPublicKey
-        {
-            get
-            {
-                return (HasPrivateKey || BlobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format);
-            }
-        }
+            ECDsa = ecdsa;
 
-        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
-        {
-            if (verifyOnly)
-                return SignatureProviderFactory.CreateForVerifying(this, algorithm);
-            else
-                return SignatureProviderFactory.CreateForSigning(this, algorithm);
+            // fake signing to determine if the ecdsa instance has the private key or not is a costly operation especially in case of HSM. We return true by default in that case, it will fail later at the time of signing or decrypting.
+            HasPrivateKey = true;
+            HasPublicKey = true;
         }
 
         /// <summary>
@@ -78,12 +68,29 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public CngKey CngKey { get; private set; }
 
+        /// <summary>
+        /// <see cref="ECDsa"/> instance used to initialize the key.
+        /// </summary>
+        public ECDsa ECDsa { get; private set; }
+
+        public override bool HasPrivateKey { get; }
+
+        public override bool HasPublicKey { get; }
+
         public override int KeySize
         {
             get
             {
                 return CngKey.KeySize;
             }
+        }
+
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
+        {
+            if (verifyOnly)
+                return SignatureProviderFactory.CreateForVerifying(this, algorithm);
+            else
+                return SignatureProviderFactory.CreateForSigning(this, algorithm);
         }
     }
 }

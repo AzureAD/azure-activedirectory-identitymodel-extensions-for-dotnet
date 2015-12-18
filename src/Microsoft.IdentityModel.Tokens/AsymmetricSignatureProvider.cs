@@ -188,6 +188,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (rsaKey != null)
             {
+                if (rsaKey.Rsa != null)
+                {
+                    _rsa = rsaKey.Rsa;
+                    return;
+                }
+
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     _rsa = new RSACng();
                 else
@@ -223,7 +229,10 @@ namespace Microsoft.IdentityModel.Tokens
             ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
             if (ecdsaKey != null)
             {
-                _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
+                if (ecdsaKey.ECDsa != null)
+                    _ecdsaCng = ecdsaKey.ECDsa;
+                else
+                    _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
                 return;
             }
 
@@ -266,8 +275,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (rsaKey != null)
             {
-                _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                if (rsaKey.Rsa != null)
+                    _rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
+                else
+                {
+                    _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                    (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                }
                 return;
             }
 
@@ -285,8 +299,13 @@ namespace Microsoft.IdentityModel.Tokens
             ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
             if (ecdsaKey != null)
             {
-                _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
-                _ecdsaCng.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                if (ecdsaKey.ECDsa != null)
+                    _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
+                else
+                {
+                    _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
+                    _ecdsaCng.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                }
                 return;
             }
 
