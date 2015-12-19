@@ -34,13 +34,13 @@ namespace Microsoft.IdentityModel.Tokens
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
     /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>
     /// </summary>
-    public class SignatureProviderFactory
+    public class CryptoProviderFactory
     {
-        public static SignatureProviderFactory Default;
+        public static CryptoProviderFactory Default;
 
-        static SignatureProviderFactory()
+        static CryptoProviderFactory()
         {
-            Default = new SignatureProviderFactory();
+            Default = new CryptoProviderFactory();
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose(bool)"/>
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be released.</param>
-        public virtual void ReleaseProvider(SignatureProvider signatureProvider)
+        public virtual void ReleaseSignatureProvider(SignatureProvider signatureProvider)
         {
             if (signatureProvider != null)
                 signatureProvider.Dispose();

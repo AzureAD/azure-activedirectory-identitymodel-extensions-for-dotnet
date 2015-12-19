@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
-            var factory = this.SignatureProviderFactory ?? SignatureProviderFactory.Default;
+            var factory = this.CryptoProviderFactory ?? CryptoProviderFactory.Default;
 
             if (verifyOnly)
                 return factory.CreateForVerifying(this, algorithm);

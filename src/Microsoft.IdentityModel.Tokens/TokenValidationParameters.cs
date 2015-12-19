@@ -91,7 +91,6 @@ namespace Microsoft.IdentityModel.Tokens
     public class TokenValidationParameters
     {
         private string _authenticationType;
-        private IList<SecurityToken> _clientDecryptionTokens = new List<SecurityToken>();
         private TimeSpan _clockSkew = DefaultClockSkew;
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
@@ -126,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
-            ClientDecryptionTokens = other.ClientDecryptionTokens;
+            TokenDecryptionKeys = other.TokenDecryptionKeys;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
@@ -219,25 +218,6 @@ namespace Microsoft.IdentityModel.Tokens
         //        _certificateValidator = value;
         //    }
         //}
-
-        /// <summary>
-        /// Gets or sets the <see cref="ReadOnlyCollection{SecurityToken}"/> that is to be used for decrypting inbound tokens.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        public IList<SecurityToken> ClientDecryptionTokens
-        {
-            get
-            {
-                return _clientDecryptionTokens;
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("ClientDecryptionTokens");
-
-                _clientDecryptionTokens = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the clock skew to apply when validating a time.
@@ -459,6 +439,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// If <see cref="ValidateSignature"/> is false, this delegate will not be called.
         /// </remarks>
         public SignatureValidator SignatureValidator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ReadOnlyCollection{SecurityKey}"/> that is to be used for decrypting inbound tokens.
+        /// </summary>
+        public IList<SecurityToken> TokenDecryptionKeys
         {
             get;
             set;

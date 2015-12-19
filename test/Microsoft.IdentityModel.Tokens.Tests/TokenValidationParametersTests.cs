@@ -161,15 +161,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("TokenValidationParametersTests: GetSets", context.Errors);
 
             Assert.Null(validationParameters.AudienceValidator);
-            Assert.NotNull(validationParameters.ClientDecryptionTokens);
-            Assert.Equal(validationParameters.ClientDecryptionTokens.Count, 0);
             Assert.Null(validationParameters.LifetimeValidator);
             Assert.Null(validationParameters.IssuerSigningKeyResolver);
             Assert.Null(validationParameters.IssuerValidator);
             Assert.Null(validationParameters.ValidAudiences);
             Assert.Null(validationParameters.ValidIssuers);
             Assert.Null(validationParameters.SignatureValidator);
-
         }
 
         class DerivedTokenValidationParameters : TokenValidationParameters

@@ -99,10 +99,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// </param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// willCreateSignatures is true and <see cref="AsymmetricSecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
+        /// willCreateSignatures is true and <see cref="AsymmetricSecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <see cref="AsymmetricSecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="SignatureProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
+        /// <see cref="AsymmetricSecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
         /// </exception>
         /// <exception cref="ArgumentException">if 'algorithm" is not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException">if 'key' is not <see cref="RsaSecurityKey"/> or <see cref="X509SecurityKey"/>.</exception>

@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public abstract class SecurityKey
     {
-        private SignatureProviderFactory _signatureProviderFactory = SignatureProviderFactory.Default;
+        private CryptoProviderFactory _cryptoProviderFactory = CryptoProviderFactory.Default;
 
         public abstract int KeySize { get; }
 
@@ -49,11 +49,11 @@ namespace Microsoft.IdentityModel.Tokens
 
         public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
 
-        public SignatureProviderFactory SignatureProviderFactory
+        public CryptoProviderFactory CryptoProviderFactory
         {
             get
             {
-                return _signatureProviderFactory;
+                return _cryptoProviderFactory;
             }
             set
             {
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw new ArgumentNullException("value");
                 };
 
-                _signatureProviderFactory = value;
+                _cryptoProviderFactory = value;
             }
         }
     }

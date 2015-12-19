@@ -121,9 +121,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             if (verifyOnly)
-                return SignatureProviderFactory.CreateForVerifying(this, algorithm);
+                return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
-                return SignatureProviderFactory.CreateForSigning(this, algorithm);
+                return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
         public override bool HasPrivateKey

@@ -425,7 +425,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// <summary>
     /// Helpful for extensibility testing for errors.
     /// </summary>
-    public class AlwaysReturnNullSignatureProviderFactory : SignatureProviderFactory
+    public class AlwaysReturnNullCryptoProviderFactory : CryptoProviderFactory
     {
         public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
         {

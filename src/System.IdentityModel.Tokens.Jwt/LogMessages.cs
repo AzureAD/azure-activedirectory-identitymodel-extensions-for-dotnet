@@ -66,7 +66,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         // Crypto Errors
         internal const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
-        internal const string IDX10636 = "IDX10636: SignatureProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
+        internal const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
         internal const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
 

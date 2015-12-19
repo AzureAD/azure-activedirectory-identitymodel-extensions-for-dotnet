@@ -217,7 +217,7 @@ namespace System.IdentityModel.Tokens.Saml2.Tests
             TestUtilities.ValidateToken(samlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(EncryptedTokenDecryptionFailedException), substringExpected: "ID4022"));
 
             TokenValidationParameters validationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters;
-            validationParameters.ClientDecryptionTokens = new List<SecurityToken>{ KeyingMaterial.DefaultX509Token_2048 }.AsReadOnly();
+            validationParameters.TokenDecryptionKeys = new List<SecurityKey>{ KeyingMaterial.DefaultX509Key_2048 }.AsReadOnly();
             TestUtilities.ValidateToken(samlToken, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             TestUtilities.ValidateTokenReplay(samlToken, tokenHandler, validationParameters);

@@ -97,9 +97,9 @@ namespace Microsoft.IdentityModel.Tokens
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (verifyOnly)
-                return SignatureProviderFactory.CreateForVerifying(this, algorithm);
+                return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
-                return SignatureProviderFactory.CreateForSigning(this, algorithm);
+                return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
     }
 }
