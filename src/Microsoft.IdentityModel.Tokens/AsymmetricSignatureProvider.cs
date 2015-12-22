@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                     _rsa = new RSAOpenSsl();
 
-                (_rsa as RSA).ImportParameters(rsaKey.Parameters);
+                _rsa.ImportParameters(rsaKey.Parameters);
                 _disposeRsa = true;
                 return;
             }
@@ -277,7 +277,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (rsaKey.Rsa != null)
                     _rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
-                else
+
+                if (_rsaCryptoServiceProvider == null)
                 {
                     _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                     (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
@@ -301,7 +302,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (ecdsaKey.ECDsa != null)
                     _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
-                else
+
+                if (_ecdsaCng == null)
                 {
                     _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
                     _ecdsaCng.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
@@ -400,7 +402,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("signature");
 
             if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625, "signature");
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625, "input");
 
             if (signature.Length == 0)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626, "signature");

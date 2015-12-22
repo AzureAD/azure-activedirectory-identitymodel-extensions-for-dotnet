@@ -125,7 +125,6 @@ namespace Microsoft.IdentityModel.Tokens
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
-            TokenDecryptionKeys = other.TokenDecryptionKeys;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
@@ -140,6 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
+            TokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
@@ -445,9 +445,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="ReadOnlyCollection{SecurityKey}"/> that is to be used for decrypting inbound tokens.
+        /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
-        public IList<SecurityToken> TokenDecryptionKeys
+        public IEnumerable<SecurityKey> TokenDecryptionKeys
         {
             get;
             set;

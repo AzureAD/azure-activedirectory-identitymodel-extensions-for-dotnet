@@ -32,6 +32,8 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public class ECDsaSecurityKey : AsymmetricSecurityKey
     {
+        private PrivateKeyStatus _privateKeyStatus = PrivateKeyStatus.AvailabilityNotDetermined;
+
         public ECDsaSecurityKey(byte[] blob, CngKeyBlobFormat blobFormat)
         {
             if (blob == null)
@@ -42,8 +44,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             CngKey = CngKey.Import(blob, blobFormat);
             BlobFormat = blobFormat;
-            HasPrivateKey = BlobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format;
-            HasPublicKey = HasPrivateKey || BlobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format;
         }
 
         public ECDsaSecurityKey(ECDsa ecdsa)
@@ -52,10 +52,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("ecdsa");
 
             ECDsa = ecdsa;
-
-            // fake signing to determine if the ecdsa instance has the private key or not is a costly operation especially in case of HSM. We return true by default in that case, it will fail later at the time of signing or decrypting.
-            HasPrivateKey = true;
-            HasPublicKey = true;
         }
 
         /// <summary>
@@ -73,15 +69,61 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public ECDsa ECDsa { get; private set; }
 
-        public override bool HasPrivateKey { get; }
+        public override bool HasPrivateKey
+        {
+            get
+            {
+                if (_privateKeyStatus == PrivateKeyStatus.AvailabilityNotDetermined)
+                {
+                    if (BlobFormat != null)
+                    {
+                        if (BlobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format)
+                            _privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
+                        else
+                            _privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            // imitate signing
+                            byte[] hash = new byte[20];
+#if DOTNET5_4
+                            ECDsa.SignData(hash, HashAlgorithmName.SHA256) ;
+#else
+                            ECDsa.SignHash(hash);
+#endif
+                            _privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
+                        }
+                        catch (CryptographicException)
+                        {
+                            _privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
+                        }
+                    }
+                }
+                return _privateKeyStatus == PrivateKeyStatus.HasPrivateKey;
+            }
+        }
 
-        public override bool HasPublicKey { get; }
+        public override bool HasPublicKey
+        {
+            get
+            {
+                if (BlobFormat != null && (BlobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format))
+                    return true;
+
+                return HasPrivateKey;
+            }
+        }
 
         public override int KeySize
         {
             get
             {
-                return CngKey.KeySize;
+                if (CngKey != null)
+                    return CngKey.KeySize;
+                else
+                    return ECDsa.KeySize;
             }
         }
 
@@ -91,6 +133,13 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
+        }
+
+        enum PrivateKeyStatus
+        {
+            AvailabilityNotDetermined,
+            HasPrivateKey,
+            DoesNotHavePrivateKey
         }
     }
 }

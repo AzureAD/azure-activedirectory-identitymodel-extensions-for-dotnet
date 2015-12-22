@@ -33,16 +33,15 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public class RsaSecurityKey : AsymmetricSecurityKey
     {
+        PrivateKeyStatus _privateKeyStatus = PrivateKeyStatus.AvailabilityNotDetermined;
+
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
-            // must have private or public key
-            HasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null;
-            HasPublicKey = rsaParameters.Exponent != null && rsaParameters.Modulus != null;
-            if (!HasPrivateKey && !HasPublicKey)
-            {
-                throw LogHelper.LogException<ArgumentException>("No public or private key material found");
-            }
+            // must have modulus and exponent otherwise the crypto operations fail later
+            if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10700, rsaParameters.ToString());
 
+            _privateKeyStatus = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null ? PrivateKeyStatus.HasPrivateKey : PrivateKeyStatus.DoesNotHavePrivateKey;
             Parameters = rsaParameters;
         }
 
@@ -51,23 +50,50 @@ namespace Microsoft.IdentityModel.Tokens
             if (rsa == null)
                 throw LogHelper.LogArgumentNullException("rsa");
 
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
-            if (rsaCsp != null)
-            {
-                HasPrivateKey = !rsaCsp.PublicOnly;
-            }
-            else
-            {
-                // fake signing to determine if the rsa instance has the private key or not is a costly operation especially in case of HSM. We return true by default in that case, it will fail later at the time of signing or decrypting.
-                HasPrivateKey = true;
-            }
-            HasPublicKey = true;
             Rsa = rsa;
+            if (HasPrivateKey)
+                Parameters = Rsa.ExportParameters(true);
+            else
+                Parameters = Rsa.ExportParameters(false);
         }
 
-        public override bool HasPrivateKey { get; }
+        public override bool HasPrivateKey
+        {
+            get
+            {
+                if (_privateKeyStatus == PrivateKeyStatus.AvailabilityNotDetermined)
+                {
+                    try
+                    {
+                        // imitate signing
+                        byte[] hash = new byte[20];
+#if DOTNET5_4
+                        Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+#else
+                        RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;
+                        if (rsaCryptoServiceProvider != null)
+                            rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.SHA256);
+                        else
+                            Rsa.DecryptValue(hash);
+#endif
+                        _privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
+                    }
+                    catch (CryptographicException)
+                    {
+                        _privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
+                    }
+                }
+                return _privateKeyStatus == PrivateKeyStatus.HasPrivateKey;
+            }
+        }
 
-        public override bool HasPublicKey { get; }
+        public override bool HasPublicKey
+        {
+            get
+            {
+                return Parameters.Exponent != null && Parameters.Modulus != null;
+            }
+        }
 
         public override int KeySize
         {
@@ -75,10 +101,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (Rsa != null)
                     return Rsa.KeySize;
-                if (HasPublicKey)
+                else if (Parameters.Modulus != null)
                     return Parameters.Modulus.Length * 8;
-                else if (HasPrivateKey)
-                    return Parameters.D.Length * 8;
                 else
                     return 0;
             }
@@ -100,6 +124,13 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
+        }
+
+        enum PrivateKeyStatus
+        {
+            AvailabilityNotDetermined,
+            HasPrivateKey,
+            DoesNotHavePrivateKey
         }
     }
 }

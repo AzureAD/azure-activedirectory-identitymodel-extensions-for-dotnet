@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact(DisplayName = "ECDsaSecurityKeyTests: Constructor")]
         public void Constructor()
         {
+            // testing constructor that takes blob and blob format
             // null blob
             ECDsaSecurityKeyConstructor(null, null, new ExpectedException(typeof(ArgumentNullException), "blob"));
             byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
@@ -46,6 +47,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             var ecdsaSecurityKey = new ECDsaSecurityKey(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob);
             Assert.True(ecdsaSecurityKey.HasPrivateKey, "ecdsaSecurityKey.HasPrivate is false");
+
+            // testing constructor that takes ECDsa instance
+            ECDsaSecurityKeyConstructorWithEcdsa(null, ExpectedException.ArgumentNullException("ecdsa"));
+            ECDsaSecurityKeyConstructorWithEcdsa(new ECDsaCng(), ExpectedException.NoExceptionExpected);
+            ECDsaSecurityKeyConstructorWithEcdsa(new ECDsaCng(ecdsaSecurityKey.CngKey), ExpectedException.NoExceptionExpected);
+            ecdsaSecurityKey = new ECDsaSecurityKey(new ECDsaCng());
+            Assert.True(ecdsaSecurityKey.HasPrivateKey, "ecdsaSecurityKey.HasPrivate is false");
         }
 
         private void ECDsaSecurityKeyConstructor(byte[] blob, CngKeyBlobFormat format, ExpectedException ee)
@@ -53,6 +61,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var ecdsaSecurityKey = new ECDsaSecurityKey(blob, format);
+                ee.ProcessNoException();
+            }
+            catch (Exception exception)
+            {
+                ee.ProcessException(exception);
+            }
+        }
+
+        private void ECDsaSecurityKeyConstructorWithEcdsa(ECDsa ecdsa, ExpectedException ee)
+        {
+            try
+            {
+                var ecdsaSecurityKey = new ECDsaSecurityKey(ecdsa);
                 ee.ProcessNoException();
             }
             catch (Exception exception)

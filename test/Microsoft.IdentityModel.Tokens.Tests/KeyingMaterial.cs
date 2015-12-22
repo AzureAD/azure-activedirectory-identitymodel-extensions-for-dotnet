@@ -81,6 +81,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
                 };
 
+            RsaParameters_2048_MissingModulus =
+                new RSAParameters
+                {
+                    D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
+                    DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
+                    DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
+                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                    InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
+                    P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
+                    Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
+                };
+
+            RsaParameters_2048_MissingExponent =
+                new RSAParameters
+                {
+                    D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
+                    DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
+                    DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
+                    InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
+                    Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
+                    P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
+                    Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
+                };
+
             byte[] cspbytes_4096 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyABAAAAEAAQCZrcZ3JOjYvkjBZwkC_ukZook4u8se9AjHSP6bySfv69VLwlQLAREu-qz13lsoylKxVT4Abz2TxI4oLKKogKAdinRoNRYrIidsbOe6wHbsxreV6Qt4aiU_YdR0PnisyIx9jnheWtcO-_PCW5dQv9-OnjbnKxgy1A5XhHaj-MhL-uVOBKHmk1cXTMcAOzt1XL_oYjxiftg_InHBBT7hG6HrPyritd_np1TckPnuJq5GeajEcwmSIxGNtR4WlTyGD-5MyIVxxWvQgvWjXHDCXp01eA_R-3KImaE62cAULabdKHbNzQFAfJOb-nmAiZU9bhKw7TdZb9Omjr7DadZ8WrqlY7kYmk73IczxX3Vnvm67_Haj7hBrKewJfvQ3SPyqF85CpyNLCrLXzLxVNqEg-YxNkg5Zlf62-t3BA-QHUW7mOIi87iuwvp6WmoZ_o_JEcAl7DY1XlsMVF5v5KrhsAm9FeUQTjFpZkkrFWkgVzBYZ0RpJbDtREgTJXy8764Gq0qcgk7CvC7RkYAtUXj_0rME6nbooLDpKhiQNl9-OLGas-kh9MtR76jTbteToQz2XsIZI3gnJjzpb_BNSvABRqbSgWJ8mVTkGmIc-YImXUqxriE5P4EdulcX5orRkD1LTWiS5tnLqLCUlK-v9SEC0raKx99H5CXl4xv_EDsM2qubzvZXWPbz3kSQY1zhwdKcemx4iIUg69JK7v9PAApf136EVRX3wjVhLUHJfBVAZ0H_VGSCosxmbUuyyh1akiLwzaH1crZz0M9uJ1iS1HZrxpVGn4DuI0A-2ZTP7GAA_q2PjVcNR65LJxAsQmQLHESnWxqA4RZxcxtCukB158isSW6cpxgnsVG2hSHh9spBUaRjzqzejAgh2lrknSJEDSxrfCusdlLmTwbQvOUANAWEpyyVUAnHToFFY6lg6jkJqlAKUdAXw-zPuE3gDaC4fwZL9pCyY-0V2kVW_xusGKg-peiAPGAdaqnL9O0l_tcHrXLNxjySMHPY925ywNf21gTHVfM_1zfc66A_8qv7bAPFMZ-9X0c2Fxq8sGbKDwwj4mnuwB5zRR1wg7YqsvR6XT29h2j7O1VtzJWAfkoMRO_g0cqQP6c9GHPIO9kmLua0KzxRD-KTaQthvgt3x8cn7Ru_NJ3UNDh5cdzt2ieuQFvTGsyoctrRWta9rzb_C0BisBWw-PejJ5yUbFaTi1pJvLOoZTZZ7lCMw5DyRMS3r59Fv7hCY2MI9uIrr4HGOgCdDtYq5Xq4TkKolf887HkuFnUrPsaqk8N-eib1XOlvdyN4YUTlJx6uLTU-kruwEJBZxZ-IRwKDRTG73dVGgf61FSFmD5jpuWNoVkzx2f1UMCYmQhF3qGRIBar0gA7EQCl7IB2TXKuC746nismR2GhlRzktUloCMrzn9OqTgLu39okB4aE_ik1PElT7NDSZNVR41rQtXhHKKOO--Ch4fFv4zlpxErAIB1hu8w4stBx0ZXOyZegHsG0b6JAq0dVjqE357GzypgrrnwvBBDwAW3hPHyHbbKFcjH2N3RRCAHZlsafa_dBHkeevcktWiEarVAhRf0dGjAapoacrL8izb5mr7NGCmg2cwF_F6WvZJhjG5SPSj2HbfLoEkLGUMtDewYK7717_JRFOUEW2OHBfdL0GB0w6hTgLMoKfYXt_rYZw87Bzim5xXLNCZ5BTiWQO4LA8-O3-8oWkHNpNAAPKLXQaGpqopBHa3ujIUQCsINKZuaMMOnl_PFALxGiVY5f9JpHMGtjAVplAZZ4vPZsW7X7O478pwejNRR3_Y4SWNWZglyBamKRxeSz007lwtnbQoywtX72QNvNgpd6jY6zf4h5hNxhZqVg0FVrQUZUBnrA2TkFP3xUDoUOA26IlSf-qKYUus36wxNet-nyoMrAunQ0RubAwE7WWlGmBX-AQ5hXew7Cb-vjhjaZtGecJxQvVIcSBsvBK9Zfp7T85TaRFsHYH_Em8Eysb3grTTNnw6tkx2n43AOML3zyQiSgO4TxwzIINKrDwx94hH4tgBlph636eQLySS3nH0bSUw0pbBZurtkeX3IKYHdsCZfMtmhJUZxLMSLlZILQLm_6GD3I6kHINvGTdhHnZSoS4BecS3vBL3tXa-p_UAvhra8u7YLuGBkM8ZUV3a7OifB0R5TKhf_nyPsJg9_W5HnFvdv1wRsL1u8vdQOFHu4O9iCbLtDs2yTmRo0UTuWBItAqOhDqcU2wA6blptT-t7KhZvfOApK10kvEeDov6ch49JXX0CIQqUe2uzWh7Hc1xVI48ahK9aautS0EpaplbPuipNp1qIGSOOeVkDYPGd0KtjtlI2ZZdvxHu1UDsfZBBc-ngZWPp8IbGFMLIvv_ZnaCwn9hzCBT87WHg9dAEbudMxNw7mBBkjDJWqNFZVWDdeZk-dx2rAC5cM09CCkjjHjX2_eCpztb65lvM0ir1l8tq3SPaz2N9OLwipLRdm8vjWwSRGYaApXqxC4ZgxzSgTm-9Yd4o60zE5JdHyyCZ0DIuHieJ437ut-ozQ5-cV8d2yUrOQWjx97ehixruKZlf8PnOn-0Q48mGtqOJ2gQNiULIpksv7AGxORmRHKoBGQtzjiGfViOxk6hf62-ilAbz7fLeSLVZhG1ixaQWXkWeSf9G27mgEvt3IfrSJLmb4tMsspeYFYdjlTtkz1XBbpuv-F6-vhbgRnQQeR9OAa5BAtsFHvDU2KSOfkJfqWVQ9ffxriCTY3R1og4U52-Jdt64IlA-7-ZBbourBEbuCti8wC0UsjgtH4uAhhu4I7Td8ja-l2MJAGu5kvOoGRvg09ClyW3Top7Bmr7YkKchSjwyrPwhJtn5edl_N9p7i_1uHTrzTmNW7z4_g8NZl1oy2F14KQXCrjo8Kw_gt7D43nu9A2MXEYvIxEoaRu6SJJh8dL-Wfjo4dNsNS6iq-RxGtlJigMRV_lAG6n9U2YPws3xj6cTRiAnRcJcpRm8QyHoE-BlxWV739ENQXcno-qpYOT6UMO-wwCTU0x92rrDAL9ow4TkjX3VrMV9B1BLUFakDfj_pRp5P4bBMtMah20CZEXgc");
             byte[] cspbytes_4096_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExABAAAAEAAQCZrcZ3JOjYvkjBZwkC_ukZook4u8se9AjHSP6bySfv69VLwlQLAREu-qz13lsoylKxVT4Abz2TxI4oLKKogKAdinRoNRYrIidsbOe6wHbsxreV6Qt4aiU_YdR0PnisyIx9jnheWtcO-_PCW5dQv9-OnjbnKxgy1A5XhHaj-MhL-uVOBKHmk1cXTMcAOzt1XL_oYjxiftg_InHBBT7hG6HrPyritd_np1TckPnuJq5GeajEcwmSIxGNtR4WlTyGD-5MyIVxxWvQgvWjXHDCXp01eA_R-3KImaE62cAULabdKHbNzQFAfJOb-nmAiZU9bhKw7TdZb9Omjr7DadZ8WrqlY7kYmk73IczxX3Vnvm67_Haj7hBrKewJfvQ3SPyqF85CpyNLCrLXzLxVNqEg-YxNkg5Zlf62-t3BA-QHUW7mOIi87iuwvp6WmoZ_o_JEcAl7DY1XlsMVF5v5KrhsAm9FeUQTjFpZkkrFWkgVzBYZ0RpJbDtREgTJXy8764Gq0qcgk7CvC7RkYAtUXj_0rME6nbooLDpKhiQNl9-OLGas-kh9MtR76jTbteToQz2XsIZI3gnJjzpb_BNSvABRqbSgWJ8mVTkGmIc-YImXUqxriE5P4EdulcX5orRkD1LTWiS5tnLqLCUlK-v9SEC0raKx99H5CXl4xv_EDsM2qubzvQ");
 
@@ -116,6 +140,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+            var rsaCsp = new RSACryptoServiceProvider();
+            rsaCsp.ImportParameters(RsaParameters_2048);
+            RsaSecurityKeyWithCspProvider_2048 = new RsaSecurityKey(rsaCsp);
+            var rsaCspPublic = new RSACryptoServiceProvider();
+            rsaCspPublic.ImportParameters(RsaParameters_2048_Public);
+            RsaSecurityKeyWithCspProvider_2048_Public = new RsaSecurityKey(rsaCspPublic);
+#if DNXCORE50
+            var rsaCng = new RSACng();
+            rsaCng.ImportParameters(RsaParameters_2048);
+            RsaSecurityKeyWithCngProvider_2048 = new RsaSecurityKey(rsaCng);
+            var rsaCngPublic = new RSACng();
+            rsaCngPublic.ImportParameters(RsaParameters_2048_Public);
+            RsaSecurityKeyWithCngProvider_2048_Public = new RsaSecurityKey(rsaCngPublic);
+#endif
 
             //ecdsa
             byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
@@ -128,6 +166,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             ECDsa256Key_Public = new ECDsaSecurityKey(ECDsa256Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
             ECDsa384Key_Public = new ECDsaSecurityKey(ECDsa384Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
             ECDsa521Key_Public = new ECDsaSecurityKey(ECDsa521Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            ECDsa256KeyWithProvider = new ECDsaSecurityKey(new ECDsaCng(CngKey.Import(ecdsa256KeyBlob, CngKeyBlobFormat.GenericPrivateBlob)));
+            ECDsa256KeyWithProvider_Public = new ECDsaSecurityKey(new ECDsaCng(CngKey.Import(ECDsa256Key.CngKey.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob)));
         }
 
         // .../Certs/SelfSigned1024_SHA256.pfx
@@ -203,6 +243,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static RSAParameters RsaParameters_2048_Public;
         public static RSAParameters RsaParameters_4096;
         public static RSAParameters RsaParameters_4096_Public;
+        public static RSAParameters RsaParameters_2048_MissingModulus;
+        public static RSAParameters RsaParameters_2048_MissingExponent;
 
         public static RsaSecurityKey RsaSecurityKey_1024;
         public static RsaSecurityKey RsaSecurityKey_1024_Public;
@@ -210,6 +252,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static RsaSecurityKey RsaSecurityKey_2048_Public;
         public static RsaSecurityKey RsaSecurityKey_4096;
         public static RsaSecurityKey RsaSecurityKey_4096_Public;
+        public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048;
+        public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048_Public;
+        public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048;
+        public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048_Public;
 
         public static SigningCredentials RSASigningCreds_1024;
         public static SigningCredentials RSASigningCreds_1024_Public;
@@ -225,6 +271,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static readonly ECDsaSecurityKey ECDsa256Key_Public;
         public static readonly ECDsaSecurityKey ECDsa384Key_Public;
         public static readonly ECDsaSecurityKey ECDsa521Key_Public;
+        public static readonly ECDsaSecurityKey ECDsa256KeyWithProvider;
+        public static readonly ECDsaSecurityKey ECDsa256KeyWithProvider_Public;
 
         public static string DefaultSymmetricKeyEncoded_256 = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);
