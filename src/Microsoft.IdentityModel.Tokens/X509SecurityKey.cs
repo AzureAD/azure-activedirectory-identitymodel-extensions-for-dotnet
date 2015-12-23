@@ -37,11 +37,11 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class X509SecurityKey : AsymmetricSecurityKey
     {
-        X509Certificate2    _certificate;
+        X509Certificate2 _certificate;
         AsymmetricAlgorithm _privateKey;
-        bool                _privateKeyAvailabilityDetermined;
-        PublicKey           _publicKey;
-        object              _thisLock = new Object();
+        bool _privateKeyAvailabilityDetermined;
+        PublicKey _publicKey;
+        object _thisLock = new Object();
 
         /// <summary>
         /// Instantiates a <see cref="SecurityKey"/> using a <see cref="X509Certificate2"/>

@@ -40,10 +40,10 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class HttpDocumentRetriever : IDocumentRetriever
     {
-        private readonly HttpClient _httpClient;
-        private bool _requireHttps;
+        private HttpClient _httpClient;
+        private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
-        public HttpDocumentRetriever() : this(new HttpClient())
+        public HttpDocumentRetriever()
         {
         }
 
@@ -53,17 +53,12 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogArgumentNullException("httpClient");
 
             _httpClient = httpClient;
-            _requireHttps = true;
         }
 
         /// <summary>
         /// Requires Https secure channel for sending requests.. This is turned ON by default for security reasons. It is RECOMMENDED that you do not allow retrieval from http addresses by default.
         /// </summary>
-        public bool RequireHttps
-        {
-            get { return _requireHttps; }
-            set { _requireHttps = value; }
-        }
+        public bool RequireHttps { get; set; } = true;
 
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
@@ -76,7 +71,9 @@ namespace Microsoft.IdentityModel.Protocols
             try
             {
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10805, address);
-                HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
+                var httpClient = _httpClient ?? _defaultHttpClient;
+                HttpResponseMessage response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
+
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
