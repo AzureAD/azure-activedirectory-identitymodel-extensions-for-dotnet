@@ -882,7 +882,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // signature missing, ValidateSignature = false"
             expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters.ValidateSignature = false;
+            validationParameters.RequireSignedTokens = false;
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
 
             // custom signature validator
@@ -895,8 +895,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.SignatureValidator = ((token, parameters) => { return null; });
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters.ValidateSignature = false;
+            expectedException = ExpectedException.SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
+            validationParameters.RequireSignedTokens = false;
             validationParameters.SignatureValidator = IdentityUtilities.SignatureValidatorThrows;
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 

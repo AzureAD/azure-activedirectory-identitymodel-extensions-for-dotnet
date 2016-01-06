@@ -468,28 +468,21 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
 
             JwtSecurityToken jwt = null;
-            if (validationParameters.ValidateSignature)
+            if (validationParameters.SignatureValidator != null)
             {
-                if (validationParameters.SignatureValidator != null)
-                {
-                    var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
-                    if (validatedJwtToken == null)
-                        throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10505, token);
+                var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
+                if (validatedJwtToken == null)
+                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10505, token);
 
-                    jwt = validatedJwtToken as JwtSecurityToken;
-                    if (jwt == null)
-                        throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token);
-                }
-                else
-                {
-                    jwt = ValidateSignature(token, validationParameters);
-                    if (jwt == null)
-                        throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10507, token);
-                }
+                jwt = validatedJwtToken as JwtSecurityToken;
+                if (jwt == null)
+                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token);
             }
             else
             {
-                jwt = ReadJwtToken(token);
+                jwt = ValidateSignature(token, validationParameters);
+                if (jwt == null)
+                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10507, token);
             }
 
             if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
