@@ -32,19 +32,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public class ECDsaSecurityKey : AsymmetricSecurityKey
     {
-        private PrivateKeyStatus _privateKeyStatus = PrivateKeyStatus.AvailabilityNotDetermined;
-
-        public ECDsaSecurityKey(byte[] blob, CngKeyBlobFormat blobFormat)
-        {
-            if (blob == null)
-                throw LogHelper.LogArgumentNullException("blob");
-
-            if (blobFormat == null)
-                throw LogHelper.LogArgumentNullException("blobFormat");
-
-            CngKey = CngKey.Import(blob, blobFormat);
-            BlobFormat = blobFormat;
-        }
+        private bool? _hasPrivateKey;
 
         public ECDsaSecurityKey(ECDsa ecdsa)
         {
@@ -55,75 +43,38 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// <see cref="CngKeyBlobFormat"/> used to initialize the <see cref="CngKey"/>
-        /// </summary>
-        public CngKeyBlobFormat BlobFormat { get; private set; }
-
-        /// <summary>
-        /// <see cref="CngKey"/> that will be used for signing/verifying operations.
-        /// </summary>
-        public CngKey CngKey { get; private set; }
-
-        /// <summary>
         /// <see cref="ECDsa"/> instance used to initialize the key.
         /// </summary>
         public ECDsa ECDsa { get; private set; }
 
-        public override bool HasPrivateKey
+        public override bool? HasPrivateKey()
         {
-            get
+            if (_hasPrivateKey == null)
             {
-                if (_privateKeyStatus == PrivateKeyStatus.AvailabilityNotDetermined)
+                try
                 {
-                    if (BlobFormat != null)
-                    {
-                        if (BlobFormat.Format == CngKeyBlobFormat.EccPrivateBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPrivateBlob.Format)
-                            _privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
-                        else
-                            _privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            // imitate signing
-                            byte[] hash = new byte[20];
+                    // imitate signing
+                    byte[] hash = new byte[20];
 #if DOTNET5_4
-                            ECDsa.SignData(hash, HashAlgorithmName.SHA256) ;
+                    ECDsa.SignData(hash, HashAlgorithmName.SHA256) ;
 #else
-                            ECDsa.SignHash(hash);
+                    ECDsa.SignHash(hash);
 #endif
-                            _privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
-                        }
-                        catch (CryptographicException)
-                        {
-                            _privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
-                        }
-                    }
+                    _hasPrivateKey = true;
                 }
-                return _privateKeyStatus == PrivateKeyStatus.HasPrivateKey;
+                catch (CryptographicException)
+                {
+                    _hasPrivateKey = false;
+                }
             }
-        }
-
-        public override bool HasPublicKey
-        {
-            get
-            {
-                if (BlobFormat != null && (BlobFormat.Format == CngKeyBlobFormat.EccPublicBlob.Format || BlobFormat.Format == CngKeyBlobFormat.GenericPublicBlob.Format))
-                    return true;
-
-                return HasPrivateKey;
-            }
+            return _hasPrivateKey;
         }
 
         public override int KeySize
         {
             get
             {
-                if (CngKey != null)
-                    return CngKey.KeySize;
-                else
-                    return ECDsa.KeySize;
+                return ECDsa.KeySize;
             }
         }
 
@@ -133,13 +84,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
-        }
-
-        enum PrivateKeyStatus
-        {
-            AvailabilityNotDetermined,
-            HasPrivateKey,
-            DoesNotHavePrivateKey
         }
     }
 }

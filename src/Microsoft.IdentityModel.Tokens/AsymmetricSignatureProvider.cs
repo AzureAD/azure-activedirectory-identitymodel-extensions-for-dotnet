@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            if (willCreateSignatures && !key.HasPrivateKey)
+            if (willCreateSignatures && !key.HasPrivateKey().Value)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
@@ -230,8 +230,6 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (ecdsaKey.ECDsa != null)
                     _ecdsaCng = ecdsaKey.ECDsa;
-                else
-                    _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
                 return;
             }
 
