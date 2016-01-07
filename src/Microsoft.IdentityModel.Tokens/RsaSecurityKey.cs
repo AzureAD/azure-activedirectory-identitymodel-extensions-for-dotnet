@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public class RsaSecurityKey : AsymmetricSecurityKey
     {
-        PrivateKeyStatus _privateKeyStatus = PrivateKeyStatus.AvailabilityNotDetermined;
+        private bool? _hasPrivateKey;
 
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10700, rsaParameters.ToString());
 
-            _privateKeyStatus = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null ? PrivateKeyStatus.HasPrivateKey : PrivateKeyStatus.DoesNotHavePrivateKey;
+            _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
             Parameters = rsaParameters;
         }
 
@@ -51,48 +51,33 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("rsa");
 
             Rsa = rsa;
-            if (HasPrivateKey)
-                Parameters = Rsa.ExportParameters(true);
-            else
-                Parameters = Rsa.ExportParameters(false);
         }
 
-        public override bool HasPrivateKey
+        public override bool? HasPrivateKey()
         {
-            get
+            if (_hasPrivateKey == null)
             {
-                if (_privateKeyStatus == PrivateKeyStatus.AvailabilityNotDetermined)
+                try
                 {
-                    try
-                    {
-                        // imitate signing
-                        byte[] hash = new byte[20];
+                    // imitate signing
+                    byte[] hash = new byte[20];
 #if DOTNET5_4
-                        Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #else
-                        RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;
-                        if (rsaCryptoServiceProvider != null)
-                            rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.SHA256);
-                        else
-                            Rsa.DecryptValue(hash);
+                    RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;
+                    if (rsaCryptoServiceProvider != null)
+                        rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.SHA256);
+                    else
+                        Rsa.DecryptValue(hash);
 #endif
-                        _privateKeyStatus = PrivateKeyStatus.HasPrivateKey;
-                    }
-                    catch (CryptographicException)
-                    {
-                        _privateKeyStatus = PrivateKeyStatus.DoesNotHavePrivateKey;
-                    }
+                    _hasPrivateKey = true;
                 }
-                return _privateKeyStatus == PrivateKeyStatus.HasPrivateKey;
+                catch (CryptographicException)
+                {
+                    _hasPrivateKey = false;
+                }
             }
-        }
-
-        public override bool HasPublicKey
-        {
-            get
-            {
-                return Parameters.Exponent != null && Parameters.Modulus != null;
-            }
+            return _hasPrivateKey;
         }
 
         public override int KeySize
@@ -124,13 +109,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
-        }
-
-        enum PrivateKeyStatus
-        {
-            AvailabilityNotDetermined,
-            HasPrivateKey,
-            DoesNotHavePrivateKey
         }
     }
 }

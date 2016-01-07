@@ -118,14 +118,10 @@ namespace Microsoft.IdentityModel.Tokens
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            if (willCreateSignatures && !key.HasPrivateKey)
+            if (willCreateSignatures && !key.HasPrivateKey().Value)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
-#if DOTNET5_4
-            ResolveDotNetCoreAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
-#else
-            ResolveDotNetDesktopAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
-#endif
+            ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
         }
 
         /// <summary>
@@ -181,7 +177,7 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
         }
 
-        private void ResolveDotNetCoreAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        private void ResolveAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
         {
             _hashAlgorithm = GetHashAlgorithmName(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
@@ -196,12 +192,15 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     _rsa = new RSACng();
-                else
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     _rsa = new RSAOpenSsl();
 
-                _rsa.ImportParameters(rsaKey.Parameters);
-                _disposeRsa = true;
-                return;
+                if (_rsa != null)
+                {
+                    _rsa.ImportParameters(rsaKey.Parameters);
+                    _disposeRsa = true;
+                    return;
+                }
             }
 
             X509SecurityKey x509Key = key as X509SecurityKey;
@@ -231,8 +230,6 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (ecdsaKey.ECDsa != null)
                     _ecdsaCng = ecdsaKey.ECDsa;
-                else
-                    _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
                 return;
             }
 
@@ -268,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
         }
 
-        private void ResolveDotNetDesktopAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        private void ResolveAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
         {
             _hashAlgorithm = GetHashAlgorithmString(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
