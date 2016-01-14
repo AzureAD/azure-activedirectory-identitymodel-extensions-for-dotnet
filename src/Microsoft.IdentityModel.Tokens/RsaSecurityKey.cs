@@ -53,16 +53,19 @@ namespace Microsoft.IdentityModel.Tokens
             Rsa = rsa;
         }
 
-        public override bool? HasPrivateKey()
+        public override bool? HasPrivateKey
         {
-            if (_hasPrivateKey == null)
+            get
             {
-                try
+
+                if (_hasPrivateKey == null)
                 {
-                    // imitate signing
-                    byte[] hash = new byte[20];
+                    try
+                    {
+                        // imitate signing
+                        byte[] hash = new byte[20];
 #if DOTNET5_4
-                    Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                        Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #else
                     RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;
                     if (rsaCryptoServiceProvider != null)
@@ -70,14 +73,15 @@ namespace Microsoft.IdentityModel.Tokens
                     else
                         Rsa.DecryptValue(hash);
 #endif
-                    _hasPrivateKey = true;
+                        _hasPrivateKey = true;
+                    }
+                    catch (CryptographicException)
+                    {
+                        _hasPrivateKey = false;
+                    }
                 }
-                catch (CryptographicException)
-                {
-                    _hasPrivateKey = false;
-                }
+                return _hasPrivateKey;
             }
-            return _hasPrivateKey;
         }
 
         public override int KeySize

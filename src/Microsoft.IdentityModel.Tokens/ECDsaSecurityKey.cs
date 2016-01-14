@@ -47,27 +47,30 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public ECDsa ECDsa { get; private set; }
 
-        public override bool? HasPrivateKey()
+        public override bool? HasPrivateKey
         {
-            if (_hasPrivateKey == null)
+            get
             {
-                try
+                if (_hasPrivateKey == null)
                 {
-                    // imitate signing
-                    byte[] hash = new byte[20];
+                    try
+                    {
+                        // imitate signing
+                        byte[] hash = new byte[20];
 #if DOTNET5_4
-                    ECDsa.SignData(hash, HashAlgorithmName.SHA256) ;
+                        ECDsa.SignData(hash, HashAlgorithmName.SHA256);
 #else
                     ECDsa.SignHash(hash);
 #endif
-                    _hasPrivateKey = true;
+                        _hasPrivateKey = true;
+                    }
+                    catch (CryptographicException)
+                    {
+                        _hasPrivateKey = false;
+                    }
                 }
-                catch (CryptographicException)
-                {
-                    _hasPrivateKey = false;
-                }
+                return _hasPrivateKey;
             }
-            return _hasPrivateKey;
         }
 
         public override int KeySize

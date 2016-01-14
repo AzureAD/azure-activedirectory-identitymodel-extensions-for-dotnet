@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -36,7 +37,7 @@ namespace System.IdentityModel.Tokens.Jwt
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
     /// </summary>
     [JsonObject]
-    public class JsonWebKey
+    public class JsonWebKey : SecurityKey
     {
         // kept private to hide that a List is used.
         // public member returns an IList.
@@ -103,6 +104,11 @@ namespace System.IdentityModel.Tokens.Jwt
             this.X5u = key.X5u;
             this.X = key.X;
             this.Y = key.Y;
+        }
+
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -182,11 +188,11 @@ namespace System.IdentityModel.Tokens.Jwt
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kty, Required = Required.Default)]
         public string Kty { get; set; }
 
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.N, Required = Required.Default)]
         /// <summary>
         /// Gets or sets the 'n' (RSA - Modulus)..
         /// </summary>
         /// <remarks> value is formated as: Base64urlEncoding</remarks>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.N, Required = Required.Default)]
         public string N { get; set; }
 
         /// <summary>
@@ -250,13 +256,13 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets or sets the 'k5t' (X.509 Certificate SHA-1 thumbprint)..
+        /// Gets or sets the 'x5t' (X.509 Certificate SHA-1 thumbprint)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5t, Required = Required.Default)]
         public string X5t { get; set; }
 
         /// <summary>
-        /// Gets or sets the 'k5t#S256' (X.509 Certificate SHA-1 thumbprint)..
+        /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-1 thumbprint)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5tS256, Required = Required.Default)]
         public string X5tS256 { get; set; }
@@ -273,5 +279,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks> value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Y, Required = Required.Default)]
         public string Y { get; set; }
+
+        public override int KeySize
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }
