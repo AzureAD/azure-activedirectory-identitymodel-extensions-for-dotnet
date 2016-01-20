@@ -282,9 +282,9 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 if (Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return N.Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(N).Length * 8;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                    return X.Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(X).Length * 8;
                 else
                     return 0;
             }
