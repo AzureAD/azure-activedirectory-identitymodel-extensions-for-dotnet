@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Constants for JsonWebKeyUse (sec 4.2)

@@ -95,12 +95,6 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10721 = "IDX10721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX10722 = "IDX10722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
 
-        // Json specific errors
-        internal const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
-        internal const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
-        internal const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
-        internal const string IDX10806 = "IDX10806: Deserializing json string into json web keys.";
-
 #pragma warning restore 1591
 
 

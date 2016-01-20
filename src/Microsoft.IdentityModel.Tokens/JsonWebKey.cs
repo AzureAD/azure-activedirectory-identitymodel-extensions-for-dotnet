@@ -25,19 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 
-namespace System.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
     /// </summary>
     [JsonObject]
-    public class JsonWebKey : SecurityKey
+    public class JsonWebKey : AsymmetricSecurityKey
     {
         // kept private to hide that a List is used.
         // public member returns an IList.
@@ -104,11 +106,6 @@ namespace System.IdentityModel.Tokens.Jwt
             this.X5u = key.X5u;
             this.X = key.X;
             this.Y = key.Y;
-        }
-
-        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -284,8 +281,33 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                throw new NotImplementedException();
+                if (Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                    return N.Length * 8;
+                else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                    return X.Length * 8;
+                else
+                    return 0;
             }
+        }
+
+        public override bool? HasPrivateKey
+        {
+            get
+            {
+                if (Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                    return D != null && DP != null && DQ != null && P != null && Q != null && QI != null;
+                else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                    return D != null;
+                else
+                    return false;
+            }
+        }
+        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
+        {
+            if (verifyOnly)
+                return CryptoProviderFactory.CreateForVerifying(this, algorithm);
+            else
+                return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
     }
 }

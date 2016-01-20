@@ -96,20 +96,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(KeyingMaterial.RsaSecurityKey_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKey_2048_Public has the private key.");
         }
 
-        [Fact(DisplayName = "RsaSecurityKeyTests: HasPublicKey")]
-        public void HasPublicKey()
-        {
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPublicKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048 does not have the public key.");
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.HasPublicKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public does not have the public key.");
-#if DNXCORE50
-
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048.HasPublicKey, "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048 does not have the public key.");
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public.HasPublicKey, "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public does not have the public key.");
-#endif
-            Assert.True(KeyingMaterial.RsaSecurityKey_2048.HasPublicKey, "KeyingMaterial.RsaSecurityKey_2048 does not have the public key.");
-            Assert.True(KeyingMaterial.RsaSecurityKey_2048_Public.HasPublicKey, "KeyingMaterial.RsaSecurityKey_2048_Public does not have the public key.");
-        }
-
         [Fact(DisplayName = "RsaSecurityTests: KeySize")]
         public void KeySize()
         {
