@@ -28,6 +28,9 @@
 using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
+// since we are in the System ns, we need to map to M.IM.Tokens
+using Algorithms = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     /// <summary>
@@ -51,7 +54,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             JwtHeader jwtHeader = new JwtHeader();
             Assert.True(jwtHeader.Typ == JwtConstants.HeaderType, "jwtHeader.ContainsValue( JwtConstants.HeaderType )");
-            Assert.True(jwtHeader.Alg == JwtAlgorithms.NONE, "jwtHeader.SignatureAlgorithm == null");
+            Assert.True(jwtHeader.Alg == Algorithms.None, "jwtHeader.SignatureAlgorithm == null");
             Assert.True(jwtHeader.SigningCredentials == null, "jwtHeader.SigningCredentials != null");
             Assert.True(jwtHeader.Kid == null, "jwtHeader.Kid == null");
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");

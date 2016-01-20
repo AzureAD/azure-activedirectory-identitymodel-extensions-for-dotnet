@@ -89,6 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
         internal const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
         internal const string IDX10644 = "IDX10644: Crypto operation not supported.";
+        internal const string IDX10645 = "IDX10645: Elliptical Curve not supported: '{0}'";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

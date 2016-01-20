@@ -27,9 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
@@ -88,7 +85,6 @@ namespace Microsoft.IdentityModel.Tokens
             this.DP = key.DP;
             this.DQ = key.DQ;
             this.E = key.E;
-            this.K = key.K;
             if (key.KeyOps != null)
                 _keyops = new List<string>(key.KeyOps);
             this.Kid = key.Kid;
@@ -146,12 +142,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.E, Required = Required.Default)]
         public string E { get; set; }
-        /// <summary>
-        /// Gets or sets the 'k' (Symmetric - Key Value)..
-        /// </summary>
-        /// Base64urlEncoding
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.K, Required = Required.Default)]
-        public string K { get; set; }
 
         /// <summary>
         /// Gets or sets the 'key_ops' (Key Operations)..
@@ -290,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        public override bool? HasPrivateKey
+        public override bool HasPrivateKey
         {
             get
             {

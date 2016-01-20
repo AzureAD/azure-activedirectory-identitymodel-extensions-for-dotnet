@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
             RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RSA_SHA256);
+            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256);
             RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
