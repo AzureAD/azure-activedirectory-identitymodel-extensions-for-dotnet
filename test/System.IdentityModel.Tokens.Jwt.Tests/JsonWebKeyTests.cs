@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 

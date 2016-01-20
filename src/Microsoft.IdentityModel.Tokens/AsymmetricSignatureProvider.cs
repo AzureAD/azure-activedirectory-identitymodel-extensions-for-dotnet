@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -118,7 +119,7 @@ namespace Microsoft.IdentityModel.Tokens
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            if (willCreateSignatures && !key.HasPrivateKey().Value)
+            if (willCreateSignatures && !key.HasPrivateKey.Value)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
@@ -229,12 +230,121 @@ namespace Microsoft.IdentityModel.Tokens
             if (ecdsaKey != null)
             {
                 if (ecdsaKey.ECDsa != null)
+                {
                     _ecdsaCng = ecdsaKey.ECDsa;
+                    return;
+                }
+            }
+
+            JsonWebKey webKey = key as JsonWebKey;
+            if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+            {
+                RSAParameters parameters = new RSAParameters()
+                {
+                    D = Encoding.UTF8.GetBytes(webKey.D),
+                    DP = Encoding.UTF8.GetBytes(webKey.DP),
+                    DQ = Encoding.UTF8.GetBytes(webKey.DQ),
+                    Exponent = Encoding.UTF8.GetBytes(webKey.E),
+                    Modulus = Encoding.UTF8.GetBytes(webKey.N),
+                    InverseQ = Encoding.UTF8.GetBytes(webKey.QI),
+                    P = Encoding.UTF8.GetBytes(webKey.P),
+                    Q = Encoding.UTF8.GetBytes(webKey.Q)
+                };
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    _rsa = new RSACng();
+                else
+                    _rsa = new RSAOpenSsl();
+
+                _rsa.ImportParameters(rsaKey.Parameters);
+                _disposeRsa = true;
                 return;
+            }
+            else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+            {
+                uint dwMagic = GetMagicValue(webKey.Crv);
+                uint cbKey = GetKeyByteCount(webKey.Crv);
+                byte[] keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                GCHandle keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
+                IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
+                byte[] x = Encoding.UTF8.GetBytes(webKey.X);
+                byte[] y = Encoding.UTF8.GetBytes(webKey.Y);
+
+                Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
+                Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
+
+                int j = 0;
+                foreach (byte b in x)
+                {
+                    Marshal.WriteByte(keyBlobPtr, 8 + j, b);
+                    j += 1;
+                }
+
+                j = 0;
+                foreach (byte b in y)
+                {
+                    Marshal.WriteByte(keyBlobPtr, 8 + (int)cbKey + j, b);
+                    j += 1;
+                }
+
+                using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
+                {
+                    _ecdsaCng = new ECDsaCng(cngKey);
+                }
             }
 
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
         }
+
+        private uint GetKeyByteCount(string curveId)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException("curveId");
+
+            uint keyByteCount;
+            switch (curveId)
+            {
+                case "P-256": keyByteCount = 32;
+                    break;
+                case "P-384": keyByteCount = 48;
+                    break;
+                case "P-512": keyByteCount = 64;
+                    break;
+                default:
+                    throw LogHelper.LogException<ArgumentException>("Curve not supported");
+            }
+            return keyByteCount;
+        }
+
+        private uint GetMagicValue(string curveId)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException("curveId");
+
+            KeyBlobMagicNumber magicNumber;
+            switch(curveId)
+            {
+                case "P-256": magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P256_MAGIC;
+                    break;
+                case "P-384": magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
+                    break;
+                case "P-512": magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
+                    break;
+                default:
+                    throw LogHelper.LogException<ArgumentException>("Curve not supported");
+            }
+            return (uint)magicNumber;
+        }
+
+        /// <summary>
+        ///     Magic numbers identifying ECDSA blob types
+        /// </summary>
+        internal enum KeyBlobMagicNumber : int
+        {
+            BCRYPT_ECDSA_PUBLIC_P256_MAGIC = 0x31534345,
+            BCRYPT_ECDSA_PUBLIC_P384_MAGIC = 0x33534345,
+            BCRYPT_ECDSA_PUBLIC_P521_MAGIC = 0x35534345,
+        }
+
 #else
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
@@ -298,14 +408,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (ecdsaKey != null)
             {
                 if (ecdsaKey.ECDsa != null)
-                    _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
-
-                if (_ecdsaCng == null)
                 {
-                    _ecdsaCng = new ECDsaCng(ecdsaKey.CngKey);
+                    _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
                     _ecdsaCng.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                    return;
                 }
-                return;
             }
 
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
