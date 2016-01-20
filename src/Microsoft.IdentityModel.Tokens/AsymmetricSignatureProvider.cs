@@ -59,12 +59,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>()
         {
-            { SecurityAlgorithms.ECDSA_SHA256, 256 },
-            { SecurityAlgorithms.ECDSA_SHA384, 256 },
-            { SecurityAlgorithms.ECDSA_SHA512, 256 },
-            { SecurityAlgorithms.RSA_SHA256, 2048 },
-            { SecurityAlgorithms.RSA_SHA384, 2048 },
-            { SecurityAlgorithms.RSA_SHA512, 2048 },
+            { SecurityAlgorithms.EcdsaSha256, 256 },
+            { SecurityAlgorithms.EcdsaSha384, 256 },
+            { SecurityAlgorithms.EcdsaSha512, 256 },
+            { SecurityAlgorithms.RsaSha256, 2048 },
+            { SecurityAlgorithms.RsaSha384, 2048 },
+            { SecurityAlgorithms.RsaSha512, 2048 },
             { SecurityAlgorithms.RsaSha256Signature, 2048 },
             { SecurityAlgorithms.RsaSha384Signature, 2048 },
             { SecurityAlgorithms.RsaSha512Signature, 2048 }
@@ -75,12 +75,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>()
         {
-            { SecurityAlgorithms.ECDSA_SHA256, 256 },
-            { SecurityAlgorithms.ECDSA_SHA384, 256 },
-            { SecurityAlgorithms.ECDSA_SHA512, 256 },
-            { SecurityAlgorithms.RSA_SHA256, 1024 },
-            { SecurityAlgorithms.RSA_SHA384, 1024 },
-            { SecurityAlgorithms.RSA_SHA512, 1024 },
+            { SecurityAlgorithms.EcdsaSha256, 256 },
+            { SecurityAlgorithms.EcdsaSha384, 256 },
+            { SecurityAlgorithms.EcdsaSha512, 256 },
+            { SecurityAlgorithms.RsaSha256, 1024 },
+            { SecurityAlgorithms.RsaSha384, 1024 },
+            { SecurityAlgorithms.RsaSha512, 1024 },
             { SecurityAlgorithms.RsaSha256Signature, 1024 },
             { SecurityAlgorithms.RsaSha384Signature, 1024 },
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            if (willCreateSignatures && !key.HasPrivateKey.Value)
+            if (willCreateSignatures && !key.HasPrivateKey)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
@@ -152,24 +152,23 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException("algorithm");
 
-
             switch (algorithm)
             {
-                case SecurityAlgorithms.SHA256:
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.Sha256:
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.RsaSha256:
                 case SecurityAlgorithms.RsaSha256Signature:
                     return HashAlgorithmName.SHA256;
 
-                case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.Sha384:
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.RsaSha384:
                 case SecurityAlgorithms.RsaSha384Signature:
                     return HashAlgorithmName.SHA384;
 
-                case SecurityAlgorithms.SHA512:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.Sha512:
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.RsaSha512:
                 case SecurityAlgorithms.RsaSha512Signature:
                     return HashAlgorithmName.SHA512;
             }
@@ -179,6 +178,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ResolveAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException("algorithm");
+
             _hashAlgorithm = GetHashAlgorithmName(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
 
@@ -238,30 +243,7 @@ namespace Microsoft.IdentityModel.Tokens
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
-                RSAParameters parameters;
-                if (willCreateSignatures)
-                {
-                    parameters = new RSAParameters()
-                    {
-                        D = Base64UrlEncoder.DecodeBytes(webKey.D),
-                        DP = Base64UrlEncoder.DecodeBytes(webKey.DP),
-                        DQ = Base64UrlEncoder.DecodeBytes(webKey.DQ),
-                        Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                        Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                        InverseQ = Base64UrlEncoder.DecodeBytes(webKey.QI),
-                        P = Base64UrlEncoder.DecodeBytes(webKey.P),
-                        Q = Base64UrlEncoder.DecodeBytes(webKey.Q)
-                    };
-                }
-                else
-                {
-                    parameters = new RSAParameters()
-                    {
-                        Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                        Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                    };
-                }
-
+                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willCreateSignatures);
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     _rsa = new RSACng();
                 else
@@ -273,146 +255,40 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
-                uint dwMagic = GetMagicValue(webKey.Crv, willCreateSignatures);
-                uint cbKey = GetKeyByteCount(webKey.Crv);
-                byte[] keyBlob;
-                if (willCreateSignatures)
-                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
-                else
-                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    throw new PlatformNotSupportedException();
 
-                GCHandle keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
-                IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
-                byte[] x = Base64UrlEncoder.DecodeBytes(webKey.X);
-                byte[] y = Base64UrlEncoder.DecodeBytes(webKey.Y);
-
-                Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
-                Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
-
-                int j = 8;
-                foreach (byte b in x)
-                    Marshal.WriteByte(keyBlobPtr, j++, b);
-
-                foreach (byte b in y)
-                    Marshal.WriteByte(keyBlobPtr, j++, b);
-
-                if (willCreateSignatures)
-                {
-                    byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
-                    foreach (byte b in d)
-                        Marshal.WriteByte(keyBlobPtr, j++, b);
-
-                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
-                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
-                    {
-                        _ecdsaCng = new ECDsaCng(cngKey);
-                    }
-                    return;
-                }
-                else
-                {
-                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
-                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
-                    {
-                        _ecdsaCng = new ECDsaCng(cngKey);
-                    }
-                    return;
-                }
+                CreateECDsaFromJsonWebKey(webKey, willCreateSignatures);
+                return;
             }
 
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
         }
-
-        private uint GetKeyByteCount(string curveId)
-        {
-            if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogArgumentNullException("curveId");
-
-            uint keyByteCount;
-            switch (curveId)
-            {
-                case "P-256": keyByteCount = 32;
-                    break;
-                case "P-384": keyByteCount = 48;
-                    break;
-                case "P-512": keyByteCount = 64;
-                    break;
-                default:
-                    throw LogHelper.LogException<ArgumentException>("Curve not supported");
-            }
-            return keyByteCount;
-        }
-
-        private uint GetMagicValue(string curveId, bool willCreateSignatures)
-        {
-            if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogArgumentNullException("curveId");
-
-            KeyBlobMagicNumber magicNumber;
-            switch(curveId)
-            {
-                case "P-256":
-                    if (willCreateSignatures)
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P256_MAGIC;
-                    else
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P256_MAGIC;
-                    break;
-                case "P-384":
-                    if (willCreateSignatures)
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P384_MAGIC;
-                    else
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
-                    break;
-                case "P-512":
-                    if (willCreateSignatures)
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC;
-                    else
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
-                    break;
-                default:
-                    throw LogHelper.LogException<ArgumentException>("Curve not supported");
-            }
-            return (uint)magicNumber;
-        }
-
-        /// <summary>
-        ///     Magic numbers identifying ECDSA blob types
-        /// </summary>
-        internal enum KeyBlobMagicNumber : int
-        {
-            BCRYPT_ECDSA_PUBLIC_P256_MAGIC = 0x31534345,
-            BCRYPT_ECDSA_PUBLIC_P384_MAGIC = 0x33534345,
-            BCRYPT_ECDSA_PUBLIC_P521_MAGIC = 0x35534345,
-            BCRYPT_ECDSA_PRIVATE_P256_MAGIC = 0x32534345,
-            BCRYPT_ECDSA_PRIVATE_P384_MAGIC = 0x34534345,
-            BCRYPT_ECDSA_PRIVATE_P521_MAGIC = 0x36534345,
-        }
-
 #else
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10000, "algorithm");
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.SHA256:
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.RSA_SHA256:
+                case SecurityAlgorithms.Sha256:
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.RsaSha256:
                 case SecurityAlgorithms.RsaSha256Signature:
-                    return SecurityAlgorithms.SHA256;
+                    return SecurityAlgorithms.Sha256;
 
-                case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.RSA_SHA384:
+                case SecurityAlgorithms.Sha384:
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.RsaSha384:
                 case SecurityAlgorithms.RsaSha384Signature:
-                    return SecurityAlgorithms.SHA384;
+                    return SecurityAlgorithms.Sha384;
 
-                case SecurityAlgorithms.SHA512:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.Sha512:
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.RsaSha512:
                 case SecurityAlgorithms.RsaSha512Signature:
-                    return SecurityAlgorithms.SHA512;
+                    return SecurityAlgorithms.Sha512;
             }
 
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
@@ -420,6 +296,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ResolveAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException("algorithm");
+
             _hashAlgorithm = GetHashAlgorithmString(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
 
@@ -450,6 +332,9 @@ namespace Microsoft.IdentityModel.Tokens
             ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
             if (ecdsaKey != null)
             {
+                if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+                    throw new PlatformNotSupportedException();
+
                 if (ecdsaKey.ECDsa != null)
                 {
                     _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
@@ -461,38 +346,184 @@ namespace Microsoft.IdentityModel.Tokens
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
-                RSAParameters parameters;
-                if (willCreateSignatures)
-                {
-                    parameters = new RSAParameters()
-                    {
-                        D = Base64UrlEncoder.DecodeBytes(webKey.D),
-                        DP = Base64UrlEncoder.DecodeBytes(webKey.DP),
-                        DQ = Base64UrlEncoder.DecodeBytes(webKey.DQ),
-                        Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                        Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                        InverseQ = Base64UrlEncoder.DecodeBytes(webKey.QI),
-                        P = Base64UrlEncoder.DecodeBytes(webKey.P),
-                        Q = Base64UrlEncoder.DecodeBytes(webKey.Q)
-                    };
-                }
-                else
-                {
-                    parameters = new RSAParameters()
-                    {
-                        Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                        Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                    };
-                }
-
+                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willCreateSignatures);
                 _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                 (_rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
+                return;
+            }
+            else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+            {
+                if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+                    throw new PlatformNotSupportedException();
+
+                CreateECDsaFromJsonWebKey(webKey, willCreateSignatures);
                 return;
             }
 
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
         }
 #endif
+
+        private RSAParameters CreateRsaParametersFromJsonWebKey(JsonWebKey webKey, bool willCreateSignatures)
+        {
+            if (webKey == null)
+                throw LogHelper.LogArgumentNullException(nameof(webKey));
+
+            RSAParameters parameters;
+            if (willCreateSignatures)
+            {
+                parameters = new RSAParameters()
+                {
+                    D = Base64UrlEncoder.DecodeBytes(webKey.D),
+                    DP = Base64UrlEncoder.DecodeBytes(webKey.DP),
+                    DQ = Base64UrlEncoder.DecodeBytes(webKey.DQ),
+                    Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
+                    Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
+                    InverseQ = Base64UrlEncoder.DecodeBytes(webKey.QI),
+                    P = Base64UrlEncoder.DecodeBytes(webKey.P),
+                    Q = Base64UrlEncoder.DecodeBytes(webKey.Q)
+                };
+            }
+            else
+            {
+                parameters = new RSAParameters()
+                {
+                    Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
+                    Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
+                };
+            }
+            return parameters;
+        }
+
+        private void CreateECDsaFromJsonWebKey(JsonWebKey webKey, bool willCreateSignatures)
+        {
+            if (webKey == null)
+                throw LogHelper.LogArgumentNullException(nameof(webKey));
+
+            uint dwMagic = GetMagicValue(webKey.Crv, willCreateSignatures);
+            uint cbKey = GetKeyByteCount(webKey.Crv);
+            byte[] keyBlob;
+            if (willCreateSignatures)
+                keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
+            else
+                keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+
+            GCHandle keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
+            IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
+            byte[] x = Base64UrlEncoder.DecodeBytes(webKey.X);
+            byte[] y = Base64UrlEncoder.DecodeBytes(webKey.Y);
+
+            Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
+            Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
+
+            int j = 8;
+            foreach (byte b in x)
+                Marshal.WriteByte(keyBlobPtr, j++, b);
+
+            foreach (byte b in y)
+                Marshal.WriteByte(keyBlobPtr, j++, b);
+
+            if (willCreateSignatures)
+            {
+                byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
+                foreach (byte b in d)
+                    Marshal.WriteByte(keyBlobPtr, j++, b);
+
+                Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
+                using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
+                {
+                    _ecdsaCng = new ECDsaCng(cngKey);
+                }
+            }
+            else
+            {
+                Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
+                using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
+                {
+                    _ecdsaCng = new ECDsaCng(cngKey);
+                }
+            }
+            keyBlobHandle.Free();
+        }
+
+        /// <summary>
+        /// Returns the size of key in bytes
+        /// </summary>
+        /// <param name="curveId">represents ecdsa curve -P256, P384, P512</param>
+        /// <returns>size of the key in bytes</returns>
+        private uint GetKeyByteCount(string curveId)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
+
+            uint keyByteCount;
+            switch (curveId)
+            {
+                case JsonWebKeyECTypes.P256:
+                    keyByteCount = 32;
+                    break;
+                case JsonWebKeyECTypes.P384:
+                    keyByteCount = 48;
+                    break;
+                case JsonWebKeyECTypes.P512:
+                    keyByteCount = 64;
+                    break;
+                default:
+                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10645, curveId);
+            }
+            return keyByteCount;
+        }
+
+        /// <summary>
+        /// Returns the magic value representing the curve corresponding to the curve id.
+        /// </summary>
+        /// <param name="curveId">represents ecdsa curve -P256, P384, P512</param>
+        /// <param name="willCreateSignatures">whether the provider will create signatures or not</param>
+        /// <returns>uint representing the magic number</returns>
+        private uint GetMagicValue(string curveId, bool willCreateSignatures)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
+
+            KeyBlobMagicNumber magicNumber;
+            switch (curveId)
+            {
+                case JsonWebKeyECTypes.P256:
+                    if (willCreateSignatures)
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P256_MAGIC;
+                    else
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P256_MAGIC;
+                    break;
+                case JsonWebKeyECTypes.P384:
+                    if (willCreateSignatures)
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P384_MAGIC;
+                    else
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
+                    break;
+                case JsonWebKeyECTypes.P512:
+                    if (willCreateSignatures)
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC;
+                    else
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
+                    break;
+                default:
+                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10645, curveId);
+            }
+            return (uint)magicNumber;
+        }
+
+        /// <summary>
+        /// Magic numbers identifying ECDSA blob types
+        /// </summary>
+        internal enum KeyBlobMagicNumber : int
+        {
+            BCRYPT_ECDSA_PUBLIC_P256_MAGIC = 0x31534345,
+            BCRYPT_ECDSA_PUBLIC_P384_MAGIC = 0x33534345,
+            BCRYPT_ECDSA_PUBLIC_P521_MAGIC = 0x35534345,
+            BCRYPT_ECDSA_PRIVATE_P256_MAGIC = 0x32534345,
+            BCRYPT_ECDSA_PRIVATE_P384_MAGIC = 0x34534345,
+            BCRYPT_ECDSA_PRIVATE_P521_MAGIC = 0x36534345,
+        }
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
@@ -501,15 +532,15 @@ namespace Microsoft.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.SHA256:
-                case SecurityAlgorithms.SHA384:
-                case SecurityAlgorithms.SHA512:
-                case SecurityAlgorithms.ECDSA_SHA256:
-                case SecurityAlgorithms.ECDSA_SHA384:
-                case SecurityAlgorithms.ECDSA_SHA512:
-                case SecurityAlgorithms.RSA_SHA256:
-                case SecurityAlgorithms.RSA_SHA384:
-                case SecurityAlgorithms.RSA_SHA512:
+                case SecurityAlgorithms.Sha256:
+                case SecurityAlgorithms.Sha384:
+                case SecurityAlgorithms.Sha512:
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSha512:
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
                 case SecurityAlgorithms.RsaSha512Signature:

@@ -115,9 +115,9 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HMAC_SHA256:
-                case SecurityAlgorithms.HMAC_SHA384:
-                case SecurityAlgorithms.HMAC_SHA512:
+                case SecurityAlgorithms.HmacSha256:
+                case SecurityAlgorithms.HmacSha384:
+                case SecurityAlgorithms.HmacSha512:
                     return true;
                 default:
                     return false;
@@ -133,13 +133,13 @@ namespace Microsoft.IdentityModel.Tokens
             switch (algorithm)
             {
                 case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HMAC_SHA256:
+                case SecurityAlgorithms.HmacSha256:
                     return new HMACSHA256();
                 case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HMAC_SHA384:
+                case SecurityAlgorithms.HmacSha384:
                     return new HMACSHA384();
                 case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HMAC_SHA512:
+                case SecurityAlgorithms.HmacSha512:
                     return new HMACSHA512();
                 default:
                     throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);

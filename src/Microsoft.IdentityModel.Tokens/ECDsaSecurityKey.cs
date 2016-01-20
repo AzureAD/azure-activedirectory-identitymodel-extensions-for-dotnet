@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public ECDsa ECDsa { get; private set; }
 
-        public override bool? HasPrivateKey
+        public override bool HasPrivateKey
         {
             get
             {
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
                         _hasPrivateKey = false;
                     }
                 }
-                return _hasPrivateKey;
+                return _hasPrivateKey.Value;
             }
         }
 

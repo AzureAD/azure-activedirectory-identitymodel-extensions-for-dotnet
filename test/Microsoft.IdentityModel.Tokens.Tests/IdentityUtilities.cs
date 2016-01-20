@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
 
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
-        public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RSA_SHA256);
+        public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
 
         public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; } }
         public static SecurityKey DefaultSymmetricSigningKey {  get { return KeyingMaterial.DefaultSymmetricSecurityKey_256;  } }

@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
-        public override bool? HasPrivateKey
+        public override bool HasPrivateKey
         {
             get
             {

@@ -27,9 +27,16 @@
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public abstract class AsymmetricSecurityKey : SecurityKey
+    /// <summary>
+    /// Constants for JsonWebKey Elliptical Curve Types
+    /// https://tools.ietf.org/html/rfc7518#section-6.2.1.1
+    /// </summary>
+    public static class JsonWebKeyECTypes
     {
-        public abstract bool HasPrivateKey { get; }
-
+#pragma warning disable 1591
+        public const string P256 = "P-256";
+        public const string P384 = "P-384";
+        public const string P512 = "P-512";
+#pragma warning restore 1591
     }
 }

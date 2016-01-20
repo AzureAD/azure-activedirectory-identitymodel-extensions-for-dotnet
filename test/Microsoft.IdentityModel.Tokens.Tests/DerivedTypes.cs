@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public ReturnNullAsymmetricSecurityKey() { }
 
-        public override bool? HasPrivateKey
+        public override bool HasPrivateKey
         {
             get { throw new NotImplementedException(); }
         }
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             _key = key;
         }
 
-        public override bool? HasPrivateKey
+        public override bool HasPrivateKey
         {
             get { return _key.HasPrivateKey; }
         }

@@ -53,15 +53,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private IDictionary<string, string> _hashAlgorithmMap =
             new Dictionary<string, string>
             {
-                { JwtAlgorithms.ECDSA_SHA256, "SHA256" },
-                { JwtAlgorithms.RSA_SHA256, "SHA256" },
-                { JwtAlgorithms.HMAC_SHA256, "SHA256" },
-                { JwtAlgorithms.ECDSA_SHA384, "SHA384" },
-                { JwtAlgorithms.RSA_SHA384, "SHA384" },
-                { JwtAlgorithms.HMAC_SHA384, "SHA384" },
-                { JwtAlgorithms.ECDSA_SHA512, "SHA512" },
-                { JwtAlgorithms.RSA_SHA512, "SHA512" },
-                { JwtAlgorithms.HMAC_SHA512, "SHA512" },
+                { SecurityAlgorithms.EcdsaSha256, "SHA256" },
+                { SecurityAlgorithms.RsaSha256, "SHA256" },
+                { SecurityAlgorithms.HmacSha256, "SHA256" },
+                { SecurityAlgorithms.EcdsaSha384, "SHA384" },
+                { SecurityAlgorithms.RsaSha384, "SHA384" },
+                { SecurityAlgorithms.HmacSha384, "SHA384" },
+                { SecurityAlgorithms.EcdsaSha512, "SHA512" },
+                { SecurityAlgorithms.RsaSha512, "SHA512" },
+                { SecurityAlgorithms.HmacSha512, "SHA512" },
           };
 
         private TimeSpan _nonceLifetime = DefaultNonceLifetime;
@@ -422,35 +422,38 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (algorithm == null)
             {
-                algorithm = JwtAlgorithms.RSA_SHA256;
+                algorithm = SecurityAlgorithms.RsaSha256;
             }
 
             try
             {
                 switch (algorithm)
                 {
-                    case SecurityAlgorithms.SHA256:
-                    case SecurityAlgorithms.ECDSA_SHA256:
-                    case SecurityAlgorithms.HMAC_SHA256:
-                    case SecurityAlgorithms.RSA_SHA256:
+                    case SecurityAlgorithms.Sha256:
+                    case SecurityAlgorithms.EcdsaSha256:
+                    case SecurityAlgorithms.HmacSha256:
+                    case SecurityAlgorithms.RsaSha256:
+                    case SecurityAlgorithms.RsaSsaPssSha256:
                     case SecurityAlgorithms.RsaSha256Signature:
-                    case SecurityAlgorithms.PS256:
+                    case SecurityAlgorithms.EcdsaSha256Signature:
                         return SHA256.Create();
 
-                    case SecurityAlgorithms.SHA384:
-                    case SecurityAlgorithms.ECDSA_SHA384:
-                    case SecurityAlgorithms.HMAC_SHA384:
-                    case SecurityAlgorithms.RSA_SHA384:
+                    case SecurityAlgorithms.Sha384:
+                    case SecurityAlgorithms.EcdsaSha384:
+                    case SecurityAlgorithms.HmacSha384:
+                    case SecurityAlgorithms.RsaSha384:
+                    case SecurityAlgorithms.RsaSsaPssSha384:
                     case SecurityAlgorithms.RsaSha384Signature:
-                    case SecurityAlgorithms.PS384:
+                    case SecurityAlgorithms.EcdsaSha384Signature:
                         return SHA384.Create();
 
-                    case SecurityAlgorithms.SHA512:
+                    case SecurityAlgorithms.Sha512:
+                    case SecurityAlgorithms.RsaSha512:
+                    case SecurityAlgorithms.EcdsaSha512:
+                    case SecurityAlgorithms.HmacSha512:
+                    case SecurityAlgorithms.RsaSsaPssSha512:
                     case SecurityAlgorithms.RsaSha512Signature:
-                    case SecurityAlgorithms.RSA_SHA512:
-                    case SecurityAlgorithms.ECDSA_SHA512:
-                    case SecurityAlgorithms.HMAC_SHA512:
-                    case SecurityAlgorithms.PS512:
+                    case SecurityAlgorithms.EcdsaSha512Signature:
                         return SHA512.Create();
                 }
 
