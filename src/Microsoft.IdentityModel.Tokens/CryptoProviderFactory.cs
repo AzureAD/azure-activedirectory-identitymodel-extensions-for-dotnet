@@ -26,10 +26,19 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="securityKey"></param>
+    /// <param name="algorithm"></param>
+    /// <returns></returns>
+    public delegate AsymmetricAlgorithm ResolveAsymmetricAlgorithm(AsymmetricSecurityKey securityKey, string algorithm, bool willCreateSignatures);
+
     /// <summary>
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
     /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>
@@ -42,6 +51,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             Default = new CryptoProviderFactory();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ResolveAsymmetricAlgorithm ResolveAsymmetricAlgorithm { get; set; }
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
