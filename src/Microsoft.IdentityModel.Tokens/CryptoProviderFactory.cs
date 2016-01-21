@@ -32,12 +32,12 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// 
+    /// Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use when signing or verifying token.
     /// </summary>
-    /// <param name="securityKey"></param>
-    /// <param name="algorithm"></param>
-    /// <returns></returns>
-    public delegate AsymmetricAlgorithm ResolveAsymmetricAlgorithm(AsymmetricSecurityKey securityKey, string algorithm, bool willCreateSignatures);
+    /// <param name="securityKey"><see cref="SecurityKey"/> to use for the crypto operations.</param>
+    /// <param name="algorithm">algorithm to use for the crypto operations</param>
+    /// <returns><see cref="AsymmetricAlgorithm"/> to use for signing and/or verifying tokens.</returns>
+    public delegate AsymmetricAlgorithm AsymmetricAlgorithmResolver(AsymmetricSecurityKey securityKey, string algorithm, bool willCreateSignatures);
 
     /// <summary>
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
@@ -53,9 +53,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 
+        /// Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use when signing or verifying token.
         /// </summary>
-        public ResolveAsymmetricAlgorithm ResolveAsymmetricAlgorithm { get; set; }
+        public AsymmetricAlgorithmResolver AsymmetricAlgorithmResolver { get; set; }
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
-                return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures);
+                return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures, AsymmetricAlgorithmResolver);
 
             SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
             if (symmetricKey != null)
