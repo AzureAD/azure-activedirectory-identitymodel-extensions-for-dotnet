@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         private HashAlgorithmName _hashAlgorithm;
         private RSA _rsa;
 #else
-        private ECDsaCng _ecdsaCng;
+        private ECDsaCng _ecdsa;
         private string _hashAlgorithm;
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
 #endif
@@ -86,12 +86,23 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
         };
 
+        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm)
+            : this(key, algorithm, false, null)
+        {
+        }
+
+        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+            : this(key, algorithm, willCreateSignatures, null)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="AsymmetricSecurityKey"/> that will be used for cryptographic operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <param name="willCreateSignatures">If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
+        /// <param name="asymmetricAlgorithmResolver">Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use for crypto operations.</param>
         /// <para>
         /// Creating signatures requires that the <see cref="AsymmetricSecurityKey"/> has access to a private key. 
         /// Verifying signatures (the default), does not require access to the private key.
@@ -106,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         /// <exception cref="ArgumentException">if 'algorithm" is not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException">if 'key' is not <see cref="RsaSecurityKey"/> or <see cref="X509SecurityKey"/>.</exception>
-        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures = false)
+        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures, AsymmetricAlgorithmResolver asymmetricAlgorithmResolver)
             : base(key, algorithm)
         {
             if (key == null)
@@ -121,9 +132,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures && !key.HasPrivateKey)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
-            if (ResolveAsymmetricAlgorithm != null)
+            if (asymmetricAlgorithmResolver != null)
             {
-                AsymmetricAlgorithm asymmetricAlgorithm = ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+                AsymmetricAlgorithm asymmetricAlgorithm = asymmetricAlgorithmResolver(key, algorithm, willCreateSignatures);
 #if DOTNET5_4
                 _rsa = asymmetricAlgorithm as RSA;
                 if (_rsa == null)
@@ -133,8 +144,8 @@ namespace Microsoft.IdentityModel.Tokens
 #else
                 _rsaCryptoServiceProvider = asymmetricAlgorithm as RSACryptoServiceProvider;
                 if (_rsaCryptoServiceProvider == null)
-                    _ecdsaCng = asymmetricAlgorithm as ECDsaCng;
-                if (_ecdsaCng == null)
+                    _ecdsa = asymmetricAlgorithm as ECDsaCng;
+                if (_ecdsa == null)
                     throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
 #endif
             }
@@ -165,8 +176,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return _minimumAsymmetricKeySizeInBitsForVerifyingMap;
             }
         }
-
-        public ResolveAsymmetricAlgorithm ResolveAsymmetricAlgorithm { get; set; }
 
 #if DOTNET5_4
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
@@ -356,8 +365,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (ecdsaKey.ECDsa != null)
                 {
-                    _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
-                    _ecdsaCng.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                    _ecdsa = ecdsaKey.ECDsa as ECDsaCng;
+                    _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
                     return;
                 }
             }
@@ -600,8 +609,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
             else if (_rsaCryptoServiceProviderProxy != null)
                 return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
-            else if (_ecdsaCng != null)
-                return _ecdsaCng.SignData(input);
+            else if (_ecdsa != null)
+                return _ecdsa.SignData(input);
 #endif
             throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10644);
         }
@@ -651,8 +660,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
             else if (_rsaCryptoServiceProviderProxy != null)
                 return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
-            else if (_ecdsaCng != null)
-                return _ecdsaCng.VerifyData(input, signature);
+            else if (_ecdsa != null)
+                return _ecdsa.VerifyData(input, signature);
 #endif
             throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10644);
         }

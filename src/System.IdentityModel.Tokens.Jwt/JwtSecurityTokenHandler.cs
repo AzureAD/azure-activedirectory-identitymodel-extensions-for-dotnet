@@ -468,6 +468,10 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
 
             JwtSecurityToken jwt = null;
+
+            if (validationParameters.CryptoProviderFactory != null)
+                CryptoProviderFactory.Default = validationParameters.CryptoProviderFactory;
+
             if (validationParameters.SignatureValidator != null)
             {
                 var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
