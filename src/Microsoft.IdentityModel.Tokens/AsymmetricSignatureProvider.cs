@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #if DOTNET5_4
         private bool _disposeRsa;
-        private ECDsa _ecdsaCng;
+        private ECDsa _ecdsa;
         private HashAlgorithmName _hashAlgorithm;
         private RSA _rsa;
 #else
@@ -121,7 +121,27 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures && !key.HasPrivateKey)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
-            ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            if (ResolveAsymmetricAlgorithm != null)
+            {
+                AsymmetricAlgorithm asymmetricAlgorithm = ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+#if DOTNET5_4
+                _rsa = asymmetricAlgorithm as RSA;
+                if (_rsa == null)
+                    _ecdsa = asymmetricAlgorithm as ECDsa;
+                if (_ecdsa == null)
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+#else
+                _rsaCryptoServiceProvider = asymmetricAlgorithm as RSACryptoServiceProvider;
+                if (_rsaCryptoServiceProvider == null)
+                    _ecdsaCng = asymmetricAlgorithm as ECDsaCng;
+                if (_ecdsaCng == null)
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+#endif
+            }
+            else
+            {
+                ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            }
         }
 
         /// <summary>
@@ -145,6 +165,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return _minimumAsymmetricKeySizeInBitsForVerifyingMap;
             }
         }
+
+        public ResolveAsymmetricAlgorithm ResolveAsymmetricAlgorithm { get; set; }
 
 #if DOTNET5_4
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
@@ -235,7 +257,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (ecdsaKey.ECDsa != null)
                 {
-                    _ecdsaCng = ecdsaKey.ECDsa;
+                    _ecdsa = ecdsaKey.ECDsa;
                     return;
                 }
             }
@@ -246,7 +268,7 @@ namespace Microsoft.IdentityModel.Tokens
                 RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willCreateSignatures);
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     _rsa = new RSACng();
-                else
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     _rsa = new RSAOpenSsl();
 
                 _rsa.ImportParameters(parameters);
@@ -332,9 +354,6 @@ namespace Microsoft.IdentityModel.Tokens
             ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
             if (ecdsaKey != null)
             {
-                if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-                    throw new PlatformNotSupportedException();
-
                 if (ecdsaKey.ECDsa != null)
                 {
                     _ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
@@ -353,9 +372,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
-                if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-                    throw new PlatformNotSupportedException();
-
                 CreateECDsaFromJsonWebKey(webKey, willCreateSignatures);
                 return;
             }
@@ -432,7 +448,7 @@ namespace Microsoft.IdentityModel.Tokens
                 Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                 using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
                 {
-                    _ecdsaCng = new ECDsaCng(cngKey);
+                    _ecdsa = new ECDsaCng(cngKey);
                 }
             }
             else
@@ -440,7 +456,7 @@ namespace Microsoft.IdentityModel.Tokens
                 Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                 using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
                 {
-                    _ecdsaCng = new ECDsaCng(cngKey);
+                    _ecdsa = new ECDsaCng(cngKey);
                 }
             }
             keyBlobHandle.Free();
@@ -577,8 +593,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
             else if (_rsaCryptoServiceProviderProxy != null)
                 return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm.Name);
-            else if (_ecdsaCng != null)
-                return _ecdsaCng.SignData(input, _hashAlgorithm);
+            else if (_ecdsa != null)
+                return _ecdsa.SignData(input, _hashAlgorithm);
 #else
             if (_rsaCryptoServiceProvider != null)
                 return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
@@ -628,8 +644,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
             else if (_rsaCryptoServiceProviderProxy != null)
                 return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm.Name, signature);
-            else if (_ecdsaCng != null)
-                return _ecdsaCng.VerifyData(input, signature, _hashAlgorithm);
+            else if (_ecdsa != null)
+                return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
 #else
             if (_rsaCryptoServiceProvider != null)
                 return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
@@ -678,8 +694,8 @@ namespace Microsoft.IdentityModel.Tokens
                     if (_rsaCryptoServiceProvider != null)
                         _rsaCryptoServiceProvider.Dispose();
 #endif
-                    if (_ecdsaCng != null)
-                        _ecdsaCng.Dispose();
+                    if (_ecdsa != null)
+                        _ecdsa.Dispose();
 
                     if (_rsaCryptoServiceProviderProxy != null)
                         _rsaCryptoServiceProviderProxy.Dispose();
