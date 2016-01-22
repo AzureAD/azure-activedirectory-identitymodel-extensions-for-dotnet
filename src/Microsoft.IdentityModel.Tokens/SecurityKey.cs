@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
             return GetSignatureProvider(algorithm, false);
         }
 
-        public SignatureProvider GetSignatureProviderForValidating(string algorithm)
+        public SignatureProvider GetSignatureProviderForVerifying(string algorithm)
         {
             return GetSignatureProvider(algorithm, true);
         }

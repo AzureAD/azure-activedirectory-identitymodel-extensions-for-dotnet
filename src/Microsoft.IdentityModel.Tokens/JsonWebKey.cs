@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
     /// </summary>
     [JsonObject]
-    public class JsonWebKey : AsymmetricSecurityKey
+    public class JsonWebKey : SecurityKey
     {
         // kept private to hide that a List is used.
         // public member returns an IList.
@@ -85,6 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
             this.DP = key.DP;
             this.DQ = key.DQ;
             this.E = key.E;
+            this.K = key.K;
             if (key.KeyOps != null)
                 _keyops = new List<string>(key.KeyOps);
             this.Kid = key.Kid;
@@ -142,6 +143,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.E, Required = Required.Default)]
         public string E { get; set; }
+
+        /// <summary>
+        /// Gets or sets the 'k' (Symmetric - Key Value)..
+        /// </summary>
+        /// Base64urlEncoding
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.K, Required = Required.Default)]
+        public string K { get; set; }
 
         /// <summary>
         /// Gets or sets the 'key_ops' (Key Operations)..
@@ -275,12 +283,14 @@ namespace Microsoft.IdentityModel.Tokens
                     return Base64UrlEncoder.DecodeBytes(N).Length * 8;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
                     return Base64UrlEncoder.DecodeBytes(X).Length * 8;
+                else if (Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    return Base64UrlEncoder.DecodeBytes(K).Length * 8;
                 else
                     return 0;
             }
         }
 
-        public override bool HasPrivateKey
+        public bool HasPrivateKey
         {
             get
             {

@@ -213,6 +213,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
                     Kty = "EC"
                 };
+            JsonWebKeySymmetric256 =
+                new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.Octet,
+                    K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
+                };
         }
 
         // .../Certs/SelfSigned1024_SHA256.pfx
@@ -322,6 +328,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static readonly JsonWebKey JsonWebKeyRsa256Public;
         public static readonly JsonWebKey JsonWebKeyEcdsa256;
         public static readonly JsonWebKey JsonWebKeyEcdsa256Public;
+        public static readonly JsonWebKey JsonWebKeySymmetric256;
 
         public static string DefaultSymmetricKeyEncoded_256 = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);

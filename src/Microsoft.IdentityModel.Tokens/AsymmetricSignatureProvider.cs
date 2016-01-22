@@ -86,12 +86,12 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
         };
 
-        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm)
+        public AsymmetricSignatureProvider(SecurityKey key, string algorithm)
             : this(key, algorithm, false, null)
         {
         }
 
-        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : this(key, algorithm, willCreateSignatures, null)
         {
         }
@@ -99,25 +99,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
-        /// <param name="key">The <see cref="AsymmetricSecurityKey"/> that will be used for cryptographic operations.</param>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <param name="willCreateSignatures">If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
         /// <param name="asymmetricAlgorithmResolver">Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use for crypto operations.</param>
         /// <para>
-        /// Creating signatures requires that the <see cref="AsymmetricSecurityKey"/> has access to a private key. 
+        /// Creating signatures requires that the <see cref="SecurityKey"/> has access to a private key.
         /// Verifying signatures (the default), does not require access to the private key.
         /// </para>
         /// </param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// willCreateSignatures is true and <see cref="AsymmetricSecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
+        /// willCreateSignatures is true and <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <see cref="AsymmetricSecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
+        /// <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
         /// </exception>
         /// <exception cref="ArgumentException">if 'algorithm" is not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException">if 'key' is not <see cref="RsaSecurityKey"/> or <see cref="X509SecurityKey"/>.</exception>
-        public AsymmetricSignatureProvider(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures, AsymmetricAlgorithmResolver asymmetricAlgorithmResolver)
+        public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, AsymmetricAlgorithmResolver asymmetricAlgorithmResolver)
             : base(key, algorithm)
         {
             if (key == null)
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            if (willCreateSignatures && !key.HasPrivateKey)
+            if (willCreateSignatures && !HasPrivateKey(key))
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
             if (asymmetricAlgorithmResolver != null)
@@ -138,15 +138,19 @@ namespace Microsoft.IdentityModel.Tokens
 #if DOTNET5_4
                 _rsa = asymmetricAlgorithm as RSA;
                 if (_rsa == null)
+                {
                     _ecdsa = asymmetricAlgorithm as ECDsa;
-                if (_ecdsa == null)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                    if (_ecdsa == null)
+                        throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                }
 #else
                 _rsaCryptoServiceProvider = asymmetricAlgorithm as RSACryptoServiceProvider;
                 if (_rsaCryptoServiceProvider == null)
+                {
                     _ecdsa = asymmetricAlgorithm as ECDsaCng;
-                if (_ecdsa == null)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                    if (_ecdsa == null)
+                        throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                }
 #endif
             }
             else
@@ -175,6 +179,19 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return _minimumAsymmetricKeySizeInBitsForVerifyingMap;
             }
+        }
+
+        private bool HasPrivateKey(SecurityKey key)
+        {
+            AsymmetricSecurityKey asymmetricSecurityKey = key as AsymmetricSecurityKey;
+            if (asymmetricSecurityKey != null)
+                return asymmetricSecurityKey.HasPrivateKey;
+
+            JsonWebKey jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+                return jsonWebKey.HasPrivateKey;
+
+            return false;
         }
 
 #if DOTNET5_4
@@ -207,7 +224,7 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
         }
 
-        private void ResolveAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
@@ -246,18 +263,13 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
                     if (rsaCsp != null)
-                    {
                         _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
-                    }
                     else
-                    {
                         _rsa = x509Key.PrivateKey as RSA;
-                    }
                 }
                 else
-                {
                     _rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
-                }
+
                 return;
             }
 
@@ -280,9 +292,12 @@ namespace Microsoft.IdentityModel.Tokens
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     _rsa = new RSAOpenSsl();
 
-                _rsa.ImportParameters(parameters);
-                _disposeRsa = true;
-                return;
+                if (_rsa != null)
+                {
+                    _rsa.ImportParameters(parameters);
+                    _disposeRsa = true;
+                    return;
+                }
             }
             else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
@@ -325,7 +340,7 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
         }
 
-        private void ResolveAsymmetricAlgorithm(AsymmetricSecurityKey key, string algorithm, bool willCreateSignatures)
+        private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
@@ -356,7 +371,6 @@ namespace Microsoft.IdentityModel.Tokens
                     _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
                 else
                     _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
-
                 return;
             }
 
@@ -394,9 +408,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (webKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(webKey));
 
+            if (webKey.N == null || webKey.E == null)
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10700, webKey);
+
             RSAParameters parameters;
             if (willCreateSignatures)
             {
+                if (webKey.D == null || webKey.DP == null || webKey.DQ == null || webKey.QI == null || webKey.P == null || webKey.Q == null)
+                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10702, webKey);
+
                 parameters = new RSAParameters()
                 {
                     D = Base64UrlEncoder.DecodeBytes(webKey.D),
@@ -425,50 +445,70 @@ namespace Microsoft.IdentityModel.Tokens
             if (webKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(webKey));
 
-            uint dwMagic = GetMagicValue(webKey.Crv, willCreateSignatures);
-            uint cbKey = GetKeyByteCount(webKey.Crv);
-            byte[] keyBlob;
-            if (willCreateSignatures)
-                keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
-            else
-                keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+            if (webKey.Crv == null)
+                throw LogHelper.LogArgumentNullException(nameof(webKey.Crv));
 
-            GCHandle keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
-            IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
-            byte[] x = Base64UrlEncoder.DecodeBytes(webKey.X);
-            byte[] y = Base64UrlEncoder.DecodeBytes(webKey.Y);
+            if (webKey.X == null)
+                throw LogHelper.LogArgumentNullException(nameof(webKey.X));
 
-            Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
-            Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
+            if (webKey.Y == null)
+                throw LogHelper.LogArgumentNullException(nameof(webKey.Y));
 
-            int j = 8;
-            foreach (byte b in x)
-                Marshal.WriteByte(keyBlobPtr, j++, b);
-
-            foreach (byte b in y)
-                Marshal.WriteByte(keyBlobPtr, j++, b);
-
-            if (willCreateSignatures)
+            GCHandle keyBlobHandle = new GCHandle();
+            try
             {
-                byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
-                foreach (byte b in d)
-                    Marshal.WriteByte(keyBlobPtr, j++, b);
+                uint dwMagic = GetMagicValue(webKey.Crv, willCreateSignatures);
+                uint cbKey = GetKeyByteCount(webKey.Crv);
+                byte[] keyBlob;
+                if (willCreateSignatures)
+                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                else
+                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
 
-                Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
-                using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
+                keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
+                IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
+                byte[] x = Base64UrlEncoder.DecodeBytes(webKey.X);
+                byte[] y = Base64UrlEncoder.DecodeBytes(webKey.Y);
+
+                Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
+                Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
+
+                int index = 8;
+                foreach (byte b in x)
+                    Marshal.WriteByte(keyBlobPtr, index++, b);
+
+                foreach (byte b in y)
+                    Marshal.WriteByte(keyBlobPtr, index++, b);
+
+                if (willCreateSignatures)
                 {
-                    _ecdsa = new ECDsaCng(cngKey);
+                    if (webKey.D == null)
+                        throw LogHelper.LogArgumentNullException(nameof(webKey.D));
+
+                    byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
+                    foreach (byte b in d)
+                        Marshal.WriteByte(keyBlobPtr, index++, b);
+
+                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
+                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
+                    {
+                        _ecdsa = new ECDsaCng(cngKey);
+                    }
+                }
+                else
+                {
+                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
+                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
+                    {
+                        _ecdsa = new ECDsaCng(cngKey);
+                    }
                 }
             }
-            else
+            finally
             {
-                Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
-                using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
-                {
-                    _ecdsa = new ECDsaCng(cngKey);
-                }
+                if (keyBlobHandle != null)
+                    keyBlobHandle.Free();
             }
-            keyBlobHandle.Free();
         }
 
         /// <summary>
@@ -540,7 +580,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Magic numbers identifying ECDSA blob types
         /// </summary>
-        internal enum KeyBlobMagicNumber : int
+        internal enum KeyBlobMagicNumber : uint
         {
             BCRYPT_ECDSA_PUBLIC_P256_MAGIC = 0x31534345,
             BCRYPT_ECDSA_PUBLIC_P384_MAGIC = 0x33534345,
@@ -557,9 +597,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             switch (algorithm)
             {
-                case SecurityAlgorithms.Sha256:
-                case SecurityAlgorithms.Sha384:
-                case SecurityAlgorithms.Sha512:
                 case SecurityAlgorithms.EcdsaSha256:
                 case SecurityAlgorithms.EcdsaSha384:
                 case SecurityAlgorithms.EcdsaSha512:

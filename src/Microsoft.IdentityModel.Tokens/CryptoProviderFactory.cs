@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityKey"><see cref="SecurityKey"/> to use for the crypto operations.</param>
     /// <param name="algorithm">algorithm to use for the crypto operations</param>
     /// <returns><see cref="AsymmetricAlgorithm"/> to use for signing and/or verifying tokens.</returns>
-    public delegate AsymmetricAlgorithm AsymmetricAlgorithmResolver(AsymmetricSecurityKey securityKey, string algorithm, bool willCreateSignatures);
+    public delegate AsymmetricAlgorithm AsymmetricAlgorithmResolver(SecurityKey securityKey, string algorithm, bool willCreateSignatures);
 
     /// <summary>
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
@@ -120,6 +120,18 @@ namespace Microsoft.IdentityModel.Tokens
             SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
             if (symmetricKey != null)
                 return new SymmetricSignatureProvider(symmetricKey, algorithm);
+
+            JsonWebKey jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+            {
+                if (jsonWebKey.Kty != null)
+                {
+                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                        return new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, AsymmetricAlgorithmResolver);
+                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                        return new SymmetricSignatureProvider(key, algorithm);
+                }
+            }
 
             throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10600, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType());
         }
