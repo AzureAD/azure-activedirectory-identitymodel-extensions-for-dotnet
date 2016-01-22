@@ -617,7 +617,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm)
         {
-            SignatureProvider signatureProvider = key.GetSignatureProviderForValidating(algorithm);
+            SignatureProvider signatureProvider = key.GetSignatureProviderForVerifying(algorithm);
             if (signatureProvider == null)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10636, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm));
 

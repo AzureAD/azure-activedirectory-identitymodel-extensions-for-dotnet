@@ -50,18 +50,18 @@ namespace Microsoft.IdentityModel.Tokens
         private int _minimumSymmetricKeySizeInBits = DefaultMinimumSymmetricKeySizeInBits;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SymmetricSecurityKey"/> to create and / or verify signatures over a array of bytes.
+        /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SecurityKey"/> to create and / or verify signatures over a array of bytes.
         /// </summary>
-        /// <param name="key">The <see cref="SymmetricSecurityKey"/> used for signing.</param>
+        /// <param name="key">The <see cref="SecurityKey"/> used for signing.</param>
         /// <param name="algorithm">The signature algorithm to use.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
         /// <exception cref="ArgumentException">'algorithm' contains only whitespace.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">'<see cref="SymmetricSecurityKey"/>.KeySize' is smaller than <see cref="CryptoProviderFactory.MinimumSymmetricKeySizeInBits"/>.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetKeyedHashAlgorithm"/> throws.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetKeyedHashAlgorithm"/> returns null.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="SymmetricSecurityKey.GetSymmetricKey"/> throws.</exception>
-        public SymmetricSignatureProvider(SymmetricSecurityKey key, string algorithm)
+        /// <exception cref="ArgumentOutOfRangeException">'<see cref="SecurityKey"/>.KeySize' is smaller than <see cref="CryptoProviderFactory.MinimumSymmetricKeySizeInBits"/>.</exception>
+        /// <exception cref="InvalidOperationException"><see cref="SecurityKey.GetKeyedHashAlgorithm"/> throws.</exception>
+        /// <exception cref="InvalidOperationException"><see cref="SecurityKey.GetKeyedHashAlgorithm"/> returns null.</exception>
+        /// <exception cref="InvalidOperationException"><see cref="SecurityKey.GetSymmetricKey"/> throws.</exception>
+        public SymmetricSignatureProvider(SecurityKey key, string algorithm)
             : base(key, algorithm)
         {
             if (key == null)
@@ -73,16 +73,29 @@ namespace Microsoft.IdentityModel.Tokens
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
                 throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
 
-            _keyedHash = GetKeyedHashAlgorithm(algorithm);
-
             try
             {
-                _keyedHash.Key = key.Key;
+                byte[] keyBytes = null;
+
+                SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+                if (symmetricSecurityKey != null)
+                    keyBytes = symmetricSecurityKey.Key;
+                else
+                {
+                    JsonWebKey jsonWebKey = key as JsonWebKey;
+                    if (jsonWebKey != null && jsonWebKey.K != null)
+                        keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+                }
+
+                _keyedHash = GetKeyedHashAlgorithm(algorithm, keyBytes);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, key, (algorithm ?? "null"));
             }
+
+            if (_keyedHash == null)
+                throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
         }
 
         /// <summary>
@@ -125,22 +138,25 @@ namespace Microsoft.IdentityModel.Tokens
 
         }
 
-        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm)
+        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] key)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException("algorithm");
+
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
 
             switch (algorithm)
             {
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha256:
-                    return new HMACSHA256();
+                    return new HMACSHA256(key);
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha384:
-                    return new HMACSHA384();
+                    return new HMACSHA384(key);
                 case SecurityAlgorithms.HmacSha512Signature:
                 case SecurityAlgorithms.HmacSha512:
-                    return new HMACSHA512();
+                    return new HMACSHA512(key);
                 default:
                     throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
             }
