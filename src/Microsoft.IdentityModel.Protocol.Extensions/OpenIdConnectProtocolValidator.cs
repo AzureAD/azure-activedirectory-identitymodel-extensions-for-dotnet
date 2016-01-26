@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             if (!jwt.Payload.ContainsKey(JwtRegisteredClaimNames.CHash))
             {
-                throw new OpenIdConnectProtocolInvalidCHashException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10308, jwt));
+                return;
             }
 
             HashAlgorithm hashAlgorithm = null;
