@@ -1,31 +1,23 @@
 {
-    "version": "2.0.0-*",
-    "description": "Includes types that provide support for WsFederation protocol.",
-    "dependencies": {
-        "Microsoft.IdentityModel.Protocols": "2.0.0-*"
+  "version": "2.0.0-*",
+  "description": "Includes types that provide support for WsFederation protocol.",
+  "dependencies": {
+    "Microsoft.IdentityModel.Protocols": "2.0.0-*"
+  },
+  "exclude": [
+    "WsFederationMessage.cs",
+    "Configuration\\WsFederationConfiguration.cs",
+    "Configuration\\WsFederationConfigurationRetriever.cs"
+  ],
+  "frameworks": {
+    "dotnet5.4": {
+      "imports": "portable-net451+win8"
     },
-    "exclude": [
-        "WsFederationMessage.cs",
-        "Configuration\\WsFederationConfiguration.cs",
-        "Configuration\\WsFederationConfigurationRetriever.cs"
-    ],
-    "frameworks": {
-        "dotnet5.4": {
-            "dependencies": {
-                "System.Collections.Specialized": "4.0.1-beta-*",
-                "System.Diagnostics.Contracts": "4.0.1-beta-*",
-                "System.Globalization": "4.0.11-beta-*",
-                "System.IO.FileSystem": "4.0.1-beta-*",
-                "System.Net.Http": "4.0.1-beta-*",
-                "System.Xml.ReaderWriter": "4.0.11-beta-*"
-            }
-        },
-        "net451": { }
-    },
-    "compilationOptions": {
-        "allowUnsafe": false,
-        "warningsAsErrors": true,
-        "delaySign": true,
-        "keyFile": "../../build/35MSSharedLib1024.snk"
-    }
+    "net451": { }
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "delaySign": true,
+    "keyFile": "../../build/35MSSharedLib1024.snk"
+  }
 }

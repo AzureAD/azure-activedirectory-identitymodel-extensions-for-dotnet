@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             FileDocumentRetriever docRetriever = new FileDocumentRetriever();
             GetDocument(null, docRetriever, CancellationToken.None, ExpectedException.ArgumentNullException());
             GetDocument("OpenIdConnectMetadata.json", docRetriever, CancellationToken.None, ExpectedException.IOException("IDX10804:", typeof(FileNotFoundException), "IDX10814:"));
-            GetDocument("project.json", docRetriever, CancellationToken.None, ExpectedException.NoExceptionExpected);
+            GetDocument("ValidJson.json", docRetriever, CancellationToken.None, ExpectedException.NoExceptionExpected);
         }
     }
 }

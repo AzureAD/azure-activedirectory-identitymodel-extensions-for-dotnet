@@ -1,21 +1,36 @@
 {
-    "version": "2.0.0-*",
-    "dependencies": {
-        "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*"
+  "version": "2.0.0-*",
+  "dependencies": {
+    "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*"
+  },
+  "exclude": [
+    "CrossTokenTests.cs",
+    "WsFederationMessageTests.cs"
+  ],
+  "testRunner": "xunit",
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net451+win8"
     },
-    "exclude": [
-        "CrossTokenTests.cs",
-        "WsFederationMessageTests.cs"
-    ],
-    "commands": {
-        "test": "xunit.runner.aspnet"
-    },
-    "frameworks": {
-        "dnx451": { },
-        "dnxcore50": { }
-    },
-    "compilationOptions": {
-        "allowUnsafe": false,
-        "warningsAsErrors": true
+    "dnx451": {
     }
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true
+  },
+  "content": [
+    "JsonWebKeySet.json",
+    "JsonWebKeySetBadBase64Data.json",
+    "JsonWebKeySetBadX509Data.json",
+    "JsonWebKeySetEnd2End.json",
+    "JsonWebKeySetSingleX509Data.json",
+    "OpenIdConnectMetadata.json",
+    "OpenIdConnectMetadata2.json",
+    "OpenIdConnectMetadataBadBase64Data.json",
+    "OpenIdConnectMetadataBadX509Data.json",
+    "OpenIdConnectMetadataEnd2End.json",
+    "OpenIdConnectMetadataJsonWebKeySetBadUri.json",
+    "PingLabsJWKS.json",
+    "PingLabs-openid-configuration.json"
+  ]
 }

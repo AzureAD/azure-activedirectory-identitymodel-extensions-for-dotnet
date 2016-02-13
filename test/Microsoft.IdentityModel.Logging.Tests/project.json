@@ -1,14 +1,14 @@
 ﻿{
-    "version": "1.0.0-*",
-    "dependencies": {
-        "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*"
+  },
+  "testRunner": "xunit",
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net451+win8"
     },
-    "commands": {
-        "test": "xunit.runner.aspnet"
-    },
-    "frameworks": {
-        "dnx451": { },
-        "dnxcore50": { }
+    "dnx451": {
     }
+  }
 }

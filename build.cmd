@@ -1,28 +1,40 @@
-@echo off
-cd %~dp0
-
+@ECHO off
 SETLOCAL
-SET CACHED_NUGET=%LocalAppData%\NuGet\NuGet.exe
 
-IF EXIST %CACHED_NUGET% goto copynuget
-echo Downloading latest version of NuGet.exe...
-IF NOT EXIST %LocalAppData%\NuGet md %LocalAppData%\NuGet
-@powershell -NoProfile -ExecutionPolicy unrestricted -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe' -OutFile '%CACHED_NUGET%'"
+SET REPO_FOLDER=%~dp0
+CD %REPO_FOLDER%
 
-:copynuget
-IF EXIST .nuget\nuget.exe goto restore
-md .nuget
-copy %CACHED_NUGET% .nuget\nuget.exe > nul
+SET BUILD_FOLDER=.build
+SET KOREBUILD_FOLDER=%BUILD_FOLDER%\KoreBuild-dotnet
+SET KOREBUILD_VERSION=
 
-:restore
-IF EXIST packages\KoreBuild goto run
-.nuget\NuGet.exe install KoreBuild -ExcludeVersion -o packages -nocache -pre
-.nuget\NuGet.exe install Sake -ExcludeVersion -Source https://www.nuget.org/api/v2/ -o packages
+SET NUGET_PATH=%BUILD_FOLDER%\NuGet.exe
+SET NUGET_VERSION=latest
+SET CACHED_NUGET=%LocalAppData%\NuGet\nuget.%NUGET_VERSION%.exe
 
-IF "%SKIP_DNX_INSTALL%"=="1" goto run
-CALL packages\KoreBuild\build\dnvm install latest -runtime CLR -arch x86 -alias default
-CALL packages\KoreBuild\build\dnvm install default -runtime CoreCLR -arch x86
+IF NOT EXIST %BUILD_FOLDER% (
+    md %BUILD_FOLDER%
+)
 
-:run
-CALL packages\KoreBuild\build\dnvm use default -runtime CLR -arch x86
-packages\Sake\tools\Sake.exe -I packages\KoreBuild\build -f makefile.shade %*
+IF NOT EXIST %NUGET_PATH% (
+    IF NOT EXIST %CACHED_NUGET% (
+        echo Downloading latest version of NuGet.exe...
+        IF NOT EXIST %LocalAppData%\NuGet ( 
+            md %LocalAppData%\NuGet
+        )
+        @powershell -NoProfile -ExecutionPolicy unrestricted -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest 'https://dist.nuget.org/win-x86-commandline/%NUGET_VERSION%/nuget.exe' -OutFile '%CACHED_NUGET%'"
+    )
+
+    copy %CACHED_NUGET% %NUGET_PATH% > nul
+)
+
+IF NOT EXIST %KOREBUILD_FOLDER% (
+    SET KOREBUILD_DOWNLOAD_ARGS=
+    IF NOT "%KOREBUILD_VERSION%"=="" (
+        SET KOREBUILD_DOWNLOAD_ARGS=-version %KOREBUILD_VERSION%
+    )
+    
+    %BUILD_FOLDER%\nuget.exe install KoreBuild-dotnet -ExcludeVersion -o %BUILD_FOLDER% -nocache -pre %KOREBUILD_DOWNLOAD_ARGS%
+)
+
+"%KOREBUILD_FOLDER%\build\KoreBuild.cmd" %*

@@ -1,23 +1,21 @@
 ﻿{
-    "version": "2.0.0-*",
-    "description": "Includes types that provide support for OpenIdConnect protocol.",
-    "dependencies": {
-        "Microsoft.IdentityModel.Protocols": "2.0.0-*"
+  "version": "2.0.0-*",
+  "description": "Includes types that provide support for OpenIdConnect protocol.",
+  "dependencies": {
+    "Microsoft.IdentityModel.Protocols": "2.0.0-*"
+  },
+  "frameworks": {
+    "dotnet5.4": {
+      "dependencies": {
+        "System.Dynamic.Runtime": "4.0.11-*"
+      },
+      "imports": "portable-net451+win8"
     },
-    "frameworks": {
-        "dotnet5.4": {
-            "dependencies": {
-                "System.Diagnostics.Tracing": "4.0.21-beta-*",
-                "System.Globalization": "4.0.11-beta-*",
-                "System.Dynamic.Runtime": "4.0.11-beta-*"
-            }
-        },
-        "net451": { }
-    },
-    "compilationOptions": {
-        "allowUnsafe": false,
-        "warningsAsErrors": true,
-        "delaySign": true,
-        "keyFile":  "../../build/35MSSharedLib1024.snk"
-    }
+    "net451": { }
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "delaySign": true,
+    "keyFile": "../../build/35MSSharedLib1024.snk"
+  }
 }

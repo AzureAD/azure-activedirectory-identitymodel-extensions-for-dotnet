@@ -1,22 +1,22 @@
 ﻿{
-    "version": "1.0.0-*",
-    "description": "Includes Event Source based logging support.",
-    "dependencies": { },
-    "frameworks": {
-        "dotnet5.4": {
-            "dependencies": {
-                "System.Diagnostics.Tracing": "4.0.21-beta-*",
-                "System.Globalization": "4.0.11-beta-*",
-                "System.IO": "4.0.11-beta-*",
-                "System.IO.FileSystem":  "4.0.1-beta-*"
-            }
-        },
-        "net451": { }
+  "version": "1.0.0-*",
+  "description": "Includes Event Source based logging support.",
+  "dependencies": { },
+  "frameworks": {
+    "dotnet5.4": {
+      "dependencies": {
+        "System.Diagnostics.Tracing": "4.1.0-*",
+        "System.Globalization": "4.0.11-*",
+        "System.IO": "4.1.0-*",
+        "System.IO.FileSystem": "4.0.1-*"
+      },
+      "imports": "portable-net451+win8"
     },
-    "compilationOptions": {
-        "allowUnsafe": false,
-        "warningsAsErrors": true,
-        "delaySign": true,
-        "keyFile":  "../../build/35MSSharedLib1024.snk"
-    }
+    "net451": { }
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "delaySign": true,
+    "keyFile": "../../build/35MSSharedLib1024.snk"
+  }
 }

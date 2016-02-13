@@ -1,4 +1,3 @@
 {
-    "sources": [ "src", "test" ],
-    "shared": "test\\Shared"
+    "projects": ["src"]
 }
