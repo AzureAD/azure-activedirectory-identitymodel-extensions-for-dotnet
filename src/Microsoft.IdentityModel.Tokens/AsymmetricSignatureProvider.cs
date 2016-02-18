@@ -243,11 +243,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return;
                 }
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    _rsa = new RSACng();
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    _rsa = new RSAOpenSsl();
-
+                _rsa = RSA.Create();
                 if (_rsa != null)
                 {
                     _rsa.ImportParameters(rsaKey.Parameters);
@@ -287,11 +283,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
                 RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willCreateSignatures);
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    _rsa = new RSACng();
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    _rsa = new RSAOpenSsl();
 
+                _rsa = RSA.Create();
                 if (_rsa != null)
                 {
                     _rsa.ImportParameters(parameters);

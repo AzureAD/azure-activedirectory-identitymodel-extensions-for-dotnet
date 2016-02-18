@@ -13,7 +13,6 @@
       "dependencies": {
         "System.IO": "4.1.0-*",
         "System.Reflection.TypeExtensions": "4.1.0-*",
-        "System.Runtime": "4.1.0-*",
         "dotnet-test-xunit": "1.0.0-dev-*"
       },
       "imports": "portable-net451+win8"
