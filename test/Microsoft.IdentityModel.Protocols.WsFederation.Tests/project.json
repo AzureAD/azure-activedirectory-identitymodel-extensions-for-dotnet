@@ -1,7 +1,7 @@
 {
   "version": "2.0.0-*",
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-*",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-*",
     "xunit": "2.1.0"
   },
   "exclude": [

@@ -7,9 +7,9 @@
   "frameworks": {
     "dotnet5.4": {
       "dependencies": {
-        "System.Collections.Specialized": "4.0.1-*",
-        "System.Diagnostics.Contracts": "4.0.1-*",
-        "System.Net.Http": "4.0.1-*"
+        "System.Collections.Specialized": "4.0.1-rc2-*",
+        "System.Diagnostics.Contracts": "4.0.1-rc2-*",
+        "System.Net.Http": "4.0.1-rc2-*"
       },
       "imports": "portable-net451+win8"
     },

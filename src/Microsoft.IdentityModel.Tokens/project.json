@@ -8,21 +8,21 @@
   "frameworks": {
     "dotnet5.4": {
       "dependencies": {
-        "System.Collections": "4.0.11-*",
-        "System.Diagnostics.Tools": "4.0.1-*",
-        "System.Runtime.Extensions": "4.1.0-*",
-        "System.Runtime.InteropServices": "4.1.0-*",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-*",
-        "System.Security.Claims": "4.0.1-*",
-        "System.Security.Cryptography.Algorithms": "4.0.0-*",
-        "System.Security.Cryptography.Cng": "4.0.0-*",
-        "System.Security.Cryptography.Csp": "4.0.0-*",
-        "System.Security.Cryptography.OpenSsl": "4.0.0-*",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-*",
-        "System.Security.Principal": "4.0.1-*",
-        "System.Text.RegularExpressions": "4.0.12-*",
-        "System.Threading": "4.0.11-*",
-        "System.Xml.ReaderWriter": "4.0.11-*"
+        "System.Collections": "4.0.11-rc2*",
+        "System.Diagnostics.Tools": "4.0.1-rc2-*",
+        "System.Runtime.Extensions": "4.1.0-rc2-*",
+        "System.Runtime.InteropServices": "4.1.0-rc2-*",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc2-*",
+        "System.Security.Claims": "4.0.1-rc2-*",
+        "System.Security.Cryptography.Algorithms": "4.0.0-rc2-*",
+        "System.Security.Cryptography.Cng": "4.0.0-rc2-*",
+        "System.Security.Cryptography.Csp": "4.0.0-rc2-*",
+        "System.Security.Cryptography.OpenSsl": "4.0.0-rc2-*",
+        "System.Security.Cryptography.X509Certificates": "4.0.0-rc2-*",
+        "System.Security.Principal": "4.0.1-rc2-*",
+        "System.Text.RegularExpressions": "4.0.12-rc2-*",
+        "System.Threading": "4.0.11-rc2-*",
+        "System.Xml.ReaderWriter": "4.0.11-rc2-*"
       },
       "imports": "portable-net451+win8"
     },
