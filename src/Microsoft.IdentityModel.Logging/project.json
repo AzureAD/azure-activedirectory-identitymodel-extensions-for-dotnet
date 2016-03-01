@@ -3,14 +3,14 @@
   "description": "Includes Event Source based logging support.",
   "dependencies": { },
   "frameworks": {
-    "dotnet5.4": {
+    "netstandard1.3": {
       "dependencies": {
         "System.Diagnostics.Tracing": "4.1.0-rc2-*",
         "System.Globalization": "4.0.11-rc2-*",
         "System.IO": "4.1.0-rc2-*",
         "System.IO.FileSystem": "4.0.1-rc2-*"
       },
-      "imports": "portable-net451+win8"
+      "imports": [ "dotnet5.4", "portable-net451+win8" ]
     },
     "net451": { }
   },

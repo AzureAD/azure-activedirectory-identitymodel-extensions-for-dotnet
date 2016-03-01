@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         // imitate signing
                         byte[] hash = new byte[20];
-#if DOTNET5_4
+#if NETSTANDARD1_3
                         ECDsa.SignData(hash, HashAlgorithmName.SHA256);
 #else
                     ECDsa.SignHash(hash);

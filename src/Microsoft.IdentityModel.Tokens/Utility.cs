@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return false;
             }
-#if DOTNET5_4
+#if NETSTANDARD1_3
             return uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase); //Uri.UriSchemeHttps is internal in dnxcore
 #else
             return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);

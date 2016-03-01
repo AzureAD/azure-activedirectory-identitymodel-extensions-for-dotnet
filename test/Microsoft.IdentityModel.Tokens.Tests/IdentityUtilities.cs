@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             XmlWriter writer = XmlWriter.Create(sb);
             tokenHandler.WriteToken(writer, securityToken);
             writer.Flush();
-#if !DNXCORE50
+#if !NETSTANDARDAPP1_5
             writer.Close();
 #endif
             return sb.ToString();
