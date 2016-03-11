@@ -13,7 +13,7 @@
       "dependencies": {
         "System.IO": "4.1.0-rc2-*",
         "System.IO.Compression": "4.1.0-rc2-*",
-        "System.Reflection.TypeExtensions": "4.1.0-rc2-*",
+	"System.Diagnostics.Process": "4.1.0-rc2-*",
         "dotnet-test-xunit": "1.0.0-dev-*"
       },
       "imports": [ "dnxcore50", "portable-net451+win8" ]
