@@ -77,22 +77,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string originalIssuer = null)
         {
-            string iss = issuer ?? IdentityUtilities.DefaultIssuer;
-            string originalIss = originalIssuer ?? IdentityUtilities.DefaultOriginalIssuer;
+            string iss = issuer ?? DefaultIssuer;
+            string originalIss = originalIssuer ?? DefaultOriginalIssuer;
 
             return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
-        }
-
-        public static string CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
-        {
-            return (new JwtSecurityTokenHandler()).CreateJwt(tokenDescriptor);
         }
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
         {
             JwtPayload payload = new JwtPayload(issuer, audience, claims, nbf, exp, iat);
             JwtHeader header = (signingCredentials != null) ? new JwtHeader(signingCredentials) : new JwtHeader();
-            return new JwtSecurityToken(header, payload);
+            return new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
         }
 
         public static string CreateSaml2Token()
@@ -156,32 +151,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return sb.ToString();
         }
 
+        public static string ActorIssuer = "http://www.GotJwt.com/Actor";
         public const string DefaultAuthenticationType = "Federation";
-
+        public static string DefaultAcr { get { return "DefaultAuthenticationContextClass"; } }
+        public static string DefaultAmr { get { return "DefaultAuthenticationMethod"; } }
+        public static List<string> DefaultAmrs { get { return new List<string> { "amr1", "amr2", "amr3", "amr4" }; } }
         public static string DefaultAudience { get { return "http://relyingparty.com"; } }
-        public static IList<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty3.com" }; } }
-
+        public static List<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty4.com" }; } }
+        public static string DefaultAuthorizedParty { get { return "http://relyingparty.azp.com"; } }
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
+        public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
         public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
-
-        public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; } }
-        public static SecurityKey DefaultSymmetricSigningKey {  get { return KeyingMaterial.DefaultSymmetricSecurityKey_256;  } }
-        public static ClaimsPrincipal DefaultClaimsPrincipal 
-        { 
-            get 
-            { 
-                return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); 
-            } 
-        }
-
+        public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; }}
+        public static SecurityKey DefaultSymmetricSigningKey {  get { return KeyingMaterial.DefaultSymmetricSecurityKey_256;}}
+        public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity);}}
+        public const string DefaultClaimsIdentityLabel = "DefaultClaimsIdentityLabel";
+        public const string DefaultClaimsIdentityLabelDup = "DefaultClaimsIdentityLabelDup";
+        public const string NotDefaultAuthenticationType = "NotDefaultAuthenticationType";
+        public const string NotDefaultClaimsIdentityLabel = "NotDefaultClaimsIdentityLabel";
+        public const string NotDefaultLabel = "NotDefaultLabel";
+        public const string NotDefaultNameClaimType = "NotDefaultNameClaimType";
+        public const string NotDefaultRoleClaimType = "NotDefaultRoleClaimType";
         public const string DefaultIssuer = "http://gotjwt.com";
         public const string DefaultOriginalIssuer = "http://gotjwt.com/Original";
-
-        public static string DefaultAsymmetricJwt
-        {
-            get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }
-        }
-
+        public static string DefaultAsymmetricJwt {get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }}
         public const string NotDefaultAudience = "http://notrelyingparty.com";
         public static IEnumerable<Claim> NotDefaultClaims
         {
@@ -200,39 +193,40 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static ClaimsIdentity NotDefaultClaimsIdentity
         {
-            get
-            {
-                return new ClaimsIdentity(NotDefaultClaims); 
-            }
+            get { return new ClaimsIdentity(NotDefaultClaims); }
         }
 
         public const string NotDefaultIssuer = "http://notgotjwt.com";
         public const string NotDefaultOriginalIssuer = "http://notgotjwt.com/Original";
         public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SecurityKey NotDefaultSigningKey = KeyingMaterial.RsaSecurityKey_2048;
-
-
+        public static string DefaultSubject = "DefaultSubject";
         public static string DefaultSymmetricJwt
         {
             get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2)); }
         }
 
-        public static string DefaultJwt(SecurityTokenDescriptor securityTokenDescriptor)
+        public static string DefaultJwt(SecurityTokenDescriptor tokenDescriptor)
         {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-
-            return tokenHandler.WriteToken(
-                tokenHandler.CreateToken(
-                    audience: securityTokenDescriptor.Audience,
-                    expires: securityTokenDescriptor.Expires,
-                    notBefore: securityTokenDescriptor.NotBefore,
-                    issuedAt: securityTokenDescriptor.IssuedAt,
-                    issuer: securityTokenDescriptor.Issuer,
-                    subject: new ClaimsIdentity(securityTokenDescriptor.Claims),
-                    signingCredentials: securityTokenDescriptor.SigningCredentials
-                    ));
+            return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
         }
 
+        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor(List<Claim> claims)
+        {
+            var retval = DefaultSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials);
+            if (claims != null)
+                retval.Claims = claims;
+
+            return retval;
+        }
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor(List<Claim> claims)
+        {
+            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials);
+            if (claims != null)
+                retval.Claims = claims;
+
+            return retval;
+        }
 
         public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
         {
@@ -243,6 +237,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Issuer = DefaultIssuer,
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials
             };
         }

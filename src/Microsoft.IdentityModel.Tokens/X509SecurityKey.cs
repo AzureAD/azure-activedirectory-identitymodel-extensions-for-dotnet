@@ -126,12 +126,12 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
+        /// <summary>
+        /// Gets a bool indicating if a PrivateKey is available.
+        /// </summary>
         public override bool HasPrivateKey
         {
-            get
-            {
-                return (PrivateKey != null);
-            }
+            get { return (PrivateKey != null); }
         }
 
         /// <summary>
@@ -139,11 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public X509Certificate2 Certificate
         {
-            get
-            {
-                return 
-                    _certificate;
-            }
+            get { return _certificate; }
         }
     }
 }

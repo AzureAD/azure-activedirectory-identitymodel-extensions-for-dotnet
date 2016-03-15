@@ -27,16 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
-namespace System.IdentityModel.Tokens.Jwt.Tests
+namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class JsonWebKeyTests
     {
         [Fact(DisplayName = "JsonWebKeyTests: Constructors")]
@@ -50,28 +44,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             RunJsonWebKeyTest("JsonWebKey_Constructors: 1", null, null, ExpectedException.ArgumentNullException(substringExpected: "json"), true, errors);
 
             // valid json, JsonWebKey1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 3", OpenIdConfigData.JsonWebKeyFromPing, OpenIdConfigData.JsonWebKeyFromPingExpected1, ExpectedException.NoExceptionExpected, false, errors);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 3", DataSets.JsonWebKeyFromPing, DataSets.JsonWebKeyFromPingExpected1, ExpectedException.NoExceptionExpected, false, errors);
 
             // valid json, JsonWebKey1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 4", OpenIdConfigData.JsonWebKeyString1, OpenIdConfigData.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected, false, errors);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 4", DataSets.JsonWebKeyString1, DataSets.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected, false, errors);
 
             // valid json, JsonWebKey2
-            jsonWebKey = RunJsonWebKeyTest("JsonWebKey_Constructors: 6", OpenIdConfigData.JsonWebKeyString2, OpenIdConfigData.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected, false, errors);
+            jsonWebKey = RunJsonWebKeyTest("JsonWebKey_Constructors: 6", DataSets.JsonWebKeyString2, DataSets.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected, false, errors);
             CompareContext context = new CompareContext();
-            if (IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1, context))
+            if (IdentityComparer.AreEqual(jsonWebKey, DataSets.JsonWebKeyExpected1, context))
             {
-                errors.Add("IdentityComparer.AreEqual(jsonWebKey, OpenIdConfigData.JsonWebKeyExpected1)");
+                errors.Add("IdentityComparer.AreEqual(jsonWebKey, DataSets.JsonWebKeyExpected1)");
                 errors.AddRange(context.Diffs);
             }
 
-            // invalid json, JsonWebKeyBadFormatString1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 7", OpenIdConfigData.JsonWebKeyBadFormatString1, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonReaderException)), false, errors);
+            //invalid json, JsonWebKeyBadFormatString1
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 7", DataSets.JsonWebKeyBadFormatString1, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonReaderException)), false, errors);
 
             // invalid json, JsonWebKeyBadFormatString2
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 8", OpenIdConfigData.JsonWebKeyBadFormatString2, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonSerializationException), innerTypeExpected: typeof(ArgumentException)), false, errors);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 8", DataSets.JsonWebKeyBadFormatString2, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonSerializationException), innerTypeExpected: typeof(System.ArgumentException)), false, errors);
 
             // invalid json, JsonWebKeyBadx509String1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 9", OpenIdConfigData.JsonWebKeyBadX509String, OpenIdConfigData.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected, false, errors);
+            RunJsonWebKeyTest("JsonWebKey_Constructors: 9", DataSets.JsonWebKeyBadX509String, DataSets.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected, false, errors);
 
             TestUtilities.AssertFailIfErrors("JsonWebKey_Constructors", errors);
         }
@@ -133,7 +127,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
 
             CompareContext context = new CompareContext();
-            if (IdentityComparer.AreEqual<IEnumerable<string>>(jsonWebKey.X5c, methods, context))
+            if (IdentityComparer.AreEqual(jsonWebKey.X5c, methods, context))
             {
                 errors.AddRange(context.Diffs);
             }

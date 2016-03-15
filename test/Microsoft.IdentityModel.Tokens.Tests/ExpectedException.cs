@@ -159,6 +159,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        public void ProcessNoException(CompareContext context)
+        {
+            if (TypeExpected != null)
+                context.Diffs.Add("expectedException.TypeExpected != null: " + TypeExpected);
+        }
+
         private static void HandleError(string err, List<string> errors )
         {
             if (errors != null)

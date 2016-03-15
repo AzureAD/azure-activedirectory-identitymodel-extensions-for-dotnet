@@ -40,14 +40,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectConfigurationTests
     {
-        [Fact(DisplayName = "OpenIdConnectConfigurationTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
-            RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException());
-            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetadataString, OpenIdConfigData.OpenIdConnectConfiguration1, ExpectedException.NoExceptionExpected);
+            var context = new CompareContext();
+            RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException(), context);
+            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetadataString1, OpenIdConfigData.OpenIdConnectConfiguration1, ExpectedException.NoExceptionExpected, context);
+            TestUtilities.AssertFailIfErrors("OpenIdConnectConfigurationTests.Constructors", context.Diffs);
         }
 
-        private void RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, bool asString = true)
+        private void RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, CompareContext context, bool asString = true)
         {
             bool exceptionHit = false;
 
@@ -68,7 +70,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (!exceptionHit && compareTo != null)
             {
-                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo), "jsonWebKey created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo, context);
             }
         }
 
@@ -101,7 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
         }
 
-        [Fact(DisplayName = "OpenIdConnectConfigurationTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
@@ -180,7 +182,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 errors.Add("");
 
             CompareContext compareContext = new CompareContext();
-            if (!IdentityComparer.AreEqual<IEnumerable<SecurityKey>>(configuration.SigningKeys, securityKeys, compareContext))
+            if (!IdentityComparer.AreEqual(configuration.SigningKeys, securityKeys, compareContext))
                 errors.AddRange(compareContext.Diffs);
 
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);

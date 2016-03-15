@@ -27,23 +27,10 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Text;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
-    public static class Issuers
-    {
-        public const string GotJwt = @"http://www.GotJwt.com";
-        public const string GotJwtOriginal = @"http://www.GotJwt.com/Original";
-        public const string Actor = @"http://www.issuer.com";
-        public const string ActorOriginal = @"http://www.issuer.com/Original";
-    }
-
-    public static class Audiences
-    {
-        public const string AuthFactors = @"http://www.AuthFactors.com";
-        public const string Empty = "";
-    }
-
     public static class EncodedJwts
     {
         public static string Asymmetric_LocalSts =  @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1ZCI6Imh0dHA6Ly9Db250b3NvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2NvdW50cnkiOiJVU0EiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyQGNvbnRvc28uY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZ2l2ZW5uYW1lIjoiVG9ueSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2hvbWVwaG9uZSI6IjU1NS4xMjEyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMiLCJzdWIiOiJib2IifQ.QW0Wfw-R5n3BHXE0vG-0giRFeB6W9oFrWJyFTaLI0qICDYx3yZ2eLXJ3zNFLVf3OG-MqytN5tqUdNfK1mRzeubqvdODHLFX36e1o3X8DR_YumyyQvgSeTJ0wwqT8PowbE3nbKfiX4TtJ4jffBelGKnL6vdx3AU2cwvLfSVp8ppA";
@@ -63,22 +50,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
     public static class JsonClaims
     {
-        public static readonly string GroupClaims = @"{""iss"":[""http://www.GotJWT.com"",""https://sts.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/""],""aud"":[""http://www.contoso.com"",""0bb44690-eae0-4b2c-b2b1-64ac03098226""],""upn"":""badams@dushyantgill.net"",""family_name"":""Adams"",""unique_name"":""badams@dushyantgill.net"",""ver"":""1.0"",""groups"":[""c4324023-3424-4ba6-9320-1ce28431b113"",""08953f81-ffd6-44f9-887d-69855355ffbd"",""694a55b2-ec4c-480d-8a7d-26d34ea9225b""],""oid"":""0c9545d0-a670-4628-8c1f-e90618a3b940"",""nonce"":""02f9c7ba-1720-4d46-b00f-6731fe2c4d14"",""given_name"":""Brad"",""exp"":1405870465,""tid"":""5803816d-c4ab-4601-a128-e2576e5d6910"",""iat"":""1403822988"",""amr"":""pwd"",""nbf"":1405866865,""sub"":""355anlmMo6uvGyabeIqNqBTUJsEPdyijxouLjfmg8G8""}";
-
-        public static Dictionary<string, Dictionary<string, string>> ClaimSources
+        public static Dictionary<string, Dictionary<string, string>> ClaimSourcesAsDictionary
         {
             get
             {
                 return new Dictionary<string, Dictionary<string, string>>
                 {
-                    {   "src1",
+                    {
+                        "src1",
                         new Dictionary<string,string>
                         {
                             { "endpoint", "https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"},
                             { "access_token", "ksj3n283dke"}
                         }
                     },
-                    {   "src2",
+                    {
+                        "src2",
                         new Dictionary<string,string>
                         {
                             { "endpoint2", "https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"},
@@ -90,17 +77,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static Dictionary<string, string> ClaimNames
+        public static Dictionary<string, string> ClaimNamesAsDictionary
         {
             get
             {
                 return new Dictionary<string, string>
                 {
-                    { "groups",
-                      "src1"
+                    {
+                        "groups",
+                        "src1"
                     },
-                    { "groups2",
-                      "src2"
+                    {
+                        "groups2",
+                        "src2"
                     }
                 };
             }
@@ -108,33 +97,25 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public static ClaimsIdentity ClaimsIdentityDistributedClaims(string issuer, string authType, Dictionary<string, Dictionary<string, string>> claimSources, Dictionary<string, string> claimNames )
         {
-            List<Claim> claims = new List<Claim>();
-            // TODO - workaround for null ref in Claim.Clone(). Was fixed and checked in 2/19, still hasn't made it to a build.
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(authType);
-            AddClaimSources(claimSources, claims, issuer, claimsIdentity);
-            AddClaimNames(claimNames, claims, issuer, claimsIdentity);
-            claimsIdentity.AddClaims(claims);
-            return claimsIdentity;
-        }
-
-        public static void AddClaimNames(Dictionary<string, string> claimNames, List<Claim> claims, string issuer, ClaimsIdentity subject)
-        {
-            foreach(var kv in claimNames)
-            {
-                Claim c = new Claim("_claim_names", @"""" + kv.Key + @""":""" + kv.Value + @"""", JwtConstants.JsonClaimValueType, issuer, issuer, subject);
-                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
-                claims.Add(c);
-            }
-        }
-
-        public static void AddClaimSources(Dictionary<string, Dictionary<string, string>> claimSources, List<Claim> claims, string issuer, ClaimsIdentity subject)
-        {
+            var identity = new ClaimsIdentity(authType);
+            var sb = new StringBuilder();
+            sb.Append("{");
             foreach (var kv in claimSources)
-            {
-                Claim c = new Claim("_claim_sources", @"""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value), JwtConstants.JsonClaimValueType, issuer, issuer, subject);
-                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = "Newtonsoft.Json.Linq.JProperty";
-                claims.Add(c);
-            }
+                sb.Append(@"{""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value) + "}");
+
+            sb.Append("}");
+            identity.AddClaim(new Claim("_claim_sources", sb.ToString(), JsonClaimValueTypes.Json, issuer, issuer, identity));
+
+            sb.Clear();
+            sb.Append("{");
+            foreach (var kv in claimNames)
+                sb.Append(@"{""" + kv.Key + @""":""" + kv.Value + @"""}");
+
+            sb.Append("}");
+
+            identity.AddClaim(new Claim("_claim_names",sb.ToString(), JsonClaimValueTypes.Json, issuer, issuer, identity));
+
+            return identity;
         }
     }
 }

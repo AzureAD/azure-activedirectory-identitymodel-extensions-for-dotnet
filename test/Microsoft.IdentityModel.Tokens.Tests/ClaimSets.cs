@@ -46,256 +46,166 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public static class ClaimSets
     {
-        public static string ActorIssuer = "http://www.GotJwt.com/Actor";
-
-        public const string DefaultAuthenticationType = "DefaultAuthenticationType";
-        public const string DefaultClaimsIdentityLabel = "DefaultClaimsIdentityLabel";
-        public const string DefaultClaimsIdentityLabelDup = "DefaultClaimsIdentityLabelDup";
-        public const string DefaultIssuer = "DefaultIssuer";
-        public const string DefaultLabel = "DefaultLabel";
-        public const string DefaultOriginalIssuer = "DefaultOriginalIssuer";
-        public const string DefaultNameClaimType = "DefaultNameClaimType";
-        public const string DefaultRoleClaimType = "DefaultRoleClaimType";
-        public const string NotDefaultAuthenticationType = "NotDefaultAuthenticationType";
-        public const string NotDefaultClaimsIdentityLabel = "NotDefaultClaimsIdentityLabel";
-        public const string NotDefaultIssuer = "NotDefaultIssuer";
-        public const string NotDefaultLabel = "NOTDefaultLabel";
-        public const string NotDefaultOriginalIssuer = "NotDefaultOriginalIssuer";
-        public const string NotDefaultNameClaimType = "NotDefaultNameClaimType";
-        public const string NotDefaultRoleClaimType = "NotDefaultRoleClaimType";
-
-        private static List<Claim> _defaultClaims;
-        private static List<Claim> _defaultClaimsWithoutEmail;
-        private static List<Claim> _defaultDuplicatedClaims;
-        private static List<Claim> _derivedDefaultClaims;
-        private static List<Claim> _derivedGlobalClaims;
-        private static List<Claim> _globalClaims;
-
-        private static ClaimsIdentity  _defaultClaimsIdentity;
-        private static ClaimsIdentity  _defaultClaimsIdentityClaimsDuplicated;
-        private static ClaimsPrincipal _defaultClaimsPrincipal;
-        private static ClaimsIdentity  _claimsIdentityDerivedClaims;
-        //private static ClaimsIdentity  _derivedDefaultClaimsIdentity;
-        private static ClaimsIdentity  _derivedClaimsIdentityDefaultClaims;
-        private static ClaimsIdentity  _derivedClaimsIdentityDerivedClaims;
-
-        static Claim _actor             = new Claim( JwtRegisteredClaimNames.Actort, IdentityUtilities.CreateJwtSecurityToken( ActorIssuer, ActorIssuer ).ToString() );
-        static Claim _audience          = new Claim( JwtRegisteredClaimNames.Aud, "audClaimSets.Value" );
-        static Claim _badHeaderType     = new Claim( JwtHeaderParameterNames.Typ, "BADDTYPE" );
-        static Claim _expBadDateFormat  = new Claim( JwtRegisteredClaimNames.Exp, "BADDATEFORMAT" );
-        static Claim _issuedAt          = new Claim( JwtRegisteredClaimNames.Iat, "issuedatClaimSets.Value" );
-        static Claim _issuer            = new Claim( JwtRegisteredClaimNames.Iss,   "issuerClaimSets.Value" );
-        static Claim _jwtId             = new Claim( JwtRegisteredClaimNames.Jti, "jwtIdClaimSets.Value" );
-        static Claim _nbfBadDateFormat  = new Claim( JwtRegisteredClaimNames.Nbf, "BADDATEFORMAT" );
-        static Claim _notAfter          = new Claim( JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate( DateTime.UtcNow + TimeSpan.FromHours( 1 ) ).ToString() );
-        static Claim _notBefore         = new Claim( JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.UtcNow).ToString() );
-        static Claim _principal         = new Claim( JwtRegisteredClaimNames.Prn, "princlipalClaimSets.Value" );
-        static Claim _sub               = new Claim( JwtRegisteredClaimNames.Sub, "Subject.Value" );
-        static Claim _type              = new Claim( JwtRegisteredClaimNames.Typ, "Type.Value" );
-
         static ClaimSets()
         {
-            _defaultClaimsWithoutEmail = new List<Claim>
+            AllReserved = new List<Claim>()
             {
-                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-
+                new Claim(JwtRegisteredClaimNames.Actort, IdentityUtilities.CreateJwtSecurityToken(IdentityUtilities.ActorIssuer, IdentityUtilities.ActorIssuer).ToString()),
+                new Claim(JwtRegisteredClaimNames.Aud, "audClaimSets.Value"),
+                new Claim(JwtHeaderParameterNames.Typ, "BADDTYPE"),
+                new Claim(JwtRegisteredClaimNames.Exp, "BADDATEFORMAT"),
+                new Claim(JwtRegisteredClaimNames.Iat, "issuedatClaimSets.Value"),
+                new Claim(JwtRegisteredClaimNames.Iss, "issuerClaimSets.Value"),
+                new Claim(JwtRegisteredClaimNames.Jti, "jwtIdClaimSets.Value"),
+                new Claim(JwtRegisteredClaimNames.Nbf, "BADDATEFORMAT"),
+                new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow + TimeSpan.FromHours(1)).ToString()),
+                new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.UtcNow).ToString()),
+                new Claim(JwtRegisteredClaimNames.Prn, "princlipalClaimSets.Value"),
+                new Claim(JwtRegisteredClaimNames.Sub, "Subject.Value"),
+                new Claim(JwtRegisteredClaimNames.Typ, "Type.Value"),
             };
 
-            _defaultClaims = new List<Claim>
+            DefaultClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim( ClaimTypes.Role, "Sales", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer ),
-                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer ),
-                new Claim( "role", "role1", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim( "roles", "roles1", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-
+                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("role", "role1", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("roles", "roles1", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
             };
 
-            _globalClaims = new List<Claim>()
+            DerivedGlobalClaims = new List<Claim>()
             {
-                new Claim("Arabic", @"?????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Turkish1", @"igISiGIsçöÇÖ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Turkish2", @"GIsÖ", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Chinese1", @"???", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Chinese2", @"??", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Japanese1", @"???", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("Japanese2", @"????<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA1", @"????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA2", @"???????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA3", @"????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA4", @"?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtA4", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB1", @"????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB2", @"??????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB3", @"????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB4", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("ExtB5", @"??????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars1", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars2", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars3", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars4", @"??a??z??4??M??f??N??g??S??l??T??m??Y??r??Y??E??K??7??P??i??P??i??U??n??)??B??G??3??L??e??M??9??R??k??S??l??X??q??X??D??]??v??1??J??c??K??7??P??i??Q??i", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("EnteringIntlChars5", @"??9??R??k??S??l??X??q??Y??E??J??gtOyYeqMY9E6??O??h??P??i??U??n??)??A??Z??s??y??e??L??8??Q??j??R??k??????????????????????W??p??X??D??]??v??1??I??b??J??6??O??h??P??i??U??n??)??B??Z??s", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates1", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates2", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates3", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("CommonSurrogates4", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample1", @"!#)6=@Aa}~<", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample2", @"??????????´?¦?????-?????????€????!???????????ag??-???????????g???????€", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample3", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample4", @"????????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample5", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample6", @"???????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample7", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample8", @"???????????????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample9", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-                new Claim("STBSample10", @"??????????", ClaimValueTypes.String, DefaultIssuer, DefaultOriginalIssuer),
-
+                new Claim("Arabic", @"?????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("Turkish1", @"??I?i???çöÇÖ", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("Turkish2", @"???Ö", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("Chinese1", @"???", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("Chinese2", @"??", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("Japanese1", @"???", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("Japanese2", @"????<", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtA1", @"????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtA2", @"???????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtA3", @"????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtA4", @"?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtA4", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtB1", @"????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtB2", @"??????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtB3", @"????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtB4", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????<", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("ExtB5", @"??????????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("EnteringIntlChars1", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("EnteringIntlChars2", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("EnteringIntlChars3", @"????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("EnteringIntlChars4", @"??a??z??4??M??f??N??g??S??l??T??m??Y??r??Y??E??K??7??P??i??P??i??U??n??)??B??G??3??L??e??M??9??R??k??S??l??X??q??X??D??]??v??1??J??c??K??7??P??i??Q??i", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("EnteringIntlChars5", @"??9??R??k??S??l??X??q??Y??E??J??gtOyYeqMY9E6??O??h??P??i??U??n??)??A??Z??s??y??e??L??8??Q??j??R??k??????????????????????W??p??X??D??]??v??1??I??b??J??6??O??h??P??i??U??n??)??B??Z??s", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("CommonSurrogates1", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("CommonSurrogates2", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("CommonSurrogates3", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("CommonSurrogates4", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample1", @"!#)6=@Aa}~<", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample2", @"????????????????????????????€????????????????????????????????????????€", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample3", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample4", @"????????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample5", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample6", @"???????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample7", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample8", @"???????????????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample9", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim("STBSample10", @"??????????", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
             };
 
-            _defaultDuplicatedClaims = new List<Claim>();
-            _defaultDuplicatedClaims.AddRange(_defaultClaims);
-            _defaultDuplicatedClaims.AddRange(_defaultClaims);
-
-            _derivedDefaultClaims = new List<Claim>();
-            foreach (var claim in _defaultClaims)
+            var claims = new List<Claim>();
+            claims.AddRange(DefaultClaims);
+            foreach (var claim in DefaultClaims)
             {
-                _derivedDefaultClaims.Add(new DerivedClaim(claim, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray()));
+                claims.Add(new DerivedClaim(claim, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray()));
             }
+            DerivedClaims = claims;
 
-            _derivedGlobalClaims = new List<Claim>();
-            foreach (var claim in _globalClaims)
+            claims = new List<Claim>();
+            foreach (var claim in DerivedGlobalClaims)
             {
-                _derivedGlobalClaims.Add(new DerivedClaim(claim, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray()));
+                claims.Add(new DerivedClaim(claim, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray()));
             }
+            DerivedGlobalClaims = claims;
 
-            _defaultClaimsIdentity = new ClaimsIdentity(_defaultClaims, DefaultAuthenticationType);
-            _defaultClaimsIdentity.Label = DefaultClaimsIdentityLabel;
-            _defaultClaimsIdentityClaimsDuplicated = new ClaimsIdentity(_defaultDuplicatedClaims, DefaultAuthenticationType);
-            _defaultClaimsIdentityClaimsDuplicated.Label = DefaultClaimsIdentityLabelDup;
-            _claimsIdentityDerivedClaims = new ClaimsIdentity(_derivedDefaultClaims, DefaultAuthenticationType);
-            _derivedClaimsIdentityDefaultClaims = new DerivedClaimsIdentity(_defaultClaims, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray());
-            _derivedClaimsIdentityDerivedClaims = new DerivedClaimsIdentity(_derivedDefaultClaims, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray());
+            claims = new List<Claim>();
+            claims.AddRange(DefaultClaims);
+            claims.AddRange(DefaultClaims);
+            DefaultDuplicatedClaims = claims;
 
-            _defaultClaimsPrincipal = new ClaimsPrincipal(_defaultClaimsIdentity);
+            DefaultClaimsIdentity = new ClaimsIdentity(DefaultClaims, IdentityUtilities.DefaultAuthenticationType);
+            DefaultClaimsIdentity.Label = IdentityUtilities.DefaultClaimsIdentityLabel;
+            DefaultClaimsIdentityClaimsDuplicated = new ClaimsIdentity(DefaultDuplicatedClaims, IdentityUtilities.DefaultAuthenticationType);
+            DefaultClaimsIdentityClaimsDuplicated.Label = IdentityUtilities.DefaultClaimsIdentityLabelDup;
+            ClaimsIdentityDerivedClaims = new ClaimsIdentity(DerivedClaims, IdentityUtilities.DefaultAuthenticationType);
+            DerivedClaimsIdentityDefaultClaims = new DerivedClaimsIdentity(DefaultClaims, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray());
+            DerivedClaimsIdentityDerivedClaims = new DerivedClaimsIdentity(DerivedClaims, Guid.NewGuid().ToString(), Guid.NewGuid().ToByteArray());
+            DefaultClaimsPrincipal = new ClaimsPrincipal(DefaultClaimsIdentity);
         }
 
         public static List<Claim> DefaultClaims
         {
-            get { return _defaultClaims; }
+            get;
+            private set;
         }
 
-        public static IList<Claim> DerivedClaims
+        public static List<Claim> DerivedClaims
         {
-            get { return _derivedDefaultClaims; }
+            get;
+            private set;
         }
 
-        public static IEnumerable<Claim> DerivedGlobalClaims
+        public static List<Claim> DerivedGlobalClaims
         {
-            get { return _derivedGlobalClaims; }
+            get;
+            private set;
         }
 
-        public static IEnumerable<Claim> DefaultClaimsDuplicated
+        public static List<Claim> DefaultDuplicatedClaims
         {
-            get
-            {
-                return _defaultDuplicatedClaims;
-            }
-        }
-
-        public static List<Claim> DefaultClaimsWithoutEmail
-        {
-            get
-            {
-                return _defaultClaimsWithoutEmail;
-            }
+            get;
+            private set;
         }
 
         public static ClaimsIdentity DefaultClaimsIdentity
         {
-            get
-            {
-                return _defaultClaimsIdentity;
-            }
+            get;
+            private set;
         }
 
         public static ClaimsIdentity DefaultClaimsIdentityClaimsDuplicated
         {
-            get
-            {
-                return _defaultClaimsIdentityClaimsDuplicated;
-            }
+            get;
+            private set;
         }
+
         public static ClaimsIdentity ClaimsIdentityDerivedClaims
         {
-            get
-            {
-                return _claimsIdentityDerivedClaims;
-            }
+            get;
+            private set;
         }
+
         public static ClaimsIdentity DerivedClaimsIdentityDefaultClaims
         {
-            get
-            {
-                return _derivedClaimsIdentityDefaultClaims;
-            }
+            get;
+            private set;
         }
 
         public static ClaimsIdentity DerivedClaimsIdentityDerivedClaims
         {
-            get
-            {
-                return _derivedClaimsIdentityDerivedClaims;
-            }
+            get;
+            private set;
         }
 
         public static ClaimsPrincipal DefaultClaimsPrincipal
         {
-            get
-            {
-                return _defaultClaimsPrincipal;
-            }
-        }
-        public static Claim GetDefaultClaim(DefaultClaimType claimType, ClaimsIdentity identity = null, string issuer = null, string originalIssuer = null)
-        {
-            string localIssuer = string.IsNullOrWhiteSpace(issuer) ? DefaultIssuer : issuer;
-            string localOriginalIssuer = string.IsNullOrWhiteSpace(originalIssuer) ? DefaultOriginalIssuer : originalIssuer;
-
-            switch (claimType)
-            {
-                case DefaultClaimType.Country:
-                    return new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, localIssuer, localOriginalIssuer, identity);
-                case DefaultClaimType.Email:
-                    return new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, localIssuer, localOriginalIssuer, identity);
-                case DefaultClaimType.GivenName:
-                    return new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, localIssuer, localOriginalIssuer, identity);
-                case DefaultClaimType.HomePhone:
-                    return new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, localIssuer, localOriginalIssuer, identity);
-                case DefaultClaimType.Role:
-                    return new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, localIssuer, localOriginalIssuer, identity);
-                default:
-                    throw new ArgumentException("unknown claimtype: " + claimType.ToString());
-            }
-        }
-
-        public static List<Claim> GetDefaultClaims(string issuer = null, string originalIssuer = null)
-        {
-            var claims = new List<Claim>
-            {
-                GetDefaultClaim(DefaultClaimType.Country, null, issuer, originalIssuer),
-                GetDefaultClaim(DefaultClaimType.Email, null, issuer, originalIssuer),
-                GetDefaultClaim(DefaultClaimType.GivenName, null, issuer, originalIssuer),
-                GetDefaultClaim(DefaultClaimType.HomePhone, null, issuer, originalIssuer),
-                GetDefaultClaim(DefaultClaimType.Role, null, issuer, originalIssuer),
-            };
-
-            return claims;
+            get;
+            private set;
         }
 
         /// <summary>
@@ -306,118 +216,73 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <returns></returns>
         public static List<Claim> GlobalClaims
         {
-            get { return _globalClaims; }
+            get;
+            private set;
         }
 
 
-        public static IEnumerable<Claim> AllReserved
+        public static List<Claim> AllReserved
         {
-            // these are all current reserved claims.
-            // should be updated as the spec changes, refer to
-            // JwtConstants.cs
-            get
-            {
-                yield return _actor;
-                yield return _audience;
-                yield return _issuedAt;
-                yield return _issuer;
-                yield return _jwtId;
-                yield return _notAfter;
-                yield return _notBefore;
-                yield return _principal;
-                yield return _sub;
-                yield return _type;
-            }
+            get;
+            private set;
         }
 
-        public static IEnumerable<Claim> Audience
-        {
-            get { yield return _audience; }
-        }
-
-        public static IEnumerable<Claim> BadDateFormats
-        {
-            get
-            {
-                yield return _nbfBadDateFormat;
-                yield return _expBadDateFormat;
-            }
-        }
-
-        public static IEnumerable<Claim> BadHeaderType
-        {
-            get { yield return _badHeaderType; }
-        }
-
-        public static IEnumerable<Claim> Empty
+        public static List<Claim> Empty
         {
             get { return new List<Claim>(); }
         }
 
-        public static IEnumerable<Claim> Issuer
-        {
-            get { yield return _issuer; }
-        }
-
-        public static IEnumerable<Claim> MultipleAudiences(string issuer = IdentityUtilities.DefaultIssuer, string orignalIssuer = IdentityUtilities.DefaultIssuer)
-        {
-            foreach(var aud in IdentityUtilities.DefaultAudiences)
-            {
-                yield return new Claim("aud", aud, ClaimValueTypes.String, issuer, orignalIssuer);
-            }
-
-            yield return new Claim("iss", issuer, ClaimValueTypes.String, issuer, orignalIssuer);
-            foreach (var c in SimpleShortClaimtypes(issuer, orignalIssuer))
-            {
-                yield return c;
-            }
-        }
-
-        public static IEnumerable<Claim> SingleAudience(string issuer = IdentityUtilities.DefaultIssuer, string orignalIssuer = IdentityUtilities.DefaultIssuer)
-        {
-            yield return new Claim("aud", IdentityUtilities.DefaultAudience, ClaimValueTypes.String, issuer, orignalIssuer);
-            yield return new Claim("iss", issuer, ClaimValueTypes.String, issuer, orignalIssuer);
-            foreach (var c in SimpleShortClaimtypes(issuer, orignalIssuer))
-            {
-                yield return c;
-            }
-        }
-
-        public static List<Claim> RoleClaimsShortType()
-        {
-            return RoleClaimsShortType(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
-        }
-
-        public static List<Claim> RoleClaimsShortType(string issuer, string originalIssuer)
-        {
-            return new List<Claim>()
-            {
-                new Claim( "role", "role1", ClaimValueTypes.String, issuer, originalIssuer),
-                new Claim( "roles", "roles1", ClaimValueTypes.String, issuer, originalIssuer),
-            };
-        }
-
-        public static List<Claim> RoleClaimsLongType()
-        {
-            return RoleClaimsLongType(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
-        }
-
-        public static List<Claim> RoleClaimsLongType(string issuer, string originalIssuer)
+        public static List<Claim> MultipleAudiences(string issuer = IdentityUtilities.DefaultIssuer, string orignalIssuer = IdentityUtilities.DefaultIssuer)
         {
             var claims = new List<Claim>();
-
-            var claim = new Claim(ClaimTypes.Role, "role1", ClaimValueTypes.String, issuer, originalIssuer);
-            claim.Properties.Add(JwtSecurityTokenHandler.ShortClaimTypeProperty, "role");
-            claims.Add(claim);
-
-            claim = new Claim(ClaimTypes.Role, "roles1", ClaimValueTypes.String, issuer, originalIssuer);
-            claim.Properties.Add(JwtSecurityTokenHandler.ShortClaimTypeProperty, "roles");
-            claims.Add(claim);
+            foreach(var aud in IdentityUtilities.DefaultAudiences)
+            {
+                claims.Add(new Claim(JwtRegisteredClaimNames.Aud, aud, ClaimValueTypes.String, issuer, orignalIssuer));
+            }
 
             return claims;
         }
 
-        public static IEnumerable<Claim> Simple( string issuer, string originalIssuer )
+        public static List<Claim> SingleAudience(string issuer = IdentityUtilities.DefaultIssuer, string orignalIssuer = IdentityUtilities.DefaultIssuer)
+        {
+            return new List<Claim> { new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience, ClaimValueTypes.String, issuer, orignalIssuer) };
+        }
+
+        public static List<string> GetDefaultRoles()
+        {
+            return new List<string>{"role1", "roles1"};
+        }
+
+        public static Dictionary<string, string> GetDefaultRolePairs()
+        {
+            return new Dictionary<string, string> {{"role","role1"},{"roles","roles1"}};
+        }
+
+        public static List<Claim> GetDefaultRoleClaims(JwtSecurityTokenHandler handler)
+        {
+            var claims = new List<Claim>();
+            foreach(var kv in GetDefaultRolePairs())
+                AddMappedClaim(kv.Key, kv.Value, handler, claims);
+
+            return claims;
+        }
+
+        private static void AddMappedClaim(string claimTypeIn, string claimValue, JwtSecurityTokenHandler handler, List<Claim> claims)
+        {
+            string claimType;
+            if (handler == null || !handler.InboundClaimTypeMap.TryGetValue(claimTypeIn, out claimType))
+            {
+                claims.Add(new Claim(claimTypeIn, claimValue, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer));
+            }
+            else
+            {
+                var claim = new Claim(claimType, claimValue, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+                claim.Properties[JwtSecurityTokenHandler.ShortClaimTypeProperty] = claimTypeIn;
+                claims.Add(claim);
+            }
+        }
+
+        public static List<Claim> Simple(string issuer = IdentityUtilities.DefaultIssuer, string originalIssuer = IdentityUtilities.DefaultOriginalIssuer )
         {
             return new List<Claim>()
             {
@@ -500,7 +365,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <param name="issuer"></param>
         /// <param name="originalIssuer"></param>
         /// <returns></returns>
-        public static IEnumerable<Claim> DuplicateTypes( string issuer = IdentityUtilities.DefaultIssuer, string originalIssuer = IdentityUtilities.DefaultOriginalIssuer)
+        public static List<Claim> DuplicateTypes( string issuer = IdentityUtilities.DefaultIssuer, string originalIssuer = IdentityUtilities.DefaultOriginalIssuer)
         {
             return new List<Claim>
             {
@@ -517,103 +382,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
-        public static IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims, IDictionary<string, string> outboundClaimTypeMap)
+        public static List<Claim> EntityAsJsonClaim( string issuer, string orginalIssuer )
         {
-            foreach (Claim claim in claims)
-            {
-                string type = null;
-                if (outboundClaimTypeMap.TryGetValue(claim.Type, out type))
-                {
-                    Claim mappedClaim = new Claim(type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject);
-                    foreach (KeyValuePair<string, string> kv in claim.Properties)
-                    {
-                        mappedClaim.Properties.Add(kv);
-                    }
-                    yield return mappedClaim;
-                }
-                else
-                    yield return claim;
-            }
-        }
-
-        public static IEnumerable<Claim> ClaimsPlus( IEnumerable<Claim> claims = null, SigningCredentials signingCredential = null, DateTime? notBefore = null, DateTime? expires = null, string issuer = null, string originalIssuer = null, string audience = null )
-        {
-            string thisIssuer = issuer ?? ClaimsIdentity.DefaultIssuer;
-            string thisOriginalIssuer = originalIssuer ?? thisIssuer;
-
-            if ( claims != null )
-            {
-                foreach ( Claim claim in claims ) yield return claim;
-            }
-
-            if ( signingCredential != null )
-            {
-                JwtHeader header = new JwtHeader( signingCredential );
-
-                foreach ( string key in header.Keys )
-                {
-                    string value = JsonExtensions.SerializeToJson(header[key]);
-                    yield return new Claim( key, value, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-                }
-            }
-
-            if (notBefore.HasValue)
-                yield return new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(notBefore.Value).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer);
-
-            if (expires.HasValue)
-                yield return new Claim( JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate( expires.Value ).ToString(), ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-
-            if ( audience != null )
-                yield return new Claim( JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-
-            if ( issuer != null )
-                yield return new Claim( JwtRegisteredClaimNames.Iss, issuer, ClaimValueTypes.String, thisIssuer, thisOriginalIssuer );
-        }
-
-        public static IEnumerable<Claim> EntityAsJsonClaim( string issuer, string orginalIssuer )
-        {
-            yield return new Claim( typeof( Entity ).ToString(), JsonExtensions.SerializeToJson(Entity.Default), "JsonClaimType", issuer, orginalIssuer );
-        }
-
-        /// <summary>
-        /// Uses JwtSecurityTokenHandler.OutboundClaimTypeMap to map claimtype.
-        /// </summary>
-        /// <param name="jwtClaim"></param>
-        /// <returns></returns>
-        public static Claim OutboundClaim( Claim claim )
-        {
-            Claim outboundClaim = claim;
-            if ( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey( claim.Type ) )
-            {
-                outboundClaim = new Claim( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type], claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject );
-                foreach ( KeyValuePair< string, string > kv in claim.Properties )
-                {
-                    outboundClaim.Properties.Add( kv );
-                }
-            }
-
-            return outboundClaim;
-        }
-
-        /// <summary>
-        /// Simulates that a jwtClaim arrived and was mapped, adds the short name property for any claims that would have been translated
-        /// </summary>
-        /// <param name="jwtClaim"></param>
-        /// <returns></returns>
-        public static Claim InboundClaim( Claim claim )
-        {
-            if ( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey( claim.Type ) )
-            {
-                if ( JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.ContainsKey( JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type] ) )
-                {
-                    if ( !claim.Properties.ContainsKey( JwtSecurityTokenHandler.ShortClaimTypeProperty ) )
-                    {
-                        claim.Properties.Add( JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type] );
-                    }
-                }
-            }
-
-            return claim;
+            return new List<Claim> { new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), JsonClaimValueTypes.Json, issuer, orginalIssuer) };
         }
     }
 

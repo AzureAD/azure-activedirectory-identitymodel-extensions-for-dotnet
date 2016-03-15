@@ -28,20 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
 
-// since we are in the System ns, we need to map to M.IM.Tokens
-using Key = Microsoft.IdentityModel.Tokens.SecurityKey;
-
-namespace System.IdentityModel.Tokens.Jwt.Tests
+namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class JsonWebKeySetTests
     {
         [Fact(DisplayName = "JsonWebKeySetTests: Constructors")]
@@ -53,35 +44,34 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // null string, nothing to add
             RunJsonWebKeySetTest((string)null, null, ExpectedException.ArgumentNullException());
-
-            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetString1,  OpenIdConfigData.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebKeySetTest(OpenIdConfigData.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:", inner: typeof(JsonReaderException)));
+            RunJsonWebKeySetTest(DataSets.JsonWebKeySetString1,  DataSets.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
+            RunJsonWebKeySetTest(DataSets.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:", inner: typeof(JsonReaderException)));
         }
 
-        [Fact(DisplayName = "JsonWebKeySetTests: Interop")]
+        [Fact]
         public void Interop()
         {
-            string certsData = File.ReadAllText(OpenIdConfigData.GoogleCertsFile);
-            RunJsonWebKeySetTest(certsData, OpenIdConfigData.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
+            string certsData = File.ReadAllText(DataSets.GoogleCertsFile);
+            RunJsonWebKeySetTest(certsData, DataSets.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
 
-            GetSigningKeys(OpenIdConfigData.JsonWebKeySetBadRsaExponentString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
-            GetSigningKeys(OpenIdConfigData.JsonWebKeySetBadRsaModulusString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
-            GetSigningKeys(OpenIdConfigData.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
-            GetSigningKeys(OpenIdConfigData.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
-            GetSigningKeys(OpenIdConfigData.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
+            GetSigningKeys(DataSets.JsonWebKeySetBadRsaExponentString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+            GetSigningKeys(DataSets.JsonWebKeySetBadRsaModulusString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+            GetSigningKeys(DataSets.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
+            GetSigningKeys(DataSets.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
+            GetSigningKeys(DataSets.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
         }
 
-        private void GetSigningKeys(string webKeySetString, List<Key> expectedKeys, ExpectedException expectedException)
+        private void GetSigningKeys(string webKeySetString, List<SecurityKey> expectedKeys, ExpectedException expectedException)
         {
 
             JsonWebKeySet webKeySet = new JsonWebKeySet(webKeySetString);
             try
             {
-                IList<Key> keys = webKeySet.GetSigningKeys();
+                IList<SecurityKey> keys = webKeySet.GetSigningKeys();
                 expectedException.ProcessNoException();
                 if (expectedKeys != null)
                 {
-                    Assert.True(IdentityComparer.AreEqual<IEnumerable<Key>>(keys, expectedKeys));
+                    Assert.True(IdentityComparer.AreEqual(keys, expectedKeys));
                 }
             }
             catch (Exception ex)
@@ -116,7 +106,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             if (compareTo != null)
             {
-                Assert.True(IdentityComparer.AreEqual<JsonWebKeySet>(jsonWebKeys, compareTo, CompareContext.Default), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
+                Assert.True(IdentityComparer.AreEqual(jsonWebKeys, compareTo, CompareContext.Default), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
             }
 
             return jsonWebKeys;

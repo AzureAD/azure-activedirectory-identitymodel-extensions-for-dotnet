@@ -30,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
@@ -421,5 +420,4 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return null;
         }
     }
-
 }

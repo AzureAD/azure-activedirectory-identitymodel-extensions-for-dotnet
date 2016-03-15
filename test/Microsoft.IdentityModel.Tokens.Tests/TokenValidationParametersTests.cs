@@ -35,15 +35,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        [Fact( DisplayName = "TokenValidationParametersTests: Publics")]
+        [Fact]
         public void Publics()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 29)
-                Assert.True(false, "Number of properties has changed from 29 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 30)
+                Assert.True(false, "Number of properties has changed from 30 to: " + properties.Length + ", adjust tests");
 
+            TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             SecurityKey issuerSigningKey2 = KeyingMaterial.RsaSecurityKey_2048;
 
@@ -66,8 +67,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             string validIssuer = "ValidIssuer";
             List<string> validIssuers = new List<string> { validIssuer };
 
+
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {
+                ActorValidationParameters = actorValidationParameters,
                 AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue,
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey }; },
@@ -84,6 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ValidIssuers = validIssuers,
             };
 
+            Assert.True(object.ReferenceEquals(actorValidationParameters, validationParametersInline.ActorValidationParameters));
             Assert.True(object.ReferenceEquals(validationParametersInline.IssuerSigningKey, issuerSigningKey));
             Assert.True(validationParametersInline.SaveSigninToken);
             Assert.False(validationParametersInline.ValidateAudience);
@@ -93,6 +97,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
+            validationParametersSets.ActorValidationParameters = actorValidationParameters;
             validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
             validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey2 }; };
@@ -108,17 +113,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
 
-            Assert.True(IdentityComparer.AreEqual<TokenValidationParameters>(validationParametersInline, validationParametersSets));
+            var compareContext = new CompareContext();
+            IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
 
             TokenValidationParameters tokenValidationParametersCloned = validationParametersInline.Clone() as TokenValidationParameters;
-            Assert.True(IdentityComparer.AreEqual<TokenValidationParameters>(tokenValidationParametersCloned, validationParametersInline));
+            IdentityComparer.AreEqual(tokenValidationParametersCloned, validationParametersInline, compareContext);
             //tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple();
 
             string id = Guid.NewGuid().ToString();
             DerivedTokenValidationParameters derivedValidationParameters = new DerivedTokenValidationParameters(id, validationParametersInline);
             DerivedTokenValidationParameters derivedValidationParametersCloned = derivedValidationParameters.Clone() as DerivedTokenValidationParameters;
-            Assert.True(IdentityComparer.AreEqual<TokenValidationParameters>(derivedValidationParameters, derivedValidationParametersCloned));
-            Assert.Equal(derivedValidationParameters.InternalString, derivedValidationParametersCloned.InternalString);
+            IdentityComparer.AreEqual(derivedValidationParameters, derivedValidationParametersCloned, compareContext);
+            IdentityComparer.AreEqual(derivedValidationParameters.InternalString, derivedValidationParametersCloned.InternalString, compareContext);
+
+            TestUtilities.AssertFailIfErrors("TokenValidationParameters", compareContext.Diffs);
         }
 
         [Fact( DisplayName = "TokenValidationParametersTests: GetSets, covers defaults")]
@@ -127,14 +135,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 29)
-                Assert.True(false, "Number of public fields has changed from 29 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 30)
+                Assert.True(false, "Number of public fields has changed from 30 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                     {
+                        new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                         new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         //new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
                         new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
@@ -155,7 +164,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
             TestUtilities.GetSet(context);
             TestUtilities.AssertFailIfErrors("TokenValidationParametersTests: GetSets", context.Errors);
-
             Assert.Null(validationParameters.AudienceValidator);
             Assert.Null(validationParameters.LifetimeValidator);
             Assert.Null(validationParameters.IssuerSigningKeyResolver);

@@ -30,6 +30,8 @@ using System.Globalization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -60,7 +62,6 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
            : this(issuer, audience, claims, notBefore, expires, null)
         {
-
         }
 
         /// <summary>
@@ -78,6 +79,9 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
         {
+            if (claims != null)
+                AddClaims(claims);
+
             if (expires.HasValue)
             {
                 if (notBefore.HasValue)
@@ -96,14 +100,12 @@ namespace System.IdentityModel.Tokens.Jwt
             if (issuedAt.HasValue)
                 this[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(issuedAt.Value.ToUniversalTime());
 
-            if (claims != null)
-                AddClaims(claims);
-
             if (!string.IsNullOrEmpty(issuer))
                 this[JwtRegisteredClaimNames.Iss] = issuer;
 
+            // if could be the case that some of the claims above had an 'aud' claim;
             if (!string.IsNullOrEmpty(audience))
-                this[JwtRegisteredClaimNames.Aud] = audience;
+                AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String));
         }
 
         /// <summary>
@@ -312,71 +314,79 @@ namespace System.IdentityModel.Tokens.Jwt
 
                     string claimType = keyValuePair.Key;
                     string claimValue = keyValuePair.Value as string;
-                    Claim c = null;
-
                     if (claimValue != null)
                     {
                         claims.Add(new Claim(keyValuePair.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
+                        continue;
                     }
-                    else
+
+                    var jobject = keyValuePair.Value as JObject;
+                    if (jobject != null)
                     {
-
-                        var values = keyValuePair.Value as Newtonsoft.Json.Linq.JArray;
-                        if (values != null)
-                        {
-                            foreach(var item in values)
-                            {
-                                if (item.Type == Newtonsoft.Json.Linq.JTokenType.String)
-                                    claims.Add(new Claim(keyValuePair.Key, item.ToString(), ClaimValueTypes.String, issuer, issuer));
-                                else
-                                {
-                                    c = new Claim(keyValuePair.Key, item.ToString(), JwtConstants.JsonClaimValueType, issuer, issuer);
-                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = item.GetType().ToString();
-                                    claims.Add(c);
-                                }
-                            }
-                            continue;
-                        }
-
-                        var objects = keyValuePair.Value as IEnumerable<object>;
-                        if (objects != null)
-                        {
-                            foreach (var obj in objects)
-                            {
-                                string str = obj as string;
-                                if (str != null)
-                                {
-                                    claims.Add(new Claim(keyValuePair.Key, str, ClaimValueTypes.String, issuer, issuer));
-                                    continue;
-                                }
-                                else
-                                {
-                                    c = new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(obj), JwtConstants.JsonClaimValueType, issuer, issuer);
-                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = obj.GetType().ToString();
-                                    claims.Add(c);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            IDictionary<string, object> dictionary = keyValuePair.Value as IDictionary<string, object>;
-                            if (dictionary != null)
-                            {
-                                foreach (var item in dictionary)
-                                {
-                                    c = new Claim(claimType, "{" + JsonExtensions.SerializeToJson(item.Key) + ":" + JsonExtensions.SerializeToJson(item.Value) + "}", JwtConstants.JsonClaimValueType, issuer, issuer);
-                                    c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = typeof(IDictionary<string, object>).ToString();
-                                    claims.Add(c);
-                                }
-                            }
-                            else
-                            {
-                                c = new Claim(claimType, JsonExtensions.SerializeToJson(keyValuePair.Value), JwtConstants.JsonClaimValueType, issuer, issuer);
-                                c.Properties[JwtSecurityTokenHandler.JsonClaimTypeProperty] = keyValuePair.Value.GetType().ToString();
-                                claims.Add(c);
-                            }
-                        }
+                        claims.Add(new Claim(keyValuePair.Key, jobject.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
+                        continue;
                     }
+
+                    var jarray = keyValuePair.Value as JArray;
+                    if (jarray != null)
+                    {
+                        foreach (var item in jarray)
+                        {
+                            var json = item as JObject;
+                            if (json != null)
+                            {
+                                claims.Add(new Claim(keyValuePair.Key, json.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
+                                continue;
+                            }
+
+                            var jarrayInner = item as JArray;
+                            if (jarrayInner != null)
+                            {
+                                claims.Add(new Claim(keyValuePair.Key, jarrayInner.ToString(Formatting.None), JsonClaimValueTypes.JsonArray, issuer, issuer));
+                                continue;
+                            }
+
+                            claims.Add(new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(item), GetClaimValueType(item), issuer, issuer));
+                        }
+
+                        continue;
+                    }
+
+                    var objects = keyValuePair.Value as IEnumerable<object>;
+                    if (objects != null)
+                    {
+                        foreach (var obj in objects)
+                        {
+                            string str = obj as string;
+                            if (str != null)
+                            {
+                                claims.Add(new Claim(keyValuePair.Key, str, ClaimValueTypes.String, issuer, issuer));
+                                continue;
+                            }
+
+                            var json = obj as JObject;
+                            if (json != null)
+                            {
+                                claims.Add(new Claim(keyValuePair.Key, json.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
+                                continue;
+                            }
+
+                            claims.Add(new Claim(keyValuePair.Key, JsonExtensions.SerializeToJson(obj), GetClaimValueType(obj), issuer, issuer));
+                        }
+
+                        continue;
+                    }
+
+                    IDictionary<string, object> dictionary = keyValuePair.Value as IDictionary<string, object>;
+                    if (dictionary != null)
+                    {
+                        foreach (var item in dictionary)
+                            claims.Add(new Claim(claimType, "{" + JsonExtensions.SerializeToJson(item.Key) + ":" + JsonExtensions.SerializeToJson(item.Value) + "}", GetClaimValueType(keyValuePair.Value), issuer, issuer));
+
+                        continue;
+                    }
+
+                    claims.Add(new Claim(claimType, JsonExtensions.SerializeToJson(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
                 }
 
                 return claims;
@@ -422,14 +432,17 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 string jsonClaimType = claim.Type;
                 object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
-                object value;
-                if (TryGetValue(jsonClaimType, out value))
+                object existingValue;
+
+                // If there is an existing value, append to it.
+                // What to do if the 'ClaimValueType' is not the same.
+                if (TryGetValue(jsonClaimType, out existingValue))
                 {
-                    IList<object> claimValues = value as IList<object>;
+                    IList<object> claimValues = existingValue as IList<object>;
                     if (claimValues == null)
                     {
                         claimValues = new List<object>();
-                        claimValues.Add(value);
+                        claimValues.Add(existingValue);
                         this[jsonClaimType] = claimValues;
                     }
 
@@ -444,33 +457,6 @@ namespace System.IdentityModel.Tokens.Jwt
 
         internal static object GetClaimValueUsingValueType(Claim claim)
         {
-            if (claim.ValueType == ClaimValueTypes.Integer)
-            {
-                int intValue;
-                if (int.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Integer32)
-            {
-                Int32 intValue;
-                if (Int32.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Integer64)
-            {
-                Int64 intValue;
-                if (Int64.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
             if (claim.ValueType == ClaimValueTypes.Boolean)
             {
                 bool boolValue;
@@ -489,7 +475,66 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
+            if (claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32)
+            {
+                int intValue;
+                if (int.TryParse(claim.Value, out intValue))
+                {
+                    return intValue;
+                }
+            }
+
+            if (claim.ValueType == ClaimValueTypes.Integer64)
+            {
+                long intValue;
+                if (long.TryParse(claim.Value, out intValue))
+                {
+                    return intValue;
+                }
+            }
+
+            if (claim.ValueType == JsonClaimValueTypes.Json)
+            {
+                return JObject.Parse(claim.Value);
+            }
+
+            if (claim.ValueType == JsonClaimValueTypes.JsonArray)
+            {
+                return JArray.Parse(claim.Value);
+            }
+
             return claim.Value;
+        }
+
+        internal static string GetClaimValueType(object obj)
+        {
+            var objType = obj.GetType();
+
+            if (objType == typeof(bool))
+                return ClaimValueTypes.Boolean;
+
+            if (objType == typeof(double))
+                return ClaimValueTypes.Double;
+
+            if (objType == typeof(int))
+                return ClaimValueTypes.Integer;
+
+            if (objType == typeof(Int32))
+                return ClaimValueTypes.Integer32;
+
+            if (objType == typeof(Int64))
+                return ClaimValueTypes.Integer64;
+
+            if (objType == typeof(string))
+                return ClaimValueTypes.String;
+
+            if (objType == typeof(JObject))
+                return JsonClaimValueTypes.Json;
+
+            if (objType == typeof(JArray))
+                return JsonClaimValueTypes.JsonArray;
+
+            return objType.ToString();
         }
 
         internal string GetStandardClaim(string claimType)

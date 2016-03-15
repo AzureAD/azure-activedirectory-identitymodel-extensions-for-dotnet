@@ -302,19 +302,19 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Returns a Json Web Token (JWT).
         /// </summary>
         /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of token contents and <see cref="SignatureProvider"/>.
-        public string CreateJwt(SecurityTokenDescriptor tokenDescriptor)
+        public string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException("tokenDescriptor");
 
-            return (CreateJwt(
+            return (CreateEncodedJwt(
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
                 tokenDescriptor.Claims,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials)).RawData;
+                tokenDescriptor.SigningCredentials));
         }
 
         /// <summary>
@@ -368,6 +368,11 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private JwtSecurityToken CreateJwt(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
+            return new JwtSecurityToken(CreateEncodedJwt(issuer, audience, claims, notBefore, expires, issuedAt, signingCredentials));
+        }
+
+        public string CreateEncodedJwt(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
+        {
             if (SetDefaultTimesOnTokenCreation)
             {
                 DateTime now = DateTime.UtcNow;
@@ -397,7 +402,8 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
-            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+
+            return signingInput + "." + rawSignature;
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
@@ -557,7 +563,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
             {
                 SecurityToken actor = null;
-                ValidateToken(jwt.Actor, validationParameters, out actor);
+                ValidateToken(jwt.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out actor);
             }
 
             ClaimsIdentity identity = CreateClaimsIdentity(jwt, issuer, validationParameters);

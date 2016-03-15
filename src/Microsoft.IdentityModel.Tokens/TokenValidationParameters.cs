@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate bool AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
-    /// Definition for IssuerSigningKeyRetriever.
+    /// Definition for IssuerSigningKeyResolver.
     /// </summary>
     /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
     /// <param name="securityToken">the <SecurityToken> that is being validated. It may be null.</SecurityToken></param>
@@ -123,6 +123,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentNullException("other");
             }
 
+            ActorValidationParameters = other.ActorValidationParameters?.Clone();
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
@@ -167,6 +168,11 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateIssuer = true;
             ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
+        }
+
+        public TokenValidationParameters ActorValidationParameters
+        {
+            get; set;
         }
 
         /// <summary>

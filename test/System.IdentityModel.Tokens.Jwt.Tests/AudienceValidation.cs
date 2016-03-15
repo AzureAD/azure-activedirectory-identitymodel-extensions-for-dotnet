@@ -31,78 +31,36 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
-using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
-
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class AudienceValidationTests
     {
-        [Fact(DisplayName = "AudienceValidation: Variations")]
+        [Fact]
         public void Variations()
         {
-            List<string> errors = new List<string>();
+            var context = new CompareContext();
+            RunAudienceVariation(ClaimSets.MultipleAudiences(), IdentityUtilities.DefaultAudiences, context);
+            RunAudienceVariation(ClaimSets.SingleAudience(), new List<string> { IdentityUtilities.DefaultAudience }, context);
 
-            RunAudienceVariation(ClaimSets.MultipleAudiences(), IdentityUtilities.DefaultAudiences, errors);
-
-            List<string> audiences = new List<string>();
-            audiences.Add(IdentityUtilities.DefaultAudience);
-            RunAudienceVariation(ClaimSets.SingleAudience(), audiences, errors);
-
-            TestUtilities.AssertFailIfErrors("AudienceValidation: ", errors);
+            TestUtilities.AssertFailIfErrors("AudienceValidation: ", context.Diffs);
         }
 
-        private void RunAudienceVariation(IEnumerable<Claim> claims, IList<string> expectedAudiences, IList<string> errors)
+        private void RunAudienceVariation(List<Claim> audienceClaims, List<string> expectedAudiences, CompareContext context)
         {
-            var validationParameters =
-                new TokenValidationParameters
-                {
-                    RequireExpirationTime = false,
-                    RequireSignedTokens = false,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false,
-                };
-
-            var payload = new JwtPayload(claims: claims);
-            var jwtToken = new JwtSecurityToken(new JwtHeader(), payload);
             var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.WriteToken(jwtToken);
+            var tokenDescriptor = IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor(audienceClaims);
+            tokenDescriptor.Audience = null;
+            var jwt = handler.CreateEncodedJwt(tokenDescriptor);
 
-            Token validatedJwt = null;
-            var claimsPrincipal = handler.ValidateToken(jwt, validationParameters, out validatedJwt);
-            var audiences = (validatedJwt as JwtSecurityToken).Audiences;
-            var jwtAudiences = jwtToken.Audiences;
+            SecurityToken token = null;
+            var claimsPrincipal = handler.ValidateToken(jwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, out token);
+            var jwtToken = token as JwtSecurityToken;
+            var audiences = jwtToken.Audiences;
 
-            if (!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, jwtAudiences))
-            {
-                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, jwtAudiences)");
-            }
-
-            if (!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, expectedAudiences))
-            {
-                errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(audiences, expectedAudiences)");
-            }
+            IdentityComparer.AreEqual(audiences, expectedAudiences as IEnumerable<string>, context);
 
             ClaimsIdentity identity = claimsPrincipal.Identity as ClaimsIdentity;
-            IEnumerable<Claim> audienceClaims = identity.FindAll("aud");
-
-            if (audienceClaims == null)
-            {
-                errors.Add(@"identity.FindAll(""aud"") == null");
-            }
-            else
-            {
-                List<string> auds = new List<string>();
-                foreach(var claim in audienceClaims)
-                {
-                    auds.Add(claim.Value);
-                }
-
-                if (!IdentityComparer.AreEqual<IEnumerable<string>>(auds, audiences))
-                {
-                    errors.Add("!IdentityComparer.AreEqual<IEnumerable<string>>(auds, audiences)");
-                }
-            }
+            IdentityComparer.AreEqual(identity.FindAll(JwtRegisteredClaimNames.Aud), audienceClaims, context);
         }
     }
 }

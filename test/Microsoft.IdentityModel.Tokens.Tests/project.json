@@ -31,5 +31,6 @@
   },
   "compilationOptions": {
     "warningsAsErrors": true
-  }
+  },
+  "content": [ "google-certs.json" ]
 }

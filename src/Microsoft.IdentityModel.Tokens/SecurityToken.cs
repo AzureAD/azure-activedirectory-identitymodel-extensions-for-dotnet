@@ -31,21 +31,35 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public abstract class SecurityToken
     {
+        /// <summary>
+        /// Gets the Id of this <see cref="SecurityToken"/>.
+        /// </summary>
         public abstract string Id { get; }
+
+        /// <summary>
+        /// Gets the Issuer of this <see cref="SecurityToken"/>.
+        /// </summary>
+        public abstract string Issuer { get; }
+
+        /// <summary>
+        /// Gets the <see cref="SecurityKey"/>.
+        /// </summary>
         public abstract SecurityKey SecurityKey { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that signed this instance.
         /// </summary>
-        /// <remarks><see cref="JwtSecurityTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
-        public abstract SecurityKey SigningKey
-        {
-            get;
-            set;
-        }
+        /// <remarks><see cref="ISecurityTokenValidator"/>.ValidateToken(...) can this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
+        public abstract SecurityKey SigningKey { get; set; }
 
-        public abstract string Issuer { get; }
+        /// <summary>
+        /// Get the Time when this <see cref="SecurityToken"/> was Valid.
+        /// </summary>
         public abstract DateTime ValidFrom { get; }
+
+        /// <summary>
+        /// Get the Time when this <see cref="SecurityToken"/> is no longer Valid.
+        /// </summary>
         public abstract DateTime ValidTo { get; }
     }
 }

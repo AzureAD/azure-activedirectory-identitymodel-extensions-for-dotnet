@@ -36,6 +36,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Empty = "empty";
         public const string Null = "null";
 
+        public static byte[] CloneByteArray(this byte[] src)
+        {
+            return (byte[])(src.Clone());
+        }
+
         /// <summary>
         /// Serializes the list of strings into string as follows:
         /// 'str1','str2','str3' ...

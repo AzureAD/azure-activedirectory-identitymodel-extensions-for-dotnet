@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             started = DateTime.UtcNow;
             for ( int i = 0; i < iterations; i++ )
             {
-                (new JwtSecurityTokenHandler()).CreateJwt(tokenDescriptor);
+                (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
             }
 
             if ( display )

@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Type type = obj.GetType();
 
             // call get all public static properties of MyClass type
-            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
             // Touch each public property
             foreach (PropertyInfo propertyInfo in propertyInfos)
@@ -366,9 +366,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.ValidateToken(securityToken, tvp, tokenValidator, ExpectedException.SecurityTokenReplayAddFailed());
         }
 
-        public static void AssertEqual(string testid, object obj1, object obj2, Func<object, object, CompareContext, bool> areEqual, CompareContext cc)
+        public static void AssertFailIfErrors(List<string> errors)
         {
-            areEqual(obj1, obj2, cc);
+            AssertFailIfErrors(null, errors);
+        }
+
+        public static void AssertFailIfErrors(CompareContext context)
+        {
+            AssertFailIfErrors(context.Title, context.Diffs);
         }
 
         public static void AssertFailIfErrors(string testId, List<string> errors)
@@ -376,8 +381,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             if (errors.Count != 0)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine(testId);
-                sb.AppendLine(Environment.NewLine);
+                if (!string.IsNullOrEmpty(testId))
+                {
+                    sb.AppendLine(testId);
+                    sb.AppendLine(Environment.NewLine);
+                }
+
                 foreach (string str in errors)
                     sb.AppendLine(str);
 

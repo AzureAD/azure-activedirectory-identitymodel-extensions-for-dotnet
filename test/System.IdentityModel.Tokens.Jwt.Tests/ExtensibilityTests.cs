@@ -51,9 +51,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             JwtSecurityToken jwt =
                 new JwtSecurityToken
                 (
-                    issuer: Issuers.GotJwt,
-                    audience: Audiences.AuthFactors,
-                    claims: ClaimSets.Simple(Issuers.GotJwt, Issuers.GotJwt),
+                    issuer: IdentityUtilities.DefaultIssuer,
+                    audience: IdentityUtilities.DefaultAudience,
+                    claims: ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
                     signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(10),
                     notBefore: DateTime.UtcNow
@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
                 ValidateAudience = false,
-                ValidIssuer = Issuers.GotJwt,
+                ValidIssuer = IdentityUtilities.DefaultIssuer,
             };
 
             List<string> errors = new List<string>();
@@ -105,37 +105,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expectedException.ProcessException(ex, errors);
             }
         }
-
-#if BREAKING
-        // NamedKeySecurityKeyIdentifierClause gone
-        [Fact(DisplayName = "Extensibility tests for NamedKeySecurityKeyIdentifierClause")]
-        public void NamedKeySecurityKeyIdentifierClause_Extensibility()
-        {
-            string clauseName = "kid";
-            string keyId = Issuers.GotJwt;
-
-            NamedKeySecurityKeyIdentifierClause clause = new NamedKeySecurityKeyIdentifierClause(clauseName, keyId);
-            SecurityKeyIdentifier keyIdentifier = new SecurityKeyIdentifier(clause);
-            SigningCredentials signingCredentials = new SigningCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256Digest, keyIdentifier);
-            JwtHeader jwtHeader = new JwtHeader(signingCredentials);
-            SecurityKeyIdentifier ski = jwtHeader.SigningKeyIdentifier;
-            Assert.Equal(ski.Count, 1, "ski.Count != 1 ");
-
-            NamedKeySecurityKeyIdentifierClause clauseOut = ski.Find<NamedKeySecurityKeyIdentifierClause>();
-            Assert.IsNotNull(clauseOut, "NamedKeySecurityKeyIdentifierClause not found");
-            Assert.Equal(clauseOut.Name, clauseName, "clauseOut.Id != clauseId");
-            Assert.Equal(clauseOut.Id, keyId, "clauseOut.KeyIdentifier != keyId");
-
-            NamedKeySecurityToken NamedKeySecurityToken = new NamedKeySecurityToken(clauseName, keyId, new SecurityKey[] { KeyingMaterial.DefaultSymmetricSecurityKey_256 });
-            ((NamedKeySecurityToken.MatchesKeyIdentifierClause(clause), "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
-
-            List<SecurityKey> list = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricSecurityKey_256 };
-            Dictionary<string, IList<SecurityKey>> keys = new Dictionary<string, IList<SecurityKey>>() { { "kid", list }, };
-            NamedKeyIssuerTokenResolver nkitr = new NamedKeyIssuerTokenResolver(keys: keys);
-            SecurityKey sk = nkitr.ResolveSecurityKey(clause);
-            Assert.IsNotNull(sk, "NamedKeySecurityToken.MatchesKeyIdentifierClause( clause ), failed");
-        }
-#endif
 
         private void RunAlgorithmMappingTest(string jwt, TokenValidationParameters validationParameters, JwtSecurityTokenHandler handler, ExpectedException expectedException)
         {
