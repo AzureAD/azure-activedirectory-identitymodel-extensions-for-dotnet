@@ -2,16 +2,27 @@
   "version": "5.0.0-*",
   "dependencies": {
     "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
-    "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests": "2.0.0-*"
+    "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests": "2.0.0-*",
+    "xunit": "2.1.0"
   },
   "testRunner": "xunit",
   "frameworks": {
     "netstandardapp1.5": {
-      "imports": [ "dnxcore50", "portable-net451+win8" ]
+      "dependencies": {
+        "dotnet-test-xunit": "1.0.0-dev-*",
+        "NETStandard.Library": "1.5.0-*",
+        "System.Diagnostics.Process": "4.1.0-*"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net451+win8"
+      ]
     },
-    "dnx451": {
+    "net451": {
       "frameworkAssemblies": {
-        "System.IdentityModel": "4.0.0.0"
+      },
+      "dependencies": {
+        "xunit.runner.console": "2.1.0"
       }
     }
   },

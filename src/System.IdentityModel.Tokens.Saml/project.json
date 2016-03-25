@@ -5,12 +5,12 @@
     "Microsoft.IdentityModel.Tokens": "5.0.0-*"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.4": {
       "dependencies": {
         "System.Runtime.Serialization.Primitives": "4.1.0-rc2-*",
         "System.Runtime.Serialization.Xml": "4.1.0-rc2-*"
       },
-      "imports": [ "dotnet5.4", "portable-net451+win8" ]
+      "imports": [ "dotnet5.5", "portable-net451+win8" ]
     },
     "net451": {
       "frameworkAssemblies": {

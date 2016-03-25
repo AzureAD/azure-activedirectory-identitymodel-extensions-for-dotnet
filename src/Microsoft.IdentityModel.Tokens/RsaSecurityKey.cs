@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         // imitate signing
                         byte[] hash = new byte[20];
-#if NETSTANDARD1_3
+#if NETSTANDARD1_4
                         Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #else
                     RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;

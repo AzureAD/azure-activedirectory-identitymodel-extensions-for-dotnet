@@ -3,10 +3,10 @@
   "description": "Includes types that provide support for cryptographic operations.",
   "dependencies": {
     "Microsoft.IdentityModel.Logging": "1.0.0-*",
-    "Newtonsoft.Json": "6.0.6"
+    "Newtonsoft.Json": "8.0.3"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.4": {
       "dependencies": {
         "System.Collections": "4.0.11-rc2-*",
         "System.Diagnostics.Tools": "4.0.1-rc2-*",
@@ -15,17 +15,15 @@
         "System.Runtime.InteropServices": "4.1.0-rc2-*",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc2-*",
         "System.Security.Claims": "4.0.1-rc2-*",
-        "System.Security.Cryptography.Algorithms": "4.0.0-rc2-*",
-        "System.Security.Cryptography.Cng": "4.0.0-rc2-*",
+        "System.Security.Cryptography.Algorithms": "4.1.0-rc2-*",
+        "System.Security.Cryptography.Cng": "4.1.0-rc2-*",
         "System.Security.Cryptography.Csp": "4.0.0-rc2-*",
-        "System.Security.Cryptography.OpenSsl": "4.0.0-rc2-*",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-rc2-*",
-        "System.Security.Principal": "4.0.1-rc2-*",
+        "System.Security.Cryptography.X509Certificates": "4.1.0-rc2-*",
         "System.Text.RegularExpressions": "4.0.12-rc2-*",
         "System.Threading": "4.0.11-rc2-*",
         "System.Xml.ReaderWriter": "4.0.11-rc2-*"
       },
-      "imports": [ "dotnet5.4", "portable-net451+win8" ]
+      "imports": [ "dotnet5.5", "portable-net451+win8" ]
     },
     "net451": {
       "frameworkAssemblies": {
