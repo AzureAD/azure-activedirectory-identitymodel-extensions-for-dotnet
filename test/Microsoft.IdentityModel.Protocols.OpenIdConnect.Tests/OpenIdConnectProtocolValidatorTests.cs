@@ -28,9 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 using System.Threading;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
@@ -875,6 +877,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     RequireTimeStampInNonce = false,
                 };
+
             PublicOpenIdConnectProtocolValidator protocolValidatorDoesNotRequireNonce =
                new PublicOpenIdConnectProtocolValidator
                {
@@ -888,8 +891,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             string nonceTicksTooSmall = Int64.MinValue.ToString() + "." + nonceWithoutTimeStamp;
             string nonceTicksNegative = ((Int64)(-1)).ToString() + "." + nonceWithoutTimeStamp;
             string nonceTicksZero = ((Int64)(0)).ToString() + "." + nonceWithoutTimeStamp;
+            string nonceExpired = (DateTime.UtcNow - TimeSpan.FromMinutes(20)).Ticks.ToString(CultureInfo.InvariantCulture) + "." + Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString() + Guid.NewGuid().ToString()));
 
             JwtSecurityToken jwtWithNonceWithTimeStamp = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceWithTimeStamp) });
+            JwtSecurityToken jwtWithNonceExpired = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceExpired) });
             JwtSecurityToken jwtWithNonceWithoutTimeStamp = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceWithoutTimeStamp) });
             JwtSecurityToken jwtWithNonceWithBadTimeStamp = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceBadTimeStamp) });
             JwtSecurityToken jwtWithNonceTicksTooLarge = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.Nonce, nonceTicksTooLarge) });
@@ -941,11 +946,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateNonce(jwtWithNonceWithTimeStamp, protocolValidatorRequiresTimeStamp, validationContext, ExpectedException.NoExceptionExpected);
 
             // nonce expired
-            validationContext.Nonce = nonceWithTimeStamp;
+            validationContext.Nonce = nonceExpired;
             protocolValidatorRequiresTimeStamp.NonceLifetime = TimeSpan.FromMilliseconds(10);
-            Thread.Sleep(100);
             ValidateNonce(
-                jwtWithNonceWithTimeStamp,
+                jwtWithNonceExpired,
                 protocolValidatorRequiresTimeStamp,
                 validationContext,
                 new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10324: ")
