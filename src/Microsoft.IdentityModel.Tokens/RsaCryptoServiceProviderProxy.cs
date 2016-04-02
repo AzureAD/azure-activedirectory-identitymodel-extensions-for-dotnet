@@ -39,8 +39,12 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
 
+        // CryptoApi provider type for an RSA provider only supporting sha1 digital signatures
+        private const int PROV_RSA_FULL = 1;
+        private const int PROV_RSA_SCHANNEL = 12;
+
         private bool _disposed;
-        
+
         // Only dispose of the RsaCryptoServiceProvider object if we created a new instance that supports SHA-256,
         // otherwise do not disposed of the referenced RsaCryptoServiceProvider
         private bool _disposeRsa;
@@ -52,24 +56,20 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("rsa");
 
             //
-            // If the provider does not understand SHA256, 
-            // replace it with one that does.
-            //
-            if (rsa.CspKeyContainerInfo.ProviderType != PROV_RSA_AES)
+            // Level up the provider type only if:
+            // 1. it is PROV_RSA_FULL or PROV_RSA_SCHANNEL which denote CSPs that only understand Sha1 algorithms
+            // 2. it is not associated with a hardware key
+            if ((rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_FULL || rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_SCHANNEL) && !rsa.CspKeyContainerInfo.HardwareDevice)
             {
                 CspParameters csp = new CspParameters();
                 csp.ProviderType = PROV_RSA_AES;
                 csp.KeyContainerName = rsa.CspKeyContainerInfo.KeyContainerName;
                 csp.KeyNumber = (int)rsa.CspKeyContainerInfo.KeyNumber;
                 if (rsa.CspKeyContainerInfo.MachineKeyStore)
-                {
                     csp.Flags = CspProviderFlags.UseMachineKeyStore;
-                }
 
-                //
                 // If UseExistingKey is not specified, the CLR will generate a key for a non-existent group.
                 // With this flag, a CryptographicException is thrown instead.
-                //
                 csp.Flags |= CspProviderFlags.UseExistingKey;
 
                 _rsa = new RSACryptoServiceProvider(csp);
