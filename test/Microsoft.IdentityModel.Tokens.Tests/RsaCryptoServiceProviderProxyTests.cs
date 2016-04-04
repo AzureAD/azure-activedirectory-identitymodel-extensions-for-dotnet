@@ -96,6 +96,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ee.ProcessException(ex);
             }
         }
+
         private void SignData(RSACryptoServiceProviderProxy rsaCspProxy, ExpectedException ee)
         {
             try

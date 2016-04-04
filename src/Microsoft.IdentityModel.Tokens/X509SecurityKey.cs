@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         X509Certificate2 _certificate;
         AsymmetricAlgorithm _privateKey;
         bool _privateKeyAvailabilityDetermined;
-        PublicKey _publicKey;
+        AsymmetricAlgorithm _publicKey;
         object _thisLock = new Object();
 
         /// <summary>
@@ -48,22 +48,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="certificate"> cert to use.</param>
         public X509SecurityKey(X509Certificate2 certificate)
-        { 
+        {
             if (certificate == null)
                 throw new ArgumentNullException("certificate");
 
             _certificate = certificate;
-			KeyId = certificate.Thumbprint;
+            KeyId = certificate.Thumbprint;
         }
 
         public override int KeySize
         {
-            get {
-#if NETSTANDARD1_4
-                return RSACertificateExtensions.GetRSAPublicKey(_certificate).KeySize;
-#else
-                return PublicKey.Key.KeySize;
-#endif
+            get
+            {
+                return PublicKey.KeySize;
             }
         }
 
@@ -91,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        public PublicKey PublicKey
+        public AsymmetricAlgorithm PublicKey
         {
             get
             {
@@ -101,7 +98,11 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_publicKey == null)
                         {
-                            _publicKey = _certificate.PublicKey;
+#if NETSTANDARD1_4
+                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(_certificate);
+#else
+                            _publicKey = _certificate.PublicKey.Key;
+#endif
                         }
                     }
                 }

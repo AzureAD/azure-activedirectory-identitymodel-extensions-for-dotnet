@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
                         _rsa = x509Key.PrivateKey as RSA;
                 }
                 else
-                    _rsa = RSACertificateExtensions.GetRSAPublicKey(x509Key.Certificate);
+                    _rsa = x509Key.PublicKey as RSA;
 
                 return;
             }
@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (willCreateSignatures)
                     _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
                 else
-                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey.Key as RSACryptoServiceProvider);
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey as RSACryptoServiceProvider);
                 return;
             }
 
