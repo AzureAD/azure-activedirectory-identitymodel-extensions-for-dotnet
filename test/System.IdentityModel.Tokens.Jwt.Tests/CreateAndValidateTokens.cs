@@ -157,64 +157,104 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
-            var jwt1 = handler.CreateEncodedJwt(createParams.SecurityTokenDescriptor);
-            var jwtToken1 = new JwtSecurityToken(jwt1);
-            SecurityToken validatedJwtToken1 = null;
-            var claimsPrincipal1 = handler.ValidateToken(jwt1, createParams.TokenValidationParameters, out validatedJwtToken1);
-
-            var jwt2 = handler.CreateEncodedJwt(
+            var encodedJwt1 = handler.CreateEncodedJwt(createParams.SecurityTokenDescriptor);
+            var encodedJwt2 = handler.CreateEncodedJwt(
                 createParams.SecurityTokenDescriptor.Issuer,
                 createParams.SecurityTokenDescriptor.Audience,
-                createParams.SecurityTokenDescriptor.Claims,
+                createParams.SecurityTokenDescriptor.Subject,
                 createParams.SecurityTokenDescriptor.NotBefore,
                 createParams.SecurityTokenDescriptor.Expires,
                 createParams.SecurityTokenDescriptor.IssuedAt,
                 createParams.SecurityTokenDescriptor.SigningCredentials);
-            var jwtToken2 = new JwtSecurityToken(jwt2);
-            SecurityToken validatedJwtToken2 = null;
-            var claimsPrincipal2 = handler.ValidateToken(jwt1, createParams.TokenValidationParameters, out validatedJwtToken2);
-
+            var jwtToken1 = new JwtSecurityToken(encodedJwt1);
+            var jwtToken2 = new JwtSecurityToken(encodedJwt2);
             var jwtToken3 = handler.CreateJwtSecurityToken(createParams.SecurityTokenDescriptor);
-            var jwt3 = handler.WriteToken(jwtToken3);
+            var jwtToken4 = handler.CreateJwtSecurityToken(
+                createParams.SecurityTokenDescriptor.Issuer,
+                createParams.SecurityTokenDescriptor.Audience,
+                createParams.SecurityTokenDescriptor.Subject,
+                createParams.SecurityTokenDescriptor.NotBefore,
+                createParams.SecurityTokenDescriptor.Expires,
+                createParams.SecurityTokenDescriptor.IssuedAt,
+                createParams.SecurityTokenDescriptor.SigningCredentials);
+            var encodedJwt3 = handler.WriteToken(jwtToken3);
+            var encodedJwt4 = handler.WriteToken(jwtToken4);
+
+            SecurityToken validatedJwtToken1 = null;
+            var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, createParams.TokenValidationParameters, out validatedJwtToken1);
+
+            SecurityToken validatedJwtToken2 = null;
+            var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, createParams.TokenValidationParameters, out validatedJwtToken2);
+
             SecurityToken validatedJwtToken3 = null;
-            var claimsPrincipal3 = handler.ValidateToken(jwt1, createParams.TokenValidationParameters, out validatedJwtToken3);
+            var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, createParams.TokenValidationParameters, out validatedJwtToken3);
+
+            SecurityToken validatedJwtToken4 = null;
+            var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, createParams.TokenValidationParameters, out validatedJwtToken4);
 
             var context = new CompareContext();
             var localContext = new CompareContext();
             if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken1, jwtToken2, localContext))
             {
-                context.Diffs.Add(string.Format(Environment.NewLine + "RoundTripTokens: Case '{0}', jwtToken != jwtToken2", createParams.Case));
+                context.Diffs.Add("jwtToken1 != jwtToken2");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
             localContext.Diffs.Clear();
-            if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken1, jwtToken3, localContext))
+            if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken3, jwtToken4, localContext))
             {
-                context.Diffs.Add(string.Format(Environment.NewLine + "RoundTripTokens: Case '{0}': jwtToken != jwtToken3", createParams.Case));
+                context.Diffs.Add("jwtToken3 != jwtToken4");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
             localContext.Diffs.Clear();
             if (!IdentityComparer.AreJwtSecurityTokensEqual(validatedJwtToken1 as JwtSecurityToken, validatedJwtToken2 as JwtSecurityToken, localContext))
             {
-                context.Diffs.Add(string.Format(Environment.NewLine + "RoundTripTokens: Case '{0}': validatedJwtToken1 != validatedJwtToken2", createParams.Case));
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken2");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
             localContext.Diffs.Clear();
             if (!IdentityComparer.AreJwtSecurityTokensEqual(validatedJwtToken1 as JwtSecurityToken, validatedJwtToken3 as JwtSecurityToken, localContext))
             {
-                context.Diffs.Add(string.Format(Environment.NewLine + "RoundTripTokens: Case '{0}': validatedJwtToken1 != validatedJwtToken3", createParams.Case));
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken3");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
-            TestUtilities.AssertFailIfErrors("RoundTripTokens", context.Diffs);
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreJwtSecurityTokensEqual(validatedJwtToken1 as JwtSecurityToken, validatedJwtToken4 as JwtSecurityToken, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal2, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal2");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal3, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal3");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal4, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripTokens: Case '{0}'", createParams.Case), context.Diffs);
         }
 
         public static TheoryData<CreateAndValidateParams> CreationParams()
         {
             var createParams = new TheoryData<CreateAndValidateParams>();
-
             var expires = DateTime.UtcNow + TimeSpan.FromDays(1);
             var handler = new JwtSecurityTokenHandler();
             var nbf = DateTime.UtcNow;
@@ -223,12 +263,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             createParams.Add(new CreateAndValidateParams
             {
-                Case = "ClaimSets.DefaultClaims",
+                Case = "ClaimSets.NoClaims",
                 SecurityTokenDescriptor = IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor(null),
                 TokenValidationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters,
             });
 
-            // empty token
             createParams.Add(new CreateAndValidateParams
             {
                 Case = "EmptyToken",
@@ -352,7 +391,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             DateTime utcNow = DateTime.UtcNow;
             DateTime expire = utcNow + TimeSpan.FromHours(1);
             ClaimsIdentity subject = new ClaimsIdentity(claims: ClaimSets.GetDefaultRoleClaims(null));
-            JwtSecurityToken jwtToken = handler.CreateToken(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience, subject, utcNow, expire, utcNow);
+            JwtSecurityToken jwtToken = handler.CreateJwtSecurityToken(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience, subject, utcNow, expire, utcNow);
 
             SecurityToken securityToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
@@ -417,7 +456,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole), 
                     });
 
-            JwtSecurityToken jwt = handler.CreateToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;
+            JwtSecurityToken jwt = handler.CreateJwtSecurityToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;
 
             // Delegates should override any other settings
             validationParameters.NameClaimTypeRetriever = NameClaimTypeDelegate;

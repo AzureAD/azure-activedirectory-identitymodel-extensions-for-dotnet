@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = OpenIdConnectConfigurationRetriever.GetAsync(OpenIdConfigData.OpenIdConnectMetadataFileEnd2End, new FileDocumentRetriever(), CancellationToken.None).Result;
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = 
-                tokenHandler.CreateToken(
+                tokenHandler.CreateJwtSecurityToken(
                     configuration.Issuer,
                     IdentityUtilities.DefaultAudience,
                     ClaimSets.DefaultClaimsIdentity,

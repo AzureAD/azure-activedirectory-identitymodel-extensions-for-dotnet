@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var retval = DefaultSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials);
             if (claims != null)
-                retval.Claims = claims;
+                retval.Subject = new ClaimsIdentity(claims);
 
             return retval;
         }
@@ -223,7 +223,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials);
             if (claims != null)
-                retval.Claims = claims;
+                retval.Subject = new ClaimsIdentity(claims);
 
             return retval;
         }
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return new SecurityTokenDescriptor
             {
                 Audience = DefaultAudience,
-                Claims = ClaimSets.DefaultClaims,
+                Subject = ClaimSets.DefaultClaimsIdentity,
                 Issuer = DefaultIssuer,
                 IssuedAt = DateTime.UtcNow,
                 Expires = DateTime.UtcNow + TimeSpan.FromDays(1),

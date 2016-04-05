@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -34,8 +33,6 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenDescriptor
     {
         public string Audience { get; set; }
-
-        public IEnumerable<Claim> Claims { get; set; }
 
         public DateTime? Expires { get; set; }
 
@@ -46,5 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         public DateTime? NotBefore { get; set; }
 
         public SigningCredentials SigningCredentials { get; set; }
+
+        public ClaimsIdentity Subject { get; set; }
     }
 }

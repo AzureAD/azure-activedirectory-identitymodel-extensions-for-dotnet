@@ -301,49 +301,30 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Returns a Json Web Token (JWT).
         /// </summary>
-        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of token contents and <see cref="SignatureProvider"/>.
-        public string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
+        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign the JSON.</remarks>
+        public virtual string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException("tokenDescriptor");
 
-            return (CreateEncodedJwt(
+            return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
-                tokenDescriptor.Claims,
+                tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials));
+                tokenDescriptor.SigningCredentials).RawData;
         }
 
         /// <summary>
-        /// Creates a Json Web Token (JWT).
-        /// </summary>
-        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of token contents and <see cref="SignatureProvider"/>.
-        public JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
-        {
-            if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException("tokenDescriptor");
-
-            return CreateJwt(
-                tokenDescriptor.Issuer,
-                tokenDescriptor.Audience,
-                tokenDescriptor.Claims,
-                tokenDescriptor.NotBefore,
-                tokenDescriptor.Expires,
-                tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials);
-        }
-
-        /// <summary>
-        /// Uses the <see cref="JwtSecurityToken(JwtHeader, JwtPayload, string, string, string)"/> constructor, first creating the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>.
-        /// <para>If <see cref="SigningCredentials"/> is not null, <see cref="JwtSecurityToken.RawData"/> will be signed.</para>
+        /// Creates a <see cref="JwtSecurityToken"/>
         /// </summary>
         /// <param name="issuer">the issuer of the token.</param>
         /// <param name="audience">the audience for this token.</param>
         /// <param name="subject">the source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">the notbefore time for this token.</param> 
+        /// <param name="notBefore">the notbefore time for this token.</param>
         /// <param name="expires">the expiration time for this token.</param>
         /// <param name="issuedAt">the issue time for this token.</param>
         /// <param name="signingCredentials">contains cryptographic material for generating a signature.</param>
@@ -351,27 +332,61 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
         /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
-        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim</para>
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
+        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign the JSON.</para>
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
-        public virtual JwtSecurityToken CreateToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
+        public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
-            var jwt = CreateJwt(issuer, audience, (subject != null ? subject.Claims : null), notBefore, expires, issuedAt, signingCredentials);
-            if (subject != null && subject.Actor != null)
-            {
-                jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
-            }
-
-            return jwt;
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials).RawData;
         }
 
-        private JwtSecurityToken CreateJwt(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
+        /// <summary>
+        /// Creates a Json Web Token (JWT).
+        /// </summary>
+        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</remarks>
+        public virtual JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
-            return new JwtSecurityToken(CreateEncodedJwt(issuer, audience, claims, notBefore, expires, issuedAt, signingCredentials));
+            if (tokenDescriptor == null)
+                throw LogHelper.LogArgumentNullException("tokenDescriptor");
+
+            return CreateJwtSecurityTokenPrivate(
+                tokenDescriptor.Issuer,
+                tokenDescriptor.Audience,
+                tokenDescriptor.Subject,
+                tokenDescriptor.NotBefore,
+                tokenDescriptor.Expires,
+                tokenDescriptor.IssuedAt,
+                tokenDescriptor.SigningCredentials);
         }
 
-        public string CreateEncodedJwt(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
+        /// <summary>
+        /// Creates a <see cref="JwtSecurityToken"/>
+        /// </summary>
+        /// <param name="issuer">the issuer of the token.</param>
+        /// <param name="audience">the audience for this token.</param>
+        /// <param name="subject">the source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">the notbefore time for this token.</param>
+        /// <param name="expires">the expiration time for this token.</param>
+        /// <param name="issuedAt">the issue time for this token.</param>
+        /// <param name="signingCredentials">contains cryptographic material for generating a signature.</param>
+        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
+        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
+        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
+        /// </remarks>
+        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
+        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
+        public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
+        {
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials);
+        }
+
+        private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
             if (SetDefaultTimesOnTokenCreation)
             {
@@ -387,8 +402,13 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721, (audience ?? "null"), (issuer ?? "null"));
-            JwtPayload payload = new JwtPayload(issuer, audience, (claims == null ? null : OutboundClaimTypeTransform(claims)), notBefore, expires, issuedAt);
+            JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials);
+
+            if (subject != null && subject.Actor != null)
+            {
+                payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
+            }
 
             string rawHeader = header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
@@ -402,8 +422,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
-
-            return signingInput + "." + rawSignature;
+            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
