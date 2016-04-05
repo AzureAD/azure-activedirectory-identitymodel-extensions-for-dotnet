@@ -386,6 +386,26 @@ namespace System.IdentityModel.Tokens.Jwt
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials);
         }
 
+        /// <summary>
+        /// Creates a Json Web Token (JWT).
+        /// </summary>
+        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</remarks>
+        public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (tokenDescriptor == null)
+                throw LogHelper.LogArgumentNullException("tokenDescriptor");
+
+            return CreateJwtSecurityTokenPrivate(
+                tokenDescriptor.Issuer,
+                tokenDescriptor.Audience,
+                tokenDescriptor.Subject,
+                tokenDescriptor.NotBefore,
+                tokenDescriptor.Expires,
+                tokenDescriptor.IssuedAt,
+                tokenDescriptor.SigningCredentials);
+        }
+
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
             if (SetDefaultTimesOnTokenCreation)
@@ -405,7 +425,7 @@ namespace System.IdentityModel.Tokens.Jwt
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials);
 
-            if (subject != null && subject.Actor != null)
+            if (subject?.Actor != null)
             {
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
             }

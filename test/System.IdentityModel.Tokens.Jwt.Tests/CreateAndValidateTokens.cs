@@ -177,8 +177,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 createParams.SecurityTokenDescriptor.Expires,
                 createParams.SecurityTokenDescriptor.IssuedAt,
                 createParams.SecurityTokenDescriptor.SigningCredentials);
+            var jwtToken5 = handler.CreateToken(createParams.SecurityTokenDescriptor) as JwtSecurityToken;
             var encodedJwt3 = handler.WriteToken(jwtToken3);
             var encodedJwt4 = handler.WriteToken(jwtToken4);
+            var encodedJwt5 = handler.WriteToken(jwtToken5);
 
             SecurityToken validatedJwtToken1 = null;
             var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, createParams.TokenValidationParameters, out validatedJwtToken1);
@@ -191,6 +193,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             SecurityToken validatedJwtToken4 = null;
             var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, createParams.TokenValidationParameters, out validatedJwtToken4);
+
+            SecurityToken validatedJwtToken5 = null;
+            var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, createParams.TokenValidationParameters, out validatedJwtToken5);
 
             var context = new CompareContext();
             var localContext = new CompareContext();
@@ -208,23 +213,37 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
 
             localContext.Diffs.Clear();
-            if (!IdentityComparer.AreJwtSecurityTokensEqual(validatedJwtToken1 as JwtSecurityToken, validatedJwtToken2 as JwtSecurityToken, localContext))
+            if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken3, jwtToken5, localContext))
+            {
+                context.Diffs.Add("jwtToken3 != jwtToken5");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken2, localContext))
             {
                 context.Diffs.Add("validatedJwtToken1 != validatedJwtToken2");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
             localContext.Diffs.Clear();
-            if (!IdentityComparer.AreJwtSecurityTokensEqual(validatedJwtToken1 as JwtSecurityToken, validatedJwtToken3 as JwtSecurityToken, localContext))
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken3, localContext))
             {
                 context.Diffs.Add("validatedJwtToken1 != validatedJwtToken3");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
             localContext.Diffs.Clear();
-            if (!IdentityComparer.AreJwtSecurityTokensEqual(validatedJwtToken1 as JwtSecurityToken, validatedJwtToken4 as JwtSecurityToken, localContext))
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken4, localContext))
             {
                 context.Diffs.Add("validatedJwtToken1 != validatedJwtToken4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken5, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken5");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
@@ -246,6 +265,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal4, localContext))
             {
                 context.Diffs.Add("claimsPrincipal1 != claimsPrincipal4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal5, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal5");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
