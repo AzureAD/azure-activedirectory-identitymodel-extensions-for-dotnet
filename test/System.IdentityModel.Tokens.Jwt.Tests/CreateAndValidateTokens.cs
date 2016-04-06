@@ -343,6 +343,46 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
+        public void CreateTokenNegativeCases()
+        {
+            var errors = new List<string>();
+            var handler = new JwtSecurityTokenHandler();
+            var ee = ExpectedException.ArgumentNullException("tokenDescriptor");
+
+            try
+            {
+                handler.CreateEncodedJwt((SecurityTokenDescriptor)null);
+                ee.ProcessNoException(errors);
+            }
+            catch(Exception ex)
+            {
+                ee.ProcessException(ex, errors);
+            }
+
+            try
+            {
+                handler.CreateJwtSecurityToken((SecurityTokenDescriptor)null);
+                ee.ProcessNoException(errors);
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex, errors);
+            }
+
+            try
+            {
+                handler.CreateToken((SecurityTokenDescriptor)null);
+                ee.ProcessNoException(errors);
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex, errors);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        [Fact]
         public void InboundFilterTest()
         {
             var handler = new JwtSecurityTokenHandler();

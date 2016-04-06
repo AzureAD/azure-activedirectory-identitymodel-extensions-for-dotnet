@@ -306,7 +306,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException("tokenDescriptor");
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
@@ -350,7 +350,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException("tokenDescriptor");
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
@@ -394,7 +394,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException("tokenDescriptor");
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
