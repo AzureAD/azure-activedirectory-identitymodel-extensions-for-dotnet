@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -50,11 +51,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
     public static class JsonClaims
     {
-        public static Dictionary<string, Dictionary<string, string>> ClaimSourcesAsDictionary
+        public static Dictionary<string, object> ClaimSourcesAsDictionary
         {
             get
             {
-                return new Dictionary<string, Dictionary<string, string>>
+                return new Dictionary<string, object>
                 {
                     {
                         "src1",
@@ -77,11 +78,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static Dictionary<string, string> ClaimNamesAsDictionary
+        public static Dictionary<string, object> ClaimNamesAsDictionary
         {
             get
             {
-                return new Dictionary<string, string>
+                return new Dictionary<string, object>
                 {
                     {
                         "groups",
@@ -95,27 +96,33 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static ClaimsIdentity ClaimsIdentityDistributedClaims(string issuer, string authType, Dictionary<string, Dictionary<string, string>> claimSources, Dictionary<string, string> claimNames )
+        public static ClaimsIdentity ClaimsIdentityDistributedClaims(string issuer, string authType, Dictionary<string, object> claimSources, Dictionary<string, object> claimNames)
         {
             var identity = new ClaimsIdentity(authType);
+            var claimValue = BuildClaimValue(claimSources);
+            identity.AddClaim(new Claim("_claim_sources", claimValue, JsonClaimValueTypes.Json, issuer, issuer, identity));
+            claimValue = BuildClaimValue(claimNames);
+            identity.AddClaim(new Claim("_claim_names", claimValue, JsonClaimValueTypes.Json, issuer, issuer, identity));
+            identity.AddClaim(new Claim("iss", issuer, ClaimValueTypes.String, issuer));
+            return identity;
+        }
+
+        private static string BuildClaimValue(Dictionary<string, object> claimSources)
+        {
             var sb = new StringBuilder();
             sb.Append("{");
+            bool first = true;
             foreach (var kv in claimSources)
-                sb.Append(@"{""" + kv.Key + @""":" + JsonExtensions.SerializeToJson(kv.Value) + "}");
-
-            sb.Append("}");
-            identity.AddClaim(new Claim("_claim_sources", sb.ToString(), JsonClaimValueTypes.Json, issuer, issuer, identity));
-
-            sb.Clear();
-            sb.Append("{");
-            foreach (var kv in claimNames)
-                sb.Append(@"{""" + kv.Key + @""":""" + kv.Value + @"""}");
+            {
+                if (!first)
+                    sb.Append(",");
+                sb.Append(@"""" + kv.Key + @""":" + JsonConvert.SerializeObject(kv.Value));
+                first = false;
+            }
 
             sb.Append("}");
 
-            identity.AddClaim(new Claim("_claim_names",sb.ToString(), JsonClaimValueTypes.Json, issuer, issuer, identity));
-
-            return identity;
+            return sb.ToString();
         }
     }
 }

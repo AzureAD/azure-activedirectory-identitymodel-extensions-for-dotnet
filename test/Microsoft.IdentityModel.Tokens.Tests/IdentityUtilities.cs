@@ -156,8 +156,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static string DefaultAcr { get { return "DefaultAuthenticationContextClass"; } }
         public static string DefaultAmr { get { return "DefaultAuthenticationMethod"; } }
         public static List<string> DefaultAmrs { get { return new List<string> { "amr1", "amr2", "amr3", "amr4" }; } }
-        public static string DefaultAudience { get { return "http://relyingparty.com"; } }
-        public static List<string> DefaultAudiences { get { return new List<string> { "http://relyingparty.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty4.com" }; } }
+        public static string DefaultAudience { get { return "http://relyingparty1.com"; } }
+        public static List<string> DefaultAudiences { get { return new List<string> { "http://relyingparty1.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty4.com" }; } }
         public static string DefaultAuthorizedParty { get { return "http://relyingparty.azp.com"; } }
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
