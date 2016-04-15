@@ -1,6 +1,6 @@
 setlocal
 cls
-set dotnethome=%localappdata%\Microsoft\dotnet\cli\bin
+set dotnethome=%localappdata%\Microsoft\dotnet
 for %%* in (.) do set project=%%~nx*
 set root=%~dp0%
 set xunit-root=%root%..\..\.build\xunit.runner.console\2.1.0\tools

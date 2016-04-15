@@ -37,6 +37,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public const string Json = "JSON";
 
-        public const string JsonArray = "JSON-ARRAY";
+        public const string JsonArray = "JSON_ARRAY";
     }
 }
