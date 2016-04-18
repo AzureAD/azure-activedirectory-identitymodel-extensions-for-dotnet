@@ -42,7 +42,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
         /// </summary>
-        [Fact(DisplayName = "JwtPayloadTests: Ensures that JwtPayload defaults are as expected")]
+        [Fact]
         public void Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -70,7 +70,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
-        [Fact(DisplayName = "JwtPayloadTests: GetSets, covers defaults")]
+        [Fact]
         public void GetSets()
         {
             // Aud, Claims, ValidFrom, ValidTo handled in Defaults.
@@ -106,16 +106,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
-        public void JwtPayloadEncoding()
-        {
-            var context = new CompareContext();
-            RunEncodingVariation(JwtPayloadTestData.ClaimForEachProperty, JwtPayloadTestData.ObjectForEachProperty, context);
-            RunEncodingVariation(JwtPayloadTestData.Multiples.Key, JwtPayloadTestData.Multiples.Value, context);
-
-            TestUtilities.AssertFailIfErrors(context.Diffs);
-        }
-
-        [Fact]
         public void FirstClassProperties()
         {
             var context = new CompareContext();
@@ -143,80 +133,272 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("JsonDataSet")]
+        [Theory, MemberData("PayloadDataSet")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-
-        public void JsonClaims(List<Claim> claims, string json)
+        public void RoundTrip(List<Claim> originalSetOfClaims, JwtPayload payloadDirectAssigmentToDictionary, JwtPayload payloadDeserializeFromJsonString)
         {
             var context = new CompareContext();
-            var payload = new JwtPayload(claims);
-            var encodedPayload = payload.SerializeToJson();
-            var payloadDecoded = JwtPayload.Deserialize(encodedPayload);
+            var payloadCtorOriginalSetOfClaims = new JwtPayload(originalSetOfClaims);
+            var encodedPayload = payloadCtorOriginalSetOfClaims.SerializeToJson();
+            var payloadEncodedThenDeserialized = JwtPayload.Deserialize(encodedPayload);
+            var instanceContext = new CompareContext(context);
 
-            IdentityComparer.AreEqual(payload, payloadDecoded, context);
-            IdentityComparer.AreEqual(payload.Claims, claims, context);
-            IdentityComparer.AreEqual(payload.Claims, payloadDecoded.Claims, context);
+            IdentityComparer.AreEqual(payloadCtorOriginalSetOfClaims, payloadEncodedThenDeserialized, instanceContext);
+            context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payloadCtorOriginalSetOfClaims), nameof(payloadEncodedThenDeserialized)), instanceContext);
 
-            CheckClaimsTypeParsing(payload.Claims, context);
-            CheckClaimsTypeParsing(payloadDecoded.Claims, context);
+            instanceContext.Diffs.Clear();
+            IdentityComparer.AreEqual(payloadCtorOriginalSetOfClaims.Claims, originalSetOfClaims, instanceContext);
+            context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payloadCtorOriginalSetOfClaims)+".Claims", nameof(originalSetOfClaims)), instanceContext);
+
+            instanceContext = new CompareContext();
+            IdentityComparer.AreEqual(payloadCtorOriginalSetOfClaims, payloadDirectAssigmentToDictionary, instanceContext);
+            context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payloadCtorOriginalSetOfClaims), nameof(payloadDirectAssigmentToDictionary)), instanceContext);
+
+            instanceContext = new CompareContext();
+            IdentityComparer.AreEqual(payloadCtorOriginalSetOfClaims, payloadDeserializeFromJsonString, instanceContext);
+            context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payloadCtorOriginalSetOfClaims), nameof(payloadDeserializeFromJsonString)), instanceContext);
+
+            instanceContext.Diffs.Clear();
+            CheckClaimsTypeParsing(payloadCtorOriginalSetOfClaims.Claims, instanceContext);
+            context.Merge(string.Format(CultureInfo.InvariantCulture, "CheckClaimsTypeParsing({0})", nameof(payloadCtorOriginalSetOfClaims)+".Claims"), instanceContext);
+
+            instanceContext.Diffs.Clear();
+            CheckClaimsTypeParsing(payloadEncodedThenDeserialized.Claims, instanceContext);
+            context.Merge(string.Format(CultureInfo.InvariantCulture, "CheckClaimsTypeParsing({0})", nameof(payloadEncodedThenDeserialized)+".Claims"), instanceContext);
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<List<Claim>, string> JsonDataSet
+        public static TheoryData<List<Claim>, JwtPayload, JwtPayload> PayloadDataSet
         {
             get
             {
-                var dataset = new TheoryData<List<Claim>, string>();
-                var claims = new List<Claim>
-                {
-                    new Claim("json3", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
-                    new Claim("json3", @"{""name3.2"":""value3.2""}", JsonClaimValueTypes.Json),
-                    new Claim("json3", @"{""name3.3"":[1,2,3]}", JsonClaimValueTypes.Json),
-                    new Claim("json3", "name3.4")
-                };
+                var intMaxValue = int.MaxValue.ToString();
+                var intMinValue = int.MinValue.ToString();
+                var longMaxValue = long.MaxValue.ToString();
+                var longMinValue = long.MinValue.ToString();
+                var longValue = ((long)int.MaxValue + 100).ToString();
+                var dataset = new TheoryData<List<Claim>, JwtPayload, JwtPayload>();
 
-                dataset.Add(claims, "");
+                // the second list of claims used to provide the set of claims that a payload will generate when
+                // JArray's are set directly on the payload as a dictionary {payload["value"] = JArray.Parse(...)}.
+                // Generation of Claims, will result in a first order set of claims.
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim("jarray2", @"[""String1"",""String2"", [""String3"", ""String4"",[1,2,3]]]", JsonClaimValueTypes.JsonArray),
+                    },
+                    dataset,
+                    new List<Claim>
+                    {
+                        new Claim("jarray2", "String1"),
+                        new Claim("jarray2", "String2"),
+                        new Claim("jarray2", @"[""String3"",""String4"",[1,2,3]]", JsonClaimValueTypes.JsonArray),
+                    });
 
-                claims = new List<Claim>
-                {
-                    new Claim("may_act", @"""sub"": ""admin@example.net""", @"""name"": ""Admin""", JsonClaimValueTypes.Json),
-                    new Claim("may_act", @"""sub"": ""admin@example.net""", @"""name"": ""Admin""", JsonClaimValueTypes.Json),
-                    new Claim("may_act2", @"""sub"": ""admin@example.net""", @"""name"": ""Admin""", JsonClaimValueTypes.Json)
-                };
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim("jarray", @"1", ClaimValueTypes.String),
+                        new Claim("jarray", @"[1,2,[1,[""2"",2],1],""42""]", JsonClaimValueTypes.JsonArray),
+                        new Claim("jarray", @"[{""Json"":""JsonValue""},[""String1"",""String2""]]", JsonClaimValueTypes.JsonArray),
+                        new Claim("jarray2", @"{""Json"":""JsonValue""}", JsonClaimValueTypes.Json),
+                        new Claim("jarray2", @"[""String1"",""String2""]", JsonClaimValueTypes.JsonArray),
+                    },
+                    dataset);
 
-                dataset.Add(claims, "");
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim("aud", "http://test.local/api/", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("exp", "1460647835", ClaimValueTypes.Integer, "http://test.local/api/"),
+                        new Claim("emailaddress", "foo1@bar.com", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("emailaddress", "foo2@bar.com", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("name", "Foo Bar", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("iss", "http://test.local/api/", ClaimValueTypes.String, "http://test.local/api/")
+                    },
+                dataset);
 
-                claims = new List<Claim>
-                {
-                    new Claim("scp", "status"),
-                    new Claim("scp", "feed"),
-                    new Claim("scp", @"[""status"",""feed""]", JsonClaimValueTypes.JsonArray),
-                    new Claim("scp", "12", ClaimValueTypes.Integer)
-                };
+                var multiples = new List<Claim>();
+                foreach (var aud in IdentityUtilities.DefaultAudiences)
+                    multiples.Add(new Claim(JwtRegisteredClaimNames.Aud, aud));
 
-                dataset.Add(claims, "");
+                foreach (var amr in IdentityUtilities.DefaultAmrs)
+                    multiples.Add(new Claim(JwtRegisteredClaimNames.Amr, amr));
 
-                claims = new List<Claim>
-                {
-                    new Claim("ClaimValueTypes", "100", ClaimValueTypes.Integer),
-                    new Claim("ClaimValueTypes", "132", ClaimValueTypes.Integer32),
-                    new Claim("ClaimValueTypes", "164", ClaimValueTypes.Integer64),
-                    new Claim("ClaimValueTypes", "-100", ClaimValueTypes.Integer),
-                    new Claim("ClaimValueTypes", "-132", ClaimValueTypes.Integer32),
-                    new Claim("ClaimValueTypes", "-164", ClaimValueTypes.Integer64),
-                    new Claim("ClaimValueTypes", "132..64", ClaimValueTypes.Double),
-                    new Claim("ClaimValueTypes", "-132.64", ClaimValueTypes.Double),
-                    new Claim("ClaimValueTypes", "true", ClaimValueTypes.Boolean),
-                    new Claim("ClaimValueTypes", "false", ClaimValueTypes.Boolean),
-                    new Claim("ClaimValueTypes", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
-                    new Claim("ClaimValueTypes", @"[""status"",""feed""]", JsonClaimValueTypes.JsonArray),
-                };
+                AddDataSet(
+                    multiples,
+                    dataset);
 
-                dataset.Add(claims, "");
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim(JwtRegisteredClaimNames.Actort, IdentityUtilities.DefaultAcr, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Acr, IdentityUtilities.DefaultAsymmetricJwt, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Amr, IdentityUtilities.DefaultAmr, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.AuthTime, EpochTime.GetIntDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Azp, IdentityUtilities.DefaultAuthorizedParty, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.CHash, Guid.NewGuid().ToString(), ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Exp,  EpochTime.GetIntDate(DateTime.UtcNow + TimeSpan.FromHours(1)).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString(), ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow + TimeSpan.FromSeconds(1)).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.UtcNow - TimeSpan.FromHours(1)).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString(), ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                        new Claim(JwtRegisteredClaimNames.Sub, IdentityUtilities.DefaultSubject, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                    },
+                    dataset);
+
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim("ClaimValueTypes.String", "ClaimValueTypes.String.Value", ClaimValueTypes.String),
+                        new Claim("ClaimValueTypes.Boolean.true", "true", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes.Boolean.false", "false", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes.Double", "123.4", ClaimValueTypes.Double),
+                        new Claim("ClaimValueTypes.int.MaxValue", intMaxValue, ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes.int.MinValue", intMinValue, ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes.long.MaxValue", longMaxValue, ClaimValueTypes.Integer64),
+                        new Claim("ClaimValueTypes.long.MinValue", longMinValue, ClaimValueTypes.Integer64),
+                        new Claim("ClaimValueTypes.JsonClaimValueTypes.Json1", @"{""jsonProperty1"":""jsonvalue1""}", JsonClaimValueTypes.Json),
+                        new Claim("ClaimValueTypes.JsonClaimValueTypes.Json2", @"{""jsonProperty2"":""jsonvalue2""}", JsonClaimValueTypes.Json),
+                        new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray", "1", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray", "2", ClaimValueTypes.Integer),
+                    },
+                    dataset);
+
+
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim("ClaimValueTypes", "0", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", "100", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", "132", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", "164", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", "-100", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", "-132", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", "-164", ClaimValueTypes.Integer),
+                        new Claim("ClaimValueTypes", longValue, ClaimValueTypes.Integer64),
+                        new Claim("ClaimValueTypes", "132.64", ClaimValueTypes.Double),
+                        new Claim("ClaimValueTypes", "-132.64", ClaimValueTypes.Double),
+                        new Claim("ClaimValueTypes", "true", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes", "false", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
+                        new Claim("ClaimValueTypes", @"[""status"",""feed""]", JsonClaimValueTypes.JsonArray),
+                    },
+                    dataset);
+
+                AddDataSet(
+                    new List<Claim>
+                    {
+                        new Claim("json3", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
+                        new Claim("json3", @"{""name3.2"":""value3.2""}", JsonClaimValueTypes.Json),
+                        new Claim("json3", @"{""name3.3"":[1,2,3]}", JsonClaimValueTypes.Json),
+                        new Claim("json3", "name3.4"),
+                        new Claim("may_act",  @"{""sub"":""admin@example.net"",""name"":""Admin""}", JsonClaimValueTypes.Json),
+                        new Claim("may_act",  @"{""sub"":""admin@example.net"",""name"":""Admin""}", JsonClaimValueTypes.Json),
+                        new Claim("may_act2", @"{""sub"":""admin@example.net"",""name"":""Admin""}", JsonClaimValueTypes.Json)
+                    },
+                    dataset);
 
                 return dataset;
             }
+        }
+
+        private static void AddDataSet(List<Claim> claims, TheoryData<List<Claim>, JwtPayload, JwtPayload> dataset, List<Claim> claims2 = null)
+        {
+            var payloadDirect = new JwtPayload();
+            var jobj = new JObject();
+            bool firstJArray = true;
+            foreach(var claim in claims)
+            {
+                object jsonValue = null;
+                object existingValue;
+                switch (claim.ValueType)
+                {
+                    case ClaimValueTypes.String:
+                        jsonValue = claim.Value;
+                        break;
+
+                    case ClaimValueTypes.Boolean:
+                        jsonValue = bool.Parse(claim.Value);
+                        break;
+
+                    case ClaimValueTypes.Double:
+                        jsonValue = double.Parse(claim.Value);
+                        break;
+
+                    case ClaimValueTypes.Integer:
+                    case ClaimValueTypes.Integer32:
+                        jsonValue = int.Parse(claim.Value);
+                        break;
+
+                    case ClaimValueTypes.Integer64:
+                        jsonValue = long.Parse(claim.Value);
+                        break;
+
+                    case JsonClaimValueTypes.Json:
+                        jsonValue = JObject.Parse(claim.Value);
+                        break;
+
+                    case JsonClaimValueTypes.JsonArray:
+                        jsonValue = JArray.Parse(claim.Value);
+                        break;
+                }
+
+                JToken jtoken = null;
+                if (jobj.TryGetValue(claim.Type, out jtoken))
+                {
+                    var jarray = new JArray();
+                    var jtokenAsJArray = jtoken as JArray;
+                    if (jtokenAsJArray != null)
+                    {
+                        if (firstJArray)
+                        {
+                            jarray.Add(JToken.FromObject(jtoken));
+                        }
+                        else
+                        {
+                            foreach (var item in jtokenAsJArray)
+                                jarray.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        jarray.Add(JToken.FromObject(jtoken));
+                    }
+
+                    jarray.Add(JToken.FromObject(jsonValue));
+                    jobj[claim.Type] = jarray;
+                    firstJArray = false;
+                }
+                else
+                {
+                    jobj.Add(claim.Type, JToken.FromObject(jsonValue));
+                }
+
+                if (payloadDirect.TryGetValue(claim.Type, out existingValue))
+                {
+                    IList<object> claimValues = existingValue as IList<object>;
+                    if (claimValues == null)
+                    {
+                        claimValues = new List<object>();
+                        claimValues.Add(existingValue);
+                        payloadDirect[claim.Type] = claimValues;
+                    }
+
+                    claimValues.Add(jsonValue);
+                }
+                else
+                {
+                    payloadDirect[claim.Type] = jsonValue;
+                }
+            }
+
+            var j = jobj.ToString(Formatting.None);
+            var payloadDeserialized = JwtPayload.Deserialize(j);
+            dataset.Add(claims2 ?? claims, payloadDirect, payloadDeserialized);
         }
 
         private void CheckClaimsTypeParsing(IEnumerable<Claim> claims, CompareContext context)
@@ -287,23 +469,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         break;
                 }
             }
-        }
-
-
-        private void RunEncodingVariation(List<Claim> claims, Dictionary<string, object> values, CompareContext context)
-        {
-            var jwtPayload1 = new JwtPayload(claims);
-            var jwtPayload2 = new JwtPayload();
-            foreach (var kv in values)
-            {
-                jwtPayload2[kv.Key] = kv.Value;
-            }
-
-            IdentityComparer.AreEqual(jwtPayload1, jwtPayload2, context);
-
-            jwtPayload1 = JwtPayload.Base64UrlDeserialize(jwtPayload1.Base64UrlEncode());
-            jwtPayload2 = JwtPayload.Base64UrlDeserialize(jwtPayload2.Base64UrlEncode());
-            IdentityComparer.AreEqual(jwtPayload1, jwtPayload2, context);
         }
     }
 }
