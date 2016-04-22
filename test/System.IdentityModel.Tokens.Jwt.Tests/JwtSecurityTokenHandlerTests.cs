@@ -458,7 +458,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false,
                 };
 
-            JwtSecurityToken jwt = tokenHandler.CreateJwtSecurityToken(
+            var jwt = tokenHandler.CreateEncodedJwt(
                 IdentityUtilities.DefaultIssuer,
                 IdentityUtilities.DefaultAudience,
                 ClaimSets.DefaultClaimsIdentity,
@@ -475,34 +475,35 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidIssuer = IdentityUtilities.DefaultIssuer,
                 };
 
-            TestUtilities.ValidateTokenReplay(securityToken: jwt.RawData, tokenValidator: tokenHandler, validationParameters: validationParameters);
-            TestUtilities.ValidateToken(jwt.RawData, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateTokenReplay(securityToken: jwt, tokenValidator: tokenHandler, validationParameters: validationParameters);
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
             validationParameters.LifetimeValidator =
                 (nb, exp, st, tvp) =>
                 {
                     return false;
                 };
-            TestUtilities.ValidateToken(jwt.RawData, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: "IDX10230:"));
 
             // validating lifetime validator
             validationParameters.ValidateLifetime = false;
             validationParameters.LifetimeValidator = IdentityUtilities.LifetimeValidatorThrows;
-            TestUtilities.ValidateToken(securityToken: jwt.RawData, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
 
             // validating issuer signing key validator
             validationParameters = SignatureValidationParameters(signingKey: IdentityUtilities.DefaultAsymmetricSigningKey);
             validationParameters.ValidateIssuerSigningKey = true;
             validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return true; };
-            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
 
             validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return false; };
-            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
+            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
 
             // validating issuer signing key resolver
             validationParameters = SignatureValidationParameters();
-            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"));
+            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"));
+
             validationParameters.IssuerSigningKeyResolver = (token, idToken, kid, parameters) => { return new List<SecurityKey> { IdentityUtilities.DefaultAsymmetricSigningKey }; };
-            TestUtilities.ValidateToken(securityToken: EncodedJwts.Asymmetric_2048, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 
         [Fact]

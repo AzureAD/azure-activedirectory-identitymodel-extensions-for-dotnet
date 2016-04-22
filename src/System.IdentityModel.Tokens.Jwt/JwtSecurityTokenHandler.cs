@@ -714,7 +714,12 @@ namespace System.IdentityModel.Tokens.Jwt
             else
             {
                 var securityKey = ResolveIssuerSigningKey(token, jwt, validationParameters);
-                if (securityKey != null)
+                if (securityKey == null)
+                {
+                    if (!string.IsNullOrEmpty(kid))
+                        throw LogHelper.LogException<SecurityTokenSignatureKeyNotFoundException>(LogMessages.IDX10501, kid, jwt);
+                }
+                else
                 {
                     securityKeys = new List<SecurityKey> { securityKey };
                 }
@@ -753,7 +758,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 if (keysAttempted.Length > 0)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10503, keysAttempted.ToString(), exceptionStrings.ToString(), jwt.ToString());
+                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10503, keysAttempted, exceptionStrings, jwt);
             }
 
             throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10500);
@@ -926,7 +931,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
         /// <param name="securityToken">the <SecurityToken> that is being validated.</SecurityToken></param>
-        /// <param name="kid">the key identifier found in the token.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>

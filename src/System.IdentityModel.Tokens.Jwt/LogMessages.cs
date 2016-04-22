@@ -58,6 +58,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         // SignatureValidation
         internal const string IDX10500 = "IDX10500: Signature validation failed. There are no security keys to use to validate the signature";
+        internal const string IDX10501 = "IDX10501: Signature validation failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
         internal const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
         internal const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'";
         internal const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";

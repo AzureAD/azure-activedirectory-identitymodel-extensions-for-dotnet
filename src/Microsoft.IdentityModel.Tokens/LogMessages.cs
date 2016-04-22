@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10236 = "IDX10236: Issuer Validated.Issuer: '{0}'";
         internal const string IDX10237 = "IDX10237: ValidateIssuerSigningKey property on ValidationParamaters is set to false. Exiting without validating the issuer signing key.";
         internal const string IDX10238 = "IDX10238: ValidateLifetime property on ValidationParamaters is set to false. Exiting without validating the lifetime.";
-        internal const string IDX10239 = "IDX10239: Lifetime of the token is validated.";
+        internal const string IDX10239 = "IDX10239: Lifetime of the token is valid.";
         internal const string IDX10240 = "IDX10240: No token replay is detected.";
         internal const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
 

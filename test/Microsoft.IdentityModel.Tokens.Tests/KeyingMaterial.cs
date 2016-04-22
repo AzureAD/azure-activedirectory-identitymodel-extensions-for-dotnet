@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             RsaSecurityKey_1024 = new RsaSecurityKey(RsaParameters_1024);
             RsaSecurityKey_1024_Public = new RsaSecurityKey(RsaParameters_1024_Public);
-            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048) { KeyId = Guid.NewGuid().ToString() };
+            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048) { KeyId = "999b2be9-6213-436b-b12b-637b0176be41" };
             RsaSecurityKey_2048_Public = new RsaSecurityKey(RsaParameters_2048_Public);
             RsaSecurityKey_4096 = new RsaSecurityKey(RsaParameters_4096);
             RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
