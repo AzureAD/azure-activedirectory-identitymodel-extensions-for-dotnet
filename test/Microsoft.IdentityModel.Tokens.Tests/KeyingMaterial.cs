@@ -33,194 +33,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     static public class KeyingMaterial
     {
-        static KeyingMaterial()
-        {
-            byte[] cspbytes_1024 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyAAQAAAEAAQAlur35vBYFooH0yfB3G919joyz-7xD8LcoQLRIqV7DdEicgTkJWD8sfDvxHRf18w2bA2kx_Bg89855uR3yDvIqtcZ-vq6Gv6yvx7iSjuXW_SNV4gVSjShBuCMelyU-dsHK-IuLcyMcms93fQ3Gh13_AFeyGuT2P0g7LUEEdz8K099x6CCApMROhY261NbN-d5uDE33bypd8tfLCWj2jlSZUNX__O7OUCVqegyI3rAPCpbtB5V7jw7uKD2lR6OeZfN7fPlPPtQEXyaIzYQHo8td6ASYcIFAUjxkBhN8lMUG2FXe-jH3tYYf3FMywf6GA6bo1LfVMW1Sb935YrGAt_fd-8YFoKDUoZgMTjcEiM0Koq80DM8Hy0rb1F4KnzKpXPy2XeGAxIEM-6MMINuh2aY-gZ6oMUomEcw9uSW1hBNk5mtPAdUqHfud8RBYvTH5yx-Cipu6wDLoQl4UTZcop-tVLpJGWJpDYkeLsda2pKJpJcITs3_gRq-QjUIG7-M2OMEvKwBd3tMfIHNkVA-RBk6v_dEHH8cRHvPZC2wna7FQztJqN5ybOSWcpqCX5RvbMkfK38hdGo6oPUkQ3YmtFLFOialpsJo-c_HDOlI32fCnjTLRsR9B-JbSDRLEHg0bVmgVyL1oZaLPYAMyUH6grtel2enOiUODgX9YZbynGtHjvGMn0-3nbz2TRUlchl5b-mQqPbM673WnddAUeaaqNc7gopo5Zofsd6-YV1Z0nL-XzLad2Ax9aAHpVoejevXGz1w");
-            byte[] cspbytes_1024_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExAAQAAAEAAQAlur35vBYFooH0yfB3G919joyz-7xD8LcoQLRIqV7DdEicgTkJWD8sfDvxHRf18w2bA2kx_Bg89855uR3yDvIqtcZ-vq6Gv6yvx7iSjuXW_SNV4gVSjShBuCMelyU-dsHK-IuLcyMcms93fQ3Gh13_AFeyGuT2P0g7LUEEdz8K0w");
-
-            RsaParameters_1024 =
-                new RSAParameters
-                {
-                    D = Base64UrlEncoder.DecodeBytes("XM_G9Xqjh1bpAWh9DNidtsyXv5x0VleYr3fsh2Y5mqLgzjWqpnkU0HWnde86sz0qZPpbXoZcSUWTPW_n7dMnY7zj0RqnvGVYf4GDQ4nO6dml166gflAyA2DPomVovcgVaFYbDR7EEg3SlvhBH7HRMo2n8Nk3UjrD8XM-mrBpqYk"),
-                    DP = Base64UrlEncoder.DecodeBytes("5mQThLUluT3MESZKMaiegT6m2aHbIAyj-wyBxIDhXbb8XKkynwpe1NtKywfPDDSvogrNiAQ3TgyYodSgoAXG-w"),
-                    DQ = Base64UrlEncoder.DecodeBytes("wTg24-8GQo2Qr0bgf7MTwiVpoqS21rGLR2JDmlhGki5V66col00UXkLoMsC6m4qCH8v5Mb1YEPGd-x0q1QFPaw"),
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    InverseQ = Base64UrlEncoder.DecodeBytes("TrEUrYndEEk9qI4aXcjfykcy2xvll6CmnCU5m5w3atLOULFrJ2wL2fMeEccfB9H9r04GkQ9UZHMgH9PeXQArLw"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("0wo_dwRBLTtIP_bkGrJXAP9dh8YNfXfPmhwjc4uL-MrBdj4llx4juEEojVIF4lUj_dbljpK4x6-sv4auvn7GtSryDvIduXnO9zwY_DFpA5sN8_UXHfE7fCw_WAk5gZxIdMNeqUi0QCi38EO8-7OMjn3dG3fwyfSBogUWvPm9uiU"),
-                    P = Base64UrlEncoder.DecodeBytes("82Weo0elPSjuDo97lQftlgoPsN6IDHpqJVDO7vz_1VCZVI72aAnL1_JdKm_3TQxu3vnN1tS6jYVOxKSAIOhx3w"),
-                    Q = Base64UrlEncoder.DecodeBytes("3fe3gLFi-d1vUm0x1bfU6KYDhv7BMlPcH4a19zH63lXYBsWUfBMGZDxSQIFwmAToXcujB4TNiCZfBNQ-T_l8ew"),
-                };
-
-            RsaParameters_1024_Public =
-                new RSAParameters
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("0wo_dwRBLTtIP_bkGrJXAP9dh8YNfXfPmhwjc4uL-MrBdj4llx4juEEojVIF4lUj_dbljpK4x6-sv4auvn7GtSryDvIduXnO9zwY_DFpA5sN8_UXHfE7fCw_WAk5gZxIdMNeqUi0QCi38EO8-7OMjn3dG3fwyfSBogUWvPm9uiU"),
-                };
-
-            byte[] cspbytes_2048 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyAAgAAAEAAQCP7GdRPSJ5_SDCM4mQsuRP72_P19sw7w7qStb9CXj4aun9iY81bhXI8YjGHZPDrhaSi4bwhGIx5JTNsxBejBTU0QOsLqb8IvlabEHD7T2J4GfIsNwh5u_u8chKMRWeUkxqLzaXdVwickmtvG7t7BjghMzl6Ubwv1DL9prH-pkH56fTqbsu1EwEF4DxWS6RBg1DKNzlmtt5SYYmNksH89yXUV5118YY0UMxJZd3a4Ir_r8wNq4ZtotCAyTfLnCKryTLPrJUcduPlTnjXeegPTFH57fK_UQjq3RGOeTkiDLvKrjQ2FRgXtLdHhXDbAqjQPX0_oruXb78kBxMf0sWa-HrmZTz2hg-VrxNsnJPS-2f-4_MIa8q2dOfGgbxQxLZM19_3VHG_qcn3sXPiVzEwjTvR8edj6wCQ96SYAOkSWByuMplbrzFMfq37u0x6JhOrbkBKWgnU0FO8JvMnAO6jpxNifsWjLkk-ca-JDbzX1L_5u54pHNE76rlEe6oKwvCq_1nG3MI3d_X623S9aQwFw94UGseJfma-6tRAj95LniiXBD7ifjLpCeZvO2W_iLHOOp2WB7DSrNQ_rLfRoStq9DxQY8To4O2SMYPQT7To6tRhRV7lsVuzoGrJIlurXjGXeGBD2gvBTy2_7qhE8ZKiYun67JpIsrN84LkM2pKRtgL7gG1kwCRFEPH_7Pl4JUMCV6kv1DeWCdKlz6fFMatcvN_MUQDBdzjpkgabhc7O_-gBCJp71gnIKsQeMNG_LBxKP0wVZBOtCW3bBmNUSHNZF5CMr7TD7TxXNP6K5sDafOc9_vHz2lkxDDaurY659PrXifpdYFKheHeGPB4nZs697MS-3AARGqCDdoekJft6mF613pzUTOBEc00hm0ehVWVent58JU3ThmcIkImGKxgWaCpaEunlcGVgmpJG562zYPWPTUzsmDnTjciCSZMw_F8PdKzN5kU73JX1yY8k0Oh3ETOxl-uFRGPOiucAeCmvw-9_Mkmyjcrv4Xsk9ftE7ZssGH-F3_O4CMGbQVnsBSpAnO8Yi0f3a9vhipydlTzqpUK7LCoRn4gWVDdsbSmlv-2zjypk_BpgoB4L6ASJOyRySk4KoYSSs38yLEg8SQyNSR95GWZJPEmZhxi5R_03TZcaicn_YCMyfNf9hLmNy8zHetIz8An2qLoZv8w-FglW2O5lXFdKgRb_W-Af2GcjyWGWsMywGEsE6p7A8Ytm8RrwZueTcib_YPFG6_Q4rHHGxcbA_fbz6GKLXrx9oY3xZfNi_3ebPE2aci3CXtoWkH3FRW6kZvGnQsHxxfBww3dogWdV9a0nVdBkfVOD8gfTdCLO8RfARUt1UYwdO22aUqSbxlnxdSgrzFKePsGp_iHCNDZlWeQOIXCIjg2oQLPPT8LYKJrxeWMsyhUw3KlK7cuU_STNLO8CmFD7p025xCrzpK1cC4VeODjur7nB-zuLdmjn-JbLSv0ky9eTNyTkkguhcBbpejM8wEuE3R-HKmV6SrgL8OlhAYBneVIpFP9h2UGoQs");
-            byte[] cspbytes_2048_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExAAgAAAEAAQCP7GdRPSJ5_SDCM4mQsuRP72_P19sw7w7qStb9CXj4aun9iY81bhXI8YjGHZPDrhaSi4bwhGIx5JTNsxBejBTU0QOsLqb8IvlabEHD7T2J4GfIsNwh5u_u8chKMRWeUkxqLzaXdVwickmtvG7t7BjghMzl6Ubwv1DL9prH-pkH56fTqbsu1EwEF4DxWS6RBg1DKNzlmtt5SYYmNksH89yXUV5118YY0UMxJZd3a4Ir_r8wNq4ZtotCAyTfLnCKryTLPrJUcduPlTnjXeegPTFH57fK_UQjq3RGOeTkiDLvKrjQ2FRgXtLdHhXDbAqjQPX0_oruXb78kBxMf0sWa-Hr");
-
-            RsaParameters_2048 =
-                new RSAParameters
-                {
-                    D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
-                    DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
-                    DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
-                    P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
-                    Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
-                };
-
-            RsaParameters_2048_Public =
-                new RSAParameters
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
-                };
-
-            RsaParameters_2048_MissingModulus =
-                new RSAParameters
-                {
-                    D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
-                    DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
-                    DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
-                    P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
-                    Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
-                };
-
-            RsaParameters_2048_MissingExponent =
-                new RSAParameters
-                {
-                    D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
-                    DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
-                    DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
-                    InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
-                    P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
-                    Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
-                };
-
-            byte[] cspbytes_4096 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyABAAAAEAAQCZrcZ3JOjYvkjBZwkC_ukZook4u8se9AjHSP6bySfv69VLwlQLAREu-qz13lsoylKxVT4Abz2TxI4oLKKogKAdinRoNRYrIidsbOe6wHbsxreV6Qt4aiU_YdR0PnisyIx9jnheWtcO-_PCW5dQv9-OnjbnKxgy1A5XhHaj-MhL-uVOBKHmk1cXTMcAOzt1XL_oYjxiftg_InHBBT7hG6HrPyritd_np1TckPnuJq5GeajEcwmSIxGNtR4WlTyGD-5MyIVxxWvQgvWjXHDCXp01eA_R-3KImaE62cAULabdKHbNzQFAfJOb-nmAiZU9bhKw7TdZb9Omjr7DadZ8WrqlY7kYmk73IczxX3Vnvm67_Haj7hBrKewJfvQ3SPyqF85CpyNLCrLXzLxVNqEg-YxNkg5Zlf62-t3BA-QHUW7mOIi87iuwvp6WmoZ_o_JEcAl7DY1XlsMVF5v5KrhsAm9FeUQTjFpZkkrFWkgVzBYZ0RpJbDtREgTJXy8764Gq0qcgk7CvC7RkYAtUXj_0rME6nbooLDpKhiQNl9-OLGas-kh9MtR76jTbteToQz2XsIZI3gnJjzpb_BNSvABRqbSgWJ8mVTkGmIc-YImXUqxriE5P4EdulcX5orRkD1LTWiS5tnLqLCUlK-v9SEC0raKx99H5CXl4xv_EDsM2qubzvZXWPbz3kSQY1zhwdKcemx4iIUg69JK7v9PAApf136EVRX3wjVhLUHJfBVAZ0H_VGSCosxmbUuyyh1akiLwzaH1crZz0M9uJ1iS1HZrxpVGn4DuI0A-2ZTP7GAA_q2PjVcNR65LJxAsQmQLHESnWxqA4RZxcxtCukB158isSW6cpxgnsVG2hSHh9spBUaRjzqzejAgh2lrknSJEDSxrfCusdlLmTwbQvOUANAWEpyyVUAnHToFFY6lg6jkJqlAKUdAXw-zPuE3gDaC4fwZL9pCyY-0V2kVW_xusGKg-peiAPGAdaqnL9O0l_tcHrXLNxjySMHPY925ywNf21gTHVfM_1zfc66A_8qv7bAPFMZ-9X0c2Fxq8sGbKDwwj4mnuwB5zRR1wg7YqsvR6XT29h2j7O1VtzJWAfkoMRO_g0cqQP6c9GHPIO9kmLua0KzxRD-KTaQthvgt3x8cn7Ru_NJ3UNDh5cdzt2ieuQFvTGsyoctrRWta9rzb_C0BisBWw-PejJ5yUbFaTi1pJvLOoZTZZ7lCMw5DyRMS3r59Fv7hCY2MI9uIrr4HGOgCdDtYq5Xq4TkKolf887HkuFnUrPsaqk8N-eib1XOlvdyN4YUTlJx6uLTU-kruwEJBZxZ-IRwKDRTG73dVGgf61FSFmD5jpuWNoVkzx2f1UMCYmQhF3qGRIBar0gA7EQCl7IB2TXKuC746nismR2GhlRzktUloCMrzn9OqTgLu39okB4aE_ik1PElT7NDSZNVR41rQtXhHKKOO--Ch4fFv4zlpxErAIB1hu8w4stBx0ZXOyZegHsG0b6JAq0dVjqE357GzypgrrnwvBBDwAW3hPHyHbbKFcjH2N3RRCAHZlsafa_dBHkeevcktWiEarVAhRf0dGjAapoacrL8izb5mr7NGCmg2cwF_F6WvZJhjG5SPSj2HbfLoEkLGUMtDewYK7717_JRFOUEW2OHBfdL0GB0w6hTgLMoKfYXt_rYZw87Bzim5xXLNCZ5BTiWQO4LA8-O3-8oWkHNpNAAPKLXQaGpqopBHa3ujIUQCsINKZuaMMOnl_PFALxGiVY5f9JpHMGtjAVplAZZ4vPZsW7X7O478pwejNRR3_Y4SWNWZglyBamKRxeSz007lwtnbQoywtX72QNvNgpd6jY6zf4h5hNxhZqVg0FVrQUZUBnrA2TkFP3xUDoUOA26IlSf-qKYUus36wxNet-nyoMrAunQ0RubAwE7WWlGmBX-AQ5hXew7Cb-vjhjaZtGecJxQvVIcSBsvBK9Zfp7T85TaRFsHYH_Em8Eysb3grTTNnw6tkx2n43AOML3zyQiSgO4TxwzIINKrDwx94hH4tgBlph636eQLySS3nH0bSUw0pbBZurtkeX3IKYHdsCZfMtmhJUZxLMSLlZILQLm_6GD3I6kHINvGTdhHnZSoS4BecS3vBL3tXa-p_UAvhra8u7YLuGBkM8ZUV3a7OifB0R5TKhf_nyPsJg9_W5HnFvdv1wRsL1u8vdQOFHu4O9iCbLtDs2yTmRo0UTuWBItAqOhDqcU2wA6blptT-t7KhZvfOApK10kvEeDov6ch49JXX0CIQqUe2uzWh7Hc1xVI48ahK9aautS0EpaplbPuipNp1qIGSOOeVkDYPGd0KtjtlI2ZZdvxHu1UDsfZBBc-ngZWPp8IbGFMLIvv_ZnaCwn9hzCBT87WHg9dAEbudMxNw7mBBkjDJWqNFZVWDdeZk-dx2rAC5cM09CCkjjHjX2_eCpztb65lvM0ir1l8tq3SPaz2N9OLwipLRdm8vjWwSRGYaApXqxC4ZgxzSgTm-9Yd4o60zE5JdHyyCZ0DIuHieJ437ut-ozQ5-cV8d2yUrOQWjx97ehixruKZlf8PnOn-0Q48mGtqOJ2gQNiULIpksv7AGxORmRHKoBGQtzjiGfViOxk6hf62-ilAbz7fLeSLVZhG1ixaQWXkWeSf9G27mgEvt3IfrSJLmb4tMsspeYFYdjlTtkz1XBbpuv-F6-vhbgRnQQeR9OAa5BAtsFHvDU2KSOfkJfqWVQ9ffxriCTY3R1og4U52-Jdt64IlA-7-ZBbourBEbuCti8wC0UsjgtH4uAhhu4I7Td8ja-l2MJAGu5kvOoGRvg09ClyW3Top7Bmr7YkKchSjwyrPwhJtn5edl_N9p7i_1uHTrzTmNW7z4_g8NZl1oy2F14KQXCrjo8Kw_gt7D43nu9A2MXEYvIxEoaRu6SJJh8dL-Wfjo4dNsNS6iq-RxGtlJigMRV_lAG6n9U2YPws3xj6cTRiAnRcJcpRm8QyHoE-BlxWV739ENQXcno-qpYOT6UMO-wwCTU0x92rrDAL9ow4TkjX3VrMV9B1BLUFakDfj_pRp5P4bBMtMah20CZEXgc");
-            byte[] cspbytes_4096_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExABAAAAEAAQCZrcZ3JOjYvkjBZwkC_ukZook4u8se9AjHSP6bySfv69VLwlQLAREu-qz13lsoylKxVT4Abz2TxI4oLKKogKAdinRoNRYrIidsbOe6wHbsxreV6Qt4aiU_YdR0PnisyIx9jnheWtcO-_PCW5dQv9-OnjbnKxgy1A5XhHaj-MhL-uVOBKHmk1cXTMcAOzt1XL_oYjxiftg_InHBBT7hG6HrPyritd_np1TckPnuJq5GeajEcwmSIxGNtR4WlTyGD-5MyIVxxWvQgvWjXHDCXp01eA_R-3KImaE62cAULabdKHbNzQFAfJOb-nmAiZU9bhKw7TdZb9Omjr7DadZ8WrqlY7kYmk73IczxX3Vnvm67_Haj7hBrKewJfvQ3SPyqF85CpyNLCrLXzLxVNqEg-YxNkg5Zlf62-t3BA-QHUW7mOIi87iuwvp6WmoZ_o_JEcAl7DY1XlsMVF5v5KrhsAm9FeUQTjFpZkkrFWkgVzBYZ0RpJbDtREgTJXy8764Gq0qcgk7CvC7RkYAtUXj_0rME6nbooLDpKhiQNl9-OLGas-kh9MtR76jTbteToQz2XsIZI3gnJjzpb_BNSvABRqbSgWJ8mVTkGmIc-YImXUqxriE5P4EdulcX5orRkD1LTWiS5tnLqLCUlK-v9SEC0raKx99H5CXl4xv_EDsM2qubzvQ");
-
-            RsaParameters_4096 =
-                new RSAParameters
-                {
-                    D = Base64UrlEncoder.DecodeBytes("B15EJtB2qDEtE2z4k6dR-o_fQGoFtQR10FfMWt3XSE44jPYLMKyr3cc0NQkw7DsMpU8Olqo-enIX1BD9vVdWXAY-gR4yxJtRyiVcdAJiNHH6GN8s_GA21Z-6AZR_FTGgmJStEUe-KupSwzYdjo6f5S8dHyaJpLuRhhIx8mLExdhA7543Puwt-MMKj46rcEEKXhe2jNZl1vDgj8-71ZjTvE6HW__invbNX3ZefrZJCD-rDI9SyCkktq9msKfodFtyKfQ0-EYG6rxk7hpAwtilr418N-0I7oYh4OJHC44sRQswL7aCuxHB6qJbkPm7D5QIrrdd4ts5hYNoHd3YJIhr_H09VFnql5CfIyk2NbxHwbZAkGuA00ceBJ0RuIWvrxf-66ZbcNUz2U7l2GEF5qUsy7T4Zi6JtH7I3b4EaO620X-SZ5GXBWmxWBthVi2St3z7vAGl6Nv6F-pk7IjVZ4jj3EJGgCpHZEZObAD7y5IpslBiA4F24qitYfI4RPuncz78V2aKu8Zi6O19PFqQs1Ky3fEV5-fQjPqtu9944omHiwx0Jsjy0SU5MdM6indY75sTKM0xmOFCrF4poGFGJMHW-PJmFy2pCC9O39iz9ki32vJlvYo085a5vrVzKni_fY3HOJKC0NMMlwvAasedT2ZeN1hVVjSqlQwjGQTmDjcx07k"),
-                    DP = Base64UrlEncoder.DecodeBytes("obx_Oz4PLLgDWeIU5JnQLFecm-Ic7DycYevfXtinoMwCTqEO04FBL90XHI5tEZRTRMm_1_uuYLA3tAxlLCSBLt922KP0SLkxhkn2WnrxFzBng6ZgNPtq5tss8svKaWiqAaPR0V8UAtWqEaLVktzreeQRdL_2aWyZHYAQRXdjHyNXKNt2yMcT3hYAD0Hwwue6gqk8G3t-E-pYdbQKJPpGG-wBepnsXBkdBy2Lw7wb1gECrEScljP-Fh8eCr7vOIpyhFcLrTUeVU0mDc0-lcRTk-JPaHhAov3tLuCkOv05r4yAllRLzlEZGnZksuKp47vgKtdkB8heChCxAyC9agESGQ"),
-                    DQ = Base64UrlEncoder.DecodeBytes("cd6SJC-Qp996mJYB2OJHiPcxPKxKgyAzHE-4A0oiJM_3wjjAjZ92TLY6fDbTtIL3xsoEbxL_gR1sEWlTzk97-mW9ErxsIHFI9UJxwnlGm2ljOL7-Juywd4U5BPhXYBqlZe0EDGxuREOnC6wMKp9-6zUxrN-sS2GK6n9Sieg24FDoQMX3U5CTDaxnQGUUtFYFDVZqFsZNmIf4N-vYqHcp2LwNZO9XC8sotJ0tXO40PUteHCmmFsglmFmNJeHYf0dRM3pwyu-4s1-7xWbPi2cZUKYVMLYGc6RJ_-VYJRrxAhTPX54Ow2hupjQIK0AUMrq3dgQpqqaGBl2L8gBAkzYHaQ"),
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    InverseQ = Base64UrlEncoder.DecodeBytes("GwF0PXhYOz8Fwhz2JyxoZ_a_L7IwhbEhfPpYGXj6XBBkHztQtXvEb5dlNlK2Y6vQnfFgA1l5jiMZiFqnTSq6z1amWkrQUutqWq-EGo8jVVxzxx5as2t7lAohAn1dSY-HnP6ig0e8JF0rKeB8bxYqe-tPbVpuOgDbFKcOoaMCLRJY7kTRaGROss0O7bIJYu_g7lE4UPfybr2wEVy_3VucR279PZiwj3z-X6hMeUQHn-js2l1RGc-QgeEu2O7y2hq-APWnvna19xK8t8R5AS6hUnYeYTcZb4McpI7cg6H_5gItSFYuErPEGZWEZst8mcB2B6Yg9-WR7epmwZbSMCVt9A"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("vfPmqjbDDsT_xnh5CfnR97GirbRASP3rKyUlLOpytrkkWtNSD2S0ovnFlW5H4E9OiGusUpeJYD6HmAY5VSafWKC0qVEAvFIT_Fs6j8kJ3kiGsJc9Q-jktds06nvUMn1I-qxmLI7flw0khko6LCi6nTrBrPQ_XlQLYGS0C6-wkyCn0qqB6zsvX8kEElE7bEka0RkWzBVIWsVKkllajBNEeUVvAmy4KvmbFxXDlleNDXsJcETyo3-GmpaevrAr7ryIOOZuUQfkA8Hd-rb-lVkOkk2M-SChNlW8zNeyCksjp0LOF6r8SDf0fgnsKWsQ7qN2_Ltuvmd1X_HMIfdOmhi5Y6W6WnzWacO-jqbTb1k37bASbj2ViYB5-puTfEABzc12KN2mLRTA2TqhmYhy-9EPeDWdXsJwXKP1gtBrxXGFyEzuD4Y8lRYetY0RI5IJc8SoeUauJu75kNxUp-ffteIqP-uhG-E-BcFxIj_YfmI8Yui_XHU7OwDHTBdXk-ahBE7l-kvI-KN2hFcO1DIYK-c2no7fv1CXW8Lz-w7XWl54jn2MyKx4PnTUYT8langL6ZW3xux2wLrnbGwnIisWNWh0ih2ggKiiLCiOxJM9bwA-VbFSyihb3vWs-i4RAQtUwkvV6-8nyZv-SMcI9B7LuziJohnp_gIJZ8FIvtjoJHfGrZk"),
-                    P = Base64UrlEncoder.DecodeBytes("z3zVMYG1_TWwnNs99hyMJI9xs1zrwbV_STv9cqpaBxgPIHqpDyoG68a_VZF2RfuYLKT9ksEfLmgDeBPuM_vwBXSUApRqQo46WOpYUaDTcQJUJcspYQENQDkvtMGTuZQd6wrfGksDkUgnuZZ2CAKjN6vzGGlUkLJ9eEihbVTsCcYpp1sSK_J5HZCu0MZcnEU4oMbWKRHHApkQC8TJkutRw1XjY6s_ABj7M2W2D9CIO-CnUaXxmh21JNaJ2zP0nK1cfWgzvIikVoey7FKbGbOoIBnVf9AZUAVfclBLWI3wfUUVod_1lwLA07-7kvQ6SCEiHpsep3RwONcYJJH3vD3WlQ"),
-                    Q = Base64UrlEncoder.DecodeBytes("6l2EkIkJDFV_djyTFdpYbjrmg1lIRa1_oFF1925M0aDAEeJncRYkBOyupE9Ni6vHSTlRGN7I3Vs6V72Jnt_wpKqxz0qdhUseO89_JaqQE65euYq1QyeAjnHg64q4PcLYmBDub9Hn6y0xkTzkMCOUe5ZNGeosb5LW4qQVGyXnyeg9PmwFrBjQwr_Na6-1VrS2HCqzxvQWkOuJdjt3XB4ODXUnze9G-8nx8d2Cb9hC2qT4QxTPCq25i0n2DvIcRs_pD6RyNPg7EYOSH2Alc1vVzj7aYW9Plx69rIrtIFxH0ZwHsHua-AjDg7IZLK_Ghc3RV-9nTPEA2_6q_A_oOvfN9Q"),
-                };
-
-            RsaParameters_4096_Public =
-                new RSAParameters
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                    Modulus = Base64UrlEncoder.DecodeBytes("vfPmqjbDDsT_xnh5CfnR97GirbRASP3rKyUlLOpytrkkWtNSD2S0ovnFlW5H4E9OiGusUpeJYD6HmAY5VSafWKC0qVEAvFIT_Fs6j8kJ3kiGsJc9Q-jktds06nvUMn1I-qxmLI7flw0khko6LCi6nTrBrPQ_XlQLYGS0C6-wkyCn0qqB6zsvX8kEElE7bEka0RkWzBVIWsVKkllajBNEeUVvAmy4KvmbFxXDlleNDXsJcETyo3-GmpaevrAr7ryIOOZuUQfkA8Hd-rb-lVkOkk2M-SChNlW8zNeyCksjp0LOF6r8SDf0fgnsKWsQ7qN2_Ltuvmd1X_HMIfdOmhi5Y6W6WnzWacO-jqbTb1k37bASbj2ViYB5-puTfEABzc12KN2mLRTA2TqhmYhy-9EPeDWdXsJwXKP1gtBrxXGFyEzuD4Y8lRYetY0RI5IJc8SoeUauJu75kNxUp-ffteIqP-uhG-E-BcFxIj_YfmI8Yui_XHU7OwDHTBdXk-ahBE7l-kvI-KN2hFcO1DIYK-c2no7fv1CXW8Lz-w7XWl54jn2MyKx4PnTUYT8langL6ZW3xux2wLrnbGwnIisWNWh0ih2ggKiiLCiOxJM9bwA-VbFSyihb3vWs-i4RAQtUwkvV6-8nyZv-SMcI9B7LuziJohnp_gIJZ8FIvtjoJHfGrZk"),
-                };
-
-            RsaSecurityKey_1024 = new RsaSecurityKey(RsaParameters_1024);
-            RsaSecurityKey_1024_Public = new RsaSecurityKey(RsaParameters_1024_Public);
-            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048) { KeyId = "999b2be9-6213-436b-b12b-637b0176be41" };
-            RsaSecurityKey_2048_Public = new RsaSecurityKey(RsaParameters_2048_Public);
-            RsaSecurityKey_4096 = new RsaSecurityKey(RsaParameters_4096);
-            RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
-            RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256);
-            RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
-            var rsaCsp = new RSACryptoServiceProvider();
-            rsaCsp.ImportParameters(RsaParameters_2048);
-            RsaSecurityKeyWithCspProvider_2048 = new RsaSecurityKey(rsaCsp);
-            var rsaCspPublic = new RSACryptoServiceProvider();
-            rsaCspPublic.ImportParameters(RsaParameters_2048_Public);
-            RsaSecurityKeyWithCspProvider_2048_Public = new RsaSecurityKey(rsaCspPublic);
-#if NETCOREAPP1_0
-            var rsaCng = new RSACng();
-            rsaCng.ImportParameters(RsaParameters_2048);
-            RsaSecurityKeyWithCngProvider_2048 = new RsaSecurityKey(rsaCng);
-            var rsaCngPublic = new RSACng();
-            rsaCngPublic.ImportParameters(RsaParameters_2048_Public);
-            RsaSecurityKeyWithCngProvider_2048_Public = new RsaSecurityKey(rsaCngPublic);
-#endif
-
-            //ecdsa
-            byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
-            byte[] ecdsa384KeyBlob = TestUtilities.HexToByteArray("45435334300000009dc6bb9cdc8dac31e3db6e6b5f58f8e3a304e5c08e632705ca9a236f1134646dca526b89f7ea98653962f4a781f2fc9bf479a2d627561b1269548050e6d2c388018b837f4ceba8ee7fe2eefea67c8418ad1e84f60c1309385e573ea5183e9ae8b6d5308a78da207c6e556af2053983321a5f8ac057b787089ee783c99093b9f2afb2f9a1e9a560ad3095b9667aa699fa");
-            byte[] ecdsa521KeyBlob = TestUtilities.HexToByteArray("454353364200000001f9f06ea4e00fd3fecc1753af7983b43cb9b692941ee6364616c9c4168845fce804beca7aa23d0a5049910db45dfb61112f4cb02e93ff62af1be203ad248dd70952015ddc31d1ad7411ca5996b8b76a40ea65f286c665225114bec8557365aa4bc79358f8c68b873cb76a1c86a5a394185d8eeb9602b8b968db1e4ac49b7cc51f83c7170055ad9b0b2d0d5d2306a66bf87a256a3739696121eb131e64ae61991ea23db99b397c32df95efb0cb284147a929c65e9f671073ca3c7a084cb9211dceb06c987277");
-
-            CngKey ecdsa256Key = CngKey.Import(ecdsa256KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
-            CngKey ecdsa256Public = CngKey.Import(ecdsa256Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
-            CngKey ecdsa384Key = CngKey.Import(ecdsa384KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
-            CngKey ecdsa384Public = CngKey.Import(ecdsa384Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
-            CngKey ecdsa512Key = CngKey.Import(ecdsa521KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
-            CngKey ecdsa512Public = CngKey.Import(ecdsa512Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
-
-            ECDsa256Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Key));
-            ECDsa384Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Key));
-            ECDsa521Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Key));
-            ECDsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public));
-            ECDsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public));
-            ECDsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public));
-
-            //json web key
-            JsonWebKeyRsa256 =
-                new JsonWebKey
-                {
-                    D = "C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ",
-                    DP = "ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE",
-                    DQ = "YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs",
-                    E = "AQAB",
-                    QI = "lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4",
-                    N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
-                    P = "_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk",
-                    Q = "7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c",
-                    Kty = "RSA"
-                };
-            JsonWebKeyRsa256Public =
-                new JsonWebKey
-                {
-                    E = "AQAB",
-                    N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
-                    Kty = "RSA"
-                };
-
-            JsonWebKeyEcdsa256 =
-                new JsonWebKey
-                {
-                    Crv = "P-256",
-                    X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
-                    Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
-                    D = "OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4TQ",
-                    Kty = "EC"
-                };
-            JsonWebKeyEcdsa256Public =
-                new JsonWebKey
-                {
-                    Crv = "P-256",
-                    X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
-                    Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
-                    Kty = "EC"
-                };
-            JsonWebKeySymmetric256 =
-                new JsonWebKey
-                {
-                    Kty = JsonWebAlgorithmsKeyTypes.Octet,
-                    K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
-                };
-        }
-
         // .../Certs/SelfSigned1024_SHA256.pfx
         // password: SelfSigned1024_SHA256
         public static string SelfSigned1024_SHA256 = @"MIIHBwIBAzCCBscGCSqGSIb3DQEHAaCCBrgEgga0MIIGsDCCA7kGCSqGSIb3DQEHAaCCA6oEggOmMIIDojCCA54GCyqGSIb3DQEMCgECoIICrjCCAqowHAYKKoZIhvcNAQwBAzAOBAiX6QpBO4EGpAICB9AEggKIVVwwasu5VeKCiUPjNbpGaj4r//RbNOUcGhZLlZICCxEwT4S7SvrNIEtw4vP3w2NfEcBaQtL6uu+eSF+xPp8eaVIVaEsysAMpmg3kP2Jt8xT6bTNvaR/5FjKvD/vSAsjDSdm3F3cugjBAq4xw/SdjO0gH8xOtx0vhYvD5ga0SN2JKkFW1xydw0b/pf7qD8t297OSLC+vaCwG4HCPj3t4XzV4SgFp0kWqJ0geAfddwC0EPCgpWEp2y+0Eh29xUVeRn8NHl4bdjv0OyLEyID94j6WQPr1ObmhMu1the7Rt3geWMdqzHQ6QWjCMVElUOGs8lXZU3Riz8AGM8QIuE4jqk20kBe2R59DUHdy7eYRnTHKsUcxjvHbq/jG7M9GB/m6eGk/smToupQEMYqzftydzICI2VAgcUB8YEf6M4ZjQxvjpn1rkTyMj8TcqyhA1fNcWxPAxbLMQEyFt25BvDyUaR0DlRiQN7GVOpXR1WEI25jIYrSFcnm830iyUKLwTxncRH57r+I7uwL65x0ZttvhFqaDAXofZKMw7uB8vy05hc/GvDVF6CVMr19fRCsjSgMH57dwzJTi6UZ6YVLu7ubigo2YM264Shq3aOno6BTgalhh1kkdl8EtPbHI4unvMg4v55B3lQVjL4o5H6vditvDFSyNoM0HazmiyzMrFzkEkj3zy1Es2b/alY5RuJceb8uyZxUhpigrg/B7ZwNIQTc+ZBEZDFWFgf18SjxQfMHq6JItwK9k65RpuC205T8cqwyZy6iY8j85Tt90Hw7OUaCbs/pznKcckktpnDW3Ca7bCstb8nWRFj403za34RREn7WL2ezvJqDt0tanCKVX/zrdjE1x4ADF/MkoTUMYHcMA0GCSsGAQQBgjcRAjEAMBMGCSqGSIb3DQEJFTEGBAQBAAAAMFcGCSqGSIb3DQEJFDFKHkgANwA1ADUAMQBlADAAMgBmAC0AYwBmADIAMQAtADQAOQBmADUALQA5AGUANgA4AC0AYgAzADIAZQBjAGYAYgBjADkAMABmADMwXQYJKwYBBAGCNxEBMVAeTgBNAGkAYwByAG8AcwBvAGYAdAAgAFMAdAByAG8AbgBnACAAQwByAHkAcAB0AG8AZwByAGEAcABoAGkAYwAgAFAAcgBvAHYAaQBkAGUAcjCCAu8GCSqGSIb3DQEHBqCCAuAwggLcAgEAMIIC1QYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQYwDgQIlEr6OswpVr0CAgfQgIICqJd2Kcz+gOZRXE3j/8XbPBPJq3VKzsLRnCbvOhXLFwqiJAXzQjRpfAebtYhn9FuswQjMDQfYdim2Lg3rYb6VDjt61YDcPc2KTW4LkmPhFaKPMPtCDko3zflcnVODrt4A3/7Ku03WjFQs15n4SHA/rDtv725TwHx3isuUmky/cYfPscgiKv2AI2DLwe9D2BCJuAp4ZmTJ8o8i+XDix7ox8KXngWguIs1B4nomr62uio3u3OKJn0gUlVg2BgIzb4SSgddhCwxyWPF2oAW+pxI51o6QORwRI2yWNGcgnXojmsVG0urZ5pez2l3BE7w5qqT6QQSfktkmRQwi1ofHOIFLB1jhmxo8ANvXDEtB8YOixZ6XZURKyoZz9nqm+JPCBbHGLd62QFTUu+w8xz1eKvM2tAjj2GL9sK0JaZbUke9ijKhyINnB6pfYsmE3ja1VQ4epPRif8fZz8OKqLy+j0D94Opxq9FQgu1+qa5gvSzQ8skBPfeAlfoYlbEd/9QmIpFc5HHYn1puMz+pp46ilBal77FdKTunCRXQPFpfvUJYweJ4mTCJeHDktZb7xj8dl+lHZl5KJWRNEusasSRwzeNW4vZo466zSTUX8gSuU0OJsPo8q7znwKyVYh2dh813IQDd/1aFTKjPzjU5Wt7t5a2GwTr1wkMH4BP7UPlsryi0pv/EOLIEuMBBNDRDpAGEzkwCD/AECwv49SzFz3oGt3pzMReRB+NuRoIpJ6mw6aLmgJ9UoYAmMSRUL5VDTlLt2xP+ex3CRIpTa0NXhSYBPa37yTNP3ID7PWqXpECoY5w+QlYLTr+BMpp0L1F1D74punzjZc2pFnOgH+TPsTrVtrkWsk1iA+RHQ/AlC2JLnR+FVJSzktyrVC34j70cMYSqY4ev5A+fs2zgGp/4cMDcwHzAHBgUrDgMCGgQUUG+ZhmoN/MaNkyP3EWNX81zZoQQEFAuZPgiZ8hZN0m3+o4CLhQk4Uu6R";
@@ -288,6 +100,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static SigningCredentials DefaultX509SigningCreds_Public_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_Public_2048, SecurityAlgorithms.RsaSha256Signature);
 
         // RSA securityKey
+        public static RSAParameters RsaParameters1;
+        public static RSAParameters RsaParameters2;
+        public static RSAParameters RsaParametersFromPing1;
+        public static RSAParameters RsaParametersFromPing2;
+        public static RSAParameters RsaParametersFromPing3;
         public static RSAParameters RsaParameters_1024;
         public static RSAParameters RsaParameters_1024_Public;
         public static RSAParameters RsaParameters_2048;
@@ -297,6 +114,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static RSAParameters RsaParameters_2048_MissingModulus;
         public static RSAParameters RsaParameters_2048_MissingExponent;
 
+        public static RsaSecurityKey RsaSecurityKey1;
+        public static RsaSecurityKey RsaSecurityKey2;
+        public static RsaSecurityKey RsaSecurityKeyFromPing1;
+        public static RsaSecurityKey RsaSecurityKeyFromPing2;
+        public static RsaSecurityKey RsaSecurityKeyFromPing3;
         public static RsaSecurityKey RsaSecurityKey_1024;
         public static RsaSecurityKey RsaSecurityKey_1024_Public;
         public static RsaSecurityKey RsaSecurityKey_2048;
@@ -345,5 +167,249 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         // These signingCreds have algorithms and hashs that are not supported
         public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature);
         //public static SigningCredentials SymmetricSigningCreds_2048RSA_H256_Sha2 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.HmacSha256Signature);
+
+        public static X509Certificate2 X509Certificate1;
+        public static X509Certificate2 X509Certificate2;
+
+        public static X509SecurityKey X509SecurityKey1;
+        public static X509SecurityKey X509SecurityKey2;
+
+        static KeyingMaterial()
+        {
+            X509Certificate1 = new X509Certificate2(Convert.FromBase64String("MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng"));
+            X509Certificate2 = new X509Certificate2(Convert.FromBase64String("MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ"));
+            X509SecurityKey1 = new X509SecurityKey(X509Certificate1);
+            X509SecurityKey2 = new X509SecurityKey(X509Certificate2);
+
+            byte[] cspbytes_1024 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyAAQAAAEAAQAlur35vBYFooH0yfB3G919joyz-7xD8LcoQLRIqV7DdEicgTkJWD8sfDvxHRf18w2bA2kx_Bg89855uR3yDvIqtcZ-vq6Gv6yvx7iSjuXW_SNV4gVSjShBuCMelyU-dsHK-IuLcyMcms93fQ3Gh13_AFeyGuT2P0g7LUEEdz8K099x6CCApMROhY261NbN-d5uDE33bypd8tfLCWj2jlSZUNX__O7OUCVqegyI3rAPCpbtB5V7jw7uKD2lR6OeZfN7fPlPPtQEXyaIzYQHo8td6ASYcIFAUjxkBhN8lMUG2FXe-jH3tYYf3FMywf6GA6bo1LfVMW1Sb935YrGAt_fd-8YFoKDUoZgMTjcEiM0Koq80DM8Hy0rb1F4KnzKpXPy2XeGAxIEM-6MMINuh2aY-gZ6oMUomEcw9uSW1hBNk5mtPAdUqHfud8RBYvTH5yx-Cipu6wDLoQl4UTZcop-tVLpJGWJpDYkeLsda2pKJpJcITs3_gRq-QjUIG7-M2OMEvKwBd3tMfIHNkVA-RBk6v_dEHH8cRHvPZC2wna7FQztJqN5ybOSWcpqCX5RvbMkfK38hdGo6oPUkQ3YmtFLFOialpsJo-c_HDOlI32fCnjTLRsR9B-JbSDRLEHg0bVmgVyL1oZaLPYAMyUH6grtel2enOiUODgX9YZbynGtHjvGMn0-3nbz2TRUlchl5b-mQqPbM673WnddAUeaaqNc7gopo5Zofsd6-YV1Z0nL-XzLad2Ax9aAHpVoejevXGz1w");
+            byte[] cspbytes_1024_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExAAQAAAEAAQAlur35vBYFooH0yfB3G919joyz-7xD8LcoQLRIqV7DdEicgTkJWD8sfDvxHRf18w2bA2kx_Bg89855uR3yDvIqtcZ-vq6Gv6yvx7iSjuXW_SNV4gVSjShBuCMelyU-dsHK-IuLcyMcms93fQ3Gh13_AFeyGuT2P0g7LUEEdz8K0w");
+
+            RsaParameters1 = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("ns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9w==")
+            };
+
+            RsaParameters2 = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==")
+            };
+
+            RsaSecurityKey1 = new RsaSecurityKey(RsaParameters1)
+            {
+                KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
+            };
+
+            RsaSecurityKey2 = new RsaSecurityKey(RsaParameters2)
+            {
+                KeyId = "kriMPdmBvx68skT8-mPAB3BseeA"
+            };
+
+            RsaParametersFromPing1 = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("mhupHfUtg_gHIqwu2wm8CprXY-gKqbPMV6tEYVqkyYrHugzQ_YDYAHr7vWo5Pe_3gIujSFwpqIfXaP8-Fl3O5fQhMo1lMv4DdRabyDLEpv7YO9qoVKTmDOZqYZx-AYBr5x1Zh2xWByI6_0dsPtCjD1pFZfg_SxNEcLPyH1aY6dT8CWYu32qG4O0WF4EihZzMkzSn8fyh8RXbMf5U9Wm2kgb0g8jK62S7MoF4IlhFaJreq898wgUohhPwR8P3X-gk0XQJAFcogEf04Fw4UmKo3z1B6mcNbPRfImhWw4wtLkhp_KIqKNOkMsSpYGSLrCvqQpgK56EJZExrmb7WozjwHw")
+            };
+
+            RsaParametersFromPing2 = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("wY2KNRyiEvyBFkr1IC_1UGWMPInkzVYpoap_-Zw5fYAXLVxKMSPdZVVLt9AVhuNtagOOQqlZ_Y32e4l19REHym6RGV9Sm1noKRxDUjkz7U8OVeUew7D7h4Dk6E2rrlIYpy9OmhhzWSS68pBTf0_ESdekKv3OQbEs99avEXOPK5uH3V-NHsy1YP3DAvl7HJaV6fn-1Nch1quLrg1G7ohBuTb4Zr-499TJ6bkfabaACz8bf-RHuPezFBjoY0LHNNu6-KQ-qqHVkoki_1OQwj2s_Lui3qYWOmLoaVN9ZzO90rBdhhg8t0JZv6pSlc7o0XT4fie5RRjiqCuOpuGQvNYKpQ")
+            };
+
+            RsaParametersFromPing3 = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("tgLZUXY8mo2Y1TaXHjOYrFGs23jZxgpzEKfBz004AEeOMHFbEP1h1Lrqf2B7f49mOpXRkBgEm4tnSYzX7pDWrMvNeRVkTFXSXwHYvda1R1kmwiTxnrC9IWjvizrr22DtzHhSSpL_7xuXtmaid2orOF8mUoXnKesPQVfq33pCKm1QUV6oFNSVxAiOKJkzFmxjYvcqzryjYi10glxPSx3cmSI8RGqlxolJr0negfLmI9bNxuAvStf_L6zXB5NFqccmkCQXn_QC3P1N3j-HgwwHTVFxkrS8kZQOMTw3TMXbtTFNrVAx1QC_3M0ze4cVncr2zTSECS_2qXM5RS7xBTEDvQ")
+            };
+
+            RsaSecurityKeyFromPing1 = new RsaSecurityKey(RsaParametersFromPing1)
+            {
+                KeyId = "20am7"
+            };
+
+            RsaSecurityKeyFromPing2 = new RsaSecurityKey(RsaParametersFromPing2)
+            {
+                KeyId = "20am3"
+            };
+
+            RsaSecurityKeyFromPing3 = new RsaSecurityKey(RsaParametersFromPing3)
+            {
+                KeyId = "20alz"
+            };
+
+            RsaParameters_1024 = new RSAParameters
+            {
+                D = Base64UrlEncoder.DecodeBytes("XM_G9Xqjh1bpAWh9DNidtsyXv5x0VleYr3fsh2Y5mqLgzjWqpnkU0HWnde86sz0qZPpbXoZcSUWTPW_n7dMnY7zj0RqnvGVYf4GDQ4nO6dml166gflAyA2DPomVovcgVaFYbDR7EEg3SlvhBH7HRMo2n8Nk3UjrD8XM-mrBpqYk"),
+                DP = Base64UrlEncoder.DecodeBytes("5mQThLUluT3MESZKMaiegT6m2aHbIAyj-wyBxIDhXbb8XKkynwpe1NtKywfPDDSvogrNiAQ3TgyYodSgoAXG-w"),
+                DQ = Base64UrlEncoder.DecodeBytes("wTg24-8GQo2Qr0bgf7MTwiVpoqS21rGLR2JDmlhGki5V66col00UXkLoMsC6m4qCH8v5Mb1YEPGd-x0q1QFPaw"),
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                InverseQ = Base64UrlEncoder.DecodeBytes("TrEUrYndEEk9qI4aXcjfykcy2xvll6CmnCU5m5w3atLOULFrJ2wL2fMeEccfB9H9r04GkQ9UZHMgH9PeXQArLw"),
+                Modulus = Base64UrlEncoder.DecodeBytes("0wo_dwRBLTtIP_bkGrJXAP9dh8YNfXfPmhwjc4uL-MrBdj4llx4juEEojVIF4lUj_dbljpK4x6-sv4auvn7GtSryDvIduXnO9zwY_DFpA5sN8_UXHfE7fCw_WAk5gZxIdMNeqUi0QCi38EO8-7OMjn3dG3fwyfSBogUWvPm9uiU"),
+                P = Base64UrlEncoder.DecodeBytes("82Weo0elPSjuDo97lQftlgoPsN6IDHpqJVDO7vz_1VCZVI72aAnL1_JdKm_3TQxu3vnN1tS6jYVOxKSAIOhx3w"),
+                Q = Base64UrlEncoder.DecodeBytes("3fe3gLFi-d1vUm0x1bfU6KYDhv7BMlPcH4a19zH63lXYBsWUfBMGZDxSQIFwmAToXcujB4TNiCZfBNQ-T_l8ew"),
+            };
+
+            RsaParameters_1024_Public = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("0wo_dwRBLTtIP_bkGrJXAP9dh8YNfXfPmhwjc4uL-MrBdj4llx4juEEojVIF4lUj_dbljpK4x6-sv4auvn7GtSryDvIduXnO9zwY_DFpA5sN8_UXHfE7fCw_WAk5gZxIdMNeqUi0QCi38EO8-7OMjn3dG3fwyfSBogUWvPm9uiU"),
+            };
+
+            byte[] cspbytes_2048 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyAAgAAAEAAQCP7GdRPSJ5_SDCM4mQsuRP72_P19sw7w7qStb9CXj4aun9iY81bhXI8YjGHZPDrhaSi4bwhGIx5JTNsxBejBTU0QOsLqb8IvlabEHD7T2J4GfIsNwh5u_u8chKMRWeUkxqLzaXdVwickmtvG7t7BjghMzl6Ubwv1DL9prH-pkH56fTqbsu1EwEF4DxWS6RBg1DKNzlmtt5SYYmNksH89yXUV5118YY0UMxJZd3a4Ir_r8wNq4ZtotCAyTfLnCKryTLPrJUcduPlTnjXeegPTFH57fK_UQjq3RGOeTkiDLvKrjQ2FRgXtLdHhXDbAqjQPX0_oruXb78kBxMf0sWa-HrmZTz2hg-VrxNsnJPS-2f-4_MIa8q2dOfGgbxQxLZM19_3VHG_qcn3sXPiVzEwjTvR8edj6wCQ96SYAOkSWByuMplbrzFMfq37u0x6JhOrbkBKWgnU0FO8JvMnAO6jpxNifsWjLkk-ca-JDbzX1L_5u54pHNE76rlEe6oKwvCq_1nG3MI3d_X623S9aQwFw94UGseJfma-6tRAj95LniiXBD7ifjLpCeZvO2W_iLHOOp2WB7DSrNQ_rLfRoStq9DxQY8To4O2SMYPQT7To6tRhRV7lsVuzoGrJIlurXjGXeGBD2gvBTy2_7qhE8ZKiYun67JpIsrN84LkM2pKRtgL7gG1kwCRFEPH_7Pl4JUMCV6kv1DeWCdKlz6fFMatcvN_MUQDBdzjpkgabhc7O_-gBCJp71gnIKsQeMNG_LBxKP0wVZBOtCW3bBmNUSHNZF5CMr7TD7TxXNP6K5sDafOc9_vHz2lkxDDaurY659PrXifpdYFKheHeGPB4nZs697MS-3AARGqCDdoekJft6mF613pzUTOBEc00hm0ehVWVent58JU3ThmcIkImGKxgWaCpaEunlcGVgmpJG562zYPWPTUzsmDnTjciCSZMw_F8PdKzN5kU73JX1yY8k0Oh3ETOxl-uFRGPOiucAeCmvw-9_Mkmyjcrv4Xsk9ftE7ZssGH-F3_O4CMGbQVnsBSpAnO8Yi0f3a9vhipydlTzqpUK7LCoRn4gWVDdsbSmlv-2zjypk_BpgoB4L6ASJOyRySk4KoYSSs38yLEg8SQyNSR95GWZJPEmZhxi5R_03TZcaicn_YCMyfNf9hLmNy8zHetIz8An2qLoZv8w-FglW2O5lXFdKgRb_W-Af2GcjyWGWsMywGEsE6p7A8Ytm8RrwZueTcib_YPFG6_Q4rHHGxcbA_fbz6GKLXrx9oY3xZfNi_3ebPE2aci3CXtoWkH3FRW6kZvGnQsHxxfBww3dogWdV9a0nVdBkfVOD8gfTdCLO8RfARUt1UYwdO22aUqSbxlnxdSgrzFKePsGp_iHCNDZlWeQOIXCIjg2oQLPPT8LYKJrxeWMsyhUw3KlK7cuU_STNLO8CmFD7p025xCrzpK1cC4VeODjur7nB-zuLdmjn-JbLSv0ky9eTNyTkkguhcBbpejM8wEuE3R-HKmV6SrgL8OlhAYBneVIpFP9h2UGoQs");
+            byte[] cspbytes_2048_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExAAgAAAEAAQCP7GdRPSJ5_SDCM4mQsuRP72_P19sw7w7qStb9CXj4aun9iY81bhXI8YjGHZPDrhaSi4bwhGIx5JTNsxBejBTU0QOsLqb8IvlabEHD7T2J4GfIsNwh5u_u8chKMRWeUkxqLzaXdVwickmtvG7t7BjghMzl6Ubwv1DL9prH-pkH56fTqbsu1EwEF4DxWS6RBg1DKNzlmtt5SYYmNksH89yXUV5118YY0UMxJZd3a4Ir_r8wNq4ZtotCAyTfLnCKryTLPrJUcduPlTnjXeegPTFH57fK_UQjq3RGOeTkiDLvKrjQ2FRgXtLdHhXDbAqjQPX0_oruXb78kBxMf0sWa-Hr");
+
+            RsaParameters_2048 = new RSAParameters
+            {
+                D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
+                DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
+                DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
+                Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
+                P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
+                Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
+            };
+
+            RsaParameters_2048_Public = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
+            };
+
+            RsaParameters_2048_MissingModulus = new RSAParameters
+            {
+                D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
+                DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
+                DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
+                P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
+                Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
+            };
+
+            RsaParameters_2048_MissingExponent = new RSAParameters
+            {
+                D = Base64UrlEncoder.DecodeBytes("C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ"),
+                DP = Base64UrlEncoder.DecodeBytes("ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"),
+                DQ = Base64UrlEncoder.DecodeBytes("YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"),
+                InverseQ = Base64UrlEncoder.DecodeBytes("lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"),
+                Modulus = Base64UrlEncoder.DecodeBytes("6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"),
+                P = Base64UrlEncoder.DecodeBytes("_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"),
+                Q = Base64UrlEncoder.DecodeBytes("7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"),
+            };
+
+            byte[] cspbytes_4096 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyABAAAAEAAQCZrcZ3JOjYvkjBZwkC_ukZook4u8se9AjHSP6bySfv69VLwlQLAREu-qz13lsoylKxVT4Abz2TxI4oLKKogKAdinRoNRYrIidsbOe6wHbsxreV6Qt4aiU_YdR0PnisyIx9jnheWtcO-_PCW5dQv9-OnjbnKxgy1A5XhHaj-MhL-uVOBKHmk1cXTMcAOzt1XL_oYjxiftg_InHBBT7hG6HrPyritd_np1TckPnuJq5GeajEcwmSIxGNtR4WlTyGD-5MyIVxxWvQgvWjXHDCXp01eA_R-3KImaE62cAULabdKHbNzQFAfJOb-nmAiZU9bhKw7TdZb9Omjr7DadZ8WrqlY7kYmk73IczxX3Vnvm67_Haj7hBrKewJfvQ3SPyqF85CpyNLCrLXzLxVNqEg-YxNkg5Zlf62-t3BA-QHUW7mOIi87iuwvp6WmoZ_o_JEcAl7DY1XlsMVF5v5KrhsAm9FeUQTjFpZkkrFWkgVzBYZ0RpJbDtREgTJXy8764Gq0qcgk7CvC7RkYAtUXj_0rME6nbooLDpKhiQNl9-OLGas-kh9MtR76jTbteToQz2XsIZI3gnJjzpb_BNSvABRqbSgWJ8mVTkGmIc-YImXUqxriE5P4EdulcX5orRkD1LTWiS5tnLqLCUlK-v9SEC0raKx99H5CXl4xv_EDsM2qubzvZXWPbz3kSQY1zhwdKcemx4iIUg69JK7v9PAApf136EVRX3wjVhLUHJfBVAZ0H_VGSCosxmbUuyyh1akiLwzaH1crZz0M9uJ1iS1HZrxpVGn4DuI0A-2ZTP7GAA_q2PjVcNR65LJxAsQmQLHESnWxqA4RZxcxtCukB158isSW6cpxgnsVG2hSHh9spBUaRjzqzejAgh2lrknSJEDSxrfCusdlLmTwbQvOUANAWEpyyVUAnHToFFY6lg6jkJqlAKUdAXw-zPuE3gDaC4fwZL9pCyY-0V2kVW_xusGKg-peiAPGAdaqnL9O0l_tcHrXLNxjySMHPY925ywNf21gTHVfM_1zfc66A_8qv7bAPFMZ-9X0c2Fxq8sGbKDwwj4mnuwB5zRR1wg7YqsvR6XT29h2j7O1VtzJWAfkoMRO_g0cqQP6c9GHPIO9kmLua0KzxRD-KTaQthvgt3x8cn7Ru_NJ3UNDh5cdzt2ieuQFvTGsyoctrRWta9rzb_C0BisBWw-PejJ5yUbFaTi1pJvLOoZTZZ7lCMw5DyRMS3r59Fv7hCY2MI9uIrr4HGOgCdDtYq5Xq4TkKolf887HkuFnUrPsaqk8N-eib1XOlvdyN4YUTlJx6uLTU-kruwEJBZxZ-IRwKDRTG73dVGgf61FSFmD5jpuWNoVkzx2f1UMCYmQhF3qGRIBar0gA7EQCl7IB2TXKuC746nismR2GhlRzktUloCMrzn9OqTgLu39okB4aE_ik1PElT7NDSZNVR41rQtXhHKKOO--Ch4fFv4zlpxErAIB1hu8w4stBx0ZXOyZegHsG0b6JAq0dVjqE357GzypgrrnwvBBDwAW3hPHyHbbKFcjH2N3RRCAHZlsafa_dBHkeevcktWiEarVAhRf0dGjAapoacrL8izb5mr7NGCmg2cwF_F6WvZJhjG5SPSj2HbfLoEkLGUMtDewYK7717_JRFOUEW2OHBfdL0GB0w6hTgLMoKfYXt_rYZw87Bzim5xXLNCZ5BTiWQO4LA8-O3-8oWkHNpNAAPKLXQaGpqopBHa3ujIUQCsINKZuaMMOnl_PFALxGiVY5f9JpHMGtjAVplAZZ4vPZsW7X7O478pwejNRR3_Y4SWNWZglyBamKRxeSz007lwtnbQoywtX72QNvNgpd6jY6zf4h5hNxhZqVg0FVrQUZUBnrA2TkFP3xUDoUOA26IlSf-qKYUus36wxNet-nyoMrAunQ0RubAwE7WWlGmBX-AQ5hXew7Cb-vjhjaZtGecJxQvVIcSBsvBK9Zfp7T85TaRFsHYH_Em8Eysb3grTTNnw6tkx2n43AOML3zyQiSgO4TxwzIINKrDwx94hH4tgBlph636eQLySS3nH0bSUw0pbBZurtkeX3IKYHdsCZfMtmhJUZxLMSLlZILQLm_6GD3I6kHINvGTdhHnZSoS4BecS3vBL3tXa-p_UAvhra8u7YLuGBkM8ZUV3a7OifB0R5TKhf_nyPsJg9_W5HnFvdv1wRsL1u8vdQOFHu4O9iCbLtDs2yTmRo0UTuWBItAqOhDqcU2wA6blptT-t7KhZvfOApK10kvEeDov6ch49JXX0CIQqUe2uzWh7Hc1xVI48ahK9aautS0EpaplbPuipNp1qIGSOOeVkDYPGd0KtjtlI2ZZdvxHu1UDsfZBBc-ngZWPp8IbGFMLIvv_ZnaCwn9hzCBT87WHg9dAEbudMxNw7mBBkjDJWqNFZVWDdeZk-dx2rAC5cM09CCkjjHjX2_eCpztb65lvM0ir1l8tq3SPaz2N9OLwipLRdm8vjWwSRGYaApXqxC4ZgxzSgTm-9Yd4o60zE5JdHyyCZ0DIuHieJ437ut-ozQ5-cV8d2yUrOQWjx97ehixruKZlf8PnOn-0Q48mGtqOJ2gQNiULIpksv7AGxORmRHKoBGQtzjiGfViOxk6hf62-ilAbz7fLeSLVZhG1ixaQWXkWeSf9G27mgEvt3IfrSJLmb4tMsspeYFYdjlTtkz1XBbpuv-F6-vhbgRnQQeR9OAa5BAtsFHvDU2KSOfkJfqWVQ9ffxriCTY3R1og4U52-Jdt64IlA-7-ZBbourBEbuCti8wC0UsjgtH4uAhhu4I7Td8ja-l2MJAGu5kvOoGRvg09ClyW3Top7Bmr7YkKchSjwyrPwhJtn5edl_N9p7i_1uHTrzTmNW7z4_g8NZl1oy2F14KQXCrjo8Kw_gt7D43nu9A2MXEYvIxEoaRu6SJJh8dL-Wfjo4dNsNS6iq-RxGtlJigMRV_lAG6n9U2YPws3xj6cTRiAnRcJcpRm8QyHoE-BlxWV739ENQXcno-qpYOT6UMO-wwCTU0x92rrDAL9ow4TkjX3VrMV9B1BLUFakDfj_pRp5P4bBMtMah20CZEXgc");
+            byte[] cspbytes_4096_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExABAAAAEAAQCZrcZ3JOjYvkjBZwkC_ukZook4u8se9AjHSP6bySfv69VLwlQLAREu-qz13lsoylKxVT4Abz2TxI4oLKKogKAdinRoNRYrIidsbOe6wHbsxreV6Qt4aiU_YdR0PnisyIx9jnheWtcO-_PCW5dQv9-OnjbnKxgy1A5XhHaj-MhL-uVOBKHmk1cXTMcAOzt1XL_oYjxiftg_InHBBT7hG6HrPyritd_np1TckPnuJq5GeajEcwmSIxGNtR4WlTyGD-5MyIVxxWvQgvWjXHDCXp01eA_R-3KImaE62cAULabdKHbNzQFAfJOb-nmAiZU9bhKw7TdZb9Omjr7DadZ8WrqlY7kYmk73IczxX3Vnvm67_Haj7hBrKewJfvQ3SPyqF85CpyNLCrLXzLxVNqEg-YxNkg5Zlf62-t3BA-QHUW7mOIi87iuwvp6WmoZ_o_JEcAl7DY1XlsMVF5v5KrhsAm9FeUQTjFpZkkrFWkgVzBYZ0RpJbDtREgTJXy8764Gq0qcgk7CvC7RkYAtUXj_0rME6nbooLDpKhiQNl9-OLGas-kh9MtR76jTbteToQz2XsIZI3gnJjzpb_BNSvABRqbSgWJ8mVTkGmIc-YImXUqxriE5P4EdulcX5orRkD1LTWiS5tnLqLCUlK-v9SEC0raKx99H5CXl4xv_EDsM2qubzvQ");
+
+            RsaParameters_4096 = new RSAParameters
+            {
+                D = Base64UrlEncoder.DecodeBytes("B15EJtB2qDEtE2z4k6dR-o_fQGoFtQR10FfMWt3XSE44jPYLMKyr3cc0NQkw7DsMpU8Olqo-enIX1BD9vVdWXAY-gR4yxJtRyiVcdAJiNHH6GN8s_GA21Z-6AZR_FTGgmJStEUe-KupSwzYdjo6f5S8dHyaJpLuRhhIx8mLExdhA7543Puwt-MMKj46rcEEKXhe2jNZl1vDgj8-71ZjTvE6HW__invbNX3ZefrZJCD-rDI9SyCkktq9msKfodFtyKfQ0-EYG6rxk7hpAwtilr418N-0I7oYh4OJHC44sRQswL7aCuxHB6qJbkPm7D5QIrrdd4ts5hYNoHd3YJIhr_H09VFnql5CfIyk2NbxHwbZAkGuA00ceBJ0RuIWvrxf-66ZbcNUz2U7l2GEF5qUsy7T4Zi6JtH7I3b4EaO620X-SZ5GXBWmxWBthVi2St3z7vAGl6Nv6F-pk7IjVZ4jj3EJGgCpHZEZObAD7y5IpslBiA4F24qitYfI4RPuncz78V2aKu8Zi6O19PFqQs1Ky3fEV5-fQjPqtu9944omHiwx0Jsjy0SU5MdM6indY75sTKM0xmOFCrF4poGFGJMHW-PJmFy2pCC9O39iz9ki32vJlvYo085a5vrVzKni_fY3HOJKC0NMMlwvAasedT2ZeN1hVVjSqlQwjGQTmDjcx07k"),
+                DP = Base64UrlEncoder.DecodeBytes("obx_Oz4PLLgDWeIU5JnQLFecm-Ic7DycYevfXtinoMwCTqEO04FBL90XHI5tEZRTRMm_1_uuYLA3tAxlLCSBLt922KP0SLkxhkn2WnrxFzBng6ZgNPtq5tss8svKaWiqAaPR0V8UAtWqEaLVktzreeQRdL_2aWyZHYAQRXdjHyNXKNt2yMcT3hYAD0Hwwue6gqk8G3t-E-pYdbQKJPpGG-wBepnsXBkdBy2Lw7wb1gECrEScljP-Fh8eCr7vOIpyhFcLrTUeVU0mDc0-lcRTk-JPaHhAov3tLuCkOv05r4yAllRLzlEZGnZksuKp47vgKtdkB8heChCxAyC9agESGQ"),
+                DQ = Base64UrlEncoder.DecodeBytes("cd6SJC-Qp996mJYB2OJHiPcxPKxKgyAzHE-4A0oiJM_3wjjAjZ92TLY6fDbTtIL3xsoEbxL_gR1sEWlTzk97-mW9ErxsIHFI9UJxwnlGm2ljOL7-Juywd4U5BPhXYBqlZe0EDGxuREOnC6wMKp9-6zUxrN-sS2GK6n9Sieg24FDoQMX3U5CTDaxnQGUUtFYFDVZqFsZNmIf4N-vYqHcp2LwNZO9XC8sotJ0tXO40PUteHCmmFsglmFmNJeHYf0dRM3pwyu-4s1-7xWbPi2cZUKYVMLYGc6RJ_-VYJRrxAhTPX54Ow2hupjQIK0AUMrq3dgQpqqaGBl2L8gBAkzYHaQ"),
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                InverseQ = Base64UrlEncoder.DecodeBytes("GwF0PXhYOz8Fwhz2JyxoZ_a_L7IwhbEhfPpYGXj6XBBkHztQtXvEb5dlNlK2Y6vQnfFgA1l5jiMZiFqnTSq6z1amWkrQUutqWq-EGo8jVVxzxx5as2t7lAohAn1dSY-HnP6ig0e8JF0rKeB8bxYqe-tPbVpuOgDbFKcOoaMCLRJY7kTRaGROss0O7bIJYu_g7lE4UPfybr2wEVy_3VucR279PZiwj3z-X6hMeUQHn-js2l1RGc-QgeEu2O7y2hq-APWnvna19xK8t8R5AS6hUnYeYTcZb4McpI7cg6H_5gItSFYuErPEGZWEZst8mcB2B6Yg9-WR7epmwZbSMCVt9A"),
+                Modulus = Base64UrlEncoder.DecodeBytes("vfPmqjbDDsT_xnh5CfnR97GirbRASP3rKyUlLOpytrkkWtNSD2S0ovnFlW5H4E9OiGusUpeJYD6HmAY5VSafWKC0qVEAvFIT_Fs6j8kJ3kiGsJc9Q-jktds06nvUMn1I-qxmLI7flw0khko6LCi6nTrBrPQ_XlQLYGS0C6-wkyCn0qqB6zsvX8kEElE7bEka0RkWzBVIWsVKkllajBNEeUVvAmy4KvmbFxXDlleNDXsJcETyo3-GmpaevrAr7ryIOOZuUQfkA8Hd-rb-lVkOkk2M-SChNlW8zNeyCksjp0LOF6r8SDf0fgnsKWsQ7qN2_Ltuvmd1X_HMIfdOmhi5Y6W6WnzWacO-jqbTb1k37bASbj2ViYB5-puTfEABzc12KN2mLRTA2TqhmYhy-9EPeDWdXsJwXKP1gtBrxXGFyEzuD4Y8lRYetY0RI5IJc8SoeUauJu75kNxUp-ffteIqP-uhG-E-BcFxIj_YfmI8Yui_XHU7OwDHTBdXk-ahBE7l-kvI-KN2hFcO1DIYK-c2no7fv1CXW8Lz-w7XWl54jn2MyKx4PnTUYT8langL6ZW3xux2wLrnbGwnIisWNWh0ih2ggKiiLCiOxJM9bwA-VbFSyihb3vWs-i4RAQtUwkvV6-8nyZv-SMcI9B7LuziJohnp_gIJZ8FIvtjoJHfGrZk"),
+                P = Base64UrlEncoder.DecodeBytes("z3zVMYG1_TWwnNs99hyMJI9xs1zrwbV_STv9cqpaBxgPIHqpDyoG68a_VZF2RfuYLKT9ksEfLmgDeBPuM_vwBXSUApRqQo46WOpYUaDTcQJUJcspYQENQDkvtMGTuZQd6wrfGksDkUgnuZZ2CAKjN6vzGGlUkLJ9eEihbVTsCcYpp1sSK_J5HZCu0MZcnEU4oMbWKRHHApkQC8TJkutRw1XjY6s_ABj7M2W2D9CIO-CnUaXxmh21JNaJ2zP0nK1cfWgzvIikVoey7FKbGbOoIBnVf9AZUAVfclBLWI3wfUUVod_1lwLA07-7kvQ6SCEiHpsep3RwONcYJJH3vD3WlQ"),
+                Q = Base64UrlEncoder.DecodeBytes("6l2EkIkJDFV_djyTFdpYbjrmg1lIRa1_oFF1925M0aDAEeJncRYkBOyupE9Ni6vHSTlRGN7I3Vs6V72Jnt_wpKqxz0qdhUseO89_JaqQE65euYq1QyeAjnHg64q4PcLYmBDub9Hn6y0xkTzkMCOUe5ZNGeosb5LW4qQVGyXnyeg9PmwFrBjQwr_Na6-1VrS2HCqzxvQWkOuJdjt3XB4ODXUnze9G-8nx8d2Cb9hC2qT4QxTPCq25i0n2DvIcRs_pD6RyNPg7EYOSH2Alc1vVzj7aYW9Plx69rIrtIFxH0ZwHsHua-AjDg7IZLK_Ghc3RV-9nTPEA2_6q_A_oOvfN9Q"),
+            };
+
+            RsaParameters_4096_Public = new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("vfPmqjbDDsT_xnh5CfnR97GirbRASP3rKyUlLOpytrkkWtNSD2S0ovnFlW5H4E9OiGusUpeJYD6HmAY5VSafWKC0qVEAvFIT_Fs6j8kJ3kiGsJc9Q-jktds06nvUMn1I-qxmLI7flw0khko6LCi6nTrBrPQ_XlQLYGS0C6-wkyCn0qqB6zsvX8kEElE7bEka0RkWzBVIWsVKkllajBNEeUVvAmy4KvmbFxXDlleNDXsJcETyo3-GmpaevrAr7ryIOOZuUQfkA8Hd-rb-lVkOkk2M-SChNlW8zNeyCksjp0LOF6r8SDf0fgnsKWsQ7qN2_Ltuvmd1X_HMIfdOmhi5Y6W6WnzWacO-jqbTb1k37bASbj2ViYB5-puTfEABzc12KN2mLRTA2TqhmYhy-9EPeDWdXsJwXKP1gtBrxXGFyEzuD4Y8lRYetY0RI5IJc8SoeUauJu75kNxUp-ffteIqP-uhG-E-BcFxIj_YfmI8Yui_XHU7OwDHTBdXk-ahBE7l-kvI-KN2hFcO1DIYK-c2no7fv1CXW8Lz-w7XWl54jn2MyKx4PnTUYT8langL6ZW3xux2wLrnbGwnIisWNWh0ih2ggKiiLCiOxJM9bwA-VbFSyihb3vWs-i4RAQtUwkvV6-8nyZv-SMcI9B7LuziJohnp_gIJZ8FIvtjoJHfGrZk"),
+            };
+
+            RsaSecurityKey_1024 = new RsaSecurityKey(RsaParameters_1024);
+            RsaSecurityKey_1024_Public = new RsaSecurityKey(RsaParameters_1024_Public);
+            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048) { KeyId = "999b2be9-6213-436b-b12b-637b0176be41" };
+            RsaSecurityKey_2048_Public = new RsaSecurityKey(RsaParameters_2048_Public);
+            RsaSecurityKey_4096 = new RsaSecurityKey(RsaParameters_4096);
+            RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
+            RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256);
+            RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
+            RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+            var rsaCsp = new RSACryptoServiceProvider();
+            rsaCsp.ImportParameters(RsaParameters_2048);
+            RsaSecurityKeyWithCspProvider_2048 = new RsaSecurityKey(rsaCsp);
+            var rsaCspPublic = new RSACryptoServiceProvider();
+            rsaCspPublic.ImportParameters(RsaParameters_2048_Public);
+            RsaSecurityKeyWithCspProvider_2048_Public = new RsaSecurityKey(rsaCspPublic);
+#if NETSTANDARDAPP1_5
+            var rsaCng = new RSACng();
+            rsaCng.ImportParameters(RsaParameters_2048);
+            RsaSecurityKeyWithCngProvider_2048 = new RsaSecurityKey(rsaCng);
+            var rsaCngPublic = new RSACng();
+            rsaCngPublic.ImportParameters(RsaParameters_2048_Public);
+            RsaSecurityKeyWithCngProvider_2048_Public = new RsaSecurityKey(rsaCngPublic);
+#endif
+
+            //ecdsa
+            byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
+            byte[] ecdsa384KeyBlob = TestUtilities.HexToByteArray("45435334300000009dc6bb9cdc8dac31e3db6e6b5f58f8e3a304e5c08e632705ca9a236f1134646dca526b89f7ea98653962f4a781f2fc9bf479a2d627561b1269548050e6d2c388018b837f4ceba8ee7fe2eefea67c8418ad1e84f60c1309385e573ea5183e9ae8b6d5308a78da207c6e556af2053983321a5f8ac057b787089ee783c99093b9f2afb2f9a1e9a560ad3095b9667aa699fa");
+            byte[] ecdsa521KeyBlob = TestUtilities.HexToByteArray("454353364200000001f9f06ea4e00fd3fecc1753af7983b43cb9b692941ee6364616c9c4168845fce804beca7aa23d0a5049910db45dfb61112f4cb02e93ff62af1be203ad248dd70952015ddc31d1ad7411ca5996b8b76a40ea65f286c665225114bec8557365aa4bc79358f8c68b873cb76a1c86a5a394185d8eeb9602b8b968db1e4ac49b7cc51f83c7170055ad9b0b2d0d5d2306a66bf87a256a3739696121eb131e64ae61991ea23db99b397c32df95efb0cb284147a929c65e9f671073ca3c7a084cb9211dceb06c987277");
+
+            CngKey ecdsa256Key = CngKey.Import(ecdsa256KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
+            CngKey ecdsa256Public = CngKey.Import(ecdsa256Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            CngKey ecdsa384Key = CngKey.Import(ecdsa384KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
+            CngKey ecdsa384Public = CngKey.Import(ecdsa384Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+            CngKey ecdsa512Key = CngKey.Import(ecdsa521KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
+            CngKey ecdsa512Public = CngKey.Import(ecdsa512Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
+
+            ECDsa256Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Key));
+            ECDsa384Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Key));
+            ECDsa521Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Key));
+            ECDsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public));
+            ECDsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public));
+            ECDsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public));
+
+            //json web key
+            JsonWebKeyRsa256 = new JsonWebKey
+            {
+                D = "C6EGZYf9U6RI5Z0BBoSlwy_gKumVqRx-dBMuAfPM6KVbwIUuSJKT3ExeL5P0Ky1b4p-j2S3u7Afnvrrj4HgVLnC1ks6rEOc2ne5DYQq8szST9FMutyulcsNUKLOM5cVromALPz3PAqE2OCLChTiQZ5XZ0AiH-KcG-3hKMa-g1MVnGW-SSmm27XQwRtUtFQFfxDuL0E0fyA9O9ZFBV5201ledBaLdDcPBF8cHC53Gm5G6FRX3QVpoewm3yGk28Wze_YvNl8U3hvbxei2Koc_b9wMbFxvHseLQrxvFg_2byE2em8FrxJstxgN7qhMsYcAyw1qGJY-cYX-Ab_1bBCpdcQ",
+                DP = "ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE",
+                DQ = "YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs",
+                E = "AQAB",
+                QI = "lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4",
+                N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
+                P = "_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk",
+                Q = "7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c",
+                Kty = "RSA"
+            };
+
+            JsonWebKeyRsa256Public = new JsonWebKey
+            {
+                E = "AQAB",
+                N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
+                Kty = "RSA"
+            };
+
+            JsonWebKeyEcdsa256 = new JsonWebKey
+            {
+                Crv = "P-256",
+                X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
+                Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
+                D = "OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4TQ",
+                Kty = "EC"
+            };
+
+            JsonWebKeyEcdsa256Public = new JsonWebKey
+            {
+                Crv = "P-256",
+                X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
+                Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
+                Kty = "EC"
+            };
+
+            JsonWebKeySymmetric256 = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.Octet,
+                K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
+            };
+        }
     }
 }

@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Xunit;
@@ -35,107 +34,77 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeySetTests
     {
-        [Fact(DisplayName = "JsonWebKeySetTests: Constructors")]
-        public void Constructors()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("JsonWekKeySetDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Constructors(string json, JsonWebKeySet compareTo, ExpectedException ee)
         {
-            //System.Diagnostics.Debugger.Launch();
-            JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
-            Assert.True(IsDefaultJsonWebKeySet(jsonWebKeys));
+            var context = new CompareContext();
+            try
+            {
+                var jsonWebKeys = new JsonWebKeySet(json);
+                var keys = jsonWebKeys.GetSigningKeys();
+                ee.ProcessNoException(context);
+                if (compareTo != null)
+                    IdentityComparer.AreEqual(jsonWebKeys, compareTo, context);
 
-            // null string, nothing to add
-            RunJsonWebKeySetTest((string)null, null, ExpectedException.ArgumentNullException());
-            RunJsonWebKeySetTest(DataSets.JsonWebKeySetString1,  DataSets.JsonWebKeySetExpected1, ExpectedException.NoExceptionExpected);
-            RunJsonWebKeySetTest(DataSets.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10804:", inner: typeof(JsonReaderException)));
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<string, JsonWebKeySet, ExpectedException> JsonWekKeySetDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<string, JsonWebKeySet, ExpectedException>();
+
+                dataset.Add(DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, null, ExpectedException.ArgumentNullException());
+                dataset.Add(DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
+                dataset.Add(File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeySetBadRsaExponentString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+                dataset.Add(DataSets.JsonWebKeySetBadRsaModulusString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+                dataset.Add(DataSets.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
+
+                return dataset;
+            }
         }
 
         [Fact]
-        public void Interop()
-        {
-            string certsData = File.ReadAllText(DataSets.GoogleCertsFile);
-            RunJsonWebKeySetTest(certsData, DataSets.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
-
-            GetSigningKeys(DataSets.JsonWebKeySetBadRsaExponentString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
-            GetSigningKeys(DataSets.JsonWebKeySetBadRsaModulusString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
-            GetSigningKeys(DataSets.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
-            GetSigningKeys(DataSets.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
-            GetSigningKeys(DataSets.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
-        }
-
-        private void GetSigningKeys(string webKeySetString, List<SecurityKey> expectedKeys, ExpectedException expectedException)
-        {
-
-            JsonWebKeySet webKeySet = new JsonWebKeySet(webKeySetString);
-            try
-            {
-                IList<SecurityKey> keys = webKeySet.GetSigningKeys();
-                expectedException.ProcessNoException();
-                if (expectedKeys != null)
-                {
-                    Assert.True(IdentityComparer.AreEqual(keys, expectedKeys));
-                }
-            }
-            catch (Exception ex)
-            {
-                expectedException.ProcessException(ex);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareTo"></param>
-        /// <param name="expectedException"></param>
-        /// <param name="asString"> this is useful when passing null for parameter 'is' and 'as' don't contain type info.</param>
-        /// <returns></returns>
-        private JsonWebKeySet RunJsonWebKeySetTest(object obj, JsonWebKeySet compareTo, ExpectedException expectedException, bool asString = true)
-        {
-            JsonWebKeySet jsonWebKeys = null;
-            try
-            {
-                if (obj is string || asString)
-                {
-                    jsonWebKeys = new JsonWebKeySet(obj as string);
-                }
-                expectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                expectedException.ProcessException(ex);
-            }
-
-            if (compareTo != null)
-            {
-                Assert.True(IdentityComparer.AreEqual(jsonWebKeys, compareTo, CompareContext.Default), "jsonWebKeys created from: " + (obj == null ? "NULL" : obj.ToString() + " did not match expected."));
-            }
-
-            return jsonWebKeys;
-        }
-
-        [Fact(DisplayName = "JsonWebKeySetTests: Defaults")]
         public void Defaults()
         {
+            var context = new CompareContext();
+            JsonWebKeySet jsonWebKeys = new JsonWebKeySet();
+
+            if (jsonWebKeys.Keys == null)
+                context.Diffs.Add("jsonWebKeys.Keys == null");
+            else if (jsonWebKeys.Keys.Count != 0)
+                context.Diffs.Add("jsonWebKeys.Keys.Count != 0");
+
+            if (jsonWebKeys.AdditionalData == null)
+                context.Diffs.Add("jsonWebKeys.AdditionalData == null");
+            else if (jsonWebKeys.AdditionalData.Count != 0)
+                context.Diffs.Add("jsonWebKeys.AdditionalData.Count != 0");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact(DisplayName = "JsonWebKeySetTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
         }
 
-        [Fact(DisplayName = "JsonWebKeySetTests: Publics")]
+        [Fact]
         public void Publics()
         {
-        }
-
-        private bool IsDefaultJsonWebKeySet(JsonWebKeySet jsonWebKeys)
-        {
-            if (jsonWebKeys.Keys == null)
-                return false;
-
-            if (jsonWebKeys.Keys.Count != 0)
-                return false;
-
-            return true;
         }
     }
 }
