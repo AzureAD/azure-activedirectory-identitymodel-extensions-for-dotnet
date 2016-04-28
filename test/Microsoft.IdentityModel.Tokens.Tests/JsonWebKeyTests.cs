@@ -33,87 +33,87 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeyTests
     {
-        [Fact(DisplayName = "JsonWebKeyTests: Constructors")]
-        public void Constructors()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("JsonWebKeyDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Constructors(string json, JsonWebKey compareTo, ExpectedException ee)
         {
-            JsonWebKey jsonWebKey = new JsonWebKey();
-            Assert.True(IsDefaultJsonWebKey(jsonWebKey));
-
-            List<string> errors = new List<string>();
-            // null string, nothing to add
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 1", null, null, ExpectedException.ArgumentNullException(substringExpected: "json"), true, errors);
-
-            // valid json, JsonWebKey1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 3", DataSets.JsonWebKeyFromPing, DataSets.JsonWebKeyFromPingExpected1, ExpectedException.NoExceptionExpected, false, errors);
-
-            // valid json, JsonWebKey1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 4", DataSets.JsonWebKeyString1, DataSets.JsonWebKeyExpected1, ExpectedException.NoExceptionExpected, false, errors);
-
-            // valid json, JsonWebKey2
-            jsonWebKey = RunJsonWebKeyTest("JsonWebKey_Constructors: 6", DataSets.JsonWebKeyString2, DataSets.JsonWebKeyExpected2, ExpectedException.NoExceptionExpected, false, errors);
-            CompareContext context = new CompareContext();
-            if (IdentityComparer.AreEqual(jsonWebKey, DataSets.JsonWebKeyExpected1, context))
-            {
-                errors.Add("IdentityComparer.AreEqual(jsonWebKey, DataSets.JsonWebKeyExpected1)");
-                errors.AddRange(context.Diffs);
-            }
-
-            //invalid json, JsonWebKeyBadFormatString1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 7", DataSets.JsonWebKeyBadFormatString1, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonReaderException)), false, errors);
-
-            // invalid json, JsonWebKeyBadFormatString2
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 8", DataSets.JsonWebKeyBadFormatString2, null, new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonSerializationException), innerTypeExpected: typeof(System.ArgumentException)), false, errors);
-
-            // invalid json, JsonWebKeyBadx509String1
-            RunJsonWebKeyTest("JsonWebKey_Constructors: 9", DataSets.JsonWebKeyBadX509String, DataSets.JsonWebKeyExpectedBadX509Data, ExpectedException.NoExceptionExpected, false, errors);
-
-            TestUtilities.AssertFailIfErrors("JsonWebKey_Constructors", errors);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareTo"></param>
-        /// <param name="expectedException"></param>
-        /// <param name="asString"> this is useful when passing null for parameter 'is' and 'as' don't contain type info.</param>
-        /// <returns></returns>
-        private JsonWebKey RunJsonWebKeyTest(string testId, object obj, JsonWebKey compareTo, ExpectedException expectedException, bool asString, List<string> errors)
-        {
-            JsonWebKey jsonWebKey = null;
+            var context = new CompareContext();
             try
             {
-                if (obj is string || asString)
-                {
-                    jsonWebKey = new JsonWebKey(obj as string);
-                }
-                expectedException.ProcessNoException(errors);
+                var jsonWebKey = new JsonWebKey(json);
+                ee.ProcessNoException(context);
+                if (compareTo != null)
+                    IdentityComparer.AreEqual(jsonWebKey, compareTo, context);
             }
             catch (Exception ex)
             {
-                expectedException.ProcessException(ex, errors);
+                ee.ProcessException(ex, context.Diffs);
             }
 
-            if (compareTo != null)
-            {
-                CompareContext context = new CompareContext();
-                if (!IdentityComparer.AreEqual(jsonWebKey, compareTo, context))
-                {
-                    errors.Add(testId + "\n!IdentityComparer.AreEqual(jsonWebKey, compareTo, context)\n" + jsonWebKey.ToString() + "\n" + compareTo.ToString() + "\n");
-                    errors.AddRange(context.Diffs);
-                    errors.Add("\n");
-                }
-            }
-
-            return jsonWebKey;
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact(DisplayName = "JsonWebKeyTests: Defaults")]
+        public static TheoryData<string, JsonWebKey, ExpectedException> JsonWebKeyDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<string, JsonWebKey, ExpectedException>();
+
+                dataset.Add(null, null, ExpectedException.ArgumentNullException(substringExpected: "json"));
+                dataset.Add(DataSets.JsonWebKeyFromPingString1, DataSets.JsonWebKeyFromPing1, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeyString1, DataSets.JsonWebKey1, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeyString2, DataSets.JsonWebKey2, ExpectedException.NoExceptionExpected);
+                dataset.Add(DataSets.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonReaderException)));
+                dataset.Add(DataSets.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonSerializationException)));
+                dataset.Add(DataSets.JsonWebKeyBadX509String, DataSets.JsonWebKeyBadX509Data, ExpectedException.NoExceptionExpected);
+
+                return dataset;
+            }
+        }
+
+        [Fact]
         public void Defaults()
         {
+            var context = new CompareContext();
+            JsonWebKey jsonWebKey = new JsonWebKey();
+
+            if (jsonWebKey.Alg != null)
+                context.Diffs.Add("jsonWebKey.Alg != null");
+
+            if (jsonWebKey.KeyOps.Count != 0)
+                context.Diffs.Add("jsonWebKey.KeyOps.Count != 0");
+
+            if (jsonWebKey.Kid != null)
+                context.Diffs.Add("jsonWebKey.Kid != null");
+
+            if (jsonWebKey.Kty != null)
+                context.Diffs.Add("jsonWebKey.Kty != null");
+
+            if (jsonWebKey.X5c == null)
+                context.Diffs.Add("jsonWebKey.X5c == null");
+
+            if (jsonWebKey.X5c.Count != 0)
+                context.Diffs.Add("jsonWebKey.X5c.Count != 0");
+
+            if (jsonWebKey.X5t != null)
+                context.Diffs.Add("jsonWebKey.X5t != null");
+
+            if (jsonWebKey.X5u != null)
+                context.Diffs.Add("jsonWebKey.X5u != null");
+
+            if (jsonWebKey.Use != null)
+                context.Diffs.Add("jsonWebKey.Use != null");
+
+            if (jsonWebKey.AdditionalData == null)
+                context.Diffs.Add("jsonWebKey.AdditionalData == null");
+            else if (jsonWebKey.AdditionalData.Count != 0)
+                context.Diffs.Add("jsonWebKey.AdditionalData.Count != 0");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact(DisplayName = "JsonWebKeyTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
@@ -135,44 +135,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("JsonWebKey_GetSets", errors);
         }
 
-        [Fact(DisplayName = "JsonWebKeyTests: Publics")]
+        [Fact]
         public void Publics()
         {
         }
 
-        private bool IsDefaultJsonWebKey(JsonWebKey jsonWebKey)
-        {
-            if (jsonWebKey.Alg != null)
-                return false;
-
-            if (jsonWebKey.KeyOps.Count != 0)
-                return false;
-
-            if (jsonWebKey.Kid != null)
-                return false;
-
-            if (jsonWebKey.Kty != null)
-                return false;
-
-            if (jsonWebKey.X5c == null)
-                return false;
-
-            if (jsonWebKey.X5c.Count != 0)
-                return false;
-
-            if (jsonWebKey.X5t != null)
-                return false;
-
-            if (jsonWebKey.X5u != null)
-                return false;
-
-            if (jsonWebKey.Use != null)
-                return false;
-
-            return true;
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("IsSupportedAlgDataSet")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool expectedResult)

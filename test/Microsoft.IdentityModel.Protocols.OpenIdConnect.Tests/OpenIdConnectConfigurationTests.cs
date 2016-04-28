@@ -27,10 +27,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
+using System.Globalization;
 using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -43,10 +44,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void Constructors()
         {
-            var context = new CompareContext();
+            var context = new CompareContext { Title = "OpenIdConnectConfigurationTests.Constructors" };
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException(), context);
-            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetadataString1, OpenIdConfigData.OpenIdConnectConfiguration1, ExpectedException.NoExceptionExpected, context);
-            TestUtilities.AssertFailIfErrors("OpenIdConnectConfigurationTests.Constructors", context.Diffs);
+            RunOpenIdConnectConfigurationTest(OpenIdConfigData.JsonAllValues, OpenIdConfigData.FullyPopulated, ExpectedException.NoExceptionExpected, context);
+            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetatadataBadJson, null, ExpectedException.ArgumentException(substringExpected: "IDX10815:", inner: typeof(JsonReaderException)), context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         private void RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, CompareContext context, bool asString = true)
@@ -60,12 +62,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     openIdConnectConfiguration = new OpenIdConnectConfiguration(obj as string);
                 }
-                expectedException.ProcessNoException();
+
+                expectedException.ProcessNoException(context.Diffs);
             }
             catch (Exception ex)
             {
                 exceptionHit = true;
-                expectedException.ProcessException(ex);
+                expectedException.ProcessException(ex, context.Diffs);
             }
 
             if (!exceptionHit && compareTo != null)
@@ -74,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectConfigurationTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
@@ -109,8 +112,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 41)
-                Assert.True(false, "Number of properties has changed from 41 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 42)
+                Assert.True(false, "Number of properties has changed from 42 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -167,19 +170,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             List<string> errors = new List<string>();
 
             if (!string.Equals(configuration.AuthorizationEndpoint, authorization_Endpoint))
-                errors.Add("");
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.AuthorizationEndpoint != authorization_Endpoint. '{0}', '{1}'.", configuration.AuthorizationEndpoint, authorization_Endpoint));
 
             if (!string.Equals(configuration.EndSessionEndpoint, end_Session_Endpoint))
-                errors.Add("");
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.EndSessionEndpoint != end_Session_Endpoint. '{0}', '{1}'.", configuration.EndSessionEndpoint, end_Session_Endpoint));
 
             if (!string.Equals(configuration.Issuer, issuer))
-                errors.Add("");
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.Issuer != issuer. '{0}', '{1}'.", configuration.Issuer, issuer));
 
             if (!string.Equals(configuration.JwksUri, jwks_Uri))
-                errors.Add("");
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.JwksUri != jwks_Uri. '{0}', '{1}'.", configuration.JwksUri, jwks_Uri));
 
             if (!string.Equals(configuration.TokenEndpoint, token_Endpoint))
-                errors.Add("");
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.TokenEndpoint != token_Endpoint. '{0}', '{1}'.", configuration.TokenEndpoint, token_Endpoint));
 
             CompareContext compareContext = new CompareContext();
             if (!IdentityComparer.AreEqual(configuration.SigningKeys, securityKeys, compareContext))
@@ -188,12 +191,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
         }
 
-        [Fact(DisplayName = "OpenIdConnectConfigurationTests: Testing OpenIdConnectConfiguration.Write")]
-        public void Write()
+        [Fact]
+        public void RoundTripFromJson()
         {
-            string compareToJson = OpenIdConfigData.OpenIdConnectMetadataCompleteString;
-            string deserializedJson = OpenIdConnectConfiguration.Write(OpenIdConnectConfiguration.Create(compareToJson));
-            Assert.True(deserializedJson.Equals(compareToJson, StringComparison.OrdinalIgnoreCase), "Deserialized json: " + deserializedJson + " does not match with the original json: " + compareToJson);
+            var context = new CompareContext { Title = "RoundTripFromJson" };
+            var oidcConfig1 = OpenIdConnectConfiguration.Create(OpenIdConfigData.JsonAllValues);
+            var oidcConfig2 = new OpenIdConnectConfiguration(OpenIdConfigData.JsonAllValues);
+            var oidcJson1 = OpenIdConnectConfiguration.Write(oidcConfig1);
+            var oidcJson2 = OpenIdConnectConfiguration.Write(oidcConfig2);
+            var oidcConfig3 = OpenIdConnectConfiguration.Create(oidcJson1);
+            var oidcConfig4 = new OpenIdConnectConfiguration(oidcJson2);
+
+            IdentityComparer.AreEqual(oidcConfig1, oidcConfig2, context);
+            IdentityComparer.AreEqual(oidcConfig1, oidcConfig3, context);
+            IdentityComparer.AreEqual(oidcConfig1, oidcConfig4, context);
+            IdentityComparer.AreEqual(oidcJson1, oidcJson2, context);
+
+            TestUtilities.AssertFailIfErrors(context);
         }
     }
 }
