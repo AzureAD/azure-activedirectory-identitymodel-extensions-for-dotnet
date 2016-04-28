@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -40,46 +40,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     [JsonObject]
     public class OpenIdConnectConfiguration
     {
-        private Collection<string> _acrValuesSupported = new Collection<string>();
-        private Collection<string> _claimsSupported = new Collection<string>();
-        private Collection<string> _claimsLocalesSupported = new Collection<string>();
-        private Collection<string> _claimTypesSupported = new Collection<string>();
-        private Collection<string> _displayValuesSupported = new Collection<string>();
-        private Collection<string> _grantTypesSupported = new Collection<string>();
-        private Collection<string> _idTokenEncryptionAlgValuesSupported = new Collection<string>();
-        private Collection<string> _idTokenEncryptionEncValuesSupported = new Collection<string>();
-        private Collection<string> _idTokenSigningAlgValuesSupported = new Collection<string>();
-        private Collection<string> _requestObjectEncryptionAlgValuesSupported = new Collection<string>();
-        private Collection<string> _requestObjectEncryptionEncValuesSupported = new Collection<string>();
-        private Collection<string> _requestObjectSigningAlgValuesSupported = new Collection<string>();
-        private Collection<string> _responseModesSupported = new Collection<string>();
-        private Collection<string> _responseTypesSupported = new Collection<string>();
-        private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
-        private Collection<string> _subjectTypesSupported = new Collection<string>();
-        private Collection<string> _scopesSupported = new Collection<string>();
-        private Collection<string> _tokenEndpointAuthMethodsSupported = new Collection<string>();
-        private Collection<string> _tokenEndpointAuthSigningAlgValuesSupported = new Collection<string>();
-        private Collection<string> _uiLocalesSupported = new Collection<string>();
-        private Collection<string> _userinfoEncryptionAlgValuesSupported = new Collection<string>();
-        private Collection<string> _userinfoEncryptionEncValuesSupported = new Collection<string>();
-        private Collection<string> _userinfoSigningAlgValuesSupported = new Collection<string>();
-
-        static OpenIdConnectConfiguration()
-        {
-        }
-
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
         /// </summary>
         /// <param name="json">json string representing the configuration.</param>
         /// <returns><see cref="OpenIdConnectConfiguration"/> object representing the configuration.</returns>
+        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
         public static OpenIdConnectConfiguration Create(string json)
         {
-            if (string.IsNullOrWhiteSpace(json))
-                throw LogHelper.LogArgumentNullException("json");
+            if (string.IsNullOrEmpty(json))
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10808, json);
-            return JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(json);
+            return new OpenIdConnectConfiguration(json);
         }
 
         /// <summary>
@@ -87,10 +61,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="configuration"><see cref="OpenIdConnectConfiguration"/> object to serialize.</param>
         /// <returns>json string representing the configuration object.</returns>
+        /// <exception cref="ArgumentNullException">if 'configuration' is null or empty.</exception>
+        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
-                throw LogHelper.LogArgumentNullException("configuration");
+                throw LogHelper.LogArgumentNullException(nameof(configuration));
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
@@ -107,72 +83,35 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing the metadata</param>
-        /// <exception cref="ArgumentNullException">if 'json' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
         public OpenIdConnectConfiguration(string json)
+            : this()
         {
-            if(string.IsNullOrWhiteSpace(json))
-                throw LogHelper.LogArgumentNullException("json");
+            if(string.IsNullOrEmpty(json))
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
-            OpenIdConnectConfiguration config = Create(json);
-            Copy(config);
+            try
+            {
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806, json, this);
+                JsonConvert.PopulateObject(json, this);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10815, json, GetType());
+            }
         }
 
-        private void Copy(OpenIdConnectConfiguration config)
-        {
-            _acrValuesSupported = config._acrValuesSupported;
-            AuthorizationEndpoint = config.AuthorizationEndpoint;
-            CheckSessionIframe = config.CheckSessionIframe;
-            _claimsSupported = config._claimsSupported;
-            _claimsLocalesSupported = config._claimsLocalesSupported;
-            ClaimsParameterSupported = config.ClaimsParameterSupported;
-            _claimTypesSupported = config._claimTypesSupported;
-            _displayValuesSupported = config._displayValuesSupported;
-            EndSessionEndpoint = config.EndSessionEndpoint;
-            _grantTypesSupported = config._grantTypesSupported;
-            HttpLogoutSupported = config.HttpLogoutSupported;
-            _idTokenEncryptionAlgValuesSupported = config._idTokenEncryptionAlgValuesSupported;
-            _idTokenEncryptionEncValuesSupported = config._idTokenEncryptionEncValuesSupported;
-            _idTokenSigningAlgValuesSupported = config._idTokenSigningAlgValuesSupported;
-            Issuer = config.Issuer;
-            JwksUri = config.JwksUri;
-            JsonWebKeySet = config.JsonWebKeySet;
-            LogoutSessionSupported = config.LogoutSessionSupported;
-            OpPolicyUri = config.OpPolicyUri;
-            OpTosUri = config.OpTosUri;
-            RegistrationEndpoint = config.RegistrationEndpoint;
-            RequireRequestUriRegistration = config.RequireRequestUriRegistration;
-            _requestObjectEncryptionAlgValuesSupported = config._requestObjectEncryptionAlgValuesSupported;
-            _requestObjectEncryptionEncValuesSupported = config._requestObjectEncryptionEncValuesSupported;
-            _requestObjectSigningAlgValuesSupported = config._requestObjectSigningAlgValuesSupported;
-            RequestParameterSupported = config.RequestParameterSupported;
-            RequestUriParameterSupported = config.RequestUriParameterSupported;
-            _responseModesSupported = config._responseModesSupported;
-            _responseTypesSupported = config._responseTypesSupported;
-            ServiceDocumentation = config.ServiceDocumentation;
-            _scopesSupported = config._scopesSupported;
-            _signingKeys = config._signingKeys;
-            _subjectTypesSupported = config._subjectTypesSupported;
-            TokenEndpoint = config.TokenEndpoint;
-            _tokenEndpointAuthMethodsSupported = config._tokenEndpointAuthMethodsSupported;
-            _tokenEndpointAuthSigningAlgValuesSupported = config._tokenEndpointAuthSigningAlgValuesSupported;
-            UserInfoEndpoint = config.UserInfoEndpoint;
-            _uiLocalesSupported = config._uiLocalesSupported;
-            _userinfoEncryptionAlgValuesSupported = config._userinfoEncryptionAlgValuesSupported;
-            _userinfoEncryptionEncValuesSupported = config._userinfoEncryptionEncValuesSupported;
-            _userinfoSigningAlgValuesSupported = config._userinfoSigningAlgValuesSupported;
-        }
+        /// <summary>
+        /// When deserializing from JSON any properties that are not defined will be placed here.
+        /// </summary>
+        [JsonExtensionData]
+        public virtual IDictionary<string, object> AdditionalData { get; } = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets the collection of 'acr_values_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.AcrValuesSupported, Required = Required.Default)]
-        public ICollection<string> AcrValuesSupported
-        {
-            get
-            {
-                return _acrValuesSupported;
-            }
-        }
+        public ICollection<string> AcrValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the authorization endpoint.
@@ -190,25 +129,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'claims_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ClaimsSupported, Required = Required.Default)]
-        public ICollection<string> ClaimsSupported
-        {
-            get
-            {
-                return _claimsSupported;
-            }
-        }
+        public ICollection<string> ClaimsSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'claims_locales_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ClaimsLocalesSupported, Required = Required.Default)]
-        public ICollection<string> ClaimsLocalesSupported
-        {
-            get
-            {
-                return _claimsLocalesSupported;
-            }
-        }
+        public ICollection<string> ClaimsLocalesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the 'claims_parameter_supported'
@@ -220,25 +147,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'claim_types_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ClaimTypesSupported, Required = Required.Default)]
-        public ICollection<string> ClaimTypesSupported
-        {
-            get
-            {
-                return _claimTypesSupported;
-            }
-        }
+        public ICollection<string> ClaimTypesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'display_values_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.DisplayValuesSupported, Required = Required.Default)]
-        public ICollection<string> DisplayValuesSupported
-        {
-            get
-            {
-                return _displayValuesSupported;
-            }
-        }
+        public ICollection<string> DisplayValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the end session endpoint.
@@ -250,13 +165,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'grant_types_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.GrantTypesSupported, Required = Required.Default)]
-        public ICollection<string> GrantTypesSupported
-        {
-            get
-            {
-                return _grantTypesSupported;
-            }
-        }
+        public ICollection<string> GrantTypesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Boolean value specifying whether the OP supports HTTP-based logout. Default is false.
@@ -268,37 +177,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'id_token_encryption_alg_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IdTokenEncryptionAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> IdTokenEncryptionAlgValuesSupported
-        {
-            get
-            {
-                return _idTokenEncryptionAlgValuesSupported;
-            }
-        }
+        public ICollection<string> IdTokenEncryptionAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'id_token_encryption_enc_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IdTokenEncryptionEncValuesSupported, Required = Required.Default)]
-        public ICollection<string> IdTokenEncryptionEncValuesSupported
-        {
-            get
-            {
-                return _idTokenEncryptionEncValuesSupported;
-            }
-        }
+        public ICollection<string> IdTokenEncryptionEncValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'id_token_signing_alg_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IdTokenSigningAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> IdTokenSigningAlgValuesSupported
-        {
-            get
-            {
-                return _idTokenSigningAlgValuesSupported;
-            }
-        }
+        public ICollection<string> IdTokenSigningAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the 'issuer'.
@@ -345,37 +236,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'request_object_encryption_alg_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.RequestObjectEncryptionAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> RequestObjectEncryptionAlgValuesSupported
-        {
-            get
-            {
-                return _requestObjectEncryptionAlgValuesSupported;
-            }
-        }
+        public ICollection<string> RequestObjectEncryptionAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'request_object_encryption_enc_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.RequestObjectEncryptionEncValuesSupported, Required = Required.Default)]
-        public ICollection<string> RequestObjectEncryptionEncValuesSupported
-        {
-            get
-            {
-                return _requestObjectEncryptionEncValuesSupported;
-            }
-        }
+        public ICollection<string> RequestObjectEncryptionEncValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'request_object_signing_alg_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.RequestObjectSigningAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> RequestObjectSigningAlgValuesSupported
-        {
-            get
-            {
-                return _requestObjectSigningAlgValuesSupported;
-            }
-        }
+        public ICollection<string> RequestObjectSigningAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the 'request_parameter_supported'
@@ -399,25 +272,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'response_modes_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ResponseModesSupported, Required = Required.Default)]
-        public ICollection<string> ResponseModesSupported
-        {
-            get
-            {
-                return _responseModesSupported;
-            }
-        }
+        public ICollection<string> ResponseModesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'response_types_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ResponseTypesSupported, Required = Required.Default)]
-        public ICollection<string> ResponseTypesSupported
-        {
-            get
-            {
-                return _responseTypesSupported;
-            }
-        }
+        public ICollection<string> ResponseTypesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the 'service_documentation'
@@ -429,36 +290,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'scopes_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.ScopesSupported, Required = Required.Default)]
-        public ICollection<string> ScopesSupported
-        {
-            get
-            {
-                return _scopesSupported;
-            }
-        }
+        public ICollection<string> ScopesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
-        public ICollection<SecurityKey> SigningKeys
-        {
-            get
-            {
-                return _signingKeys;
-            }
-        }
+        public ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
 
         /// <summary>
         /// Gets the collection of 'subject_types_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.SubjectTypesSupported, Required = Required.Default)]
-        public ICollection<string> SubjectTypesSupported
-        {
-            get
-            {
-                return _subjectTypesSupported;
-            }
-        }
+        public ICollection<string> SubjectTypesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the 'token_endpoint'.
@@ -470,37 +313,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'token_endpoint_auth_methods_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.TokenEndpointAuthMethodsSupported, Required = Required.Default)]
-        public ICollection<string> TokenEndpointAuthMethodsSupported
-        {
-            get
-            {
-                return _tokenEndpointAuthMethodsSupported;
-            }
-        }
+        public ICollection<string> TokenEndpointAuthMethodsSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'token_endpoint_auth_signing_alg_values_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.TokenEndpointAuthSigningAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> TokenEndpointAuthSigningAlgValuesSupported
-        {
-            get
-            {
-                return _tokenEndpointAuthSigningAlgValuesSupported;
-            }
-        }
+        public ICollection<string> TokenEndpointAuthSigningAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'ui_locales_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.UILocalesSupported, Required = Required.Default)]
-        public ICollection<string> UILocalesSupported
-        {
-            get
-            {
-                return _uiLocalesSupported;
-            }
-        }
+        public ICollection<string> UILocalesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the 'user_info_endpoint'.
@@ -512,36 +337,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the collection of 'userinfo_encryption_alg_values_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.UserInfoEncryptionAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> UserInfoEndpointEncryptionAlgValuesSupported
-        {
-            get
-            {
-                return _userinfoEncryptionAlgValuesSupported;
-            }
-        }
+        public ICollection<string> UserInfoEndpointEncryptionAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'userinfo_encryption_enc_values_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.UserInfoEncryptionEncValuesSupported, Required = Required.Default)]
-        public ICollection<string> UserInfoEndpointEncryptionEncValuesSupported
-        {
-            get
-            {
-                return _userinfoEncryptionEncValuesSupported;
-            }
-        }
+        public ICollection<string> UserInfoEndpointEncryptionEncValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets the collection of 'userinfo_signing_alg_values_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.UserInfoSigningAlgValuesSupported, Required = Required.Default)]
-        public ICollection<string> UserInfoEndpointSigningAlgValuesSupported
-        {
-            get
-            {
-                return _userinfoSigningAlgValuesSupported;
-            }
-        }
+        public ICollection<string> UserInfoEndpointSigningAlgValuesSupported { get; } = new Collection<string>();
     }
 }

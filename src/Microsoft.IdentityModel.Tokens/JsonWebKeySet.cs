@@ -38,9 +38,23 @@ namespace Microsoft.IdentityModel.Tokens
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
     /// <remarks>provides support for http://tools.ietf.org/html/rfc7517.</remarks>
+    [JsonObject]
     public class JsonWebKeySet
     {
-        private List<JsonWebKey> _keys = new List<JsonWebKey>();
+        /// <summary>
+        /// Returns a new instance of <see cref="JsonWebKeySet"/>.
+        /// </summary>
+        /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
+        /// <returns><see cref="JsonWebKeySet"/></returns>
+        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
+        static public JsonWebKeySet Create(string json)
+        {
+            if (string.IsNullOrEmpty(json))
+                throw LogHelper.LogArgumentNullException(nameof(json));
+
+            return new JsonWebKeySet(json);
+        }
 
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKeySet"/>.
@@ -53,34 +67,35 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing values.</param>
-        /// <exception cref="ArgumentNullException">if 'json' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
         public JsonWebKeySet(string json)
         {
-            if (string.IsNullOrWhiteSpace(json))
-                throw LogHelper.LogArgumentNullException("json");
+            if (string.IsNullOrEmpty(json))
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806);
-                var jwebKeys = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
-                _keys = jwebKeys._keys;
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806, json, this);
+                JsonConvert.PopulateObject(json, this);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10804, json);
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10805, json, GetType());
             }
         }
 
         /// <summary>
+        /// When deserializing from JSON any properties that are not defined will be placed here.
+        /// </summary>
+        [JsonExtensionData]
+        public virtual IDictionary<string, object> AdditionalData { get; } = new Dictionary<string, object>();
+
+        /// <summary>
         /// Gets the <see cref="IList{JsonWebKey}"/>.
         /// </summary>       
-        public IList<JsonWebKey> Keys
-        {
-            get
-            {
-                return _keys;
-            }
-        }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeySetParameterNames.Keys, Required = Required.Default)]
+        public IList<JsonWebKey> Keys { get; } = new List<JsonWebKey>();
 
         /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
@@ -88,9 +103,9 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<SecurityKey> GetSigningKeys()
         {
             List<SecurityKey> keys = new List<SecurityKey>();
-            for (int i = 0; i < _keys.Count; i++)
+            for (int i = 0; i < Keys.Count; i++)
             {
-                JsonWebKey webKey = _keys[i];
+                JsonWebKey webKey = Keys[i];
 
                 if (!StringComparer.Ordinal.Equals(webKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
                     continue;

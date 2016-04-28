@@ -25,211 +25,87 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
+    /// <summary>
+    /// This configuration data is used to test that loading metadata from a json string has expected values.
+    /// jsonstrings are defined and objects are created then tests use them to ensure they are the same.
+    /// </summary>
     public class OpenIdConfigData
     {
-        public static JsonWebKey JsonWebKeyFromPing1;
-        public static JsonWebKey JsonWebKeyFromPing2;
-        public static JsonWebKey JsonWebKeyFromPing3;
-        public static JsonWebKey JsonWebKeyExpected1;
-        public static JsonWebKey JsonWebKeyExpected2;
-        public static JsonWebKey JsonWebKeyExpectedBadX509Data;
-
-        public static JsonWebKeySet JsonWebKeySetExpected1;
-        public static JsonWebKeySet JsonWebKeySetExpected2;
-        public static JsonWebKeySet JsonWebKeySetX509Data;
-
-        public static OpenIdConnectConfiguration OpenIdConnectConfiguration1;
-        public static OpenIdConnectConfiguration OpenIdConnectConfigurationSingleX509Data1;
-        public static OpenIdConnectConfiguration OpenIdConnectConfigurationWithKeys1;
-        public static OpenIdConnectConfiguration OpenIdConnectConfigurationPingLabsJWKS;
-
-        public static X509Certificate2 X509Certificate1;
-        public static X509Certificate2 X509Certificate2;
-        public static IDictionary<string, object> JsonWebKeyDictionary1;
-
+        public static OpenIdConnectConfiguration FullyPopulated = new OpenIdConnectConfiguration();
+        public static OpenIdConnectConfiguration FullyPopulatedWithKeys = new OpenIdConnectConfiguration();
+        public static OpenIdConnectConfiguration PingLabs = new OpenIdConnectConfiguration();
+        public static OpenIdConnectConfiguration SingleX509Data = new OpenIdConnectConfiguration();
         public static string AADCommonUrl = "https://login.windows.net/common/.well-known/openid-configuration";
-        public static string CyranoJsonWebKeySet;
         public static string BadUri = "_____NoSuchfile____";
         public static string HttpsBadUri = "https://_____NoSuchfile____";
-
-        // Keys
-
-        public static string JsonWebKey_X5c_1 = "MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng";
-        public static string JsonWebKey_X5c_2 = "MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ";
-        public static string JsonWebKeyString1 =
-                                        @"{ ""alg"":""SHA256"",
-                                            ""e"":""AQAB"",
-                                            ""key_ops"":[""signing""],
-                                            ""kid"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                            ""kty"":""RSA"",                                            
-                                            ""n"":""rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="",                                            
-                                            ""x5c"":[""MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng""],
-                                            ""x5t"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                            ""x5u"":""https://jsonkeyurl"",
-                                            ""use"":""sig""
-                                        }";
-
-        public static string JsonWebKeyString2 =
-                                            @"{ ""alg"":""SHA256"",
-                                                ""e"":""AQAB"",                                              
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",
-                                                ""x5t"":""kriMPdmBvx68skT8-mPAB3BseeA"",                                               
-                                                ""x5c"":[""MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""],
-                                                ""use"":""sig""
-                                        }";
-
-        public static string JsonWebKeyBadFormatString1 =
-                                            @"{ ""e"":""AQAB"",
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",                                               
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                                                                                                                            
-                                                ""x5c"":[""MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""],
-                                                ""x5t"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""use""::""sig""
-                                               }";
-
-        public static string JsonWebKeyBadFormatString2 =
-                                            @"{ ""e"":""AQAB"",                                               
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                             
-                                                ""x5c"":""M""IIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""],
-                                                ""x5t"":""kriMPdmBvx68skT8-mPAB3BseeA"",                                               
-                                                ""use""::""sig""
-                                               }";
-
-        public static string JsonWebKeyBadRsaExponentString =
-                                            @"{ ""e"":""AQABC"",
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",                       
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                               
-                                                ""use"":""sig""
-                                             }";
-
-        public static string JsonWebKeyBadRsaModulusString =
-                                            @"{ ""e"":""AQAB"",
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",
-                                                ""n"":""kSSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                               
-                                                ""use"":""sig""
-                                             }";
-
-        public static string JsonWebKeyRsaNoKidString =
-                                            @"{ ""e"":""AQAB"",
-                                                ""kty"":""RSA"",
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                               
-                                                ""use"":""sig""
-                                            }";
-
-        public static string JsonWebKeyKtyNotRsaString =
-                                            @"{ ""e"":""AQAB"",
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSAA"",
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                               
-                                                ""use"":""sig""
-                                             }";
-
-        public static string JsonWebKeyUseNotSigString =
-                                            @"{ ""e"":""AQAB"",
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                               
-                                                ""use"":""sigg""
-                                             }";
-
-        public static string JsonWebKeyBadX509String =
-                                            @"{ ""e"":""AQAB"",
-                                                ""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""kty"":""RSA"",
-                                                ""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",                                               
-                                                ""x5c"":[""==MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""],
-                                                ""x5t"":""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                ""use"":""sig""
-                                            }";
-
-
-        public static string JsonWebKeySetBadRsaExponentString = @"{ ""keys"":[" + JsonWebKeyBadRsaExponentString + "]}";
-        public static string JsonWebKeySetBadRsaModulusString = @"{ ""keys"":[" + JsonWebKeyBadRsaModulusString + "]}";
-        public static string JsonWebKeySetUseNoKidString = @"{ ""keys"":[" + JsonWebKeyRsaNoKidString + "]}";
-        public static string JsonWebKeySetKtyNotRsaString = @"{ ""keys"":[" + JsonWebKeyKtyNotRsaString + "]}";
-        public static string JsonWebKeySetUseNotSigString = @"{ ""keys"":[" + JsonWebKeyUseNotSigString + "]}";
-        public static string JsonWebKeySetBadX509String = @"{ ""keys"":[" + JsonWebKeyBadX509String + "]}";
-
-        // Key Sets
-        public static string JsonWebKeySet = "JsonWebKeySet.json";
-        public static string JsonWebKeySetString1 = @"{ ""keys"":[" + JsonWebKeyString1 + "," + JsonWebKeyString2 + "]}";
-        public static string JsonWebKeySetString2 = @"{ ""keys"":[" + JsonWebKeyString2 + "]}";
-        public static string JsonWebKeySetBadFormatingString =
-                                            @"{ ""keys"":[
-                                                {   ""e"":""AQAB"",
-                                                    ""kty"":""RSA"",
-                                                    ""kid"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                                    ""n"":""rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="",
-                                                    ""x5c"":[""MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng""
-                                                    ""x5t"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                                    ""use"":""sig""
-                                                }
-                                            ]}";
-
-        public static string JsonWebKeySetSingleX509DataString =
-                                            @"{ ""keys"":[
-                                                {   ""e"":""AQAB"",                                                                                                
-                                                    ""kid"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",                                               
-                                                    ""kty"":""RSA"",
-                                                    ""n"":""rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="",
-                                                    ""x5c"":""MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng"",
-                                                    ""x5t"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                                    ""use"":""sig""
-                                               }
-                                            ]}";
-
-        // Metadata
-        public static string OpenIdConnectMetadataPingString = @"{""version"":""3.0"",
+        public static string OpenIdConnectMetadataPingString = @"{""authorization_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/authorization.oauth2"",
                                                                   ""issuer"":""https:\/\/connect-interop.pinglabs.org:9031"",
-                                                                  ""authorization_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/authorization.oauth2"",
-                                                                  ""token_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/token.oauth2"",
-                                                                  ""revocation_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/revoke_token.oauth2"",
-                                                                  ""userinfo_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/idp\/userinfo.openid"",
-                                                                  ""ping_revoked_sris_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/pf-ws\/rest\/sessionMgmt\/revokedSris"",
-                                                                  ""ping_end_session_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/idp\/startSLO.ping"",
-                                                                  ""scopes_supported"":[""phone"",""address"",""email"",""openid"",""profile""],
-                                                                  ""response_types_supported"":[""code"",""token"",""id_token"",""code token"",""code id_token"",""token id_token"",""code token id_token""],
-                                                                  ""response_modes_supported"":[""fragment"",""query"",""form_post""],
-                                                                  ""subject_types_supported"":[""public""],
                                                                   ""id_token_signing_alg_values_supported"":[""none"",""HS256"",""HS384"",""HS512"",""RS256"",""RS384"",""RS512"",""ES256"",""ES384"",""ES512""],
-                                                                  ""token_endpoint_auth_methods_supported"":[""client_secret_basic"",""client_secret_post""],
                                                                   ""claim_types_supported"":[""normal""],
                                                                   ""claims_parameter_supported"":false,
+                                                                  ""ping_end_session_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/idp\/startSLO.ping"",
+                                                                  ""ping_revoked_sris_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/pf-ws\/rest\/sessionMgmt\/revokedSris"",
                                                                   ""request_parameter_supported"":false,
-                                                                  ""request_uri_parameter_supported"":false}";
+                                                                  ""request_uri_parameter_supported"":false,
+                                                                  ""response_modes_supported"":[""fragment"",""query"",""form_post""],
+                                                                  ""response_types_supported"":[""code"",""token"",""id_token"",""code token"",""code id_token"",""token id_token"",""code token id_token""],
+                                                                  ""revocation_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/revoke_token.oauth2"",
+                                                                  ""scopes_supported"":[""phone"",""address"",""email"",""openid"",""profile""],
+                                                                  ""subject_types_supported"":[""public""],
+                                                                  ""token_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/as\/token.oauth2"",
+                                                                  ""token_endpoint_auth_methods_supported"":[""client_secret_basic"",""client_secret_post""],
+                                                                  ""userinfo_endpoint"":""https:\/\/connect-interop.pinglabs.org:9031\/idp\/userinfo.openid"",
+                                                                  ""version"":""3.0""}";
 
-        public static string OpenIdConnectMetadataFile = @"OpenIdConnectMetadata.json";
+        public static string JsonFile = @"OpenIdConnectMetadata.json";
         public static string OpenIdConnectMetadataFileEnd2End = @"OpenIdConnectMetadataEnd2End.json";
-        public static string OpenIdConnectMetadataJsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
-        public static string OpenIdConnectMetadataString1 =
-                                            @"{ ""authorization_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+        public static string JsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
+        public static string JsonAllValues =
+                                            @"{ ""acr_values_supported"" : [""acr_value1"", ""acr_value2"", ""acr_value3""],
+                                                ""authorization_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
                                                 ""check_session_iframe"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
-                                                ""end_session_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
-                                                ""id_token_signing_alg_values_supported"":[""RS256""],
-                                                ""issuer"":""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
-                                                ""jwks_uri"":""JsonWebKeySet.json"",
-                                                ""microsoft_multi_refresh_token"":true,
-                                                ""response_types_supported"":[""code"",""id_token"",""code id_token""],
-                                                ""response_modes_supported"":[""query"",""fragment"",""form_post""],
-                                                ""scopes_supported"":[""openid""],
-                                                ""subject_types_supported"":[""pairwise""],
-                                                ""token_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
-                                                ""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""]
+                                                ""claims_locales_supported"" : [ ""claim_local1"", ""claim_local2"", ""claim_local3"" ],
+                                                ""claims_parameter_supported"" : true,
+                                                ""claims_supported"": [ ""sub"", ""iss"", ""aud"", ""exp"", ""iat"", ""auth_time"", ""acr"", ""amr"", ""nonce"", ""email"", ""given_name"", ""family_name"", ""nickname"" ],
+                                                ""claim_types_supported"" : [ ""Normal Claims"", ""Aggregated Claims"", ""Distributed Claims"" ],
+                                                ""display_values_supported"" : [ ""displayValue1"", ""displayValue2"", ""displayValue3"" ],
+                                                ""end_session_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
+                                                ""grant_types_supported"" : [""authorization_code"",""implicit""],
+                                                ""http_logout_supported"" : true,
+                                                ""id_token_encryption_alg_values_supported"" : [""RSA1_5"", ""A256KW""],
+                                                ""id_token_encryption_enc_values_supported"" : [""A128CBC-HS256"",""A256CBC-HS512""],
+                                                ""id_token_signing_alg_values_supported"" : [""RS256""],
+                                                ""issuer"" : ""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
+                                                ""jwks_uri"" : ""JsonWebKeySet.json"",
+                                                ""logout_session_supported"" : true,
+                                                ""microsoft_multi_refresh_token"" : true,
+                                                ""op_policy_uri"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_policy_uri"",
+                                                ""op_tos_uri"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_tos_uri"",
+                                                ""request_object_encryption_alg_values_supported"" : [""A192KW"", ""A256KW""],
+                                                ""request_object_encryption_enc_values_supported"" : [""A192GCM"",""A256GCM""],
+                                                ""request_object_signing_alg_values_supported"" : [""PS256"", ""PS512""],
+                                                ""request_parameter_supported"" : true,
+                                                ""request_uri_parameter_supported"" : true,
+                                                ""require_request_uri_registration"" : true,
+                                                ""response_modes_supported"" : [""query"", ""fragment"",""form_post""],
+                                                ""response_types_supported"" : [""code"",""id_token"",""code id_token""],
+                                                ""service_documentation"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/service_documentation"",
+                                                ""scopes_supported"" : [""openid""],
+                                                ""subject_types_supported"" : [""pairwise""],
+                                                ""token_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
+                                                ""token_endpoint_auth_methods_supported"" : [""client_secret_post"",""private_key_jwt""],
+                                                ""token_endpoint_auth_signing_alg_values_supported"" : [""ES192"", ""ES256""],
+                                                ""ui_locales_supported"" : [""hak-CN"", ""en-us""],
+                                                ""userinfo_endpoint"" : ""https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo"",
+                                                ""userinfo_encryption_alg_values_supported"" : [""ECDH-ES+A128KW"",""ECDH-ES+A192KW""],
+                                                ""userinfo_encryption_enc_values_supported"" : [""A256CBC-HS512"", ""A128CBC-HS256""],
+                                                ""userinfo_signing_alg_values_supported"" : [""ES384"", ""ES512""]
                                             }";
 
         public static string OpenIdConnectMetadataSingleX509DataString =
@@ -248,287 +124,107 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""]
                                             }";
 
-        public static string OpenIdConnectMetadataCompleteString =
-            @"{""acr_values_supported"":[],""authorization_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",""check_session_iframe"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",""claims_supported"":[],""claims_locales_supported"":[],""claim_types_supported"":[],""display_values_supported"":[],""end_session_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",""grant_types_supported"":[],""id_token_encryption_alg_values_supported"":[],""id_token_encryption_enc_values_supported"":[],""id_token_signing_alg_values_supported"":[""RS256""],""issuer"":""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",""jwks_uri"":""JsonWebKeySet.json"",""JsonWebKeySet"":null,""request_object_encryption_alg_values_supported"":[],""request_object_encryption_enc_values_supported"":[],""request_object_signing_alg_values_supported"":[],""response_modes_supported"":[""query"",""fragment"",""form_post""],""response_types_supported"":[""code"",""id_token"",""code id_token""],""scopes_supported"":[""openid""],""SigningKeys"":[],""subject_types_supported"":[""pairwise""],""token_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""],""token_endpoint_auth_signing_alg_values_supported"":[],""ui_locales_supported"":[],""userinfo_encryption_alg_values_supported"":[],""userinfo_encryption_enc_values_supported"":[],""userinfo_signing_alg_values_supported"":[]}";
-
-        public static string OpenIdConnectMetadataSingleItemString = @"{""{0}"":""{2}""}";
         public static string OpenIdConnectMetadataBadX509DataString = @"{""jwks_uri"":""JsonWebKeySetBadX509Data.json""}";
         public static string OpenIdConnectMetadataBadBase64DataString = @"{""jwks_uri"":""JsonWebKeySetBadBase64Data.json""}";
         public static string OpenIdConnectMetadataBadUriKeysString = @"{""jwks_uri"":""___NoSuchFile___""}";
         public static string OpenIdConnectMetadataBadFormatString = @"{""issuer""::""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/""}";
         public static string OpenIdConnectMetadataPingLabsJWKSString = @"{""jwks_uri"":""PingLabsJWKS.json""}";
-
+        public static string OpenIdConnectMetatadataBadJson = @"{...";
 
         // interop
         public static string GoogleCertsFile = "google-certs.json";
         public static JsonWebKeySet GoogleCertsExpected;
 
-
         static OpenIdConfigData()
         {
-
-            // Config targeting from PingIdentity
-
-            JsonWebKeyFromPing1 = new JsonWebKey
+            PingLabs = new OpenIdConnectConfiguration()
             {
-                E = "AQAB",
-                Kid = "20am7",
-                Kty = "RSA",
-                N = "mhupHfUtg_gHIqwu2wm8CprXY-gKqbPMV6tEYVqkyYrHugzQ_YDYAHr7vWo5Pe_3gIujSFwpqIfXaP8-Fl3O5fQhMo1lMv4DdRabyDLEpv7YO9qoVKTmDOZqYZx-AYBr5x1Zh2xWByI6_0dsPtCjD1pFZfg_SxNEcLPyH1aY6dT8CWYu32qG4O0WF4EihZzMkzSn8fyh8RXbMf5U9Wm2kgb0g8jK62S7MoF4IlhFaJreq898wgUohhPwR8P3X-gk0XQJAFcogEf04Fw4UmKo3z1B6mcNbPRfImhWw4wtLkhp_KIqKNOkMsSpYGSLrCvqQpgK56EJZExrmb7WozjwHw",
-                Use = "sig"
+                JwksUri = "PingLabsJWKS.json",
+                JsonWebKeySet = new JsonWebKeySet()
             };
 
-            JsonWebKeyFromPing2 = new JsonWebKey
-            {
-                E = "AQAB",
-                Kid = "20am3",
-                Kty = "RSA",
-                N = "wY2KNRyiEvyBFkr1IC_1UGWMPInkzVYpoap_-Zw5fYAXLVxKMSPdZVVLt9AVhuNtagOOQqlZ_Y32e4l19REHym6RGV9Sm1noKRxDUjkz7U8OVeUew7D7h4Dk6E2rrlIYpy9OmhhzWSS68pBTf0_ESdekKv3OQbEs99avEXOPK5uH3V-NHsy1YP3DAvl7HJaV6fn-1Nch1quLrg1G7ohBuTb4Zr-499TJ6bkfabaACz8bf-RHuPezFBjoY0LHNNu6-KQ-qqHVkoki_1OQwj2s_Lui3qYWOmLoaVN9ZzO90rBdhhg8t0JZv6pSlc7o0XT4fie5RRjiqCuOpuGQvNYKpQ",
-                Use = "sig"
-            };
+            PingLabs.SigningKeys.Add(KeyingMaterial.RsaSecurityKeyFromPing1);
+            PingLabs.SigningKeys.Add(KeyingMaterial.RsaSecurityKeyFromPing2);
+            PingLabs.SigningKeys.Add(KeyingMaterial.RsaSecurityKeyFromPing3);
+            PingLabs.JsonWebKeySet.Keys.Add(DataSets.JsonWebKeyFromPing1);
+            PingLabs.JsonWebKeySet.Keys.Add(DataSets.JsonWebKeyFromPing2);
+            PingLabs.JsonWebKeySet.Keys.Add(DataSets.JsonWebKeyFromPing3);
 
-            JsonWebKeyFromPing3 = new JsonWebKey
-            {
-                E = "AQAB",
-                Kid = "20alz",
-                Kty = "RSA",
-                N = "tgLZUXY8mo2Y1TaXHjOYrFGs23jZxgpzEKfBz004AEeOMHFbEP1h1Lrqf2B7f49mOpXRkBgEm4tnSYzX7pDWrMvNeRVkTFXSXwHYvda1R1kmwiTxnrC9IWjvizrr22DtzHhSSpL_7xuXtmaid2orOF8mUoXnKesPQVfq33pCKm1QUV6oFNSVxAiOKJkzFmxjYvcqzryjYi10glxPSx3cmSI8RGqlxolJr0negfLmI9bNxuAvStf_L6zXB5NFqccmkCQXn_QC3P1N3j-HgwwHTVFxkrS8kZQOMTw3TMXbtTFNrVAx1QC_3M0ze4cVncr2zTSECS_2qXM5RS7xBTEDvQ",
-                Use = "sig"
-            };
-
-            RSAParameters rsa1 =
-                new RSAParameters
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPing1.E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPing1.N)
-                };
-
-            RSAParameters rsa2 =
-                new RSAParameters
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPing2.E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPing2.N)
-                };
-
-            RSAParameters rsa3 =
-                new RSAParameters
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPing3.E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(JsonWebKeyFromPing3.N)
-                };
-
-            OpenIdConnectConfigurationPingLabsJWKS =
-                new OpenIdConnectConfiguration()
-                {
-                    JwksUri = "PingLabsJWKS.json",
-                    JsonWebKeySet = new JsonWebKeySet()
-                };
-
-            OpenIdConnectConfigurationPingLabsJWKS.SigningKeys.Add(new RsaSecurityKey(rsa1) { KeyId = JsonWebKeyFromPing1.Kid });
-            OpenIdConnectConfigurationPingLabsJWKS.SigningKeys.Add(new RsaSecurityKey(rsa2) { KeyId = JsonWebKeyFromPing2.Kid });
-            OpenIdConnectConfigurationPingLabsJWKS.SigningKeys.Add(new RsaSecurityKey(rsa3) { KeyId = JsonWebKeyFromPing3.Kid });
-            OpenIdConnectConfigurationPingLabsJWKS.JsonWebKeySet.Keys.Add(JsonWebKeyFromPing1);
-            OpenIdConnectConfigurationPingLabsJWKS.JsonWebKeySet.Keys.Add(JsonWebKeyFromPing2);
-            OpenIdConnectConfigurationPingLabsJWKS.JsonWebKeySet.Keys.Add(JsonWebKeyFromPing3);
-
-            // Config made up
-            JsonWebKeyExpected1 = new JsonWebKey
-            {
-                Alg = "SHA256",
-                E = "AQAB",
-                Kid = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                Kty = "RSA",
-                N = "rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw==",
-                X5t = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                X5u = "https://jsonkeyurl",
-                Use = "sig",
-            };
-
-            JsonWebKeyExpected1.X5c.Add(JsonWebKey_X5c_1);
-            JsonWebKeyExpected1.KeyOps.Add("signing");
-            JsonWebKeyDictionary1 =
-                new Dictionary<string, object>
-                {
-                    {"alg", "SHA256"},
-                    {"e", "AQAB"},
-                    {"key_ops", "signing"},
-                    {"kid", "NGTFvdK-fythEuLwjpwAJOM9n-A"},
-                    {"kty", "RSA"},
-                    {"n", "rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="},
-                    {"x5c", new List<object> { JsonWebKey_X5c_1 }},
-                    {"x5t", "NGTFvdK-fythEuLwjpwAJOM9n-A"},
-                    {"x5u", "https://jsonkeyurl"},
-                    {"use", "sig"},
-                };
-
-            JsonWebKeyExpected2 =
-                new JsonWebKey
-                {
-                    Alg = "SHA256",
-                    E = "AQAB",
-                    Kid = "kriMPdmBvx68skT8-mPAB3BseeA",
-                    Kty = "RSA",
-                    N = "kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==",
-                    X5t = "kriMPdmBvx68skT8-mPAB3BseeA",
-                    Use = "sig",
-                };
-
-            JsonWebKeyExpected2.X5c.Add(JsonWebKey_X5c_2);
-            JsonWebKeySetExpected1 = new JsonWebKeySet();
-            JsonWebKeySetExpected1.Keys.Add(JsonWebKeyExpected1);
-            JsonWebKeySetExpected1.Keys.Add(JsonWebKeyExpected2);
-
-            JsonWebKeyExpectedBadX509Data =
-                new JsonWebKey
-                {
-                    Kid = "kriMPdmBvx68skT8-mPAB3BseeA",
-                    Kty = "RSA",
-                    X5t = "kriMPdmBvx68skT8-mPAB3BseeA",
-                    Use = "sig"
-                };
-
-            JsonWebKeyExpectedBadX509Data.X5c.Add("==MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ");
-
-            OpenIdConnectConfiguration1 =
-                new OpenIdConnectConfiguration()
-                {
-                    AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
-                    CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
-                    EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
-                    Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/",
-                    JwksUri = "JsonWebKeySet.json",
-                    TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
-                };
-
-            OpenIdConnectConfiguration1.IdTokenSigningAlgValuesSupported.Add("RS256");
-            OpenIdConnectConfiguration1.ResponseTypesSupported.Add("code");
-            OpenIdConnectConfiguration1.ResponseTypesSupported.Add("id_token");
-            OpenIdConnectConfiguration1.ResponseTypesSupported.Add("code id_token");
-            OpenIdConnectConfiguration1.ResponseModesSupported.Add("query");
-            OpenIdConnectConfiguration1.ResponseModesSupported.Add("fragment");
-            OpenIdConnectConfiguration1.ResponseModesSupported.Add("form_post");
-            OpenIdConnectConfiguration1.ScopesSupported.Add("openid");
-            OpenIdConnectConfiguration1.SubjectTypesSupported.Add("pairwise");
-            OpenIdConnectConfiguration1.TokenEndpointAuthMethodsSupported.Add("client_secret_post");
-            OpenIdConnectConfiguration1.TokenEndpointAuthMethodsSupported.Add("private_key_jwt");
-
-            X509Certificate1 = new X509Certificate2(Convert.FromBase64String("MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng"));
-            X509Certificate2 = new X509Certificate2(Convert.FromBase64String("MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ"));
-            OpenIdConnectConfigurationWithKeys1 =
-                new OpenIdConnectConfiguration()
-                {
-                    AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
-                    CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
-                    EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
-                    Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/",
-                    JwksUri = "JsonWebKeySet.json",
-                    JsonWebKeySet = JsonWebKeySetExpected1,
-                    TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
-                };
-
-            OpenIdConnectConfigurationWithKeys1.IdTokenSigningAlgValuesSupported.Add("RS256");
-            OpenIdConnectConfigurationWithKeys1.ResponseTypesSupported.Add("code");
-            OpenIdConnectConfigurationWithKeys1.ResponseTypesSupported.Add("id_token");
-            OpenIdConnectConfigurationWithKeys1.ResponseTypesSupported.Add("code id_token");
-            OpenIdConnectConfigurationWithKeys1.ResponseModesSupported.Add("query");
-            OpenIdConnectConfigurationWithKeys1.ResponseModesSupported.Add("fragment");
-            OpenIdConnectConfigurationWithKeys1.ResponseModesSupported.Add("form_post");
-            OpenIdConnectConfigurationWithKeys1.ScopesSupported.Add("openid");
-            OpenIdConnectConfigurationWithKeys1.SubjectTypesSupported.Add("pairwise");
-            OpenIdConnectConfigurationWithKeys1.TokenEndpointAuthMethodsSupported.Add("client_secret_post");
-            OpenIdConnectConfigurationWithKeys1.TokenEndpointAuthMethodsSupported.Add("private_key_jwt");
-
-            string n = "ns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9w==";
-            string e = "AQAB";
-            string n2 = "kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==";
-            string e2 = "AQAB";
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(
-                new RsaSecurityKey(
-                    new RSAParameters
-                    {
-                        Exponent = Base64UrlEncoder.DecodeBytes(e),
-                        Modulus = Base64UrlEncoder.DecodeBytes(n),
-                    })
-                {
-                    KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
-                });
-
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(
-                new RsaSecurityKey(
-                    new RSAParameters
-                    {
-                        Exponent = Base64UrlEncoder.DecodeBytes(e2),
-                        Modulus = Base64UrlEncoder.DecodeBytes(n2),
-                    })
-                {
-                    KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
-                });
-
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(new X509SecurityKey(X509Certificate1));
-            OpenIdConnectConfigurationWithKeys1.SigningKeys.Add(new X509SecurityKey(X509Certificate2));
+            // matches with OpenIdConnectMetadataString
+            SetDefaultConfiguration(FullyPopulated);
+            FullyPopulated.AdditionalData["microsoft_multi_refresh_token"] = true;
+            SetDefaultConfiguration(FullyPopulatedWithKeys);
+            FullyPopulatedWithKeys.JsonWebKeySet = DataSets.JsonWebKeySet1;
+            FullyPopulatedWithKeys.AdditionalData["microsoft_multi_refresh_token"] = true;
+            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.RsaSecurityKey1);
+            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.RsaSecurityKey2);
+            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.X509SecurityKey1);
+            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
             // Config with X509Data
-            JsonWebKeySetX509Data = new JsonWebKeySet();
-            JsonWebKeySetX509Data.Keys.Add(new JsonWebKey
-            {
-                Kid = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                Kty = "RSA",
-                Use = "sig",
-                X5t = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                X5c = new List<string> { "MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng" }
-            });
-
-            OpenIdConnectConfigurationSingleX509Data1 =
-                new OpenIdConnectConfiguration()
-                {
-                    AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
-                    CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
-                    EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout",
-                    Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/",
-                    JwksUri = "JsonWebKeySetSingleX509Data.json",
-                    JsonWebKeySet = JsonWebKeySetX509Data,
-                    TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token",
-                };
-
-            OpenIdConnectConfigurationSingleX509Data1.SigningKeys.Add(new X509SecurityKey(X509Certificate1));
-            OpenIdConnectConfigurationSingleX509Data1.IdTokenSigningAlgValuesSupported.Add("RS256");
-            OpenIdConnectConfigurationSingleX509Data1.ResponseTypesSupported.Add("code");
-            OpenIdConnectConfigurationSingleX509Data1.ResponseTypesSupported.Add("id_token");
-            OpenIdConnectConfigurationSingleX509Data1.ResponseTypesSupported.Add("code id_token");
-            OpenIdConnectConfigurationSingleX509Data1.ResponseModesSupported.Add("query");
-            OpenIdConnectConfigurationSingleX509Data1.ResponseModesSupported.Add("fragment");
-            OpenIdConnectConfigurationSingleX509Data1.ResponseModesSupported.Add("form_post");
-            OpenIdConnectConfigurationSingleX509Data1.ScopesSupported.Add("openid");
-            OpenIdConnectConfigurationSingleX509Data1.SubjectTypesSupported.Add("pairwise");
-            OpenIdConnectConfigurationSingleX509Data1.TokenEndpointAuthMethodsSupported.Add("client_secret_post");
-            OpenIdConnectConfigurationSingleX509Data1.TokenEndpointAuthMethodsSupported.Add("private_key_jwt");
-
-            // interrop
-            GoogleCertsExpected = new JsonWebKeySet();
-            GoogleCertsExpected.Keys.Add(
-                new JsonWebKey
-                {
-                    Alg = "RS256",
-                    E = "AQAB",
-                    Kty = "RSA",
-                    Kid = "ab844f3d4c69feee0de2501b04e1a4c8d78eead1",
-                    N = "AKrMiv5vhYehVKXnSpZZN6lYymUIi+NS97ceYKYClMlNyj2Ln4ErWiOwjwdivG2kZnN0kKCC/XL9E+uEgsZO3ECvvDtgtFhPOR0MiqL7pp/K7d58dbKUWX/cWy8E4bm/Zmwa/g0HDcW6o19+Q85IPYXbY/6Z2oOgA9qDAoGHkjIv",
-                    Use = "sig",
-                });
-
-            GoogleCertsExpected.Keys.Add(
-                 new JsonWebKey
-                 {
-                     Alg = "RS256",
-                     E = "AQAB",
-                     Kty = "RSA",
-                     Kid = "550326e0aacb4674d22905a1a51a808cfa7463b0",
-                     N = "ANLFuJO6EoKczde+YP3b1yuz2b46D7Rd7CjrbvKrzbjkH29iRFLBagT7nojwdMOPrsV+WLp/C8lfkRT7UJ38lnQh3m4oEy98HdRRMZh5Vtpbotgt4S/ugh5ansJdHSXSBTxk+X1ZnTzMOUH7ZROpxw3NcX/IFl0sshFlTbebPrDj",
-                     Use = "sig",
-                 });
-
-            CyranoJsonWebKeySet = @"{ ""keys"":[{""kty"":""RSA"",""use"":""sig"",""kid"":""kriMPdmBvx68skT8-mPAB3BseeA"",""x5t"":""kriMPdmBvx68skT8-mPAB3BseeA"",""n"":""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",""e"":""AQAB"",""x5c"":[""MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""]},{""kty"":""RSA"",""use"":""sig"",""kid"":""MnC_VZcATfM5pOYiJHMba9goEKY"",""x5t"":""MnC_VZcATfM5pOYiJHMba9goEKY"",""n"":""vIqz+4+ER/vNWLON9yv8hIYV737JQ6rCl6XfzOC628seYUPf0TaGk91CFxefhzh23V9Tkq+RtwN1Vs/z57hO82kkzL+cQHZX3bMJD+GEGOKXCEXURN7VMyZWMAuzQoW9vFb1k3cR1RW/EW/P+C8bb2dCGXhBYqPfHyimvz2WarXhntPSbM5XyS5v5yCw5T/Vuwqqsio3V8wooWGMpp61y12NhN8bNVDQAkDPNu2DT9DXB1g0CeFINp/KAS/qQ2Kq6TSvRHJqxRR68RezYtje9KAqwqx4jxlmVAQy0T3+T+IAbsk1wRtWDndhO6s1Os+dck5TzyZ/dNOhfXgelixLUQ=="",""e"":""AQAB"",""x5c"":[""MIIC4jCCAcqgAwIBAgIQQNXrmzhLN4VGlUXDYCRT3zANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE0MTAyODAwMDAwMFoXDTE2MTAyNzAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALyKs/uPhEf7zVizjfcr/ISGFe9+yUOqwpel38zgutvLHmFD39E2hpPdQhcXn4c4dt1fU5KvkbcDdVbP8+e4TvNpJMy/nEB2V92zCQ/hhBjilwhF1ETe1TMmVjALs0KFvbxW9ZN3EdUVvxFvz/gvG29nQhl4QWKj3x8opr89lmq14Z7T0mzOV8kub+cgsOU/1bsKqrIqN1fMKKFhjKaetctdjYTfGzVQ0AJAzzbtg0/Q1wdYNAnhSDafygEv6kNiquk0r0RyasUUevEXs2LY3vSgKsKseI8ZZlQEMtE9/k/iAG7JNcEbVg53YTurNTrPnXJOU88mf3TToX14HpYsS1ECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAfolx45w0i8CdAUjjeAaYdhG9+NDHxop0UvNOqlGqYJexqPLuvX8iyUaYxNGzZxFgGI3GpKfmQP2JQWQ1E5JtY/n8iNLOKRMwqkuxSCKJxZJq4Sl/m/Yv7TS1P5LNgAj8QLCypxsWrTAmq2HSpkeSk4JBtsYxX6uhbGM/K1sEktKybVTHu22/7TmRqWTmOUy9wQvMjJb2IXdMGLG3hVntN/WWcs5w8vbt1i8Kk6o19W2MjZ95JaECKjBDYRlhG1KmSBtrsKsCBQoBzwH/rXfksTO9JoUYLXiW0IppB7DhNH4PJ5hZI91R8rR0H3/bKkLSuDaKLWSqMhozdhXsIIKvJQ==""]}]}";
+            SingleX509Data.AdditionalData["microsoft_multi_refresh_token"] = true;
+            SingleX509Data.AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize";
+            SingleX509Data.CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession";
+            SingleX509Data.EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout";
+            SingleX509Data.Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/";
+            SingleX509Data.JsonWebKeySet = DataSets.JsonWebKeySetX509Data;
+            SingleX509Data.JwksUri = "JsonWebKeySetSingleX509Data.json";
+            SingleX509Data.IdTokenSigningAlgValuesSupported.Add("RS256");
+            AddToCollection(SingleX509Data.ResponseTypesSupported, new string[]{"code", "id_token", "code id_token"});
+            AddToCollection(SingleX509Data.ResponseModesSupported, new string[]{"query", "fragment", "form_post"});
+            SingleX509Data.ScopesSupported.Add("openid");
+            SingleX509Data.SigningKeys.Add(KeyingMaterial.X509SecurityKey1);
+            SingleX509Data.SubjectTypesSupported.Add("pairwise");
+            SingleX509Data.TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token";
+            AddToCollection(SingleX509Data.TokenEndpointAuthMethodsSupported, new string[] { "client_secret_post", "private_key_jwt" });
         }
 
+        private static void SetDefaultConfiguration(OpenIdConnectConfiguration config)
+        {
+            AddToCollection(config.AcrValuesSupported, "acr_value1", "acr_value2", "acr_value3");
+            config.AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize";
+            config.CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession";
+            AddToCollection(config.ClaimsLocalesSupported, "claim_local1", "claim_local2", "claim_local3");
+            config.ClaimsParameterSupported = true;
+            AddToCollection(config.ClaimsSupported, "sub", "iss", "aud", "exp", "iat", "auth_time", "acr", "amr", "nonce", "email", "given_name", "family_name", "nickname");
+            AddToCollection(config.ClaimTypesSupported, "Normal Claims", "Aggregated Claims", "Distributed Claims");
+            AddToCollection(config.DisplayValuesSupported, "displayValue1", "displayValue2", "displayValue3");
+            config.EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout";
+            AddToCollection(config.GrantTypesSupported, "authorization_code", "implicit");
+            config.HttpLogoutSupported = true;
+            AddToCollection(config.IdTokenEncryptionAlgValuesSupported, "RSA1_5", "A256KW");
+            AddToCollection(config.IdTokenEncryptionEncValuesSupported, "A128CBC-HS256","A256CBC-HS512");
+            AddToCollection(config.IdTokenSigningAlgValuesSupported, "RS256");
+            config.Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/";
+            config.JwksUri = "JsonWebKeySet.json";
+            config.LogoutSessionSupported = true;
+            config.OpPolicyUri = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_policy_uri";
+            config.OpTosUri = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_tos_uri";
+            AddToCollection(config.RequestObjectEncryptionAlgValuesSupported, "A192KW", "A256KW");
+            AddToCollection(config.RequestObjectEncryptionEncValuesSupported, "A192GCM", "A256GCM");
+            AddToCollection(config.RequestObjectSigningAlgValuesSupported, "PS256", "PS512");
+            config.RequestParameterSupported = true;
+            config.RequestUriParameterSupported = true;
+            config.RequireRequestUriRegistration = true;
+            AddToCollection(config.ResponseModesSupported, "query", "fragment", "form_post");
+            AddToCollection(config.ResponseTypesSupported, "code", "id_token", "code id_token");
+            config.ScopesSupported.Add("openid");
+            config.ServiceDocumentation = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/service_documentation";
+            config.SubjectTypesSupported.Add("pairwise");
+            config.TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token";
+            AddToCollection(config.TokenEndpointAuthMethodsSupported, "client_secret_post", "private_key_jwt");
+            AddToCollection(config.TokenEndpointAuthSigningAlgValuesSupported, "ES192", "ES256");
+            AddToCollection(config.UILocalesSupported, "hak-CN", "en-us");
+            config.UserInfoEndpoint = "https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo";
+            AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW","ECDH-ES+A192KW");
+            AddToCollection(config.UserInfoEndpointEncryptionEncValuesSupported, "A256CBC-HS512", "A128CBC-HS256");
+            AddToCollection(config.UserInfoEndpointSigningAlgValuesSupported, "ES384", "ES512");
+        }
+
+        private static void AddToCollection(ICollection<string> collection, params string[] strings)
+        {
+            foreach (var str in strings)
+                collection.Add(str);
+        }
     }
 }

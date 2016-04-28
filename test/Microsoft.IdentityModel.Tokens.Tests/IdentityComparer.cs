@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return (context.Diffs.Count == 0);
         }
 
-    public bool IgnoreClaimsIdentityType { get; set; }
+        public bool IgnoreClaimsIdentityType { get; set; }
 
         public bool IgnoreClaimsPrincipalType { get; set; }
 
@@ -174,7 +174,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     localContext.Diffs.Add(Environment.NewLine + "items in first enumeration NOT Matched");
                     foreach (var item in notMatched)
                     {
-                        localContext.Diffs.Add(item.ToString());
+                        if (item != null)
+                            localContext.Diffs.Add(item.ToString());
+                        else
+                            localContext.Diffs.Add("item is null");
                     }
                 }
 
@@ -183,7 +186,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     localContext.Diffs.Add(Environment.NewLine + "expectedValues NOT Matched");
                     foreach (var item in expectedValues)
                     {
-                        localContext.Diffs.Add(item.ToString());
+                        if (item != null)
+                            localContext.Diffs.Add(item.ToString());
+                        else
+                            localContext.Diffs.Add("item is null");
                     }
                 }
 
@@ -340,6 +346,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return AreEnumsEqual<string>(t1 as IEnumerable<string>, t2 as IEnumerable<string>, context, AreStringsEqual);
             else if (t1 is string)
                 return AreStringsEqual(t1 as string, t2 as string, context);
+            else if (t1 is Dictionary<string, object>)
+                return AreDictionariesEqual(t1 as Dictionary<string, object>, t2 as Dictionary<string, object>, context);
             else if (t1 is Dictionary<string, object>.ValueCollection)
                 return AreValueCollectionsEqual(t1 as Dictionary<string, object>.ValueCollection, t2 as Dictionary<string, object>.ValueCollection, context);
             else if (t1 is Newtonsoft.Json.Linq.JArray)
@@ -364,7 +372,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ContinueCheckingEquality(t1, t2, localContext);
                 return context.Merge(localContext);
             }
-
         }
 
         public static bool AreJArraysEqual(Newtonsoft.Json.Linq.JArray a1, Newtonsoft.Json.Linq.JArray a2, CompareContext context)
@@ -476,10 +483,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     // for now just typing strings, should expand types.
                     var obj1 = dictionary1[key];
                     var obj2 = dictionary2[key];
-                    if (obj1 is int || obj1 is long || obj1 is DateTime)
+                    if (obj1 is int || obj1 is long || obj1 is DateTime || obj1 is bool || obj1 is double || obj1 is System.TimeSpan)
                     {
                         if (!obj1.Equals(obj2))
-                            localContext.Diffs.Add(IdentityComparer.BuildStringDiff(key + ": ", obj1, obj2));
+                            localContext.Diffs.Add(BuildStringDiff(key + ": ", obj1, obj2));
                     }
                     else
                     {
@@ -493,8 +500,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }
             }
 
-            context.Diffs.AddRange(localContext.Diffs);
-            return localContext.Diffs.Count == 0;
+            return context.Merge(localContext);
         }
 
         public static bool AreDictionariesEqual(IDictionary<string, string> dictionary1, IDictionary<string, string> dictionary2, CompareContext context)
@@ -753,19 +759,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             Type type = obj1.GetType();
             var localContext = new CompareContext(context);
-
             // public instance properties
             PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
             // Touch each public property
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
+                var propertyContext = new CompareContext(context);
                 try
                 {
                     if (type == typeof(Claim) && context.IgnoreSubject && propertyInfo.Name == "Subject")
                         continue;
-
-                    var propertyContext = new CompareContext(context);
 
                     if (propertyInfo.GetMethod != null)
                     {
@@ -792,7 +796,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }
                 catch (Exception ex)
                 {
-                    localContext.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "Reflection failed getting 'PropertyInfo'. Exception '{0}'", ex));
+                    localContext.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "Reflection failed getting 'PropertyInfo: {0}'. Exception: '{1}'.", propertyInfo.Name, ex));
                 }
             }
 
