@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void OpenIdConnectMessage_IssuerAddressHasQuery()
         {
             List<string> errors = new List<string>();
-            var address = "http://gotJwt.onmicrosoft.com/?foo=bar";
+            var address = "http://gotJwt.onmicrosoft.com/?param=value";
             var clientId = Guid.NewGuid().ToString();
             var message = new OpenIdConnectMessage() { IssuerAddress = address };
 
