@@ -214,9 +214,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         new Claim("aud", "http://test.local/api/", ClaimValueTypes.String, "http://test.local/api/"),
                         new Claim("exp", "1460647835", ClaimValueTypes.Integer, "http://test.local/api/"),
-                        new Claim("emailaddress", "foo1@bar.com", ClaimValueTypes.String, "http://test.local/api/"),
-                        new Claim("emailaddress", "foo2@bar.com", ClaimValueTypes.String, "http://test.local/api/"),
-                        new Claim("name", "Foo Bar", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("emailaddress", "user1@contoso.com", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("emailaddress", "user2@contoso.com", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("name", "user", ClaimValueTypes.String, "http://test.local/api/"),
                         new Claim("iss", "http://test.local/api/", ClaimValueTypes.String, "http://test.local/api/")
                     },
                     dataset);
