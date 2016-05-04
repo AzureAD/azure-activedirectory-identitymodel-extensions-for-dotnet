@@ -6,11 +6,11 @@
   },
   "frameworks": {
     "netstandard1.4": {
-      "imports": [ "dotnet5.5", "portable-net451+win8" ]
+      "imports": [ "portable-net451+win8" ]
     },
     "net451": { }
   },
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true,
     "delaySign": true,
     "keyFile": "../../build/35MSSharedLib1024.snk"

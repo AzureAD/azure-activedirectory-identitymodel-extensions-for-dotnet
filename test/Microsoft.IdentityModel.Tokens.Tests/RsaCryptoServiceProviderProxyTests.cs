@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         byte[] input = new byte[10];
 
-#if NETSTANDARDAPP1_5
+#if NETCOREAPP1_0
         HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA256;
 #else
         string _hashAlgorithm = SecurityAlgorithms.Sha256;
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-#if NETSTANDARDAPP1_5
+#if NETCOREAPP1_0
                 rsaCsp.SignData(input, _hashAlgorithm.Name);
 #else
                 rsaCsp.SignData(input, _hashAlgorithm);
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-#if NETSTANDARDAPP1_5
+#if NETCOREAPP1_0
                 rsaCspProxy.SignData(input, _hashAlgorithm.Name);
 #else
                 rsaCspProxy.SignData(input, _hashAlgorithm);

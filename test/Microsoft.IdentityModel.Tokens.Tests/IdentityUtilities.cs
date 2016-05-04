@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             XmlWriter writer = XmlWriter.Create(sb);
             tokenHandler.WriteToken(writer, securityToken);
             writer.Flush();
-#if !NETSTANDARDAPP1_5
+#if !NETCOREAPP1_0
             writer.Close();
 #endif
             return sb.ToString();
