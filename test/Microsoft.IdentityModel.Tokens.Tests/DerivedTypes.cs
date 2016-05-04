@@ -234,6 +234,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             throw new NotImplementedException();
         }
 
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            throw new NotImplementedException();
+        }
+
         public override int KeySize
         {
             get { throw new NotImplementedException(); }
@@ -291,6 +296,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             throw new NotImplementedException();
         }
 
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            throw new NotImplementedException();
+        }
+
         public override int KeySize
         {
             get { throw new NotImplementedException(); }
@@ -321,6 +331,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             throw new NotImplementedException();
         }
 
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>

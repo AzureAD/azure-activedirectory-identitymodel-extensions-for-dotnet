@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
 
-            if (!IsSupportedAlgorithm(algorithm))
+            if (!key.IsSupportedAlgorithm(algorithm))
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10640, (algorithm ?? "null"));
 
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
@@ -581,29 +581,6 @@ namespace Microsoft.IdentityModel.Tokens
             BCRYPT_ECDSA_PRIVATE_P256_MAGIC = 0x32534345,
             BCRYPT_ECDSA_PRIVATE_P384_MAGIC = 0x34534345,
             BCRYPT_ECDSA_PRIVATE_P521_MAGIC = 0x36534345,
-        }
-
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSha512Signature:
-                    return true;
-
-                default:
-                    return false;
-            }
         }
 
         /// <summary>

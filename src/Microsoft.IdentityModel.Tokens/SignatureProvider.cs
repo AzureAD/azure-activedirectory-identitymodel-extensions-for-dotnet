@@ -53,13 +53,6 @@ namespace Microsoft.IdentityModel.Tokens
             set;
         }
 
-        /// <summary>
-        /// Answers if this <see cref="SignatureProvider"/> supports the key, algorithm pair.
-        /// </summary>
-        /// <param name="algorithm">the crypto algorithm to use.</param>
-        /// <returns>'true' if algorithm is supported.</returns>
-        public abstract bool IsSupportedAlgorithm(string algorithm);
-
         public SecurityKey Key { get; private set; }
 
         public string Algorithm { get; private set; }

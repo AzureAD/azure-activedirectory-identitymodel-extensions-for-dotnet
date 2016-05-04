@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -87,6 +88,26 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForVerifying(this, algorithm);
             else
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
+        }
+
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
     }
 }

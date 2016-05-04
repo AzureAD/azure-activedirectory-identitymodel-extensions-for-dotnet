@@ -171,5 +171,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return true;
         }
+
+        [Fact(DisplayName = "RsaSecurityKeyTests: IsSupportedAlgorithm")]
+        public void IsSupportedAlgorithm()
+        {
+            Assert.True(KeyingMaterial.JsonWebKeyEcdsa256.IsSupportedAlgorithm(SecurityAlgorithms.EcdsaSha256), "KeyingMaterial.JsonWebKeyEcdsa256.IsSupportedAlgorithm returned false for ecdsasha256");
+            Assert.True(!KeyingMaterial.JsonWebKeyEcdsa256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256Signature), "KeyingMaterial.JsonWebKeyEcdsa256.IsSupportedAlgorithm returned true for rsasha256");
+            Assert.True(KeyingMaterial.JsonWebKeyRsa256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256), "KeyingMaterial.JsonWebKeyRsa256.IsSupportedAlgorithm returned false for rsasha256");
+            Assert.True(!KeyingMaterial.JsonWebKeyRsa256.IsSupportedAlgorithm(SecurityAlgorithms.EcdsaSha256), "KeyingMaterial.JsonWebKeyRsa256.IsSupportedAlgorithm returned true for ecdsasha256");
+            Assert.True(KeyingMaterial.JsonWebKeySymmetric256.IsSupportedAlgorithm(SecurityAlgorithms.HmacSha256), "KeyingMaterial.JsonWebKeySymmetric256.IsSupportedAlgorithm returned false for hmacsha256");
+            Assert.True(!KeyingMaterial.JsonWebKeySymmetric256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256Signature), "KeyingMaterial.JsonWebKeySymmetric256.IsSupportedAlgorithm returned true for RsaSha256Signature");
+        }
     }
 }

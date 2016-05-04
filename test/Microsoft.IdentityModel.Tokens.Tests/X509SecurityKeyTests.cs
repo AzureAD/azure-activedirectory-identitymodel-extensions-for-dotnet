@@ -66,5 +66,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // there are no defaults.
         }
+
+        [Fact(DisplayName = "X509SecurityKeyTests: IsSupportedAlgorithm")]
+        public void IsSupportedAlgorithm()
+        {
+            Assert.True(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256Signature), "KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.IsSupportedAlgorithm returned false for RsaSha256Signature");
+            Assert.True(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha512), "KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public.IsSupportedAlgorithm returned false for RsaSha512");
+            Assert.True(!KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512.IsSupportedAlgorithm(SecurityAlgorithms.Aes128Encryption), "KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512 should not support Aes128Encryption");
+            Assert.True(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha384), "KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256.IsSupportedAlgorithm returned false for RsaSha384");
+        }
     }
 }
