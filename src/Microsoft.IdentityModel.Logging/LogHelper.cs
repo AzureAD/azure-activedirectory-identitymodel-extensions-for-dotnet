@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Logging
         /// Logs an event using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
         /// <param name="argument">argument that is null or empty.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
         public static ArgumentNullException LogArgumentNullException(string argument)
         {
             return LogException<ArgumentNullException>(EventLevel.Error, null, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.", argument);
@@ -49,6 +50,7 @@ namespace Microsoft.IdentityModel.Logging
         /// Logs an event using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="message">message to log.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
         public static T LogException<T>(string message) where T : Exception
         {
             return LogException<T>(EventLevel.Error, null, message, null);
@@ -59,6 +61,7 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
         public static T LogException<T>(string format, params object[] args) where T : Exception
         {
             return LogException<T>(EventLevel.Error, null, format, args);
@@ -69,6 +72,7 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="message">message to log.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
         public static T LogException<T>(Exception innerException, string message) where T : Exception
         {
             return LogException<T>(EventLevel.Error, innerException, message, null);
@@ -80,6 +84,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
         public static T LogException<T>(Exception innerException, string format, params object[] args) where T : Exception
         {
             return LogException<T>(EventLevel.Error, innerException, format, args);
@@ -109,7 +114,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Logs an event using the event source logger and returns new typed exception.
         /// </summary>
-        /// <param name="eventLevel">Identifies the level of an event to be logged. Default is Error.</param>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="message">message to log.</param>
         public static T LogException<T>(EventLevel eventLevel, Exception innerException, string message) where T : Exception
@@ -120,7 +125,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Logs an event using the event source logger and returns new typed exception.
         /// </summary>
-        /// <param name="eventLevel">Identifies the level of an event to be logged. Default is Error.</param>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
