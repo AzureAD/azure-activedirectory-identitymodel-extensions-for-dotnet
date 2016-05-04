@@ -96,13 +96,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(KeyingMaterial.RsaSecurityKey_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKey_2048_Public has the private key.");
         }
 
-        [Fact(DisplayName = "RsaSecurityTests: KeySize")]
+        [Fact(DisplayName = "RsaSecurityKeyTests: KeySize")]
         public void KeySize()
         {
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKey_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKey_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKey_4096.KeySize == 4096, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 4096", KeyingMaterial.RsaSecurityKey_4096.KeySize));
+        }
+
+        [Fact(DisplayName = "RsaSecurityKeyTests: IsSupportedAlgorithm")]
+        public void IsSupportedAlgorithm()
+        {
+            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256Signature), "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.IsSupportedAlgorithm returned false for rsasha256");
+            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256), "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.IsSupportedAlgorithm returned false for rsasha256");
+            Assert.True(!KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.IsSupportedAlgorithm(SecurityAlgorithms.EcdsaSha256), "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048 should not support ecdsa256");
+            Assert.True(KeyingMaterial.RsaSecurityKey_2048.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256Signature), "KeyingMaterial.RsaSecurityKey_2048.IsSupportedAlgorithm returned false for rsasha256");
         }
     }
 }

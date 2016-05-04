@@ -50,6 +50,13 @@ namespace Microsoft.IdentityModel.Tokens
 
         public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
 
+        /// <summary>
+        /// Answers if this <see cref="SecurityKey"/> supports the algorithm.
+        /// </summary>
+        /// <param name="algorithm">the crypto algorithm to use.</param>
+        /// <returns>'true' if algorithm is supported.</returns>
+        public abstract bool IsSupportedAlgorithm(string algorithm);
+
         public CryptoProviderFactory CryptoProviderFactory
         {
             get

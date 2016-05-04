@@ -61,5 +61,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // there are no defaults.
         }
+
+        [Fact(DisplayName = "EcdsaSecurityKeyTests: IsSupportedAlgorithm")]
+        public void IsSupportedAlgorithm()
+        {
+            Assert.True(KeyingMaterial.ECDsa256Key.IsSupportedAlgorithm(SecurityAlgorithms.EcdsaSha256), "KeyingMaterial.ECDsa256Key.IsSupportedAlgorithm returned false for ecdsasha256");
+            Assert.True(KeyingMaterial.ECDsa256Key_Public.IsSupportedAlgorithm(SecurityAlgorithms.EcdsaSha256Signature), "KeyingMaterial.ECDsa256Key_Public.IsSupportedAlgorithm returned false for ecdsasha256");
+            Assert.True(!KeyingMaterial.ECDsa384Key.IsSupportedAlgorithm(SecurityAlgorithms.Aes128Encryption), "KeyingMaterial.ECDsa384Key should not support Aes128Encryption");
+            Assert.True(KeyingMaterial.ECDsa521Key.IsSupportedAlgorithm(SecurityAlgorithms.EcdsaSha384), "KeyingMaterial.ECDsa521Key.IsSupportedAlgorithm returned false for EcdsaSha384");
+        }
     }
 }

@@ -65,6 +65,26 @@ namespace Microsoft.IdentityModel.Tokens
                 return factory.CreateForSigning(this, algorithm);
         }
 
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.HmacSha256:
+                case SecurityAlgorithms.HmacSha384:
+                case SecurityAlgorithms.HmacSha512:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         public virtual byte[] Key
         {
             get { return _key.CloneByteArray(); }
