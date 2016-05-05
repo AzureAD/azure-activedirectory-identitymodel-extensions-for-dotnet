@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var rsaCspPublic = new RSACryptoServiceProvider();
             rsaCspPublic.ImportParameters(RsaParameters_2048_Public);
             RsaSecurityKeyWithCspProvider_2048_Public = new RsaSecurityKey(rsaCspPublic);
-#if NETSTANDARDAPP1_5
+#if NETCOREAPP1_0
             var rsaCng = new RSACng();
             rsaCng.ImportParameters(RsaParameters_2048);
             RsaSecurityKeyWithCngProvider_2048 = new RsaSecurityKey(rsaCng);

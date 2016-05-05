@@ -7,10 +7,12 @@
   },
   "testRunner": "xunit",
   "frameworks": {
-    "netstandardapp1.5": {
+    "netcoreapp1.0": {
       "dependencies": {
-        "dotnet-test-xunit": "1.0.0-dev-*",
-        "NETStandard.Library": "1.5.0-*",
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        },
         "System.Diagnostics.Process": "4.1.0-*"
       },
       "imports": [
@@ -26,7 +28,7 @@
       }
     }
   },
-  "compilationOptions": {
+  "buildOptions": {
     "warningsAsErrors": true
   }
 }

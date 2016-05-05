@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048 does not have the private key.");
             Assert.False(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public has the private key.");
-#if NETSTANDARDAPP1_5
+#if NETCOREAPP1_0
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048 does not have the private key.");
             Assert.False(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public has the private key.");
 #endif
