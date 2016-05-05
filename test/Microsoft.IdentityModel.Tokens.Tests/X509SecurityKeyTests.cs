@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 x509SecurityKey = new X509SecurityKey(null);
                 expectedException.ProcessNoException();
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 expectedException.ProcessException(exception);
             }
@@ -67,13 +67,27 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // there are no defaults.
         }
 
-        [Fact(DisplayName = "X509SecurityKeyTests: IsSupportedAlgorithm")]
-        public void IsSupportedAlgorithm()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IsSupportedAlgDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void IsSupportedAlgorithm(X509SecurityKey key, string alg, bool expectedResult)
         {
-            Assert.True(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha256Signature), "KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.IsSupportedAlgorithm returned false for RsaSha256Signature");
-            Assert.True(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha512), "KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public.IsSupportedAlgorithm returned false for RsaSha512");
-            Assert.True(!KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512.IsSupportedAlgorithm(SecurityAlgorithms.Aes128Encryption), "KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512 should not support Aes128Encryption");
-            Assert.True(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256.IsSupportedAlgorithm(SecurityAlgorithms.RsaSha384), "KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256.IsSupportedAlgorithm returned false for RsaSha384");
+            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+        }
+
+        public static TheoryData<X509SecurityKey, string, bool> IsSupportedAlgDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<X509SecurityKey, string, bool>();
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.Aes128Encryption, false);
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256, SecurityAlgorithms.RsaSha384, true);
+                return dataset;
+
+            }
         }
     }
 }
