@@ -70,6 +70,7 @@ namespace Microsoft.IdentityModel.Test
             JwtSecurityTokenHandler.InboundClaimFilter.Add("iss");
             JwtSecurityTokenHandler.InboundClaimFilter.Add("nbf");
 
+            string nullIssuerJwtToken = IdentityUtilities.CreateJwtToken(IdentityUtilities.NullIssuerAsymmetricSecurityTokenDescriptor, jwtHandler);
             string jwtToken = IdentityUtilities.CreateJwtToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, jwtHandler);
 
             // saml tokens created using Microsoft.IdentityModel.Extensions
@@ -81,11 +82,14 @@ namespace Microsoft.IdentityModel.Test
             string smSamlToken = IdentityUtilities.CreateSamlToken(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor, smSamlHandler);
 
             ClaimsPrincipal jwtPrincipal = ValidateToken(jwtToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, jwtHandler, ExpectedException.NoExceptionExpected);
+            ClaimsPrincipal jwtPrincipal2 = ValidateToken(nullIssuerJwtToken, IdentityUtilities.GetNullIssuerAsymmetricTokenValidationParameters(false), jwtHandler, ExpectedException.NoExceptionExpected);
+            ClaimsPrincipal jwtPrincipal3 = ValidateToken(nullIssuerJwtToken, IdentityUtilities.GetNullIssuerAsymmetricTokenValidationParameters(true), jwtHandler, ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"));
             ClaimsPrincipal imSaml2Principal = ValidateToken(imSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal imSamlPrincipal = ValidateToken(imSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSamlHandler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal smSaml2Principal = ValidateToken(smSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal smSamlPrincipal = ValidateToken(smSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSamlHandler, ExpectedException.NoExceptionExpected);
 
+            Assert.AreEqual(jwtPrincipal2.FindFirst(ClaimTypes.Country).Issuer, ClaimsIdentity.DefaultIssuer);
             Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(imSamlPrincipal,  imSaml2Principal, new CompareContext { IgnoreSubject = true }));
             Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSamlPrincipal,  imSaml2Principal, new CompareContext { IgnoreSubject = true }));
             Assert.IsTrue(IdentityComparer.AreEqual<ClaimsPrincipal>(smSaml2Principal, imSaml2Principal, new CompareContext { IgnoreSubject = true }));
@@ -100,11 +104,11 @@ namespace Microsoft.IdentityModel.Test
 
         private ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)
         {
-            ClaimsPrincipal princiapl = null;
+            ClaimsPrincipal principal = null;
             try
             {
                 SecurityToken validatedToken;
-                princiapl = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
+                principal = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -112,7 +116,7 @@ namespace Microsoft.IdentityModel.Test
                 expectedException.ProcessException(exception);
             }
 
-            return princiapl;
+            return principal;
         }
 
 

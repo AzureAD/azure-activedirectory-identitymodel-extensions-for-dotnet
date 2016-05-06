@@ -1056,12 +1056,7 @@ namespace System.IdentityModel.Tokens
             {
                 throw new ArgumentNullException("jwt");
             }
-
-            if (string.IsNullOrWhiteSpace(issuer))
-            {
-                throw new ArgumentException(ErrorMessages.IDX10221);
-            }
-
+            
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwt, issuer);
             foreach (Claim jwtClaim in jwt.Claims)
             {
