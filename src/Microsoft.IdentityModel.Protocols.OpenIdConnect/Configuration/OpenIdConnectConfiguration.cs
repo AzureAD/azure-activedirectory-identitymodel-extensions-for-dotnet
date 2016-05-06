@@ -62,7 +62,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <param name="configuration"><see cref="OpenIdConnectConfiguration"/> object to serialize.</param>
         /// <returns>json string representing the configuration object.</returns>
         /// <exception cref="ArgumentNullException">if 'configuration' is null or empty.</exception>
-        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
@@ -85,7 +84,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <param name="json">a json string containing the metadata</param>
         /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
         public OpenIdConnectConfiguration(string json)
-            : this()
         {
             if(string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
