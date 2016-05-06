@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class RsaSecurityKeyTests
     {
-        [Fact(DisplayName = "RsaSecurityKeyTests: Constructor")]
+        [Fact]
         public void Constructor()
         {
             // testing constructor that takes rsa parameters
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact(DisplayName = "RsaSecurityKeyTests: HasPrivateKey")]
+        [Fact]
         public void HasPrivateKey()
         {
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048 does not have the private key.");
@@ -96,13 +96,35 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(KeyingMaterial.RsaSecurityKey_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKey_2048_Public has the private key.");
         }
 
-        [Fact(DisplayName = "RsaSecurityTests: KeySize")]
+        [Fact]
         public void KeySize()
         {
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKey_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKey_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKey_4096.KeySize == 4096, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 4096", KeyingMaterial.RsaSecurityKey_4096.KeySize));
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IsSupportedAlgDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool expectedResult)
+        {
+            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+       }
+
+        public static TheoryData<RsaSecurityKey, string, bool> IsSupportedAlgDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<RsaSecurityKey, string, bool>();
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, false);
+                dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                return dataset;
+            }
         }
     }
 }

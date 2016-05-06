@@ -61,5 +61,28 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             // there are no defaults.
         }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IsSupportedAlgDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void IsSupportedAlgorithm(ECDsaSecurityKey key, string alg, bool expectedResult)
+        {
+            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+        }
+
+        public static TheoryData<ECDsaSecurityKey, string, bool> IsSupportedAlgDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<ECDsaSecurityKey, string, bool>();
+                dataset.Add(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true);
+                dataset.Add(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.EcdsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.Aes128Encryption, false);
+                dataset.Add(KeyingMaterial.ECDsa521Key, SecurityAlgorithms.EcdsaSha384, true);
+                return dataset;
+
+            }
+        }
     }
 }

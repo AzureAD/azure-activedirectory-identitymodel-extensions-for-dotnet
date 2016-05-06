@@ -118,11 +118,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             JsonWebKey jsonWebKey = new JsonWebKey();
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jsonWebKey, "JsonWebKey_GetSets");
-            List<string> methods = new List<string>{"Alg", "Kid", "Kty", "X5t", "X5u", "Use"};
+            List<string> methods = new List<string> { "Alg", "Kid", "Kty", "X5t", "X5u", "Use" };
             List<string> errors = new List<string>();
-            foreach(string method in methods)
+            foreach (string method in methods)
             {
-                TestUtilities.GetSet(jsonWebKey, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString()}, errors);
+                TestUtilities.GetSet(jsonWebKey, method, null, new object[] { Guid.NewGuid().ToString(), null, Guid.NewGuid().ToString() }, errors);
                 jsonWebKey.X5c.Add(method);
             }
 
@@ -170,6 +170,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return false;
 
             return true;
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IsSupportedAlgDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool expectedResult)
+        {
+            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+        }
+
+        public static TheoryData<JsonWebKey, string, bool> IsSupportedAlgDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<JsonWebKey, string, bool>();
+                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.RsaSha256Signature, false);
+                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, false);
+                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false);
+                return dataset;
+            }
         }
     }
 }

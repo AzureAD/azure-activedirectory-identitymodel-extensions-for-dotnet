@@ -127,6 +127,26 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSha512:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSha512Signature:
+                    return _certificate.PublicKey != null;
+
+                default:
+                    return false;
+            }
+        }
+
         /// <summary>
         /// Gets a bool indicating if a PrivateKey is available.
         /// </summary>

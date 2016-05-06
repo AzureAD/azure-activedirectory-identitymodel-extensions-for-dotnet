@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
 
-            if (!IsSupportedAlgorithm(algorithm))
+            if (!key.IsSupportedAlgorithm(algorithm))
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10640, (algorithm ?? "null"));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
@@ -116,26 +116,6 @@ namespace Microsoft.IdentityModel.Tokens
 
                 _minimumSymmetricKeySizeInBits = value;
             }
-        }
-
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            if (string.IsNullOrWhiteSpace(algorithm))
-                return false;
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HmacSha256:
-                case SecurityAlgorithms.HmacSha384:
-                case SecurityAlgorithms.HmacSha512:
-                    return true;
-                default:
-                    return false;
-            }
-
         }
 
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] key)

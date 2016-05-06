@@ -279,9 +279,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             foreach (var algorithm in
                 new string[] {
-                    SecurityAlgorithms.EcdsaSha256,
-                    SecurityAlgorithms.EcdsaSha384,
-                    SecurityAlgorithms.EcdsaSha512,
                     SecurityAlgorithms.RsaSha256,
                     SecurityAlgorithms.RsaSha384,
                     SecurityAlgorithms.RsaSha512,
@@ -298,8 +295,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     errors.Add("Creation of AsymmetricSignatureProvider with algorithm: " + algorithm + ", threw: " + ex.Message);
                 }
 
-                TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
             }
+
+            foreach (var algorithm in
+                new string[] {
+                    SecurityAlgorithms.EcdsaSha256,
+                    SecurityAlgorithms.EcdsaSha384,
+                    SecurityAlgorithms.EcdsaSha512 })
+            {
+                try
+                {
+                    var provider = new AsymmetricSignatureProvider(KeyingMaterial.ECDsa256Key, algorithm);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add("Creation of AsymmetricSignatureProvider with algorithm: " + algorithm + ", threw: " + ex.Message);
+                }
+
+            }
+            TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
+
         }
 
         [Fact(DisplayName = "SignatureProviderTests: Verify Asymmetric Signature Providers")]

@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 x509SecurityKey = new X509SecurityKey(null);
                 expectedException.ProcessNoException();
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 expectedException.ProcessException(exception);
             }
@@ -65,6 +65,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void Defaults()
         {
             // there are no defaults.
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IsSupportedAlgDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void IsSupportedAlgorithm(X509SecurityKey key, string alg, bool expectedResult)
+        {
+            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+        }
+
+        public static TheoryData<X509SecurityKey, string, bool> IsSupportedAlgDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<X509SecurityKey, string, bool>();
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.Aes128Encryption, false);
+                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256, SecurityAlgorithms.RsaSha384, true);
+                return dataset;
+
+            }
         }
     }
 }
