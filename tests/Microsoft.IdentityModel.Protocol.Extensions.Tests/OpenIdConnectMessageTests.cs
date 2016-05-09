@@ -144,8 +144,8 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectMessage message = new OpenIdConnectMessage();
             Type type = typeof(OpenIdConnectMessage);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 47)
-                Assert.Fail("Number of public fields has changed from 47 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 48)
+                Assert.Fail("Number of public fields has changed from 48 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
