@@ -116,7 +116,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>The default value is ClaimTypeMapping.OutboundClaimTypeMap</para>
         /// </summary>
         /// <remarks>This mapping is applied only when using <see cref="JwtPayload.AddClaim"/> or <see cref="JwtPayload.AddClaims"/>. Adding values directly will not result in translation.</remarks>
-        /// <exception cref="ArgumentNullException">'value is null.</exception>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
         public IDictionary<string, string> OutboundClaimTypeMap
         {
             get
@@ -158,7 +158,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain the original JSON claim 'name' if a mapping occurred when the <see cref="Claim"/>(s) were created.
         /// <para>See <seealso cref="InboundClaimTypeMap"/> for more information.</para>
         /// </summary>
-        /// <exception cref="ArgumentException">if <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
+        /// <exception cref="ArgumentException">If <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
         public static string ShortClaimTypeProperty
         {
             get
@@ -179,7 +179,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain .Net type that was recogninzed when JwtPayload.Claims serialized the value to JSON.
         /// <para>See <seealso cref="InboundClaimTypeMap"/> for more information.</para>
         /// </summary>
-        /// <exception cref="ArgumentException">if <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
+        /// <exception cref="ArgumentException">If <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
         public static string JsonClaimTypeProperty
         {
             get
@@ -217,7 +217,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets or sets the token lifetime in minutes.
         /// </summary>
-        /// <remarks>Used by <see cref="CreateToken(string, string, ClaimsIdentity, DateTime?, DateTime?, SigningCredentials)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
+        /// <remarks>Used by <see cref="CreateToken(SecurityTokenDescriptor)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
         public int TokenLifetimeInMinutes
         {
@@ -235,6 +235,10 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Gets the type of the <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>.
+        /// </summary>
+        /// <return>The type of <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/></return>
         public override Type TokenType
         {
             get { return typeof(JwtSecurityToken); }
@@ -263,7 +267,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Determines if the string is a well formed Json Web token (see: http://tools.ietf.org/html/rfc7519 )
         /// </summary>
-        /// <param name="tokenString">string that should represent a valid JSON Web Token.</param>
+        /// <param name="tokenString">String that should represent a valid JSON Web Token.</param>
         /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/>( token, @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$" ).
         /// </remarks>
         /// <returns>
@@ -301,7 +305,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Returns a Json Web Token (JWT).
         /// </summary>
-        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
         /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign the JSON.</remarks>
         public virtual string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
         {
@@ -321,13 +325,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Creates a <see cref="JwtSecurityToken"/>
         /// </summary>
-        /// <param name="issuer">the issuer of the token.</param>
-        /// <param name="audience">the audience for this token.</param>
-        /// <param name="subject">the source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">the notbefore time for this token.</param>
-        /// <param name="expires">the expiration time for this token.</param>
-        /// <param name="issuedAt">the issue time for this token.</param>
-        /// <param name="signingCredentials">contains cryptographic material for generating a signature.</param>
+        /// <param name="issuer">The issuer of the token.</param>
+        /// <param name="audience">The audience for this token.</param>
+        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">The notbefore time for this token.</param>
+        /// <param name="expires">The expiration time for this token.</param>
+        /// <param name="issuedAt">The issue time for this token.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
@@ -336,7 +340,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign the JSON.</para>
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
         public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials).RawData;
@@ -345,7 +349,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Creates a Json Web Token (JWT).
         /// </summary>
-        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <param name="tokenDescriptor"> A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
         /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</remarks>
         public virtual JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
@@ -365,13 +369,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Creates a <see cref="JwtSecurityToken"/>
         /// </summary>
-        /// <param name="issuer">the issuer of the token.</param>
-        /// <param name="audience">the audience for this token.</param>
-        /// <param name="subject">the source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">the notbefore time for this token.</param>
-        /// <param name="expires">the expiration time for this token.</param>
-        /// <param name="issuedAt">the issue time for this token.</param>
-        /// <param name="signingCredentials">contains cryptographic material for generating a signature.</param>
+        /// <param name="issuer">The issuer of the token.</param>
+        /// <param name="audience">The audience for this token.</param>
+        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">The notbefore time for this token.</param>
+        /// <param name="expires">The expiration time for this token.</param>
+        /// <param name="issuedAt">The issue time for this token.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
@@ -380,7 +384,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
         public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials);
@@ -389,7 +393,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Creates a Json Web Token (JWT).
         /// </summary>
-        /// <param name="tokenDescriptor"> a <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <param name="tokenDescriptor"> A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
         /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</remarks>
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
@@ -461,6 +465,11 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Convert string into <see cref="JwtSecurityToken"/>.
+        /// </summary>
+        /// <param name="token">A 'JSON Web Token' (JWT). May be signed as per 'JSON Web Signature' (JWS).</param>
+        /// <returns>The <see cref="JwtSecurityToken"/></returns>
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (token == null)
@@ -645,8 +654,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="SecurityKey"/> and algorithm specified.
         /// </summary>
-        /// <param name="input">string to be signed</param>
-        /// <param name="signatureProvider">the <see cref="SignatureProvider"/> used to sign the token</param>
+        /// <param name="input">String to be signed</param>
+        /// <param name="signatureProvider">The <see cref="SignatureProvider"/> used to sign the token</param>
         /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
         /// <exception cref="ArgumentNullException">'input' or 'signatureProvider' is null.</exception>
         internal static string CreateEncodedSignature(string input, SignatureProvider signatureProvider)
@@ -675,12 +684,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
         /// using 'JSON Web Signature' (JWS).</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
-        /// <exception cref="ArgumentNullException"> thrown if 'token is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException"> thrown if 'validationParameters is null.</exception>
-        /// <exception cref="SecurityTokenValidationException"> thrown if a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException"> thrown if the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
+        /// <exception cref="ArgumentNullException">If 'token is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters is null.</exception>
+        /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
         /// This can indicate that a key refresh is required.</exception>
-        /// <exception cref="SecurityTokenInvalidSignatureException"> thrown if after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
         /// <returns><see cref="JwtSecurityToken"/> that has the signature validated if token was signed and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</returns>
         /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
         /// <para>If the 'token' signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'token'.</para></remarks>
@@ -780,7 +789,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="jwt">The <see cref="JwtSecurityToken"/> to use as a <see cref="Claim"/> source.</param>
         /// <param name="issuer">The value to set <see cref="Claim.Issuer"/></param>
-        /// <param name="validationParameters"> contains parameters for validating the token.</param>
+        /// <param name="validationParameters"> Contains parameters for validating the token.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JwtSecurityToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JwtSecurityToken jwt, string issuer, TokenValidationParameters validationParameters)
         {
@@ -844,7 +853,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="actor"><see cref="ClaimsIdentity"/> as actor.</param>
         /// <returns><see cref="string"/> representing the actor.</returns>
         /// <remarks>If <see cref="ClaimsIdentity.BootstrapContext"/> is not null:
-        /// <para>&#160;&#160;if 'type' is 'string', return as string.</para>
+        /// <para>&#160;&#160;If 'type' is 'string', return as string.</para>
         /// <para>&#160;&#160;if 'type' is 'BootstrapContext' and 'BootstrapContext.SecurityToken' is 'JwtSecurityToken'</para>
         /// <para>&#160;&#160;&#160;&#160;if 'JwtSecurityToken.RawData' != null, return RawData.</para>        
         /// <para>&#160;&#160;&#160;&#160;else return <see cref="JwtSecurityTokenHandler.WriteToken( SecurityToken )"/>.</para>        
@@ -894,7 +903,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="audiences">The audiences found in the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        /// <remarks>See <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAudience(audiences, securityToken, validationParameters);
@@ -929,8 +938,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
-        /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
-        /// <param name="securityToken">the <SecurityToken> that is being validated.</SecurityToken></param>
+        /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+        /// <param name="securityToken">The <SecurityToken> that is being validated.</SecurityToken></param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
@@ -988,7 +997,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets or sets a bool that controls if token creation will set default 'exp', 'nbf' and 'iat' if not specified.
         /// </summary>
-        /// <remarks>see: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
+        /// <remarks>See: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
         [DefaultValue(true)]
         public bool SetDefaultTimesOnTokenCreation { get; set; }
 
@@ -997,8 +1006,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> to validate.</param>
-        /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
-        /// <remarks>If the <see cref="JwtSecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using <see cref="TokenValidationParameters.CertificateValidator"/>.</remarks>
+        /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
+        /// <remarks>If the <see cref="JwtSecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using the CertificateValidator.</remarks>
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
@@ -1014,6 +1023,12 @@ namespace System.IdentityModel.Tokens.Jwt
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Deserializes token with the provided <see cref="TokenValidationParameters"/>.
+        /// </summary>
+        /// <param name="reader"><see cref="XmlReader"/>.</param>
+        /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
+        /// <returns>The <see cref="SecurityToken"/></returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             throw new NotImplementedException();

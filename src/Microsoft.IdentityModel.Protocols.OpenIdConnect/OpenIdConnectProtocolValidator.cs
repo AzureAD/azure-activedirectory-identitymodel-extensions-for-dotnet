@@ -121,8 +121,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or set the <see cref="TimeSpan"/> defining how long a nonce is valid.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">if 'value' is less than or equal to 'TimeSpan.Zero'.</exception>
-        /// <remarks>if <see cref="RequireTimeStampInNonce"/> is true, then the nonce timestamp is bound by DateTime.UtcNow + NonceLifetime.</remarks>
+        /// <exception cref="ArgumentOutOfRangeException">If 'value' is less than or equal to 'TimeSpan.Zero'.</exception>
+        /// <remarks>If <see cref="RequireTimeStampInNonce"/> is true, then the nonce timestamp is bound by DateTime.UtcNow + NonceLifetime.</remarks>
         public TimeSpan NonceLifetime
         {
             get
@@ -208,8 +208,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Validates that an OpenIdConnect Response from 'authorization_endpoint" is valid as per http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
         /// <param name="validationContext">the <see cref="OpenIdConnectProtocolValidationContext"/> that contains expected values.</param>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolException">if the response is not spec compliant.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolException">If the response is not spec compliant.</exception>
         /// <remarks>It is assumed that the IdToken had ('aud', 'iss', 'signature', 'lifetime') validated.</remarks>
         public virtual void ValidateAuthenticationResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
@@ -252,8 +252,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Validates that an OpenIdConnect Response from "token_endpoint" is valid as per http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
         /// <param name="validationContext">the <see cref="OpenIdConnectProtocolValidationContext"/> that contains expected values.</param>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolException">if the response is not spec compliant.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolException">If the response is not spec compliant.</exception>
         /// <remarks>It is assumed that the IdToken had ('aud', 'iss', 'signature', 'lifetime') validated.</remarks>
         public virtual void ValidateTokenResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
@@ -288,8 +288,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Validates that an OpenIdConnect Response from "useinfo_endpoint" is valid as per http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
         /// <param name="validationContext">the <see cref="OpenIdConnectProtocolValidationContext"/> that contains expected values.</param>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolException">if the response is not spec compliant.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolException">If the response is not spec compliant.</exception>
         public virtual void ValidateUserInfoResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
@@ -469,10 +469,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Validates the 'token' or 'code' see: http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
-        /// <param name="expectedValue">the expected value of the hash. normally the c_hash or at_hash claim.</param>
-        /// <param name="hashItem">item to be hashed per oidc spec.</param>
-        /// <param name="algorithm">algorithm to use for compute hash.</param>
-        /// <exception cref="OpenIdConnectProtocolException">if expected value does not equal the hashed value.</exception>
+        /// <param name="expectedValue">The expected value of the hash. normally the c_hash or at_hash claim.</param>
+        /// <param name="hashItem">Item to be hashed per oidc spec.</param>
+        /// <param name="algorithm">Algorithm for computing hash over hashItem.</param>
+        /// <exception cref="OpenIdConnectProtocolException">If expected value does not equal the hashed value.</exception>
         private void ValidateHash(string expectedValue, string hashItem, string algorithm)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10303, expectedValue);
@@ -490,12 +490,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Validates the 'code' according to http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
-        /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains the protocol message to validate.</param>
-        /// <exception cref="ArgumentNullException">if 'idToken' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the validationContext contains a 'code' and there is no 'c_hash' claim in the 'id_token'.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the validationContext contains a 'code' and the 'c_hash' claim is not a string in the 'id_token'.</exception> 
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the 'c_hash' claim in the 'idToken' does not correspond to the 'code' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
+        /// <param name="validationContext">A <see cref="OpenIdConnectProtocolValidationContext"/> that contains the protocol message to validate.</param>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext.ValidatedIdToken' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the validationContext contains a 'code' and there is no 'c_hash' claim in the 'id_token'.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the validationContext contains a 'code' and the 'c_hash' claim is not a string in the 'id_token'.</exception> 
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the 'c_hash' claim in the 'id_token' does not correspond to the 'code' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
         protected virtual void ValidateCHash(OpenIdConnectProtocolValidationContext validationContext)
         {
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10304);
@@ -540,12 +540,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Validates the 'token' according to http://openid.net/specs/openid-connect-core-1_0.html
         /// </summary>
-        /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains the protocol message to validate.</param>
-        /// <exception cref="ArgumentNullException">if 'idToken' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">if the validationContext contains a 'token' and there is no 'at_hash' claim in the id_token.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">if the validationContext contains a 'token' and the 'at_hash' claim is not a string in the 'id_token'.</exception> 
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">if the 'at_hash' claim in the 'idToken' does not correspond to the 'token' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
+        /// <param name="validationContext">A <see cref="OpenIdConnectProtocolValidationContext"/> that contains the protocol message to validate.</param>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext.ValidatedIdToken' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the validationContext contains a 'token' and there is no 'at_hash' claim in the id_token.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the validationContext contains a 'token' and the 'at_hash' claim is not a string in the 'id_token'.</exception> 
+        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the 'at_hash' claim in the 'id_token' does not correspond to the 'access_token' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
         protected virtual void ValidateAtHash(OpenIdConnectProtocolValidationContext validationContext)
         {
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10309);
@@ -586,12 +586,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Validates that the <see cref="JwtSecurityToken"/> contains the nonce.
         /// </summary>
-        /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains the 'nonce' to validate.</param>
-        /// <exception cref="ArgumentNullException">if 'idToken' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null and RequireNonce is true.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if the 'nonce' found in the 'id_token' does not match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">if <see cref="RequireTimeStampInNonce"/> is true and a timestamp is not: found, well formed, negatire or expired.</exception>
+        /// <param name="validationContext">A <see cref="OpenIdConnectProtocolValidationContext"/> that contains the 'nonce' to validate.</param>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext.ValidatedIdToken' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is null and RequireNonce is true.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">If the 'nonce' found in the 'id_token' does not match <see cref="OpenIdConnectProtocolValidationContext.Nonce"/>.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidNonceException">If <see cref="RequireTimeStampInNonce"/> is true and a timestamp is not: found, well formed, negatire or expired.</exception>
         /// <remarks>The timestamp is only validated if <see cref="RequireTimeStampInNonce"/> is true.
         /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the 'id_token'.</para></remarks>
         protected virtual void ValidateNonce(OpenIdConnectProtocolValidationContext validationContext)
@@ -662,10 +662,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Validates that the 'state' in message is valid.
         /// </summary>
-        /// <param name="validationContext">a <see cref="OpenIdConnectProtocolValidationContext"/> that contains the 'state' to validate.</param>
-        /// <exception cref="ArgumentNullException">if 'validationContext' is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidStateException">if 'state' is present in <see cref="OpenIdConnectProtocolValidationContext.State"/> but either <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage"/> or <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage.State"/> is null.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidStateException">if 'state' in the context does not match the state in the message.</exception>
+        /// <param name="validationContext">A <see cref="OpenIdConnectProtocolValidationContext"/> that contains the 'state' to validate.</param>
+        /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationContext.ProtocolMessage ' is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidStateException">If 'validationContext.State' is present in <see cref="OpenIdConnectProtocolValidationContext.State"/> but either <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage"/> or its state property is null.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidStateException">If 'state' in the context does not match the state in the message.</exception>
         protected virtual void ValidateState(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (!RequireStateValidation)

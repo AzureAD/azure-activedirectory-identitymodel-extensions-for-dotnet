@@ -50,6 +50,10 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _disposeRsa;
         private RSACryptoServiceProvider _rsa;
 
+        /// <summary>
+        /// Initializes an new instance of <see cref="RSACryptoServiceProviderProxy"/>.
+        /// </summary>
+        /// <param name="rsa"><see cref="RSACryptoServiceProvider"/></param>
         public RSACryptoServiceProviderProxy(RSACryptoServiceProvider rsa)
         {
             if (rsa == null)
@@ -84,22 +88,41 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Destructs the <see cref="RSACryptoServiceProviderProxy"/> instance.
+        /// </summary>
         ~RSACryptoServiceProviderProxy()
         {
             this.Dispose(false);
         }
 
+        /// <summary>
+        /// Releases all resources used by the current instance of the <see cref="RSACryptoServiceProviderProxy"/> class.
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Computes the hash value of the specified byte array using the specified hash algorithm, and signs the resulting hash value.
+        /// </summary>
+        /// <param name="signingInput">The input byte array for which to compute the hash.</param>
+        /// <param name="hash">The hash algorithm to use to create the hash value. </param>
+        /// <returns>The <see cref="RSA"/> Signature for the specified data.</returns>
         public byte[] SignData(byte[] signingInput, object hash)
         {
             return _rsa.SignData(signingInput, hash);
         }
 
+        /// <summary>
+        /// Verifies that a digital signature is valid by determining the hash value in the signature using the provided public key and comparing it to the hash value of the provided data.
+        /// </summary>
+        /// <param name="signingInput">The input byte array.</param>
+        /// <param name="hash">The hash algorithm to use to create the hash value.</param>
+        /// <param name="signature">The signature byte array to be verified.</param>
+        /// <returns>true if the signature is valid; otherwise, false.</returns>
         public bool VerifyData(byte[] signingInput, object hash, byte[] signature)
         {
             return _rsa.VerifyData(signingInput, hash, signature);

@@ -46,8 +46,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
         /// <returns><see cref="JsonWebKeySet"/></returns>
-        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
-        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
+        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
         static public JsonWebKeySet Create(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -67,8 +67,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing values.</param>
-        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
-        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
+        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
         public JsonWebKeySet(string json)
         {
             if (string.IsNullOrEmpty(json))

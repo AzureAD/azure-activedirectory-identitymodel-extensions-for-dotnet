@@ -33,15 +33,15 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Interface that defines a model for retrieving configuration data.
     /// </summary>
-    /// <typeparam name="T">must be class</typeparam>
+    /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     public interface IConfigurationManager<T> where T : class
     {
         /// <summary>
         /// Retrieve the current configuration, refreshing and/or caching as needed.
-        /// This should throw if the configuration cannot be retrieved, instead of returning null.
+        /// This method will throw if the configuration cannot be retrieved, instead of returning null.
         /// </summary>
-        /// <param name="cancel"></param>
-        /// <returns></returns>
+        /// <param name="cancel"><see cref="CancellationToken"/></param>
+        /// <returns><see cref="Task{T}"/></returns>
         Task<T> GetConfigurationAsync(CancellationToken cancel);
 
         /// <summary>

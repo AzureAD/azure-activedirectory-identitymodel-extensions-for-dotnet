@@ -52,13 +52,21 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with <see cref="IEnumerable{Claim}"/>. Default string comparer <see cref="StringComparer.Ordinal"/>.
-        /// <param name="claims">the claims to add.</param>
+        /// <param name="claims">The claims to add.</param>
         /// </summary>
         public JwtPayload(IEnumerable<Claim> claims)
             : this(issuer: null, audience: null, claims: claims, notBefore: null, expires: null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
+        /// </summary>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <param name="notBefore">If notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
+        /// <param name="expires">If expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
            : this(issuer, audience, claims, notBefore, expires, null)
         {
@@ -67,15 +75,15 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// </summary>
-        /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
-        /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
-        /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
-        /// <param name="notBefore">if notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
-        /// <param name="expires">if expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
-        /// <param name="issuedAt">if issuedAt.HasValue is 'true' a { iat, 'value' } claim is added.</param>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <param name="notBefore">If notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
+        /// <param name="expires">If expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
         /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
-        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
         {
@@ -223,7 +231,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets 'value' of the 'issuer' claim { iss, 'value' }.
+        /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
         /// </summary>
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public string Iss
@@ -244,7 +252,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets 'value' of the 'nonce' claim { nonce, 'value' }.
+        /// Gets the 'value' of the 'nonce' claim { nonce, 'value' }.
         /// </summary>
         /// <remarks>If the 'nonce' claim is not found, null is returned.</remarks>
         public string Nonce
@@ -256,7 +264,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
         
         /// <summary>
-        /// Gets "value" of the 'subject' claim { sub, 'value' }.
+        /// Gets the 'value' of the 'subject' claim { sub, 'value' }.
         /// </summary>
         /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
         public string Sub
@@ -268,7 +276,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// Gets the 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned. Time is returned as UTC.</remarks>
         public DateTime ValidFrom
@@ -280,7 +288,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets 'value' of the 'expiration' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// Gets the 'value' of the 'expiration' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public DateTime ValidTo
@@ -419,8 +427,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Adds a JSON object representing the <see cref="Claim"/> to the <see cref="JwtPayload"/>
         /// </summary>
-        /// <param name="claim">{ 'Claim.Type', 'Claim.Value' } is added. If a JSON object is found with the name == <see cref="Claim.Type"/> then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
-        /// <remarks>See <see cref="AddClaims"/> for details on how <see cref="JwtSecurityTokenHandler.OutboundClaimTypeMap"/> is applied.</remarks>
+        /// <param name="claim">{ 'Claim.Type', 'Claim.Value' } is added. If a JSON object is found with the name == <see cref="Claim.Type"/> then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <remarks>See <see cref="AddClaims"/> For details on how <see cref="JwtSecurityTokenHandler.OutboundClaimTypeMap"/> is applied.</remarks>
         /// <exception cref="ArgumentNullException">'claim' is null.</exception>
         public void AddClaim(Claim claim)
         {
@@ -435,7 +443,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Adds a number of <see cref="Claim"/> to the <see cref="JwtPayload"/> as JSON { name, value } pairs.
         /// </summary>
-        /// <param name="claims">for each <see cref="Claim"/> a JSON pair { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
+        /// <param name="claims">For each <see cref="Claim"/> a JSON pair { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
         /// <remarks>
         /// <para>Any <see cref="Claim"/> in the <see cref="IEnumerable{Claim}"/> that is null, will be ignored.</para></remarks>
         /// <exception cref="ArgumentNullException">'claims' is null.</exception>
@@ -683,8 +691,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="key">Claim in the payload that should map to an integer.</param>
         /// <remarks>If the claim is not found, the function returns: DateTime.MinValue
         /// </remarks>
-        /// <exception cref="SecurityTokenException">if an overflow exception is thrown by the runtime.</exception>
-        /// <returns>the DateTime representation of a claim.</returns>
+        /// <exception cref="SecurityTokenException">If an overflow exception is thrown by the runtime.</exception>
+        /// <returns>The DateTime representation of a claim.</returns>
         private DateTime GetDateTime(string key)
         {
             object dateValue;
@@ -733,8 +741,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Serializes this instance to JSON.
         /// </summary>
-        /// <returns>this instance as JSON.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        /// <returns>This instance as JSON.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string SerializeToJson()
         {
             return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
@@ -744,7 +752,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Encodes this instance as Base64UrlEncoded JSON.
         /// </summary>
         /// <returns>Base64UrlEncoded JSON.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string Base64UrlEncode()
         {
             return Base64UrlEncoder.Encode(SerializeToJson());
@@ -754,8 +762,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtPayload"/> instance.
         /// </summary>
         /// <param name="base64UrlEncodedJsonString">base64url encoded JSON to deserialize.</param>
-        /// <returns>an instance of <see cref="JwtPayload"/>.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        /// <returns>An instance of <see cref="JwtPayload"/>.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
         public static JwtPayload Base64UrlDeserialize(string base64UrlEncodedJsonString)
         {
             return JsonExtensions.DeserializeJwtPayload(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
@@ -764,9 +772,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Deserialzes JSON into a <see cref="JwtPayload"/> instance.
         /// </summary>
-        /// <param name="jsonString">the JSON to deserialize.</param>
-        /// <returns>an instance of <see cref="JwtPayload"/>.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        /// <param name="jsonString">The JSON to deserialize.</param>
+        /// <returns>An instance of <see cref="JwtPayload"/>.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
         public static JwtPayload Deserialize(string jsonString)
         {
             return JsonExtensions.DeserializeJwtPayload(jsonString);

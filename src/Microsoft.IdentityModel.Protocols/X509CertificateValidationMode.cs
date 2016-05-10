@@ -27,6 +27,9 @@
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// Represents X509Certificate validation mode.
+    /// </summary>
     public class X509CertificateValidationMode
     {
     }

@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Builds a Url using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>UrlEncoded string.</returns>
-        /// <remarks>Each parameter &lt;Key, Value> is first transformed using <see cref="HttpUtility.UrlEncode(string)"/>.</remarks>
+        /// <remarks>Each parameter &lt;Key, Value&gt; is first transformed using <see cref="Uri.EscapeDataString(string)"/>.</remarks>
         public virtual string BuildRedirectUrl()
         {
             StringBuilder strBuilder = new StringBuilder(_issuerAddress);
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="parameter">The parameter name.</param>
         /// <returns>The value of the parameter or null if the parameter does not exists.</returns>
-        /// <exception cref="ArgumentNullException">parameter is null</exception>
+        /// <exception cref="ArgumentNullException">If parameter is null</exception>
         public virtual string GetParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the issuer address.
         /// </summary>
-        /// <exception cref="ArgumentNullException">The 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
         public string IssuerAddress
         {
             get
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the title used when constructing the post string.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if the 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
         public string PostTitle 
         {
             get
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Removes a parameter.
         /// </summary>
         /// <param name="parameter">The parameter name.</param>
-        /// <exception cref="ArgumentNullException">if 'parameter' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If 'parameter' is null or empty.</exception>
         public virtual void RemoveParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="parameter">The parameter name.</param>
         /// <param name="value">The value to be assigned to parameter.</param>
-        /// <exception cref="ArgumentNullException">if 'parameterName' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If 'parameterName' is null or empty.</exception>
         /// <remarks>If null is passed as value and the parameter exists, that parameter is removed.</remarks>
         public void SetParameter(string parameter, string value) 
         {
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the script button text used when constructing the post string.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if the 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
         public string ScriptButtonText
         {
             get
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the text used when constructing the post string that will be displayed to used if script is disabled.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if the 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
         public string ScriptDisabledText
         {
             get

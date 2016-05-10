@@ -32,11 +32,14 @@ using System;
 
 namespace Microsoft.IdentityModel.Protocols
 {
+    /// <summary>
+    /// Converts an object to and from a Base64Url encoded string.
+    /// </summary>
     public class Base64UrlConverter : JsonConverter
     {
         
         /// <summary>
-        /// Converts a byte array to a Base64Url encoded string
+        /// Converts a byte array to a Base64Url encoded string.
         /// </summary>
         /// <param name="input">The byte array to convert</param>
         /// <returns>The Base64Url encoded form of the input</returns>
@@ -64,8 +67,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Adds padding to the input
         /// </summary>
-        /// <param name="input"> the input string </param>
-        /// <returns> the padded string </returns>
+        /// <param name="input">The input string.</param>
+        /// <returns>The padded string.</returns>
         private static string Pad( string input )
         {
             var count = 3 - ( ( input.Length + 3 ) % 4 );
@@ -78,6 +81,11 @@ namespace Microsoft.IdentityModel.Protocols
             return input + new string( '=', count );
         }
 
+        /// <summary>
+        /// Determines whether the input object type can convert to the specified object type.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>true if this instance can convert the specified object type; otherwise, false.</returns>
         public override bool CanConvert( Type objectType )
         {
             if ( objectType == typeof( byte[] ) )
@@ -86,6 +94,14 @@ namespace Microsoft.IdentityModel.Protocols
             return false;
         }
 
+        /// <summary>
+        /// Reads the JSON representation of the object.
+        /// </summary>
+        /// <param name="reader">The <see cref="JsonReader"/> to read from.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="existingValue">The existing value of object being read.</param>
+        /// <param name="serializer">The calling serializer <see cref="JsonSerializer"/>.</param>
+        /// <returns>The object value.</returns>
         public override object ReadJson( JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer )
         {
             if ( objectType != typeof( byte[] ) )
@@ -105,6 +121,12 @@ namespace Microsoft.IdentityModel.Protocols
             return null;
         }
 
+        /// <summary>
+        /// Writes the JSON representation of the object.
+        /// </summary>
+        /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
+        /// <param name="value">The input value.</param>
+        /// <param name="serializer">The calling serializer <see cref="JsonSerializer"/>.</param>
         public override void WriteJson( JsonWriter writer, object value, JsonSerializer serializer )
         {
             if ( value.GetType() != typeof( byte[] ) )

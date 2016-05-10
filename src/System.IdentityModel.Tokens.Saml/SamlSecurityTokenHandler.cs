@@ -36,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace System.IdentityModel.Tokens.Saml
 {
     /// <summary>
-    /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator,
+    /// A derived <see cref="System.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler"/> that implements ISecurityTokenValidator,
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
@@ -110,8 +110,8 @@ namespace System.IdentityModel.Tokens.Saml
         /// Creates claims from a Saml securityToken.
         /// </summary>
         /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
-        /// <param name="issuer">the issuer value for each <see cref="Claim"/> in the <see cref="ClaimsIdentity"/>.</param>
-        /// <param name="validationParameters"> contains parameters for validating the securityToken.</param>
+        /// <param name="issuer">The issuer value for each <see cref="Claim"/> in the <see cref="ClaimsIdentity"/>.</param>
+        /// <param name="validationParameters"> Contains parameters for validating the securityToken.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
@@ -131,7 +131,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
         /// <returns>A <see cref="SecurityToken"/> instance.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if 'tokenDescriptor' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'tokenDescriptor' is null.</exception>
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
@@ -190,8 +190,8 @@ namespace System.IdentityModel.Tokens.Saml
         /// <summary>
         /// Obsolete method, use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="tokenString">not supported.</param>
-        /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
+        /// <param name="tokenString">Not supported.</param>
+        /// <exception cref="NotSupportedException">Use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
         public override SecurityToken ReadToken(string tokenString)
         {
             throw new NotSupportedException(LogMessages.IDX11007);
@@ -200,8 +200,8 @@ namespace System.IdentityModel.Tokens.Saml
         /// <summary>
         /// Obsolete method, use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="reader">no supported.</param>
-        /// <exception cref="NotSupportedException"> use use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
+        /// <param name="reader">Not supported.</param>
+        /// <exception cref="NotSupportedException">Use <see cref="ReadToken(XmlReader, TokenValidationParameters)"/> to read a <see cref="SamlSecurityToken"/>.</exception>
         public override SecurityToken ReadToken(XmlReader reader)
         {
             throw new NotImplementedException(LogMessages.IDX11003);
@@ -224,7 +224,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="securityToken">A string containing a well formed securityToken.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
-        /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
+        /// <param name="validatedToken">The <see cref="SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
@@ -386,7 +386,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> to validate.</param>
-        /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
+        /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);

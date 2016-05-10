@@ -128,13 +128,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class specifying optional parameters.
         /// </summary>
-        /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
-        /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
-        /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
-        /// <param name="expires">if expires.HasValue a { exp, 'value' } claim is added.</param>
-        /// <param name="notBefore">if notbefore.HasValue a { nbf, 'value' } claim is added.</param>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be used to sign the <see cref="JwtSecurityToken"/>. See <see cref="JwtHeader(SigningCredentials)"/> for details pertaining to the Header Parameter(s).</param>
-        /// <exception cref="ArgumentException">if 'expires' &lt;= 'notbefore'.</exception>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
         public JwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null)
         {
             if (expires.HasValue && notBefore.HasValue)
@@ -258,7 +258,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the signature algorithm associated with this instance.
         /// </summary>
-        /// <remarks>if there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
+        /// <remarks>If there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
             get { return Header.Alg; }
@@ -279,7 +279,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override SecurityKey SigningKey { get; set; }
 
         /// <summary>
-        /// Gets "value" of the 'subject' claim { sub, 'value' }.
+        /// Gets the "value" of the 'subject' claim { sub, 'value' }.
         /// </summary>
         /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
         public string Subject
@@ -288,7 +288,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// Gets the 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom
@@ -297,7 +297,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets 'value' of the 'expiration' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// Gets the 'value' of the 'expiration' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidTo

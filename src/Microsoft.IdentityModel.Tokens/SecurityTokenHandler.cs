@@ -42,11 +42,20 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
+        /// <summary>
+        /// Returns <see cref="SecurityKeyIdentifierClause"/>.
+        /// </summary>
+        /// <param name="token"><see cref="SecurityToken"/></param>
+        /// <param name="attached">true if attached; otherwise, false.</param>
         public virtual SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Returns <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor"><see cref="SecurityTokenDescriptor"/></param>
         public virtual SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             throw new NotImplementedException();
@@ -74,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the System.Type of the SecurityToken this instance handles.
+        /// This must be overridden to get the System.Type of the SecurityToken this instance handles.
         /// </summary>
         public abstract Type TokenType
         {
@@ -102,6 +111,11 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 
+        /// <summary>
+        /// Gets security token.
+        /// </summary>
+        /// <param name="reader"><see cref="XmlReader"/>.</param>
+        /// <remarks>SecurityToken instance which represents the serialized token.</remarks>
         public virtual SecurityToken ReadToken(XmlReader reader)
         {
             return null;
@@ -118,12 +132,18 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Serializes to XML a token of the type handled by this instance.
+        /// This must be overridden to serialize to XML a token of the type handled by this instance.
         /// </summary>
         /// <param name="writer">The XML writer.</param>
         /// <param name="token">A token of type <see cref="TokenType"/>.</param>
         public abstract void WriteToken(XmlWriter writer, SecurityToken token);
 
+        /// <summary>
+        /// This must be overridden to deserialize token with the provided <see cref="TokenValidationParameters"/>.
+        /// </summary>
+        /// <param name="reader"><see cref="XmlReader"/>.</param>
+        /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
+        /// <remarks>SecurityToken instance which represents the serialized token.</remarks>
         public abstract SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters);
     }
 }

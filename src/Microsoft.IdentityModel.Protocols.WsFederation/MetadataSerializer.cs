@@ -27,8 +27,14 @@
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
+    /// <summary>
+    /// This class serializes the xml metadata that we get from discovery endpoint.
+    /// </summary>
     public class MetadataSerializer
     {
+        /// <summary>
+        /// Gets or sets the <see cref="X509CertificateValidationMode"/>.
+        /// </summary>
         public X509CertificateValidationMode CertificateValidationMode { get; set; }
     }
 }

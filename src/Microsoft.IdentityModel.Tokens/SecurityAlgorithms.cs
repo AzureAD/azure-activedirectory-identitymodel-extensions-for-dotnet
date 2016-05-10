@@ -27,8 +27,12 @@
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Constants for Security Algorithm.
+    /// </summary>
     public static class SecurityAlgorithms
     {
+#pragma warning disable 1591
         public const string Aes128Encryption = "http://www.w3.org/2001/04/xmlenc#aes128-cbc";
         public const string Aes128KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
         public const string Aes192Encryption = "http://www.w3.org/2001/04/xmlenc#aes192-cbc";
@@ -89,5 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Sha256 = "SHA256";
         public const string Sha384 = "SHA384";
         public const string Sha512 = "SHA512";
+
+#pragma warning restore 1591
     }
 }

@@ -45,9 +45,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Definition for IssuerSigningKeyResolver.
     /// </summary>
-    /// <param name="token">the <see cref="string"/> representation of the token that is being validated.</param>
-    /// <param name="securityToken">the <SecurityToken> that is being validated. It may be null.</SecurityToken></param>
-    /// <param name="kid">a key identifier. It may be null.</param>
+    /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+    /// <param name="securityToken">The <SecurityToken> that is being validated. It may be null.</SecurityToken></param>
+    /// <param name="kid">A key identifier. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A <see cref="SecurityKey"/> to use when validating a signature.</returns>
     public delegate IEnumerable<SecurityKey> IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
@@ -171,6 +171,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateLifetime = true;
         }
 
+        /// <summary>
+        /// Gets or sets <see cref="TokenValidationParameters"/>.
+        /// </summary>
         public TokenValidationParameters ActorValidationParameters
         {
             get; set;
@@ -192,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/>.
         /// </summary>
-        /// <exception cref="ArgumentNullException"> if 'value' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If 'value' is null or whitespace.</exception>
         public string AuthenticationType
         {
             get
@@ -229,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the clock skew to apply when validating a time.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException"> if 'value' is less than 0.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">If 'value' is less than 0.</exception>
         [DefaultValue(300)]
         public TimeSpan ClockSkew
         {
@@ -512,11 +515,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a boolean to control if the issuer will be validated during token validation.
         /// </summary>
-        /// <remarks>Validation of the issuer, mitigates a forwarding attacks that can occur when an
+        /// <remarks>
+        /// Validation of the issuer mitigates forwarding attacks that can occur when an
         /// IdentityProvider represents multiple tenants and signs tokens with the same keys.
         /// It is possible that a token issued for the same audience could be from a different tenant. For example an application could accept users from
         /// contoso.onmicrosoft.com but not fabrikam.onmicrosoft.com, both valid tenants. A application that accepts tokens from fabrikam could forward them
         /// to the application that accepts tokens for contoso.
+        /// </remarks>
         [DefaultValue(true)]
         public bool ValidateIssuer
         {

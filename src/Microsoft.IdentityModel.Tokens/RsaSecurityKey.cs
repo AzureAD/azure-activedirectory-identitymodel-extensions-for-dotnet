@@ -31,10 +31,17 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Represents a Rsa security key.
+    /// </summary>
     public class RsaSecurityKey : AsymmetricSecurityKey
     {
         private bool? _hasPrivateKey;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RsaSecurityKey"/> class.
+        /// </summary>
+        /// <param name="rsaParameters"><see cref="RSAParameters"/></param>
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
             // must have modulus and exponent otherwise the crypto operations fail later
@@ -45,6 +52,10 @@ namespace Microsoft.IdentityModel.Tokens
             Parameters = rsaParameters;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RsaSecurityKey"/> class.
+        /// </summary>
+        /// <param name="rsa"><see cref="RSA"/></param>
         public RsaSecurityKey(RSA rsa)
         {
             if (rsa == null)
@@ -53,6 +64,10 @@ namespace Microsoft.IdentityModel.Tokens
             Rsa = rsa;
         }
 
+        /// <summary>
+        /// Gets a bool indicating if a private key exists.
+        /// </summary>
+        /// <return>true if it has a private key; otherwise, false.</return>
         public override bool HasPrivateKey
         {
             get
@@ -84,6 +99,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Gets RSA key size.
+        /// </summary>
         public override int KeySize
         {
             get
@@ -107,6 +125,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public RSA Rsa { get; private set; }
 
+        /// <summary>
+        /// Returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
+        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
+        /// If verifyOnly is false, then the private key is required.</param>
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (verifyOnly)
@@ -115,6 +139,11 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
+        /// <summary>
+        /// Returns whether the <see cref="RsaSecurityKey"/> supports the given algorithm.
+        /// </summary>
+        /// <param name="algorithm">The crypto algorithm to use.</param>
+        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))

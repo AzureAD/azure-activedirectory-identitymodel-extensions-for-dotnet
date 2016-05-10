@@ -86,11 +86,22 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
         };
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.<see cref="SecurityKey"/></param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm)
             : this(key, algorithm, false, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="willCreateSignatures">Whether this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.</param>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : this(key, algorithm, willCreateSignatures, null)
         {
@@ -99,9 +110,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
-        /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
-        /// <param name="willCreateSignatures">If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
+        /// <param name="willCreateSignatures">Whether this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
         /// <param name="asymmetricAlgorithmResolver">Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use for crypto operations.</param>
         /// <para>
         /// Creating signatures requires that the <see cref="SecurityKey"/> has access to a private key.
@@ -110,13 +121,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// willCreateSignatures is true and <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
+        /// willCreateSignatures is true and <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="CryptoProviderFactory.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
+        /// <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
         /// </exception>
-        /// <exception cref="ArgumentException">if 'algorithm" is not supported.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">if 'key' is not <see cref="RsaSecurityKey"/> or <see cref="X509SecurityKey"/>.</exception>
+        /// <exception cref="ArgumentException">If <see cref="SecurityKey.IsSupportedAlgorithm"/> returns false.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">If the runtime is unable to create a suitable cryptographic provider.</exception>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, AsymmetricAlgorithmResolver asymmetricAlgorithmResolver)
             : base(key, algorithm)
         {
@@ -195,6 +206,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #if NETSTANDARD1_4
+        /// <summary>
+        /// Returns the <see cref="HashAlgorithmName"/> instance.
+        /// </summary>
+        /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -304,6 +319,10 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 #else
+        /// <summary>
+        /// Returns the algorithm name.
+        /// </summary>
+        /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -507,8 +526,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the size of key in bytes
         /// </summary>
-        /// <param name="curveId">represents ecdsa curve -P256, P384, P512</param>
-        /// <returns>size of the key in bytes</returns>
+        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
+        /// <returns>Size of the key in bytes</returns>
         private uint GetKeyByteCount(string curveId)
         {
             if (string.IsNullOrEmpty(curveId))
@@ -535,9 +554,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the magic value representing the curve corresponding to the curve id.
         /// </summary>
-        /// <param name="curveId">represents ecdsa curve -P256, P384, P512</param>
-        /// <param name="willCreateSignatures">whether the provider will create signatures or not</param>
-        /// <returns>uint representing the magic number</returns>
+        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
+        /// <param name="willCreateSignatures">Whether the provider will create signatures or not</param>
+        /// <returns>Uint representing the magic number</returns>
         private uint GetMagicValue(string curveId, bool willCreateSignatures)
         {
             if (string.IsNullOrEmpty(curveId))
@@ -584,15 +603,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( AsymmetricSecurityKey, string, bool )"/>.
+        /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( SecurityKey, string, bool )"/>.
         /// </summary>
-        /// <param name="input">bytes to be signed.</param>
-        /// <returns>a signature over the input.</returns>
+        /// <param name="input">The bytes to be signed.</param>
+        /// <returns>A signature over the input.</returns>
         /// <exception cref="ArgumentNullException">'input' is null. </exception>
         /// <exception cref="ArgumentException">'input.Length' == 0. </exception>
-        /// <exception cref="ObjectDisposedException">if <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
-        /// <exception cref="InvalidOperationException">if the internal <see cref="AsymmetricSignatureFormatter"/> is null. This can occur if the constructor parameter 'willBeUsedforSigning' was not 'true'.</exception>
-        /// <exception cref="InvalidOperationException">if the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if the constructor parameter 'willBeUsedforSigning' was not 'true'.</exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public override byte[] Sign(byte[] input)
         {
             if (input == null)
@@ -625,16 +644,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Verifies that a signature over the' input' matches the signature.
         /// </summary>
-        /// <param name="input">the bytes to generate the signature over.</param>
-        /// <param name="signature">the value to verify against.</param>
+        /// <param name="input">The bytes to generate the signature over.</param>
+        /// <param name="signature">The value to verify against.</param>
         /// <returns>true if signature matches, false otherwise.</returns>
         /// <exception cref="ArgumentNullException">'input' is null.</exception>
         /// <exception cref="ArgumentNullException">'signature' is null.</exception>
         /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
         /// <exception cref="ArgumentException">'signature.Length' == 0.</exception>
-        /// <exception cref="ObjectDisposedException">if <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
-        /// <exception cref="InvalidOperationException">if the internal <see cref="AsymmetricSignatureDeformatter"/> is null. This can occur if a derived type does not call the base constructor.</exception>
-        /// <exception cref="InvalidOperationException">if the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if a derived type does not call the base constructor.</exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null)
@@ -676,9 +695,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Validates that the asymmetric key size is more than the allowed minimum
         /// </summary>
-        /// <param name="key">asymmetric key to validate</param>
-        /// <param name="algorithm">algorithm for which this key will be used</param>
-        /// <param name="willCreateSignatures">whether they key will be used for creating signatures</param>
+        /// <param name="key">The asymmetric key to validate</param>
+        /// <param name="algorithm">Algorithm for which this key will be used</param>
+        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures</param>
         public void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (willCreateSignatures)

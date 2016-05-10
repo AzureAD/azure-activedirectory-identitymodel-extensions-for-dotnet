@@ -52,6 +52,12 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         public static IdentityModelEventSource Logger { get; }
 
+        /// <summary>
+        /// Writes an event log by using the provided string argument and current UTC time.
+        /// No level filtering is done on the event.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <remarks>No level filtering.</remarks>
         [Event(6, Level = EventLevel.LogAlways)]
         public void WriteAlways(string message)
         {
@@ -62,6 +68,11 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes an event log by using the provided string argument, current UTC time and the provided arguments list.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void WriteAlways(string message, params object[] args)
         {
@@ -74,6 +85,10 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes a verbose event log by using the provided string argument and current UTC time.
+        /// </summary>
+        /// <param name="message">The log message.</param>
         [Event(1, Level = EventLevel.Verbose)]
         public void WriteVerbose(string message)
         {
@@ -84,6 +99,11 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes a verbose event log by using the provided string argument, current UTC time and the provided arguments list.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void WriteVerbose(string message, params object[] args)
         {
@@ -96,6 +116,10 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes an information event log by using the provided string argument and current UTC time.
+        /// </summary>
+        /// <param name="message">The log message.</param>
         [Event(2, Level = EventLevel.Informational)]
         public void WriteInformation(string message)
         {
@@ -106,6 +130,11 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes an information event log by using the provided string argument, current UTC time and the provided arguments list.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void WriteInformation(string message, params object[] args)
         {
@@ -118,6 +147,10 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes a warning event log by using the provided string argument and current UTC time.
+        /// </summary>
+        /// <param name="message">The log message.</param>
         [Event(3, Level = EventLevel.Warning)]
         public void WriteWarning(string message)
         {
@@ -128,6 +161,11 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes a warning event log by using the provided string argument, current UTC time and the provided arguments list.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void WriteWarning(string message, params object[] args)
         {
@@ -137,6 +175,10 @@ namespace Microsoft.IdentityModel.Logging
                 WriteWarning(message);
         }
 
+        /// <summary>
+        /// Writes an error event log by using the provided string argument and current UTC time.
+        /// </summary>
+        /// <param name="message">The log message.</param>
         [Event(4, Level = EventLevel.Error)]
         public void WriteError(string message)
         {
@@ -147,6 +189,11 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes an error event log by using the provided string argument, current UTC time and the provided arguments list.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void WriteError(string message, params object[] args)
         {
@@ -159,6 +206,10 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes a critical event log by using the provided string argument and current UTC time.
+        /// </summary>
+        /// <param name="message">The log message.</param>
         [Event(5, Level = EventLevel.Critical)]
         public void WriteCritical(string message)
         {
@@ -169,6 +220,11 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes a critical event log by using the provided string argument, current UTC time and the provided arguments list.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void WriteCritical(string message, params object[] args)
         {
@@ -181,12 +237,25 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Writes an exception log by using the provided event identifer, exception argument, string argument and current UTC time.
+        /// </summary>
+        /// <param name="level"><see cref="EventLevel"/></param>
+        /// <param name="innerException"><see cref="Exception"/></param>
+        /// <param name="message">The log message.</param>
         [NonEvent]
         public void Write(EventLevel level, Exception innerException, string message)
         {
             Write(level, innerException, message, null);
         }
 
+        /// <summary>
+        /// Writes an exception log by using the provided event identifer, exception argument, string argument, arguments list and current UTC time.
+        /// </summary>
+        /// <param name="level"><see cref="EventLevel"/></param>
+        /// <param name="innerException"><see cref="Exception"/></param>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
         public void Write(EventLevel level, Exception innerException, string message, params object[] args)
         {
@@ -229,7 +298,7 @@ namespace Microsoft.IdentityModel.Logging
         {
             get; set;
         }
-
+        
         private string PrepareMessage(EventLevel level, string message, params object[] args)
         {
             if (message == null)

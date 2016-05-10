@@ -41,10 +41,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKey"/>.
         /// </summary>
-        /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
+        /// <param name="json">A string that contains JSON Web Key parameters in JSON format.</param>
         /// <returns><see cref="JsonWebKey"/></returns>
-        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
-        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
+        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
         static public JsonWebKey Create(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -63,9 +63,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKey"/> from a json string.
         /// </summary>
-        /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
-        /// <exception cref="ArgumentNullException">if 'json' is null or empty.</exception>
-        /// <exception cref="ArgumentException">if 'json' fails to deserialize.</exception>
+        /// <param name="json">A string that contains JSON Web Key parameters in JSON format.</param>
+        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
         public JsonWebKey(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -103,21 +103,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the 'd' (ECC - Private Key OR RSA - Private Exponent)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlUInt</remarks>
+        /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.D, Required = Required.Default)]
         public string D { get; set; }
 
         /// <summary>
         /// Gets or sets the 'dp' (RSA - First Factor CRT Exponent)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlUInt</remarks>
+        /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.DP, Required = Required.Default)]
         public string DP { get; set; }
 
         /// <summary>
         /// Gets or sets the 'dq' (RSA - Second Factor CRT Exponent)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlUInt</remarks>
+        /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.DQ, Required = Required.Default)]
         public string DQ { get; set; }
 
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens
         public string K { get; set; }
 
         /// <summary>
-        /// Gets or sets the 'key_ops' (Key Operations)..
+        /// Gets the 'key_ops' (Key Operations)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.KeyOps, Required = Required.Default)]
         public IList<string> KeyOps { get; private set; } = new List<string>();
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the 'n' (RSA - Modulus)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlEncoding</remarks>
+        /// <remarks>Value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.N, Required = Required.Default)]
         public string N { get; set; }
 
@@ -168,21 +168,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the 'p' (RSA - First Prime Factor)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlUInt</remarks>
+        /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.P, Required = Required.Default)]
         public string P { get; set; }
 
         /// <summary>
         /// Gets or sets the 'q' (RSA - Second  Prime Factor)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlUInt</remarks>
+        /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Q, Required = Required.Default)]
         public string Q { get; set; }
 
         /// <summary>
         /// Gets or sets the 'qi' (RSA - First CRT Coefficient)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlUInt</remarks>
+        /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.QI, Required = Required.Default)]
         public string QI { get; set; }
 
@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the 'x' (ECC - X Coordinate)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlEncoding</remarks>
+        /// <remarks>Value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X, Required = Required.Default)]
         public string X { get; set; }
 
@@ -226,10 +226,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the 'y' (ECC - Y Coordinate)..
         /// </summary>
-        /// <remarks> value is formated as: Base64urlEncoding</remarks>
+        /// <remarks>Value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Y, Required = Required.Default)]
         public string Y { get; set; }
 
+        /// <summary>
+        /// Gets the key size of <see cref="JsonWebKey"/>.
+        /// </summary>
         public override int KeySize
         {
             get
@@ -245,6 +248,10 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Gets a bool indicating if a private key exists.
+        /// </summary>
+        /// <return>true if it has a private key; otherwise, false.</return>
         public bool HasPrivateKey
         {
             get
@@ -257,6 +264,13 @@ namespace Microsoft.IdentityModel.Tokens
                     return false;
             }
         }
+
+        /// <summary>
+        /// Returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
+        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
+        /// If verifyOnly is false, then the private key is required.</param>
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (verifyOnly)
@@ -265,6 +279,11 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
+        /// <summary>
+        /// Returns whether the <see cref="JsonWebKey"/> supports the given algorithm.
+        /// </summary>
+        /// <param name="algorithm">The crypto algorithm to use.</param>
+        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))

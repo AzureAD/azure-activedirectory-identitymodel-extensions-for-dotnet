@@ -30,33 +30,60 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Base class for Security Key.
+    /// </summary>
     public abstract class SecurityKey
     {
         private CryptoProviderFactory _cryptoProviderFactory = CryptoProviderFactory.Default;
 
+        /// <summary>
+        /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
+        /// </summary>
         public abstract int KeySize { get; }
 
+        /// <summary>
+        /// Gets the key id of this <see cref="SecurityKey"/>.
+        /// </summary>
         public string KeyId { get; set; }
 
+
+        /// <summary>
+        /// Creates a <see cref="SignatureProvider"/> instance that supports the algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for signing.</param>
         public SignatureProvider GetSignatureProviderForSigning(string algorithm)
         {
             return GetSignatureProvider(algorithm, false);
         }
 
+        /// <summary>
+        /// Creates a <see cref="SignatureProvider"/> instance that supports the algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying.</param>
         public SignatureProvider GetSignatureProviderForVerifying(string algorithm)
         {
             return GetSignatureProvider(algorithm, true);
         }
 
+        /// <summary>
+        /// This must be overridden to returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
+        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
+        /// If verifyOnly is false, then the private key is required.</param>
         public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
 
         /// <summary>
-        /// Answers if this <see cref="SecurityKey"/> supports the algorithm.
+        /// This must be overridden to specify whether this SecurityKey supports the algorithm.
         /// </summary>
-        /// <param name="algorithm">the crypto algorithm to use.</param>
-        /// <returns>'true' if algorithm is supported.</returns>
+        /// <param name="algorithm">The crypto algorithm to use.</param>
+        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public abstract bool IsSupportedAlgorithm(string algorithm);
 
+        /// <summary>
+        /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.
+        /// </summary>
         public CryptoProviderFactory CryptoProviderFactory
         {
             get

@@ -52,7 +52,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON</param>
-        /// <exception cref="ArgumentNullException">if 'signingCredentials' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials)
             : base(StringComparer.Ordinal)
         {
@@ -146,8 +146,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Serializes this instance to JSON.
         /// </summary>
-        /// <returns>this instance as JSON.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        /// <returns>This instance as JSON.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string SerializeToJson()
         {
             return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
@@ -157,7 +157,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Encodes this instance as Base64UrlEncoded JSON.
         /// </summary>
         /// <returns>Base64UrlEncoded JSON.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string Base64UrlEncode()
         {
             return Base64UrlEncoder.Encode(SerializeToJson());
@@ -166,9 +166,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
         /// </summary>
-        /// <param name="base64UrlEncodedJsonString">base64url encoded JSON to deserialize.</param>
-        /// <returns>an instance of <see cref="JwtHeader"/>.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        /// <param name="base64UrlEncodedJsonString">Base64url encoded JSON to deserialize.</param>
+        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
         public static JwtHeader Base64UrlDeserialize(string base64UrlEncodedJsonString)
         {
             return JsonExtensions.DeserializeJwtHeader(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
@@ -177,9 +177,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Deserialzes JSON into a <see cref="JwtHeader"/> instance.
         /// </summary>
-        /// <param name="jsonString"> the JSON to deserialize.</param>
-        /// <returns>an instance of <see cref="JwtHeader"/>.</returns>
-        /// <remarks>use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        /// <param name="jsonString"> The JSON to deserialize.</param>
+        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
         public static JwtHeader Deserialize(string jsonString)
         {
             return JsonExtensions.DeserializeJwtHeader(jsonString);
