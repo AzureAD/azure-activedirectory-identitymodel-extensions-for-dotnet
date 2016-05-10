@@ -59,6 +59,14 @@ namespace System.IdentityModel.Tokens.Jwt
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
+        /// </summary>
+        /// <param name="issuer">if this value is not null, a { iss, 'issuer' } claim will be added.</param>
+        /// <param name="audience">if this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="claims">if this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object> } will be created to contain the duplicate values.</param>
+        /// <param name="notBefore">if notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
+        /// <param name="expires">if expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
            : this(issuer, audience, claims, notBefore, expires, null)
         {
