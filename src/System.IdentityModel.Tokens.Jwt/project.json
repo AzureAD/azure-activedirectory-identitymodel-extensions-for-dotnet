@@ -1,6 +1,6 @@
 {
   "version": "5.0.0-*",
-  "description": "Includes types that provide support for creating, serializeing and validating JWT tokens.",
+  "description": "Includes types that provide support for creating, serializing and validating JWT tokens.",
   "dependencies": {
     "Microsoft.IdentityModel.Tokens": "5.0.0-*"
   },
