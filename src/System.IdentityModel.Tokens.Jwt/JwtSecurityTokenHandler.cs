@@ -217,7 +217,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets or sets the token lifetime in minutes.
         /// </summary>
-        /// <remarks>Used by <see cref="CreateToken(string, string, ClaimsIdentity, DateTime?, DateTime?, SigningCredentials)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
+        /// <remarks>Used by <see cref="CreateJwtSecurityTokenPrivate(string, string, ClaimsIdentity, DateTime?, DateTime?, DateTime?, SigningCredentials)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
         public int TokenLifetimeInMinutes
         {
@@ -235,6 +235,10 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Gets the type of the <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>.
+        /// </summary>
+        /// <return>The type of <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/></return>
         public override Type TokenType
         {
             get { return typeof(JwtSecurityToken); }
@@ -461,6 +465,11 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Convert string into <see cref="JwtSecurityToken"/>.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns>The <see cref="JwtSecurityToken"/></returns>
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (token == null)
@@ -998,7 +1007,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="JwtSecurityToken"/> to validate.</param>
         /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
-        /// <remarks>If the <see cref="JwtSecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using <see cref="TokenValidationParameters.CertificateValidator"/>.</remarks>
+        /// <remarks>If the <see cref="JwtSecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using the CertificateValidator.</remarks>
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
@@ -1014,6 +1023,12 @@ namespace System.IdentityModel.Tokens.Jwt
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Deserializes token with the provided <see cref="TokenValidationParameters"/>.
+        /// </summary>
+        /// <param name="reader">The XML Reader.</param>
+        /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
+        /// <returns>The <see cref="SecurityToken"/></returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             throw new NotImplementedException();

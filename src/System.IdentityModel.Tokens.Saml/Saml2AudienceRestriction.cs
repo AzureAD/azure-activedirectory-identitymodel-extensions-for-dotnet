@@ -29,8 +29,14 @@ using System.Collections.Generic;
 
 namespace System.IdentityModel.Tokens.Saml2
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="Saml2AudienceRestriction"/>. 
+    /// </summary>
     public class Saml2AudienceRestriction
     {
+        /// <summary>
+        /// Gets of sets the list of Audiences.
+        /// </summary>
         public IList<Uri> Audiences { get; set; }
     }
 }

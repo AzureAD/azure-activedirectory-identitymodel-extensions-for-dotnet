@@ -38,7 +38,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace System.IdentityModel.Tokens.Saml2
 {
     /// <summary>
-    /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator,
+    /// A derived <see cref="System.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator,
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
@@ -124,7 +124,7 @@ namespace System.IdentityModel.Tokens.Saml2
         /// <param name="token">The saml token.</param>
         /// <param name="attached">Boolean that indicates if a attached or unattached
         /// reference needs to be created.</param>
-        /// <returns>A <see cref="Saml2AssertionKeyIdentifierClause"/>.</returns>
+        /// <returns>A <see cref="SecurityKeyIdentifierClause"/>.</returns>
         public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
         {
             if (null == token)

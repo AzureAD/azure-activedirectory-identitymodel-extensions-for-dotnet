@@ -27,6 +27,9 @@
 
 namespace System.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="SamlCondition"/>. 
+    /// </summary>
     public class SamlCondition
     {
     }

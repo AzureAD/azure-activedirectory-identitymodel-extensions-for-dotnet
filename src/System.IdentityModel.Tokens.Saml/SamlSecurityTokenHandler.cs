@@ -36,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace System.IdentityModel.Tokens.Saml
 {
     /// <summary>
-    /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator,
+    /// A derived <see cref="System.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler"/> that implements ISecurityTokenValidator,
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
@@ -224,7 +224,7 @@ namespace System.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="securityToken">A string containing a well formed securityToken.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
-        /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
+        /// <param name="validatedToken">The <see cref="SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
