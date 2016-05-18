@@ -305,5 +305,42 @@ namespace Microsoft.IdentityModel.Test
         {
             throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
         }
+
+        public const string NullIssuer = null;
+
+        public static TokenValidationParameters GetNullIssuerAsymmetricTokenValidationParameters(bool isValidIssuer)
+        {
+            return NullIssuerTokenValidationParameters(DefaultAsymmetricSigningToken, isValidIssuer);
+        }
+
+        public static TokenValidationParameters NullIssuerTokenValidationParameters(SecurityToken securityToken, bool isValidIssuer)
+        {
+            return new TokenValidationParameters
+            {
+                AuthenticationType = DefaultAuthenticationType,
+                IssuerSigningToken = securityToken,
+                ValidAudience = DefaultAudience,
+                ValidIssuer = NullIssuer,
+                ValidateIssuer = isValidIssuer,
+            };
+        }
+
+        public static SecurityTokenDescriptor NullIssuerAsymmetricSecurityTokenDescriptor
+        {
+            get { return NullIssuerSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials); }
+        }
+
+        public static SecurityTokenDescriptor NullIssuerSecurityTokenDescriptor(SigningCredentials signingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                AppliesToAddress = DefaultAudience,
+                SigningCredentials = signingCredentials,
+                Subject = DefaultClaimsIdentity,
+                TokenIssuerName = NullIssuer,
+                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
+            };
+        }
+
     }
 }
