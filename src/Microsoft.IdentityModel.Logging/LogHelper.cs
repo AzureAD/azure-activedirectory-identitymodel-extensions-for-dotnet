@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Logging
     public class LogHelper
     {
         /// <summary>
-        /// Logs an event using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
+        /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
         /// <param name="argument">argument that is null or empty.</param>
         /// <remarks>EventLevel is set to Error.</remarks>
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="message">message to log.</param>
         /// <remarks>EventLevel is set to Error.</remarks>
@@ -57,7 +57,19 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="message">message to log.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
+        public static T LogArgumentException<T>(string argumentName, string message) where T : ArgumentException
+        {
+            return LogArgumentException<T>(EventLevel.Error, argumentName, null, message, null);
+        }
+
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -68,7 +80,19 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="format">Format string of the log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
+        public static T LogArgumentException<T>(string argumentName, string format, params object[] args) where T : ArgumentException
+        {
+            return LogArgumentException<T>(EventLevel.Error, argumentName, null, format, args);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="message">message to log.</param>
@@ -79,7 +103,19 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
+        /// <param name="message">message to log.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
+        public static T LogArgumentException<T>(string argumentName, Exception innerException, string message) where T : ArgumentException
+        {
+            return LogArgumentException<T>(EventLevel.Error, argumentName, innerException, message, null);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
@@ -91,7 +127,20 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
+        /// <param name="format">Format string of the log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>EventLevel is set to Error.</remarks>
+        public static T LogArgumentException<T>(string argumentName, Exception innerException, string format, params object[] args) where T : ArgumentException
+        {
+            return LogArgumentException<T>(EventLevel.Error, argumentName, innerException, format, args);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
         /// <param name="message">message to log.</param>
@@ -101,7 +150,18 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="message">message to log.</param>
+        public static T LogArgumentException<T>(EventLevel eventLevel, string argumentName, string message) where T : ArgumentException
+        {
+            return LogArgumentException<T>(eventLevel, argumentName, null, message, null);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
         /// <param name="format">Format string of the log message.</param>
@@ -112,7 +172,19 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="format">Format string of the log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static T LogArgumentException<T>(EventLevel eventLevel, string argumentName, string format, params object[] args) where T : ArgumentException
+        {
+            return LogArgumentException<T>(eventLevel, argumentName, null, format, args);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
@@ -123,13 +195,51 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
-        /// Logs an event using the event source logger and returns new typed exception.
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
+        /// <param name="message">message to log.</param>
+        public static T LogArgumentException<T>(EventLevel eventLevel, string argumentName, Exception innerException, string message) where T : ArgumentException
+        {
+            return LogArgumentException<T>(eventLevel, argumentName, innerException, message, null);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static T LogException<T>(EventLevel eventLevel, Exception innerException, string format, params object[] args) where T : Exception
+        {
+            return LogExceptionImpl<T>(eventLevel, null, innerException, format, args);
+        }
+
+        /// <summary>
+        /// Logs an argument exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
+        /// <param name="format">Format string of the log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static T LogArgumentException<T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : ArgumentException
+        {
+            return LogExceptionImpl<T>(eventLevel, argumentName, innerException, format, args);
+        }
+
+        /// <summary>
+        /// Logs an exception using the event source logger and returns new typed exception.
+        /// </summary>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
+        /// <param name="argumentName">Identifies the argument whose value generated the ArgumentException.</param>
+        /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
+        /// <param name="format">Format string of the log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        private static T LogExceptionImpl<T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception 
         {
             string message = null;
 
@@ -141,10 +251,17 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
 
-            if (innerException != null)
-                return (T)Activator.CreateInstance(typeof(T), message, innerException);
+            if (innerException != null) 
+                if (String.IsNullOrEmpty(argumentName))
+                    return (T)Activator.CreateInstance(typeof(T), message, innerException);
+                else
+                    return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException);
             else
-                return (T)Activator.CreateInstance(typeof(T), message);
+                if (String.IsNullOrEmpty(argumentName))
+                    return (T)Activator.CreateInstance(typeof(T), message);
+                else
+                    return (T)Activator.CreateInstance(typeof(T), argumentName, message);
         }
+
     }
 }

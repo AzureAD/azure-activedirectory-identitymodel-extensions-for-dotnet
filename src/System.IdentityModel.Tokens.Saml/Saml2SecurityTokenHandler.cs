@@ -193,7 +193,7 @@ namespace System.IdentityModel.Tokens.Saml2
             {
                 if (value < 1)
                 {
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture));
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture));
                 }
 
                 _maximumTokenSizeInBytes = value;

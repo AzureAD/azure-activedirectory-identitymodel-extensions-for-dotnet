@@ -229,7 +229,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10104, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10104, value);
 
                 _defaultTokenLifetimeInMinutes = value;
             }
@@ -254,7 +254,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10101, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10101, value);
 
                 _maximumTokenSizeInBytes = value;
             }

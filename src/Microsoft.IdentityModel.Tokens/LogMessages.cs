@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // Crypto Errors
         internal const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type: '{4}'.";
-        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have less than: '{1}' bits. KeySize: '{2}'.";
+        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have less than: '{1}' bits. KeySize is: '{2}'.";
         internal const string IDX10613 = "IDX10613: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than: '{0}'.";
         internal const string IDX10621 = "IDX10621: This AsymmetricSignatureProvider has a minimum key size requirement of: '{0}', the AsymmetricSecurityKey in has a KeySize of: '{1}'.";
         internal const string IDX10623 = "IDX10623: The KeyedHashAlgorithm is null, cannot sign data.";

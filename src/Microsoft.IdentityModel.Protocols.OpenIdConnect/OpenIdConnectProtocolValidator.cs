@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10105, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10105, value);
                 }
 
                 _nonceLifetime = value;

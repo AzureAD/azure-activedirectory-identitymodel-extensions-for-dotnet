@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value);
 
                 _automaticRefreshInterval = value;
             }
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10106, MinimumRefreshInterval, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10106, MinimumRefreshInterval, value);
 
                 _refreshInterval = value;
             }
