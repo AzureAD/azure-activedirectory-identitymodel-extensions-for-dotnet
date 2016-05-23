@@ -51,11 +51,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </remarks>
         public JwtSecurityToken(string jwtEncodedString)
         {
-            if (null == jwtEncodedString)
-                throw LogHelper.LogArgumentNullException("jwtEncodedString");
-
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10002, "jwtEncodedString");
+                throw LogHelper.LogArgumentNullException(nameof(jwtEncodedString));
 
             // Quick fix prior to beta8, will add configuration in RC
             var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
@@ -85,19 +82,19 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
         {
             if (header == null)
-                throw LogHelper.LogArgumentNullException("header");
+                throw LogHelper.LogArgumentNullException(nameof(header));
 
             if (payload == null)
-                throw LogHelper.LogArgumentNullException("payload");
+                throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrWhiteSpace(rawHeader))
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10002, "rawHeader");
+                throw LogHelper.LogArgumentNullException(nameof(rawHeader));
 
             if (string.IsNullOrWhiteSpace(rawPayload))
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10002, "rawPayload");
+                throw LogHelper.LogArgumentNullException(nameof(rawPayload));
 
             if (rawSignature == null)
-                throw LogHelper.LogArgumentNullException("rawSignature");
+                throw LogHelper.LogArgumentNullException(nameof(rawSignature));
 
             Header = header;
             Payload = payload;

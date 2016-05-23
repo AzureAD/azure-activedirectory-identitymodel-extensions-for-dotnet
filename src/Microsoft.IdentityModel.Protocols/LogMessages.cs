@@ -35,13 +35,11 @@ namespace Microsoft.IdentityModel.Protocols
 #pragma warning disable 1591
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
-        internal const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty object.";
-        internal const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
 
         // properties, configuration 
         internal const string IDX10106 = "IDX10106: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'.";
         internal const string IDX10107 = "IDX10107: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'.";
-        internal const string IDX10108 = "IDX10108: The address specified is not valid as per HTTPS scheme. Please specify an https address for security reasons. If you want to test with http address, set the RequireHttps property  on IDocumentRetriever to false. address: '{0}'.";
+        internal const string IDX10108 = "IDX10108: The address specified is not valid as per HTTPS scheme. Please specify an https address for security reasons. If you want to test with http address, set the RequireHttps property  on IDocumentRetriever to false.";
 
         // configuration retrieval errors
         internal const string IDX10803 = "IDX10803: Unable to obtain configuration from: '{0}'.";

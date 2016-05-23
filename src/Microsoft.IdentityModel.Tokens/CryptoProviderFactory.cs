@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10002, "algorithm");
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)

@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, nameof(CryptoProviderFactory));
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _cryptoProviderFactory = value;
             }

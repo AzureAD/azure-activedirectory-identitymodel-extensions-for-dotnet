@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "IssuerAddress");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _issuerAddress = value;
             }
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "PostTitle");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _postTitle = value;
             }
@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual void RemoveParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "parameter");
+                throw LogHelper.LogArgumentNullException(nameof(parameter));
 
             if (_parameters.ContainsKey(parameter))
                 _parameters.Remove(parameter);
@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "ScriptButtonText");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _scriptButtonText = value;
             }
@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "ScriptDisabledText");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _scriptDisabledText = value;
             }

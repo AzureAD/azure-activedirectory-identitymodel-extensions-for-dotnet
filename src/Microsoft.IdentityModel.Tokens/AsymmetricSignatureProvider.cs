@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures)
             {
                 if (webKey.D == null || webKey.DP == null || webKey.DQ == null || webKey.QI == null || webKey.P == null || webKey.Q == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10702, webKey);
+                    throw LogHelper.LogArgumentException<ArgumentNullException>(nameof(webKey), LogMessages.IDX10702, webKey);
 
                 parameters = new RSAParameters()
                 {

@@ -47,8 +47,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             CryptoProviderFactory factory = new CryptoProviderFactory();
 
             // Asymmetric / Symmetric both need signature alg specified
-            FactoryCreateFor("Signing:    - algorithm string.Empty", KeyingMaterial.X509SecurityKey_1024, string.Empty, factory, ExpectedException.ArgumentException());
-            FactoryCreateFor("Verifying: - algorithm string.Empty", KeyingMaterial.X509SecurityKey_1024, string.Empty, factory, ExpectedException.ArgumentException());
+            FactoryCreateFor("Signing:    - algorithm string.Empty", KeyingMaterial.X509SecurityKey_1024, string.Empty, factory, ExpectedException.ArgumentNullException());
+            FactoryCreateFor("Verifying: - algorithm string.Empty", KeyingMaterial.X509SecurityKey_1024, string.Empty, factory, ExpectedException.ArgumentNullException());
 
             // Json Web Keys
             FactoryCreateFor("Signing: - No exception", KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, factory, ExpectedException.NoExceptionExpected);

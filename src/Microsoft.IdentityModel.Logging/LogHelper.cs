@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <remarks>EventLevel is set to Error.</remarks>
         public static ArgumentNullException LogArgumentNullException(string argument)
         {
-            return LogException<ArgumentNullException>(EventLevel.Error, null, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.", argument);
+            return LogArgumentException<ArgumentNullException>(EventLevel.Error, argument, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.", argument);
         }
 
         /// <summary>

@@ -35,9 +35,6 @@ namespace System.IdentityModel.Tokens.Jwt
         #pragma warning disable 1591
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
-        internal const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty object.";
-        internal const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
-        internal const string IDX10003 = "IDX10003: The parameter '{0}' cannot be 'null'.";
 
         // properties, configuration 
         internal const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";

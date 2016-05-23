@@ -103,7 +103,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 Name = "EncodedString: string.Empty",
                 EncodedString = string.Empty,
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10002:"),
+                ExpectedException = ExpectedException.ArgumentNullException(),
             });
 
             RunEncodedTest(new JwtSecurityTokenTestVariation

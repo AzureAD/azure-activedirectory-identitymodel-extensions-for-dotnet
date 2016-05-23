@@ -104,7 +104,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "InboundClaimTypeMap");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _inboundClaimTypeMap = value;
             }
@@ -127,7 +127,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "OutboundClaimTypeMap");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _outboundClaimTypeMap = value;
             }
@@ -148,7 +148,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "InboundClaimFilter");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _inboundClaimFilter = value;
             }
@@ -169,7 +169,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "ShortClaimTypeProperty");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 shortClaimTypeProperty = value;
             }
@@ -190,7 +190,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, "JsonClaimTypeProperty");
+                    throw LogHelper.LogArgumentNullException("value");
 
                 jsonClaimTypeProperty = value;
             }
@@ -633,7 +633,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             JwtSecurityToken jwt = token as JwtSecurityToken;
             if (jwt == null)
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10706, new object[] { GetType(), typeof(JwtSecurityToken), token.GetType() });
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(token), LogMessages.IDX10706, new object[] { GetType(), typeof(JwtSecurityToken), token.GetType() });
 
             string signingInput = string.Concat(jwt.EncodedHeader, ".", jwt.EncodedPayload);
             if (jwt.SigningCredentials == null)
@@ -855,7 +855,7 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual string CreateActorValue(ClaimsIdentity actor)
         {
             if (actor == null)
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10003, "actor");
+                throw LogHelper.LogArgumentNullException(nameof(actor));
 
             if (actor.BootstrapContext != null)
             {
