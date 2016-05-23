@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("key");
 
             if (!key.IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogArgumentException<ArgumentException>("algorithm", LogMessages.IDX10640, (algorithm ?? "null"));
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10640, (algorithm ?? "null"));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
                 throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (_keyedHash == null)
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10641, key);
+                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.HmacSha512:
                     return new HMACSHA512(key);
                 default:
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("algorithm", LogMessages.IDX10640, algorithm);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
             }
         }
 

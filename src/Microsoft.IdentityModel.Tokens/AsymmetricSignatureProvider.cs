@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _ecdsa = asymmetricAlgorithm as ECDsa;
                     if (_ecdsa == null)
-                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10641, key);
+                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
                 }
 #else
                 _rsaCryptoServiceProvider = asymmetricAlgorithm as RSACryptoServiceProvider;
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _ecdsa = asymmetricAlgorithm as ECDsaCng;
                     if (_ecdsa == null)
-                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10641, key);
+                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
                 }
 #endif
             }
@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return HashAlgorithmName.SHA512;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("algorithm", LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10641, key);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 #else
         protected virtual string GetHashAlgorithmString(string algorithm)
@@ -330,7 +330,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.Sha512;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("algorithm", LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -392,7 +392,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10641, key);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 #endif
 
