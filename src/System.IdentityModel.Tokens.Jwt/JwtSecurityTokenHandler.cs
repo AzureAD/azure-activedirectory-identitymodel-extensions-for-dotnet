@@ -538,7 +538,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (validationParameters.IssuerSigningKeyValidator != null)
                 {
-                    if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, validationParameters))
+                    if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
                         throw LogHelper.LogException<SecurityTokenInvalidSigningKeyException>(LogMessages.IDX10232, jwt.SigningKey);
                 }
                 else

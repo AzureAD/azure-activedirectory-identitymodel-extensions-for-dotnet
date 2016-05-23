@@ -559,7 +559,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10333);
 
-            if (validationContext.ProtocolMessage.AccessToken == null)
+            if (string.IsNullOrEmpty(validationContext.ProtocolMessage.AccessToken))
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10310);
                 return;
