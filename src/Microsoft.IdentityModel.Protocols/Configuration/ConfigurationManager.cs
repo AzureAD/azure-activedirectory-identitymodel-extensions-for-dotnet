@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// 5 days is the default time interval that afterwards, <see cref="GetConfigurationAsync()"/> will obtain new configuration.
         /// </summary>
-        public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(5, 0, 0, 0);
+        public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(1, 0, 0, 0);
 
         /// <summary>
         /// 30 seconds is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
