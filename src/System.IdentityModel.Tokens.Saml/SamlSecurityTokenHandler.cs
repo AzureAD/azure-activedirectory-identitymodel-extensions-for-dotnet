@@ -180,7 +180,7 @@ namespace System.IdentityModel.Tokens.Saml
             {
                 if (value < 1)
                 {
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10101, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10101, value);
                 }
 
                 _maximumTokenSizeInBytes = value;

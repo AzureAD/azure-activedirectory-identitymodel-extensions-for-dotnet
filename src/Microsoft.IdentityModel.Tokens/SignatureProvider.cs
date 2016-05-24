@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected SignatureProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
-                throw LogHelper.LogException<ArgumentNullException>("key");
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             Key = key;
             Algorithm = algorithm;

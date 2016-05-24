@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             foreach(string property in properties)
             {
-                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: property));
+                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"));
                 TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected);

@@ -68,10 +68,10 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("key");
 
             if (!key.IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10640, (algorithm ?? "null"));
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10640, (algorithm ?? "null"));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
-                throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
+                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
 
             try
             {
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < DefaultMinimumSymmetricKeySizeInBits)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits);
 
                 _minimumSymmetricKeySizeInBits = value;
             }
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.HmacSha512:
                     return new HMACSHA512(key);
                 default:
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
             }
         }
 
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10623);
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10623);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
             return AreEqual(signature, _keyedHash.ComputeHash(input));

@@ -35,8 +35,6 @@ namespace Microsoft.IdentityModel.Tokens
         #pragma warning disable 1591
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
-        internal const string IDX10001 = "IDX10001: The property value '{0}' cannot be a 'null' or an empty object.";
-        internal const string IDX10002 = "IDX10002: The parameter '{0}' cannot be 'null' or a string containing only whitespace.";
 
         // properties, configuration 
         internal const string IDX10100 = "IDX10100: ClockSkew must be greater than TimeSpan.Zero. value: '{0}'";
@@ -71,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // Crypto Errors
         internal const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type: '{4}'.";
-        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have less than: '{1}' bits. KeySize: '{2}'.";
+        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have less than: '{1}' bits. KeySize is: '{2}'.";
         internal const string IDX10613 = "IDX10613: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than: '{0}'.";
         internal const string IDX10621 = "IDX10621: This AsymmetricSignatureProvider has a minimum key size requirement of: '{0}', the AsymmetricSecurityKey in has a KeySize of: '{1}'.";
         internal const string IDX10623 = "IDX10623: The KeyedHashAlgorithm is null, cannot sign data.";

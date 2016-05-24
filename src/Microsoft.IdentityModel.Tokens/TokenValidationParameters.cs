@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10100, value);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10100, value);
 
                 _clockSkew = value;
             }
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10001, nameof(CryptoProviderFactory));
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _cryptoProviderFactory = value;
             }
@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10102);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10102);
 
                 _nameClaimType = value;
             }
@@ -414,7 +414,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10103);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10103);
 
                 _roleClaimType = value;
             }

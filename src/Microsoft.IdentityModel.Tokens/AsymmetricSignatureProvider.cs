@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _ecdsa = asymmetricAlgorithm as ECDsa;
                     if (_ecdsa == null)
-                        throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
                 }
 #else
                 _rsaCryptoServiceProvider = asymmetricAlgorithm as RSACryptoServiceProvider;
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _ecdsa = asymmetricAlgorithm as ECDsaCng;
                     if (_ecdsa == null)
-                        throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
                 }
 #endif
             }
@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return HashAlgorithmName.SHA512;
             }
 
-            throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 #else
         protected virtual string GetHashAlgorithmString(string algorithm)
@@ -330,7 +330,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.Sha512;
             }
 
-            throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -392,7 +392,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10641, key);
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 #endif
 
@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures)
             {
                 if (webKey.D == null || webKey.DP == null || webKey.DQ == null || webKey.QI == null || webKey.P == null || webKey.Q == null)
-                    throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10702, webKey);
+                    throw LogHelper.LogArgumentException<ArgumentNullException>(nameof(webKey), LogMessages.IDX10702, webKey);
 
                 parameters = new RSAParameters()
                 {
@@ -684,11 +684,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures)
             {
                 if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize);
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize);
             }
 
             if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
-                throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize);
+                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize);
         }
 
         /// <summary>

@@ -81,11 +81,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static async Task<OpenIdConnectConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10000, "address");
+                throw LogHelper.LogArgumentNullException(nameof(address));
 
             if (retriever == null)
             {
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10000, "retriever");
+                throw LogHelper.LogArgumentNullException(nameof(retriever));
             }
 
             string doc = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
