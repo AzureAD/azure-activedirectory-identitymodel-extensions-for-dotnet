@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols
     public class ConfigurationManager<T> : IConfigurationManager<T> where T : class
     {
         /// <summary>
-        /// 5 days is the default time interval that afterwards, <see cref="GetConfigurationAsync()"/> will obtain new configuration.
+        /// 1 day is the default time interval that afterwards, <see cref="GetConfigurationAsync()"/> will obtain new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(1, 0, 0, 0);
 
