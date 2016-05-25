@@ -40,8 +40,8 @@ Please submit a Contributor License Agreement (CLA) before submitting a pull req
 Your pull request should: 
 
 * Include a description of what your change intends to do
-* Be a child commit of a reasonably recent commit in the correct branch 
-    * Please squash all commits into a single one
+* Be based on a reasonably recent pull in the correct branch 
+    * Please rebase and squash all commits into a single one
 * Pass all tests
 * Have clear commit messages 
 * Include new tests for new features

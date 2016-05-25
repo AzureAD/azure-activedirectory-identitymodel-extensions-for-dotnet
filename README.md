@@ -20,6 +20,12 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ## Assemblies in this repo
 ----
 
+### 3.x
+#### System.IdentityModel.Tokens.Jwt (version 3.x)
+
+* Support for creating and validating Json Web Tokens.
+* Provides model for config free validation using TokenValidationParameters.
+
 ### 4.x
 #### System.IdentityModel.Tokens.Jwt (version 4.x)
 
@@ -56,4 +62,4 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 
 ## License
 
-Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved. Licensed under the Apache License, Version 2.0 (the "License"); 
+Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the Apache License, Version 2.0 (the "License"); 
