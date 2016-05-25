@@ -20,16 +20,39 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ## Assemblies in this repo
 ----
 
-### System.IdentityModel.Tokens.Jwt
+### 4.x
+#### System.IdentityModel.Tokens.Jwt (version 4.x)
 
 * Support for creating and validating Json Web Tokens.
 * Provides model for config free validation using TokenValidationParameters.
 
-### Microsoft.IdentityModel.Protocol.Extensions
+#### Microsoft.IdentityModel.Protocol.Extensions (version 2.x)
 
 * Support for creating and consuming OpenId and WsFederation messages.
 * Support for validating Saml and Saml2 tokens using TokenValidationParameters.
 * Support for dynamic metatdata retreival.
+
+### 5.x
+#### Microsoft.IdentityModel.Tokens (version 5.x)
+* Includes types that provide support for cryptographic operations.
+
+#### System.IdentityModel.Tokens.Jwt (version 5.x)
+* Includes types that provide support for creating, serializing and validating JWT tokens.
+
+#### System.IdentityModel.Tokens.Saml (version 5.x, currently in beta)
+* Includes types that provide support for Saml tokens.
+
+#### Microsoft.IdentityModel.Protocols (version 2.x)
+* Provides types that are common across OpenIdConnect and WsFed protocols.
+
+#### Microsoft.IdentityModel.Protocols.OpenIdConnect (version 2.x)
+* Includes types that provide support for OpenIdConnect protocol.
+
+#### Microsoft.IdentityModel.Protocols.WsFederation (version 2.x, currently in beta)
+* Includes types that provide support for WsFederation protocol.
+
+#### Microsoft.IdentityModel.Logging (version 1.x)
+* Includes Event Source based logging support.
 
 ## License
 

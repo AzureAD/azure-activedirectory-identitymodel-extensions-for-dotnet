@@ -1,15 +1,13 @@
 # Branch Structure
 * **master**: The latest official GA version, which is currently 4.x
 * **dev**: The dev working branch of master, which is 4.x
-* **KMaster**: The master branch for 5.x (Project K)
-* **KDev**: The dev working branch of KMaster (Project K)
+* **KDev**: The dev working branch of master for 5.x
 
 If you are contributing code to 4.x, you should branch from **dev**
-If you are contributing code to 5.x (Project K), you should branch from **KDev**
+If you are contributing code to 5.x, you should branch from **KDev**
 
 ## Release branches
 Release tracking branches are created for each significant release. At this time, we have the following release branches:
-* **KDevRC2**
 * **KRelease**
 * **Release3x**
 * **release4x**
