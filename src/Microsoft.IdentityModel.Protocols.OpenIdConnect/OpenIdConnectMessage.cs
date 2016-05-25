@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual string CreateAuthenticationRequestUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
-            openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
+            openIdConnectMessage.RequestType = OpenIdConnectRequestTypes.AuthenticationRequest;
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual string CreateLogoutRequestUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
-            openIdConnectMessage.RequestType = OpenIdConnectRequestType.LogoutRequest;
+            openIdConnectMessage.RequestType = OpenIdConnectRequestTypes.LogoutRequest;
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -436,7 +436,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or set the request type for this message
         /// </summary>
         /// <remarks>This is helpful when sending different messages through a common routine, when extra parameters need to be set or checked.</remarks>
-        public OpenIdConnectRequestType RequestType
+        public OpenIdConnectRequestTypes RequestType
         {
             get;
             set;
