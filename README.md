@@ -19,22 +19,49 @@ If you find a security issue with our libraries or services please report it to 
 
 ## Contributing
 
-All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. 
+All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. See [CONTRIBUTING.md](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/CONTRIBUTING.md) for guidelines, branch information, build instructions, and legalese. 
 
 ## Assemblies in this repo
 ----
 
-### System.IdentityModel.Tokens.Jwt
+### 3.x
+#### System.IdentityModel.Tokens.Jwt (version 3.x)
 
-* Support for creating and validating Json Web Tokens.
+* Support for creating, serializing, and validating Json Web Tokens.
 * Provides model for config free validation using TokenValidationParameters.
 
-### Microsoft.IdentityModel.Protocol.Extensions
+#### Microsoft.IdentityModel.Protocol.Extensions (version 1.x)
 
 * Support for creating and consuming OpenId and WsFederation messages.
 * Support for validating Saml and Saml2 tokens using TokenValidationParameters.
 * Support for dynamic metatdata retreival.
 
+### 4.x
+#### System.IdentityModel.Tokens.Jwt (version 4.x)
+#### Microsoft.IdentityModel.Protocol.Extensions (version 2.x)
+
+
+### 5.x
+#### Microsoft.IdentityModel.Tokens (version 5.x)
+* Includes types that provide support for cryptographic operations.
+
+#### System.IdentityModel.Tokens.Jwt (version 5.x)
+
+#### System.IdentityModel.Tokens.Saml (version 5.x, currently in beta)
+* Includes types that provide support for Saml tokens.
+
+#### Microsoft.IdentityModel.Protocols (version 2.x)
+* Provides types that are common across OpenIdConnect and WsFed protocols.
+
+#### Microsoft.IdentityModel.Protocols.OpenIdConnect (version 2.x)
+* Includes types that provide support for OpenIdConnect protocol.
+
+#### Microsoft.IdentityModel.Protocols.WsFederation (version 2.x, currently in beta)
+* Includes types that provide support for WsFederation protocol.
+
+#### Microsoft.IdentityModel.Logging (version 1.x)
+* Includes Event Source based logging support.
+
 ## License
 
-Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved. Licensed under the Apache License, Version 2.0 (the "License"); 
+Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the Apache License, Version 2.0 (the "License"); 
