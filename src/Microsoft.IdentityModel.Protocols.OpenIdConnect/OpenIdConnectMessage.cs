@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual string CreateAuthenticationRequestUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
-            openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
+            openIdConnectMessage.RequestType = OpenIdConnectRequestType.Authentication;
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual string CreateLogoutRequestUrl()
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
-            openIdConnectMessage.RequestType = OpenIdConnectRequestType.LogoutRequest;
+            openIdConnectMessage.RequestType = OpenIdConnectRequestType.Logout;
             return openIdConnectMessage.BuildRedirectUrl();
         }
 

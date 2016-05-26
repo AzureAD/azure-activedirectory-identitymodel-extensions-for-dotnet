@@ -30,12 +30,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// <summary>
     /// Response modes for OpenIdConnect.
     /// </summary>
-    public static class OpenIdConnectResponseModes
+    /// <remarks>Can be used to determine the response mode by consumers of an <see cref="OpenIdConnectMessage"/>.
+    /// For example: OpenIdConnectMessageTests.Publics() sets <see cref="OpenIdConnectMessage.ResponseMode"/>
+    /// to <see cref="OpenIdConnectResponseMode.FormPost"/>.</remarks>
+    public static class OpenIdConnectResponseMode
     {
-#pragma warning disable 1591
+        /// <summary>
+        /// Indicates a Query Response see: http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse.
+        /// </summary>
         public const string Query = "query";
+
+        /// <summary>
+        /// Indicates a Form Post Response see: http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse.
+        /// </summary>
         public const string FormPost = "form_post";
+
+        /// <summary>
+        /// Indicates a Fragment Response see: http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse.
+        /// </summary>
         public const string Fragment = "fragment";
-#pragma warning restore 1591
     }
 }
