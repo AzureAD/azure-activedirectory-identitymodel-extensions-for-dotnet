@@ -29,8 +29,16 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// A wrapper class for properties that are used for signature valdiation.
+    /// </summary>
     public class SigningCredentials
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/></param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
         public SigningCredentials(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -43,18 +51,27 @@ namespace Microsoft.IdentityModel.Tokens
             Key = key;
         }
 
+        /// <summary>
+        /// Gets the algorithm which used for signature valdiation.
+        /// </summary>
         public string Algorithm
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the <see cref="SecurityKey"/> which used for signature valdiation.
+        /// </summary>
         public SecurityKey Key
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the key id which used for signature valdiation.
+        /// </summary>
         public string Kid
         {
             get { return Key.KeyId; }

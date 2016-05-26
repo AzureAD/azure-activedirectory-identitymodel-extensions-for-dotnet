@@ -38,6 +38,9 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class FileDocumentRetriever : IDocumentRetriever
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileDocumentRetriever"/> class.
+        /// </summary>
         public FileDocumentRetriever()
         { }
 
@@ -47,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="address">Fully qualified path to a file.</param>
         /// <param name="cancel"><see cref="CancellationToken"/> not used.</param>
         /// <returns>UTF8 decoding of bytes in the file.</returns>
-        /// <exception cref="ArgumentNullException">if address is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If address is null or whitespace.</exception>
         /// <exception cref="IOException">with inner expection containing the original exception.</exception>
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {

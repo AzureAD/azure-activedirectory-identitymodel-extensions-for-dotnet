@@ -39,6 +39,9 @@ namespace Microsoft.IdentityModel.Logging
         private StreamWriter _streamWriter;
         private bool _disposeStreamWriter = true;
 
+        /// <summary>
+        /// Name of the default log file, excluding its path.
+        /// </summary>
         public readonly static string DefaultLogFileName = "IdentityModelLogs.txt";
 
         /// <summary>
@@ -86,6 +89,10 @@ namespace Microsoft.IdentityModel.Logging
             _disposeStreamWriter = false;
         }
 
+        /// <summary>
+        /// Called whenever an event has been written by an event source for which the event listener has enabled events.
+        /// </summary>
+        /// <param name="eventData"><see cref="EventWrittenEventArgs"/></param>
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             if (eventData == null)
@@ -103,6 +110,9 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
+        /// <summary>
+        /// Releases all resources used by the current instance of the <see cref="TextWriterEventListener"/> class.
+        /// </summary>
         public override void Dispose()
         {
             if (_disposeStreamWriter && _streamWriter != null)

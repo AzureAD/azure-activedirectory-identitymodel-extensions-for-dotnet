@@ -31,10 +31,17 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Represents a ECDsa security key.
+    /// </summary>
     public class ECDsaSecurityKey : AsymmetricSecurityKey
     {
         private bool? _hasPrivateKey;
 
+        /// <summary>
+        /// Returns a new instance of <see cref="ECDsaSecurityKey"/>.
+        /// </summary>
+        /// <param name="ecdsa"><see cref="System.Security.Cryptography.ECDsa"/></param>
         public ECDsaSecurityKey(ECDsa ecdsa)
         {
             if (ecdsa == null)
@@ -44,10 +51,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// <see cref="ECDsa"/> instance used to initialize the key.
+        /// <see cref="System.Security.Cryptography.ECDsa"/> instance used to initialize the key.
         /// </summary>
         public ECDsa ECDsa { get; private set; }
 
+        /// <summary>
+        /// Gets a bool indicating if a private key exists.
+        /// </summary>
+        /// <return>true if it has a private key; otherwise, false.</return>
         public override bool HasPrivateKey
         {
             get
@@ -74,6 +85,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Gets <see cref="System.Security.Cryptography.ECDsa"/> key size.
+        /// </summary>
         public override int KeySize
         {
             get
@@ -82,6 +96,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
+        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
+        /// If verifyOnly is false, then the private key is required.</param>
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (verifyOnly)
@@ -90,6 +110,11 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
+        /// <summary>
+        /// Returns whether the <see cref="ECDsaSecurityKey"/> supports the given algorithm.
+        /// </summary>
+        /// <param name="algorithm">The crypto algorithm to use.</param>
+        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))

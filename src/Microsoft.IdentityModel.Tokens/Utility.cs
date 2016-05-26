@@ -31,11 +31,26 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Contains some utility methods.
+    /// </summary>
     public static class Utility
     {
+        /// <summary>
+        /// A string with "empty" value.
+        /// </summary>
         public const string Empty = "empty";
+
+        /// <summary>
+        /// A string with "null" value.
+        /// </summary>
         public const string Null = "null";
 
+        /// <summary>
+        /// Creates a copy of the byte array.
+        /// </summary>
+        /// <param name="src">The resource array.</param>
+        /// <returns>A copy of the byte array.</returns>
         public static byte[] CloneByteArray(this byte[] src)
         {
             return (byte[])(src.Clone());
@@ -81,6 +96,11 @@ namespace Microsoft.IdentityModel.Tokens
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Returns whether the input string is https.
+        /// </summary>
+        /// <param name="address">The input string.</param>
+        /// <remarks>true if the input string is https; otherwise, false.</remarks>
         public static bool IsHttps(string address)
         {
             if (string.IsNullOrEmpty(address))
@@ -100,6 +120,11 @@ namespace Microsoft.IdentityModel.Tokens
 
         }
 
+        /// <summary>
+        /// Returns whether the input uri is https.
+        /// </summary>
+        /// <param name="uri"><see cref="Uri"/>.</param>
+        /// <returns>true if the input uri is https; otherwise, false.</returns>
         public static bool IsHttps(Uri uri)
         {
             if (uri == null)

@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
         /// <param name="other"> an <see cref="OpenIdConnectMessage"/> to copy.</param>
-        /// <exception cref="ArgumentNullException"> if 'other' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'other' is null.</exception>
         protected OpenIdConnectMessage(OpenIdConnectMessage other)
         {
             if (other == null)

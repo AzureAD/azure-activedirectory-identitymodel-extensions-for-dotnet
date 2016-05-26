@@ -35,6 +35,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SignatureProvider : IDisposable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
+        /// </summary>
+        /// <param name="key">That will be used for signature operations. <see cref="SecurityKey"/></param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
         protected SignatureProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -53,19 +59,25 @@ namespace Microsoft.IdentityModel.Tokens
             set;
         }
 
+        /// <summary>
+        /// Gets the <see cref="SecurityKey"/>.
+        /// </summary>
         public SecurityKey Key { get; private set; }
 
+        /// <summary>
+        /// Gets the signature algorithm.
+        /// </summary>
         public string Algorithm { get; private set; }
 
         /// <summary>
-        /// Produces a signature over the 'input'
+        /// This must be overridden to produce a signature over the 'input'.
         /// </summary>
         /// <param name="input">bytes to sign.</param>
         /// <returns>signed bytes</returns>
         public abstract byte[] Sign(byte[] input);
 
         /// <summary>
-        /// Verifies that a signature created over the 'input' matches the signature.
+        /// This must be overridden to verifie that a signature created over the 'input' matches the signature.
         /// </summary>
         /// <param name="input">bytes to verify.</param>
         /// <param name="signature">signature to compare against.</param>

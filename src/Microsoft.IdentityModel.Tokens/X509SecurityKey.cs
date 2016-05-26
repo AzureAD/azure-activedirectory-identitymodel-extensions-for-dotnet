@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Instantiates a <see cref="SecurityKey"/> using a <see cref="X509Certificate2"/>
         /// </summary>
-        /// <param name="certificate"> cert to use.</param>
+        /// <param name="certificate">The cert to use.</param>
         public X509SecurityKey(X509Certificate2 certificate)
         {
             if (certificate == null)
@@ -56,6 +56,9 @@ namespace Microsoft.IdentityModel.Tokens
             KeyId = certificate.Thumbprint;
         }
 
+        /// <summary>
+        /// Gets the key size.
+        /// </summary>
         public override int KeySize
         {
             get
@@ -64,6 +67,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Returns the private key from the <see cref="X509SecurityKey"/>.
+        /// </summary>
         public AsymmetricAlgorithm PrivateKey
         {
             get
@@ -88,6 +94,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Gets the public key from the <see cref="X509SecurityKey"/>.
+        /// </summary>
         public AsymmetricAlgorithm PublicKey
         {
             get
@@ -116,6 +125,12 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _thisLock; }
         }
 
+        /// <summary>
+        /// Returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
+        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
+        /// If verifyOnly is false, then the private key is required.</param>
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -127,6 +142,11 @@ namespace Microsoft.IdentityModel.Tokens
                 return CryptoProviderFactory.CreateForSigning(this, algorithm);
         }
 
+        /// <summary>
+        /// Returns whether the <see cref="X509SecurityKey"/> supports the given algorithm.
+        /// </summary>
+        /// <param name="algorithm">The crypto algorithm to use.</param>
+        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
@@ -148,8 +168,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets a bool indicating if a PrivateKey is available.
+        /// Gets a bool indicating if a private key exists.
         /// </summary>
+        /// <return>true if it has a private key; otherwise, false.</return>
         public override bool HasPrivateKey
         {
             get { return (PrivateKey != null); }

@@ -27,6 +27,9 @@
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Contains information about the keys inside the tokens.
+    /// </summary>
     public class SecurityKeyIdentifierClause
     {
     }

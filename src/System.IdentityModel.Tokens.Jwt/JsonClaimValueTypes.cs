@@ -33,10 +33,15 @@ namespace System.IdentityModel.Tokens.Jwt
     public static class JsonClaimValueTypes
     {
         /// <summary>
-        /// When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.
+        /// A URI that represents the JSON XML data type.
         /// </summary>
+        /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
         public const string Json = "JSON";
 
+        /// <summary>
+        /// A URI that represents the JSON array XML data type.
+        /// </summary>
+        /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
         public const string JsonArray = "JSON_ARRAY";
     }
 }

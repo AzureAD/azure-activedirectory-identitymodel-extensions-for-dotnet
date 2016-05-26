@@ -29,8 +29,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Tokens.Saml2
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="Saml2SecurityToken"/>.
+    /// </summary>
     public class Saml2SecurityToken : SecurityToken
     {
+        /// <summary>
+        /// Gets the Id of this <see cref="Saml2SecurityToken"/>.
+        /// </summary>
         public override string Id
         {
             get
@@ -39,6 +45,9 @@ namespace System.IdentityModel.Tokens.Saml2
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="SecurityKey"/>.
+        /// </summary>
         public override SecurityKey SecurityKey
         {
             get
@@ -47,6 +56,9 @@ namespace System.IdentityModel.Tokens.Saml2
             }
         }
 
+        /// <summary>
+        /// Get the time when this <see cref="Saml2SecurityToken"/> was valid.
+        /// </summary>
         public override DateTime ValidFrom
         {
             get
@@ -55,6 +67,9 @@ namespace System.IdentityModel.Tokens.Saml2
             }
         }
 
+        /// <summary>
+        /// Get the time when this <see cref="Saml2SecurityToken"/> is no longer valid.
+        /// </summary>
         public override DateTime ValidTo
         {
             get
@@ -63,14 +78,24 @@ namespace System.IdentityModel.Tokens.Saml2
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="Saml2Conditions"/>.
+        /// </summary>
         public Saml2Conditions Conditions { get; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that signed this instance.
+        /// </summary>
+        /// <remarks><see cref="ISecurityTokenValidator"/>.ValidateToken(...) updates this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
         public override SecurityKey SigningKey
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the Issuer of this <see cref="Saml2SecurityToken"/>.
+        /// </summary>
         public override string Issuer { get; }
     }
 }

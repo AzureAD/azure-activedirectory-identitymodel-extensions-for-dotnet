@@ -29,18 +29,30 @@ using System.Collections.Generic;
 
 namespace System.IdentityModel.Tokens.Saml2
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="Saml2Conditions"/>. 
+    /// </summary>
     public class Saml2Conditions
     {
+        /// <summary>
+        /// Gets or sets the notbefore time.
+        /// </summary>
         public DateTime? NotBefore
         {
             get; set;
         }
 
+        /// <summary>
+        /// Gets or sets the expires time.
+        /// </summary>
         public DateTime? Expires
         {
             get; set;
         }
 
+        /// <summary>
+        /// Gets or sets the list of Saml2AudienceRestriction.
+        /// </summary>
         public IList<Saml2AudienceRestriction> AudienceRestrictions { get; set; }
     }
 }

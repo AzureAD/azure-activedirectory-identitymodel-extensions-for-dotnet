@@ -35,7 +35,7 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     internal static class ClaimTypeMapping
     {
-        // this is the short to long mapping.
+        // This is the short to long mapping.
         // key      is the long  claim type
         // value    is the short claim type
         private static Dictionary<string, string> shortToLongClaimTypeMapping = null;

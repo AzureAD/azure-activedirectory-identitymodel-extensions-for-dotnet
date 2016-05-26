@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Initializes an new instance of <see cref="StaticConfigurationManager{T}"/> with a Configuration instance.
         /// </summary>
-        /// <param name="configuration">Configuration of type <see cref="OpenIdConnectConfiguration"/> or <see cref="WsFederationConfiguration"/>.</param>
+        /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or OpenIdConnectConfiguration.</param>
         public StaticConfigurationManager(T configuration)
         {
             if (configuration == null)

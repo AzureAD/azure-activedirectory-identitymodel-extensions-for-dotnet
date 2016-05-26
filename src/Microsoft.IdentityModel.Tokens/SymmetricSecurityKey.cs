@@ -29,11 +29,18 @@ using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Represents a symmetric security key.
+    /// </summary>
     public class SymmetricSecurityKey : SecurityKey
     {
         int _keySize;
         byte[] _key;
 
+        /// <summary>
+        /// Returns a new instance of <see cref="SymmetricSecurityKey"/> instance.
+        /// </summary>
+        /// <param name="key">The byte array of the key.</param>
         public SymmetricSecurityKey(byte[] key)
         {
             if (key == null)
@@ -50,11 +57,20 @@ namespace Microsoft.IdentityModel.Tokens
             _keySize = _key.Length * 8;
         }
 
+        /// <summary>
+        /// Gets the key size.
+        /// </summary>
         public override int KeySize
         {
             get { return _keySize; }
         }
 
+        /// <summary>
+        /// Returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
+        /// </summary>
+        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
+        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
+        /// If verifyOnly is false, then the private key is required.</param>
         public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
         {
             var factory = this.CryptoProviderFactory ?? CryptoProviderFactory.Default;
@@ -65,6 +81,11 @@ namespace Microsoft.IdentityModel.Tokens
                 return factory.CreateForSigning(this, algorithm);
         }
 
+        /// <summary>
+        /// Returns whether the <see cref="SymmetricSecurityKey"/> supports the given algorithm.
+        /// </summary>
+        /// <param name="algorithm">The crypto algorithm to use.</param>
+        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -85,6 +106,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <summary>
+        /// Gets the byte array of the key.
+        /// </summary>
         public virtual byte[] Key
         {
             get { return _key.CloneByteArray(); }

@@ -40,7 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt
     /// Delegate that can be set on <see cref="JsonExtensions.Deserializer"/> to control deserialization JSON into objects.
     /// </summary>
     /// <param name="obj">JSON to deserialize.</param>
-    /// <param name="targetType">type expected.</param>
+    /// <param name="targetType">Type expected.</param>
     /// <returns>The deserialized object.</returns>
     public delegate object Deserializer(string obj, Type targetType);
 
@@ -61,7 +61,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets or sets a <see cref="Serializer"/> to use when serializing objects to JSON.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'value' is null.</exception>
         public static Serializer Serializer
         {
             get
@@ -80,7 +80,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets or sets a <see cref="Deserializer"/> to use when deserializing objects from JSON.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'value' is null.</exception>
         public static Deserializer Deserializer
         {
             get
@@ -100,7 +100,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Serializes an object to JSON.
         /// </summary>
         /// <param name="value">The object to serialize</param>
-        /// <returns>the object as JSON.</returns>
+        /// <returns>The object as JSON.</returns>
         public static string SerializeToJson(object value)
         {
             return Serializer(value);
@@ -109,9 +109,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Deserialzes JSON into an instance of type T.
         /// </summary>
-        /// <typeparam name="T">the object type.</typeparam>
-        /// <param name="jsonString">the JSON to deserialze.</param>
-        /// <returns>a new instance of type T.</returns>
+        /// <typeparam name="T">The object type.</typeparam>
+        /// <param name="jsonString">The JSON to deserialze.</param>
+        /// <returns>A new instance of type T.</returns>
         public static T DeserializeFromJson<T>(string jsonString) where T : class
         {
             return Deserializer(jsonString, typeof(T)) as T;
@@ -120,8 +120,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Deserialzes JSON into an instance of <see cref="JwtHeader"/>.
         /// </summary>
-        /// <param name="jsonString">the JSON to deserialze.</param>
-        /// <returns>a new instance <see cref="JwtHeader"/>.</returns>
+        /// <param name="jsonString">The JSON to deserialze.</param>
+        /// <returns>A new instance <see cref="JwtHeader"/>.</returns>
         public static JwtHeader DeserializeJwtHeader(string jsonString)
         {
             return Deserializer(jsonString, typeof(JwtHeader)) as JwtHeader;
@@ -130,8 +130,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Deserialzes JSON into an instance of <see cref="JwtPayload"/>.
         /// </summary>
-        /// <param name="jsonString">the JSON to deserialze.</param>
-        /// <returns>a new instance <see cref="JwtPayload"/>.</returns>
+        /// <param name="jsonString">The JSON to deserialze.</param>
+        /// <returns>A new instance <see cref="JwtPayload"/>.</returns>
         public static JwtPayload DeserializeJwtPayload(string jsonString)
         {
             return Deserializer(jsonString, typeof(JwtPayload)) as JwtPayload;

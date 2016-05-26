@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// <summary>
     /// Manages the retrieval of Configuration data.
     /// </summary>
-    /// <typeparam name="T">must be a class.</typeparam>
+    /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : IConfigurationManager<T> where T : class
     {
@@ -76,7 +76,8 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Instantiaties a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
-        /// <param name="metadataAddress">the address to obtain configuration.</param>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever)
             : this(metadataAddress, configRetriever, new HttpDocumentRetriever())
         {
@@ -85,8 +86,9 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Instantiaties a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
-        /// <param name="metadataAddress">the address to obtain configuration.</param>
-        /// <param name="httpClient">the client to use when obtaining configuration.</param>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="httpClient">The client to use when obtaining configuration.</param>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, HttpClient httpClient)
             : this(metadataAddress, configRetriever, new HttpDocumentRetriever(httpClient))
         {
@@ -95,8 +97,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Instantiaties a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
-        /// <param name="metadataAddress">the address to obtain configuration.</param>
-        /// <param name="docRetriever">the <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <exception cref="ArgumentNullException">If 'metadataAddress' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If 'configRetriever' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
@@ -206,8 +212,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>if the last refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
-        /// <para>if <see cref="RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method is essentially an no-op.</para>
+        /// <para>If the last refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// <para>If <see cref="RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public void RequestRefresh()
         {
