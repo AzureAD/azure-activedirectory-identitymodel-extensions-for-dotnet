@@ -44,9 +44,10 @@ namespace Microsoft.IdentityModel.Tokens
         // token validation
         internal const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
         internal const string IDX10205 = "IDX10205: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}'.";
+        internal const string IDX10207 = "IDX10207: Unable to validate audience. The 'audiences' parameter is null.";
         internal const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null.";
         internal const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace";
-        internal const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match:  validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'";
+        internal const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match:  validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'.";
         internal const string IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid.\nValidFrom: '{0}'\nCurrent time: '{1}'.";
         internal const string IDX10223 = "IDX10223: Lifetime validation failed. The token is expired.\nValidTo: '{0}'\nCurrent time: '{1}'.";
         internal const string IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore: '{0}' is after Expires: '{1}'.";
@@ -54,15 +55,16 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10227 = "IDX10227: TokenValidationParameters.TokenReplayCache is not null, indicating to check for token replay but the security token has no expiration time: token '{0}'.";
         internal const string IDX10228 = "IDX10228: The securityToken has previously been validated, securityToken: '{0}'.";
         internal const string IDX10229 = "IDX10229: TokenValidationParameters.TokenReplayCache was unable to add the securityToken: '{0}'.";
-        internal const string IDX10233 = "IDX10233: ValidateAudience property on ValidationParamaters is set to false. Exiting without validating the audience.";
+        internal const string IDX10233 = "IDX10233: ValidateAudience property on ValidationParameters is set to false. Exiting without validating the audience.";
         internal const string IDX10234 = "IDX10244: Audience Validated.Audience: '{0}'";
-        internal const string IDX10235 = "IDX10235: ValidateIssuer property on ValidationParamaters is set to false. Exiting without validating the issuer.";
+        internal const string IDX10235 = "IDX10235: ValidateIssuer property on ValidationParameters is set to false. Exiting without validating the issuer.";
         internal const string IDX10236 = "IDX10236: Issuer Validated.Issuer: '{0}'";
-        internal const string IDX10237 = "IDX10237: ValidateIssuerSigningKey property on ValidationParamaters is set to false. Exiting without validating the issuer signing key.";
-        internal const string IDX10238 = "IDX10238: ValidateLifetime property on ValidationParamaters is set to false. Exiting without validating the lifetime.";
+        internal const string IDX10237 = "IDX10237: ValidateIssuerSigningKey property on ValidationParameters is set to false. Exiting without validating the issuer signing key.";
+        internal const string IDX10238 = "IDX10238: ValidateLifetime property on ValidationParameters is set to false. Exiting without validating the lifetime.";
         internal const string IDX10239 = "IDX10239: Lifetime of the token is valid.";
         internal const string IDX10240 = "IDX10240: No token replay is detected.";
         internal const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
+
 
         // Formating
         internal const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";

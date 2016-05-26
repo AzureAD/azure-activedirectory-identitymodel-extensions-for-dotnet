@@ -492,10 +492,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // validating issuer signing key validator
             validationParameters = SignatureValidationParameters(signingKey: IdentityUtilities.DefaultAsymmetricSigningKey);
             validationParameters.ValidateIssuerSigningKey = true;
-            validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return true; };
+            validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return true; };
             TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
 
-            validationParameters.IssuerSigningKeyValidator = (key, parameters) => { return false; };
+            validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return false; };
             TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
 
             // validating issuer signing key resolver

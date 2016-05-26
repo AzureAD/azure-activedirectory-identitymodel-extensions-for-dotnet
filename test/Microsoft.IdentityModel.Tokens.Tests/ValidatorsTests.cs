@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -36,23 +37,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class ValidatorsTests
     {
-        [Fact(DisplayName = "ValidatorsTests: AudienceValidator")]
-        public void Audience()
-        {
-            List<string> audiences = new List<string> { "", IdentityUtilities.DefaultAudience };
-            List<string> invalidAudiences = new List<string> { "", IdentityUtilities.NotDefaultAudience };
-
-            RunAudienceTest(audiences: null, securityToken: null, validationParameters: null, ee: ExpectedException.ArgumentNullException());
-            RunAudienceTest(audiences: null, securityToken: null, validationParameters: new TokenValidationParameters { ValidateAudience = false }, ee: ExpectedException.NoExceptionExpected);
-            RunAudienceTest(audiences: null, securityToken: null, validationParameters: new TokenValidationParameters(), ee: ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10214:"));
-            RunAudienceTest(audiences: audiences, securityToken: null, validationParameters: new TokenValidationParameters(), ee: ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10208:"));
-            RunAudienceTest(audiences: audiences, securityToken: null, validationParameters: new TokenValidationParameters { ValidAudience = IdentityUtilities.NotDefaultAudience}, ee: ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10214:"));
-            RunAudienceTest(audiences: audiences, securityToken: null, validationParameters: new TokenValidationParameters { ValidAudiences = invalidAudiences }, ee: ExpectedException.SecurityTokenInvalidAudienceException(substringExpected: "IDX10214:"));
-            RunAudienceTest(audiences: audiences, securityToken: null, validationParameters: new TokenValidationParameters { ValidAudience = IdentityUtilities.DefaultAudience }, ee: ExpectedException.NoExceptionExpected);
-            RunAudienceTest(audiences: audiences, securityToken: null, validationParameters: new TokenValidationParameters { ValidAudiences = audiences }, ee: ExpectedException.NoExceptionExpected);
-        }
-
-        private void RunAudienceTest(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("AudienceDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Audience(List<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
             {
@@ -65,23 +53,32 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact(DisplayName = "ValidatorsTests: IssuerValidator")]
-        public void Issuer()
+        public static TheoryData<List<string>, SecurityToken, TokenValidationParameters, ExpectedException> AudienceDataSet
         {
-            List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
-            List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
+            get
+            {
+                List<string> audiences = new List<string> { "", IdentityUtilities.DefaultAudience };
+                List<string> invalidAudiences = new List<string> { "", IdentityUtilities.NotDefaultAudience };
 
-            RunIssuerTest(issuer: null, securityToken: null, validationParameters: null, ee: ExpectedException.ArgumentNullException());
-            RunIssuerTest(issuer: null, securityToken: null, validationParameters: new TokenValidationParameters { ValidateIssuer = false }, ee: ExpectedException.NoExceptionExpected);
-            RunIssuerTest(issuer: null, securityToken: null, validationParameters: new TokenValidationParameters(), ee: ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10211:"));
-            RunIssuerTest(issuer: IdentityUtilities.DefaultIssuer, securityToken: null, validationParameters: new TokenValidationParameters(), ee: ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10204:"));
-            RunIssuerTest(issuer: IdentityUtilities.DefaultIssuer, securityToken: null, validationParameters: new TokenValidationParameters { ValidIssuer = IdentityUtilities.NotDefaultIssuer }, ee: ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"));
-            RunIssuerTest(issuer: IdentityUtilities.DefaultIssuer, securityToken: null, validationParameters: new TokenValidationParameters { ValidIssuers = invalidIssuers }, ee: ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"));
-            RunIssuerTest(issuer: IdentityUtilities.DefaultIssuer, securityToken: null, validationParameters: new TokenValidationParameters { ValidIssuer = IdentityUtilities.DefaultIssuer }, ee: ExpectedException.NoExceptionExpected);
-            RunIssuerTest(issuer: IdentityUtilities.DefaultIssuer, securityToken: null, validationParameters: new TokenValidationParameters { ValidIssuers = issuers }, ee: ExpectedException.NoExceptionExpected);
+                var dataset = new TheoryData<List<string>, SecurityToken, TokenValidationParameters, ExpectedException>();
+
+                dataset.Add(null, null, null, ExpectedException.ArgumentNullException());
+                dataset.Add(null, null, new TokenValidationParameters { ValidateAudience = false }, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10207:"));
+                dataset.Add(audiences, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"));
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.NotDefaultAudience }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"));
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = invalidAudiences }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"));
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.DefaultAudience }, ExpectedException.NoExceptionExpected);
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = audiences }, ExpectedException.NoExceptionExpected);
+
+                return dataset;
+            }
         }
 
-        private void RunIssuerTest(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IssuerDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Issuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
             {
@@ -94,23 +91,36 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact(DisplayName = "ValidatorsTests: LifetimeValidator")]
-        public void Lifetime()
+        public static TheoryData<string, SecurityToken, TokenValidationParameters, ExpectedException> IssuerDataSet
         {
-            RunLifetimeTest(expires: null, notBefore: null, securityToken: null, validationParameters: null, ee: ExpectedException.ArgumentNullException());
-            RunLifetimeTest(expires: null, notBefore: null, securityToken: null, validationParameters: new TokenValidationParameters { ValidateLifetime = false }, ee: ExpectedException.NoExceptionExpected);
-            RunLifetimeTest(expires: null, notBefore: null, securityToken: null, validationParameters: new TokenValidationParameters { }, ee: ExpectedException.SecurityTokenNoExpirationException(substringExpected: "IDX10225:"));
-            RunLifetimeTest(expires: DateTime.UtcNow, notBefore: DateTime.UtcNow + TimeSpan.FromHours(1), securityToken: null, validationParameters: new TokenValidationParameters { }, ee: ExpectedException.SecurityTokenInvalidLifetimeException(substringExpected: "IDX10224:"));
-            RunLifetimeTest(expires: DateTime.UtcNow + TimeSpan.FromHours(2), notBefore: DateTime.UtcNow + TimeSpan.FromHours(1), securityToken: null, validationParameters: new TokenValidationParameters { }, ee: ExpectedException.SecurityTokenNotYetValidException(substringExpected: "IDX10222:"));
-            RunLifetimeTest(expires: DateTime.UtcNow - TimeSpan.FromHours(1), notBefore: DateTime.UtcNow - TimeSpan.FromHours(2), securityToken: null, validationParameters: new TokenValidationParameters { }, ee: ExpectedException.SecurityTokenExpiredException(substringExpected: "IDX10223:"));
-            RunLifetimeTest(expires: DateTime.UtcNow, notBefore: DateTime.UtcNow - TimeSpan.FromHours(2), securityToken: null, validationParameters: new TokenValidationParameters { }, ee: ExpectedException.NoExceptionExpected);
+            get
+            {
+                List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
+                List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
+
+                var dataset = new TheoryData<string, SecurityToken, TokenValidationParameters, ExpectedException>();
+
+                dataset.Add(null, null, null, ExpectedException.ArgumentNullException());
+                dataset.Add(null, null, new TokenValidationParameters { ValidateIssuer = false }, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:"));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.NotDefaultIssuer }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.DefaultIssuer }, ExpectedException.NoExceptionExpected);
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = issuers }, ExpectedException.NoExceptionExpected);
+
+                return dataset;
+            }
         }
 
-        private void RunLifetimeTest(DateTime? expires, DateTime? notBefore, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("LifeTimeDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Lifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
             {
-                Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
+                Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
                 ee.ProcessNoException();
             }
             catch (Exception ex)
@@ -119,9 +129,116 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact(DisplayName = "ValidatorsTests: SecurityKeyValidator")]
-        public void SecurityKey()
+        public static TheoryData<DateTime?, DateTime?, SecurityToken, TokenValidationParameters, ExpectedException> LifeTimeDataSet
         {
+            get
+            {
+                List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
+                List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
+
+                //                           notbefore  expires    
+                var dataset = new TheoryData<DateTime?, DateTime?, SecurityToken, TokenValidationParameters, ExpectedException>();
+
+                dataset.Add(null, null, null, null, ExpectedException.ArgumentNullException());
+                dataset.Add(null, null, null, new TokenValidationParameters { ValidateLifetime = false }, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenNoExpirationException("IDX10225:"));
+                dataset.Add(DateTime.UtcNow + TimeSpan.FromHours(1), DateTime.UtcNow, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidLifetimeException("IDX10224:"));
+                dataset.Add(DateTime.UtcNow + TimeSpan.FromHours(1), DateTime.UtcNow + TimeSpan.FromHours(2), null, new TokenValidationParameters(), ExpectedException.SecurityTokenNotYetValidException("IDX10222:"));
+                dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow - TimeSpan.FromHours(1), null, new TokenValidationParameters(), ExpectedException.SecurityTokenExpiredException("IDX10223:"));
+                dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters(), ExpectedException.NoExceptionExpected);
+
+                // clock skew, positive then negative
+                dataset.Add(DateTime.UtcNow + TimeSpan.FromMinutes(2), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.NoExceptionExpected);
+                dataset.Add(DateTime.UtcNow - TimeSpan.FromMinutes(2), DateTime.UtcNow - TimeSpan.FromMinutes(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.NoExceptionExpected);
+                dataset.Add(DateTime.UtcNow + TimeSpan.FromMinutes(6), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.SecurityTokenNotYetValidException("IDX10222:"));
+                dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow - TimeSpan.FromMinutes(6), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.SecurityTokenExpiredException("IDX10223:"));
+
+                return dataset;
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("SecurityKeyDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
+        {
+            try
+            {
+                Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<SecurityKey, SecurityToken, TokenValidationParameters, ExpectedException> SecurityKeyDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<SecurityKey, SecurityToken, TokenValidationParameters, ExpectedException>();
+
+                dataset.Add(null, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true }, ExpectedException.ArgumentNullException());
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, null, new TokenValidationParameters { ValidateIssuerSigningKey = true }, ExpectedException.ArgumentNullException());
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, new JwtSecurityToken(), null, ExpectedException.ArgumentNullException());
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true }, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = false }, ExpectedException.NoExceptionExpected);
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, null, new TokenValidationParameters { ValidateIssuerSigningKey = false }, ExpectedException.NoExceptionExpected);
+
+                return dataset;
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("TokenReplayDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void TokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters, ExpectedException ee)
+        {
+            try
+            {
+                Validators.ValidateTokenReplay(securityToken, expirationTime, validationParameters);
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, DateTime?, TokenValidationParameters, ExpectedException> TokenReplayDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<string, DateTime?, TokenValidationParameters, ExpectedException>();
+
+                dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.ArgumentNullException());
+                dataset.Add(string.Empty, null, new TokenValidationParameters(), ExpectedException.ArgumentNullException());
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), null, ExpectedException.ArgumentNullException());
+                dataset.Add("token", null, new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = true } }, ExpectedException.SecurityTokenNoExpirationException());
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = true } }, ExpectedException.SecurityTokenReplayDetected("IDX10228:"));
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = false, FindRetVal = false } }, ExpectedException.SecurityTokenReplayAddFailed("IDX10229:"));
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = false } }, ExpectedException.NoExceptionExpected);
+
+                return dataset;
+            }
+        }
+
+        class TokenReplayCache : ITokenReplayCache
+        {
+            public bool AddRetVal { get; set; }
+
+            public bool FindRetVal { get; set; }
+
+            public bool TryAdd(string securityToken, DateTime expiresOn)
+            {
+                return AddRetVal;
+            }
+
+            public bool TryFind(string securityToken)
+            {
+                return FindRetVal;
+            }
         }
     }
 }

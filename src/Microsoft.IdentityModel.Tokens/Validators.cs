@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if(validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateAudience)
             {
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (audiences == null)
-                throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), (validationParameters.ValidAudience ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences));
+                throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10207);
 
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
                 throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10208);
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateIssuer)
             {
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (string.IsNullOrWhiteSpace(issuer))
-                throw LogHelper.LogException<SecurityTokenInvalidIssuerException>(LogMessages.IDX10211, "validationParameters");
+                throw LogHelper.LogException<SecurityTokenInvalidIssuerException>(LogMessages.IDX10211);
 
             // Throw if all possible places to validate against are null or empty
             if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && (validationParameters.ValidIssuers == null))
@@ -153,17 +153,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
+        /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'vaidationParameters' is null.</exception>
         public static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateIssuerSigningKey)
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10237);
                 return;
             }
+
+            if (securityKey == null)
+                throw LogHelper.LogArgumentNullException(nameof(securityKey));
+
+            if (securityToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey != null)
@@ -188,7 +196,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateLifetime)
             {
@@ -227,10 +235,10 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateTokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogArgumentNullException("securityToken");
+                throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
