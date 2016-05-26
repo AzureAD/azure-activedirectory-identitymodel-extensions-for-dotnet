@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// RequestTypes for OpenIdConnect.
     /// </summary>
     /// <remarks>Can be used to determine the message type.</remarks>
-    public enum OpenIdConnectRequestType
+    public enum OpenIdConnectRequestTypes
     {
 #pragma warning disable 1591
         AuthenticationRequest,
