@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Definition for IssuerSigningKeyResolver.
     /// </summary>
     /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
-    /// <param name="securityToken">The <SecurityToken> that is being validated. It may be null.</SecurityToken></param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated. It may be null.</param>
     /// <param name="kid">A key identifier. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A <see cref="SecurityKey"/> to use when validating a signature.</returns>
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Definition for IssuerSigningKeyValidator.
     /// </summary>
-    /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>./param>
+    /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     public delegate bool IssuerSigningKeyValidator(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters);
