@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
+                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10623);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10642, input);
 
@@ -190,10 +190,10 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (signature == null)
-                throw LogHelper.LogArgumentNullException("signature");
+                throw LogHelper.LogArgumentNullException(nameof(signature));
 
             if (input.Length == 0)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625);
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10623);
+                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10623);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
             return AreEqual(signature, _keyedHash.ComputeHash(input));

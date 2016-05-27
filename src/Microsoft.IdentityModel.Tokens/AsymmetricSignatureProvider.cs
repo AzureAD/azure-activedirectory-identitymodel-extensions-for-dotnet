@@ -146,6 +146,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (asymmetricAlgorithmResolver != null)
             {
                 AsymmetricAlgorithm asymmetricAlgorithm = asymmetricAlgorithmResolver(key, algorithm, willCreateSignatures);
+                if (asymmetricAlgorithm == null)
+                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10646, nameof(key), algorithm);
+
 #if NETSTANDARD1_4
                 _rsa = asymmetricAlgorithm as RSA;
                 if (_rsa == null)
@@ -670,9 +673,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_disposed)
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
-
-            if (_hashAlgorithm == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10621, "signature");
 
 #if NETSTANDARD1_4
             if (_rsa != null)
