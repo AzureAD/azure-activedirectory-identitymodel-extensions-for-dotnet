@@ -3,21 +3,20 @@
   "dependencies": {
     "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*"
+    "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
+    "Microsoft.NETCore.Platforms": "1.0.1-*",
+    "dotnet-test-xunit": "1.0.0-*"
   },
-  "exclude": [
-    "WsFederationMessageTests.cs"
-  ],
   "testRunner": "xunit",
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.0.0-rc3-002857",
           "type": "platform"
         },
-        "System.Diagnostics.Process": "4.1.0-*"
+        "System.Diagnostics.Process": "4.1.0-rc3-*",
+        "System.Runtime": "4.1.0-rc3-*"
       },
       "imports": [
         "dnxcore50",
@@ -35,6 +34,7 @@
     }
   },
   "buildOptions": {
-    "warningsAsErrors": true
+    "warningsAsErrors": true,
+    "compile": { "exclude": [ "WsFederationMessageTests.cs" ] }
   }
 }

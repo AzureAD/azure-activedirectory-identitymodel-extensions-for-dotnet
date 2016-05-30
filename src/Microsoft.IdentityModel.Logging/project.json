@@ -5,10 +5,10 @@
   "frameworks": {
     "netstandard1.4": {
       "dependencies": {
-        "System.Diagnostics.Tracing": "4.1.0-rc2-*",
-        "System.Globalization": "4.0.11-rc2-*",
-        "System.IO": "4.1.0-rc2-*",
-        "System.IO.FileSystem": "4.0.1-rc2-*"
+        "System.Diagnostics.Tracing": "4.1.0-rc3-*",
+        "System.Globalization": "4.0.11-rc3-*",
+        "System.IO": "4.1.0-rc3-*",
+        "System.IO.FileSystem": "4.0.1-rc3-*"
       },
       "imports": [ "portable-net451+win8" ]
     },

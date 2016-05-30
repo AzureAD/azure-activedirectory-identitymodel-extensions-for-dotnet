@@ -4,11 +4,6 @@
   "dependencies": {
     "Microsoft.IdentityModel.Protocols": "2.0.0-*"
   },
-  "exclude": [
-    "WsFederationMessage.cs",
-    "Configuration\\WsFederationConfiguration.cs",
-    "Configuration\\WsFederationConfigurationRetriever.cs"
-  ],
   "frameworks": {
     "netstandard1.4": {
       "imports": [ "portable-net451+win8" ]
@@ -16,9 +11,11 @@
     "net451": { }
   },
   "buildOptions": {
-    "warningsAsErrors": true,
+    "compile": { "exclude": [ "WsFederationMessage.cs", "Configuration\\WsFederationConfiguration.cs", "Configuration\\WsFederationConfigurationRetriever.cs"] },
     "delaySign": true,
     "keyFile": "../../build/35MSSharedLib1024.snk",
-    "xmlDoc": true
+	"warningsAsErrors": true,
+    "xmlDoc": true,
+    "warningsAsErrors": true
   }
 }

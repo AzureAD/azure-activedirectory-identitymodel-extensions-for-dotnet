@@ -15,6 +15,7 @@ project.lock.json
 [Rr]elease/
 x64/
 build/
+.build/dotnetcli/local/*/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -208,6 +209,5 @@ stash/*
 TestResults/*
 docs/*
 backup/*
-.build/
 .testPublish/
 /.vs/
