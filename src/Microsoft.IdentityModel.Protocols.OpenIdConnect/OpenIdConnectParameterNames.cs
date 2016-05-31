@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string ResponseType = "response_type";
         public const string Scope = "scope";
         public const string SessionState = "session_state";
+        public const string Sid = "sid";
         public const string State = "state";
         public const string TargetLinkUri = "target_link_uri";
         public const string TokenType = "token_type";

@@ -165,8 +165,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectMessage message = new OpenIdConnectMessage();
             Type type = typeof(OpenIdConnectMessage);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 46)
-                Assert.True(true, "Number of public fields has changed from 46 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 47)
+                Assert.True(true, "Number of public fields has changed from 47 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -204,6 +204,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new KeyValuePair<string, List<object>>("Resource", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Scope", new List<object>{null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("SessionState", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Sid", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("State", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("TargetLinkUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
