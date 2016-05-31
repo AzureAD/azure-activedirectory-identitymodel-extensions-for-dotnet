@@ -4,8 +4,8 @@
     "Newtonsoft.Json": "8.0.3",
     "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-*",
     "Microsoft.NETCore.Platforms": "1.0.1-*",
-    "dotnet-test-xunit": "1.0.0-*",
     "System.IdentityModel.Tokens.Saml": "5.0.0-*",
+    "dotnet-test-xunit": "1.0.0-*",
     "xunit": "2.1.0"
   },
   "testRunner": "xunit",
@@ -13,10 +13,10 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.0.0-rc3-002857",
           "type": "platform"
         },
-        "System.Reflection.TypeExtensions": "4.1.0-rc2-*"
+        "System.Reflection.TypeExtensions": "4.1.0-rc3-*"
       },
       "imports": [
         "dnxcore50",
@@ -34,7 +34,7 @@
     }
   },
   "buildOptions": {
-    "warningsAsErrors": true
-  },
-  "content": [ "google-certs.json" ]
+    "warningsAsErrors": true,
+    "copyToOutput": [ "google-certs.json" ]
+  }
 }

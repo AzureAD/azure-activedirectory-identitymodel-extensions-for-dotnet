@@ -7,9 +7,9 @@
   "frameworks": {
     "netstandard1.4": {
       "dependencies": {
-        "System.Collections.Specialized": "4.0.1-rc2-*",
-        "System.Diagnostics.Contracts": "4.0.1-rc2-*",
-        "System.Net.Http": "4.0.1-rc2-*"
+        "System.Collections.Specialized": "4.0.1-rc3-*",
+        "System.Diagnostics.Contracts": "4.0.1-rc3-*",
+        "System.Net.Http": "4.1.0-rc3-*"
       },
       "imports": [ "portable-net451+win8" ]
     },
