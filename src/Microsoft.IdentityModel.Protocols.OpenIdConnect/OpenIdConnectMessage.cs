@@ -497,6 +497,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets or sets 'sid'.
+        /// </summary>
+        public string Sid
+        {
+            get { return GetParameter(OpenIdConnectParameterNames.Sid); }
+            set { SetParameter(OpenIdConnectParameterNames.Sid, value); }
+        }
+
+        /// <summary>
         /// Gets or sets 'state'.
         /// </summary>
         public string State

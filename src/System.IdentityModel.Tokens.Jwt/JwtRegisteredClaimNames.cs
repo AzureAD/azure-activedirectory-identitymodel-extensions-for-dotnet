@@ -140,6 +140,11 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Prn = "prn";
 
         /// <summary>
+        /// http://openid.net/specs/openid-connect-frontchannel-1_0.html#OPLogout
+        /// </summary>
+        public const string Sid = "sid";
+
+        /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Sub = "sub";
