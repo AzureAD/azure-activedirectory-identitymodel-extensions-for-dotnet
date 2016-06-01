@@ -1,0 +1,59 @@
+<root>
+  <dotnetArchitecture>x64</dotnetArchitecture>
+  <dotnetChannel>preview</dotnetChannel>
+  <dotnetVersion>1.0.0-preview2-002911</dotnetVersion>
+  <dotnetUrl>https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1</dotnetUrl>
+  <coreFxOldVersion>-rc3-\*</coreFxOldVersion>
+  <coreFxNewVersion>-rc3-24128-00</coreFxNewVersion>
+  <netCoreAppOldVersion>1.0.0-rc3-\*</netCoreAppOldVersion>
+  <netCoreAppNewVersion>1.0.0-rc3-004338</netCoreAppNewVersion>
+  <nugetVersion>3.5.0-rc-1285</nugetVersion>
+  <projects>
+    <src>
+      <project name="Microsoft.IdentityModel.Logging">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Tokens">
+        <build>yes</build>
+      </project>
+      <project name="System.IdentityModel.Tokens.Jwt">
+        <build>yes</build>
+      </project>
+      <project name="System.IdentityModel.Tokens.Saml">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Protocols">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Protocols.WsFederation">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect">
+        <build>yes</build>
+      </project>
+    </src>
+    <test>
+      <project name="Microsoft.IdentityModel.Logging.Tests">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Tokens.Tests">
+        <build>yes</build>
+      </project>
+      <project name="System.IdentityModel.Tokens.Jwt.Tests">
+        <build>yes</build>
+      </project>
+      <project name="System.IdentityModel.Tokens.Saml.Tests">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Protocols.Tests">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests">
+        <build>yes</build>
+      </project>
+    </test>
+  </projects>
+</root>

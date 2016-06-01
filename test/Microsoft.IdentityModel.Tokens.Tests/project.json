@@ -8,12 +8,13 @@
     "dotnet-test-xunit": "1.0.0-*",
     "xunit": "2.1.0"
   },
+  "description": "Microsoft.IdentityModel.Tokens.Tests",
   "testRunner": "xunit",
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-rc3-002857",
+          "version": "1.0.0-rc3-004338",
           "type": "platform"
         },
         "System.Reflection.TypeExtensions": "4.1.0-rc3-*"
