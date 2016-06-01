@@ -240,9 +240,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             string expected = string.Format(CultureInfo.InvariantCulture, @"");
             Report("1", errors, url, expected);
 
-            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
-            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
-            message.Scope = OpenIdConnectScopes.OpenIdProfile;
+            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
+            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+            message.Scope = OpenIdConnectScope.OpenIdProfile;
 
             url = message.BuildRedirectUrl();
             expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile");
@@ -256,9 +256,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // IssuerAddress only
             message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
-            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
-            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
-            message.Scope = OpenIdConnectScopes.OpenIdProfile;
+            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
+            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+            message.Scope = OpenIdConnectScope.OpenIdProfile;
             message.Nonce = nonce;
 
             url = message.BuildRedirectUrl();
@@ -279,9 +279,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // IssuerAdderss, Redirect_uri, Response
             message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
-            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
-            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
-            message.Scope = OpenIdConnectScopes.OpenIdProfile;
+            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
+            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+            message.Scope = OpenIdConnectScope.OpenIdProfile;
             message.Nonce = nonce;
             message.RedirectUri = redirectUri;
             message.Resource = resource;
@@ -291,9 +291,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // IssuerAdderss, Redirect_uri, Response, customParam
             message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
-            message.ResponseMode = OpenIdConnectResponseModes.FormPost;
-            message.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
-            message.Scope = OpenIdConnectScopes.OpenIdProfile;
+            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
+            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+            message.Scope = OpenIdConnectScope.OpenIdProfile;
             message.Nonce = nonce;
             message.Parameters.Add(customParameterName, customParameterValue);
             message.RedirectUri = redirectUri;
