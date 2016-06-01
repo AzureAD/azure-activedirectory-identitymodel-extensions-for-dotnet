@@ -111,22 +111,31 @@ namespace Microsoft.IdentityModel.Test
             securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
             expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "IDX10506:", innerTypeExpected: typeof(SignatureVerificationFailedException));
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+            ValidateToken(defaultSaml2Token, tokenValidationParameters, securityTokenValidators, expectedException);
 
             // keyInfo is null.
             const string startKeyInfo = "<KeyInfo>";
             const string endKeyInfo = "</KeyInfo>";
-            int start = defaultSamlToken.IndexOf(startKeyInfo);
-            int end = defaultSamlToken.IndexOf(endKeyInfo);
-            string nullKeyInfoSamlToken = defaultSamlToken.Remove(start, end - start + endKeyInfo.Length);
+            int samlStart = defaultSamlToken.IndexOf(startKeyInfo);
+            int samlEnd = defaultSamlToken.IndexOf(endKeyInfo);
+            string nullKeyInfoSamlToken = defaultSamlToken.Remove(samlStart, samlEnd - samlStart + endKeyInfo.Length);
+            int saml2Start = defaultSaml2Token.IndexOf(startKeyInfo);
+            int saml2End = defaultSaml2Token.IndexOf(endKeyInfo);
+            string nullKeyInfoSaml2Token = defaultSaml2Token.Remove(saml2Start, saml2End - saml2Start + endKeyInfo.Length);
             expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "ID4037:");
             ValidateToken(nullKeyInfoSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+            ValidateToken(nullKeyInfoSaml2Token, tokenValidationParameters, securityTokenValidators, expectedException);
 
-            string emptyKeyInfoSamlToken = defaultSamlToken.Remove(start + startKeyInfo.Length, end - start - startKeyInfo.Length);
+            // keyInfo is empty.
+            string emptyKeyInfoSamlToken = defaultSamlToken.Remove(samlStart + startKeyInfo.Length, samlEnd - samlStart - startKeyInfo.Length);
+            string emptyKeyInfoSaml2Token = defaultSaml2Token.Remove(saml2Start + startKeyInfo.Length, saml2End - saml2Start - startKeyInfo.Length);
             ValidateToken(emptyKeyInfoSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+            ValidateToken(emptyKeyInfoSaml2Token, tokenValidationParameters, securityTokenValidators, expectedException);
 
             // There is no any of SigningKey/SigningKeys/SigningToken/SigningTokens/IssuerSigningKeyResolver in validation parameters.
             tokenValidationParameters = new TokenValidationParameters();
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+            ValidateToken(defaultSaml2Token, tokenValidationParameters, securityTokenValidators, expectedException);
 
             securityTokenValidators.Clear();
             securityTokenValidators.Add(new IMSamlTokenHandler());
