@@ -28,19 +28,16 @@ using System.Text;
 using System.Xml;
 using SamlHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 
-
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// A derived <see cref="System.IdentityModel.Tokens.Saml2SecurityTokenHandler"/> that implements ISecurityTokenValidator, 
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
-    ///     
     public class SamlSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
         internal const string SamlTokenProfile11 = "urn:oasis:names:tc:SAML:1.0:assertion";
         internal const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
-        private const string KeyInfo = "KeyInfo";
 
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { SamlTokenProfile11, OasisWssSamlTokenProfile11 };
@@ -310,6 +307,11 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                 }
 
+                if (samlToken == null)
+                {
+                    throw new NullReferenceException(ErrorMessages.IDX10201);
+                }
+
                 if (samlToken.Assertion == null)
                 {
                     throw new ArgumentException(ErrorMessages.IDX10202);
@@ -411,7 +413,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(securityToken);
-                XmlNodeList keyInfoList = xmlDoc.GetElementsByTagName(KeyInfo);
+                XmlNodeList keyInfoList = xmlDoc.GetElementsByTagName(SamlConstants.KeyInfo);
                 if (keyInfoList.Count > 0
                     && (validationParameters.IssuerSigningKey != null
                     || validationParameters.IssuerSigningKeys != null
@@ -429,12 +431,13 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (issuerTokenResolver.IsKeyMatched)
                         {
-                            // keyInfo in token matched with key(s) in validationParameters.
+                            // keyInfo in token matched with key(s) in validationParameters. This usually means the token was compromised.
                             throw;
                         }
                         else
                         {
-                          throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10506, securityToken), ex);
+                            // KeyInfo in token didn't match with key(s) in validationParameters. This means the user should refresh the key material.
+                            throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10506, securityToken), ex);
                         }
                     }
                 }
