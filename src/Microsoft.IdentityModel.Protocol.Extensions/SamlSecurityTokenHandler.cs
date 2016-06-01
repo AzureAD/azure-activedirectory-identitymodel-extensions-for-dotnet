@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.IdentityModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -26,6 +27,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using SamlHandler = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
+
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -38,6 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         internal const string SamlTokenProfile11 = "urn:oasis:names:tc:SAML:1.0:assertion";
         internal const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
+        private const string KeyInfo = "KeyInfo";
 
         private Int32 _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { SamlTokenProfile11, OasisWssSamlTokenProfile11 };
@@ -287,118 +290,160 @@ namespace Microsoft.IdentityModel.Tokens
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes));
             }
 
+            SecurityKeyResolver issuerTokenResolver = new SecurityKeyResolver(securityToken, validationParameters);
+
             // Calling System.IdentityModel.Tokens.SamlSecurityTokenHandler requires Configuration and IssuerTokenResolver be set.
             Configuration = new SecurityTokenHandlerConfiguration
             {
-                IssuerTokenResolver = new SecurityKeyResolver(securityToken, validationParameters),
+                IssuerTokenResolver = issuerTokenResolver,
                 MaxClockSkew = validationParameters.ClockSkew,
             };
 
-            SamlSecurityToken samlToken;
-            using (StringReader sr = new StringReader(securityToken))
+            try
             {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                SamlSecurityToken samlToken;
+                using (StringReader sr = new StringReader(securityToken))
                 {
-                    samlToken = ReadToken(reader, validationParameters) as SamlSecurityToken;
-                }
-            }
-
-            if (samlToken.Assertion == null)
-            {
-                throw new ArgumentException(ErrorMessages.IDX10202);
-            }
-
-            if (samlToken.Assertion.SigningToken == null && validationParameters.RequireSignedTokens)
-            {
-                throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
-            }
-
-            DateTime? notBefore = null;
-            DateTime? expires = null;
-            if (samlToken.Assertion.Conditions != null)
-            {
-                notBefore = samlToken.Assertion.Conditions.NotBefore;
-                expires = samlToken.Assertion.Conditions.NotOnOrAfter;
-            }
-
-            Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
-
-            if (validationParameters.ValidateLifetime)
-            {
-                if (validationParameters.LifetimeValidator != null)
-                {
-                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
+                    using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                     {
-                        throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, securityToken));
+                        samlToken = ReadToken(reader, validationParameters) as SamlSecurityToken;
                     }
                 }
-                else
+
+                if (samlToken.Assertion == null)
                 {
-                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
+                    throw new ArgumentException(ErrorMessages.IDX10202);
                 }
-            }
 
-            if (validationParameters.ValidateAudience)
-            {
-                List<string> audiences = new List<string>();
-                if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.Conditions != null)
+                if (samlToken.Assertion.SigningToken == null && validationParameters.RequireSignedTokens)
                 {
-                    foreach (SamlCondition condition in samlToken.Assertion.Conditions.Conditions)
-                    {
-                        SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
-                        if (null == audienceRestriction)
-                        {
-                            continue;
-                        }
+                    throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
+                }
 
-                        foreach (Uri uri in audienceRestriction.Audiences)
+                DateTime? notBefore = null;
+                DateTime? expires = null;
+                if (samlToken.Assertion.Conditions != null)
+                {
+                    notBefore = samlToken.Assertion.Conditions.NotBefore;
+                    expires = samlToken.Assertion.Conditions.NotOnOrAfter;
+                }
+
+                Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
+
+                if (validationParameters.ValidateLifetime)
+                {
+                    if (validationParameters.LifetimeValidator != null)
+                    {
+                        if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                         {
-                            audiences.Add(uri.OriginalString);
+                            throw new SecurityTokenInvalidLifetimeException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10230, securityToken));
                         }
                     }
+                    else
+                    {
+                        ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
+                    }
                 }
 
-                if (validationParameters.AudienceValidator != null)
+                if (validationParameters.ValidateAudience)
                 {
-                    if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
+                    List<string> audiences = new List<string>();
+                    if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.Conditions != null)
                     {
-                        throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, securityToken));
+                        foreach (SamlCondition condition in samlToken.Assertion.Conditions.Conditions)
+                        {
+                            SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
+                            if (null == audienceRestriction)
+                            {
+                                continue;
+                            }
+
+                            foreach (Uri uri in audienceRestriction.Audiences)
+                            {
+                                audiences.Add(uri.OriginalString);
+                            }
+                        }
+                    }
+
+                    if (validationParameters.AudienceValidator != null)
+                    {
+                        if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
+                        {
+                            throw new SecurityTokenInvalidAudienceException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10231, securityToken));
+                        }
+                    }
+                    else
+                    {
+                        ValidateAudience(audiences, samlToken, validationParameters);
+                    }
+                }
+
+                string issuer = null;
+                issuer = samlToken.Assertion.Issuer == null ? null : samlToken.Assertion.Issuer;
+
+                if (validationParameters.ValidateIssuer)
+                {
+                    if (validationParameters.IssuerValidator != null)
+                    {
+                        issuer = validationParameters.IssuerValidator(issuer, samlToken, validationParameters);
+                    }
+                    else
+                    {
+                        issuer = ValidateIssuer(issuer, samlToken, validationParameters);
+                    }
+                }
+
+                if (samlToken.Assertion.SigningToken != null)
+                {
+                    ValidateIssuerSecurityKey(samlToken.Assertion.SigningToken.SecurityKeys[0], samlToken, validationParameters);
+                }
+
+                ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
+                if (validationParameters.SaveSigninToken)
+                {
+                    identity.BootstrapContext = new BootstrapContext(securityToken);
+                }
+
+                validatedToken = samlToken;
+                return new ClaimsPrincipal(identity);
+            }
+            catch (SignatureVerificationFailedException ex)
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(securityToken);
+                XmlNodeList keyInfoList = xmlDoc.GetElementsByTagName(KeyInfo);
+                if (keyInfoList.Count > 0
+                    && (validationParameters.IssuerSigningKey != null
+                    || validationParameters.IssuerSigningKeys != null
+                    || validationParameters.IssuerSigningToken != null
+                    || validationParameters.IssuerSigningTokens != null
+                    || validationParameters.IssuerSigningKeyResolver != null))
+                {
+                    XmlNode keyInfoNode = keyInfoList.Item(0);
+                    if (String.IsNullOrEmpty(keyInfoNode.InnerXml))
+                    {
+                        // KeyInfo element is empty.
+                        throw;
+                    }
+                    else
+                    {
+                        if (issuerTokenResolver.IsKeyMatched)
+                        {
+                            // keyInfo in token matched with key(s) in validationParameters.
+                            throw;
+                        }
+                        else
+                        {
+                          throw new SecurityTokenSignatureKeyNotFoundException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10506, securityToken), ex);
+                        }
                     }
                 }
                 else
                 {
-                    ValidateAudience(audiences, samlToken, validationParameters);
+                    // Missing KeyInfo element or validation parameters' SigningKey/SigningKeys/SigningToken/SigningTokens/IssuerSigningKeyResolver.
+                    throw;
                 }
             }
-
-            string issuer = null;
-            issuer = samlToken.Assertion.Issuer == null ? null : samlToken.Assertion.Issuer;
-
-            if (validationParameters.ValidateIssuer)
-            {
-                if (validationParameters.IssuerValidator != null)
-                {
-                    issuer = validationParameters.IssuerValidator(issuer, samlToken, validationParameters);
-                }
-                else
-                {
-                    issuer = ValidateIssuer(issuer, samlToken, validationParameters);
-                }
-            }
-
-            if (samlToken.Assertion.SigningToken != null)
-            {
-                ValidateIssuerSecurityKey(samlToken.Assertion.SigningToken.SecurityKeys[0], samlToken, validationParameters);
-            }
-
-            ClaimsIdentity identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
-            if (validationParameters.SaveSigninToken)
-            {
-                identity.BootstrapContext = new BootstrapContext(securityToken);
-            }
-
-            validatedToken = samlToken;
-            return new ClaimsPrincipal(identity);
         }
 
         /// <summary>

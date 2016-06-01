@@ -106,8 +106,26 @@ namespace Microsoft.IdentityModel.Test
             expectedException = ExpectedException.SecurityTokenValidationException("IDX10201");
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
 
+            // keyInfo in token doesn't match to signing key in validation parameters.
+            tokenValidationParameters.IssuerSigningKey = KeyingMaterial.AsymmetricKey_1024;
             securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
+            expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "IDX10506:", innerTypeExpected: typeof(SignatureVerificationFailedException));
+            ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+
+            // keyInfo is null.
+            const string startKeyInfo = "<KeyInfo>";
+            const string endKeyInfo = "</KeyInfo>";
+            int start = defaultSamlToken.IndexOf(startKeyInfo);
+            int end = defaultSamlToken.IndexOf(endKeyInfo);
+            string nullKeyInfoSamlToken = defaultSamlToken.Remove(start, end - start + endKeyInfo.Length);
             expectedException = ExpectedException.SignatureVerificationFailedException(substringExpected: "ID4037:");
+            ValidateToken(nullKeyInfoSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+
+            string emptyKeyInfoSamlToken = defaultSamlToken.Remove(start + startKeyInfo.Length, end - start - startKeyInfo.Length);
+            ValidateToken(emptyKeyInfoSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
+
+            // There is no any of SigningKey/SigningKeys/SigningToken/SigningTokens/IssuerSigningKeyResolver in validation parameters.
+            tokenValidationParameters = new TokenValidationParameters();
             ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, expectedException);
 
             securityTokenValidators.Clear();
