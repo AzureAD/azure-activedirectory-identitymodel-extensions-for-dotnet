@@ -568,7 +568,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires = new DateTime?(jwt.ValidTo);
             }
 
-            Validators.ValidateTokenReplay(token, expires, validationParameters);
             if (validationParameters.ValidateLifetime)
             {
                 if (validationParameters.LifetimeValidator != null)
@@ -608,6 +607,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
+            Validators.ValidateTokenReplay(token, expires, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
             {
                 SecurityToken actor = null;
