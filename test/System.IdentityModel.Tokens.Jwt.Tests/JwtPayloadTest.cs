@@ -138,9 +138,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void TestClaimWithNullValue()
         {
-            JwtPayload jwtPayload = new JwtPayload();
-            jwtPayload.Add("testClaim", null);
-            List<Claim> claims = jwtPayload.Claims as List<Claim>;   // this should not throw
+            JwtPayload payload = new JwtPayload();
+            payload.Add("nullClaim", null);
+            foreach (Claim claim in payload.Claims)
+            {
+                if (claim.Type == "nullClaim")
+                    return;
+            }
+            Assert.True(false, "Claim with expected type: nullClaim is not found");
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
