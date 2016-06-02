@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10623);
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10642, input);
 
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<ArgumentNullException>(LogMessages.IDX10623);
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
             return AreEqual(signature, _keyedHash.ComputeHash(input));

@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 AsymmetricAlgorithm asymmetricAlgorithm = asymmetricAlgorithmResolver(key, algorithm, willCreateSignatures);
                 if (asymmetricAlgorithm == null)
-                    throw LogHelper.LogException<ArgumentOutOfRangeException>(LogMessages.IDX10646, nameof(key), algorithm);
+                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, nameof(key), algorithm);
 
 #if NETSTANDARD1_4
                 _rsa = asymmetricAlgorithm as RSA;
