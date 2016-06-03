@@ -475,7 +475,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidIssuer = IdentityUtilities.DefaultIssuer,
                 };
 
-            TestUtilities.ValidateTokenReplay(securityToken: jwt, tokenValidator: tokenHandler, validationParameters: validationParameters);
+            TestUtilities.ValidateTokenReplay(jwt, tokenHandler, validationParameters);
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
             validationParameters.LifetimeValidator =
                 (nb, exp, st, tvp) =>
@@ -487,23 +487,29 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // validating lifetime validator
             validationParameters.ValidateLifetime = false;
             validationParameters.LifetimeValidator = IdentityUtilities.LifetimeValidatorThrows;
-            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // validating issuer signing key validator
-            validationParameters = SignatureValidationParameters(signingKey: IdentityUtilities.DefaultAsymmetricSigningKey);
+            validationParameters = SignatureValidationParameters(IdentityUtilities.DefaultAsymmetricSigningKey);
             validationParameters.ValidateIssuerSigningKey = true;
             validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return true; };
-            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return false; };
-            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:"));
 
             // validating issuer signing key resolver
             validationParameters = SignatureValidationParameters();
-            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"));
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"));
 
             validationParameters.IssuerSigningKeyResolver = (token, idToken, kid, parameters) => { return new List<SecurityKey> { IdentityUtilities.DefaultAsymmetricSigningKey }; };
-            TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+
+            // validating custom crypto provider factory
+            validationParameters = SignatureValidationParameters();
+            validationParameters.CryptoProviderFactory = new CryptoProviderFactory();
+            validationParameters.CryptoProviderFactory.AsymmetricAlgorithmResolver = ((key, alg, willCreateSignatures) => { return null; });
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.ArgumentOutOfRangeException("IDX10646"));
         }
 
         [Fact]

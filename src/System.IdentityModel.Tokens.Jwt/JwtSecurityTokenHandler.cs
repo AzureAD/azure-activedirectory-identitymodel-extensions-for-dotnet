@@ -523,9 +523,6 @@ namespace System.IdentityModel.Tokens.Jwt
 
             JwtSecurityToken jwt = null;
 
-            if (validationParameters.CryptoProviderFactory != null)
-                CryptoProviderFactory.Default = validationParameters.CryptoProviderFactory;
-
             if (validationParameters.SignatureValidator != null)
             {
                 var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
@@ -750,6 +747,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
+                        if (validationParameters.CryptoProviderFactory != null)
+                            securityKey.CryptoProviderFactory = validationParameters.CryptoProviderFactory;
+
                         if (ValidateSignature(encodedBytes, signatureBytes, securityKey, jwt.Header.Alg))
                         {
                             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10242, token);
