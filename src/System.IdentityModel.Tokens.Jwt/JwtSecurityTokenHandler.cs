@@ -78,6 +78,14 @@ namespace System.IdentityModel.Tokens.Jwt
         public static ISet<string> DefaultInboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
 
         /// <summary>
+        /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
+        /// </summary>
+        static JwtSecurityTokenHandler()
+        {
+            IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityTokenHandler"/> class.
         /// </summary>
         public JwtSecurityTokenHandler()
