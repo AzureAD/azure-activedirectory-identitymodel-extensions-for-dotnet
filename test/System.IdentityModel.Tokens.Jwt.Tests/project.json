@@ -5,12 +5,13 @@
     "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests": "2.0.0-*",
     "xunit": "2.1.0"
   },
+  "description": "System.IdentityModel.Tokens.Jwt.Tests",
   "testRunner": "xunit",
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-rc3-002857",
+          "version": "1.0.0-rc3-004338",
           "type": "platform"
         },
         "System.Diagnostics.Process": "4.1.0-rc3-*"
