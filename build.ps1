@@ -205,9 +205,9 @@ if ($build -eq "YES")
         Write-Host ""
         Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType"
         Write-Host ""
-        Write-Host ">>> Copy-Item $root\src\$name\bin\$buildType $artifactsRoot\build\$name -Recurse"
+        Write-Host ">>> Copy-Item $root\src\$name\bin\$buildType $artifactsRoot\build\$name\$buildType -Recurse"
         Write-Host ""
-        Copy-Item src\$name\bin\$buildType $artifactsRoot\build\$name -Recurse
+        Copy-Item src\$name\bin\$buildType $artifactsRoot\build\$name\$buildType -Recurse
     }
 }
 
