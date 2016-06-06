@@ -48,23 +48,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// <see cref="OpenIdConnectProtocolValidator"/> is used to ensure that an <see cref="OpenIdConnectMessage"/>
     ///  obtained using OpenIdConnect is compliant with  http://openid.net/specs/openid-connect-core-1_0.html .
     /// </summary>
-    public class OpenIdConnectProtocolValidator
+    public class OpenIdConnectProtocolValidator : IDisposable
     {
-        private IDictionary<string, string> _hashAlgorithmMap =
-            new Dictionary<string, string>
-            {
-                { SecurityAlgorithms.EcdsaSha256, "SHA256" },
-                { SecurityAlgorithms.RsaSha256, "SHA256" },
-                { SecurityAlgorithms.HmacSha256, "SHA256" },
-                { SecurityAlgorithms.EcdsaSha384, "SHA384" },
-                { SecurityAlgorithms.RsaSha384, "SHA384" },
-                { SecurityAlgorithms.HmacSha384, "SHA384" },
-                { SecurityAlgorithms.EcdsaSha512, "SHA512" },
-                { SecurityAlgorithms.RsaSha512, "SHA512" },
-                { SecurityAlgorithms.HmacSha512, "SHA512" },
-          };
+        private IDictionary<ISet<string>, HashAlgorithm> _hashAlgorithmMap;
 
         private TimeSpan _nonceLifetime = DefaultNonceLifetime;
+
+        private bool _disposed = false;
 
         /// <summary>
         /// Default for the how long the nonce is valid.
@@ -86,6 +76,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             RequireSub = false;
             RequireTimeStampInNonce = true;
             RequireStateValidation = true;
+
+            InitializeHashAlgorithmMap();
         }
 
         /// <summary>
@@ -110,7 +102,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the algorithm mapping between OpenIdConnect and .Net for Hash algorithms.
         /// a <see cref="IDictionary{TKey, TValue}"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/rfc7518 to .Net.
         /// </summary>
-        public IDictionary<string, string> HashAlgorithmMap
+        public IDictionary<ISet<string>, HashAlgorithm> HashAlgorithmMap
         {
             get
             {
@@ -334,6 +326,38 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Calls <see cref="HashAlgorithm.Dispose()"/> to release this managed resources.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this._disposed)
+            {
+                if (disposing)
+                {
+                    foreach (var item in _hashAlgorithmMap)
+                    {
+                        if (item.Value != null)
+                        {
+                            item.Value.Dispose();
+                        }
+                    }
+                }
+
+                _disposed = true;
+            }
+        }
+
+        /// <summary>
         /// Validates the claims in the 'id_token' as per http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
         /// </summary>
         /// <param name="validationContext">the <see cref="OpenIdConnectProtocolValidationContext"/> that contains expected values.</param>
@@ -427,43 +451,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                switch (algorithm)
+                HashAlgorithm alg = null;
+                foreach (var item in _hashAlgorithmMap)
                 {
-                    case SecurityAlgorithms.Sha256:
-                    case SecurityAlgorithms.EcdsaSha256:
-                    case SecurityAlgorithms.HmacSha256:
-                    case SecurityAlgorithms.RsaSha256:
-                    case SecurityAlgorithms.RsaSsaPssSha256:
-                    case SecurityAlgorithms.RsaSha256Signature:
-                    case SecurityAlgorithms.EcdsaSha256Signature:
-                        return SHA256.Create();
-
-                    case SecurityAlgorithms.Sha384:
-                    case SecurityAlgorithms.EcdsaSha384:
-                    case SecurityAlgorithms.HmacSha384:
-                    case SecurityAlgorithms.RsaSha384:
-                    case SecurityAlgorithms.RsaSsaPssSha384:
-                    case SecurityAlgorithms.RsaSha384Signature:
-                    case SecurityAlgorithms.EcdsaSha384Signature:
-                        return SHA384.Create();
-
-                    case SecurityAlgorithms.Sha512:
-                    case SecurityAlgorithms.RsaSha512:
-                    case SecurityAlgorithms.EcdsaSha512:
-                    case SecurityAlgorithms.HmacSha512:
-                    case SecurityAlgorithms.RsaSsaPssSha512:
-                    case SecurityAlgorithms.RsaSha512Signature:
-                    case SecurityAlgorithms.EcdsaSha512Signature:
-                        return SHA512.Create();
+                    if (item.Key.Contains(algorithm))
+                    {
+                        alg = item.Value;
+                        break;
+                    }
                 }
 
+                if (alg == null)
+                {
+                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10302, algorithm);
+                }
+
+                return alg;
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogException<OpenIdConnectProtocolException>(ex, LogMessages.IDX10301, algorithm);
             }
-
-            throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10302, algorithm);
         }
 
         /// <summary>
@@ -531,7 +539,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 ValidateHash(chash, validationContext.ProtocolMessage.Code, validationContext.ValidatedIdToken.Header.Alg);
             }
-            catch(OpenIdConnectProtocolException ex)
+            catch (OpenIdConnectProtocolException ex)
             {
                 throw LogHelper.LogException<OpenIdConnectProtocolInvalidCHashException>(ex, LogMessages.IDX10347);
             }
@@ -648,7 +656,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 {
                     nonceTime = DateTime.FromBinary(ticks);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw LogHelper.LogException<OpenIdConnectProtocolInvalidNonceException>(ex, LogMessages.IDX10327, timestamp, DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture));
                 }
@@ -700,6 +708,62 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State, StringComparison.Ordinal))
             {
                 throw LogHelper.LogException<OpenIdConnectProtocolInvalidStateException>(LogMessages.IDX10331, validationContext.State, validationContext.ProtocolMessage.State);
+            }
+        }
+
+        private void InitializeHashAlgorithmMap()
+        {
+            ISet<string> securityAlgorithms256 = new HashSet<string>();
+            securityAlgorithms256.Add(SecurityAlgorithms.EcdsaSha256);
+            securityAlgorithms256.Add(SecurityAlgorithms.HmacSha256);
+            securityAlgorithms256.Add(SecurityAlgorithms.RsaSha256);
+            securityAlgorithms256.Add(SecurityAlgorithms.RsaSsaPssSha256);
+            securityAlgorithms256.Add(SecurityAlgorithms.RsaSha256Signature);
+            securityAlgorithms256.Add(SecurityAlgorithms.EcdsaSha256Signature);
+            _hashAlgorithmMap.Add(securityAlgorithms256, SHA256.Create());
+
+            ISet<string> securityAlgorithms384 = new HashSet<string>();
+            securityAlgorithms384.Add(SecurityAlgorithms.EcdsaSha384);
+            securityAlgorithms384.Add(SecurityAlgorithms.HmacSha384);
+            securityAlgorithms384.Add(SecurityAlgorithms.RsaSha384);
+            securityAlgorithms384.Add(SecurityAlgorithms.RsaSsaPssSha384);
+            securityAlgorithms384.Add(SecurityAlgorithms.RsaSha384Signature);
+            securityAlgorithms384.Add(SecurityAlgorithms.EcdsaSha384Signature);
+            _hashAlgorithmMap.Add(securityAlgorithms384, SHA384.Create());
+
+            ISet<string> securityAlgorithms512 = new HashSet<string>();
+            securityAlgorithms512.Add(SecurityAlgorithms.RsaSha512);
+            securityAlgorithms512.Add(SecurityAlgorithms.EcdsaSha512);
+            securityAlgorithms512.Add(SecurityAlgorithms.HmacSha512);
+            securityAlgorithms512.Add(SecurityAlgorithms.RsaSsaPssSha512);
+            securityAlgorithms512.Add(SecurityAlgorithms.RsaSha512Signature);
+            securityAlgorithms512.Add(SecurityAlgorithms.EcdsaSha512Signature);
+            _hashAlgorithmMap.Add(securityAlgorithms512, SHA512.Create());
+        }
+
+        /// <summary>
+        /// This method is used in derived class which customizes the specific HashAlgorithmMap.
+        /// </summary>
+        /// <param name="hashAlgorithmMap">Customized HashAlgorithmMap.</param>
+        /// <param name="isAppend">Appends the customized HashAlgorithmMap to the default HashAlgorithmMap or not.</param>
+        protected void CustomizeHashAlgorithmMap(IDictionary<ISet<string>, HashAlgorithm> hashAlgorithmMap, bool isAppend = false)
+        {
+            if (isAppend)
+            {
+                foreach (var item in hashAlgorithmMap)
+                {
+                    _hashAlgorithmMap.Add(item.Key, item.Value);
+                }
+            }
+            else
+            {
+                foreach (var item in _hashAlgorithmMap)
+                {
+                    item.Value.Dispose();
+                }
+
+                _hashAlgorithmMap.Clear();
+                _hashAlgorithmMap = hashAlgorithmMap;
             }
         }
     }
