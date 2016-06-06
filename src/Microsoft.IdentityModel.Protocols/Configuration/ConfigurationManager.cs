@@ -74,6 +74,14 @@ namespace Microsoft.IdentityModel.Protocols
         private T _currentConfiguration;
 
         /// <summary>
+        /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
+        /// </summary>
+        static ConfigurationManager()
+        {
+            IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(ConfigurationManager<T>).AssemblyQualifiedName);
+        }
+
+        /// <summary>
         /// Instantiaties a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
