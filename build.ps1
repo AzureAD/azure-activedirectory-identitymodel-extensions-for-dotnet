@@ -45,8 +45,6 @@ Write-Host "dotnetexe: " $dotnetexe;
 Write-Host "coreFxOldVersion: " $coreFxOldVersion;
 Write-Host "coreFxNewVersion: " $coreFxNewVersion;
 Write-Host "nugetVersion: " $nugetVersion;
-Write-Host "netCoreAppOldVersion: " $netCoreAppOldVersion;
-Write-Host "netCoreAppNewVersion: " $netCoreAppNewVersion;
 
 $ErrorActionPreference = "Stop"
 
@@ -193,21 +191,21 @@ if ($build -eq "YES")
         $name = $project.name;
         if (Test-Path("$artifactsRoot\build\$name\$buildType"))
         {
-            Write-Host ">>> Remove-Item -Recurse -Force $artifactsRoot\build\$name\$buildType"
+            Write-Host ">>> Remove-Item -Recurse -Force $artifactsRoot\build\$name\$buildType (artifacts)"
             Remove-Item -Recurse -Force $artifactsRoot\build\$name\$buildType
         }
 
-        if (Test-Path("$src\$name\bin\$buildType"))
+        if (Test-Path("$root\src\$name\bin\$buildType"))
         {
-            Write-Host ">>> Remove-Item -Recurse -Force $src\$name\bin\$buildType"
-            Remove-Item -Recurse -Force $src\$name\bin\$buildType
+            Write-Host ">>> Remove-Item -Recurse -Force $root\src\$name\bin\$buildType (src)"
+            Remove-Item -Recurse -Force $root\src\$name\bin\$buildType
         }
 
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe pack src\$name -c $buildType -o $src\$name\bin\$buildType"
+        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType"
         Write-Host ""
-        Start-Process -wait -NoNewWindow $dotnetexe "pack src\$name -c $buildType -o $src\$name\bin\$buildType"
+        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType"
         Write-Host ""
-        Write-Host ">>> Copy-Item src\$name\bin\$buildType $artifactsRoot\build\$name -Recurse"
+        Write-Host ">>> Copy-Item $root\src\$name\bin\$buildType $artifactsRoot\build\$name -Recurse"
         Write-Host ""
         Copy-Item src\$name\bin\$buildType $artifactsRoot\build\$name -Recurse
     }
