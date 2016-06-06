@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
         /// </summary>
-        /// <param name="key">That will be used for signature operations. <see cref="SecurityKey"/></param>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         protected SignatureProvider(SecurityKey key, string algorithm)
@@ -53,11 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
         /// </summary>
-        public string Context
-        {
-            get;
-            set;
-        }
+        public string Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/>.
@@ -77,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         public abstract byte[] Sign(byte[] input);
 
         /// <summary>
-        /// This must be overridden to verifie that a signature created over the 'input' matches the signature.
+        /// This must be overridden to verify a signature created over the 'input'.
         /// </summary>
         /// <param name="input">bytes to verify.</param>
         /// <param name="signature">signature to compare against.</param>

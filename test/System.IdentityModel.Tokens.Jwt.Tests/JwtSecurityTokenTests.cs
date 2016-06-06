@@ -157,7 +157,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             RunEncodedTest(new JwtSecurityTokenTestVariation
             {
-                Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
+                Name = "EncodedString: invalid encoding, 4 parts",
                 EncodedString = string.Format("{0}.{1}.{2}.{3}", tokenParts[0], tokenParts[1], tokenParts[2], tokenParts[2]),
                 ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
             });

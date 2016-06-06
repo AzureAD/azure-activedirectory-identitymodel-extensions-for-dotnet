@@ -86,8 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> to use for signing.</param>
         /// <param name="algorithm">The algorithm to use for verifying.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
-        /// <exception cref="ArgumentException">'algorithm' contains only whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or whitespace.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="AsymmetricSecurityKey"/> is too small.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="SymmetricSecurityKey"/> is too small.</exception>
         /// <exception cref="ArgumentException"><see cref="SecurityKey"/>' is not a <see cref="AsymmetricSecurityKey"/> or a <see cref="SymmetricSecurityKey"/>.</exception>
@@ -109,10 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
-            if (algorithm == null)
-                throw LogHelper.LogArgumentNullException("algorithm");
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
@@ -132,6 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
                         return new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, AsymmetricAlgorithmResolver);
+
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                         return new SymmetricSignatureProvider(key, algorithm);
                 }

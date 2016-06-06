@@ -445,13 +445,8 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawHeader = header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = string.Empty;
-            string signingInput = string.Concat(rawHeader, ".", rawPayload);
-
             if (signingCredentials != null)
-            {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10645);
-                rawSignature = CreateEncodedSignature(signingInput, signingCredentials.Key.GetSignatureProviderForSigning(signingCredentials.Algorithm));
-            }
+                rawSignature = CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
@@ -514,17 +509,17 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed using 'JSON Web Signature' (JWS).</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
-        /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'token.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
         public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
-                throw LogHelper.LogArgumentNullException("token");
+                throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
@@ -653,34 +648,64 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwt.SigningCredentials == null)
                 return signingInput + ".";
             else
-                return signingInput + "." + CreateEncodedSignature(signingInput, jwt.SigningCredentials.Key.GetSignatureProviderForSigning(jwt.SigningCredentials.Algorithm));
+                return signingInput + "." + CreateEncodedSignature(signingInput, jwt.SigningCredentials);
         }
 
         /// <summary>
-        /// Produces a signature over the 'input' using the <see cref="SecurityKey"/> and algorithm specified.
+        /// Produces a signature over the 'input'.
         /// </summary>
         /// <param name="input">String to be signed</param>
-        /// <param name="signatureProvider">The <see cref="SignatureProvider"/> used to sign the token</param>
+        /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
         /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
-        /// <exception cref="ArgumentNullException">'input' or 'signatureProvider' is null.</exception>
-        internal static string CreateEncodedSignature(string input, SignatureProvider signatureProvider)
+        /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
+        internal static string CreateEncodedSignature(string input, SigningCredentials signingCredentials)
         {
             if (input == null)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
+            if (signingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
+
+            var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
+            var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogArgumentNullException("signatureProvider");
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10636, (signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()), (signingCredentials.Algorithm ?? "Null"));
 
-            return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
+            try
+            {
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10645);
+                return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
+            }
+            finally
+            {
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+            }
         }
 
-        private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm)
+        /// <summary>
+        /// Obtains a SignatureProvider and validates the signature.
+        /// </summary>
+        /// <param name="encodedBytes">bytes to validate.</param>
+        /// <param name="signature">signature to compare against.</param>
+        /// <param name="key"><see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">crypto algorithm to use.</param>
+        /// <param name="validationParameters">priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
+        /// <returns>true if signature is valid.</returns>
+        private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, TokenValidationParameters validationParameters)
         {
-            SignatureProvider signatureProvider = key.GetSignatureProviderForVerifying(algorithm);
+            var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10636, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm));
 
-            return signatureProvider.Verify(encodedBytes, signature);
+            try
+            {
+                return signatureProvider.Verify(encodedBytes, signature);
+            }
+            finally
+            {
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+            }
         }
 
         /// <summary>
@@ -755,10 +780,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        if (validationParameters.CryptoProviderFactory != null)
-                            securityKey.CryptoProviderFactory = validationParameters.CryptoProviderFactory;
-
-                        if (ValidateSignature(encodedBytes, signatureBytes, securityKey, jwt.Header.Alg))
+                        if (ValidateSignature(encodedBytes, signatureBytes, securityKey, jwt.Header.Alg, validationParameters))
                         {
                             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10242, token);
                             jwt.SigningKey = securityKey;
