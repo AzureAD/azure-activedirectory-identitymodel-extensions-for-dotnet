@@ -1,10 +1,10 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
   <dotnetChannel>preview</dotnetChannel>
-  <dotnetVersion>1.0.0-preview2-002911</dotnetVersion>
+  <dotnetVersion>1.0.0-preview2-002990</dotnetVersion>
   <dotnetUrl>https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1</dotnetUrl>
   <coreFxOldVersion>-rc3-\*</coreFxOldVersion>
-  <coreFxNewVersion>-rc3-24128-00</coreFxNewVersion>
+  <coreFxNewVersion>-rc3-24206-00</coreFxNewVersion>
   <netCoreAppOldVersion>1.0.0-rc3-\*</netCoreAppOldVersion>
   <netCoreAppNewVersion>1.0.0-rc3-004338</netCoreAppNewVersion>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
