@@ -506,10 +506,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // validating custom crypto provider factory
-            validationParameters = SignatureValidationParameters();
+            validationParameters = SignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048);
             validationParameters.CryptoProviderFactory = new CryptoProviderFactory();
             validationParameters.CryptoProviderFactory.AsymmetricAlgorithmResolver = ((key, alg, willCreateSignatures) => { return null; });
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.ArgumentOutOfRangeException("IDX10646"));
+            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"));
         }
 
         [Fact]

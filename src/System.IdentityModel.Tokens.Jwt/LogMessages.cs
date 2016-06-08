@@ -67,6 +67,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
         internal const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
+        internal const string IDX10646 = "IDX10646: CryptoProviderFactory.CreateForSigning returned null for key: '{0}', signatureAlgorithm: '{1}'.";
 
         // JWT specific errors
         internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";

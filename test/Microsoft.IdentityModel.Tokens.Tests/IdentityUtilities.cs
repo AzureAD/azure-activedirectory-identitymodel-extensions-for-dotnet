@@ -162,9 +162,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
         public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
-        public static SecurityKey DefaultAsymmetricSigningKey { get { return KeyingMaterial.DefaultX509Key_2048; }}
-        public static SecurityKey DefaultSymmetricSigningKey {  get { return KeyingMaterial.DefaultSymmetricSecurityKey_256;}}
-        public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity);}}
+        public static SecurityKey DefaultAsymmetricSigningKey { get { return new X509SecurityKey(KeyingMaterial.DefaultCert_2048); } }
+        public static SecurityKey DefaultSymmetricSigningKey {  get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
+        public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); } }
         public const string DefaultClaimsIdentityLabel = "DefaultClaimsIdentityLabel";
         public const string DefaultClaimsIdentityLabelDup = "DefaultClaimsIdentityLabelDup";
         public const string NotDefaultAuthenticationType = "NotDefaultAuthenticationType";

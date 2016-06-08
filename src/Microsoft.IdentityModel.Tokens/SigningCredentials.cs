@@ -61,6 +61,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
+        /// </summary>
+        public CryptoProviderFactory CryptoProviderFactory { get; set; }
+
+        /// <summary>
         /// Gets the <see cref="SecurityKey"/> which used for signature valdiation.
         /// </summary>
         public SecurityKey Key

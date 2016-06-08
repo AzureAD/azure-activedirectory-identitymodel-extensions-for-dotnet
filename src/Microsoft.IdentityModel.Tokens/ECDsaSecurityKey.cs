@@ -97,20 +97,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
-        /// </summary>
-        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
-        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
-        /// If verifyOnly is false, then the private key is required.</param>
-        public override SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly)
-        {
-            if (verifyOnly)
-                return CryptoProviderFactory.CreateForVerifying(this, algorithm);
-            else
-                return CryptoProviderFactory.CreateForSigning(this, algorithm);
-        }
-
-        /// <summary>
         /// Returns whether the <see cref="ECDsaSecurityKey"/> supports the given algorithm.
         /// </summary>
         /// <param name="algorithm">The crypto algorithm to use.</param>

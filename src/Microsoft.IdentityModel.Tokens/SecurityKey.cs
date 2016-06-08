@@ -47,33 +47,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public string KeyId { get; set; }
 
-
-        /// <summary>
-        /// Creates a <see cref="SignatureProvider"/> instance that supports the algorithm.
-        /// </summary>
-        /// <param name="algorithm">The algorithm to use for signing.</param>
-        public SignatureProvider GetSignatureProviderForSigning(string algorithm)
-        {
-            return GetSignatureProvider(algorithm, false);
-        }
-
-        /// <summary>
-        /// Creates a <see cref="SignatureProvider"/> instance that supports the algorithm.
-        /// </summary>
-        /// <param name="algorithm">The algorithm to use for verifying.</param>
-        public SignatureProvider GetSignatureProviderForVerifying(string algorithm)
-        {
-            return GetSignatureProvider(algorithm, true);
-        }
-
-        /// <summary>
-        /// This must be overridden to returns a <see cref="SignatureProvider"/> instance that will provide signatures support for this key and algorithm.
-        /// </summary>
-        /// <param name="algorithm">The algorithm to use for verifying/signing.</param>
-        /// <param name="verifyOnly">This value is indicates if the <see cref="SignatureProvider"/> will be used to create or verify signatures.
-        /// If verifyOnly is false, then the private key is required.</param>
-        public abstract SignatureProvider GetSignatureProvider(string algorithm, bool verifyOnly);
-
         /// <summary>
         /// This must be overridden to specify whether this SecurityKey supports the algorithm.
         /// </summary>
