@@ -201,9 +201,9 @@ if ($build -eq "YES")
             Remove-Item -Recurse -Force $root\src\$name\bin\$buildType
         }
 
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType"
+        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType -s"
         Write-Host ""
-        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType"
+        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType -s"
         Write-Host ""
         Write-Host ">>> Copy-Item $root\src\$name\bin\$buildType $artifactsRoot\build\$name\$buildType -Recurse"
         Write-Host ""
