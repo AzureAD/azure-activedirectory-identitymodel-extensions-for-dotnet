@@ -65,7 +65,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10240 = "IDX10240: No token replay is detected.";
         internal const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
 
-
         // Formating
         internal const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";
 
@@ -81,20 +80,22 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than: '{0}'.";
         internal const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
-        internal const string IDX10634 = "IDX10634: Unable to create the symmetric signature provider.\n\nSymmetricSecurityKey: '{0}'\nSignatureAlgorithm: '{1}' check to make sure the SignatureAlgorithm is supported.";
+        internal const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\n\nSignatureAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
         internal const string IDX10638 = "IDX10638: Cannot created the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         internal const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         internal const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
         internal const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
         internal const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
         internal const string IDX10644 = "IDX10644: Crypto operation not supported.";
-        internal const string IDX10645 = "IDX10645: Elliptical Curve not supported: '{0}'";
-        internal const string IDX10646 = "IDX10646: The delegate for resolving asymmetric algorithm returned null. Key: {0}, Alg: {1}.";
+        internal const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
+        internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupported(Key: '{0}', Algorithm: '{1}'), but Create.(CryptoTypes.SignatureProvider, key, algorithm) as '{2}' == NULL.";
+        internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}'), but Create.(CryptoTypes.HashAlgorithm, algorithm) as '{1}' == NULL.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
         internal const string IDX10701 = "IDX10701: Invalid JsonWebKey rsa keying material: '{0}'. Both modulus and exponent should be present";
         internal const string IDX10702 = "IDX10702: One or more private RSA key parts are null in the JsonWebKey: '{0}'";
+        internal const string IDX10703 = "IDX10703: Cannot create symmetric security key. Key length is zero.";
 
         // Json specific errors
         internal const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";

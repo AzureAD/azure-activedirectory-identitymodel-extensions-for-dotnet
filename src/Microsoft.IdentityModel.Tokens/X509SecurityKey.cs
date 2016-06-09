@@ -126,31 +126,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns whether the <see cref="X509SecurityKey"/> supports the given algorithm.
-        /// </summary>
-        /// <param name="algorithm">The crypto algorithm to use.</param>
-        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSha512Signature:
-                    return _certificate.PublicKey != null;
-
-                default:
-                    return false;
-            }
-        }
-
-        /// <summary>
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>

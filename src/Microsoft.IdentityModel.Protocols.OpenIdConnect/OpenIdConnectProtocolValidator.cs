@@ -54,17 +54,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             new Dictionary<string, string>
             {
                 { SecurityAlgorithms.EcdsaSha256, "SHA256" },
-                { SecurityAlgorithms.RsaSha256, "SHA256" },
+                { SecurityAlgorithms.EcdsaSha256Signature, "SHA256" },
                 { SecurityAlgorithms.HmacSha256, "SHA256" },
+                { SecurityAlgorithms.RsaSha256, "SHA256" },
+                { SecurityAlgorithms.RsaSha256Signature, "SHA256" },
+                { SecurityAlgorithms.RsaSsaPssSha256, "SHA256" },
                 { SecurityAlgorithms.EcdsaSha384, "SHA384" },
-                { SecurityAlgorithms.RsaSha384, "SHA384" },
+                { SecurityAlgorithms.EcdsaSha384Signature, "SHA384" },
                 { SecurityAlgorithms.HmacSha384, "SHA384" },
+                { SecurityAlgorithms.RsaSha384, "SHA384" },
+                { SecurityAlgorithms.RsaSha384Signature, "SHA384" },
+                { SecurityAlgorithms.RsaSsaPssSha384, "SHA384" },
                 { SecurityAlgorithms.EcdsaSha512, "SHA512" },
-                { SecurityAlgorithms.RsaSha512, "SHA512" },
+                { SecurityAlgorithms.EcdsaSha512Signature, "SHA512" },
                 { SecurityAlgorithms.HmacSha512, "SHA512" },
+                { SecurityAlgorithms.RsaSha512, "SHA512" },
+                { SecurityAlgorithms.RsaSha512Signature, "SHA512" },
+                { SecurityAlgorithms.RsaSsaPssSha512, "SHA512" }
           };
 
         private TimeSpan _nonceLifetime = DefaultNonceLifetime;
+        private CryptoProviderFactory _cryptoProviderFactory;
 
         /// <summary>
         /// Default for the how long the nonce is valid.
@@ -86,6 +96,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             RequireSub = false;
             RequireTimeStampInNonce = true;
             RequireStateValidation = true;
+
+            _cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderFactory.Default);
         }
 
         /// <summary>
@@ -414,56 +426,47 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Returns the implementation corresponding to the input string 'algorithm'.
+        /// Returns a <see cref="HashAlgorithm"/> corresponding to string 'algorithm' after translation using <see cref="HashAlgorithmMap"/>.
         /// </summary>
         /// <param name="algorithm">string representing the hash algorithm</param>
-        /// <returns><see cref="HashAlgorithm"/> corresponding to the input string 'algorithm'</returns>
+        /// <returns>A <see cref="HashAlgorithm"/>.</returns>
         public virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
             if (algorithm == null)
-            {
                 algorithm = SecurityAlgorithms.RsaSha256;
-            }
 
             try
             {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.Sha256:
-                    case SecurityAlgorithms.EcdsaSha256:
-                    case SecurityAlgorithms.HmacSha256:
-                    case SecurityAlgorithms.RsaSha256:
-                    case SecurityAlgorithms.RsaSsaPssSha256:
-                    case SecurityAlgorithms.RsaSha256Signature:
-                    case SecurityAlgorithms.EcdsaSha256Signature:
-                        return SHA256.Create();
+                string hashAlgorithm;
+                if (!HashAlgorithmMap.TryGetValue(algorithm, out hashAlgorithm))
+                    hashAlgorithm = algorithm;
 
-                    case SecurityAlgorithms.Sha384:
-                    case SecurityAlgorithms.EcdsaSha384:
-                    case SecurityAlgorithms.HmacSha384:
-                    case SecurityAlgorithms.RsaSha384:
-                    case SecurityAlgorithms.RsaSsaPssSha384:
-                    case SecurityAlgorithms.RsaSha384Signature:
-                    case SecurityAlgorithms.EcdsaSha384Signature:
-                        return SHA384.Create();
-
-                    case SecurityAlgorithms.Sha512:
-                    case SecurityAlgorithms.RsaSha512:
-                    case SecurityAlgorithms.EcdsaSha512:
-                    case SecurityAlgorithms.HmacSha512:
-                    case SecurityAlgorithms.RsaSsaPssSha512:
-                    case SecurityAlgorithms.RsaSha512Signature:
-                    case SecurityAlgorithms.EcdsaSha512Signature:
-                        return SHA512.Create();
-                }
-
+                return CryptoProviderFactory.CreateHashAlgorithm(hashAlgorithm);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<OpenIdConnectProtocolException>(ex, LogMessages.IDX10301, algorithm);
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(ex, LogMessages.IDX10301, algorithm, typeof(HashAlgorithm));
             }
 
             throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10302, algorithm);
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="CryptoProviderFactory"/> that will be used for crypto operations.
+        /// </summary>
+        public CryptoProviderFactory CryptoProviderFactory
+        {
+            get
+            {
+                return _cryptoProviderFactory;
+            }
+            set
+            {
+                if (value == null)
+                    throw LogHelper.LogArgumentNullException("value");
+
+                _cryptoProviderFactory = value;
+            }
         }
 
         /// <summary>
@@ -476,14 +479,25 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private void ValidateHash(string expectedValue, string hashItem, string algorithm)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10303, expectedValue);
-            using (var hashAlgorithm = GetHashAlgorithm(algorithm))
+            HashAlgorithm hashAlgorithm = null;
+            try
             {
-                var hashBytes = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(hashItem));
-                var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
-                if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
-                {
-                    throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10300, expectedValue, hashItem, algorithm);
-                }
+                hashAlgorithm = GetHashAlgorithm(algorithm);
+                CheckHash(hashAlgorithm, expectedValue, hashItem, algorithm);
+            }
+            finally
+            {
+                CryptoProviderFactory.ReleaseHashAlgorithm(hashAlgorithm);
+            }
+        }
+
+        private void CheckHash(HashAlgorithm hashAlgorithm, string expectedValue, string hashItem, string algorithm)
+        {
+            var hashBytes = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(hashItem));
+            var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
+            if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
+            {
+                throw LogHelper.LogException<OpenIdConnectProtocolException>(LogMessages.IDX10300, expectedValue, hashItem, algorithm);
             }
         }
 

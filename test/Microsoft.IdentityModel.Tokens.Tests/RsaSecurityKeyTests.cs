@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool expectedResult)
         {
-            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
                 Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
        }
 
@@ -123,6 +123,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, true);
                 dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, false);
                 dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                RsaSecurityKey testKey = new RsaSecurityKey(KeyingMaterial.RsaParameters1);
+                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.EcdsaSha256 });
+                dataset.Add(testKey, SecurityAlgorithms.EcdsaSha256, true);
                 return dataset;
             }
         }

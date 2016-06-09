@@ -507,8 +507,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // validating custom crypto provider factory
             validationParameters = SignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048);
-            validationParameters.CryptoProviderFactory = new CryptoProviderFactory();
-            validationParameters.CryptoProviderFactory.AsymmetricAlgorithmResolver = ((key, alg, willCreateSignatures) => { return null; });
+            validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"));
         }
 
