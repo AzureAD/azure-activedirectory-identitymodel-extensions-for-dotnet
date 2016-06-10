@@ -19,6 +19,7 @@
 namespace System.IdentityModel.Tokens
 {
     using Microsoft.IdentityModel;
+    using System.ComponentModel;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
@@ -84,6 +85,7 @@ namespace System.IdentityModel.Tokens
         /// </summary>
         public JwtSecurityTokenHandler()
         {
+            SetDefaultTimesOnTokenCreation = true;
         }
 
         /// <summary>Gets or sets the <see cref="IDictionary{TKey, TValue}"/> used to map Inbound Cryptographic Algorithms.</summary>
@@ -254,6 +256,13 @@ namespace System.IdentityModel.Tokens
                 jsonClaimTypeProperty = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets a bool that controls if token creation will set default 'exp', 'nbf' and 'iat' if not specified.
+        /// </summary>
+        /// <remarks>See: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
+        [DefaultValue(true)]
+        public bool SetDefaultTimesOnTokenCreation { get; set; }
 
         /// <summary>
         /// Returns 'true' which indicates this instance can validate a <see cref="JwtSecurityToken"/>.
@@ -489,20 +498,22 @@ namespace System.IdentityModel.Tokens
         /// <exception cref="ArgumentException">if 'expires' &lt;= 'notBefore'.</exception>
         public virtual JwtSecurityToken CreateToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null, SignatureProvider signatureProvider = null)
         {
+            if (SetDefaultTimesOnTokenCreation)
+            {
+                DateTime now = DateTime.UtcNow;
+                if (!expires.HasValue)
+                    expires = now + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
+
+                if (!notBefore.HasValue)
+                    notBefore = now;
+            }
+
             if (expires.HasValue && notBefore.HasValue)
             {
                 if (notBefore >= expires)
                 {
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10401, expires.Value,  notBefore.Value));
                 }
-            }
-
-            // if not set, use defaults
-            if (!expires.HasValue && !notBefore.HasValue)
-            {
-                DateTime now = DateTime.UtcNow;
-                expires = now + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
-                notBefore = now;
             }
 
             JwtPayload payload = new JwtPayload(issuer, audience, subject == null ? null : subject.Claims, notBefore, expires);

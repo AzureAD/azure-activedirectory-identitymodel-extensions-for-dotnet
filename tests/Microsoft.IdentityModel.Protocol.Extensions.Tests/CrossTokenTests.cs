@@ -84,6 +84,17 @@ namespace Microsoft.IdentityModel.Test
             ClaimsPrincipal jwtPrincipal = ValidateToken(jwtToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, jwtHandler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal jwtPrincipal2 = ValidateToken(nullIssuerJwtToken, IdentityUtilities.GetNullIssuerAsymmetricTokenValidationParameters(false), jwtHandler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal jwtPrincipal3 = ValidateToken(nullIssuerJwtToken, IdentityUtilities.GetNullIssuerAsymmetricTokenValidationParameters(true), jwtHandler, ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"));
+
+            jwtHandler.SetDefaultTimesOnTokenCreation = false;
+            string nullLifetimeJwtToken = IdentityUtilities.CreateJwtToken(IdentityUtilities.NullLifetimeAsymmetricSecurityTokenDescriptor, jwtHandler);
+            // Test SetDefaultTimesOnTokenCreation = false,  RequireExpirationTime = false;
+            ClaimsPrincipal jwtPrincipal4 = ValidateToken(nullLifetimeJwtToken, IdentityUtilities.NullLifetimeAsymmetricTokenValidationParameters, jwtHandler, ExpectedException.NoExceptionExpected);
+            TokenValidationParameters nullLifetimeAsymmetricTokenValidationParameters = IdentityUtilities.NullLifetimeAsymmetricTokenValidationParameters;
+            nullLifetimeAsymmetricTokenValidationParameters.RequireExpirationTime = true;
+            // Test SetDefaultTimesOnTokenCreation = false,  RequireExpirationTime = true;
+            ClaimsPrincipal jwtPrincipal5 = ValidateToken(nullLifetimeJwtToken, nullLifetimeAsymmetricTokenValidationParameters, jwtHandler, ExpectedException.SecurityTokenNoExpirationException("IDX10225:"));
+            jwtHandler.SetDefaultTimesOnTokenCreation = true;
+
             ClaimsPrincipal imSaml2Principal = ValidateToken(imSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal imSamlPrincipal = ValidateToken(imSamlToken, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSamlHandler, ExpectedException.NoExceptionExpected);
             ClaimsPrincipal smSaml2Principal = ValidateToken(smSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, imSaml2Handler, ExpectedException.NoExceptionExpected);
