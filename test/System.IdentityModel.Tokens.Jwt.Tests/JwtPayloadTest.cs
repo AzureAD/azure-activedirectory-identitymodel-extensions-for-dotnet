@@ -139,13 +139,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void TestClaimWithNullValue()
         {
             JwtPayload payload = new JwtPayload();
+            string compareTo = "{\"nullClaim\":null}";
             payload.Add("nullClaim", null);
+            bool claimFound = false;
             foreach (Claim claim in payload.Claims)
             {
                 if (claim.Type == "nullClaim")
-                    return;
+                    claimFound = true;
             }
-            Assert.True(false, "Claim with expected type: nullClaim is not found");
+
+            if (!claimFound)
+                Assert.True(false, "Claim with expected type: nullClaim is not found");
+
+            Assert.Equal(payload.SerializeToJson(), compareTo);
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -267,7 +273,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var payloadDirect = new JwtPayload();
             var jobj = new JObject();
-            foreach(var claim in claims)
+            foreach (var claim in claims)
             {
                 object jsonValue = null;
                 object existingValue;
