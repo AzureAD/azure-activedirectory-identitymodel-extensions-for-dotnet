@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -160,6 +161,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, false);
                 dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);
                 dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false);
+                JsonWebKey testKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.Octet,
+                    K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
+                };
+                testKey.CryptoProviderFactory = testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
+                dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, true);
                 return dataset;
             }
         }

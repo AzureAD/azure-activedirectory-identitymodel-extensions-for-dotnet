@@ -25,53 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.IdentityModel.Logging;
+using System.Security.Cryptography;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Base class for Security Key.
+    /// Crypto operations
     /// </summary>
-    public abstract class SecurityKey
+    public interface ICryptoProvider
     {
-        private CryptoProviderFactory _cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderFactory.Default);
+        /// <summary>
+        /// Called to determin if &lt;key, algorithm&gt; is supported.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to apply.</param>
+        /// <returns>true if supported</returns>
+        bool IsSupported(SecurityKey key, string algorithm);
 
         /// <summary>
-        /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
+        /// returns a <see cref="HashAlgorithm>"/> for a signature algorithm
         /// </summary>
-        public abstract int KeySize { get; }
+        /// <param name="signatureAlgorithm">the signature algorithm.</param>
+        HashAlgorithm ResolveHashAlgorithmFromSignatureAlgorithm(string signatureAlgorithm);
 
         /// <summary>
-        /// Gets the key id of this <see cref="SecurityKey"/>.
+        /// returns a <see cref="SignatureProvider"/> that supports a <see cref="SecurityKey"/> algorithm pair.
         /// </summary>
-        public string KeyId { get; set; }
-
-        /// <summary>
-        /// This must be overridden to specify whether this SecurityKey supports the algorithm.
-        /// </summary>
-        /// <param name="algorithm">The crypto algorithm to use.</param>
-        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
-        public abstract bool IsSupportedAlgorithm(string algorithm);
-
-        /// <summary>
-        /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.
-        /// </summary>
-        public CryptoProviderFactory CryptoProviderFactory
-        {
-            get
-            {
-                return _cryptoProviderFactory;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw LogHelper.LogArgumentNullException("value");
-                };
-
-                _cryptoProviderFactory = value;
-            }
-        }
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to apply.</param>
+        SignatureProvider ResolveSignatureProvider(SecurityKey key, string algorithm);
     }
 }

@@ -440,10 +440,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return Encoding.UTF8.GetBytes("SignedBytes");
         }
 
+        public bool VerifyResult { get; set; } = true;
+
         public override bool Verify(byte[] input, byte[] signature)
         {
             VerifyCalled = true;
-            return true;
+            return VerifyResult;
         }
 
         protected override void Dispose(bool disposing)
@@ -457,6 +459,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public CustomCryptoProviderFactory()
         {
         }
+
+        public CustomCryptoProviderFactory(string[] supportedAlgorithms)
+        {
+            SupportedAlgorithms.AddRange(supportedAlgorithms);
+        }
+
+        public List<string> SupportedAlgorithms { get; private set; } = new List<string>();
 
         public SignatureProvider SignatureProvider { get; set; }
 
@@ -477,11 +486,37 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             CreateForVerifyingCalled = true;
             return SignatureProvider;
         }
+        public override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            foreach (var alg in SupportedAlgorithms)
+                if (alg.Equals(algorithm, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+            return false;
+        }
 
         public override void ReleaseSignatureProvider(SignatureProvider signatureProvider)
         {
             ReleaseSignatureProviderCalled = true;
             signatureProvider.Dispose();
+        }
+    }
+
+    public class CustomCryptoProvider : ICryptoProvider
+    {
+        public bool IsSupported(SecurityKey key, string algorithm)
+        {
+            return true;
+        }
+
+        public HashAlgorithm ResolveHashAlgorithmFromSignatureAlgorithm(string signatureAlgorithm)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SignatureProvider ResolveSignatureProvider(SecurityKey key, string algorithm)
+        {
+            throw new NotImplementedException();
         }
     }
 }

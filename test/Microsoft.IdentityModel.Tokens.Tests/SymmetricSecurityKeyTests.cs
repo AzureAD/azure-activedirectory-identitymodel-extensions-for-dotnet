@@ -27,62 +27,62 @@
 
 using System;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    public class X509SecurityKeyTests
+    public class SymmetricSecurityKeyTests
     {
-        [Fact]
-        public void Constructor()
-        {
-            X509SecurityKey x509SecurityKey;
-            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
-            try
-            {
-                x509SecurityKey = new X509SecurityKey(null);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                expectedException.ProcessException(exception);
-            }
 
-            X509Certificate2 x509Certificate2 = KeyingMaterial.DefaultCert_2048;
-            expectedException = ExpectedException.NoExceptionExpected;
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ConstructorDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant        
+        public void Constructor(byte[] key, ExpectedException ee)
+        {
             try
             {
-                x509SecurityKey = new X509SecurityKey(x509Certificate2);
-                Assert.Same(x509Certificate2, x509SecurityKey.Certificate);
+                var symmetricSecurityKey = new SymmetricSecurityKey(key);
+                ee.ProcessNoException();
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                ee.ProcessException(exception);
+            }
+        }
+
+        public static TheoryData<byte[], ExpectedException> ConstructorDataSet
+        {
+            get
+            {
+                var dataset = new TheoryData<byte[], ExpectedException>();
+                dataset.Add(KeyingMaterial.DefaultSymmetricKeyBytes_256, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, ExpectedException.ArgumentNullException());
+                dataset.Add(new byte[0], ExpectedException.ArgumentException());
+                return dataset;
             }
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("IsSupportedAlgDataSet")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void IsSupportedAlgorithm(X509SecurityKey key, string alg, bool expectedResult)
+        public void IsSupportedAlgorithm(SymmetricSecurityKey key, string alg, bool expectedResult)
         {
             if (key.IsSupportedAlgorithm(alg) != expectedResult)
                 Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
         }
 
-        public static TheoryData<X509SecurityKey, string, bool> IsSupportedAlgDataSet
+        public static TheoryData<SymmetricSecurityKey, string, bool> IsSupportedAlgDataSet
         {
             get
             {
-                var dataset = new TheoryData<X509SecurityKey, string, bool>();
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, SecurityAlgorithms.RsaSha256, true);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.Aes128Encryption, false);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256, SecurityAlgorithms.RsaSha384, true);
-                X509SecurityKey testKey = new X509SecurityKey(KeyingMaterial.CertSelfSigned2048_SHA256);
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSsaPssSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSsaPssSha256Signature, true);
+                var dataset = new TheoryData<SymmetricSecurityKey, string, bool>();
+                dataset.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256, true);
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha384Signature, true);
+                dataset.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.Aes128Encryption, false);
+
+                SymmetricSecurityKey testKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
+                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.Aes128Encryption });
+                dataset.Add(testKey, SecurityAlgorithms.Aes128Encryption, true);
                 return dataset;
             }
         }

@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -53,6 +52,8 @@ namespace Microsoft.IdentityModel.Tokens
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+
+        ICryptoProvider _customCryptoProvider;
 
         /// <summary>
         /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
@@ -113,7 +114,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <param name="willCreateSignatures">Whether this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.
-        /// <param name="asymmetricAlgorithmResolver">Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use for crypto operations.</param>
+        /// <param name="customCryptoProvider"><see cref="ICryptoProvider"/> to use for custom crypto operations</param>
         /// <para>
         /// Creating signatures requires that the <see cref="SecurityKey"/> has access to a private key.
         /// Verifying signatures (the default), does not require access to the private key.
@@ -128,47 +129,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey.IsSupportedAlgorithm"/> returns false.</exception>
         /// <exception cref="ArgumentOutOfRangeException">If the runtime is unable to create a suitable cryptographic provider.</exception>
-        public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, AsymmetricAlgorithmResolver asymmetricAlgorithmResolver)
+        public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, ICryptoProvider customCryptoProvider)
             : base(key, algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
 
-            if (!key.IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10640, (algorithm ?? "null"));
-
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
-            ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             if (willCreateSignatures && !HasPrivateKey(key))
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
 
-            if (asymmetricAlgorithmResolver != null)
+            _customCryptoProvider = customCryptoProvider;
+            if (customCryptoProvider == null || !customCryptoProvider.IsSupported(key, algorithm))
             {
-                AsymmetricAlgorithm asymmetricAlgorithm = asymmetricAlgorithmResolver(key, algorithm, willCreateSignatures);
-                if (asymmetricAlgorithm == null)
-                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, nameof(key), algorithm);
+                if (!key.IsSupportedAlgorithm(algorithm))
+                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10640, (algorithm ?? "null"));
 
-#if NETSTANDARD1_4
-                _rsa = asymmetricAlgorithm as RSA;
-                if (_rsa == null)
-                {
-                    _ecdsa = asymmetricAlgorithm as ECDsa;
-                    if (_ecdsa == null)
-                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
-                }
-#else
-                _rsaCryptoServiceProvider = asymmetricAlgorithm as RSACryptoServiceProvider;
-                if (_rsaCryptoServiceProvider == null)
-                {
-                    _ecdsa = asymmetricAlgorithm as ECDsaCng;
-                    if (_ecdsa == null)
-                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
-                }
-#endif
-            }
-            else
-            {
+                ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
                 ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
             }
         }
@@ -626,6 +604,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
+            if(_customCryptoProvider != null && _customCryptoProvider.IsSupported(Key, Algorithm))
+            {
+                SignatureProvider signatureProvider = _customCryptoProvider.ResolveSignatureProvider(Key, Algorithm);
+                if (signatureProvider != null)
+                    return signatureProvider.Sign(input);
+                else
+                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10646, Key, Algorithm);
+            }
+
 #if NETSTANDARD1_4
             if (_rsa != null)
                 return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
@@ -674,6 +661,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
+            if (_customCryptoProvider != null && _customCryptoProvider.IsSupported(Key, Algorithm))
+            {
+                SignatureProvider signatureProvider = _customCryptoProvider.ResolveSignatureProvider(Key, Algorithm);
+                if (signatureProvider != null)
+                    return signatureProvider.Verify(input, signature);
+                else
+                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10646, Key, Algorithm);
+
+            }
+
 #if NETSTANDARD1_4
             if (_rsa != null)
                 return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
@@ -698,7 +695,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The asymmetric key to validate</param>
         /// <param name="algorithm">Algorithm for which this key will be used</param>
         /// <param name="willCreateSignatures">Whether they key will be used for creating signatures</param>
-        public void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+        public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (willCreateSignatures)
             {

@@ -420,6 +420,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <returns><see cref="HashAlgorithm"/> corresponding to the input string 'algorithm'</returns>
         public virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
+
+            if (CryptoProviderFactory.CustomCryptoProvider != null)
+            {
+                var hashalg = CryptoProviderFactory.CustomCryptoProvider.ResolveHashAlgorithmFromSignatureAlgorithm(algorithm);
+                if (hashalg != null)
+                    return hashalg;
+            }
+
             if (algorithm == null)
             {
                 algorithm = SecurityAlgorithms.RsaSha256;
@@ -429,7 +437,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 switch (algorithm)
                 {
-                    case SecurityAlgorithms.Sha256:
                     case SecurityAlgorithms.EcdsaSha256:
                     case SecurityAlgorithms.HmacSha256:
                     case SecurityAlgorithms.RsaSha256:
@@ -438,7 +445,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     case SecurityAlgorithms.EcdsaSha256Signature:
                         return SHA256.Create();
 
-                    case SecurityAlgorithms.Sha384:
                     case SecurityAlgorithms.EcdsaSha384:
                     case SecurityAlgorithms.HmacSha384:
                     case SecurityAlgorithms.RsaSha384:
@@ -447,16 +453,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     case SecurityAlgorithms.EcdsaSha384Signature:
                         return SHA384.Create();
 
-                    case SecurityAlgorithms.Sha512:
-                    case SecurityAlgorithms.RsaSha512:
                     case SecurityAlgorithms.EcdsaSha512:
                     case SecurityAlgorithms.HmacSha512:
+                    case SecurityAlgorithms.RsaSha512:
                     case SecurityAlgorithms.RsaSsaPssSha512:
                     case SecurityAlgorithms.RsaSha512Signature:
                     case SecurityAlgorithms.EcdsaSha512Signature:
                         return SHA512.Create();
                 }
-
             }
             catch (Exception ex)
             {

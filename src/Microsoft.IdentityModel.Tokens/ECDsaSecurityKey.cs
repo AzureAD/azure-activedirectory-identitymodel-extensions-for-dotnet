@@ -103,22 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                    return true;
-
-                default:
-                    return false;
-            }
+            return CryptoProviderFactory.IsSupportedAlgorithm(this, algorithm);
         }
     }
 }

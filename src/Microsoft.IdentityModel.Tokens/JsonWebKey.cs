@@ -272,60 +272,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if this supports the algorithm; otherwise, false.</returns>
         public override bool IsSupportedAlgorithm(string algorithm)
         {
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (Kty == JsonWebAlgorithmsKeyTypes.RSA)
-            {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.RsaSha256:
-                    case SecurityAlgorithms.RsaSha384:
-                    case SecurityAlgorithms.RsaSha512:
-                    case SecurityAlgorithms.RsaSha256Signature:
-                    case SecurityAlgorithms.RsaSha384Signature:
-                    case SecurityAlgorithms.RsaSha512Signature:
-                        return true;
-
-                    default:
-                        return false;
-                }
-            }
-            else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-            {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.EcdsaSha256:
-                    case SecurityAlgorithms.EcdsaSha384:
-                    case SecurityAlgorithms.EcdsaSha512:
-                    case SecurityAlgorithms.EcdsaSha256Signature:
-                    case SecurityAlgorithms.EcdsaSha384Signature:
-                    case SecurityAlgorithms.EcdsaSha512Signature:
-                        return true;
-
-                    default:
-                        return false;
-                }
-            }
-            else if (Kty == JsonWebAlgorithmsKeyTypes.Octet)
-            {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.HmacSha256Signature:
-                    case SecurityAlgorithms.HmacSha384Signature:
-                    case SecurityAlgorithms.HmacSha512Signature:
-                    case SecurityAlgorithms.HmacSha256:
-                    case SecurityAlgorithms.HmacSha384:
-                    case SecurityAlgorithms.HmacSha512:
-                        return true;
-
-                    default:
-                        return false;
-                }
-            }
-            else
-                return false;
-
+            return CryptoProviderFactory.IsSupportedAlgorithm(this, algorithm);
         }
     }
 }

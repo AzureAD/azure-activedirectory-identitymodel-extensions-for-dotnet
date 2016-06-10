@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -37,10 +36,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SymmetricSignatureProvider : SignatureProvider
     {
-        private static byte[] s_bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-        private static byte[] s_bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
         private bool _disposed;
         private KeyedHashAlgorithm _keyedHash;
+        ICryptoProvider _customCryptoProvider;
 
         /// <summary>
         /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
@@ -61,40 +59,62 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> throws.</exception>
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> returns null.</exception>
         public SymmetricSignatureProvider(SecurityKey key, string algorithm)
+            : this(key, algorithm, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SecurityKey"/> to create and / or verify signatures over a array of bytes.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
+        /// <param name="algorithm">The signature algorithm to use.</param>
+        /// <param name="customCryptoProvider"><see cref="ICryptoProvider"/> to use for custom crypto operations</param>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
+        /// <exception cref="ArgumentException">'algorithm' contains only whitespace.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">'<see cref="SecurityKey"/>.KeySize' is smaller than <see cref="SymmetricSignatureProvider.MinimumSymmetricKeySizeInBits"/>.</exception>
+        /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> throws.</exception>
+        /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> returns null.</exception>
+        public SymmetricSignatureProvider(SecurityKey key, string algorithm, ICryptoProvider customCryptoProvider)
             : base(key, algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
 
-            if (!key.IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10640, (algorithm ?? "null"));
+            _customCryptoProvider = customCryptoProvider;
 
-            if (key.KeySize < MinimumSymmetricKeySizeInBits)
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
+            if (customCryptoProvider == null || !customCryptoProvider.IsSupported(key, algorithm))
+            { 
+                if (!key.IsSupportedAlgorithm(algorithm))
+                    throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10640, (algorithm ?? "null"));
 
-            try
-            {
-                byte[] keyBytes = null;
+                if (key.KeySize < MinimumSymmetricKeySizeInBits)
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
 
-                SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-                if (symmetricSecurityKey != null)
-                    keyBytes = symmetricSecurityKey.Key;
-                else
+                try
                 {
-                    JsonWebKey jsonWebKey = key as JsonWebKey;
-                    if (jsonWebKey != null && jsonWebKey.K != null)
-                        keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+                    byte[] keyBytes = null;
+
+                    SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+                    if (symmetricSecurityKey != null)
+                        keyBytes = symmetricSecurityKey.Key;
+                    else
+                    {
+                        JsonWebKey jsonWebKey = key as JsonWebKey;
+                        if (jsonWebKey != null && jsonWebKey.K != null)
+                            keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+                    }
+
+                    _keyedHash = GetKeyedHashAlgorithm(algorithm, keyBytes);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, key, (algorithm ?? "null"));
                 }
 
-                _keyedHash = GetKeyedHashAlgorithm(algorithm, keyBytes);
+                if (_keyedHash == null)
+                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
             }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, key, (algorithm ?? "null"));
-            }
-
-            if (_keyedHash == null)
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
 
         /// <summary>
@@ -164,6 +184,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (input.Length == 0)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10624);
 
+            if (_customCryptoProvider != null && _customCryptoProvider.IsSupported(Key, Algorithm))
+            {
+                SignatureProvider signatureProvider = _customCryptoProvider.ResolveSignatureProvider(Key, Algorithm);
+                if (signatureProvider != null)
+                    return signatureProvider.Sign(input);
+                else
+                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10646, Key, Algorithm);
+            }
+
             if (_disposed)
                 throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
 
@@ -201,6 +230,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (signature.Length == 0)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626);
 
+            if (_customCryptoProvider != null && _customCryptoProvider.IsSupported(Key, Algorithm))
+            {
+                SignatureProvider signatureProvider = _customCryptoProvider.ResolveSignatureProvider(Key, Algorithm);
+                if (signatureProvider != null)
+                    return signatureProvider.Verify(input,signature);
+                else
+                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10646, Key, Algorithm);
+            }
+
             if (_disposed)
                 throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
 
@@ -208,7 +246,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
-            return AreEqual(signature, _keyedHash.ComputeHash(input));
+            return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
         }
 
         #region IDisposable Members
@@ -235,44 +273,5 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         #endregion
-
-        /// <summary>
-        /// Compares two byte arrays for equality. Hash size is fixed normally it is 32 bytes.
-        /// The attempt here is to take the same time if an attacker shortens the signature OR changes some of the signed contents.
-        /// </summary>
-        /// <param name="a">
-        /// One set of bytes to compare.
-        /// </param>
-        /// <param name="b">
-        /// The other set of bytes to compare with.
-        /// </param>
-        /// <returns>
-        /// true if the bytes are equal, false otherwise.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-        private static bool AreEqual(byte[] a, byte[] b)
-        {
-            int result = 0;
-            byte[] a1, a2;
-
-            if (((null == a) || (null == b))
-            || (a.Length != b.Length))
-            {
-                a1 = s_bytesA; 
-                a2 = s_bytesB;
-            }
-            else
-            {
-                a1 = a; 
-                a2 = b;
-            }
-
-            for (int i = 0; i < a1.Length; i++)
-            {
-                result |= a1[i] ^ a2[i];
-            }
-
-            return result == 0;
-        }
     }
 }

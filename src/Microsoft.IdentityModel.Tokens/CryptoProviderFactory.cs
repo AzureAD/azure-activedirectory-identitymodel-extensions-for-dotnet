@@ -26,20 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use when signing or verifying token.
-    /// </summary>
-    /// <param name="securityKey"><see cref="SecurityKey"/> to use for the crypto operations.</param>
-    /// <param name="algorithm">Algorithm to use for the crypto operations</param>
-    /// <param name="willCreateSignatures">Whether this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.</param>
-    /// <returns><see cref="AsymmetricAlgorithm"/> To use for signing and/or verifying tokens.</returns>
-    public delegate AsymmetricAlgorithm AsymmetricAlgorithmResolver(SecurityKey securityKey, string algorithm, bool willCreateSignatures);
-
     /// <summary>
     /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
     /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>
@@ -51,15 +43,122 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static CryptoProviderFactory Default;
 
+        /// <summary>
+        /// Extensibility point for custom crypto support
+        /// </summary>
+        /// <remarks>By default, if set, <see cref="ICryptoProvider.IsSupported(SecurityKey, string)"/> will be called before crypto operations.
+        /// If true is returned, then this will be called for operations.</remarks>
+        public static ICryptoProvider CustomCryptoProvider;
+
+        /// <summary>
+        /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
+        /// </summary>
         static CryptoProviderFactory()
         {
             Default = new CryptoProviderFactory();
         }
 
         /// <summary>
-        /// Delegate to resolve <see cref="AsymmetricAlgorithm"/> to use when signing or verifying token.
+        /// Default constructor for <see cref="CryptoProviderFactory"/>.
         /// </summary>
-        public AsymmetricAlgorithmResolver AsymmetricAlgorithmResolver { get; set; }
+        public CryptoProviderFactory() { }
+
+        /// <summary>
+        /// Constructor that creates a deep copy of given <see cref="CryptoProviderFactory"/> object.
+        /// </summary>
+        /// <param name="factory"><see cref="CryptoProviderFactory"/> to copy from.</param>
+        public CryptoProviderFactory(CryptoProviderFactory factory)
+        {
+            if (factory == null)
+                throw LogHelper.LogArgumentNullException(nameof(factory));
+        }
+
+        /// <summary>
+        /// Answers if an algorithm is supported
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/></param>
+        /// <param name="algorithm">the algorithm to use</param>
+        /// <returns></returns>
+        public virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupported(key, algorithm))
+                return true;
+
+            if (key as RsaSecurityKey != null)
+                return IsRsaAlgorithmSupported(algorithm);
+
+            if (key as X509SecurityKey != null)
+                return IsRsaAlgorithmSupported(algorithm);
+
+            JsonWebKey jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+            {
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                    return IsRsaAlgorithmSupported(algorithm);
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                    return IsEcdsaAlgorithmSupported(algorithm);
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    return IsSymmetricAlgorithmSupported(algorithm);
+
+                return false;
+            }
+
+            if (key as ECDsaSecurityKey != null)
+                return IsEcdsaAlgorithmSupported(algorithm);
+
+            if (key as SymmetricSecurityKey != null)
+                return IsSymmetricAlgorithmSupported(algorithm);
+
+            return false;
+        }
+
+        private bool IsEcdsaAlgorithmSupported(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool IsRsaAlgorithmSupported(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSha512:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSha512Signature:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool IsSymmetricAlgorithmSupported(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.HmacSha256:
+                case SecurityAlgorithms.HmacSha384:
+                case SecurityAlgorithms.HmacSha512:
+                    return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
@@ -115,11 +214,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
-                return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures, AsymmetricAlgorithmResolver);
+                return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures, CustomCryptoProvider);
 
             SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
             if (symmetricKey != null)
-                return new SymmetricSignatureProvider(symmetricKey, algorithm);
+                return new SymmetricSignatureProvider(symmetricKey, algorithm, CustomCryptoProvider);
 
             JsonWebKey jsonWebKey = key as JsonWebKey;
             if (jsonWebKey != null)
@@ -127,7 +226,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (jsonWebKey.Kty != null)
                 {
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                        return new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, AsymmetricAlgorithmResolver);
+                        return new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, CustomCryptoProvider);
 
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                         return new SymmetricSignatureProvider(key, algorithm);

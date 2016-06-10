@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectProtocolValidatorTests
     {
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: GenerateNonce")]
+        [Fact]
         public void GenerateNonce()
         {
             List<string> errors = new List<string>();
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: GetSets, test covers defaults")]
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectProtocolValidator validationParameters = new OpenIdConnectProtocolValidator();
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: validate userinfo endpoint response")]
+        [Fact]
         public void ValidateUserInfoResponse()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateOpenIdConnectMessageWithIdTokenOnly")]
+        [Fact]
         public void ValidateMessageWithIdToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithIdTokenCode")]
+        [Fact]
         public void ValidateMessageWithIdTokenCode()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var cHashClaim = IdentityUtilities.CreateHashClaim(validCode, "SHA256");
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = "RS256";
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -312,7 +312,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithIdTokenCodeToken")]
+        [Fact]
         public void ValidateMessageWithIdTokenCodeToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -325,7 +325,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.CHash, cHashClaim));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = "RS256";
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -356,7 +356,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateTokenResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithIdTokenToken")]
+        [Fact]
         public void ValidateMessageWithIdTokenToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var atHashClaim = IdentityUtilities.CreateHashClaim(validAccessToken, "SHA256");
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = "RS256";
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -439,7 +439,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithToken")]
+        [Fact]
         public void ValidateMessageWithToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -469,7 +469,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithCodeToken")]
+        [Fact]
         public void ValidateMessageWithCodeToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -511,7 +511,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return jwt;
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateAuthenticationResponse")]
+        [Fact]
         public void ValidateAuthenticationResponse()
         {
             var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
@@ -570,7 +570,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return;
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of IdToken")]
+        [Fact]
         public void ValidateIdToken()
         {
             var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
@@ -735,7 +735,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return;
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of CHash")]
+        [Fact]
         public void Validate_CHash()
         {
             var protocolValidator = new PublicOpenIdConnectProtocolValidator();
@@ -868,7 +868,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of Nonce")]
+        [Fact]
         public void Validate_Nonce()
         {
             PublicOpenIdConnectProtocolValidator protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectProtocolValidator();
