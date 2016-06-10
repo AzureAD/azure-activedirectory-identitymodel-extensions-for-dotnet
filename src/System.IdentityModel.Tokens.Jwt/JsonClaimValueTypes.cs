@@ -43,5 +43,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
         public const string JsonArray = "JSON_ARRAY";
+
+        /// <summary>
+        /// A URI that represents the JSON null data type
+        /// </summary>
+        /// <remarks>When mapping json to .Net Claim(s), we use empty string to represent the claim value and set the ClaimValueType to JsonNull</remarks>
+        public const string JsonNull = "JSON_NULL";
     }
 }
