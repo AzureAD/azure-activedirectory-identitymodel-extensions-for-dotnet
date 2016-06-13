@@ -14,7 +14,7 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-rc3-004338",
+          "version": "1.0.0-rc3-004459-00",
           "type": "platform"
         },
         "System.Reflection.TypeExtensions": "4.1.0-rc3-*"
