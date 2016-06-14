@@ -51,7 +51,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// With the Header Parameters:
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
-        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON</param>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON.</param>
         /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials)
             : this(signingCredentials, null)
@@ -63,7 +63,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// With the Header Parameters:
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
-        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON</param>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)

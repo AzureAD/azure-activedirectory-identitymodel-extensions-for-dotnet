@@ -78,7 +78,6 @@ namespace System.IdentityModel.Tokens.Jwt
         public static ISet<string> DefaultInboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
 
         private IDictionary<string, string> _outboundAlgorithmMap = null;
-        private object _outboundAlgorithmMapLock = new object();
 
         /// <summary>
         /// Default JwtHeader algorithm mapping
