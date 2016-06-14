@@ -77,12 +77,32 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public static ISet<string> DefaultInboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
 
+        private IDictionary<string, string> _outboundAlgorithmMap = null;
+
+        /// <summary>
+        /// Default JwtHeader algorithm mapping
+        /// </summary>
+        public static IDictionary<string, string> DefaultOutboundAlgorithmMap;
+
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
         /// </summary>
         static JwtSecurityTokenHandler()
         {
             IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
+            DefaultOutboundAlgorithmMap = new Dictionary<string, string>
+             {
+                 { SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256 },
+                 { SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384 },
+                 { SecurityAlgorithms.EcdsaSha512Signature, SecurityAlgorithms.EcdsaSha512 },
+                 { SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.HmacSha256 },
+                 { SecurityAlgorithms.HmacSha384Signature, SecurityAlgorithms.HmacSha384 },
+                 { SecurityAlgorithms.HmacSha512Signature, SecurityAlgorithms.HmacSha512 },
+                 { SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256 },
+                 { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
+                 { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
+             };
+
         }
 
         /// <summary>
@@ -93,6 +113,7 @@ namespace System.IdentityModel.Tokens.Jwt
             _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
             _outboundClaimTypeMap = new Dictionary<string, string>(DefaultOutboundClaimTypeMap);
             _inboundClaimFilter = new HashSet<string>(DefaultInboundClaimFilter);
+            _outboundAlgorithmMap = new Dictionary<string, string>(DefaultOutboundAlgorithmMap);
             SetDefaultTimesOnTokenCreation = true;
         }
 
@@ -140,6 +161,18 @@ namespace System.IdentityModel.Tokens.Jwt
                 _outboundClaimTypeMap = value;
             }
         }
+
+        /// <summary>
+        /// Gets the outbound algorithm map that is passed to the <see cref="JwtHeader"/> constructor.
+        /// </summary>
+        public IDictionary<string, string> OutboundAlgorithmMap
+        {
+            get
+            {
+                return _outboundAlgorithmMap;
+            }
+        }
+
 
         /// <summary>Gets or sets the <see cref="ISet{String}"/> used to filter claims when populating a <see cref="ClaimsIdentity"/> claims form a <see cref="JwtSecurityToken"/>.
         /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.
@@ -435,7 +468,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
-            JwtHeader header = new JwtHeader(signingCredentials);
+            JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
 
             if (subject?.Actor != null)
             {

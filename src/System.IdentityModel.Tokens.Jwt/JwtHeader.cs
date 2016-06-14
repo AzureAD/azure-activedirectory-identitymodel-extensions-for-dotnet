@@ -42,7 +42,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
-            : this(null)
+            : this(null, null)
         {
         }
 
@@ -51,9 +51,22 @@ namespace System.IdentityModel.Tokens.Jwt
         /// With the Header Parameters:
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
-        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON</param>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON.</param>
         /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials)
+            : this(signingCredentials, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
+        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)
             : base(StringComparer.Ordinal)
         {
             if (signingCredentials == null)
@@ -62,7 +75,12 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             else
             {
-                this[JwtHeaderParameterNames.Alg] = signingCredentials.Algorithm;
+                string outboundAlg;
+                if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out outboundAlg))
+                    this[JwtHeaderParameterNames.Alg] = outboundAlg;
+                else
+                    this[JwtHeaderParameterNames.Alg] = signingCredentials.Algorithm;
+
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
                     this[JwtHeaderParameterNames.Kid] = signingCredentials.Key.KeyId;
             }
