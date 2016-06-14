@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync()
         {
-            return await GetConfigurationAsync(CancellationToken.None);
+            return await GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Protocols
                 return _currentConfiguration;
             }
 
-            await _refreshLock.WaitAsync(cancel);
+            await _refreshLock.WaitAsync(cancel).ConfigureAwait(false); ;
             try
             {
                 Exception retrieveEx = null;
