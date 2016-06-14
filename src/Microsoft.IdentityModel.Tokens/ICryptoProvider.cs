@@ -25,46 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.IdentityModel.Logging;
+using System.Security.Cryptography;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Base class for Security Key.
+    /// Crypto operations
     /// </summary>
-    public abstract class SecurityKey
+    public interface ICryptoProvider
     {
-        private CryptoProviderFactory _cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderFactory.Default);
+        /// <summary>
+        /// Called to determine if a cryptoType is supported.
+        /// </summary>
+        /// <param name="algorithm">the algorithm that defines the crypto operator.</param>
+        /// <param name="args">the arguments required by the cryptoType. May be null.</param>
+        /// <returns>true if supported</returns>
+        bool IsSupportedAlgorithm(string algorithm, params object[] args);
 
         /// <summary>
-        /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
+        /// returns an object of cryptoType.
         /// </summary>
-        public abstract int KeySize { get; }
+        /// <param name="algorithm">the algorithm that defines the crypto operator.</param>
+        /// <param name="args">the arguments required by the cryptoType. May be null.</param>
+        /// <remarks>call <see cref="ICryptoProvider.Release(object)"/> when finished with the object.</remarks>
+        object Create(string algorithm, params object[] args);
 
         /// <summary>
-        /// Gets the key id of this <see cref="SecurityKey"/>.
+        /// called to release the object returned from <see cref="ICryptoProvider.Create(string, object[])"/>
         /// </summary>
-        public string KeyId { get; set; }
-
-        /// <summary>
-        /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.
-        /// </summary>
-        public CryptoProviderFactory CryptoProviderFactory
-        {
-            get
-            {
-                return _cryptoProviderFactory;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw LogHelper.LogArgumentNullException("value");
-                };
-
-                _cryptoProviderFactory = value;
-            }
-        }
+        /// <param name="cryptoInstance">the object returned from <see cref="ICryptoProvider.Create(string, object[])"/>.</param>
+        void Release(object cryptoInstance);
     }
 }

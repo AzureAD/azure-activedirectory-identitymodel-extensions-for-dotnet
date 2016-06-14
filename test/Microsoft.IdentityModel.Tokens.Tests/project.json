@@ -17,7 +17,8 @@
           "version": "1.0.0-rc3-004459-00",
           "type": "platform"
         },
-        "System.Reflection.TypeExtensions": "4.1.0-rc3-*"
+        "System.Reflection.TypeExtensions": "4.1.0-rc3-*",
+        "System.Security.Cryptography.Algorithms": "4.2.0-rc3-*"
       },
       "imports": [
         "dnxcore50",

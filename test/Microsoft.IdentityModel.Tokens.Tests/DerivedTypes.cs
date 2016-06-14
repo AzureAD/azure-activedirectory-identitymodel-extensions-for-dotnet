@@ -231,11 +231,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class NotAsymmetricOrSymmetricSecurityKey : SecurityKey
     {
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
         public override int KeySize
         {
             get { throw new NotImplementedException(); }
@@ -288,11 +283,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get { throw new NotImplementedException(); }
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
         public override int KeySize
         {
             get { throw new NotImplementedException(); }
@@ -318,10 +308,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public override int KeySize { get { return _key.KeySize; } }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     /// <summary>
@@ -419,69 +405,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
             return null;
-        }
-    }
-
-    public class CustomSignatureProvider : SignatureProvider
-    {
-        public CustomSignatureProvider(SecurityKey key, string algorithm)
-            : base(key, algorithm)
-        { }
-
-        public bool DisposeCalled { get; set; } = false;
-
-        public bool SignCalled { get; set; } = false;
-
-        public bool VerifyCalled { get; set; } = false;
-
-        public override byte[] Sign(byte[] input)
-        {
-            SignCalled = true;
-            return Encoding.UTF8.GetBytes("SignedBytes");
-        }
-
-        public override bool Verify(byte[] input, byte[] signature)
-        {
-            VerifyCalled = true;
-            return true;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            DisposeCalled = true;
-        }
-    }
-
-    public class CustomCryptoProviderFactory : CryptoProviderFactory
-    {
-        public CustomCryptoProviderFactory()
-        {
-        }
-
-        public SignatureProvider SignatureProvider { get; set; }
-
-        public bool CreateForSigningCalled { get; set; } = false;
-
-        public bool CreateForVerifyingCalled { get; set; } = false;
-
-        public bool ReleaseSignatureProviderCalled { get; set; } = false;
-
-        public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
-        {
-            CreateForSigningCalled = true;
-            return SignatureProvider;
-        }
-
-        public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
-        {
-            CreateForVerifyingCalled = true;
-            return SignatureProvider;
-        }
-
-        public override void ReleaseSignatureProvider(SignatureProvider signatureProvider)
-        {
-            ReleaseSignatureProviderCalled = true;
-            signatureProvider.Dispose();
         }
     }
 }

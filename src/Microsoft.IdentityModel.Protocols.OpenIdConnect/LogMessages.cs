@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         // protocol validation
         internal const string IDX10300 = "IDX10300: The hash claim: '{0}' in the id_token did not validate with against: '{1}', algorithm: '{2}'.";
-        internal const string IDX10301 = "IDX10301: The algorithm: '{0}' specified in the jwt header was unable to create a hashAlgorithm. See inner exception for details.";
+        internal const string IDX10301 = "IDX10301: The algorithm: '{0}' specified in the jwt header could not be used to create a '{1}'. See inner exception for details.";
         internal const string IDX10302 = "IDX10302: The algorithm: '{0}' specified in the jwt header is not supported.";
         internal const string IDX10303 = "IDX10303: Validating hash of OIDC protocol message. Expected: '{0}'.";
         internal const string IDX10304 = "IDX10304: Validating 'c_hash' using id_token and code.";

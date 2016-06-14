@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -44,14 +45,10 @@ namespace Microsoft.IdentityModel.Tokens
         public SymmetricSecurityKey(byte[] key)
         {
             if (key == null)
-            {
-                throw new ArgumentNullException("key");
-            }
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (key.Length == 0)
-            {
-                throw new ArgumentException("SR.GetString(SR.SymmetricKeyLengthTooShort, symmetricKey.Length))");
-            }
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10703);
 
             _key = key.CloneByteArray();
             _keySize = _key.Length * 8;
@@ -65,32 +62,6 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _keySize; }
         }
 
-
-        /// <summary>
-        /// Returns whether the <see cref="SymmetricSecurityKey"/> supports the given algorithm.
-        /// </summary>
-        /// <param name="algorithm">The crypto algorithm to use.</param>
-        /// <returns>true if this supports the algorithm; otherwise, false.</returns>
-        public override bool IsSupportedAlgorithm(string algorithm)
-        {
-            if (string.IsNullOrWhiteSpace(algorithm))
-                return false;
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HmacSha256:
-                case SecurityAlgorithms.HmacSha384:
-                case SecurityAlgorithms.HmacSha512:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
         /// <summary>
         /// Gets the byte array of the key.
         /// </summary>
@@ -98,13 +69,5 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get { return _key.CloneByteArray(); }
         }
-
-        //public abstract byte[] GenerateDerivedKey(string algorithm, byte[] label, byte[] nonce, int derivedKeyLength, int offset);
-        //public abstract ICryptoTransform GetDecryptionTransform(string algorithm, byte[] iv);
-        //public abstract ICryptoTransform GetEncryptionTransform(string algorithm, byte[] iv);
-        //public abstract int GetIVSize(string algorithm);
-        //public abstract KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm);
-        //public abstract SymmetricAlgorithm GetSymmetricAlgorithm(string algorithm);
-        //public abstract byte[] GetSymmetricKey();
     }
 }

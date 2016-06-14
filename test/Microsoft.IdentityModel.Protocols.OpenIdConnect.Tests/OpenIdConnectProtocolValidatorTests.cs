@@ -32,8 +32,8 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectProtocolValidatorTests
     {
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: GenerateNonce")]
+        [Fact]
         public void GenerateNonce()
         {
             List<string> errors = new List<string>();
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: GetSets, test covers defaults")]
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectProtocolValidator validationParameters = new OpenIdConnectProtocolValidator();
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             ExpectedException ee = ExpectedException.ArgumentNullException();
             Assert.NotNull(validationParameters.HashAlgorithmMap);
-            Assert.Equal(validationParameters.HashAlgorithmMap.Count, 9);
+            Assert.Equal(validationParameters.HashAlgorithmMap.Count, 18);
 
             ee = ExpectedException.ArgumentOutOfRangeException();
             try
@@ -108,6 +108,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 ee.ProcessException(ex);
             }
+
+            ee = ExpectedException.ArgumentNullException();
+            try
+            {
+                validationParameters.CryptoProviderFactory = null;
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+
         }
 
         private void ValidateAuthenticationResponse(OpenIdConnectProtocolValidationContext context, OpenIdConnectProtocolValidator validator, ExpectedException ee)
@@ -149,7 +161,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: validate userinfo endpoint response")]
+        [Fact]
         public void ValidateUserInfoResponse()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator
@@ -232,7 +244,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateOpenIdConnectMessageWithIdTokenOnly")]
+        [Fact]
         public void ValidateMessageWithIdToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -263,7 +275,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithIdTokenCode")]
+        [Fact]
         public void ValidateMessageWithIdTokenCode()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -273,7 +285,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var cHashClaim = IdentityUtilities.CreateHashClaim(validCode, "SHA256");
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = "RS256";
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -312,7 +324,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithIdTokenCodeToken")]
+        [Fact]
         public void ValidateMessageWithIdTokenCodeToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -325,7 +337,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.CHash, cHashClaim));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = "RS256";
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -356,7 +368,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateTokenResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithIdTokenToken")]
+        [Fact]
         public void ValidateMessageWithIdTokenToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -366,7 +378,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var atHashClaim = IdentityUtilities.CreateHashClaim(validAccessToken, "SHA256");
             var jwt = CreateValidatedIdToken();
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Nonce, validNonce));
-            jwt.Header[JwtHeaderParameterNames.Alg] = "SHA256";
+            jwt.Header[JwtHeaderParameterNames.Alg] = "RS256";
 
             var protocolValidationContext = new OpenIdConnectProtocolValidationContext
             {
@@ -439,7 +451,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithToken")]
+        [Fact]
         public void ValidateMessageWithToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -469,7 +481,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithCodeToken")]
+        [Fact]
         public void ValidateMessageWithCodeToken()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
@@ -511,7 +523,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return jwt;
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: ValidateAuthenticationResponse")]
+        [Fact]
         public void ValidateAuthenticationResponse()
         {
             var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
@@ -570,7 +582,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return;
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of IdToken")]
+        [Fact]
         public void ValidateIdToken()
         {
             var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
@@ -661,7 +673,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.AuthTime, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
 
             // multiple 'aud' but no 'azp' claim. no exception thrown, warning logged
-            validatedIdToken.Payload[JwtRegisteredClaimNames.Aud] = new List<string> { "abc", "xyz"};
+            validatedIdToken.Payload[JwtRegisteredClaimNames.Aud] = new List<string> { "abc", "xyz" };
             ValidateIdToken(validatedIdToken, protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
 
             // 'azp' claim
@@ -735,7 +747,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return;
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of CHash")]
+        [Fact]
         public void Validate_CHash()
         {
             var protocolValidator = new PublicOpenIdConnectProtocolValidator();
@@ -770,16 +782,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new JwtSecurityToken
                 (
                     audience: IdentityUtilities.DefaultAudience,
-                    issuer: IdentityUtilities.DefaultIssuer                    
+                    issuer: IdentityUtilities.DefaultIssuer
                 );
 
-            JwtSecurityToken jwtWithSignatureChash1 = 
+            JwtSecurityToken jwtWithSignatureChash1 =
                 new JwtSecurityToken
                 (
-                    audience : IdentityUtilities.DefaultAudience,
+                    audience: IdentityUtilities.DefaultAudience,
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash1) },
                     issuer: IdentityUtilities.DefaultIssuer,
-                    signingCredentials : IdentityUtilities.DefaultAsymmetricSigningCredentials
+                    signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 
             JwtSecurityToken jwtWithSignatureMultipleChashes =
@@ -868,7 +880,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidatorTests: Validation of Nonce")]
+        [Fact]
         public void Validate_Nonce()
         {
             PublicOpenIdConnectProtocolValidator protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectProtocolValidator();
@@ -961,7 +973,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             protocolValidatorRequiresTimeStamp.NonceLifetime = TimeSpan.FromMinutes(10);
             ValidateNonce(
                 jwtWithNonceWithoutTimeStamp,
-                protocolValidatorRequiresTimeStamp, 
+                protocolValidatorRequiresTimeStamp,
                 validationContext,
                 new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10325:")
                 );
@@ -1047,7 +1059,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 validator.PublicValidateAtHash(jwt, context);
                 ee.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex);
             }
@@ -1254,6 +1266,165 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedException.NoExceptionExpected
                 );
                 return dataset;
+            }
+        }
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory]
+        [InlineData(SecurityAlgorithms.EcdsaSha256, "SHA256", true)]
+        [InlineData(SecurityAlgorithms.EcdsaSha256Signature, "SHA256", true)]
+        [InlineData(SecurityAlgorithms.HmacSha256, "SHA256", true)]
+        [InlineData(SecurityAlgorithms.RsaSha256, "SHA256", true)]
+        [InlineData(SecurityAlgorithms.RsaSha256Signature, "SHA256", true)]
+        [InlineData(SecurityAlgorithms.RsaSsaPssSha256, "SHA256", true)]
+        [InlineData(SecurityAlgorithms.EcdsaSha384, "SHA384", true)]
+        [InlineData(SecurityAlgorithms.EcdsaSha384Signature, "SHA384", true)]
+        [InlineData(SecurityAlgorithms.HmacSha384, "SHA384", true)]
+        [InlineData(SecurityAlgorithms.RsaSha384, "SHA384", true)]
+        [InlineData(SecurityAlgorithms.RsaSha384Signature, "SHA384", true)]
+        [InlineData(SecurityAlgorithms.RsaSsaPssSha384, "SHA384", true)]
+        [InlineData(SecurityAlgorithms.EcdsaSha512, "SHA512", true)]
+        [InlineData(SecurityAlgorithms.EcdsaSha512Signature, "SHA512", true)]
+        [InlineData(SecurityAlgorithms.HmacSha512, "SHA512", true)]
+        [InlineData(SecurityAlgorithms.RsaSha512, "SHA512", true)]
+        [InlineData(SecurityAlgorithms.RsaSha512Signature, "SHA512", true)]
+        [InlineData(SecurityAlgorithms.RsaSsaPssSha512, "SHA512", true)]
+        [InlineData(SecurityAlgorithms.ExclusiveC14nWithComments, "SHA512", false)]
+        [InlineData(SecurityAlgorithms.Aes128KeyWrap, "SHA512", false)]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void DefaultAlgorithmMapTest(string algorithm, string expectedHash, bool shouldFind)
+        {
+            var protocolValidator = new OpenIdConnectProtocolValidator();
+            string hashFound;
+            Assert.True(protocolValidator.HashAlgorithmMap.TryGetValue(algorithm, out hashFound) == shouldFind);
+            if (shouldFind)
+                Assert.True(hashFound.Equals(expectedHash, StringComparison.Ordinal));
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("HashAlgExtensibilityDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void HashAlgorithmExtensibility(OpenIdConnectProtocolValidator protocolValidator, string alg, Type algorithmType, ExpectedException ee)
+        {
+            ee.Verbose = false;
+            try
+            {
+                var hash = protocolValidator.GetHashAlgorithm(alg);
+                ee.ProcessNoException();
+                Assert.True(hash.GetType() == algorithmType, string.Format(CultureInfo.InvariantCulture, "hash.GetType() != algorithmType: '{0}' : '{1}'", hash.GetType(), algorithmType));
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<OpenIdConnectProtocolValidator, string, Type, ExpectedException> HashAlgExtensibilityDataSet
+        {
+            get
+            {
+                var dataSet = new TheoryData<OpenIdConnectProtocolValidator, string, Type, ExpectedException>();
+
+                // CustomCryptoProviderFactory understands this 'hash' algorithm
+                var customHashAlgorithm = new CustomHashAlgorithm();
+                var customCryptoProviderFactory = new CustomCryptoProviderFactory()
+                {
+                    HashAlgorithm = customHashAlgorithm
+                };
+
+                var validator = new OpenIdConnectProtocolValidator()
+                {
+                    CryptoProviderFactory = customCryptoProviderFactory
+                };
+
+                dataSet.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), ExpectedException.NoExceptionExpected);
+
+                // Default CryptoProviderFactory faults on this 'hash' algorithm
+                validator = new OpenIdConnectProtocolValidator()
+                {
+                    CryptoProviderFactory = new CryptoProviderFactory()
+                };
+
+                dataSet.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(InvalidOperationException)));
+
+                // Adjust mapping table, and Default CryptoProviderFactory will find 'hash' algorithm
+                var sha2 = SHA256.Create();
+                validator = new OpenIdConnectProtocolValidator();
+                validator.HashAlgorithmMap[SecurityAlgorithms.ExclusiveC14nWithComments] = SecurityAlgorithms.Sha256;
+                dataSet.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, sha2.GetType(), ExpectedException.NoExceptionExpected);
+
+                // Support a single hash algorithm, add CryptoProvider that supports hash algorithm
+                var cryptoProvider = new CustomCryptoProvider()
+                {
+                    HashAlgorithm = customHashAlgorithm,
+                    IsSupportedResult = true
+                };
+
+                cryptoProvider.AdditionalHashAlgorithms.Add(SecurityAlgorithms.ExclusiveC14nWithComments);
+
+                validator = new OpenIdConnectProtocolValidator()
+                {
+                    CryptoProviderFactory = new CryptoProviderFactory()
+                };
+
+                validator.CryptoProviderFactory.CustomCryptoProvider = cryptoProvider;
+                dataSet.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), ExpectedException.NoExceptionExpected);
+
+                return dataSet;
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("GetHashAlgDataSet")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void GetHashAlgorithm(OpenIdConnectProtocolValidator protocolValidator, string alg, Type algorithmType, ExpectedException ee)
+        {
+            ee.Verbose = false;
+            try
+            {
+                var hash = protocolValidator.GetHashAlgorithm(alg);
+                ee.ProcessNoException();
+                Assert.True(hash.GetType() == algorithmType);
+            }
+            catch(Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<OpenIdConnectProtocolValidator, string, Type, ExpectedException> GetHashAlgDataSet
+        {
+            get
+            {
+                var validator = new OpenIdConnectProtocolValidator();
+                var sha2 = SHA256.Create();
+                var sha3 = SHA384.Create();
+                var sha5 = SHA512.Create();
+
+                return new TheoryData<OpenIdConnectProtocolValidator, string, Type, ExpectedException>
+                {
+                    {validator, SecurityAlgorithms.EcdsaSha256, sha2.GetType(), ExpectedException.NoExceptionExpected },
+                    {validator, SecurityAlgorithms.EcdsaSha256Signature, sha2.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.HmacSha256, sha2.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.RsaSha256, sha2.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.RsaSha256Signature, sha2.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.RsaSsaPssSha256, sha2.GetType(), ExpectedException.NoExceptionExpected},
+
+                    {validator, SecurityAlgorithms.EcdsaSha384, sha3.GetType(), ExpectedException.NoExceptionExpected },
+                    {validator, SecurityAlgorithms.HmacSha384, sha3.GetType(), ExpectedException.NoExceptionExpected },
+                    {validator, SecurityAlgorithms.RsaSha384, sha3.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.RsaSsaPssSha384, sha3.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.RsaSha384Signature, sha3.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.EcdsaSha384Signature, sha3.GetType(), ExpectedException.NoExceptionExpected},
+
+                    {validator, SecurityAlgorithms.RsaSha512Signature, sha5.GetType(), ExpectedException.NoExceptionExpected },
+                    {validator, SecurityAlgorithms.RsaSsaPssSha512, sha5.GetType(), ExpectedException.NoExceptionExpected },
+                    {validator, SecurityAlgorithms.EcdsaSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.EcdsaSha512Signature, sha5.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.HmacSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
+                    {validator, SecurityAlgorithms.RsaSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
+
+                    {validator, SecurityAlgorithms.ExclusiveC14nWithComments, sha5.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(InvalidOperationException))}
+                };
             }
         }
     }

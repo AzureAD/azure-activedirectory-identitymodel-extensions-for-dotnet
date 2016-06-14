@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -145,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool expectedResult)
         {
-            if (key.IsSupportedAlgorithm(alg) != expectedResult)
+            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
                 Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
         }
 
@@ -160,6 +161,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, false);
                 dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);
                 dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false);
+                JsonWebKey testKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.Octet,
+                    K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
+                };
+                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
+                dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, true);
                 return dataset;
             }
         }

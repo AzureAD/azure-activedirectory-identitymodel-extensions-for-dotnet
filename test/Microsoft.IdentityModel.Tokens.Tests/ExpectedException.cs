@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-//#define  _Verbose
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,6 +46,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             SubstringExpected = substringExpected;
             TypeExpected = typeExpected;
         }
+
+        public static bool DefaultVerbose { get; set; } = false;
 
         public static ExpectedException ArgumentException(string substringExpected = null, Type inner = null)
         {
@@ -143,9 +143,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
             }
 
-#if _Verbose
-            Console.WriteLine(Environment.NewLine + "Exception displayed to user: " + Environment.NewLine + Environment.NewLine + exception);
-#endif
+            if (DefaultVerbose || Verbose)
+                Console.WriteLine(Environment.NewLine + "Exception displayed to user: " + Environment.NewLine + Environment.NewLine + exception);
         }
 
         public void ProcessNoException(List<string> errors = null)
@@ -244,5 +243,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string SubstringExpected { get; set; }
 
         public Type TypeExpected { get; set; }
+
+        public bool Verbose { get; set; } = false;
     }
 }
