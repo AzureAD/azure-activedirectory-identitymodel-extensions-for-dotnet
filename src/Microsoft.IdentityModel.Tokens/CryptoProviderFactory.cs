@@ -37,10 +37,22 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class CryptoProviderFactory
     {
+        private static CryptoProviderFactory _default;
+
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
         /// </summary>
-        public static CryptoProviderFactory Default;
+        public static CryptoProviderFactory Default
+        {
+            get { return _default; }
+            set
+            {
+                if (value == null)
+                    throw LogHelper.LogArgumentNullException("value");
+
+                _default = value;
+            }
+        }
 
         /// <summary>
         /// Extensibility point for custom crypto support application wide.
@@ -101,8 +113,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (key as RsaSecurityKey != null)
                 return IsRsaAlgorithmSupported(algorithm);
 
-            if (key as X509SecurityKey != null)
+            var x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+#if NETSTANDARD1_4
+                if (x509Key.PublicKey as RSA == null)
+                    return false;
+#else
+                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
+                    return false;
+#endif
                 return IsRsaAlgorithmSupported(algorithm);
+            }
 
             JsonWebKey jsonWebKey = key as JsonWebKey;
             if (jsonWebKey != null)
@@ -300,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10634, (algorithm ?? "null"), key);
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10634, algorithm, key);
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
