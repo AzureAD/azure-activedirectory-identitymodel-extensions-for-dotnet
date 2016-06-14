@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, key, (algorithm ?? "null"));
+                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, (algorithm ?? "null"), key);
             }
 
             if (_keyedHash == null)

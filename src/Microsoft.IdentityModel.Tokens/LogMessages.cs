@@ -88,8 +88,8 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
         internal const string IDX10644 = "IDX10644: Crypto operation not supported.";
         internal const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
-        internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupported(Key: '{0}', Algorithm: '{1}'), but Create.(CryptoTypes.SignatureProvider, key, algorithm) as '{2}' == NULL.";
-        internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}'), but Create.(CryptoTypes.HashAlgorithm, algorithm) as '{1}' == NULL.";
+        internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupported(Key: '{0}', Algorithm: '{1}'), but Create.(algorithm, key) as '{2}' == NULL.";
+        internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}'), but Create.(algorithm) as '{1}' == NULL.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
