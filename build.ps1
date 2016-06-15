@@ -51,7 +51,7 @@ $ErrorActionPreference = "Stop"
 function SetCoreFxVersion([string]$fileName, [string]$oldVersion, [string]$newVersion)
 {
     $content = Get-Content -Path $fileName -raw;
-    if ((-not $content.Contains($newVersion)) -and ($content.Contains("-rc3-")))
+    if ($content.Contains("-rc3-"))
     {
         Write-Host ">>> SetCoreFxVersion: " $fileName ", " $oldVersion ", " $newVersion
         $newContent = $content -replace $oldVersion, $newVersion;
