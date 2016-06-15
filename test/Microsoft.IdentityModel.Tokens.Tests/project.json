@@ -1,7 +1,7 @@
 {
   "version": "5.0.0-*",
   "dependencies": {
-    "Newtonsoft.Json": "9.0.1-beta1",
+    "Newtonsoft.Json": "9.0.1",
     "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-*",
     "Microsoft.NETCore.Platforms": "1.0.1-*",
     "System.IdentityModel.Tokens.Saml": "5.0.0-*",
