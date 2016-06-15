@@ -3,7 +3,7 @@
   "description": "Includes types that provide support for cryptographic operations.",
   "dependencies": {
     "Microsoft.IdentityModel.Logging": "1.0.0-*",
-    "Newtonsoft.Json": "9.0.1-beta1"
+    "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
     "netstandard1.4": {
