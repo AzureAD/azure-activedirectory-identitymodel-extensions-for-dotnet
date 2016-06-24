@@ -47,9 +47,9 @@ namespace System.IdentityModel.Tokens
         public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
 
         /// <summary>
-        /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
+        /// Token format: 'header.payload.signature'. Signature is optional, and if missing, trailing '.' is also optional.
         /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        public const string JsonCompactSerializationRegex = @"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)\.?(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$";
 
         /// <summary>
         /// When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.
