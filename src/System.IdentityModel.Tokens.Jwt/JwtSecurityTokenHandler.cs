@@ -1037,9 +1037,18 @@ namespace System.IdentityModel.Tokens.Jwt
             if (!string.IsNullOrEmpty(securityToken.Header.X5t))
             {
                 string x5t = securityToken.Header.X5t;
-                if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, StringComparison.Ordinal))
+                if (validationParameters.IssuerSigningKey != null)
                 {
-                    return validationParameters.IssuerSigningKey;
+                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, StringComparison.Ordinal))
+                    {
+                        return validationParameters.IssuerSigningKey;
+                    }
+
+                    X509SecurityKey x509Key = validationParameters.IssuerSigningKey as X509SecurityKey;
+                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.Ordinal))
+                    {
+                        return validationParameters.IssuerSigningKey;
+                    }
                 }
 
                 if (validationParameters.IssuerSigningKeys != null)
