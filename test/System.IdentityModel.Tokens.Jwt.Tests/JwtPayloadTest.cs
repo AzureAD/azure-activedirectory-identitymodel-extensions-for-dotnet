@@ -123,6 +123,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             json = unicodePayload.Base64UrlEncode();
             json2 = payload.Base64UrlEncode();
             Assert.True(string.Equals(json2, json2));
+
+            retrievePayload = JwtPayload.Base64UrlDeserialize(json);
+            Assert.True(string.Equals(retrievePayload.Iss, issuer));
         }
 
         [Fact]
