@@ -58,7 +58,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             _validationParameters = validationParameters;
+
+            this.IsKeyMatched = false;
         }
+
+        public bool IsKeyMatched { get; set; }
 
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> that matches the <see cref="SecurityKeyIdentifierClause"/>
@@ -176,7 +180,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (_validationParameters.IssuerSigningKeyResolver != null)
             {
                 key = _validationParameters.IssuerSigningKeyResolver(token: _securityToken, securityToken: null, keyIdentifier: new SecurityKeyIdentifier(keyIdentifierClause), validationParameters: _validationParameters);
-                return (key != null);
+                if (key != null)
+                {
+                    this.IsKeyMatched = true;
+                }
             }
 
             if (_validationParameters.IssuerSigningKey != null)
@@ -184,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (Matches(keyIdentifierClause, _validationParameters.IssuerSigningKey, certMatcher, out token))
                 {
                     key = _validationParameters.IssuerSigningKey;
-                    return true;
+                    this.IsKeyMatched = true;
                 }
             }
 
@@ -194,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (Matches(keyIdentifierClause, securityKey, certMatcher, out token))
                 {
                     key = securityKey;
-                    return true;
+                    this.IsKeyMatched = true;
                 }
             }
 
@@ -204,7 +211,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     token = _validationParameters.IssuerSigningToken;
                     key = token.SecurityKeys[0];
-                    return true;
+                    this.IsKeyMatched = true;
                 }
             }
 
@@ -216,12 +223,13 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         token = issuerToken;
                         key = token.SecurityKeys[0];
-                        return true;
+                        this.IsKeyMatched = true;
+                        break;
                     }
                 }
             }
 
-            return false;
+            return this.IsKeyMatched;
         }
     }
 }
