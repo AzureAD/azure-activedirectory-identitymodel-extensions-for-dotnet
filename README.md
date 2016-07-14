@@ -3,6 +3,12 @@
 
 IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity. 
 
+## Usage
+IdentityModel Extensions for .NET 5 has now been released. If you are using IdentityModel Extensions with ASP.NET, the following combinations are supported:
+* **IdentityModel Extensions for .NET 4.x** and **ASP.NET 4**
+* **IdentityModel Extensions for .NET 5.x** and **ASP.NET Core 1.x**
+All other combinations aren't supported.
+
 ## Samples and Documentation
 
 [We provide a full suite of sample applications and documentation on GitHub](https://github.com/azure-samples?query=active-directory) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
