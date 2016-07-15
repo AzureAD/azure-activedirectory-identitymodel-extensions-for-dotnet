@@ -24,50 +24,16 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+
 using System;
-using Microsoft.IdentityModel.Logging;
-using System.Security.Cryptography;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class AsymmetricEncryptionProvider : EncryptionProvider
+    public interface IAuthenticatedEncryptingProvider : IEncryptingProvider
     {
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private bool _disposed;
-
-        public AsymmetricEncryptionProvider(SecurityKey key, string algorithm)
-            : base(key, algorithm)
-        {
-        }
-
-        public override string[] Encrypt(byte[] input)
-        {
-            if (input == null)
-                throw LogHelper.LogArgumentNullException("plaintext");
-
-            if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'input'");
-
-            if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
-
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.Encrypt(input, true);
-        }
-
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                if (disposing)
-                {
-                    if (_rsaCryptoServiceProvider != null)
-                        _rsaCryptoServiceProvider.Dispose();
-                }
-            }
-        }
+        Tuple<byte[], byte[]> EncryptAndAuthenticate(byte[] paintext);
     }
 }

@@ -196,6 +196,16 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+        public virtual IDecryptingProvider CreateForDecrypting()
+        {
+
+        }
+
+        public virtual IEncryptingProvider CreateForEncrypting()
+        {
+
+        }
+
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
         /// </summary>

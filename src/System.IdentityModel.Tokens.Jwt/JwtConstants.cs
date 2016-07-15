@@ -57,5 +57,19 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
 
+        /// <summary>
+        /// The number of parts in a JWE token.
+        /// </summary>
+        public const int JwePartNumber = 5;
+
+        /// <summary>
+        /// The number of parts in a JWS token.
+        /// </summary>
+        public const int JwsPartNumber = 3;
+
+        /// <summary>
+        /// The maximum number of parts in a JWT.
+        /// </summary>
+        public const int MaxJwtPartNumber = 5;
     }
 }

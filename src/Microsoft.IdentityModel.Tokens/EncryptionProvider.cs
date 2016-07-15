@@ -29,7 +29,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public abstract class EncryptionProvider : IDisposable
+    public abstract class EncryptionProvider : IEncryptingProvider, IDecryptingProvider, IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EncryptionProvider"/> class used to encode and decode Ciphertext and Authentication Tag.
@@ -38,13 +38,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="iv">The initialization vector that will be used for encrypting the plaintext. </param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        protected EncryptionProvider(SecurityKey key, string algorithm, byte[] iv)
+        protected EncryptionProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
             
             Key = key;
-            InitializationVector = iv;
             Algorithm = algorithm;
         }
 
@@ -58,13 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public SecurityKey Key { get; private set; }
 
-        public byte[] InitializationVector { get; private set; }  
-        
         public string Algorithm { get; private set; }
-
-        public abstract string[] Encrypt(byte[] input);
-
-        public abstract string Decrypt(string AutheticationTag);
 
         #region IDisposable Members
 

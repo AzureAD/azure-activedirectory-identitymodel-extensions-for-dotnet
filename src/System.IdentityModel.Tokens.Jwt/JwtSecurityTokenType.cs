@@ -24,50 +24,27 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-using System;
-using Microsoft.IdentityModel.Logging;
-using System.Security.Cryptography;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace System.IdentityModel.Tokens.Jwt
 {
-    public class AsymmetricEncryptionProvider : EncryptionProvider
+    /// <summary>
+    /// Specifies the type of a <see cref="JwtSecurityToken"/>.
+    /// </summary>
+    public enum JwtSecurityTokenType
     {
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private bool _disposed;
+        /// <summary>
+        /// The default type of JWT which means the type of token is undefined or undetected/undetectable.
+        /// </summary>
+        Unknown,
 
-        public AsymmetricEncryptionProvider(SecurityKey key, string algorithm)
-            : base(key, algorithm)
-        {
-        }
+        /// <summary>
+        /// The JWS token type defined in RFC 7515 (https://tools.ietf.org/html/rfc7515).
+        /// </summary>
+        JWS,
 
-        public override string[] Encrypt(byte[] input)
-        {
-            if (input == null)
-                throw LogHelper.LogArgumentNullException("plaintext");
-
-            if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'input'");
-
-            if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
-
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.Encrypt(input, true);
-        }
-
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                if (disposing)
-                {
-                    if (_rsaCryptoServiceProvider != null)
-                        _rsaCryptoServiceProvider.Dispose();
-                }
-            }
-        }
+        /// <summary>
+        /// The JWS token type defined in RFC 7516 (https://tools.ietf.org/html/rfc7516).
+        /// </summary>
+        JWE
     }
 }

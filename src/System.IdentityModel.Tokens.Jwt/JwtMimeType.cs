@@ -24,50 +24,45 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-using System;
-using Microsoft.IdentityModel.Logging;
-using System.Security.Cryptography;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace System.IdentityModel.Tokens.Jwt
 {
-    public class AsymmetricEncryptionProvider : EncryptionProvider
+    /// <summary>
+    /// Defines the mdeia type of a JWT or the contents contained by a JWT.
+    /// This is used by JOSE headers (<see cref="JwtHeader"/>) to define:
+    /// - The mdeia type of the complete JWT (the typ parameter of the JOSE header).
+    /// - The mdeia type of the secured content (the cty parameter of the JOSE header).
+    /// </summary>
+    public enum JwtMimeType
     {
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private bool _disposed;
+        /// <summary>
+        /// The type of the content is undefined.
+        /// </summary>
+        Empty,
 
-        public AsymmetricEncryptionProvider(SecurityKey key, string algorithm)
-            : base(key, algorithm)
-        {
-        }
+        /// <summary>
+        /// The content is JSON; usually a set of claims under the context of JWT.
+        /// </summary>
+        JSON,
 
-        public override string[] Encrypt(byte[] input)
-        {
-            if (input == null)
-                throw LogHelper.LogArgumentNullException("plaintext");
+        /// <summary>
+        /// The contect is a JWT (JWS or JWE) serialized in compact format.
+        /// </summary>
+        JOSE,
 
-            if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'input'");
+        /// <summary>
+        /// The contect is a JWT (JWS or JWE) serialized in full (JSON) format.
+        /// </summary>
+        JOSEANDJSON,
 
-            if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
+        /// <summary>
+        /// The contect is a JWT (JWS or JWE) while its serialization mode is unspecified.
+        /// </summary>
+        JWT,
 
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.Encrypt(input, true);
-        }
-
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                if (disposing)
-                {
-                    if (_rsaCryptoServiceProvider != null)
-                        _rsaCryptoServiceProvider.Dispose();
-                }
-            }
-        }
+        /// <summary>
+        /// The content is some other type not defined in this enum.
+        /// </summary>
+        Other,
     }
 }
