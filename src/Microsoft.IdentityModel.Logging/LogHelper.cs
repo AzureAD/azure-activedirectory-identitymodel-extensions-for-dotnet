@@ -232,6 +232,28 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
+        /// Logs an exception using the event source logger.
+        /// </summary>
+        /// <param name="exception">The exception to log.</param>
+        public static Exception LogExceptionMessage(Exception exception)
+        {
+            return LogExceptionMessage(EventLevel.Error, exception);
+        }
+
+
+        /// <summary>
+        /// Logs an exception using the event source logger.
+        /// </summary>
+        /// <param name="eventLevel">Identifies the level of an event to be logged.</param>
+        /// <param name="exception">The exception to log.</param>
+        public static Exception LogExceptionMessage(EventLevel eventLevel, Exception exception)
+        {
+            if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
+                IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
+            return exception;
+        }
+
+        /// <summary>
         /// Logs an exception using the event source logger and returns new typed exception.
         /// </summary>
         /// <param name="eventLevel">Identifies the level of an event to be logged.</param>

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -244,7 +245,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10100, value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10100, value)));
 
                 _clockSkew = value;
             }
@@ -386,7 +387,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10102);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", LogMessages.IDX10102));
 
                 _nameClaimType = value;
             }
@@ -409,7 +410,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10103);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", LogMessages.IDX10103));
 
                 _roleClaimType = value;
             }

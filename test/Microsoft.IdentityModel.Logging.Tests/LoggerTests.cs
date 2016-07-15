@@ -30,6 +30,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Logging.Tests
 {
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             var guid = Guid.NewGuid().ToString();
             try
             {
-                throw LogHelper.LogException<ArgumentNullException>(guid);
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(guid));
             }
             catch (Exception ex)
             {
@@ -69,7 +70,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Critical);
 
             // default logs at Error
-            var exception = LogHelper.LogException<ArgumentException>(guid1);
+            var exception = LogHelper.LogExceptionMessage(new ArgumentException(guid1));
             Assert.Equal(exception.GetType(), typeof(ArgumentException));
             Assert.True(string.IsNullOrEmpty(listener.TraceBuffer));
             Assert.Contains(guid1, exception.Message);
@@ -78,23 +79,23 @@ namespace Microsoft.IdentityModel.Logging.Tests
             IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
 
-            exception = LogHelper.LogException<ArgumentException>(guid1);
+            exception = LogHelper.LogExceptionMessage(new ArgumentException(guid1));
             Assert.Equal(exception.GetType(), typeof(ArgumentException));
             Assert.Contains(guid1, exception.Message);
 
-            exception = LogHelper.LogException<ArgumentException>(messageWithParams, guid2);
+            exception = LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid2)));
             Assert.Contains(guid2, exception.Message);
             Assert.Equal(exception.GetType(), typeof(ArgumentException));
 
-            exception = LogHelper.LogException<ArgumentException>(EventLevel.Error, messageWithParams, guid3);
+            exception = LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid3)));
             Assert.Contains(guid3, exception.Message);
 
-            exception = LogHelper.LogException<ArgumentException>(EventLevel.Error, new NotSupportedException(), messageWithParams, guid4);
+            exception = LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid4), new NotSupportedException()));
             Assert.Contains(guid4, exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal(exception.InnerException.GetType(), typeof(NotSupportedException));
 
-            exception = LogHelper.LogException<ArgumentException>(EventLevel.Informational, new NotSupportedException(), messageWithParams, guid5);
+            exception = LogHelper.LogExceptionMessage(EventLevel.Informational, new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid5), new NotSupportedException()));
             Assert.Contains(guid5, exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Equal(exception.InnerException.GetType(), typeof(NotSupportedException));

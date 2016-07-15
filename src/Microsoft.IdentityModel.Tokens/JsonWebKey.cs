@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -48,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens
         static public JsonWebKey Create(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogArgumentNullException(nameof(json));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
 
             return new JsonWebKey(json);
         }
@@ -69,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
         public JsonWebKey(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogArgumentNullException(nameof(json));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
 
             try
             {
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10805, json, GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, json, GetType()), ex));
             }
         }
 

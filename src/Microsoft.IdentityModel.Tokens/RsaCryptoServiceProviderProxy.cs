@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
         public RSACryptoServiceProviderProxy(RSACryptoServiceProvider rsa)
         {
             if (rsa == null)
-                throw LogHelper.LogArgumentNullException("rsa");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("rsa", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "rsa"))); 
 
             //
             // Level up the provider type only if:

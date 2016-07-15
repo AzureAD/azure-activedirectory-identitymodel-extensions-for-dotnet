@@ -41,6 +41,9 @@ namespace Microsoft.IdentityModel.Logging
         internal const string MIML11000 = "MIML11000: eventData.Payload is null or empty. Not logging any messages.";
         internal const string MIML11001 = "MIML11001: Cannot create the fileStream or StreamWriter to write logs. See inner exception.";
         internal const string MIML11002 = "MIML11002: Unknown log level: {0}.";
+
+        // general exceptions
+        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 #pragma warning restore 1591
 
     }

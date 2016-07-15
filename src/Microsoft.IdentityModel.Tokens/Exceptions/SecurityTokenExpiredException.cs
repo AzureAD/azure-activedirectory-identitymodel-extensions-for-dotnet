@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenExpiredException : SecurityTokenValidationException
     {
         /// <summary>
+        /// Gets or sets the Expires value that created the validation exception.
+        /// </summary>
+        public DateTime? Expires { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of  <see cref="SecurityTokenExpiredException"/>
         /// </summary>
         public SecurityTokenExpiredException()

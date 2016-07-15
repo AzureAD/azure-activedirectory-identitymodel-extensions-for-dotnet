@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenInvalidAudienceException : SecurityTokenValidationException
     {
         /// <summary>
+        /// Gets or sets the InvalidAudience that created the validation exception.
+        /// </summary>
+        public string InvalidAudience { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidAudienceException"/> class.
         /// </summary>
         public SecurityTokenInvalidAudienceException()
