@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             _certificate = certificate;
             KeyId = certificate.Thumbprint;
+            X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
         }
 
         /// <summary>
@@ -66,6 +67,11 @@ namespace Microsoft.IdentityModel.Tokens
                 return PublicKey.KeySize;
             }
         }
+
+        /// <summary>
+        /// Gets the X5t of this <see cref="X509SecurityKey"/>.
+        /// </summary>
+        public string X5t { get; }
 
         /// <summary>
         /// Returns the private key from the <see cref="X509SecurityKey"/>.

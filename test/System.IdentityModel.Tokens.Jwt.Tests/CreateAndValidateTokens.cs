@@ -138,6 +138,53 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
+        public void MatchX5t()
+        {
+            X509SecurityKey signingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
+            X509SecurityKey validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
+
+            // Assume SigningKey.KeyId doesn't match validationParameters.IssuerSigningKey.KeyId
+            signingKey.KeyId = null;
+            var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256Signature);
+
+            var header = new JwtHeader(signingCredentials);
+            header.Add(JwtHeaderParameterNames.X5t, Base64UrlEncoder.Encode(KeyingMaterial.CertSelfSigned2048_SHA256.GetCertHash()));
+            var payload = new JwtPayload();
+            payload.AddClaims(ClaimSets.DefaultClaims);
+
+            var jwtToken = new JwtSecurityToken(header, payload);
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.WriteToken(jwtToken);
+
+            var validationParameters =
+                new TokenValidationParameters
+                {
+                    RequireExpirationTime = false,
+                    RequireSignedTokens = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                };
+            validationParameters.IssuerSigningKey = validateKey;
+
+            SecurityToken validatedSecurityToken = null;
+            var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+
+            validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public;
+            validationParameters.IssuerSigningKey = validateKey;
+
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:");
+            try
+            {
+                cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+        }
+
+        [Fact]
         public void EmptyToken()
         {
             var handler = new JwtSecurityTokenHandler();
