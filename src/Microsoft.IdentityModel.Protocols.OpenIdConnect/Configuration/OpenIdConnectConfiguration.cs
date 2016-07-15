@@ -31,6 +31,7 @@ using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static OpenIdConnectConfiguration Create(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogArgumentNullException(nameof(json));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10808, json);
             return new OpenIdConnectConfiguration(json);
@@ -65,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
-                throw LogHelper.LogArgumentNullException(nameof(configuration));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(configuration)))); 
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
@@ -86,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public OpenIdConnectConfiguration(string json)
         {
             if(string.IsNullOrEmpty(json))
-                throw LogHelper.LogArgumentNullException(nameof(json));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
 
             try
             {
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10815, json, GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10815, json, GetType()), ex));
             }
         }
 

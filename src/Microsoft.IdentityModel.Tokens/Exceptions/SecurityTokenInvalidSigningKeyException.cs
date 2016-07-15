@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenInvalidSigningKeyException : SecurityTokenValidationException
     {
         /// <summary>
+        /// Gets or sets the NotBefore value that created the validation exception.
+        /// </summary>
+        public SecurityKey SigningKey { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
         /// </summary>
         public SecurityTokenInvalidSigningKeyException()

@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ECDsaSecurityKey(ECDsa ecdsa)
         {
             if (ecdsa == null)
-                throw LogHelper.LogArgumentNullException("ecdsa");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("ecdsa", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "ecdsa"))); 
 
             ECDsa = ecdsa;
         }

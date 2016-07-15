@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -44,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected SignatureProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(key)))); 
 
             Key = key;
             Algorithm = algorithm;

@@ -193,7 +193,7 @@ namespace System.IdentityModel.Tokens.Saml2
             {
                 if (value < 1)
                 {
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value.ToString(CultureInfo.InvariantCulture))));
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -231,10 +231,10 @@ namespace System.IdentityModel.Tokens.Saml2
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException("reader");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("reader", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "reader"))); 
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
 
             throw new NotImplementedException();
         }
@@ -253,14 +253,14 @@ namespace System.IdentityModel.Tokens.Saml2
         {
             validatedToken = null;
             if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogArgumentNullException("securityToken");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("securityToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityToken"))); 
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
             {
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
             }
 
             Saml2SecurityToken samlToken;
@@ -293,7 +293,8 @@ namespace System.IdentityModel.Tokens.Saml2
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
-                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, securityToken);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken))
+                        { NotBefore = notBefore, Expires = expires });
                     }
                 }
                 else
@@ -331,7 +332,8 @@ namespace System.IdentityModel.Tokens.Saml2
                 {
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
-                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, securityToken);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken))
+                            { InvalidAudience = String.Join(", ", audiences) });
                     }
                 }
                 else
@@ -424,11 +426,11 @@ namespace System.IdentityModel.Tokens.Saml2
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException("token");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, this.GetType(), typeof(Saml2SecurityToken), token.GetType())));
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
@@ -445,14 +447,14 @@ namespace System.IdentityModel.Tokens.Saml2
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException("writer");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("writer", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "writer"))); 
 
             if (token == null)
-                throw LogHelper.LogArgumentNullException("token");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             throw new NotSupportedException();
         }

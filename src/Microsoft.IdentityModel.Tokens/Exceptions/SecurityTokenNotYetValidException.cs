@@ -39,6 +39,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenNotYetValidException : SecurityTokenValidationException
     {
         /// <summary>
+        /// Gets or sets the NotBefore value that created the validation exception.
+        /// </summary>
+        public DateTime? NotBefore { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of  <see cref="SecurityTokenNotYetValidException"/>
         /// </summary>
         public SecurityTokenNotYetValidException()
