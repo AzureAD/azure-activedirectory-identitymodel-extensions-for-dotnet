@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using Xunit;
 
@@ -39,12 +40,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class ExpectedException
     {
-        public ExpectedException(Type typeExpected = null, string substringExpected = null, Type innerTypeExpected = null)
+        public ExpectedException(Type typeExpected = null, string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
             IgnoreInnerException = false;
             InnerTypeExpected = innerTypeExpected;
             SubstringExpected = substringExpected;
             TypeExpected = typeExpected;
+            PropertiesExpected = propertiesExpected;
         }
 
         public static bool DefaultVerbose { get; set; } = false;
@@ -143,6 +145,34 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
             }
 
+            if (PropertiesExpected != null && PropertiesExpected.Count > 0)
+            { 
+                foreach (KeyValuePair<string, object> property in PropertiesExpected)
+                {
+                    PropertyInfo propertyInfo = TypeExpected.GetProperty(property.Key);
+                    if (propertyInfo == null)
+                    {
+                        HandleError("exception type " + TypeExpected + " does not have expected property " + property.Key, errors);
+                    }
+                    object runtimeValue = propertyInfo.GetValue(exception);
+
+                    bool expectedTypeIsNullable = propertyInfo.PropertyType.GetTypeInfo().IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+                    Type expectedTypeNonNullable = expectedTypeIsNullable ? propertyInfo.PropertyType.GetGenericArguments()[0] : propertyInfo.PropertyType;
+
+                    if (runtimeValue != null && runtimeValue.GetType() != expectedTypeNonNullable && !expectedTypeNonNullable.IsAssignableFrom(runtimeValue.GetType()))
+                    {
+                        HandleError("exception type " + TypeExpected + " does not match the expected property " + property.Key + " type.\nexpected type: " + expectedTypeNonNullable + ", actual type: " + runtimeValue.GetType(), errors);
+                    }
+
+                    if (runtimeValue != property.Value && 
+                        ((runtimeValue != null && !runtimeValue.Equals(property.Value)) ||
+                         (property.Value != null && !property.Value.Equals(runtimeValue))))
+                    {
+                        HandleError("exception type " + TypeExpected + " doesn't have the expected property value " + property.Key + " value.\nexpected value: " + property.Value + ", actual value: " + runtimeValue, errors);
+                    }
+                }
+            }
+
             if (DefaultVerbose || Verbose)
                 Console.WriteLine(Environment.NewLine + "Exception displayed to user: " + Environment.NewLine + Environment.NewLine + exception);
         }
@@ -177,23 +207,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return new ExpectedException(typeExpected: typeof(SecurityTokenException), substringExpected: substringExpected, innerTypeExpected: innertypeExpected);
         }
 
-        public static ExpectedException SecurityTokenExpiredException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SecurityTokenExpiredException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenExpiredException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SecurityTokenExpiredException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
-        public static ExpectedException SecurityTokenInvalidAudienceException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SecurityTokenInvalidAudienceException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
-        }
-
-        public static ExpectedException SecurityTokenInvalidIssuerException(string substringExpected = null, Type innerTypeExpected = null)
-        {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidIssuerException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
-        public static ExpectedException SecurityTokenInvalidLifetimeException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SecurityTokenInvalidIssuerException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidIssuerException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
+        }
+
+        public static ExpectedException SecurityTokenInvalidLifetimeException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidLifetimeException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
         public static ExpectedException SecurityTokenInvalidSignatureException(string substringExpected = null, Type innerTypeExpected = null)
@@ -206,9 +236,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return new ExpectedException(typeExpected: typeof(SecurityTokenNoExpirationException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }                
 
-        public static ExpectedException SecurityTokenNotYetValidException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SecurityTokenNotYetValidException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenNotYetValidException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SecurityTokenNotYetValidException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
         public static ExpectedException SecurityTokenReplayAddFailed(string substringExpected = null, Type innerTypeExpected = null)
@@ -231,14 +261,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return new ExpectedException(typeExpected: typeof(SecurityTokenValidationException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
 
-        public static ExpectedException SecurityTokenInvalidSigningKeyException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SecurityTokenInvalidSigningKeyException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSigningKeyException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSigningKeyException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
         public bool IgnoreInnerException { get; set; }
 
         public Type InnerTypeExpected { get; set; }
+
+        public Dictionary<string, object> PropertiesExpected { get; set; }
 
         public string SubstringExpected { get; set; }
 

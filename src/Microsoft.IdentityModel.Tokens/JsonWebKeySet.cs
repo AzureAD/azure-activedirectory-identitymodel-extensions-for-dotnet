@@ -31,6 +31,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -51,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         static public JsonWebKeySet Create(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogArgumentNullException(nameof(json));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
 
             return new JsonWebKeySet(json);
         }
@@ -72,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         public JsonWebKeySet(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogArgumentNullException(nameof(json));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
 
             try
             {
@@ -81,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10805, json, GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, json, GetType()), ex));
             }
         }
 
@@ -125,11 +126,11 @@ namespace Microsoft.IdentityModel.Tokens
                             }
                             catch (CryptographicException ex)
                             {
-                                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10802, webKey.X5c[0]);
+                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), ex));
                             }
                             catch (FormatException fex)
                             {
-                                throw LogHelper.LogException<InvalidOperationException>(fex, LogMessages.IDX10802, webKey.X5c[0]);
+                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), fex));
                             }
                         }
                     }
@@ -153,11 +154,11 @@ namespace Microsoft.IdentityModel.Tokens
                         }
                         catch (CryptographicException ex)
                         {
-                            throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10801, webKey.E, webKey.N);
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), ex));
                         }
                         catch (FormatException ex)
                         {
-                            throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10801, webKey.E, webKey.N);
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), ex));
                         }
                     }
                 }

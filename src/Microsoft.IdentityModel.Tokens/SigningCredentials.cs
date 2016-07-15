@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Logging;
+using System;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -42,10 +44,10 @@ namespace Microsoft.IdentityModel.Tokens
         public SigningCredentials(SecurityKey key, string algorithm)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
 
             if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
 
             Algorithm = algorithm;
             Key = key;

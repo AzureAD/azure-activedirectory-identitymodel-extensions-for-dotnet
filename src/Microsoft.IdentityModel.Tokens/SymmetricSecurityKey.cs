@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -45,10 +46,10 @@ namespace Microsoft.IdentityModel.Tokens
         public SymmetricSecurityKey(byte[] key)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(key)))); 
 
             if (key.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10703);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10703));
 
             _key = key.CloneByteArray();
             _keySize = _key.Length * 8;

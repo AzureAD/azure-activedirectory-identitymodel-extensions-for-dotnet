@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenInvalidIssuerException : SecurityTokenValidationException
     {
         /// <summary>
+        /// Gets or sets the InvalidIssuer that created the validation exception.
+        /// </summary>
+        public string InvalidIssuer { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidIssuerException"/> class.
         /// </summary>
         public SecurityTokenInvalidIssuerException()
