@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -125,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual string GetParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogArgumentNullException("parameter");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("parameter", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "parameter"))); 
 
             string value = null;
             _parameters.TryGetValue(parameter, out value);
@@ -145,7 +146,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
 
                 _issuerAddress = value;
             }
@@ -176,7 +177,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
 
                 _postTitle = value;
             }
@@ -190,7 +191,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual void RemoveParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogArgumentNullException(nameof(parameter));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(parameter), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(parameter)))); 
 
             if (_parameters.ContainsKey(parameter))
                 _parameters.Remove(parameter);
@@ -206,7 +207,7 @@ namespace Microsoft.IdentityModel.Protocols
         public void SetParameter(string parameter, string value) 
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogArgumentNullException("parameter");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("parameter", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "parameter"))); 
 
             if (value == null)
             {
@@ -247,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
 
                 _scriptButtonText = value;
             }
@@ -267,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
 
                 _scriptDisabledText = value;
             }

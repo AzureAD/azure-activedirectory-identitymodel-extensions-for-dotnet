@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -62,13 +63,13 @@ namespace Microsoft.IdentityModel.Tokens
             : base(key, algorithm)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10634, (algorithm ?? "null"), key);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, (algorithm ?? "null"), key), nameof(algorithm)));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize);
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize)));
 
             try
             {
@@ -88,11 +89,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10634, (algorithm ?? "null"), key);
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, (algorithm ?? "null"), key), ex));
             }
 
             if (_keyedHash == null)
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
         }
 
         /// <summary>
@@ -109,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < DefaultMinimumSymmetricKeySizeInBits)
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10628, DefaultMinimumSymmetricKeySizeInBits)));
 
                 _minimumSymmetricKeySizeInBits = value;
             }
@@ -124,10 +125,10 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] key)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
 
             if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
 
             switch (algorithm)
             {
@@ -144,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return new HMACSHA512(key);
 
                 default:
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
             }
         }
 
@@ -160,16 +161,16 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("input", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "input"))); 
 
             if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10624);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10624));
 
             if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10623));
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10642, input);
 
@@ -191,22 +192,22 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null)
-                throw LogHelper.LogArgumentNullException(nameof(input));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(input), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(input)))); 
 
             if (signature == null)
-                throw LogHelper.LogArgumentNullException(nameof(signature));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(signature), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(signature)))); 
 
             if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10625));
 
             if (signature.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10626));
 
             if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10623));
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
             return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));

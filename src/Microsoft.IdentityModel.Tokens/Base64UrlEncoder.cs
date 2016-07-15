@@ -28,6 +28,7 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -54,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static string Encode(string arg)
         {
             if (null == arg)
-                throw LogHelper.LogArgumentNullException("arg");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("arg", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "arg"))); 
 
             return Encode(Encoding.UTF8.GetBytes(arg));
         }
@@ -72,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static string Encode(byte[] inArray, int offset, int length)
         {
             if (inArray == null)
-                throw LogHelper.LogArgumentNullException("inArray");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("inArray", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "inArray"))); 
 
             string s = Convert.ToBase64String(inArray, offset, length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
@@ -92,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static string Encode(byte[] inArray)
         {
             if (inArray == null)
-                throw LogHelper.LogArgumentNullException("inArray");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("inArray", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "inArray"))); 
 
             string s = Convert.ToBase64String(inArray, 0, inArray.Length);
             s = s.Split(base64PadCharacter)[0]; // Remove any trailing padding
@@ -134,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw LogHelper.LogException<FormatException>(LogMessages.IDX14700, str);
+                    throw LogHelper.LogExceptionMessage(new FormatException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX14700, str)));
             }
 
             return Convert.FromBase64String(str);

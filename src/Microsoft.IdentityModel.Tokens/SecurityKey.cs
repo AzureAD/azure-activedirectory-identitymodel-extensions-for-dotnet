@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -60,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
                 };
 
                 _cryptoProviderFactory = value;
