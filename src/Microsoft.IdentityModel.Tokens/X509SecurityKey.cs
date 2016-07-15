@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             _certificate = certificate;
             KeyId = certificate.Thumbprint;
-            X5t = Base64UrlEncoder.Encode(certificate.Thumbprint);
+            X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
         }
 
         /// <summary>
