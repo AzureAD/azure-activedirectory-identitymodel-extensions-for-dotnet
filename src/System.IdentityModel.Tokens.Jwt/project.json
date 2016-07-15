@@ -13,7 +13,6 @@
   "buildOptions": {
     "warningsAsErrors": true,
     "delaySign": true,
-    "keyFile": "../../build/35MSSharedLib1024.snk",
-    "xmlDoc":  true
+    "keyFile": "../../build/35MSSharedLib1024.snk"
   }
 }

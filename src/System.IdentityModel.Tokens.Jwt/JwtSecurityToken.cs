@@ -214,6 +214,8 @@ namespace System.IdentityModel.Tokens.Jwt
             get { return Payload.Iss; }
         }
 
+        public bool IsJwe { get; set; }
+
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
         /// </summary>
@@ -321,9 +323,18 @@ namespace System.IdentityModel.Tokens.Jwt
         internal void Decode(string jwtEncodedString)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, jwtEncodedString);
-            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
-            if (tokenParts.Length != 3)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
+            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 5);
+            switch (tokenParts.Length)
+            {
+                case 3:
+                    this.IsJwe = false;
+                    break;
+                case 5:
+                    this.IsJwe = true;
+                    break;
+                default:
+                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
+            }
 
             try
             {
