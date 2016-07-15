@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -46,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10700, rsaParameters.ToString());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, rsaParameters.ToString())));
 
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
             Parameters = rsaParameters;
@@ -59,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         public RsaSecurityKey(RSA rsa)
         {
             if (rsa == null)
-                throw LogHelper.LogArgumentNullException("rsa");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("rsa", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "rsa"))); 
 
             Rsa = rsa;
         }

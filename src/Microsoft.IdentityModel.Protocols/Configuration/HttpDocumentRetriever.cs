@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -58,7 +59,7 @@ namespace Microsoft.IdentityModel.Protocols
         public HttpDocumentRetriever(HttpClient httpClient)
         {
             if (httpClient == null)
-                throw LogHelper.LogArgumentNullException("httpClient");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("httpClient", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "httpClient"))); 
 
             _httpClient = httpClient;
         }
@@ -77,10 +78,10 @@ namespace Microsoft.IdentityModel.Protocols
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-                throw LogHelper.LogArgumentNullException("address");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("address", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "address"))); 
 
             if (!Utility.IsHttps(address) && RequireHttps)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10108, address);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10108, address));
 
             try
             {
@@ -93,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<IOException>(ex, LogMessages.IDX10804, address);
+                throw LogHelper.LogExceptionMessage(new IOException(String.Format(LogMessages.IDX10804, address), ex));
             }
         }
     }
