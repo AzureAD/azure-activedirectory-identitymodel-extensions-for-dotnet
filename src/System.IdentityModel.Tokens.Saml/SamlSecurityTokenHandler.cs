@@ -32,6 +32,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 
 namespace System.IdentityModel.Tokens.Saml
 {
@@ -116,10 +117,10 @@ namespace System.IdentityModel.Tokens.Saml
         protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
-                throw LogHelper.LogArgumentNullException("samlToken");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("samlToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "samlToken"))); 
 
             if (string.IsNullOrWhiteSpace(issuer))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10221);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10221));
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
 
@@ -135,7 +136,7 @@ namespace System.IdentityModel.Tokens.Saml
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
-                throw LogHelper.LogArgumentNullException("tokenDescriptor");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("tokenDescriptor", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "tokenDescriptor"))); 
 
             throw new NotImplementedException();
         }
@@ -180,7 +181,7 @@ namespace System.IdentityModel.Tokens.Saml
             {
                 if (value < 1)
                 {
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10101, value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value)));
                 }
 
                 _maximumTokenSizeInBytes = value;
@@ -232,14 +233,14 @@ namespace System.IdentityModel.Tokens.Saml
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogArgumentNullException("securityToken");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("securityToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityToken"))); 
 
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
 
             SamlSecurityToken samlToken;
             using (StringReader sr = new StringReader(securityToken))
@@ -271,7 +272,8 @@ namespace System.IdentityModel.Tokens.Saml
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
-                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, securityToken);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken))
+                            { NotBefore = notBefore, Expires = expires });
                     }
                 }
                 else
@@ -304,7 +306,8 @@ namespace System.IdentityModel.Tokens.Saml
                 {
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
-                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, securityToken);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken))
+                            { InvalidAudience = String.Join(", ", audiences) });
                     }
                 }
                 else
@@ -405,7 +408,7 @@ namespace System.IdentityModel.Tokens.Saml
 
             SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             StringBuilder stringBuilder = new StringBuilder();
             using (XmlWriter xmlWriter = XmlWriter.Create(stringBuilder))
@@ -433,7 +436,7 @@ namespace System.IdentityModel.Tokens.Saml
 
             SamlSecurityToken samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             throw new NotImplementedException();
         }

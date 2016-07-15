@@ -38,6 +38,16 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenInvalidLifetimeException : SecurityTokenValidationException
     {
         /// <summary>
+        /// Gets or sets the NotBefore value that created the validation exception.
+        /// </summary>
+        public DateTime? NotBefore { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Expires value that created the validation exception.
+        /// </summary>
+        public DateTime? Expires { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidLifetimeException"/> class.
         /// </summary>
         public SecurityTokenInvalidLifetimeException()
