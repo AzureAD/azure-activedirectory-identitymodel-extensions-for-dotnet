@@ -107,6 +107,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
+        public void JwtPayloadUnicodeMapping()
+        {
+            string issuer = "a\\b";
+            List<Claim> claims = new List<Claim>();
+            JwtPayload unicodePayload = new JwtPayload("a\u005Cb", "", claims, null, null);
+            string json = unicodePayload.SerializeToJson();
+            JwtPayload payload = new JwtPayload(issuer, "", claims, null, null);
+            string json2 = payload.SerializeToJson();
+            Assert.True(string.Equals(json, json2));
+
+            JwtPayload retrievePayload = JwtPayload.Deserialize(json);
+            Assert.True(string.Equals(retrievePayload.Iss, issuer));
+
+            json = unicodePayload.Base64UrlEncode();
+            json2 = payload.Base64UrlEncode();
+            Assert.True(string.Equals(json, json2));
+
+            retrievePayload = JwtPayload.Base64UrlDeserialize(json);
+            Assert.True(string.Equals(retrievePayload.Iss, issuer));
+        }
+
+        [Fact]
         public void JwtPayloadEncoding()
         {
             var context = new CompareContext();
