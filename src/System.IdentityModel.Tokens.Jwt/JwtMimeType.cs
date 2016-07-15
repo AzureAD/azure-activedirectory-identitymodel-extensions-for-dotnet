@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -28,48 +28,41 @@
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// Defines the mdeia type of a JWT or the contents contained by a JWT.
+    /// This is used by JOSE headers (<see cref="JwtHeader"/>) to define:
+    /// - The mdeia type of the complete JWT (the typ parameter of the JOSE header).
+    /// - The mdeia type of the secured content (the cty parameter of the JOSE header).
     /// </summary>
-    public static class JwtConstants
+    public enum JwtMimeType
     {
         /// <summary>
-        /// Short header type.
+        /// The type of the content is undefined.
         /// </summary>
-        public const string HeaderType = "JWT";
+        Empty,
 
         /// <summary>
-        /// Long header type.
+        /// The content is JSON; usually a set of claims under the context of JWT.
         /// </summary>
-        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
+        JSON,
 
         /// <summary>
-        /// Short token type.
+        /// The contect is a JWT (JWS or JWE) serialized in compact format.
         /// </summary>
-        public const string TokenType = "JWT";
+        JOSE,
 
         /// <summary>
-        /// Long token type.
+        /// The contect is a JWT (JWS or JWE) serialized in full (JSON) format.
         /// </summary>
-        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
+        JOSEANDJSON,
 
         /// <summary>
-        /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
+        /// The contect is a JWT (JWS or JWE) while its serialization mode is unspecified.
         /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        JWT,
 
         /// <summary>
-        /// The number of parts in a JWE token.
+        /// The content is some other type not defined in this enum.
         /// </summary>
-        public const int JwePartNumber = 5;
-
-        /// <summary>
-        /// The number of parts in a JWS token.
-        /// </summary>
-        public const int JwsPartNumber = 3;
-
-        /// <summary>
-        /// The maximum number of parts in a JWT.
-        /// </summary>
-        public const int MaxJwtPartNumber = 5;
+        Other,
     }
 }

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -28,48 +28,23 @@
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// Specifies the type of a <see cref="JwtSecurityToken"/>.
     /// </summary>
-    public static class JwtConstants
+    public enum JwtSecurityTokenType
     {
         /// <summary>
-        /// Short header type.
+        /// The default type of JWT which means the type of token is undefined or undetected/undetectable.
         /// </summary>
-        public const string HeaderType = "JWT";
+        Unknown,
 
         /// <summary>
-        /// Long header type.
+        /// The JWS token type defined in RFC 7515 (https://tools.ietf.org/html/rfc7515).
         /// </summary>
-        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
+        JWS,
 
         /// <summary>
-        /// Short token type.
+        /// The JWS token type defined in RFC 7516 (https://tools.ietf.org/html/rfc7516).
         /// </summary>
-        public const string TokenType = "JWT";
-
-        /// <summary>
-        /// Long token type.
-        /// </summary>
-        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
-
-        /// <summary>
-        /// Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
-        /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
-
-        /// <summary>
-        /// The number of parts in a JWE token.
-        /// </summary>
-        public const int JwePartNumber = 5;
-
-        /// <summary>
-        /// The number of parts in a JWS token.
-        /// </summary>
-        public const int JwsPartNumber = 3;
-
-        /// <summary>
-        /// The maximum number of parts in a JWT.
-        /// </summary>
-        public const int MaxJwtPartNumber = 5;
+        JWE
     }
 }

@@ -96,6 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (rawSignature == null)
                 throw LogHelper.LogArgumentNullException(nameof(rawSignature));
 
+            Type = JwtSecurityTokenType.JWS;
             Header = header;
             Payload = payload;
             RawData = string.Concat(rawHeader, ".", rawPayload, ".", rawSignature);
@@ -120,6 +121,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (payload == null)
                 throw LogHelper.LogArgumentNullException("payload");
 
+            Type = JwtSecurityTokenType.JWS;
             Header = header;
             Payload = payload;
             RawSignature = string.Empty;
@@ -143,6 +145,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10401, expires.Value, notBefore.Value);
             }
 
+            Type = JwtSecurityTokenType.JWS;
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
             Header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials);
             RawSignature = string.Empty;
@@ -154,7 +157,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return Payload.Actort; }
+            get { return Payload != null ? Payload.Actort : null; }
         }
 
         /// <summary>
@@ -163,16 +166,18 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'audience' claim is not found, enumeration will be empty.</remarks>
         public IEnumerable<string> Audiences
         {
-            get { return Payload.Aud; }
+            get { return Payload != null ? Payload.Aud : null; }
         }
 
         /// <summary>
         /// Gets the <see cref="Claim"/>(s) for this token.
+        /// If this is a JWE token, this property only returns the encrypted claims;
+        ///  the unencrypted claims should be read from the header seperately.
         /// </summary>
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get { return Payload.Claims; }
+            get { return Payload != null ? Payload.Claims : null; }
         }
 
         /// <summary>
@@ -188,7 +193,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public virtual string EncodedPayload
         {
-            get { return Payload.Base64UrlEncode(); }
+            get { return Payload != null ? Payload.Base64UrlEncode() : null; }
         }
 
         /// <summary>
@@ -202,7 +207,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
         public override string Id
         {
-            get { return Payload.Jti; }
+            get { return Payload != null ? Payload.Jti : null; }
         }
 
         /// <summary>
@@ -211,13 +216,43 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public override string Issuer
         {
-            get { return Payload.Iss; }
+            get { return Payload != null ? Payload.Iss : null; }
         }
 
         /// <summary>
+        /// Gets the nested JWT which is the secured content of this JWT.
+        /// </summary>
+        public JwtSecurityToken NestedToken { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
+        /// Note that if this JWT is nested, this property represnts the payload of the most inner token.
+        /// This property can be null if the content type of the most inner token is unrecognized, in that case
+        ///  the content of the token is the string returned by PlainText property.
         /// </summary>
         public JwtPayload Payload { get; private set; }
+
+        /// <summary>
+        /// Gets the plain text associated with this instance.
+        /// For JWS, this property is the secured content, or the BASE64URL encoded payload JSON.
+        /// Note that if this JWT is nested, this property represnts the content of the most inner token.
+        /// Unlike Payload, this property should always have a non-empty value.
+        /// </summary>
+        public string PlainText { get; private set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawAuthenticationTag { get; private set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawCiphertext { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -225,6 +260,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
         public string RawData { get; private set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawEncryptedKey { get; private set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawInitializationVector { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -246,6 +295,21 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
         public string RawSignature { get; private set; }
+
+        /// <summary>
+        /// Gets the type of this token.
+        /// </summary>
+        public JwtSecurityTokenType Type { get; private set; }
+
+        /// <summary>
+        /// Gets a flag indicating whether this is a JWS token.
+        /// </summary>
+        public bool IsJws => Type == JwtSecurityTokenType.JWS;
+
+        /// <summary>
+        /// Gets a flag indicating whether this is a JWE token.
+        /// </summary>
+        public bool IsJwe => Type == JwtSecurityTokenType.JWE;
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/>s for this instance.
@@ -284,7 +348,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
         public string Subject
         {
-            get { return Payload.Sub; }
+            get { return Payload != null ? Payload.Sub : null; }
         }
 
         /// <summary>
@@ -293,7 +357,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom
         {
-            get { return Payload.ValidFrom; }
+            get { return Payload != null ? Payload.ValidFrom : default(DateTime); }
         }
 
         /// <summary>
@@ -302,7 +366,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidTo
         {
-            get { return Payload.ValidTo; }
+            get { return Payload != null ? Payload.ValidTo : default(DateTime); }
         }
 
         /// <summary>
@@ -311,64 +375,194 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return Header.SerializeToJson() + "." + Payload.SerializeToJson();
+            if (NestedToken != null)
+            {
+                return Header.SerializeToJson() + "." + NestedToken.ToString();
+            }
+
+            return Header.SerializeToJson() + "." + Payload != null ? Payload.SerializeToJson() : PlainText;
         }
 
         /// <summary>
-        /// Decodes the string into the header, payload and signature
+        /// Decodes the string into the header, payload and signature.
         /// </summary>
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
         internal void Decode(string jwtEncodedString)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, jwtEncodedString);
-            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
-            if (tokenParts.Length != 3)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
+            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtPartNumber + 1);
+            if (tokenParts.Length == 1)
+            {
+                // TODO (Yan): Add a new log message for this
+                throw new ArgumentException("No parts found for this token. It could have been formatted in JSON which is currently nor supported.",
+                    nameof(jwtEncodedString));
+            }
 
+            // Numbers of parts exceeds maximum
+            if (tokenParts.Length > JwtConstants.MaxJwtPartNumber)
+            {
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString);
+            }
+
+            // Decode the header
             try
             {
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10717, tokenParts[0]);
                 Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
-
-                // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
-                string type = Header.Typ;
-                if (type != null)
-                {
-                    if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
-                        throw LogHelper.LogException<SecurityTokenException>(LogMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type);
-                }
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString);
             }
 
-            try
+            // Verify the token media type defined in the header
+            switch (Header.Type)
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
-                Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString);
-            }
+                case JwtMimeType.JOSEANDJSON:
+                    // TODO (Yan): Add log message for this
+                    throw new ArgumentException("The JSON formatted token is not currently supported.", nameof(jwtEncodedString));
 
-            if (!string.IsNullOrEmpty(tokenParts[2]))
-            {
-                try
-                {
-                    Base64UrlEncoder.DecodeBytes(tokenParts[2]);
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "signature", tokenParts[2], jwtEncodedString);
-                }
+                case JwtMimeType.Other:
+                    // TODO (Yan): Change the message or define a new message for this error.
+                    // The type value "JOSE" or "JOSE+JSON" are also allowed according to RFC 7515
+                    //  and the message should indicate them as well.
+                    throw LogHelper.LogException<SecurityTokenException>(LogMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, Header.Typ);
             }
 
             RawData = jwtEncodedString;
             RawHeader = tokenParts[0];
+
+            // Determine the token type by examing enc parameter in the header.
+            Type = string.IsNullOrWhiteSpace(Header.Enc) ? JwtSecurityTokenType.JWS : JwtSecurityTokenType.JWE;
+            if (IsJws)
+            {
+                DecodeJws(tokenParts);
+            }
+            else
+            {
+                DecodeJwe(tokenParts);
+            }
+        }
+
+        internal void Decrypt()
+        {
+            if (!IsJwe)
+            {
+                // Nothing to do if the token is not encrypted.
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Decodes the payload and signature from the JWS parts.
+        /// </summary>
+        /// <param name="tokenParts">Parts of the JWS including the header.</param>
+        private void DecodeJws(string[] tokenParts)
+        {
+            // Verify the part number
+            if (tokenParts.Length != JwtConstants.JwsPartNumber)
+            {
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
+            }
+
+            // Decode the payload.
+            // If the media type of the payload is unspecified or "JSON", it should be able to be deserialized to JwtPayload property bag.
+            // If the media type of the payload is JWT, decode it as the nested token.
+            // For all other media types the payload remains in plain text (RawPayload).
+            switch (Header.ContentType)
+            {
+                case JwtMimeType.Empty:
+                case JwtMimeType.JSON:
+                    try
+                    {
+                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
+                        Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", tokenParts[1], RawData);
+                    }
+
+                    break;
+
+                case JwtMimeType.JWT:
+                case JwtMimeType.JOSE:
+                case JwtMimeType.JOSEANDJSON:
+                    break;
+            }
+
+            this.VerifyBase64UrlString(tokenParts[2], "signature", canBeEmpty: true);
+
             RawPayload = tokenParts[1];
             RawSignature = tokenParts[2];
+        }
+
+        /// <summary>
+        /// Decodes the payload and signature from the JWE parts.
+        /// </summary>
+        /// <param name="tokenParts">Parts of the JWE including the header.</param>
+        private void DecodeJwe(string[] tokenParts)
+        {
+            // Verify the part number
+            if (tokenParts.Length != JwtConstants.JwePartNumber)
+            {
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
+            }
+
+            this.VerifyBase64UrlString(tokenParts[1], "encrypted key");
+            this.VerifyBase64UrlString(tokenParts[2], "initial vector");
+            this.VerifyBase64UrlString(tokenParts[3], "cyphertext");
+            this.VerifyBase64UrlString(tokenParts[4], "authentication tag");
+
+            RawEncryptedKey = tokenParts[1];
+            RawInitializationVector = tokenParts[2];
+            RawCiphertext = tokenParts[3];
+            RawAuthenticationTag = tokenParts[4];
+        }
+
+        /// <summary>
+        /// Decodes a given string as the nested token.
+        /// </summary>
+        /// <param name="token">The token string to decode.</param>
+        private void DecodeNestedToken(string token)
+        {
+            NestedToken = new JwtSecurityToken(token);
+            if (Payload != null)
+            {
+                Payload = NestedToken.Payload;
+            }
+            else
+            {
+                PlainText = NestedToken.PlainText;
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the given string is BASE64URL encoded.
+        /// </summary>
+        /// <param name="str">The string to verify.</param>
+        /// <param name="description">The description of the string part.</param>
+        /// <param name="canBeEmpty">A flag indicating wether the string can be null or empty.</param>
+        private void VerifyBase64UrlString(string str, string description, bool canBeEmpty = false)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                if (canBeEmpty)
+                {
+                    return;
+                }
+
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10703, description, str, RawData);
+            }
+
+            try
+            {
+                Base64UrlEncoder.DecodeBytes(str);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, description, str, RawData);
+            }
         }
     }
 }

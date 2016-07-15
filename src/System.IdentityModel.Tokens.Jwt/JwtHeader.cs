@@ -102,6 +102,41 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Gets the content mime type (Cty) of the token.
+        /// </summary>
+        /// <remarks>If the content mime type is not found, null is returned.</remarks>
+        public string Cty
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtHeaderParameterNames.Cty);
+            }
+        }
+
+        /// <summary>
+        /// Gets a <see cref="JwtMimeType"/> representing the content mime type (Typ) of the token.
+        /// </summary>
+        public JwtMimeType ContentType
+        {
+            get
+            {
+                return JwtMimeTypeHelper.FromString(this.Cty);
+            }
+        }
+
+        /// <summary>
+        /// Gets the encryption algorithm (Enc) of the token.
+        /// </summary>
+        /// <remarks>If the content mime type is not found, null is returned.</remarks>
+        public string Enc
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtHeaderParameterNames.Enc);
+            }
+        }
+
+        /// <summary>
         /// Gets the <see cref="SigningCredentials"/> passed in the constructor.
         /// </summary>
         /// <remarks>This value may be null.</remarks>
@@ -119,6 +154,29 @@ namespace System.IdentityModel.Tokens.Jwt
             get
             {
                 return this.GetStandardClaim(JwtHeaderParameterNames.Typ);
+            }
+        }
+
+        /// <summary>
+        /// Gets a <see cref="JwtMimeType"/> representing the mime type (Typ) of the token.
+        /// </summary>
+        public JwtMimeType Type
+        {
+            get
+            {
+                JwtMimeType type = JwtMimeTypeHelper.FromString(this.Typ);
+                switch (type)
+                {
+                    case JwtMimeType.Empty:
+                    case JwtMimeType.JWT:
+                    case JwtMimeType.JOSE:
+                    case JwtMimeType.JOSEANDJSON:
+                        return type;
+
+                    default:
+                        // Note that JwtMimeType.Json is not a valid value for token type.
+                        return JwtMimeType.Other;
+                }
             }
         }
 
@@ -144,6 +202,24 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Gets the compression  algorithm (Zip) of the token.
+        /// </summary>
+        /// <remarks>If the content mime type is not found, null is returned.</remarks>
+        public string Zip
+        {
+            get
+            {
+                return this.GetStandardClaim(JwtHeaderParameterNames.Zip);
+            }
+        }
+
+        /// <summary>
+        /// Gets a standart claim from the header.
+        /// A standard cliam is either a string or a value of another type serialized in JSON format.
+        /// </summary>
+        /// <param name="claimType">The key of the claim.</param>
+        /// <returns>The standart claim string; or null if not found.</returns>
         internal string GetStandardClaim(string claimType)
         {
             object value = null;
