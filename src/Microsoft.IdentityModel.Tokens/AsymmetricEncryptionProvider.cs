@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-
 using System;
 using Microsoft.IdentityModel.Logging;
 using System.Security.Cryptography;
@@ -36,8 +35,8 @@ namespace Microsoft.IdentityModel.Tokens
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
         private bool _disposed;
 
-        public AsymmetricEncryptionProvider(SecurityKey key, string algorithm)
-            : base(key, algorithm)
+        public AsymmetricEncryptionProvider(SecurityKey key, string algorithm, byte[] iv)
+            : base(key, algorithm, iv)
         {
         }
 
