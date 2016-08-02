@@ -71,5 +71,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// The maximum number of parts in a JWT.
         /// </summary>
         public const int MaxJwtPartNumber = 5;
+
+        /// <summary>
+        /// JWE header alg indicating a shared symmetric key is directly used as CEK.
+        /// </summary>
+        public const string DirectKeyUseAlg = "dir";
     }
 }

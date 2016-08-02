@@ -557,23 +557,48 @@ namespace System.IdentityModel.Tokens.Jwt
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
 
+            // Decode token
             JwtSecurityToken jwt = new JwtSecurityToken(token);
-            JwtSecurityToken currentJwt = jwt;
-            do
-            {
-                switch (currentJwt.Type)
-                {
-                    case JwtSecurityTokenType.JWE:
-                        this.DecryptJweToken(currentJwt, validationParameters);
-                        break;
 
-                    case JwtSecurityTokenType.JWS:
-                        this.ValidateJwsTokenSignature(currentJwt, validationParameters);
-                        break;
+            // Decrypt token if encrypted
+            if (jwt.IsEncrypted)
+            {
+                SecurityKey key = validationParameters.DecryptionKeyResolver(token, jwt, jwt.EncryptionHeader.Kid, validationParameters);
+                if (key == null)
+                {
+                    // TODO (Yan): Add a new exception massage
+                    throw LogHelper.LogException<ArgumentException>("Failed to resolve decryption key.");
                 }
 
-                currentJwt = currentJwt.NestedToken;
-            } while (currentJwt != null);
+                byte[] cek;
+                if (JwtConstants.DirectKeyUseAlg.Equals(jwt.EncryptionHeader.Alg, StringComparison.Ordinal))
+                {
+                    // Use key as CEK directly
+                    SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+                    if (symmetricSecurityKey == null)
+                    {
+                        // TODO (Yan): Add a new exception massage
+                        throw LogHelper.LogException<ArgumentException>("The resolved key for direct use is not a symmetric key");
+                    }
+
+                    cek = symmetricSecurityKey.Key;
+                }
+                else
+                {
+                    // Decrypt key first
+                    IDecryptionProvider decryptionProvider = validationParameters.CryptoProviderFactory.CreateForDecrypting(key, jwt.EncryptionHeader.Alg, null);
+                    cek = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawEncryptedKey));
+                }
+
+                jwt.Decrypt(validationParameters.CryptoProviderFactory, cek);
+            }
+
+
+            // Validate signature if token is signed
+            if (jwt.IsSigned)
+            {
+                this.ValidateSignature(jwt, validationParameters);
+            }
 
             validatedToken = jwt;
             return this.ValidateTokenPayload(jwt, validationParameters);

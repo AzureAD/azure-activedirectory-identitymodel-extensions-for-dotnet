@@ -196,14 +196,14 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        public virtual IDecryptingProvider CreateForDecrypting()
+        public virtual IDecryptionProvider CreateForDecrypting(SecurityKey key, string algorithm, object additionalParam)
         {
-
+            return null;
         }
 
-        public virtual IEncryptingProvider CreateForEncrypting()
+        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm)
         {
-
+            return null;
         }
 
         /// <summary>
