@@ -1,9 +1,4 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
+﻿// This code is licensed under the MIT License.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -25,26 +20,10 @@
 //
 //------------------------------------------------------------------------------
 
-namespace System.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Specifies the type of a <see cref="JwtSecurityToken"/>.
-    /// </summary>
-    public enum JwtSecurityTokenType
+    public interface IEncryptionProvider
     {
-        /// <summary>
-        /// The default type of JWT which means the type of token is undefined or undetected/undetectable.
-        /// </summary>
-        Unknown,
-
-        /// <summary>
-        /// The JWS token type defined in RFC 7515 (https://tools.ietf.org/html/rfc7515).
-        /// </summary>
-        JWS,
-
-        /// <summary>
-        /// The JWS token type defined in RFC 7516 (https://tools.ietf.org/html/rfc7516).
-        /// </summary>
-        JWE
+        byte[] Encrypt(byte[] plaintext, out object extraOutputs);
     }
 }

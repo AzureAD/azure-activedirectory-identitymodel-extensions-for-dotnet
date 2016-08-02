@@ -313,30 +313,12 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for signature validation.
-        /// </summary>
-        public SecurityKey DecryptionKey
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
         public DecryptionKeyResolver DecryptionKeyResolver
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets an set of <see cref="IEnumerable{SecurityKey}"/> may be used to decrypt the token.
-        /// </summary>
-        public IEnumerable<SecurityKey> DecryptionKeys
         {
             get;
             set;
