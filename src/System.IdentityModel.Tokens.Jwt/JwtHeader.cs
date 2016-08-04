@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -52,9 +53,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON.</param>
-        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials)
             : this(signingCredentials, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Alg }, { enc, SigningCredentials.Enc } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used creating a JWE Compact JSON.</param>
+        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, bool isContentSigned)
+            : this(encryptingCredentials, null, isContentSigned)
         {
         }
 
@@ -65,7 +77,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
-        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)
             : base(StringComparer.Ordinal)
         {
@@ -77,16 +88,50 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 string outboundAlg;
                 if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out outboundAlg))
-                    this[JwtHeaderParameterNames.Alg] = outboundAlg;
+                    Alg = outboundAlg;
                 else
-                    this[JwtHeaderParameterNames.Alg] = signingCredentials.Algorithm;
+                    Alg = signingCredentials.Algorithm;
 
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
-                    this[JwtHeaderParameterNames.Kid] = signingCredentials.Key.KeyId;
+                    Kid = signingCredentials.Key.KeyId;
             }
 
-            this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
+            Typ = JwtConstants.HeaderType;
             SigningCredentials = signingCredentials;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, bool isContentSigned)
+            : base(StringComparer.Ordinal)
+        {
+            if (encryptingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
+
+            string outboundAlg;
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out outboundAlg))
+                Alg = outboundAlg;
+            else
+                Alg = encryptingCredentials.Alg;
+
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Enc, out outboundAlg))
+                Enc = outboundAlg;
+            else
+                Enc = encryptingCredentials.Enc;
+
+            if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
+                Kid = encryptingCredentials.Key.KeyId;
+
+            Typ = JwtConstants.HeaderType;
+            if (isContentSigned)
+                Cty = JwtConstants.HeaderType;
+            EncryptingCredentials = encryptingCredentials;
         }
 
         /// <summary>
@@ -98,6 +143,11 @@ namespace System.IdentityModel.Tokens.Jwt
             get
             {
                 return this.GetStandardClaim(JwtHeaderParameterNames.Alg);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Alg] = value;
             }
         }
 
@@ -111,6 +161,11 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 return this.GetStandardClaim(JwtHeaderParameterNames.Cty);
             }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Cty] = value;
+            }
         }
 
         /// <summary>
@@ -120,7 +175,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return JwtMimeTypeHelper.FromString(this.Cty);
+                return JwtMimeTypeHelper.FromString(Cty);
             }
         }
 
@@ -134,7 +189,18 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 return this.GetStandardClaim(JwtHeaderParameterNames.Enc);
             }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Enc] = value;
+            }
         }
+
+        /// <summary>
+        /// Gets the <see cref="EncryptingCredentials"/> passed in the constructor.
+        /// </summary>
+        /// <remarks>This value may be null.</remarks>
+        public EncryptingCredentials EncryptingCredentials { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="SigningCredentials"/> passed in the constructor.
@@ -155,6 +221,11 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 return this.GetStandardClaim(JwtHeaderParameterNames.Typ);
             }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Typ] = value;
+            }
         }
 
         /// <summary>
@@ -164,7 +235,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                JwtMimeType type = JwtMimeTypeHelper.FromString(this.Typ);
+                JwtMimeType type = JwtMimeTypeHelper.FromString(Typ);
                 switch (type)
                 {
                     case JwtMimeType.Empty:
@@ -188,6 +259,11 @@ namespace System.IdentityModel.Tokens.Jwt
             get
             {
                 return GetStandardClaim(JwtHeaderParameterNames.Kid);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Kid] = value;
             }
         }
 

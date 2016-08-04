@@ -111,6 +111,59 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
         /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
+        /// <param name="rawHeader">base64urlencoded JwtHeader</param>
+        /// <param name="rawPayload">base64urlencoded JwtPayload</param>
+        /// <param name="rawSignature">base64urlencoded JwtSignature</param>
+        /// <exception cref="ArgumentNullException">'encryptionHeader' is null.</exception>
+        /// <exception cref="ArgumentNullException">'payload' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawInitialVector' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawCiphertext' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawAuthenticationTag' is null.</exception>
+        /// <exception cref="ArgumentException">'rawEncryptionHeader' or 'rawPayload' or is null or whitespace.</exception>
+        public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature,
+            JwtHeader encryptionHeader, string rawEncryptionHeader, string rawEncryptedKey, string rawInitialVector, string rawCiphertext, string rawAuthenticationTag)
+        {
+            if (encryptionHeader == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptionHeader));
+
+            if (payload == null)
+                throw LogHelper.LogArgumentNullException(nameof(payload));
+
+            if (string.IsNullOrWhiteSpace(rawEncryptionHeader))
+                throw LogHelper.LogArgumentNullException(nameof(rawEncryptionHeader));
+
+            if (string.IsNullOrWhiteSpace(rawPayload))
+                throw LogHelper.LogArgumentNullException(nameof(rawPayload));
+
+            if (rawInitialVector == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawInitialVector));
+
+            if (rawCiphertext == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawCiphertext));
+
+            if (rawAuthenticationTag == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawAuthenticationTag));
+
+            EncryptionHeader = encryptionHeader;
+            Header = header;
+            Payload = payload;
+            RawData = string.Join(".", rawEncryptionHeader, rawEncryptedKey, rawInitialVector, rawCiphertext, rawAuthenticationTag);
+
+            RawHeader = rawHeader;
+            RawPayload = rawPayload;
+            RawSignature = rawSignature;
+            RawEncryptionHeader = rawEncryptionHeader;
+            RawEncryptedKey = rawEncryptedKey;
+            RawInitializationVector = rawInitialVector;
+            RawCiphertext = rawCiphertext;
+            RawAuthenticationTag = rawAuthenticationTag;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the encoded <see cref="JwtHeader"/> and <see cref="JwtPayload"/>. The jwtEncodedString is the result of those operations.
+        /// </summary>
+        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
+        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
         public JwtSecurityToken(JwtHeader header, JwtPayload payload)
@@ -479,6 +532,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 return;
             }
 
+            if (cryptoProviderFactory == null)
+            {
+                throw LogHelper.LogException<ArgumentNullException>(nameof(cryptoProviderFactory));
+            }
+
             // Decrypt plaintext
             AuthenticatedEncryptionParameters param = new AuthenticatedEncryptionParameters
             {
@@ -487,7 +545,22 @@ namespace System.IdentityModel.Tokens.Jwt
                 AuthenticationTag = Base64UrlEncoder.DecodeBytes(RawAuthenticationTag)
             };
             IDecryptionProvider decryptionProvider = cryptoProviderFactory.CreateForDecrypting(null, EncryptionHeader.Enc, param);
-            byte[] plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(RawCiphertext));
+            if (decryptionProvider == null)
+            {
+                // TODO (Yan): Add exception message.
+                throw LogHelper.LogException<InvalidOperationException>("Failed to create decryption provider.");
+            }
+
+            byte[] plaintextBytes;
+            try
+            {
+                plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(RawCiphertext));
+            }
+            finally
+            {
+                cryptoProviderFactory.ReleaseDecryptionProvider(decryptionProvider);
+            }
+
             string plaintext = Encoding.ASCII.GetString(plaintextBytes);
 
             // Decode plaintext, it's either payload JSON or a nested JWS token
