@@ -20,9 +20,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    public interface IDecryptionProvider
+    public interface IDecryptionProvider : IDisposable
     {
         byte[] Decrypt(byte[] ciphertext);
     }

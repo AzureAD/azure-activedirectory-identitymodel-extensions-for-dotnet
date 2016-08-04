@@ -243,6 +243,26 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// When finished with a <see cref="IDecryptionProvider"/> call this method for cleanup. The default behavior is to call <see cref="IDecryptionProvider.Dispose()"/>
+        /// </summary>
+        /// <param name="decryptionProvider"><see cref="IDecryptionProvider"/> to be released.</param>
+        public virtual void ReleaseDecryptionProvider(IDecryptionProvider decryptionProvider)
+        {
+            if (decryptionProvider != null)
+                decryptionProvider.Dispose();
+        }
+
+        /// <summary>
+        /// When finished with a <see cref="IEncryptionProvider"/> call this method for cleanup. The default behavior is to call <see cref="IEncryptionProvider.Dispose()"/>
+        /// </summary>
+        /// <param name="encryptionProvider"><see cref="IEncryptionProvider"/> to be released.</param>
+        public virtual void ReleaseEncryptionProvider(IEncryptionProvider encryptionProvider)
+        {
+            if (encryptionProvider != null)
+                encryptionProvider.Dispose();
+        }
+
+        /// <summary>
         /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose()"/>
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be released.</param>

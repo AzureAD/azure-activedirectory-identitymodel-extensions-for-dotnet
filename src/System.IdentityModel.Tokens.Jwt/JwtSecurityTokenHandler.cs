@@ -360,7 +360,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials).RawData;
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials).RawData;
         }
 
         /// <summary>
@@ -384,7 +385,32 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
         public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials).RawData;
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null).RawData;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="JwtSecurityToken"/>
+        /// </summary>
+        /// <param name="issuer">The issuer of the token.</param>
+        /// <param name="audience">The audience for this token.</param>
+        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">The notbefore time for this token.</param>
+        /// <param name="expires">The expiration time for this token.</param>
+        /// <param name="issuedAt">The issue time for this token.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
+        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
+        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
+        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
+        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign the JSON.</para>
+        /// </remarks>
+        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
+        {
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials).RawData;
         }
 
         /// <summary>
@@ -404,7 +430,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials);
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials);
         }
 
         /// <summary>
@@ -428,7 +455,32 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
         public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
         {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials);
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="JwtSecurityToken"/>
+        /// </summary>
+        /// <param name="issuer">The issuer of the token.</param>
+        /// <param name="audience">The audience for this token.</param>
+        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">The notbefore time for this token.</param>
+        /// <param name="expires">The expiration time for this token.</param>
+        /// <param name="issuedAt">The issue time for this token.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
+        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
+        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
+        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
+        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
+        /// </remarks>
+        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null, EncryptingCredentials encryptingCredentials = null)
+        {
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials);
         }
 
         /// <summary>
@@ -448,10 +500,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials);
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials);
         }
 
-        private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
+        private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
             if (SetDefaultTimesOnTokenCreation)
             {
@@ -478,11 +531,80 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawHeader = header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = string.Empty;
-            if (signingCredentials != null)
+            bool signed = signingCredentials != null;
+            if (signed)
                 rawSignature = CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
-            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+
+            if (encryptingCredentials != null)
+            {
+                string plaintext = signed ? new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
+                return CreateEncryptedToken(plaintext, signed, encryptingCredentials, header, payload, rawHeader, rawPayload, rawSignature);
+            }
+            else
+            {
+                return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+            }
+        }
+
+        private JwtSecurityToken CreateEncryptedToken(string plaintext, bool signed, EncryptingCredentials encryptingCredentials,
+            JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
+        {
+            if (encryptingCredentials.CryptoProviderFactory == null)
+                // TODO (Yan): Add exception message.
+                throw LogHelper.LogException<ArgumentException>("EncryptingCredentials must contain a CryptoProviderFactory.");
+
+            JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, signed);
+            bool isDirectKeyUsed = JwtConstants.DirectKeyUseAlg.Equals(encryptionHeader.Alg, StringComparison.Ordinal);
+            IEncryptionProvider encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(
+                isDirectKeyUsed ? encryptingCredentials.Key : null,
+                encryptingCredentials.Enc);
+            if (encryptionProvider == null)
+                // TODO (Yan): Add exception message.
+                throw LogHelper.LogException<InvalidOperationException>("Failed to create the token encryption provider.");
+
+            byte[] ciphertextBytes;
+            object extraOutputs;
+            try
+            {
+                ciphertextBytes = encryptionProvider.Encrypt(Encoding.ASCII.GetBytes(plaintext), out extraOutputs);
+            }
+            finally
+            {
+                encryptingCredentials.CryptoProviderFactory.ReleaseEncryptionProvider(encryptionProvider);
+            }
+
+            AuthenticatedEncryptionParameters authenticatedEncryptionParameters = extraOutputs as AuthenticatedEncryptionParameters;
+            if (authenticatedEncryptionParameters == null)
+                // TODO (Yan): Add exception message.
+                throw LogHelper.LogException<InvalidOperationException>("Failed to create the token encryption provider.");
+
+            string rawEncryptionHeader = encryptionHeader.Base64UrlEncode();
+            string rawCipherText = Base64UrlEncoder.Encode(ciphertextBytes);
+            string rawInitialVector = Base64UrlEncoder.Encode(authenticatedEncryptionParameters.InitialVector);
+            string rawAuthenticationTag = Base64UrlEncoder.Encode(authenticatedEncryptionParameters.AuthenticationTag);
+            if (isDirectKeyUsed)
+                return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
+                    encryptionHeader, rawEncryptionHeader, string.Empty, rawInitialVector, rawCipherText, rawAuthenticationTag);
+
+            encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(encryptingCredentials.Key, encryptingCredentials.Alg);
+            if (encryptionProvider == null)
+                // TODO (Yan): Add exception message.
+                throw LogHelper.LogException<InvalidOperationException>("Failed to create the key encryption provider.");
+            byte[] encryptedKeyBytes;
+            try
+            {
+                encryptedKeyBytes = encryptionProvider.Encrypt(authenticatedEncryptionParameters.Key, out extraOutputs);
+            }
+            finally
+            {
+                encryptingCredentials.CryptoProviderFactory.ReleaseEncryptionProvider(encryptionProvider);
+            }
+
+            string rawEncryptedKey = Base64UrlEncoder.Encode(encryptedKeyBytes);
+            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
+                encryptionHeader, rawEncryptionHeader, rawEncryptedKey, rawInitialVector, rawCipherText, rawAuthenticationTag);
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
@@ -623,11 +745,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwt == null)
                 throw LogHelper.LogArgumentException<ArgumentException>(nameof(token), LogMessages.IDX10706, new object[] { GetType(), typeof(JwtSecurityToken), token.GetType() });
 
-            string signingInput = string.Concat(jwt.EncodedHeader, ".", jwt.EncodedPayload);
-            if (jwt.SigningCredentials == null)
-                return signingInput + ".";
-            else
-                return signingInput + "." + CreateEncodedSignature(signingInput, jwt.SigningCredentials);
+            return jwt.RawData;
         }
 
         /// <summary>
@@ -1159,65 +1277,6 @@ namespace System.IdentityModel.Tokens.Jwt
                         if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
                         {
                             return signingKey;
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="SecurityKey"/> to use when decrypting a token.
-        /// </summary>
-        /// <param name="token">The <see cref="string"/> representation of the token to be decrypted.</param>
-        /// <param name="securityToken">The <SecurityToken> to be decrypted.</SecurityToken></param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use to decrypt the token.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual SecurityKey ResolveDecryptionKey(string token, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
-
-            if (securityToken == null)
-                throw LogHelper.LogArgumentNullException("securityToken");
-
-            if (!string.IsNullOrEmpty(securityToken.Header.Kid))
-            {
-                string kid = securityToken.Header.Kid;
-                if (validationParameters.DecryptionKey != null && string.Equals(validationParameters.DecryptionKey.KeyId, kid, StringComparison.Ordinal))
-                {
-                    return validationParameters.DecryptionKey;
-                }
-
-                if (validationParameters.DecryptionKeys != null)
-                {
-                    foreach (SecurityKey key in validationParameters.DecryptionKeys)
-                    {
-                        if (key != null && string.Equals(key.KeyId, kid, StringComparison.Ordinal))
-                        {
-                            return key;
-                        }
-                    }
-                }
-            }
-
-            if (!string.IsNullOrEmpty(securityToken.Header.X5t))
-            {
-                string x5t = securityToken.Header.X5t;
-                if (validationParameters.DecryptionKey != null && string.Equals(validationParameters.DecryptionKey.KeyId, x5t, StringComparison.Ordinal))
-                {
-                    return validationParameters.DecryptionKey;
-                }
-
-                if (validationParameters.DecryptionKeys != null)
-                {
-                    foreach (SecurityKey key in validationParameters.DecryptionKeys)
-                    {
-                        if (key != null && string.Equals(key.KeyId, x5t, StringComparison.Ordinal))
-                        {
-                            return key;
                         }
                     }
                 }

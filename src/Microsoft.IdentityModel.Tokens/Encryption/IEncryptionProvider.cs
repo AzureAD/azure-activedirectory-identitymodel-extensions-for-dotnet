@@ -20,9 +20,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    public interface IEncryptionProvider
+    public interface IEncryptionProvider : IDisposable
     {
         byte[] Encrypt(byte[] plaintext, out object extraOutputs);
     }
