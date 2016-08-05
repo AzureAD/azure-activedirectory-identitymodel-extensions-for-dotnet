@@ -490,7 +490,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (isNested)
             {
-                if (!string.IsNullOrWhiteSpace(Header.Enc))
+                if (!string.IsNullOrWhiteSpace(header.Enc))
                 {
                     // TODO (Yan): Add log message for this
                     throw LogHelper.LogException<ArgumentException>("The nested token must be JWS.");
