@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace";
         public const string IDX10212 = "IDX10212: {0} can only validate tokens of type {1}.";
         public const string IDX10213 = "IDX10213: SecurityTokens must be signed. SecurityToken: '{0}'.";
-        public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match:  validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'";
+        public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'";
         public const string IDX10215 = "IDX10215: Audience validation failed. Audiences passed in was null";
         public const string IDX10216 = "IDX10216: Lifetime validation failed. 'NotBefore' preceeds the current time: '{0}', ClockSkew (InSeconds): '{1}', notbefore: '{2}'";
         public const string IDX10217 = "IDX10217: Lifetime validation failed. 'NotOnOrAfter' is after the current time: '{0}', ClockSkew (InSeconds): '{1}', notbefore: '{2}'";
@@ -110,6 +110,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
         public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'";
         public const string IDX10505 = "IDX10505: Unable to validate signature. The 'Delegate' specified on TokenValidationParameters, returned a null SecurityKey.\nSecurityKeyIdentifier: '{0}'\nToken: '{1}'.";
+        public const string IDX10506 = "IDX10506: Unable to validate signature. The token contained a KeyInfo, but it could not be matched against any of the provided keys. You can try refreshing metadata or your keys if they are provided directly.\nToken: {0}";
 
         // Crypto Errors
         public const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type: '{4}'.";

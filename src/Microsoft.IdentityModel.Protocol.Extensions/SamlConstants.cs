@@ -24,6 +24,7 @@ namespace Microsoft.IdentityModel.Tokens
     public static class SamlConstants
     {
         #pragma warning disable 1591
+        public const string KeyInfo = "KeyInfo";
         public const string Assertion = "Assertion";
         public const string EncryptedAssertion = "EncryptedAssertion";
         public const int MajorVersionValue = 1;
