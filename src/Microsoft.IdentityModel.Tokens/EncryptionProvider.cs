@@ -57,7 +57,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public SecurityKey Key { get; private set; }
 
+        public byte[] InitializationVector { get; private set; }  
+        
         public string Algorithm { get; private set; }
+
+        public abstract string[] Encrypt(byte[] input);
+
+        public abstract string Decrypt(string AutheticationTag);
 
         #region IDisposable Members
 

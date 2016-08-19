@@ -462,6 +462,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString);
             }
 
+
             // Decode the header
             JwtHeader header;
             try
