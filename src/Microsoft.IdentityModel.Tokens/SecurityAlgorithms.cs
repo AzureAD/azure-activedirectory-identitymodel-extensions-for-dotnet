@@ -94,6 +94,13 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Sha384 = "SHA384";
         public const string Sha512 = "SHA512";
 
+        /// see: https://tools.ietf.org/html/rfc7518#section-4.1
+        public const string RsaPKCS1 = "RSA1_5";
+        public const string RsaOAEP = "RSA-OAEP";
+
+        // see : https://tools.ietf.org/html/rfc7518#section-5.1
+        public const string Aes128CbcHmacSha256 = "A128CBC-HS256";
+        public const string Aes256CbcHmacSha512 = "A256CBC-HS512";
 #pragma warning restore 1591
     }
 }

@@ -7,6 +7,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public class AuthenticatedEncryptionParameters
     {
+        // CEK
         public byte[] Key { get; set; }
         public byte[] InitialVector { get; set; }
         public byte[] AuthenticationTag { get; set; }
