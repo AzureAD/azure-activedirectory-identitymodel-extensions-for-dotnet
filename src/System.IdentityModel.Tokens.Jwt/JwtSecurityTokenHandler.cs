@@ -521,14 +521,15 @@ namespace System.IdentityModel.Tokens.Jwt
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
-            JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
+           // JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
+           JwtHeader header = signingCredentials == null ? null : new JwtHeader(signingCredentials, OutboundAlgorithmMap);
 
             if (subject?.Actor != null)
             {
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
             }
 
-            string rawHeader = header.Base64UrlEncode();
+            string rawHeader = header == null ? null : header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = string.Empty;
             bool signed = signingCredentials != null;
@@ -539,11 +540,13 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (encryptingCredentials != null)
             {
+                // Create simple JWE or nested JWE
                 string plaintext = signed ? new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
                 return CreateEncryptedToken(plaintext, signed, encryptingCredentials, header, payload, rawHeader, rawPayload, rawSignature);
             }
             else
             {
+                // Create JWS
                 return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
             }
         }
@@ -557,6 +560,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, signed);
             bool isDirectKeyUsed = JwtConstants.DirectKeyUseAlg.Equals(encryptionHeader.Alg, StringComparison.Ordinal);
+
             IEncryptionProvider encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(
                 isDirectKeyUsed ? encryptingCredentials.Key : null,
                 encryptingCredentials.Enc);
@@ -568,6 +572,7 @@ namespace System.IdentityModel.Tokens.Jwt
             object extraOutputs;
             try
             {
+                // Encrypt plaintext
                 ciphertextBytes = encryptionProvider.Encrypt(Encoding.ASCII.GetBytes(plaintext), out extraOutputs);
             }
             finally
@@ -595,6 +600,7 @@ namespace System.IdentityModel.Tokens.Jwt
             byte[] encryptedKeyBytes;
             try
             {
+                // Encrypt key
                 encryptedKeyBytes = encryptionProvider.Encrypt(authenticatedEncryptionParameters.Key, out extraOutputs);
             }
             finally
@@ -719,7 +725,8 @@ namespace System.IdentityModel.Tokens.Jwt
             // Validate signature if token is signed
             if (jwt.IsSigned)
             {
-                this.ValidateSignature(jwt, validationParameters);
+                //this.ValidateSignature(jwt, validationParameters);
+                this.ValidateJwsTokenSignature(jwt, validationParameters);
             }
 
             validatedToken = jwt;

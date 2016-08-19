@@ -61,10 +61,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of <see cref="JwtHeader"/>.
         /// With the Header Parameters:
-        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Alg }, { enc, SigningCredentials.Enc } }</para>
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Alg }, { enc, EncryptingCredentials.Enc } }</para>
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used creating a JWE Compact JSON.</param>
-        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
         public JwtHeader(EncryptingCredentials encryptingCredentials, bool isContentSigned)
             : this(encryptingCredentials, null, isContentSigned)
         {
@@ -105,7 +105,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// With the Header Parameters:
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
-        /// <param name="encryptingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, bool isContentSigned)

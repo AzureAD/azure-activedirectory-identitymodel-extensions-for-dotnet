@@ -87,13 +87,5 @@ namespace Microsoft.IdentityModel.Tokens
             get;
             private set;
         }
-
-        /// <summary>
-        /// Gets the key id which used for token encryption.
-        /// </summary>
-        public string Kid
-        {
-            get { return Key.KeyId; }
-        }
     }
 }
