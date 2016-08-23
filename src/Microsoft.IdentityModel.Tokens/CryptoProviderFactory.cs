@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -38,6 +39,21 @@ namespace Microsoft.IdentityModel.Tokens
     public class CryptoProviderFactory
     {
         private static CryptoProviderFactory _default;
+        public static readonly HashSet<string> DefaultkeyWrapAlgorithm = new HashSet<string>()
+        {
+            { SecurityAlgorithms.Aes128CbcHmacSha256 },
+            { SecurityAlgorithms.Aes256CbcHmacSha512 }
+        };
+
+        public static readonly HashSet<string> DefaultContentEncryptAlgorithm = new HashSet<string>()
+        {
+            { SecurityAlgorithms.RsaPKCS1 },
+            { SecurityAlgorithms.RsaOAEP },
+            { SecurityAlgorithms.Aes128KW }
+        };
+
+        private HashSet<string> _keyWrapAlgorithm;
+        private HashSet<string> _contentEncryptAlgorithm;
 
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
@@ -72,7 +88,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default constructor for <see cref="CryptoProviderFactory"/>.
         /// </summary>
-        public CryptoProviderFactory() { }
+        public CryptoProviderFactory()
+        {
+            _keyWrapAlgorithm = new HashSet<string>(DefaultkeyWrapAlgorithm);
+            _contentEncryptAlgorithm = new HashSet<string>(DefaultContentEncryptAlgorithm);
+        }
 
         /// <summary>
         /// Constructor that creates a deep copy of given <see cref="CryptoProviderFactory"/> object.
@@ -257,9 +277,41 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 
-        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm)
+        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm, AuthenticatedEncryptionParameters authenticatedEncryptionParameters, string encodedProtectHeader)
         {
-            return null;
+            if (algorithm == null)
+                throw LogHelper.LogArgumentNullException("algorithm");
+
+            if (algorithm.Length == 0)
+                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
+
+            if (_keyWrapAlgorithm.Contains(algorithm))
+            {
+                switch (algorithm)
+                {
+                    case SecurityAlgorithms.RsaPKCS1:
+                    case SecurityAlgorithms.RsaOAEP:
+                        return new RsaProvider(key, algorithm);
+
+                    default:
+                        // TODO (Yan) : Add exception and throw
+                        throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm");
+                }
+            }
+
+            if (_contentEncryptAlgorithm.Contains(algorithm))
+            {
+
+                switch (algorithm)
+                {
+                    case SecurityAlgorithms.Aes128CbcHmacSha256:
+                    case SecurityAlgorithms.Aes256CbcHmacSha512:
+                        return new AesCbcHmacSha2Provider(key, algorithm, null, encodedProtectHeader);
+                }
+            }
+
+            // TODO (Yan) : Add exception and throw
+            throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
         /// <summary>

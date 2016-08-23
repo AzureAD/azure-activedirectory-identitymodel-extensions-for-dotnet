@@ -65,6 +65,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         public byte[] Encrypt(byte[] plaintext, out object extraOutputs)
         {
+            if (plaintext == null)
+                throw LogHelper.LogArgumentNullException("plaintext");
+
+            if (plaintext.Length == 0)
+                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'plaintext'");
+
             // Generate random CEK.
             if (_cek == null)
                 _cek = GenerateCEK();
@@ -87,6 +93,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         public byte[] Decrypt(byte[] ciphertext)
         {
+            if (ciphertext == null)
+                throw LogHelper.LogArgumentNullException("ciphertext");
+
+            if (ciphertext.Length == 0)
+                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'ciphertext'");
+
             if (_authenticatedData == null)
                 // TODO (Yan) : Add exception log message and throw;
                 throw LogHelper.LogArgumentNullException("_authenticatedData");

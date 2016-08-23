@@ -8,23 +8,31 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public class RsaProvider : IDecryptionProvider, IEncryptionProvider
     {
+        private SecurityKey _key;
+
+#if NETSTANDARD1_4
+        private bool _disposeRsa;
         private RSA _rsa;
-        private byte[] _cek;
-        private SecurityKey _encryptedKey;
-      //  private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+#else
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+#endif
         private RSAEncryptionPadding _padding;
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+
+        public static readonly int DefaultMinimumKeySize = 2048;
 
         public RsaProvider(SecurityKey key, string alg)
         {
             if (key == null)
-            {
-                _cek = GenerateCEK();
-               // _encryptedKey = ??? how to convert cek to SecurityKey
-            }
+                throw LogHelper.LogArgumentNullException("key");
 
-            _encryptedKey = key;
+            if (alg == null)
+                throw LogHelper.LogArgumentNullException("alg");
 
-            _padding = ResolveAlgorithm(alg);
+            _padding = ResolvePaddingMode(alg);
+
+            ValidateKeySize(key, alg);
+            _key = key;
         }
 
         public byte[] Encrypt(byte[] plaintext, out object extraOutputs)
@@ -32,31 +40,28 @@ namespace Microsoft.IdentityModel.Tokens
             if(plaintext == null)
                 throw LogHelper.LogArgumentNullException("plaintext");
 
+            if (plaintext.Length == 0)
+                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'plaintext'");
+
             // Resolve public key
-            ResolveKey(_encryptedKey, false);
+            ResolveKey(_key, false);
 
-            // TODO :  1. generate iv if required for the algorithm, not for this case(rsa);
-
-            // TODO : generate AuthenticateTag
-            if (_cek !=null)
-                byte[] authenticationTag = GenerateAuthenticateTag(_cek, , 0)
-
-            object outputs = new AuthenticatedEncryptionParameters()
-            {
-                Key = _cek,
-                InitialVector = new byte[0],
-                AuthenticationTag = 
-            }
+            extraOutputs = null;
 
             if (_rsa != null)
                 return _rsa.Encrypt(plaintext, _padding);
 
+            // TODO (Yan) : Add exception and throw
+            throw LogHelper.LogException<InvalidOperationException>("Cannot get valid rsa");
         }
 
         public byte[] Decrypt(byte[] ciphertext)
         {
             if (ciphertext == null)
                 throw LogHelper.LogArgumentNullException("ciphertext");
+
+            if (ciphertext.Length == 0)
+                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'ciphertext'");
 
             if (!HasPrivateKey(_key))
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, _key);
@@ -73,9 +78,6 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ResolveKey(SecurityKey key, bool isPrivateKey)
         {
-            if (_rsa != null)
-                return;
-
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
 
@@ -92,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_rsa != null)
                 {
                     _rsa.ImportParameters(rsaKey.Parameters);
-                    // _disposeRsa = true;
+                    _disposeRsa = true;
                     return;
                 }
             }
@@ -123,43 +125,28 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_rsa != null)
                 {
                     _rsa.ImportParameters(parameters);
-                    //  _disposeRsa = true;
+                    _disposeRsa = true;
                     return;
                 }
             }
 
             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
-
-        private byte[] GenerateCEK()
-        {
-            byte[] cek = null;
-            return cek;
-
-        }
-
-        private byte[] GenerateAuthenticateTag(byte[] inputKey, int macKeySize, int encKeySize)
-        {
-            byte[] authenticateTag = null;
-            return authenticateTag;
-        }
-
-        private void GetKeySize(string algorithm, out int macKeySize, out int encKeySize)
-        {
-            macKeySize = 0;
-            encKeySize = 0;
-        }
         
         private bool HasPrivateKey(SecurityKey key)
         {
+            AsymmetricSecurityKey asymmetricSecurityKey = key as AsymmetricSecurityKey;
+            if (asymmetricSecurityKey != null)
+                return asymmetricSecurityKey.HasPrivateKey;
+
+            JsonWebKey jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+                return jsonWebKey.HasPrivateKey;
+
             return false;
         }
 
-
-        private void ValidateSecurityKeySize()
-        { }
-
-        private RSAEncryptionPadding ResolveAlgorithm(string algorithm)
+        private RSAEncryptionPadding ResolvePaddingMode(string algorithm)
         {
             switch (algorithm)
             {
@@ -211,6 +198,16 @@ namespace Microsoft.IdentityModel.Tokens
                 };
             }
             return parameters;
+        }
+
+        private void ValidateKeySize(SecurityKey key, string algorithm)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            if (key.KeySize < RsaProvider.DefaultMinimumKeySize)
+                // TODO (Yan) : Add excepiton and throw
+                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("Key.KeySize", String.Format("The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.", key, algorithm, key.KeySize));
         }
     }
 }
