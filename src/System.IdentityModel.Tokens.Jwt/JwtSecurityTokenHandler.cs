@@ -593,17 +593,15 @@ namespace System.IdentityModel.Tokens
                             JwtConstants.TokenType));
             }
 
-            using (XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader))
+            XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader);
+            string wsuId = dictionaryReader.GetAttribute(WSSecurityUtilityConstantsInternal.Attributes.Id, WSSecurityConstantsInternal.Namespace);
+            JwtSecurityToken jwt = this.ReadToken(Encoding.UTF8.GetString(dictionaryReader.ReadElementContentAsBase64())) as JwtSecurityToken;
+            if (wsuId != null && jwt != null)
             {
-                string wsuId = dictionaryReader.GetAttribute(WSSecurityUtilityConstantsInternal.Attributes.Id, WSSecurityConstantsInternal.Namespace);
-                JwtSecurityToken jwt = this.ReadToken(Encoding.UTF8.GetString(dictionaryReader.ReadElementContentAsBase64())) as JwtSecurityToken;
-                if (wsuId != null && jwt != null)
-                {
-                    jwt.SetId(wsuId);
-                }
-
-                return jwt;
+                jwt.SetId(wsuId);
             }
+
+            return jwt;
         }
 
         /// <summary>
