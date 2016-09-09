@@ -43,14 +43,14 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate bool AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
-    /// Definition for DecryptionKeyResolver.
+    /// Definition for TokenDecryptionKeyResolver.
     /// </summary>
     /// <param name="token">The <see cref="string"/> representation of the token to be decrypted.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> to be decrypted. It may be null.</param>
     /// <param name="kid">A key identifier. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A <see cref="SecurityKey"/> to use when decrypting the token.</returns>
-    public delegate SecurityKey DecryptionKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
+    public delegate SecurityKey TokenDecryptionKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for IssuerSigningKeyResolver.
@@ -152,6 +152,8 @@ namespace Microsoft.IdentityModel.Tokens
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
+            TokenDecryptionKey = other.TokenDecryptionKey;
+            TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
@@ -313,12 +315,21 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
+        /// </summary>
+        public SecurityKey TokenDecryptionKey
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public DecryptionKeyResolver DecryptionKeyResolver
+        public TokenDecryptionKeyResolver TokenDecryptionKeyResolver
         {
             get;
             set;

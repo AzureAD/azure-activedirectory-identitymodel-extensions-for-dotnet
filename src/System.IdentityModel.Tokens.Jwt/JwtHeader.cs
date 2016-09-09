@@ -65,7 +65,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used creating a JWE Compact JSON.</param>
         /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
-        public JwtHeader(EncryptingCredentials encryptingCredentials, bool isContentSigned)
+        public JwtHeader(EncryptingCredentials encryptingCredentials, bool isNested)
             : this(encryptingCredentials, null, isContentSigned)
         {
         }
@@ -108,7 +108,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
-        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, bool isContentSigned)
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, bool isNested)
             : base(StringComparer.Ordinal)
         {
             if (encryptingCredentials == null)
@@ -129,7 +129,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 Kid = encryptingCredentials.Key.KeyId;
 
             Typ = JwtConstants.HeaderType;
-            if (isContentSigned)
+            if (isNested)
                 Cty = JwtConstants.HeaderType;
             EncryptingCredentials = encryptingCredentials;
         }

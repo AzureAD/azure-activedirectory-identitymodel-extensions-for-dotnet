@@ -564,7 +564,7 @@ namespace System.IdentityModel.Tokens.Jwt
             IEncryptionProvider encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(
                 isDirectKeyUsed ? encryptingCredentials.Key : null,
                 encryptingCredentials.Enc,
-                null, encryptionHeader.Base64UrlEncode());
+                encryptionHeader.Base64UrlEncode());
             if (encryptionProvider == null)
                 // TODO (Yan): Add exception message.
                 throw LogHelper.LogException<InvalidOperationException>("Failed to create the token encryption provider.");
@@ -594,7 +594,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
                     encryptionHeader, rawEncryptionHeader, string.Empty, rawInitialVector, rawCipherText, rawAuthenticationTag);
 
-            encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(encryptingCredentials.Key, encryptingCredentials.Alg, null, null);
+            encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(encryptingCredentials.Key, encryptingCredentials.Alg, null);
             if (encryptionProvider == null)
                 // TODO (Yan): Add exception message.
                 throw LogHelper.LogException<InvalidOperationException>("Failed to create the key encryption provider.");

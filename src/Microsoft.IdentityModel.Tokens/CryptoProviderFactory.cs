@@ -218,72 +218,45 @@ namespace Microsoft.IdentityModel.Tokens
 
         public virtual IDecryptionProvider CreateForDecrypting(SecurityKey key, string algorithm, object additionalParam)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
+            if (algorithm == null)
+                throw LogHelper.LogArgumentNullException("algorithm");
 
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+            if (algorithm.Length == 0)
+                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
 
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
             {
                 IDecryptionProvider decryptionProvider = CustomCryptoProvider.Create(algorithm, key) as IDecryptionProvider;
                 if (decryptionProvider == null)
+                    // TODO (Yan) : Add exception and throw
                     throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider));
 
                 return decryptionProvider;
             }
 
-            if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10634, algorithm, key);
-
-            RsaSecurityKey rsaKey = key as RsaSecurityKey;
-            if (rsaKey != null)
+            if (_keyWrapAlgorithm.Contains(algorithm))
             {
-                return null;
-                //return new RsaDecryptionProvider();
+
             }
-
-            X509SecurityKey x509Key = key as X509SecurityKey;
-            if (x509Key != null)
-            {
-                return null;
-                //return new RsaDecryptionProvider();
-            }
-
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
-            {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return null;
-                //return new RsaDecryptionProvider();
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                    return null;
-                // return new ECDsaDecryptProvider();
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    return null;
-                // return new AesKWDecryptProvider();
-            }
-
-            ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
-            if (ecdsaKey != null)
-                return null;
-            // return new ECDsaDecryptProvider();
-
-            SymmetricSecurityKey aesKey = key as SymmetricSecurityKey;
-            if (aesKey != null)
-                return null;
-            // return new AesKWDecryptProvider();
-
-            return null;
         }
 
-        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm, AuthenticatedEncryptionParameters authenticatedEncryptionParameters, string encodedProtectHeader)
+        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm, string encodedProtectHeader)
         {
             if (algorithm == null)
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             if (algorithm.Length == 0)
                 throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
+
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
+            {
+                IEncryptionProvider encryptionProvider = CustomCryptoProvider.Create(algorithm, key) as IEncryptionProvider;
+                if (encryptionProvider == null)
+                    // TODO (Yan) : Add exception and throw
+                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider));
+
+                return encryptionProvider;
+            }
 
             if (_keyWrapAlgorithm.Contains(algorithm))
             {
