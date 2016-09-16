@@ -240,7 +240,16 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm, string encodedProtectHeader)
+        public virtual IEncryptionProvider CreateAuthenticatedEncryptionProvider(SymmetricSecurityKey key, string algorithm, byte[] iv, byte[] aad);
+
+        public virtual IEncryptionProvider CreateAuthenticatedDecryptionProvider(SymmetricSecurityKey key, string algorithm, byte[] iv, byte[] aad, byte[] at);
+
+        public virtual IEncryptionProvider CreateEncryptionProvider(AsymmetricSecurityKey key, string algorithm);
+
+        public virtual IEncryptionProvider CreateEncryptionProvider(SymmetricSecurityKey key, string algorithm, byte[] iv);
+
+
+        public virtual IEncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm)
         {
             if (algorithm == null)
                 throw LogHelper.LogArgumentNullException("algorithm");

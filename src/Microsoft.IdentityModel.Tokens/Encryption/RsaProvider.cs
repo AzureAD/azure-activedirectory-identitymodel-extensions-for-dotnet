@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
             _key = key;
         }
 
-        public byte[] Encrypt(byte[] plaintext, out object extraOutputs)
+        public byte[] Encrypt(byte[] plaintext)
         {
             if(plaintext == null)
                 throw LogHelper.LogArgumentNullException("plaintext");

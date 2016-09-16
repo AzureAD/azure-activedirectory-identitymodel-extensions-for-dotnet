@@ -7,17 +7,33 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    public class EncryptionResult
+    {
+        public byte[] CypherText { get; set; }
+
+        public byte[] InitialVector { get; set; }
+
+        public byte[] AuthenticationTag { get; set; }
+    }
+
     public class AesCbcHmacSha2Provider : IDecryptionProvider, IEncryptionProvider
     {
         // Used for encrypting.
         private byte[] _cek;
         private AesCbcHmacSha2 _algorithm;
         private byte[] _authenticatedData;
+        private SymmetricSecurityKey _key;
 
         // Used for decrypting.
         private AuthenticatedEncryptionParameters _authenticatedEncryptionParameters;
 
-        public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, AuthenticatedEncryptionParameters authenticatedEncryptionParameters, string encodedProtectHeader)
+        public AesCbcHmacSha2Provider(SymmetricSecurityKey key, string algorithm, byte[] iv, byte[] AAD)
+            :this(key, algorithm, iv, AAD, null)
+        {
+
+        }
+
+        public AesCbcHmacSha2Provider(SymmetricSecurityKey key, string algorithm, byte[] iv, byte[] AAD, byte[] AT)
         {
             if (key != null && authenticatedEncryptionParameters != null)
                 // TODO (Yan) : Add exception log message and throw;
@@ -63,7 +79,9 @@ namespace Microsoft.IdentityModel.Tokens
             _authenticatedData = Encoding.ASCII.GetBytes(encodedProtectHeader);
         }
 
-        public byte[] Encrypt(byte[] plaintext, out object extraOutputs)
+        // With this signature we don't need any out params,
+        // Caller has to generate iv.
+        public override EncryptionResult Encrypt(byte[] plaintext)
         {
             if (plaintext == null)
                 throw LogHelper.LogArgumentNullException("plaintext");
@@ -75,19 +93,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (_cek == null)
                 _cek = GenerateCEK();
 
-            AuthenticatedEncryptionParameters authenticatedEncryptionParameters = new AuthenticatedEncryptionParameters()
+            var result = new EncryptionResult()
             {
-                Key = _cek,
                 InitialVector = GenerateIV()
             };
 
-            IAuthenticatedCryptoTransform authenticatedCryptoTransform = (IAuthenticatedCryptoTransform)_algorithm.CreateEncryptor(_cek, authenticatedEncryptionParameters.InitialVector, _authenticatedData);
-            byte[] result = authenticatedCryptoTransform.TransformFinalBlock(plaintext, 0, plaintext.Length);
-          //  byte[] result = _algorithm.CreateEncryptor(_cek, authenticatedEncryptionParameters.InitialVector, _authenticatedData).TransformFinalBlock(plaintext, 0, plaintext.Length);
-            authenticatedEncryptionParameters.AuthenticationTag = authenticatedCryptoTransform.Tag;
-
-            extraOutputs = authenticatedEncryptionParameters;
-
+            IAuthenticatedCryptoTransform authenticatedCryptoTransform = (IAuthenticatedCryptoTransform)_algorithm.CreateEncryptor(_cek, result.InitialVector, _authenticatedData);
+            result.CypherText = authenticatedCryptoTransform.TransformFinalBlock(plaintext, 0, plaintext.Length);
+            //  byte[] result = _algorithm.CreateEncryptor(_cek, authenticatedEncryptionParameters.InitialVector, _authenticatedData).TransformFinalBlock(plaintext, 0, plaintext.Length);
+            result.AuthenticationTag = authenticatedCryptoTransform.Tag;
             return result;
         }
 
