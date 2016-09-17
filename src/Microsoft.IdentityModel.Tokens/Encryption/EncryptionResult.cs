@@ -5,11 +5,15 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class AuthenticatedEncryptionParameters
+    public class EncryptionResult
     {
         // CEK
-        public byte[] CEK { get; set; }
+        public byte[] Key { get; set; }
+
+        public byte[] CypherText { get; set; }
+
         public byte[] InitialVector { get; set; }
+
         public byte[] AuthenticationTag { get; set; }
     }
 }

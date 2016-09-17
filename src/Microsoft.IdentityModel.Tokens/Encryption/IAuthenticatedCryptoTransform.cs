@@ -22,5 +22,9 @@ namespace Microsoft.IdentityModel.Tokens
     public interface IAuthenticatedCryptoTransform : ICryptoTransform
     {
         byte[] Tag { get; }
+
+        byte[] IV { get; }
+
+        byte[] Key { get; }
     }
 }

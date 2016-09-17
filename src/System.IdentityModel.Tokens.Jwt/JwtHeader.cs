@@ -66,7 +66,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used creating a JWE Compact JSON.</param>
         /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
         public JwtHeader(EncryptingCredentials encryptingCredentials, bool isNested)
-            : this(encryptingCredentials, null, isContentSigned)
+            : this(encryptingCredentials, null, isNested)
         {
         }
 
@@ -169,17 +169,6 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets a <see cref="JwtMimeType"/> representing the content mime type (Typ) of the token.
-        /// </summary>
-        public JwtMimeType ContentType
-        {
-            get
-            {
-                return JwtMimeTypeHelper.FromString(Cty);
-            }
-        }
-
-        /// <summary>
         /// Gets the encryption algorithm (Enc) of the token.
         /// </summary>
         /// <remarks>If the content mime type is not found, null is returned.</remarks>
@@ -225,29 +214,6 @@ namespace System.IdentityModel.Tokens.Jwt
             private set
             {
                 this[JwtHeaderParameterNames.Typ] = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets a <see cref="JwtMimeType"/> representing the mime type (Typ) of the token.
-        /// </summary>
-        public JwtMimeType Type
-        {
-            get
-            {
-                JwtMimeType type = JwtMimeTypeHelper.FromString(Typ);
-                switch (type)
-                {
-                    case JwtMimeType.Empty:
-                    case JwtMimeType.JWT:
-                    case JwtMimeType.JOSE:
-                    case JwtMimeType.JOSEANDJSON:
-                        return type;
-
-                    default:
-                        // Note that JwtMimeType.Json is not a valid value for token type.
-                        return JwtMimeType.Other;
-                }
             }
         }
 

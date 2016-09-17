@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class RsaProvider : IDecryptionProvider, IEncryptionProvider
+    public class RsaProvider : EncryptionProvider
     {
         private SecurityKey _key;
 

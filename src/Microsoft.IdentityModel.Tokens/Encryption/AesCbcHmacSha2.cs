@@ -45,12 +45,6 @@ namespace Microsoft.IdentityModel.Tokens
 
         public override ICryptoTransform CreateEncryptor( byte[] key, byte[] iv, byte[] authenticationData )
         {
-            if ( key == null )
-                throw new CryptographicException( "No key material" );
-
-            if ( iv == null )
-                throw new CryptographicException( "No initialization vector" );
-
             if ( authenticationData == null )
                 throw new CryptographicException( "No associated data" );
 
@@ -80,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
                 case Aes256CbcHmacSha512.AlgorithmName:
                     {
                         if ( ( key.Length << 3 ) < 512 )
-                            throw new CryptographicException( string.Format( CultureInfo.CurrentCulture, "{0} key length in bits {1} < 512", algorithm, key.Length << 3 ) );
+                            throw new CryptographicException(string.Format( CultureInfo.CurrentCulture, "{0} key length in bits {1} < 512", algorithm, key.Length << 3 ));
 
                         hmac_key = new byte[256 >> 3];
                         aes_key  = new byte[256 >> 3];
@@ -94,32 +88,82 @@ namespace Microsoft.IdentityModel.Tokens
 
                 default:
                     {
-                        throw new CryptographicException( string.Format( CultureInfo.CurrentCulture, "Unsupported algorithm: {0}", algorithm ) );
+                        throw new CryptographicException(string.Format( CultureInfo.CurrentCulture, "Unsupported algorithm: {0}", algorithm ));
                     }
             }
         }
 
+        private static int GetKeySize(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case Aes128CbcHmacSha256.AlgorithmName:
+                    return 128;
+
+                case Aes256CbcHmacSha512.AlgorithmName:
+                    return 256;
+                    
+                default:
+                    throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, "Unsupported algorithm: {0}", algorithm));
+            }
+        }
+        
         class AesCbcHmacSha2Encryptor : IAuthenticatedCryptoTransform
         {
-            readonly byte[]  _hmac_key;
+            readonly byte[] _hmac_key;
 
-            readonly byte[]  _associated_data_length;
+            readonly byte[] _associated_data_length;
 
             RijndaelManaged  _aes;
-            HMAC             _hmac;
+            HMAC _hmac;
 
             ICryptoTransform _inner;
-            byte[]           _tag;
+            byte[] _tag;
+            byte[] _iv;
+            byte[] _key;
 
             internal AesCbcHmacSha2Encryptor( string name, byte[] key, byte[] iv, byte[] associatedData )
             {
-                // Split the key to get the AES key, the HMAC key and the HMAC object
-                byte[] aesKey;
+                if (key != null)
+                {
+                    // Split the key to get the AES key, the HMAC key and the HMAC object
+                    byte[] aesKey;
 
-                GetAlgorithmParameters( name, key, out aesKey, out _hmac_key, out _hmac );
+                    GetAlgorithmParameters(name, key, out aesKey, out _hmac_key, out _hmac);
+                    // Create the AES provider with giving key
+                    _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length * 8, Key = aesKey };
+                    _key = key;
+                }
+                else
+                {
+                    // Create the AES provider with specific key size
+                    int keySize = GetKeySize(name);
+                    _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = keySize };
+                    byte[] _hmac_key = _aes.Key;
+                    if (name == Aes128CbcHmacSha256.AlgorithmName)
+                    {
+                        _hmac = new HMACSHA256(_hmac_key);
+                    }
+                    else if (name == Aes256CbcHmacSha512.AlgorithmName)
+                    {
+                        _hmac = new HMACSHA512(_hmac_key);
+                    }
+                    else
+                    {
+                        // TODO: Add unsupported exception
+                        throw new CryptographicException(string.Format(CultureInfo.CurrentCulture, "Unsupported algorithm: {0}", name));
+                    }
 
-                // Create the AES provider
-                _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length*8, Key = aesKey, IV = iv };
+                    _key = new byte[keySize];
+                    Array.Copy(_hmac_key, _key, keySize >> 3);
+                    Array.Copy(_aes.Key, 0, _key, keySize >> 3, keySize >> 3);
+                }
+
+                if (iv != null)
+                {
+                    _aes.IV = iv;
+                }
+                _iv = _aes.IV;
 
                 _inner = _aes.CreateEncryptor();
 
@@ -127,12 +171,22 @@ namespace Microsoft.IdentityModel.Tokens
 
                 // Prime the hash.
                 _hmac.TransformBlock( associatedData, 0, associatedData.Length, associatedData, 0 );
-                _hmac.TransformBlock( iv, 0, iv.Length, iv, 0 );
+                _hmac.TransformBlock(_iv, 0, _iv.Length, _iv, 0 );
             }
 
             public byte[] Tag
             {
                 get { return _tag; }
+            }
+
+            public byte[] IV
+            {
+                get { return _iv;  }
+            }
+
+            public byte[] Key
+            {
+                get { return _key; }
             }
 
             public bool CanReuseTransform

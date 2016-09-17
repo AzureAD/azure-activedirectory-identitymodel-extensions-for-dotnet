@@ -475,20 +475,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString);
             }
 
-            // Verify the token media type defined in the header
-            switch (header.Type)
-            {
-                case JwtMimeType.JOSEANDJSON:
-                    // TODO (Yan): Add log message for this
-                    throw new ArgumentException("The JSON formatted token is not currently supported.", nameof(jwtEncodedString));
-
-                case JwtMimeType.Other:
-                    // TODO (Yan): Change the message or define a new message for this error.
-                    // The type value "JOSE" or "JOSE+JSON" are also allowed according to RFC 7515
-                    //  and the message should indicate them as well.
-                    throw LogHelper.LogException<SecurityTokenException>(LogMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, Header.Typ);
-            }
-
             if (isNested)
             {
                 if (!string.IsNullOrWhiteSpace(header.Enc))
@@ -565,25 +551,22 @@ namespace System.IdentityModel.Tokens.Jwt
             string plaintext = Encoding.ASCII.GetString(plaintextBytes);
 
             // Decode plaintext, it's either payload JSON or a nested JWS token
-            switch (EncryptionHeader.ContentType)
+            if (EncryptionHeader.Cty != null)
             {
-                case JwtMimeType.Empty:
-                case JwtMimeType.JSON:
-                    try
-                    {
-                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, plaintext);
-                        Payload = JwtPayload.Base64UrlDeserialize(plaintext);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", plaintext, RawData);
-                    }
-
-                    break;
-
-                default:
-                    Decode(plaintext, true);
-                    break;
+                // Decode nested JWS
+                Decode(plaintext, true);
+            }
+            else
+            {
+                try
+                {
+                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, plaintext);
+                    Payload = JwtPayload.Base64UrlDeserialize(plaintext);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", plaintext, RawData);
+                }
             }
         }
 
@@ -602,27 +585,23 @@ namespace System.IdentityModel.Tokens.Jwt
             // Decode the payload.
             // If the media type of the payload is unspecified or "JSON", it should be able to be deserialized to JwtPayload property bag.
             // We do not support other content types for JWS.
-            switch (Header.ContentType)
+            if (Header.Cty != null)
             {
-                case JwtMimeType.Empty:
-                case JwtMimeType.JSON:
-                    try
-                    {
-                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
-                        Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", tokenParts[1], RawData);
-                    }
-
-                    break;
-
-                case JwtMimeType.JWT:
-                case JwtMimeType.JOSE:
-                case JwtMimeType.JOSEANDJSON:
-                    // TODO (Yan): Add a new error message indicating that nested token is not supported of JWS.
+                // Don't support nested JWS
+                // TODO(Yan): Add a new error message indicating that nested token is not supported of JWS.
                     throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10703, "payload", tokenParts[1], RawData);
+            }
+            else
+            {
+                try
+                {
+                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
+                    Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", tokenParts[1], RawData);
+                }
             }
 
             this.VerifyBase64UrlString(tokenParts[2], "signature", canBeEmpty: true);
@@ -640,12 +619,6 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             // Verify the part number
             if (tokenParts.Length != JwtConstants.JwePartNumber)
-            {
-                // TODO (Yan): exception message
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
-            }
-
-            if (EncryptionHeader.ContentType == JwtMimeType.Other)
             {
                 // TODO (Yan): exception message
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
