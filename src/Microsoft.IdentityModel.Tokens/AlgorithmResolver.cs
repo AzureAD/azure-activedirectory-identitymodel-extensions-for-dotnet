@@ -36,9 +36,9 @@ namespace Microsoft.IdentityModel.Tokens
             //Default.AddAlgorithm( Aes192Cbc.AlgorithmName, new Aes192Cbc() );
             //Default.AddAlgorithm( Aes256Cbc.AlgorithmName, new Aes256Cbc() );
 
-            Default.AddAlgorithm( AesKw128.AlgorithmName, new AesKw128() );
+         //   Default.AddAlgorithm( AesKw128.AlgorithmName, new AesKw128() );
           //  Default.AddAlgorithm( AesKw192.AlgorithmName, new AesKw192() );
-            Default.AddAlgorithm( AesKw256.AlgorithmName, new AesKw256() );
+         //   Default.AddAlgorithm( AesKw256.AlgorithmName, new AesKw256() );
 
             //Default.AddAlgorithm( Rsa15.AlgorithmName, new Rsa15() );
             //Default.AddAlgorithm( RsaOaep.AlgorithmName, new RsaOaep() );

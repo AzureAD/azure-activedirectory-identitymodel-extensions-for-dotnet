@@ -114,7 +114,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             readonly byte[] _associated_data_length;
 
-            RijndaelManaged  _aes;
+            //#if NETSTANDARD1_4
+            //            AesManaged _aesManaged;
+            //#else
+            //            RijndaelManaged _aes;
+            //#endif
+
+            SymmetricAlgorithm _aes;
             HMAC _hmac;
 
             ICryptoTransform _inner;
@@ -131,15 +137,24 @@ namespace Microsoft.IdentityModel.Tokens
 
                     GetAlgorithmParameters(name, key, out aesKey, out _hmac_key, out _hmac);
                     // Create the AES provider with giving key
+#if NETSTANDARD1_4
+                    _aes = new AesManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length * 8, Key = aesKey };
+#else
                     _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length * 8, Key = aesKey };
+#endif
                     _key = key;
                 }
                 else
                 {
                     // Create the AES provider with specific key size
                     int keySize = GetKeySize(name);
+#if NETSTANDARD1_4
+                    _aes = new AesManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = keySize };
+#else
                     _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = keySize };
-                    byte[] _hmac_key = _aes.Key;
+#endif
+                    _hmac_key = _aes.Key;
+
                     if (name == Aes128CbcHmacSha256.AlgorithmName)
                     {
                         _hmac = new HMACSHA256(_hmac_key);
@@ -275,11 +290,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             readonly byte[]  _associated_data_length;
 
-            RijndaelManaged  _aes;
+            //#if NETSTANDARD1_4
+            //#else
+            //            RijndaelManaged  _aes;
+            //#endif
+            SymmetricAlgorithm _aes;
             HMAC             _hmac;
 
             ICryptoTransform _inner;
-            byte[]           _tag;
+            byte[] _tag;
+            byte[] _iv;
+            byte[] _key;
 
             internal AesCbcHmacSha2Decryptor( string name, byte[] key, byte[] iv, byte[] associatedData )
             {
@@ -288,9 +309,12 @@ namespace Microsoft.IdentityModel.Tokens
 
                 GetAlgorithmParameters( name, key, out aesKey, out _hmac_key, out _hmac );
 
+#if NETSTANDARD1_4
+                _aes = new AesManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length*8, Key = aesKey, IV = iv };
+#else
                 // Create the AES provider
                 _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length*8, Key = aesKey, IV = iv };
-
+#endif
                 _inner = _aes.CreateDecryptor();
 
                 _associated_data_length = ConvertToBigEndian( associatedData.Length * 8 );
@@ -303,6 +327,15 @@ namespace Microsoft.IdentityModel.Tokens
             public byte[] Tag
             {
                 get { return _tag; }
+            }
+            public byte[] IV
+            {
+                get { return _iv; }
+            }
+
+            public byte[] Key
+            {
+                get { return _key; }
             }
 
             public bool CanReuseTransform

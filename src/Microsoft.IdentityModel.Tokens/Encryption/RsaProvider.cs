@@ -13,10 +13,11 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
         private bool _disposeRsa;
         private RSA _rsa;
-#else
-        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
-#endif
         private RSAEncryptionPadding _padding;
+#else
+        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
+        private bool _fOAEP;
+#endif
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 
         public static readonly int DefaultMinimumKeySize = 2048;
@@ -29,13 +30,30 @@ namespace Microsoft.IdentityModel.Tokens
             if (alg == null)
                 throw LogHelper.LogArgumentNullException("alg");
 
+#if NETSTANDARD1_4
             _padding = ResolvePaddingMode(alg);
+#else
+            switch (alg)
+            {
+                case SecurityAlgorithms.RsaPKCS1:
+                    _fOAEP = false;
+                    break;
+
+                case SecurityAlgorithms.RsaOAEP:
+                    _fOAEP = true;
+                    break;
+
+                default:
+                    // TODO(Yan): Add exception
+                    throw LogHelper.LogArgumentException<ArgumentException>(nameof(alg), String.Format("Unsupported algorithm: {0}", alg));
+            }
+#endif
 
             ValidateKeySize(key, alg);
             _key = key;
         }
-
-        public byte[] Encrypt(byte[] plaintext)
+        
+        public override EncryptionResult Encrypt(byte[] plaintext)
         {
             if(plaintext == null)
                 throw LogHelper.LogArgumentNullException("plaintext");
@@ -43,19 +61,29 @@ namespace Microsoft.IdentityModel.Tokens
             if (plaintext.Length == 0)
                 throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'plaintext'");
 
+            EncryptionResult result = new EncryptionResult();
+
             // Resolve public key
-            ResolveKey(_key, false);
-
-            extraOutputs = null;
-
+#if NETSTANDARD1_4
+            ResolveAlgorithm(_key, false);
             if (_rsa != null)
-                return _rsa.Encrypt(plaintext, _padding);
-
-            // TODO (Yan) : Add exception and throw
-            throw LogHelper.LogException<InvalidOperationException>("Cannot get valid rsa");
+            {
+                result.CypherText = _rsa.Encrypt(plaintext, _padding);
+                return result;
+            }
+#else
+            ResolveAlgorithm(_key, false);
+            if (_rsaCryptoServiceProvider != null)
+            {
+                result.CypherText = _rsaCryptoServiceProvider.Encrypt(plaintext, _fOAEP);
+                return result;
+            }
+#endif
+                // TODO (Yan) : Add exception and throw
+                throw LogHelper.LogException<InvalidOperationException>("Cannot get valid rsa");
         }
 
-        public byte[] Decrypt(byte[] ciphertext)
+        public override byte[] Decrypt(byte[] ciphertext)
         {
             if (ciphertext == null)
                 throw LogHelper.LogArgumentNullException("ciphertext");
@@ -66,17 +94,22 @@ namespace Microsoft.IdentityModel.Tokens
             if (!HasPrivateKey(_key))
                 throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, _key);
 
+#if NETSTANDARD1_4
             // Resolve private key
-            ResolveKey(_key, true);
-
+            ResolveAlgorithm(_key, true);
             if (_rsa != null)
                 return _rsa.Decrypt(ciphertext, _padding);
-
-            // TODO (Yan) Add a new log message for this 
-            throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10644);
+#else
+            ResolveAlgorithm(_key, true);
+            if (_rsaCryptoServiceProvider != null)
+                return _rsaCryptoServiceProvider.Decrypt(ciphertext, _fOAEP);
+#endif
+                // TODO (Yan) Add a new log message for this 
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10644);
         }
 
-        private void ResolveKey(SecurityKey key, bool isPrivateKey)
+#if NETSTANDARD1_4
+        private void ResolveAlgorithm(SecurityKey key, bool isPrivateKey)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException("key");
@@ -132,7 +165,49 @@ namespace Microsoft.IdentityModel.Tokens
 
             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
         }
-        
+#else
+        private void ResolveAlgorithm(SecurityKey key, bool isPrivateKey)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+            
+            RsaSecurityKey rsaKey = key as RsaSecurityKey;
+
+            if (rsaKey != null)
+            {
+                if (rsaKey.Rsa != null)
+                    _rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
+
+                if (_rsaCryptoServiceProvider == null)
+                {
+                    _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                    (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                }
+                return;
+            }
+
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                if (isPrivateKey)
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
+                else
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey as RSACryptoServiceProvider);
+                return;
+            }
+
+            JsonWebKey webKey = key as JsonWebKey;
+            if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+            {
+                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, isPrivateKey);
+                _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                (_rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
+                return;
+            }
+
+            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
+        }
+#endif
         private bool HasPrivateKey(SecurityKey key)
         {
             AsymmetricSecurityKey asymmetricSecurityKey = key as AsymmetricSecurityKey;
@@ -146,6 +221,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+#if NETSTANDARD1_4
         private RSAEncryptionPadding ResolvePaddingMode(string algorithm)
         {
             switch (algorithm)
@@ -162,6 +238,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
             }
         }
+#endif
 
         private RSAParameters CreateRsaParametersFromJsonWebKey(JsonWebKey webKey, bool isPrivateKey)
         {

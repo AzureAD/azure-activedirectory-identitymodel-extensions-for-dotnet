@@ -20,35 +20,35 @@ using System.Security.Cryptography;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class AesKw128 : AesKw
-    {
-        public const string AlgorithmName = "A128KW";
+    //public class AesKw128 : AesKw
+    //{
+    //    public const string AlgorithmName = "A128KW";
 
-        public AesKw128()
-            : base( AlgorithmName )
-        {
-        }
+    //    public AesKw128()
+    //        : base( AlgorithmName )
+    //    {
+    //    }
 
-        public override ICryptoTransform CreateDecryptor( byte[] key, byte[] iv )
-        {
-            if ( key == null )
-                throw new ArgumentNullException( "key" );
+    //    public override ICryptoTransform CreateDecryptor( byte[] key, byte[] iv )
+    //    {
+    //        if ( key == null )
+    //            throw new ArgumentNullException( "key" );
 
-            if ( key.Length << 3 != 128 )
-                throw new ArgumentOutOfRangeException( "key", "key must be 128 bits long" );
+    //        if ( key.Length << 3 != 128 )
+    //            throw new ArgumentOutOfRangeException( "key", "key must be 128 bits long" );
 
-            return base.CreateDecryptor( key, iv );
-        }
+    //        return base.CreateDecryptor( key, iv );
+    //    }
 
-        public override ICryptoTransform CreateEncryptor( byte[] key, byte[] iv )
-        {
-            if ( key == null )
-                throw new ArgumentNullException( "key" );
+    //    public override ICryptoTransform CreateEncryptor( byte[] key, byte[] iv )
+    //    {
+    //        if ( key == null )
+    //            throw new ArgumentNullException( "key" );
 
-            if ( key.Length << 3 != 128 )
-                throw new ArgumentOutOfRangeException( "key", "key must be 128 bits long" );
+    //        if ( key.Length << 3 != 128 )
+    //            throw new ArgumentOutOfRangeException( "key", "key must be 128 bits long" );
 
-            return base.CreateEncryptor( key, iv );
-        }
-    }
+    //        return base.CreateEncryptor( key, iv );
+    //    }
+    //}
 }
