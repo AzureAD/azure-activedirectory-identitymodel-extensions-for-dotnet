@@ -291,7 +291,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// This property can be null if the content type of the most inner token is unrecognized, in that case
         ///  the content of the token is the string returned by PlainText property.
         /// </summary>
-        public JwtPayload Payload { get; private set; }
+        public JwtPayload Payload { get; internal set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -511,64 +511,64 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="cryptoProviderFactory">The <see cref="CryptoProviderFactory"/> istance used to create the decryption provider.</param>
         /// <param name="cek">The CEK.</param>
-        internal void Decrypt(CryptoProviderFactory cryptoProviderFactory, byte[] cek)
-        {
-            if (!IsEncrypted)
-            {
-                // Nothing to do if the token is not encrypted.
-                return;
-            }
+        //internal void Decrypt(CryptoProviderFactory cryptoProviderFactory, byte[] cek)
+        //{
+        //    if (!IsEncrypted)
+        //    {
+        //        // Nothing to do if the token is not encrypted.
+        //        return;
+        //    }
 
-            if (cryptoProviderFactory == null)
-            {
-                throw LogHelper.LogException<ArgumentNullException>(nameof(cryptoProviderFactory));
-            }
+        //    if (cryptoProviderFactory == null)
+        //    {
+        //        throw LogHelper.LogException<ArgumentNullException>(nameof(cryptoProviderFactory));
+        //    }
 
-            // Decrypt plaintext
-            AuthenticatedEncryptionParameters param = new AuthenticatedEncryptionParameters
-            {
-                Key = cek,
-                InitialVector = Base64UrlEncoder.DecodeBytes(RawInitializationVector),
-                AuthenticationTag = Base64UrlEncoder.DecodeBytes(RawAuthenticationTag)
-            };
-            IDecryptionProvider decryptionProvider = cryptoProviderFactory.CreateForDecrypting(null, EncryptionHeader.Enc, param);
-            if (decryptionProvider == null)
-            {
-                // TODO (Yan): Add exception message.
-                throw LogHelper.LogException<InvalidOperationException>("Failed to create decryption provider.");
-            }
+        //    // Decrypt plaintext
+        //    AuthenticatedEncryptionParameters param = new AuthenticatedEncryptionParameters
+        //    {
+        //        CEK = cek,
+        //        InitialVector = Base64UrlEncoder.DecodeBytes(RawInitializationVector),
+        //        AuthenticationTag = Base64UrlEncoder.DecodeBytes(RawAuthenticationTag)
+        //    };
+        //    EncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedDecryptionProvider(EncryptionHeader.Enc, param, Encoding.ASCII.GetBytes(EncodedEncryptionHeader));
+        //    if (decryptionProvider == null)
+        //    {
+        //        // TODO (Yan): Add exception message.
+        //        throw LogHelper.LogException<InvalidOperationException>("Failed to create decryption provider.");
+        //    }
 
-            byte[] plaintextBytes;
-            try
-            {
-                plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(RawCiphertext));
-            }
-            finally
-            {
-                cryptoProviderFactory.ReleaseDecryptionProvider(decryptionProvider);
-            }
+        //    byte[] plaintextBytes;
+        //    try
+        //    {
+        //        plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(RawCiphertext));
+        //    }
+        //    finally
+        //    {
+        //        cryptoProviderFactory.ReleaseDecryptionProvider(decryptionProvider);
+        //    }
 
-            string plaintext = Encoding.ASCII.GetString(plaintextBytes);
+        //    string plaintext = Encoding.ASCII.GetString(plaintextBytes);
 
-            // Decode plaintext, it's either payload JSON or a nested JWS token
-            if (EncryptionHeader.Cty != null)
-            {
-                // Decode nested JWS
-                Decode(plaintext, true);
-            }
-            else
-            {
-                try
-                {
-                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, plaintext);
-                    Payload = JwtPayload.Base64UrlDeserialize(plaintext);
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", plaintext, RawData);
-                }
-            }
-        }
+        //    // Decode plaintext, it's either payload JSON or a nested JWS token
+        //    if (EncryptionHeader.Cty != null)
+        //    {
+        //        // Decode nested JWS
+        //        Decode(plaintext, true);
+        //    }
+        //    else
+        //    {
+        //        try
+        //        {
+        //            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, plaintext);
+        //            Payload = JwtPayload.Base64UrlDeserialize(plaintext);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", plaintext, RawData);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Decodes the payload and signature from the JWS parts.

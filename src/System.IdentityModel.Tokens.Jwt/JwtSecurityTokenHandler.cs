@@ -453,10 +453,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
-        public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
-        {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null);
-        }
+        //public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
+        //{
+        //    return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null);
+        //}
 
         /// <summary>
         /// Creates a <see cref="JwtSecurityToken"/>
@@ -521,8 +521,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
-           // JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
-           JwtHeader header = signingCredentials == null ? null : new JwtHeader(signingCredentials, OutboundAlgorithmMap);
+            JwtHeader header = signingCredentials == null ? null : new JwtHeader(signingCredentials, OutboundAlgorithmMap);
 
             if (subject?.Actor != null)
             {
@@ -532,8 +531,8 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawHeader = header == null ? null : header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = string.Empty;
-            bool signed = signingCredentials != null;
-            if (signed)
+            bool nested = signingCredentials != null;
+            if (nested)
                 rawSignature = CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
@@ -541,8 +540,8 @@ namespace System.IdentityModel.Tokens.Jwt
             if (encryptingCredentials != null)
             {
                 // Create simple JWE or nested JWE
-                string plaintext = signed ? new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
-                return CreateEncryptedToken(plaintext, signed, encryptingCredentials, header, payload, rawHeader, rawPayload, rawSignature);
+                string plaintext = nested ? new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
+                return CreateEncryptedToken(plaintext, nested, encryptingCredentials, header, payload, rawHeader, rawPayload, rawSignature);
             }
             else
             {
@@ -551,20 +550,19 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private JwtSecurityToken CreateEncryptedToken(string plaintext, bool signed, EncryptingCredentials encryptingCredentials,
+        private JwtSecurityToken CreateEncryptedToken(string plaintext, bool nested, EncryptingCredentials encryptingCredentials,
             JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
         {
-            //  CryptoProviderFactory cryptoProviderFactory = (encryptingCredentials.CryptoProviderFactory ?? 
-            var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
+            CryptoProviderFactory cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
             if (cryptoProviderFactory == null)
                 // TODO (Yan): Add exception message.
                 throw LogHelper.LogException<ArgumentException>("EncryptingCredentials must contain a CryptoProviderFactory.");
 
-            JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, signed);
+            JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, nested);
             bool isDirectKeyUsed = JwtConstants.DirectKeyUseAlg.Equals(encryptionHeader.Alg, StringComparison.Ordinal);
 
-            EncryptionProvider encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateAuthenticatedEncryptionProvider(
+            EncryptionProvider encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(
                 isDirectKeyUsed ? encryptingCredentials.Key : null,
                 encryptingCredentials.Enc,
                 Encoding.ASCII.GetBytes(encryptionHeader.Base64UrlEncode()));
@@ -577,13 +575,12 @@ namespace System.IdentityModel.Tokens.Jwt
             try
             {
                 // Encrypt plaintext
-                //  ciphertextBytes = encryptionProvider.Encrypt(Encoding.ASCII.GetBytes(plaintext), out extraOutputs);
-                result = encryptionProvider.Encrypt(Encoding.ASCII.GetBytes(plaintext));
+                result = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(plaintext));
                 ciphertextBytes = result.CypherText;
             }
             finally
             {
-                encryptingCredentials.CryptoProviderFactory.ReleaseEncryptionProvider(encryptionProvider);
+          //      encryptingCredentials.CryptoProviderFactory.ReleaseEncryptionProvider(encryptionProvider);
             }
 
             //AuthenticatedEncryptionParameters authenticatedEncryptionParameters = extraOutputs as AuthenticatedEncryptionParameters;
@@ -595,26 +592,37 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawCipherText = Base64UrlEncoder.Encode(ciphertextBytes);
             string rawInitialVector = Base64UrlEncoder.Encode(result.InitialVector);
             string rawAuthenticationTag = Base64UrlEncoder.Encode(result.AuthenticationTag);
-            if (isDirectKeyUsed)
-                return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
-                    encryptionHeader, rawEncryptionHeader, string.Empty, rawInitialVector, rawCipherText, rawAuthenticationTag);
 
-            encryptionProvider = encryptingCredentials.CryptoProviderFactory.CreateForEncrypting(encryptingCredentials.Key, encryptingCredentials.Alg, null);
-            if (encryptionProvider == null)
-                // TODO (Yan): Add exception message.
-                throw LogHelper.LogException<InvalidOperationException>("Failed to create the key encryption provider.");
-            byte[] encryptedKeyBytes;
-            try
+            string rawEncryptedKey = string.Empty;
+            if (!isDirectKeyUsed)
             {
-                // Encrypt key
-                encryptedKeyBytes = encryptionProvider.Encrypt(authenticatedEncryptionParameters.Key, out extraOutputs);
-            }
-            finally
-            {
-                encryptingCredentials.CryptoProviderFactory.ReleaseEncryptionProvider(encryptionProvider);
+                byte[] symmetricKey = GetSymmetricSecurityKey(encryptingCredentials.Key);
+                if (symmetricKey != null)
+                {
+                    encryptionProvider = cryptoProviderFactory.CreateForKeyEncryptionProvider(symmetricKey, encryptingCredentials.Alg);
+                }
+                else
+                {
+                    encryptionProvider = cryptoProviderFactory.CreateForKeyEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
+                }
+
+                if (encryptionProvider == null)
+                    // TODO (Yan): Add exception message.
+                    throw LogHelper.LogException<InvalidOperationException>("Failed to create the key encryption provider.");
+                EncryptionResult encryptedResult;
+                try
+                {
+                    // Encrypt key
+                    encryptedResult = encryptionProvider.Encrypt(result.Key);
+                }
+                finally
+                {
+                 //   encryptingCredentials.CryptoProviderFactory.ReleaseEncryptionProvider(encryptionProvider);
+                }
+
+                rawEncryptedKey = Base64UrlEncoder.Encode(encryptedResult.Key);
             }
 
-            string rawEncryptedKey = Base64UrlEncoder.Encode(encryptedKeyBytes);
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
                 encryptionHeader, rawEncryptionHeader, rawEncryptedKey, rawInitialVector, rawCipherText, rawAuthenticationTag);
         }
@@ -748,15 +756,16 @@ namespace System.IdentityModel.Tokens.Jwt
                         {
                             // Decrypt key first
                             EncryptionProvider decryptionProvider;
-                            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-                            if (symmetricSecurityKey != null)
+                            byte[] symmetricKey = GetSymmetricSecurityKey(key);
+                            if (symmetricKey != null)
                             {
-                                decryptionProvider = validationParameters.CryptoProviderFactory.CreateForKeyDecryptionProvider(key as AsymmetricSecurityKey, jwt.EncryptionHeader.Alg, );
+                                decryptionProvider = validationParameters.CryptoProviderFactory.CreateForKeyEncryptionProvider(symmetricKey, jwt.EncryptionHeader.Alg, Base64UrlEncoder.DecodeBytes(jwt.EncryptionHeader.IV));
                             }
                             else
                             {
-                                decryptionProvider = validationParameters.CryptoProviderFactory.CreateForAsymmetricKeyWrapProvider(symmetricSecurityKey, jwt.EncryptionHeader.Alg);
+                                decryptionProvider = validationParameters.CryptoProviderFactory.CreateForKeyEncryptionProvider(key, jwt.EncryptionHeader.Alg);
                             }
+
                             cek = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawEncryptedKey));
                         }
 
@@ -892,7 +901,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="jwt">The JWS token to validate.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
-        protected virtual void ValidateJwsTokenSignature(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        private void ValidateJwsTokenSignature(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             if (jwt == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwt));
@@ -913,7 +922,11 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             else
             {
-                ValidateSignature(jwt, validationParameters);
+                JwtSecurityToken verifiedJwt = ValidateSignature(jwt.RawData, validationParameters);
+                if (verifiedJwt.SigningKey != null)
+                {
+                    jwt.SigningKey = verifiedJwt.SigningKey;
+                }
             }
 
             // Validate signing key
@@ -1033,21 +1046,22 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns><see cref="JwtSecurityToken"/> that has the signature validated if token was signed and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</returns>
         /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
         /// <para>If the 'token' signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'token'.</para></remarks>
-        protected virtual void ValidateSignature(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        protected virtual JwtSecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
-            if (jwt == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwt));
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+            if (string.IsNullOrWhiteSpace(token))
+                throw LogHelper.LogArgumentNullException("token");
 
-            string token = jwt.RawData;
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException("validationParameters");
+
+            JwtSecurityToken jwt = ReadJwtToken(token);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.RawHeader + "." + jwt.RawPayload);
             if (string.IsNullOrEmpty(jwt.RawSignature))
             {
                 if (validationParameters.RequireSignedTokens)
                     throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10504, token);
                 else
-                    return;
+                    return jwt;
             }
 
             byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(jwt.RawSignature);
@@ -1093,7 +1107,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         {
                             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10242, token);
                             jwt.SigningKey = securityKey;
-                            return;
+                            return jwt;
                         }
                     }
                     catch (Exception ex)
@@ -1470,6 +1484,25 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", plaintext, jwt.RawData);
                 }
             }
+        }
+
+        private byte[] GetSymmetricSecurityKey(SecurityKey key)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            // try to use the provided key directly.
+            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+            if (symmetricSecurityKey != null)
+                return symmetricSecurityKey.Key;
+            else
+            {
+                JsonWebKey jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey != null && jsonWebKey.K != null)
+                    return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+            }
+
+            return null;
         }
 
         /// <summary>

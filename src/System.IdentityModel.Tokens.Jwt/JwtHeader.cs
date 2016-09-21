@@ -131,6 +131,7 @@ namespace System.IdentityModel.Tokens.Jwt
             Typ = JwtConstants.HeaderType;
             if (isNested)
                 Cty = JwtConstants.HeaderType;
+
             EncryptingCredentials = encryptingCredentials;
         }
 
@@ -253,6 +254,14 @@ namespace System.IdentityModel.Tokens.Jwt
             get
             {
                 return this.GetStandardClaim(JwtHeaderParameterNames.Zip);
+            }
+        }
+
+        public string IV
+        {
+            get
+            {
+                return GetStandardClaim(JwtHeaderParameterNames.IV);
             }
         }
 

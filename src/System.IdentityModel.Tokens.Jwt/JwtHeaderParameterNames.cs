@@ -88,5 +88,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// see:https://tools.ietf.org/html/rfc7516#section-4.1.3
         /// </summary>
         public const string Zip = "zip";
+
+        /// <summary>
+        /// see:https://tools.ietf.org/html/rfc7518#section-4.7.1.1
+        /// </summary>
+        public const string IV = "iv";
     }
 }

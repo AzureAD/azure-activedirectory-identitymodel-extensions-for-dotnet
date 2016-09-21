@@ -224,30 +224,6 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        //public virtual EncryptionProvider CreateForDecrypting(SecurityKey key, string algorithm, object additionalParam)
-        //{
-        //    if (algorithm == null)
-        //        throw LogHelper.LogArgumentNullException("algorithm");
-
-        //    if (algorithm.Length == 0)
-        //        throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-        //    if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
-        //    {
-        //        EncryptionProvider decryptionProvider = CustomCryptoProvider.Create(algorithm, key) as EncryptionProvider;
-        //        if (decryptionProvider == null)
-        //            // TODO (Yan) : Add exception and throw
-        //            throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider));
-
-        //        return decryptionProvider;
-        //    }
-
-        //    if (_keyWrapAlgorithm.Contains(algorithm))
-        //    {
-
-        //    }
-        //}
-
         public virtual EncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm, byte[] authenticationData)
         {
             if (algorithm == null)
@@ -320,7 +296,7 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
-        public virtual EncryptionProvider CreateForAsymmetricKeyWrapProvider(SecurityKey key, string algorithm)
+        public virtual EncryptionProvider CreateForKeyEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException("algorithm");
@@ -358,45 +334,15 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
-        //public virtual EncryptionProvider CreateForKeyDecryptionProvider(SecurityKey key, string algorithm)
-        //{
-        //    if (key == null)
-        //        throw LogHelper.LogArgumentNullException("algorithm");
-
-        //    if (algorithm == null)
-        //        throw LogHelper.LogArgumentNullException("algorithm");
-
-        //    if (algorithm.Length == 0)
-        //        throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-        //    if (_keyWrapAsymmetricAlgorithm.Contains(algorithm))
-        //    {
-        //        switch (algorithm)
-        //        {
-        //            case SecurityAlgorithms.RsaPKCS1:
-        //            case SecurityAlgorithms.RsaOAEP:
-        //                return new RsaProvider(key, algorithm);
-
-        //            default:
-        //                throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-        //        }
-        //    }
-
-        //    // TODO(Yan) : Add exception and throw
-        //    throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-        //}
-
-        public virtual EncryptionProvider CreateForKeyEncryptionProvider(SymmetricSecurityKey key, string algorithm, byte[] iv)
+        public virtual EncryptionProvider CreateForKeyEncryptionProvider(byte[] key, string algorithm)
         {
             return null;
         }
 
-        public virtual EncryptionProvider CreateForKeyDecryptionProvider(SymmetricSecurityKey key, string algorithm, byte[] iv)
+        public virtual EncryptionProvider CreateForKeyEncryptionProvider(byte[] key, string algorithm, byte[] iv)
         {
             return null;
         }
-
-
         //public virtual EncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm)
         //{
         //    if (algorithm == null)

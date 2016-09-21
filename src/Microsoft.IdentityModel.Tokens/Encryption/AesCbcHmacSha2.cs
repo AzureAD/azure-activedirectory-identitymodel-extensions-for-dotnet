@@ -322,6 +322,9 @@ namespace Microsoft.IdentityModel.Tokens
                 // Prime the hash.
                 _hmac.TransformBlock( associatedData, 0, associatedData.Length, associatedData, 0 );
                 _hmac.TransformBlock( iv, 0, iv.Length, iv, 0 );
+
+                _iv = iv;
+                _key = key;
             }
 
             public byte[] Tag
