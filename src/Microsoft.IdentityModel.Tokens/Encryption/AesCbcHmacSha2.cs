@@ -43,13 +43,13 @@ namespace Microsoft.IdentityModel.Tokens
             return new AesCbcHmacSha2Decryptor( Name, key, iv, authenticationData );
         }
 
-        public override ICryptoTransform CreateEncryptor( byte[] key, byte[] iv, byte[] authenticationData )
+        public override ICryptoTransform CreateEncryptor( byte[] key, byte[] authenticationData )
         {
             if ( authenticationData == null )
                 throw new CryptographicException( "No associated data" );
 
             // Create the Encryptor
-            return new AesCbcHmacSha2Encryptor( Name, key, iv, authenticationData );
+            return new AesCbcHmacSha2Encryptor( Name, key, authenticationData );
         }
 
         private static void GetAlgorithmParameters( string algorithm, byte[] key, out byte[] aes_key, out byte[] hmac_key, out HMAC hmac )
@@ -114,13 +114,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             readonly byte[] _associated_data_length;
 
-            //#if NETSTANDARD1_4
-            //            AesManaged _aesManaged;
-            //#else
-            //            RijndaelManaged _aes;
-            //#endif
-
-            SymmetricAlgorithm _aes;
+            Aes _aes;
             HMAC _hmac;
 
             ICryptoTransform _inner;
@@ -128,8 +122,12 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] _iv;
             byte[] _key;
 
-            internal AesCbcHmacSha2Encryptor( string name, byte[] key, byte[] iv, byte[] associatedData )
+            internal AesCbcHmacSha2Encryptor( string name, byte[] key, byte[] associatedData )
             {
+                _aes = Aes.Create();
+                _aes.Mode = CipherMode.CBC;
+                _aes.Padding = PaddingMode.PKCS7;
+
                 if (key != null)
                 {
                     // Split the key to get the AES key, the HMAC key and the HMAC object
@@ -137,22 +135,16 @@ namespace Microsoft.IdentityModel.Tokens
 
                     GetAlgorithmParameters(name, key, out aesKey, out _hmac_key, out _hmac);
                     // Create the AES provider with giving key
-#if NETSTANDARD1_4
-                    _aes = new AesManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length * 8, Key = aesKey };
-#else
-                    _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length * 8, Key = aesKey };
-#endif
+                    _aes.KeySize = aesKey.Length * 8;
+                    _aes.Key = aesKey;
+
                     _key = key;
                 }
                 else
                 {
                     // Create the AES provider with specific key size
                     int keySize = GetKeySize(name);
-#if NETSTANDARD1_4
-                    _aes = new AesManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = keySize };
-#else
-                    _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = keySize };
-#endif
+                    _aes.KeySize = keySize;
                     _hmac_key = _aes.Key;
 
                     if (name == Aes128CbcHmacSha256.AlgorithmName)
@@ -174,10 +166,6 @@ namespace Microsoft.IdentityModel.Tokens
                     Array.Copy(_aes.Key, 0, _key, keySize >> 3, keySize >> 3);
                 }
 
-                if (iv != null)
-                {
-                    _aes.IV = iv;
-                }
                 _iv = _aes.IV;
 
                 _inner = _aes.CreateEncryptor();
@@ -290,11 +278,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             readonly byte[]  _associated_data_length;
 
-            //#if NETSTANDARD1_4
-            //#else
-            //            RijndaelManaged  _aes;
-            //#endif
-            SymmetricAlgorithm _aes;
+            Aes _aes;
             HMAC             _hmac;
 
             ICryptoTransform _inner;
@@ -309,12 +293,13 @@ namespace Microsoft.IdentityModel.Tokens
 
                 GetAlgorithmParameters( name, key, out aesKey, out _hmac_key, out _hmac );
 
-#if NETSTANDARD1_4
-                _aes = new AesManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length*8, Key = aesKey, IV = iv };
-#else
-                // Create the AES provider
-                _aes = new RijndaelManaged { Mode = CipherMode.CBC, Padding = PaddingMode.PKCS7, KeySize = aesKey.Length*8, Key = aesKey, IV = iv };
-#endif
+                _aes = Aes.Create();
+                _aes.Mode = CipherMode.CBC;
+                _aes.Padding = PaddingMode.PKCS7;
+                _aes.KeySize = aesKey.Length * 8;
+                _aes.Key = aesKey;
+                _aes.IV = iv;
+
                 _inner = _aes.CreateDecryptor();
 
                 _associated_data_length = ConvertToBigEndian( associatedData.Length * 8 );

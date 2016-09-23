@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     case SecurityAlgorithms.Aes128CbcHmacSha256:
                     case SecurityAlgorithms.Aes256CbcHmacSha512:
-                        return new AesCbcHmacSha2Provider(key, algorithm, null, authenticationData);
+                        return new AesCbcHmacSha2Provider(key, algorithm, authenticationData);
 
                     default:
                         // TODO (Yan) : Add exception and throw
@@ -516,20 +516,6 @@ namespace Microsoft.IdentityModel.Tokens
                 default:
                     return false;
             }
-        }
-
-        private byte[] GenerateCEK(int size)
-        {
-            byte[] key = new byte[size];
-            _rnd.NextBytes(key);
-            return key;
-        }
-
-        private byte[] GenerateIV(int size)
-        {
-            byte[] iv = new byte[size];
-            _rnd.NextBytes(iv);
-            return iv;
         }
 
         private SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)

@@ -371,7 +371,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP1_0
             AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
 #else
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, new ExpectedException(typeof(CryptographicException)), errors, false);
+            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
 #endif
 
             signature = GetSignature(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes);

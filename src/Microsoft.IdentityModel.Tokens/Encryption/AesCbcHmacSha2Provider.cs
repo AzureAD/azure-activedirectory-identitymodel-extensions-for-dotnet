@@ -11,39 +11,28 @@ namespace Microsoft.IdentityModel.Tokens
     {
         // Used for encrypting.
         private byte[] _cek;
-        private byte[] _iv;
         private AesCbcHmacSha2 _algorithm;
         private byte[] _authenticatedData;
-     //   private SymmetricSecurityKey _key;
 
         // Used for decrypting.
         private AuthenticatedEncryptionParameters _authenticatedEncryptionParameters;
 
         // For encryption
-        //public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData)
-        //    :this(key, algorithm, authenticationData, null)
-        //{
-        //}
-
-        // For encryption
-        public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] iv, byte[] authenticationData)
-            :this(key, algorithm, iv, authenticationData, null)
-        { }
+        public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData)
+            :this(key, algorithm, authenticationData, null)
+        {
+        }
 
         // For decryption
         public AesCbcHmacSha2Provider(string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
-            :this(null, algorithm, null, authenticationData, authenticatedEncryptionParameters)
+            :this(null, algorithm, authenticationData, authenticatedEncryptionParameters)
         {
         }
 
         // key used for encrypt, authenticatedEncryptionParameters be used for decrypt.
         // public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
-        private AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] iv, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
+        private AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
         {
-            //if (key != null && authenticatedEncryptionParameters != null)
-            //    // TODO (Yan) : Add exception log message and throw;
-            //    throw LogHelper.LogArgumentException<ArgumentException>(nameof(key), "Key and authenticatedEncryptionParameters cannot have value at the same time.");
-            
             if (authenticationData == null || authenticationData.Length == 0)
             // TODO (Yan) : Add exception log message and throw;
             throw LogHelper.LogArgumentException<ArgumentException>(nameof(authenticationData), "Encoded Protect Header could not be null or empty.");
@@ -79,11 +68,6 @@ namespace Microsoft.IdentityModel.Tokens
 
                     ValidateKeySize(_cek, algorithm);
                 }
-
-                if (iv != null)
-                {
-                    _iv = iv;
-                }
             }
 
             _authenticatedData = authenticationData;
@@ -101,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             var result = new EncryptionResult();
 
-            IAuthenticatedCryptoTransform authenticatedCryptoTransform = (IAuthenticatedCryptoTransform)_algorithm.CreateEncryptor(_cek, _iv, _authenticatedData);
+            IAuthenticatedCryptoTransform authenticatedCryptoTransform = (IAuthenticatedCryptoTransform)_algorithm.CreateEncryptor(_cek, _authenticatedData);
             result.CypherText = authenticatedCryptoTransform.TransformFinalBlock(plaintext, 0, plaintext.Length);
             result.Key = authenticatedCryptoTransform.Key;
             result.InitialVector = authenticatedCryptoTransform.IV;
@@ -126,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] result = authenticatedCryptoTransform.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
             if (!authenticatedCryptoTransform.Tag.SequenceEqual(_authenticatedEncryptionParameters.AuthenticationTag))
                 // TODO (Yan) : invalid AuthenticationData or Ciphertext, see https://tools.ietf.org/html/rfc7516#section-11.5 for security considerations on thwarting timing attachks.
-                throw LogHelper.LogException<SecurityTokenValidationException>("Invalid AAD or CipherText.");
+                throw LogHelper.LogException<SecurityTokenValidationException>(String.Format("Failed to validate CipherText : {0} with AAD : {1}.", ciphertext, _authenticatedData));
 
             return result;
         }

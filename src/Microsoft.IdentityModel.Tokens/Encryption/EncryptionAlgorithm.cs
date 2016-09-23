@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="iv">The initialization vector</param>
         /// <param name="authenticationData">Authentication data</param>
         /// <returns>An ICryptoTranform for encrypting data</returns>
-        public abstract ICryptoTransform CreateEncryptor( byte[] key, byte[] iv, byte[] authenticationData );
+        public abstract ICryptoTransform CreateEncryptor( byte[] key, byte[] authenticationData );
 
         /// <summary>
         /// Crea a decryptor for the specified key

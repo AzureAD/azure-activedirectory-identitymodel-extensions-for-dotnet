@@ -491,7 +491,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 RawData = jwtEncodedString;
 
                 // Determine the token type
-                if (string.IsNullOrWhiteSpace(Header.Enc))
+                if (string.IsNullOrWhiteSpace(header.Enc))
                 {
                     // The token is JWS
                     Header = header;
