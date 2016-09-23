@@ -804,7 +804,38 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwt == null)
                 throw LogHelper.LogArgumentException<ArgumentException>(nameof(token), LogMessages.IDX10706, new object[] { GetType(), typeof(JwtSecurityToken), token.GetType() });
 
-            return jwt.RawData;
+            if (jwt.RawData != null)
+                return jwt.RawData;
+
+            string signingInput = string.Concat(jwt.EncodedHeader, ".", jwt.EncodedPayload);
+            if (jwt.IsEncrypted)
+            {
+                // For jwe
+                string rawHeader = jwt.Header == null ? null : jwt.Header.Base64UrlEncode();
+                string rawPayload = jwt.Payload.Base64UrlEncode();
+                string rawSignature = string.Empty;
+
+                bool nested = jwt.SigningCredentials != null;
+                string plaintext = nested ? new JwtSecurityToken(jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
+                JwtSecurityToken finalJwt = CreateEncryptedToken(plaintext, nested, jwt.EncryptingCredentials, jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature);
+
+                return finalJwt.RawData;
+            }
+            else if (jwt.IsSigned)
+            {
+                // for jws
+                if (jwt.SigningCredentials == null)
+                {
+                    return signingInput + ".";
+                }
+                else
+                {
+                    return signingInput + "." + CreateEncodedSignature(signingInput, jwt.SigningCredentials);
+                }
+            }
+
+            // TODO (Yan) : Add exception
+            throw LogHelper.LogArgumentException<ArgumentException>("token", "Invalid jwt token");
         }
 
         /// <summary>

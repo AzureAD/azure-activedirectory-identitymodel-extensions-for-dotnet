@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class AesCbcHmacSha2Provider : EncryptionProvider
+    public class AuthenticatedEncryptionProvider : EncryptionProvider
     {
         // Used for encrypting.
         private byte[] _cek;
@@ -18,20 +18,20 @@ namespace Microsoft.IdentityModel.Tokens
         private AuthenticatedEncryptionParameters _authenticatedEncryptionParameters;
 
         // For encryption
-        public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData)
+        public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm, byte[] authenticationData)
             :this(key, algorithm, authenticationData, null)
         {
         }
 
         // For decryption
-        public AesCbcHmacSha2Provider(string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
+        public AuthenticatedEncryptionProvider(string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
             :this(null, algorithm, authenticationData, authenticatedEncryptionParameters)
         {
         }
 
         // key used for encrypt, authenticatedEncryptionParameters be used for decrypt.
-        // public AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
-        private AesCbcHmacSha2Provider(SecurityKey key, string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
+        // public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
+        private AuthenticatedEncryptionProvider(SecurityKey key, string algorithm, byte[] authenticationData, AuthenticatedEncryptionParameters authenticatedEncryptionParameters)
         {
             if (authenticationData == null || authenticationData.Length == 0)
             // TODO (Yan) : Add exception log message and throw;
@@ -44,11 +44,10 @@ namespace Microsoft.IdentityModel.Tokens
                 // For Decrypting
                 ValidateKeySize(authenticatedEncryptionParameters.CEK, algorithm);
                 _authenticatedEncryptionParameters = authenticatedEncryptionParameters;
-
             }
             else
             {
-                // For Encrypting              
+                // For Encrypting
                 if (key != null)
                 {
                     // try to use the provided key directly.
@@ -130,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10703);
             }
         }
-        
+
         private void ValidateKeySize(byte[] key, string algorithm)
         {
             switch (algorithm)
@@ -142,7 +141,6 @@ namespace Microsoft.IdentityModel.Tokens
                             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, algorithm, key.Length << 3);
                         break;
                     }
-                    
 
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
                     {
@@ -150,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens
                             // TODO (Yan) : Add new exception to LogMessages and throw;
                             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, algorithm, key.Length << 3);
                         break;
-                    }                    
+                    }
 
                 default:
                     //TODO (Yan) : Add new exception to logMessages and throw;

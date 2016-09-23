@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     case SecurityAlgorithms.Aes128CbcHmacSha256:
                     case SecurityAlgorithms.Aes256CbcHmacSha512:
-                        return new AesCbcHmacSha2Provider(key, algorithm, authenticationData);
+                        return new AuthenticatedEncryptionProvider(key, algorithm, authenticationData);
 
                     default:
                         // TODO (Yan) : Add exception and throw
@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     case SecurityAlgorithms.Aes128CbcHmacSha256:
                     case SecurityAlgorithms.Aes256CbcHmacSha512:
-                        return new AesCbcHmacSha2Provider(algorithm, aad, authenticatedEncryptionParameters);
+                        return new AuthenticatedEncryptionProvider(algorithm, aad, authenticatedEncryptionParameters);
                 }
             }
 
@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Tokens
         //        {
         //            case SecurityAlgorithms.Aes128CbcHmacSha256:
         //            case SecurityAlgorithms.Aes256CbcHmacSha512:
-        //                return new AesCbcHmacSha2Provider(key, algorithm, null, encodedProtectHeader);
+        //                return new AuthenticatedEncryptionProvider(key, algorithm, null, encodedProtectHeader);
         //        }
         //    }
 

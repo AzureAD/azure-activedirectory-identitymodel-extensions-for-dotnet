@@ -174,9 +174,33 @@ namespace System.IdentityModel.Tokens.Jwt
             if (payload == null)
                 throw LogHelper.LogArgumentNullException("payload");
 
-            Header = header;
+            if (header.Enc != null)
+            {
+                EncryptionHeader = header;
+            }
+            else
+            {
+                Header = header;
+            }
+
             Payload = payload;
             RawSignature = string.Empty;
+        }
+
+        public JwtSecurityToken(JwtHeader header, JwtHeader encryptionHeader, JwtPayload payload)
+        {
+            if (header == null)
+                throw LogHelper.LogArgumentNullException("header");
+
+            if (encryptionHeader == null)
+                throw LogHelper.LogArgumentNullException("encryptHeader");
+
+            if (payload == null)
+                throw LogHelper.LogArgumentNullException("payload");
+
+            Header = header;
+            EncryptionHeader = encryptionHeader;
+            Payload = payload;
         }
 
         /// <summary>
@@ -389,6 +413,11 @@ namespace System.IdentityModel.Tokens.Jwt
         public SigningCredentials SigningCredentials
         {
             get { return IsSigned ? Header.SigningCredentials : null; }
+        }
+
+        public EncryptingCredentials EncryptingCredentials
+        {
+            get { return IsEncrypted ? EncryptionHeader.EncryptingCredentials : null;  }
         }
 
         /// <summary>
