@@ -137,7 +137,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-
         [Fact]
         public void SignatureProviders_Sign()
         {
@@ -274,7 +273,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-
         [Fact]
         public void AsymmetricSignatureProvider_SupportedAlgorithms()
         {
@@ -390,8 +388,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private byte[] GetSignature(SecurityKey key, string algorithm, byte[] rawBytes)
         {
-            AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(key, algorithm, true);
-            return provider.Sign(rawBytes);
+            var provider = new AsymmetricSignatureProvider(key, algorithm, true);
+            var bytes = provider.Sign(rawBytes);
+            provider.Dispose();
+
+            return bytes;
         }
 
         private void AsymmetricSignatureProviders_Verify_Variation(SecurityKey key, string algorithm, byte[] rawBytes, byte[] signature, ExpectedException ee, List<string> errors, bool shouldSignatureSucceed)
@@ -538,6 +539,138 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ee.ProcessException(ex, errors);
             }
         }
-#endregion
+        #endregion
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(KeyDisposeData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignatureProviderDispose_Test(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
+        {
+            try
+            {
+                var jsonWebKey = securityKey as JsonWebKey;
+                var symmetricSecurityKey = securityKey as SymmetricSecurityKey;
+
+                if (symmetricSecurityKey != null || jsonWebKey?.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    SymmetricProviderDispose(testId, securityKey, algorithm, ee);
+                else
+                    AsymmetricProviderDispose(testId, securityKey, algorithm, ee);
+
+                var bytes = new byte[1024];
+                var provider = securityKey.CryptoProviderFactory.CreateForSigning(securityKey, algorithm);
+                var signature = provider.Sign(bytes);
+                securityKey.CryptoProviderFactory.ReleaseSignatureProvider(provider);
+
+                provider = securityKey.CryptoProviderFactory.CreateForSigning(securityKey, algorithm);
+                signature = provider.Sign(bytes);
+                securityKey.CryptoProviderFactory.ReleaseSignatureProvider(provider);
+
+                provider = securityKey.CryptoProviderFactory.CreateForVerifying(securityKey, algorithm);
+                provider.Verify(bytes, signature);
+
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public void AsymmetricProviderDispose(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
+        {
+            try
+            {
+                var bytes = new byte[256];
+                var asymmetricProvider = new AsymmetricSignatureProvider(securityKey, algorithm, true);
+                var signature = asymmetricProvider.Sign(bytes);
+                asymmetricProvider.Dispose();
+
+                asymmetricProvider = new AsymmetricSignatureProvider(securityKey, algorithm, true);
+                signature = asymmetricProvider.Sign(bytes);
+                asymmetricProvider.Dispose();
+
+                asymmetricProvider = new AsymmetricSignatureProvider(securityKey, algorithm, false);
+                asymmetricProvider.Verify(bytes, signature);
+
+                ee.ProcessNoException();
+            }
+            catch(Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public void SymmetricProviderDispose(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
+        {
+            try
+            {
+                var bytes = new byte[256];
+                var symmetricProvider = new SymmetricSignatureProvider(securityKey, algorithm);
+                var signature = symmetricProvider.Sign(bytes);
+                symmetricProvider.Dispose();
+
+                symmetricProvider = new SymmetricSignatureProvider(securityKey, algorithm);
+                signature = symmetricProvider.Sign(bytes);
+                symmetricProvider.Dispose();
+
+                symmetricProvider = new SymmetricSignatureProvider(securityKey, algorithm);
+                symmetricProvider.Verify(bytes, signature);
+
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, SecurityKey, string, ExpectedException> KeyDisposeData()
+        {
+            var dataSet = new TheoryData<string, SecurityKey, string, ExpectedException>();
+
+            dataSet.Add(
+                "Test1",
+                new RsaSecurityKey(new RSACryptoServiceProvider(2048)),
+                SecurityAlgorithms.RsaSha256,
+                ExpectedException.NoExceptionExpected
+            );
+
+            dataSet.Add(
+                "Test2",
+                new RsaSecurityKey(KeyingMaterial.RsaParameters_2048),
+                SecurityAlgorithms.RsaSha256,
+                ExpectedException.NoExceptionExpected
+            );
+
+            dataSet.Add(
+                "Test3",
+                KeyingMaterial.JsonWebKeyRsa256,
+                SecurityAlgorithms.RsaSha256,
+                ExpectedException.NoExceptionExpected
+            );
+
+            dataSet.Add(
+                "Test4",
+                KeyingMaterial.JsonWebKeyEcdsa256,
+                SecurityAlgorithms.EcdsaSha256,
+                ExpectedException.NoExceptionExpected
+            );
+
+            dataSet.Add(
+                "Test5",
+                KeyingMaterial.ECDsa256Key,
+                SecurityAlgorithms.EcdsaSha256,
+                ExpectedException.NoExceptionExpected
+            );
+
+            dataSet.Add(
+                "Test6",
+                KeyingMaterial.SymmetricSecurityKey2_256,
+                SecurityAlgorithms.HmacSha256,
+                ExpectedException.NoExceptionExpected
+            );
+
+            return dataSet;
+        }
     }
 }
