@@ -546,6 +546,12 @@ namespace System.IdentityModel.Tokens.Jwt
             else
             {
                 // Create JWS
+                if (header == null)
+                {
+                    header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
+                    rawHeader = header.Base64UrlEncode();
+                }
+
                 return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
             }
         }

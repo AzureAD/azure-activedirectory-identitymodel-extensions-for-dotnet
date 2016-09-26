@@ -307,8 +307,6 @@ namespace System.IdentityModel.Tokens.Jwt
             get { return Payload.Iss; }
         }
 
-        public bool IsJwe { get; set; }
-
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
         /// Note that if this JWT is nested, this property represnts the payload of the most inner token.
