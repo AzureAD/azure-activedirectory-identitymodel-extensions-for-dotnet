@@ -491,7 +491,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the size of key in bytes
         /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
+        /// <param name="curveId">Represents ecdsa curve -P256, P384, P521</param>
         /// <returns>Size of the key in bytes</returns>
         private uint GetKeyByteCount(string curveId)
         {
@@ -507,7 +507,8 @@ namespace Microsoft.IdentityModel.Tokens
                 case JsonWebKeyECTypes.P384:
                     keyByteCount = 48;
                     break;
-                case JsonWebKeyECTypes.P512:
+                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
+                case JsonWebKeyECTypes.P521:
                     keyByteCount = 64;
                     break;
                 default:
@@ -542,7 +543,8 @@ namespace Microsoft.IdentityModel.Tokens
                     else
                         magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
                     break;
-                case JsonWebKeyECTypes.P512:
+                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
+                case JsonWebKeyECTypes.P521:
                     if (willCreateSignatures)
                         magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC;
                     else
