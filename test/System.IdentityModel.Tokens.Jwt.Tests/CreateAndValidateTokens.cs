@@ -325,6 +325,39 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripTokens: Case '{0}'", createParams.Case), context.Diffs);
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        //       [Theory, MemberData(nameof(CreationJWEParams))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Fact]
+        public void RoundTripJWETokens(/*CreateAndValidateParams createJWEParams*/)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimTypeMap.Clear();
+            // Test alg = "dir"
+            //  var encodedJwt1 = handler.CreateEncodedJwt(createJWEParams.SecurityTokenDescriptor);
+            SecurityTokenDescriptor securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_JWE(ClaimSets.DefaultClaims);
+            //createParams.Add(new CreateAndValidateParams
+            //{
+            //    Case = "ClaimSets.Simple_DirKey_JWE",
+            //    ExceptionType = null,
+            //    SecurityTokenDescriptor = securityTokenDescriptor,
+            //    TokenValidationParameters = IdentityUtilities.DefaultDirectKeyTokenValidationParameters
+            //});
+            var encodedJwt1 = handler.CreateEncodedJwt(securityTokenDescriptor);
+
+            TokenValidationParameters validationParameters =
+                new TokenValidationParameters
+                {
+                    TokenDecryptionKey = IdentityUtilities.DefaultSymmetricEncryptionKey,
+                    AuthenticationType = IdentityUtilities.DefaultAuthenticationType,
+                    ValidAudience = IdentityUtilities.DefaultAudience,
+                    ValidIssuer = IdentityUtilities.DefaultIssuer,
+                };
+
+            SecurityToken token = null;
+            var claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
+        }
+
         public static TheoryData<CreateAndValidateParams> CreationParams()
         {
             var createParams = new TheoryData<CreateAndValidateParams>();
@@ -384,6 +417,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExceptionType = null,
                 SecurityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor(ClaimSets.GetDefaultRoleClaims(handler)),
                 TokenValidationParameters = IdentityUtilities.DefaultSymmetricTokenValidationParameters
+            });
+
+            return createParams;
+        }
+
+        public static TheoryData<CreateAndValidateParams> CreationJWEParams()
+        {
+            var createParams = new TheoryData<CreateAndValidateParams>();
+            var expires = DateTime.UtcNow + TimeSpan.FromDays(1);
+            var handler = new JwtSecurityTokenHandler();
+            var nbf = DateTime.UtcNow;
+
+            SecurityTokenDescriptor securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_JWE(ClaimSets.DefaultClaims);
+           // securityTokenDescriptor.EncryptingCredentials = new EncryptingCredentials(IdentityUtilities.DefaultSymmetricEncryptionKey, JwtConstants.DirectKeyUseAlg, Aes128CbcHmacSha256.AlgorithmName);
+            createParams.Add(new CreateAndValidateParams
+            {
+                Case = "ClaimSets.Simple_DirKey_JWE",
+                ExceptionType = null,
+                SecurityTokenDescriptor = securityTokenDescriptor,
+                TokenValidationParameters = IdentityUtilities.DefaultDirectKeyTokenValidationParameters
             });
 
             return createParams;

@@ -379,7 +379,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public string RawSignature { get; private set; }
 
         /// <summary>
-        /// Gets a flag indicating whether this token is signed.
+        /// Gets a flag indicating whether this token is signed(JWS).
         /// </summary>
         public bool IsSigned => Header != null;
 

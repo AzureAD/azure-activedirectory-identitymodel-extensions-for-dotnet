@@ -39,7 +39,6 @@ namespace Microsoft.IdentityModel.Tokens
     public class CryptoProviderFactory
     {
         private static CryptoProviderFactory _default;
-        private static Random _rnd = new Random();
 
         private static readonly HashSet<string> DefaultAsymmetrickeyWrapAlgorithm = new HashSet<string>()
         {
@@ -111,6 +110,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
+            _keyWrapAsymmetricAlgorithm = new HashSet<string>(DefaultAsymmetrickeyWrapAlgorithm);
+            _keyWrapSymmetricAlgorithm = new HashSet<string>(DefaultSymmetrickeyWrapAlgorithm);
+            _contentEncryptAlgorithm = new HashSet<string>(DefaultContentEncryptAlgorithm);
             CustomCryptoProvider = other.CustomCryptoProvider;
         }
 
