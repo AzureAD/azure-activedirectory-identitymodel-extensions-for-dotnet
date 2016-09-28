@@ -107,10 +107,6 @@ namespace Microsoft.IdentityModel.Tokens
             IAuthenticatedCryptoTransform authenticatedCryptoTransform = (IAuthenticatedCryptoTransform)_algorithm.CreateDecryptor(_authenticatedEncryptionParameters.CEK,
                 _authenticatedEncryptionParameters.InitialVector, _authenticatedData);
             byte[] result = authenticatedCryptoTransform.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
-            if (!authenticatedCryptoTransform.Tag.SequenceEqual(_authenticatedEncryptionParameters.AuthenticationTag))
-                // TODO (Yan) : invalid AuthenticationData or Ciphertext, see https://tools.ietf.org/html/rfc7516#section-11.5 for security considerations on thwarting timing attachks.
-                throw LogHelper.LogException<SecurityTokenValidationException>(String.Format("Failed to validate CipherText : {0} with AAD : {1}.", ciphertext, _authenticatedData));
-
             return result;
         }
 

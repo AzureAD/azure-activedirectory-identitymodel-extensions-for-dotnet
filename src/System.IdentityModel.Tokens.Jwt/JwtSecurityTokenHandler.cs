@@ -328,13 +328,40 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             // Quick fix prior to beta8, will add configuration in RC
-            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
-            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            bool isMatch = false;
+            // Quick fix prior to beta8, will add configuration in RC
+            var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
+            if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
             }
 
-            if( !regex.IsMatch(tokenString))
+            if (regexJws.IsMatch(tokenString))
+                isMatch = true;
+            else
+            {
+                var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
+                if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                {
+                    regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                }
+
+                if (regexJwe.IsMatch(tokenString))
+                    isMatch = true;
+                else
+                {
+                    var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
+                    if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexDirAlgJwe.IsMatch(tokenString))
+                        isMatch = true;
+                }
+            }
+
+            if (!isMatch)
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
                 return false;
@@ -711,7 +738,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // Decrypt token if encrypted
             if (jwt.IsEncrypted)
             {
-                string kid = jwt.Header.Kid;
+                string kid = jwt.EncryptionHeader.Kid;
                 IEnumerable<SecurityKey> securityKeys = null;
                 if (validationParameters.TokenDecryptionKeyResolver != null)
                 {
@@ -735,7 +762,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (securityKeys == null)
                 {
                     // Try all keys since there is no keyidentifier
-                    securityKeys = GetAllDecryptionKeys(token, jwt, kid, validationParameters);
+                    securityKeys = GetAllDecryptionKeys(validationParameters);
                 }
                 
                 if (securityKeys != null)
@@ -746,6 +773,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     byte[] cek;
                     foreach (SecurityKey key in securityKeys)
                     {
+                        CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                         if (JwtConstants.DirectKeyUseAlg.Equals(jwt.EncryptionHeader.Alg, StringComparison.Ordinal))
                         {
                             // Use key as CEK directly
@@ -765,17 +793,17 @@ namespace System.IdentityModel.Tokens.Jwt
                             byte[] symmetricKey = GetSymmetricSecurityKey(key);
                             if (symmetricKey != null)
                             {
-                                decryptionProvider = validationParameters.CryptoProviderFactory.CreateForKeyEncryptionProvider(symmetricKey, jwt.EncryptionHeader.Alg, Base64UrlEncoder.DecodeBytes(jwt.EncryptionHeader.IV));
+                                decryptionProvider = cryptoProviderFactory.CreateForKeyEncryptionProvider(symmetricKey, jwt.EncryptionHeader.Alg, Base64UrlEncoder.DecodeBytes(jwt.EncryptionHeader.IV));
                             }
                             else
                             {
-                                decryptionProvider = validationParameters.CryptoProviderFactory.CreateForKeyEncryptionProvider(key, jwt.EncryptionHeader.Alg);
+                                decryptionProvider = cryptoProviderFactory.CreateForKeyEncryptionProvider(key, jwt.EncryptionHeader.Alg);
                             }
 
                             cek = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawEncryptedKey));
                         }
 
-                        Decrypt(jwt, validationParameters.CryptoProviderFactory, cek);
+                        Decrypt(jwt, cryptoProviderFactory, cek);
                     }
                 }
             }
@@ -1174,7 +1202,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     yield return securityKey;
         }
         
-        private IEnumerable<SecurityKey> GetAllDecryptionKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
+        private IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10243);
             if (validationParameters.TokenDecryptionKey != null)

@@ -55,14 +55,40 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
                 throw LogHelper.LogArgumentNullException(nameof(jwtEncodedString));
 
+            bool isMatch = false;
             // Quick fix prior to beta8, will add configuration in RC
-            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
-            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
+            if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
             }
 
-            if (!regex.IsMatch(jwtEncodedString))
+            if (regexJws.IsMatch(jwtEncodedString))
+                isMatch = true;
+            else
+            {
+                var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
+                if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                {
+                    regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                }
+
+                if (regexJwe.IsMatch(jwtEncodedString))
+                    isMatch = true;
+                else
+                {
+                    var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
+                    if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexDirAlgJwe.IsMatch(jwtEncodedString))
+                        isMatch = true;
+                }
+            }
+
+            if (!isMatch)
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
 
             Decode(jwtEncodedString);
@@ -651,7 +677,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
             }
 
-            this.VerifyBase64UrlString(tokenParts[1], "encrypted key");
+            this.VerifyBase64UrlString(tokenParts[1], "encrypted key", true);
             this.VerifyBase64UrlString(tokenParts[2], "initial vector");
             this.VerifyBase64UrlString(tokenParts[3], "cyphertext");
             this.VerifyBase64UrlString(tokenParts[4], "authentication tag");
