@@ -166,6 +166,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static SecurityKey DefaultAsymmetricSigningKey { get { return new X509SecurityKey(KeyingMaterial.DefaultCert_2048); } }
         public static SecurityKey DefaultSymmetricSigningKey {  get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
         public static SecurityKey DefaultSymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
+        public static SecurityKey SymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256); } }
         public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); } }
         public const string DefaultClaimsIdentityLabel = "DefaultClaimsIdentityLabel";
         public const string DefaultClaimsIdentityLabelDup = "DefaultClaimsIdentityLabelDup";

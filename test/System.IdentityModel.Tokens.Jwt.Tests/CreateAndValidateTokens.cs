@@ -356,6 +356,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             SecurityToken token = null;
             var claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
+
+            // negative case
+            //    string symmetricKeyString = "gWm6iSKi0g4Uf18A8tODC4hxRG5yrMRJivmB3Z7kOlw=";
+            //byte[] symmetricKeyBytes = Convert.FromBase64String(symmetricKeyString);
+            //validationParameters.TokenDecryptionKey = new SymmetricSecurityKey(symmetricKeyBytes);//IdentityUtilities.SymmetricEncryptionKey;
+            validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
+            token = null;
+            claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
         }
 
         public static TheoryData<CreateAndValidateParams> CreationParams()
