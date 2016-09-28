@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
             : base(key, algorithm)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
+                throw LogHelper.LogArgumentNullException("key");
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, (algorithm ?? "null"), key), nameof(algorithm)));
@@ -125,10 +125,10 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] key)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
+                throw LogHelper.LogArgumentNullException("key");
 
             switch (algorithm)
             {
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("input", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "input"))); 
+                throw LogHelper.LogArgumentNullException("input");
 
             if (input.Length == 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10624));
@@ -192,10 +192,10 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(input), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(input)))); 
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (signature == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(signature), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(signature)))); 
+                throw LogHelper.LogArgumentNullException(nameof(signature));
 
             if (input.Length == 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10625));

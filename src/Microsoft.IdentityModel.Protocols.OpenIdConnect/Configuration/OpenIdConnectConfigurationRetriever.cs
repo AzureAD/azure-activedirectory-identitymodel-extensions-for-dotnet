@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -81,11 +80,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static async Task<OpenIdConnectConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(address), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(address)))); 
+                throw LogHelper.LogArgumentNullException(nameof(address));
 
             if (retriever == null)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(retriever), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(retriever)))); 
+                throw LogHelper.LogArgumentNullException(nameof(retriever));
             }
 
             string doc = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);

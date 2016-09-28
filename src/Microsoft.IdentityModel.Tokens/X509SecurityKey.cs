@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 return false;
 
-            return other.Certificate.ToString() == this._certificate.ToString();
+            return other.Certificate.Thumbprint.ToString() == this._certificate.Thumbprint.ToString();
         }
 
         /// <summary>
