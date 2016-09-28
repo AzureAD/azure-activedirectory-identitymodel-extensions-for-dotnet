@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens
         static public JsonWebKey Create(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
             return new JsonWebKey(json);
         }
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
         public JsonWebKey(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
             try
             {
