@@ -134,7 +134,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _inboundClaimTypeMap = value;
             }
@@ -157,7 +157,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _outboundClaimTypeMap = value;
             }
@@ -190,7 +190,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _inboundClaimFilter = value;
             }
@@ -211,7 +211,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 shortClaimTypeProperty = value;
             }
@@ -232,7 +232,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 jsonClaimTypeProperty = value;
             }
@@ -320,7 +320,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override bool CanReadToken(string tokenString)
         {
             if (tokenString == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("tokenString", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "tokenString"))); 
+                throw LogHelper.LogArgumentNullException("tokenString");
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
@@ -352,7 +352,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(tokenDescriptor), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(tokenDescriptor)))); 
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
@@ -396,7 +396,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual JwtSecurityToken CreateJwtSecurityToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(tokenDescriptor), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(tokenDescriptor)))); 
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
@@ -440,7 +440,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(tokenDescriptor), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(tokenDescriptor)))); 
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
@@ -510,7 +510,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (token == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
+                throw LogHelper.LogArgumentNullException("token");
 
             if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
@@ -550,10 +550,10 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(token), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(token)))); 
+                throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(validationParameters), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(validationParameters)))); 
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
@@ -675,7 +675,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
+                throw LogHelper.LogArgumentNullException("token");
 
             JwtSecurityToken jwt = token as JwtSecurityToken;
             if (jwt == null)
@@ -698,10 +698,10 @@ namespace System.IdentityModel.Tokens.Jwt
         internal static string CreateEncodedSignature(string input, SigningCredentials signingCredentials)
         {
             if (input == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(input), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(input)))); 
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (signingCredentials == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(signingCredentials), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(signingCredentials)))); 
+                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
 
             var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm);
@@ -763,10 +763,10 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual JwtSecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(token))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
+                throw LogHelper.LogArgumentNullException("token");
 
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             JwtSecurityToken jwt = ReadJwtToken(token);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.RawHeader + "." + jwt.RawPayload);
@@ -861,7 +861,7 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual ClaimsIdentity CreateClaimsIdentity(JwtSecurityToken jwt, string issuer, TokenValidationParameters validationParameters)
         {
             if (jwt == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("jwt", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "jwt"))); 
+                throw LogHelper.LogArgumentNullException("jwt");
 
             if (string.IsNullOrWhiteSpace(issuer))
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
@@ -931,7 +931,7 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual string CreateActorValue(ClaimsIdentity actor)
         {
             if (actor == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(actor), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(actor)))); 
+                throw LogHelper.LogArgumentNullException(nameof(actor));
 
             if (actor.BootstrapContext != null)
             {
@@ -1013,10 +1013,10 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             if (securityToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("securityToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityToken"))); 
+                throw LogHelper.LogArgumentNullException("securityToken");
 
             if (!string.IsNullOrEmpty(securityToken.Header.Kid))
             {

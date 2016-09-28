@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _default = value;
             }
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         public CryptoProviderFactory(CryptoProviderFactory other)
         {
             if (other == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(other), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(other)))); 
+                throw LogHelper.LogArgumentNullException(nameof(other));
 
             CustomCryptoProvider = other.CustomCryptoProvider;
         }
@@ -308,10 +308,10 @@ namespace Microsoft.IdentityModel.Tokens
         private SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(key)))); 
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(algorithm)))); 
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {

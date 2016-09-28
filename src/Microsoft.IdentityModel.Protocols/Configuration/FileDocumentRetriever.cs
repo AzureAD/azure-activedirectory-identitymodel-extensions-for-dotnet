@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("address", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "address"))); 
+                throw LogHelper.LogArgumentNullException("address");
 
             try
             {

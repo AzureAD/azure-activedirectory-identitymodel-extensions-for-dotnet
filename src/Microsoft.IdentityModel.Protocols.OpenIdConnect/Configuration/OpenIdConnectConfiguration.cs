@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static OpenIdConnectConfiguration Create(string json)
         {
             if (string.IsNullOrEmpty(json))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10808, json);
             return new OpenIdConnectConfiguration(json);
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(configuration)))); 
+                throw LogHelper.LogArgumentNullException(nameof(configuration));
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
             return JsonConvert.SerializeObject(configuration);
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public OpenIdConnectConfiguration(string json)
         {
             if(string.IsNullOrEmpty(json))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(json), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(json)))); 
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
             try
             {
