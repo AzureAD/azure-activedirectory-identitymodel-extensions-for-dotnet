@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Tokens
         // CEK
         public byte[] Key { get; set; }
 
-        public byte[] CypherText { get; set; }
+        public byte[] CipherText { get; set; }
 
         public byte[] InitialVector { get; set; }
 

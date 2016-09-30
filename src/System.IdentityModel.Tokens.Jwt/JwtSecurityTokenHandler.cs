@@ -609,7 +609,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 // Encrypt plaintext
                 result = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(plaintext));
-                ciphertextBytes = result.CypherText;
+                ciphertextBytes = result.CipherText;
             }
             finally
             {
@@ -1526,7 +1526,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             finally
             {
-             //   cryptoProviderFactory.ReleaseDecryptionProvider(decryptionProvider);
+                //   cryptoProviderFactory.ReleaseDecryptionProvider(decryptionProvider);
             }
 
             string plaintext = Encoding.ASCII.GetString(plaintextBytes);

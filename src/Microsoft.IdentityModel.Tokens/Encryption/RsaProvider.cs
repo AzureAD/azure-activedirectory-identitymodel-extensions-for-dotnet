@@ -68,14 +68,14 @@ namespace Microsoft.IdentityModel.Tokens
             ResolveAlgorithm(_key, false);
             if (_rsa != null)
             {
-                result.CypherText = _rsa.Encrypt(plaintext, _padding);
+                result.CipherText = _rsa.Encrypt(plaintext, _padding);
                 return result;
             }
 #else
             ResolveAlgorithm(_key, false);
             if (_rsaCryptoServiceProvider != null)
             {
-                result.CypherText = _rsaCryptoServiceProvider.Encrypt(plaintext, _fOAEP);
+                result.CipherText = _rsaCryptoServiceProvider.Encrypt(plaintext, _fOAEP);
                 return result;
             }
 #endif

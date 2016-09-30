@@ -212,6 +212,32 @@ namespace Microsoft.IdentityModel.Tokens
             return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
         }
 
+        public bool Verify(byte[] input, byte[] signature, int length)
+        {
+            if (input == null)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (signature == null)
+                throw LogHelper.LogArgumentNullException(nameof(signature));
+
+            if (input.Length == 0)
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625);
+
+            if (signature.Length == 0)
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626);
+
+            if (_disposed)
+                throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
+
+            if (_keyedHash == null)
+                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
+
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
+            byte[] hashBytes = new byte[length];
+            Array.Copy(_keyedHash.ComputeHash(input), hashBytes, length);
+            return Utility.AreEqual(signature, hashBytes);
+        }
+
         #region IDisposable Members
 
         /// <summary>
