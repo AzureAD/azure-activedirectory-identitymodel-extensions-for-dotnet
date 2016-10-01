@@ -1512,7 +1512,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 InitialVector = Base64UrlEncoder.DecodeBytes(jwt.RawInitializationVector),
                 AuthenticationTag = Base64UrlEncoder.DecodeBytes(jwt.RawAuthenticationTag)
             };
-            EncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedDecryptionProvider(jwt.EncryptionHeader.Enc, param, Encoding.ASCII.GetBytes(jwt.EncodedEncryptionHeader));
+            EncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedDecryptionProvider(jwt.EncryptionHeader.Enc, param, Encoding.ASCII.GetBytes(jwt.RawEncryptionHeader));
             if (decryptionProvider == null)
             {
                 // TODO (Yan): Add exception message.

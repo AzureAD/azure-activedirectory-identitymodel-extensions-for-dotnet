@@ -114,8 +114,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             var result = new EncryptionResult();
 
-            result.CipherText = _aes.CreateEncryptor().TransformFinalBlock(plaintext, 0, plaintext.Length);
-            result.Key = new byte[_aes.KeySize >> 3 + _symmetricSignatureProvider.Key.KeySize >> 3];
+            // result.CipherText = _aes.CreateEncryptor().TransformFinalBlock(plaintext, 0, plaintext.Length);
+            result.CipherText = EncryptionUtilities.Transform(_aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
+             result.Key = new byte[(_aes.KeySize >> 3) + (_symmetricSignatureProvider.Key.KeySize >> 3)];
             SymmetricSecurityKey hmacKey = _symmetricSignatureProvider.Key as SymmetricSecurityKey;
             if (hmacKey == null)
                 throw LogHelper.LogException<ArgumentException>("HMAC key is not symmetric key.");
@@ -166,11 +167,12 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(ciphertext, 0, macBytes, _authenticatedData.Length + _aes.IV.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, _authenticatedData.Length + _aes.IV.Length + ciphertext.Length, al.Length);
             if (!_symmetricSignatureProvider.Verify(macBytes, _authenticationTag, hmacKey.Key.Length))
-                throw LogHelper.LogException<ArgumentException>(string.Format("Failed to decrypt {0} with enc key {1}, hmac key {2}", ciphertext, _aes.Key, hmacKey.Key));
+                throw LogHelper.LogException<ArgumentException>(string.Format("Failed to decrypt {0} with enc key {1}, hmac key {2}", ciphertext.ToString(), _aes.Key.ToString(), hmacKey.Key).ToString());
 
             try
             {
-                return _aes.CreateDecryptor().TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+                //   return _aes.CreateDecryptor().TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+                return EncryptionUtilities.Transform(_aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
             }
             catch (Exception ex)
             {
