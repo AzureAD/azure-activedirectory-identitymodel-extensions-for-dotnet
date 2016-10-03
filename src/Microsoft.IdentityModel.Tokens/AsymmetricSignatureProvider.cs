@@ -422,13 +422,13 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(webKey));
 
             if (webKey.Crv == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.Crv), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.Crv)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey.Crv));
 
             if (webKey.X == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.X), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.X)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey.X));
 
             if (webKey.Y == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.Y), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.Y)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey.Y));
 
             GCHandle keyBlobHandle = new GCHandle();
             try
@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (willCreateSignatures)
                 {
                     if (webKey.D == null)
-                        throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.D), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.D)))); 
+                        throw LogHelper.LogArgumentNullException(nameof(webKey.D));
 
                     byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
                     foreach (byte b in d)
