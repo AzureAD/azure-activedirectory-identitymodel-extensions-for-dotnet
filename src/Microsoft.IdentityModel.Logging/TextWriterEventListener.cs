@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Logging
         public TextWriterEventListener(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-                throw LogHelper.LogArgumentNullException("filePath");
+                throw LogHelper.LogArgumentNullException(nameof(filePath));
 
             Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
             _streamWriter = new StreamWriter(fileStream);
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Logging
         public TextWriterEventListener(StreamWriter streamWriter)
         {
             if (streamWriter == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("streamWriter", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "streamWriter"))); 
+                throw LogHelper.LogArgumentNullException("streamWriter");
 
             _streamWriter = streamWriter;
             _disposeStreamWriter = false;
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Logging
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             if (eventData == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("eventData", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "eventData"))); 
+                throw LogHelper.LogArgumentNullException("eventData");
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {

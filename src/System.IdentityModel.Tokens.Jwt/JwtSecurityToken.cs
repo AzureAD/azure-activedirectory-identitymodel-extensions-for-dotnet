@@ -53,7 +53,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(string jwtEncodedString)
         {
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(jwtEncodedString)))); 
+                throw LogHelper.LogArgumentNullException(nameof(jwtEncodedString));
 
             // Quick fix prior to beta8, will add configuration in RC
             var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
@@ -83,19 +83,19 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
         {
             if (header == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(header), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(header)))); 
+                throw LogHelper.LogArgumentNullException(nameof(header));
 
             if (payload == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(payload), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(payload)))); 
+                throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrWhiteSpace(rawHeader))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(rawHeader), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(rawHeader)))); 
+                throw LogHelper.LogArgumentNullException(nameof(rawHeader));
 
             if (string.IsNullOrWhiteSpace(rawPayload))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(rawPayload), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(rawPayload)))); 
+                throw LogHelper.LogArgumentNullException(nameof(rawPayload));
 
             if (rawSignature == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(rawSignature), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(rawSignature)))); 
+                throw LogHelper.LogArgumentNullException(nameof(rawSignature));
 
             Header = header;
             Payload = payload;
@@ -116,10 +116,10 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(JwtHeader header, JwtPayload payload)
         {
             if (header == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("header", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "header"))); 
+                throw LogHelper.LogArgumentNullException("header");
 
             if (payload == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("payload", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "payload"))); 
+                throw LogHelper.LogArgumentNullException("payload");
 
             Header = header;
             Payload = payload;

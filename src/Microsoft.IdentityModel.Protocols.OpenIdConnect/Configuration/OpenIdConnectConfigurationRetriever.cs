@@ -31,7 +31,6 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {

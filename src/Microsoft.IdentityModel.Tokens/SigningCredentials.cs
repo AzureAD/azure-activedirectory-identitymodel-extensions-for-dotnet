@@ -44,10 +44,10 @@ namespace Microsoft.IdentityModel.Tokens
         public SigningCredentials(SecurityKey key, string algorithm)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
+                throw LogHelper.LogArgumentNullException("key");
 
             if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             Algorithm = algorithm;
             Key = key;

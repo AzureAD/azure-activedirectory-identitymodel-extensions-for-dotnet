@@ -226,7 +226,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateAuthenticationResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             // no 'response' is recieved or 'id_token' in the response is null 
             if (validationContext.ProtocolMessage == null)
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateTokenResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             // no 'response' is recieved 
             if (validationContext.ProtocolMessage == null)
@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateUserInfoResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (string.IsNullOrEmpty(validationContext.UserInfoEndpointResponse))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10337));
@@ -352,10 +352,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         protected virtual void ValidateIdToken(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext.ValidatedIdToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext.ValidatedIdToken"))); 
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             // if user sets the custom validator, we call the delegate. The default checks for multiple audiences and azp are not executed.
             if (this.IdTokenValidator != null)
@@ -463,7 +463,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _cryptoProviderFactory = value;
             }
@@ -515,10 +515,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10304);
 
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext.ValidatedIdToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext.ValidatedIdToken"))); 
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10333));
@@ -565,10 +565,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10309);
 
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext.ValidatedIdToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext.ValidatedIdToken"))); 
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10333));
@@ -613,10 +613,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10319);
 
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ValidatedIdToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext.ValidatedIdToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext.ValidatedIdToken"))); 
+                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
 
             string nonceFoundInJwt = validationContext.ValidatedIdToken.Payload.Nonce;
             if (!RequireNonce && string.IsNullOrEmpty(validationContext.Nonce) && string.IsNullOrEmpty(nonceFoundInJwt))
@@ -690,7 +690,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             if (validationContext == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationContext", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationContext"))); 
+                throw LogHelper.LogArgumentNullException("validationContext");
 
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10333));

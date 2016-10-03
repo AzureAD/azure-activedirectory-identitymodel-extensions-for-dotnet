@@ -117,7 +117,7 @@ namespace System.IdentityModel.Tokens.Saml
         protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("samlToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "samlToken"))); 
+                throw LogHelper.LogArgumentNullException("samlToken");
 
             if (string.IsNullOrWhiteSpace(issuer))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10221));
@@ -136,7 +136,7 @@ namespace System.IdentityModel.Tokens.Saml
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("tokenDescriptor", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "tokenDescriptor"))); 
+                throw LogHelper.LogArgumentNullException("tokenDescriptor");
 
             throw new NotImplementedException();
         }
@@ -233,11 +233,11 @@ namespace System.IdentityModel.Tokens.Saml
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("securityToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityToken"))); 
+                throw LogHelper.LogArgumentNullException("securityToken");
 
 
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));

@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (value == null)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
                 };
 
                 _cryptoProviderFactory = value;

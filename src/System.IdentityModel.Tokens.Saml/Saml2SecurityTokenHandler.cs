@@ -231,10 +231,10 @@ namespace System.IdentityModel.Tokens.Saml2
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             if (reader == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("reader", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "reader"))); 
+                throw LogHelper.LogArgumentNullException("reader");
 
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             throw new NotImplementedException();
         }
@@ -253,10 +253,10 @@ namespace System.IdentityModel.Tokens.Saml2
         {
             validatedToken = null;
             if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("securityToken", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "securityToken"))); 
+                throw LogHelper.LogArgumentNullException("securityToken");
 
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("validationParameters", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "validationParameters"))); 
+                throw LogHelper.LogArgumentNullException("validationParameters");
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
             {
@@ -426,7 +426,7 @@ namespace System.IdentityModel.Tokens.Saml2
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
+                throw LogHelper.LogArgumentNullException("token");
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)
@@ -447,10 +447,10 @@ namespace System.IdentityModel.Tokens.Saml2
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("writer", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "writer"))); 
+                throw LogHelper.LogArgumentNullException("writer");
 
             if (token == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("token", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "token"))); 
+                throw LogHelper.LogArgumentNullException("token");
 
             Saml2SecurityToken samlSecurityToken = token as Saml2SecurityToken;
             if (samlSecurityToken == null)

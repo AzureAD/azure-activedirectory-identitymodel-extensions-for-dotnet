@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _postTitle = value;
             }
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual void RemoveParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(parameter), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(parameter)))); 
+                throw LogHelper.LogArgumentNullException(nameof(parameter));
 
             if (_parameters.ContainsKey(parameter))
                 _parameters.Remove(parameter);
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Protocols
         public void SetParameter(string parameter, string value) 
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("parameter", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "parameter"))); 
+                throw LogHelper.LogArgumentNullException("parameter");
 
             if (value == null)
             {
@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _scriptButtonText = value;
             }
@@ -268,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _scriptDisabledText = value;
             }

@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens
             : base(key, algorithm)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
+                throw LogHelper.LogArgumentNullException("key");
 
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             switch (algorithm)
             {
@@ -206,10 +206,10 @@ namespace Microsoft.IdentityModel.Tokens
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
+                throw LogHelper.LogArgumentNullException("key");
 
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             _hashAlgorithm = GetHashAlgorithmName(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
@@ -290,7 +290,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             switch (algorithm)
             {
@@ -319,10 +319,10 @@ namespace Microsoft.IdentityModel.Tokens
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("key", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "key"))); 
+                throw LogHelper.LogArgumentNullException("key");
 
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("algorithm", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "algorithm"))); 
+                throw LogHelper.LogArgumentNullException("algorithm");
 
             _hashAlgorithm = GetHashAlgorithmString(algorithm);
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Tokens
         private RSAParameters CreateRsaParametersFromJsonWebKey(JsonWebKey webKey, bool willCreateSignatures)
         {
             if (webKey == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey));
 
             if (webKey.N == null || webKey.E == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, webKey)));
@@ -419,16 +419,16 @@ namespace Microsoft.IdentityModel.Tokens
         private void CreateECDsaFromJsonWebKey(JsonWebKey webKey, bool willCreateSignatures)
         {
             if (webKey == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey));
 
             if (webKey.Crv == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.Crv), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.Crv)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey.Crv));
 
             if (webKey.X == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.X), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.X)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey.X));
 
             if (webKey.Y == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.Y), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.Y)))); 
+                throw LogHelper.LogArgumentNullException(nameof(webKey.Y));
 
             GCHandle keyBlobHandle = new GCHandle();
             try
@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (willCreateSignatures)
                 {
                     if (webKey.D == null)
-                        throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey.D), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(webKey.D)))); 
+                        throw LogHelper.LogArgumentNullException(nameof(webKey.D));
 
                     byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
                     foreach (byte b in d)
@@ -497,7 +497,7 @@ namespace Microsoft.IdentityModel.Tokens
         private uint GetKeyByteCount(string curveId)
         {
             if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(curveId), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(curveId)))); 
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
 
             uint keyByteCount;
             switch (curveId)
@@ -527,7 +527,7 @@ namespace Microsoft.IdentityModel.Tokens
         private uint GetMagicValue(string curveId, bool willCreateSignatures)
         {
             if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(curveId), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(curveId)))); 
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
 
             KeyBlobMagicNumber magicNumber;
             switch (curveId)
@@ -583,7 +583,7 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("input", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "input"))); 
+                throw LogHelper.LogArgumentNullException("input");
 
             if (input.Length == 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10624));
@@ -625,10 +625,10 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("input", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "input"))); 
+                throw LogHelper.LogArgumentNullException("input");
 
             if (signature == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("signature", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "signature"))); 
+                throw LogHelper.LogArgumentNullException("signature");
 
             if (input.Length == 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10625, "input"));

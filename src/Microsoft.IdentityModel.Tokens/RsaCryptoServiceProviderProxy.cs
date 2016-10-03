@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
         public RSACryptoServiceProviderProxy(RSACryptoServiceProvider rsa)
         {
             if (rsa == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("rsa", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "rsa"))); 
+                throw LogHelper.LogArgumentNullException("rsa");
 
             //
             // Level up the provider type only if:

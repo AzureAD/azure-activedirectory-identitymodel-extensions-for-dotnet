@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(validationParameters), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(validationParameters)))); 
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateIssuer)
             {
@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(validationParameters), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(validationParameters)))); 
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateIssuerSigningKey)
             {
@@ -175,10 +175,10 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (securityKey == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityKey), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(securityKey)))); 
+                throw LogHelper.LogArgumentNullException(nameof(securityKey));
 
             if (securityToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityToken), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(securityToken)))); 
+                throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey != null)
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(validationParameters), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(validationParameters)))); 
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateLifetime)
             {
@@ -245,10 +245,10 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateTokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityToken), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(securityToken)))); 
+                throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(validationParameters), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(validationParameters)))); 
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)

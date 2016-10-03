@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         public SymmetricSecurityKey(byte[] key)
         {
             if (key == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(key)))); 
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (key.Length == 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10703));
