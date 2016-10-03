@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Microsoft.IdentityModel.Logging;
 using System.Globalization;
 

@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Logging
         public TextWriterEventListener(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("filePath", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "filePath")));
+                throw LogHelper.LogArgumentNullException("filePath");
 
             Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
             _streamWriter = new StreamWriter(fileStream);

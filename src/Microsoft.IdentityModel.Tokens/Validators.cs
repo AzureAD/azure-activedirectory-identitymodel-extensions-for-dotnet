@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(validationParameters), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, nameof(validationParameters))));
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (!validationParameters.ValidateAudience)
             {
@@ -221,11 +221,11 @@ namespace Microsoft.IdentityModel.Tokens
             DateTime utcNow = DateTime.UtcNow;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenNotYetValidException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10222, notBefore.Value, utcNow))
-                    { NotBefore = notBefore });
+                    { NotBefore = notBefore.Value });
  
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenExpiredException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10223, expires.Value, utcNow))
-                    { Expires = expires });
+                    { Expires = expires.Value });
 
             // if it reaches here, that means lifetime of the token is valid
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10239);

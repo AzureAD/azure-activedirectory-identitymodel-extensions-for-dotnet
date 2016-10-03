@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual string GetParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("parameter", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "parameter"))); 
+                throw LogHelper.LogArgumentNullException("parameter");
 
             string value = null;
             _parameters.TryGetValue(parameter, out value);
@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, "value"))); 
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _issuerAddress = value;
             }
