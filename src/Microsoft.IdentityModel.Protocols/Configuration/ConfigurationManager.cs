@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -138,7 +139,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value)));
 
                 _automaticRefreshInterval = value;
             }
@@ -153,7 +154,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10106, MinimumRefreshInterval, value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(LogMessages.IDX10106, MinimumRefreshInterval, value)));
 
                 _refreshInterval = value;
             }
@@ -200,7 +201,7 @@ namespace Microsoft.IdentityModel.Protocols
                     catch (Exception ex)
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
-                        throw LogHelper.LogException<InvalidOperationException>(ex, LogMessages.IDX10803, (_metadataAddress ?? "null"));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, (_metadataAddress ?? "null")), ex));
                     }
                 }
 
@@ -209,7 +210,7 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 else
                 {
-                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10803, (_metadataAddress ?? "null"));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, (_metadataAddress ?? "null"))));
                 }
             }
             finally

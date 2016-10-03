@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -124,10 +125,10 @@ namespace Microsoft.IdentityModel.Tokens
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             if (willCreateSignatures && !HasPrivateKey(key))
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10638, key);
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10638, key)));
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), LogMessages.IDX10634, (algorithm ?? "null"), key );
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, (algorithm ?? "null"), key), nameof(algorithm)));
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
@@ -199,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return HashAlgorithmName.SHA512;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -279,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
         }
 #else
         /// <summary>
@@ -312,7 +313,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.Sha512;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(algorithm), LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -374,7 +375,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>(nameof(key), LogMessages.IDX10641, key);
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
         }
 #endif
 
@@ -384,13 +385,13 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(webKey));
 
             if (webKey.N == null || webKey.E == null)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10700, webKey);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, webKey)));
 
             RSAParameters parameters;
             if (willCreateSignatures)
             {
                 if (webKey.D == null || webKey.DP == null || webKey.DQ == null || webKey.QI == null || webKey.P == null || webKey.Q == null)
-                    throw LogHelper.LogArgumentException<ArgumentNullException>(nameof(webKey), LogMessages.IDX10702, webKey);
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10702, webKey)));
 
                 parameters = new RSAParameters()
                 {
@@ -512,7 +513,7 @@ namespace Microsoft.IdentityModel.Tokens
                     keyByteCount = 64;
                     break;
                 default:
-                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10645, curveId);
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
             }
             return keyByteCount;
         }
@@ -551,7 +552,7 @@ namespace Microsoft.IdentityModel.Tokens
                         magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
                     break;
                 default:
-                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10645, curveId);
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
             }
             return (uint)magicNumber;
         }
@@ -585,10 +586,10 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("input");
 
             if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10624);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10624));
 
             if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
 #if NETSTANDARD1_4
             if (_rsa != null)
@@ -605,7 +606,7 @@ namespace Microsoft.IdentityModel.Tokens
             else if (_ecdsa != null)
                 return _ecdsa.SignData(input);
 #endif
-            throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10644);
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
         /// <summary>
@@ -630,13 +631,13 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("signature");
 
             if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625, "input");
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10625, "input"));
 
             if (signature.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626, "signature");
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10626, "signature"));
 
             if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(GetType().ToString());
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
 #if NETSTANDARD1_4
             if (_rsa != null)
@@ -653,7 +654,7 @@ namespace Microsoft.IdentityModel.Tokens
             else if (_ecdsa != null)
                 return _ecdsa.VerifyData(input, signature);
 #endif
-            throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10644);
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
         /// <summary>
@@ -667,11 +668,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures)
             {
                 if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize)));
             }
 
             if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize);
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize)));
         }
 
         /// <summary>

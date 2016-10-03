@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -80,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogArgumentNullException("address");
 
             if (!Utility.IsHttps(address) && RequireHttps)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10108, address);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10108, address));
 
             try
             {
@@ -93,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<IOException>(ex, LogMessages.IDX10804, address);
+                throw LogHelper.LogExceptionMessage(new IOException(String.Format(LogMessages.IDX10804, address), ex));
             }
         }
     }

@@ -35,6 +35,7 @@ using System.Threading;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -270,7 +271,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10104, value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10104, value)));
 
                 _defaultTokenLifetimeInMinutes = value;
             }
@@ -299,7 +300,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("value", LogMessages.IDX10101, value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value)));
 
                 _maximumTokenSizeInBytes = value;
             }
@@ -512,10 +513,10 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException("token");
 
             if (token.Length * 2 > MaximumTokenSizeInBytes)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             if (!CanReadToken(token))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10708, GetType(), token);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10708, GetType(), token)));
 
             var jwt = new JwtSecurityToken();
             jwt.Decode(token);
@@ -555,7 +556,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             JwtSecurityToken jwt = null;
 
@@ -563,17 +564,17 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedJwtToken == null)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10505, token);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, token)));
 
                 jwt = validatedJwtToken as JwtSecurityToken;
                 if (jwt == null)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
             }
             else
             {
                 jwt = ValidateSignature(token, validationParameters);
                 if (jwt == null)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10507, token);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10507, token)));
             }
 
             if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
@@ -581,7 +582,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (validationParameters.IssuerSigningKeyValidator != null)
                 {
                     if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
-                        throw LogHelper.LogException<SecurityTokenInvalidSigningKeyException>(LogMessages.IDX10232, jwt.SigningKey);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                            { SigningKey = jwt.SigningKey });
                 }
                 else
                 {
@@ -606,7 +608,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (validationParameters.LifetimeValidator != null)
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
-                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, jwt);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, jwt))
+                        { NotBefore = notBefore, Expires = expires });
                 }
                 else
                 {
@@ -619,7 +622,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (validationParameters.AudienceValidator != null)
                 {
                     if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
-                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, jwt.ToString());
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, jwt.ToString()))
+                            { InvalidAudience = String.Join(", ", jwt.Audiences)});
                 }
                 else
                 {
@@ -675,7 +679,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             JwtSecurityToken jwt = token as JwtSecurityToken;
             if (jwt == null)
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(token), LogMessages.IDX10706, new object[] { GetType(), typeof(JwtSecurityToken), token.GetType() });
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()), nameof(token)));
 
             string signingInput = string.Concat(jwt.EncodedHeader, ".", jwt.EncodedPayload);
             if (jwt.SigningCredentials == null)
@@ -702,7 +706,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10636, (signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()), (signingCredentials.Algorithm ?? "Null"));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10636, (signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()), (signingCredentials.Algorithm ?? "Null"))));
 
             try
             {
@@ -729,7 +733,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10636, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10636, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm))));
 
             try
             {
@@ -769,7 +773,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrEmpty(jwt.RawSignature))
             {
                 if (validationParameters.RequireSignedTokens)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10504, token);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10504, token)));
                 else
                     return jwt;
             }
@@ -789,7 +793,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (securityKey == null)
                 {
                     if (!string.IsNullOrEmpty(kid))
-                        throw LogHelper.LogException<SecurityTokenSignatureKeyNotFoundException>(LogMessages.IDX10501, kid, jwt);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10501, kid, jwt)));
                 }
                 else
                 {
@@ -830,10 +834,10 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 if (keysAttempted.Length > 0)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10503, keysAttempted, exceptionStrings, jwt);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10503, keysAttempted, exceptionStrings, jwt)));
             }
 
-            throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10500);
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogMessages.IDX10500));
         }
 
         private IEnumerable<SecurityKey> GetAllKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
@@ -881,7 +885,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10710, JwtRegisteredClaimNames.Actort, jwtClaim.Value);
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10710, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
 
                     if (CanReadToken(jwtClaim.Value))
                     {

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10805, json, GetType());
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, json, GetType()), ex));
             }
         }
 

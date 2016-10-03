@@ -27,6 +27,7 @@
 
 using System;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.IO;
 
 namespace Microsoft.IdentityModel.Logging
@@ -57,8 +58,8 @@ namespace Microsoft.IdentityModel.Logging
             }
             catch (Exception ex)
             {
-                LogHelper.LogException<InvalidOperationException>(ex, LogMessages.MIML11001);
-                throw ex;
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML11001, ex));
+                throw;
             }
         }
 
@@ -69,7 +70,7 @@ namespace Microsoft.IdentityModel.Logging
         public TextWriterEventListener(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-                throw LogHelper.LogArgumentNullException("filePath");
+                throw LogHelper.LogArgumentNullException(nameof(filePath));
 
             Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
             _streamWriter = new StreamWriter(fileStream);
