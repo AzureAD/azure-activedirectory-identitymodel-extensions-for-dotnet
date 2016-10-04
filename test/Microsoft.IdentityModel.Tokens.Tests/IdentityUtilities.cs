@@ -268,6 +268,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor_NestedJWE(List<Claim> claims)
+        {
+            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials, DefaultSymmetricEncryptingCredentials);
+            if (claims != null)
+                retval.Subject = new ClaimsIdentity(claims);
+
+            return retval;
+        }
+
+        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                Audience = DefaultAudience,
+                Subject = ClaimSets.DefaultClaimsIdentity,
+                Issuer = DefaultIssuer,
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                NotBefore = DateTime.UtcNow,
+                SigningCredentials = signingCredentials,
+                EncryptingCredentials = encryptingCredentials
+            };
+        }
+
         public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
         {
             get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }

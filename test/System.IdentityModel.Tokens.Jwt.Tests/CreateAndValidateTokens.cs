@@ -334,15 +334,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
             // Test alg = "dir"
-            //  var encodedJwt1 = handler.CreateEncodedJwt(createJWEParams.SecurityTokenDescriptor);
             SecurityTokenDescriptor securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_JWE(ClaimSets.DefaultClaims);
-            //createParams.Add(new CreateAndValidateParams
-            //{
-            //    Case = "ClaimSets.Simple_DirKey_JWE",
-            //    ExceptionType = null,
-            //    SecurityTokenDescriptor = securityTokenDescriptor,
-            //    TokenValidationParameters = IdentityUtilities.DefaultDirectKeyTokenValidationParameters
-            //});
             var encodedJwt1 = handler.CreateEncodedJwt(securityTokenDescriptor);
 
             TokenValidationParameters validationParameters =
@@ -358,12 +350,31 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
 
             // negative case
-            //    string symmetricKeyString = "gWm6iSKi0g4Uf18A8tODC4hxRG5yrMRJivmB3Z7kOlw=";
-            //byte[] symmetricKeyBytes = Convert.FromBase64String(symmetricKeyString);
-            //validationParameters.TokenDecryptionKey = new SymmetricSecurityKey(symmetricKeyBytes);//IdentityUtilities.SymmetricEncryptionKey;
             validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
             token = null;
-            claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
+            try
+            {
+                claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
+            }
+            catch (Exception)
+            {
+                // Expected
+            }
+
+            // Nested JWT
+            securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_NestedJWE(ClaimSets.DefaultClaims);
+            var encodedJwt2 = handler.CreateEncodedJwt(securityTokenDescriptor);
+            validationParameters =
+                new TokenValidationParameters
+                {
+                    TokenDecryptionKey = IdentityUtilities.DefaultSymmetricEncryptionKey,
+                    IssuerSigningKey = IdentityUtilities.DefaultSymmetricSigningKey,
+                    AuthenticationType = IdentityUtilities.DefaultAuthenticationType,
+                    ValidAudience = IdentityUtilities.DefaultAudience,
+                    ValidIssuer = IdentityUtilities.DefaultIssuer,
+                };
+
+            claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
         }
 
         public static TheoryData<CreateAndValidateParams> CreationParams()

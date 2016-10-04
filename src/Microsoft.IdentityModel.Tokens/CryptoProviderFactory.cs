@@ -226,23 +226,13 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        public virtual EncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm, byte[] authenticationData)
+        public virtual AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (algorithm == null)
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             if (algorithm.Length == 0)
                 throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-            //if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
-            //{
-            //    EncryptionProvider encryptionProvider = CustomCryptoProvider.Create(algorithm, key) as EncryptionProvider;
-            //    if (encryptionProvider == null)
-            //        // TODO (Yan) : Add exception and throw
-            //        throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider));
-
-            //    return encryptionProvider;
-            //}
 
             if (_contentEncryptAlgorithm.Contains(algorithm))
             {
@@ -251,7 +241,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     case SecurityAlgorithms.Aes128CbcHmacSha256:
                     case SecurityAlgorithms.Aes256CbcHmacSha512:
-                        return new AuthenticatedEncryptionProvider(key, algorithm, authenticationData);
+                        return new AuthenticatedEncryptionProvider(key, algorithm);
 
                     default:
                         // TODO (Yan) : Add exception and throw
@@ -263,40 +253,30 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
-        public virtual EncryptionProvider CreateAuthenticatedDecryptionProvider(string algorithm, AuthenticatedEncryptionParameters authenticatedEncryptionParameters, byte[] aad)
-        {
-            if (algorithm == null)
-                throw LogHelper.LogArgumentNullException("algorithm");
+        //public virtual EncryptionProvider CreateAuthenticatedDecryptionProvider(string algorithm, AuthenticatedEncryptionParameters authenticatedEncryptionParameters, byte[] aad)
+        //{
+        //    if (algorithm == null)
+        //        throw LogHelper.LogArgumentNullException("algorithm");
 
-            if (algorithm.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
+        //    if (algorithm.Length == 0)
+        //        throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
 
-            if (authenticatedEncryptionParameters == null)
-                throw LogHelper.LogArgumentNullException("authenticatedEncryptionParameters");
+        //    if (authenticatedEncryptionParameters == null)
+        //        throw LogHelper.LogArgumentNullException("authenticatedEncryptionParameters");
 
-            //if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, authenticatedEncryptionParameters.CEK))
-            //{
-            //    EncryptionProvider encryptionProvider = CustomCryptoProvider.Create(algorithm, aad, authenticatedEncryptionParameters) as EncryptionProvider;
-            //    if (encryptionProvider == null)
-            //        // TODO (Yan) : Add exception and throw
-            //        throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, authenticatedEncryptionParameters.CEK, algorithm, typeof(EncryptionProvider));
+        //    if (_contentEncryptAlgorithm.Contains(algorithm))
+        //    {
+        //        switch (algorithm)
+        //        {
+        //            case SecurityAlgorithms.Aes128CbcHmacSha256:
+        //            case SecurityAlgorithms.Aes256CbcHmacSha512:
+        //                return new AuthenticatedEncryptionProvider(algorithm, aad, authenticatedEncryptionParameters);
+        //        }
+        //    }
 
-            //    return encryptionProvider;
-            //}
-
-            if (_contentEncryptAlgorithm.Contains(algorithm))
-            {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.Aes128CbcHmacSha256:
-                    case SecurityAlgorithms.Aes256CbcHmacSha512:
-                        return new AuthenticatedEncryptionProvider(algorithm, aad, authenticatedEncryptionParameters);
-                }
-            }
-
-            // TODO(Yan) : Add exception and throw
-            throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-        }
+        //    // TODO(Yan) : Add exception and throw
+        //    throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
+        //}
 
         public virtual EncryptionProvider CreateForKeyEncryptionProvider(SecurityKey key, string algorithm)
         {
