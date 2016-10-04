@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             switch (algorithm)
             {
-                case Aes128CbcHmacSha256.AlgorithmName:
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
                     {
                         if ((key.Length << 3) < 256)
                             // TODO (Yan) : Add log message
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens
                         break;
                     }
 
-                case Aes256CbcHmacSha512.AlgorithmName:
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
                     {
                         if ((key.Length << 3) < 512)
                             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10628, 512);
