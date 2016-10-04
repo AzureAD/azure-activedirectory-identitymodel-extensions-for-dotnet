@@ -19,6 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _fOAEP;
 #endif
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+        private bool _disposed;
 
         public static readonly int DefaultMinimumKeySize = 2048;
 
@@ -285,6 +286,28 @@ namespace Microsoft.IdentityModel.Tokens
             if (key.KeySize < RsaProvider.DefaultMinimumKeySize)
                 // TODO (Yan) : Add excepiton and throw
                 throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("Key.KeySize", String.Format("The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.", key, algorithm, key.KeySize));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+
+                if (disposing)
+                {
+#if NETSTANDARD1_4
+                    if (_rsa != null && _disposeRsa)
+                        _rsa.Dispose();
+#else
+                    if (_rsaCryptoServiceProvider != null)
+                        _rsaCryptoServiceProvider.Dispose();
+#endif
+
+                    if (_rsaCryptoServiceProviderProxy != null)
+                        _rsaCryptoServiceProviderProxy.Dispose();
+                }
+            }
         }
     }
 }

@@ -349,7 +349,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             SecurityToken token = null;
             var claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
 
-            // negative case
+            // negative case for simple JWT
             validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
             token = null;
             try
@@ -375,6 +375,30 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 };
 
             claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
+
+            // negative case for nestede JWT
+            // Case 1: invalid signing key
+            validationParameters.IssuerSigningKey = IdentityUtilities.SymmetricEncryptionKey;
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:");
+            try
+            {
+                claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+
+            // Case 2: invalid EncryptionKey
+            validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
+            try
+            {
+                claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
+            }
+            catch (Exception)
+            {
+                // Expected
+            }
         }
 
         public static TheoryData<CreateAndValidateParams> CreationParams()

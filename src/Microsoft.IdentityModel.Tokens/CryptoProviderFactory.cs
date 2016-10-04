@@ -236,7 +236,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_contentEncryptAlgorithm.Contains(algorithm))
             {
-
                 switch (algorithm)
                 {
                     case SecurityAlgorithms.Aes128CbcHmacSha256:
@@ -253,124 +252,47 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
-        //public virtual EncryptionProvider CreateAuthenticatedDecryptionProvider(string algorithm, AuthenticatedEncryptionParameters authenticatedEncryptionParameters, byte[] aad)
-        //{
-        //    if (algorithm == null)
-        //        throw LogHelper.LogArgumentNullException("algorithm");
-
-        //    if (algorithm.Length == 0)
-        //        throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-        //    if (authenticatedEncryptionParameters == null)
-        //        throw LogHelper.LogArgumentNullException("authenticatedEncryptionParameters");
-
-        //    if (_contentEncryptAlgorithm.Contains(algorithm))
-        //    {
-        //        switch (algorithm)
-        //        {
-        //            case SecurityAlgorithms.Aes128CbcHmacSha256:
-        //            case SecurityAlgorithms.Aes256CbcHmacSha512:
-        //                return new AuthenticatedEncryptionProvider(algorithm, aad, authenticatedEncryptionParameters);
-        //        }
-        //    }
-
-        //    // TODO(Yan) : Add exception and throw
-        //    throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-        //}
-
-        public virtual EncryptionProvider CreateForKeyEncryptionProvider(SecurityKey key, string algorithm)
+        // For asymmertic key encryption/decryption
+        public virtual EncryptionProvider CreateForAsymmerticKeyEncryptionProvider(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("algorithm");
+            throw new NotImplementedException();
+            //if (key == null)
+            //    throw LogHelper.LogArgumentNullException("algorithm");
 
-            if (algorithm == null)
-                throw LogHelper.LogArgumentNullException("algorithm");
+            //if (algorithm == null)
+            //    throw LogHelper.LogArgumentNullException("algorithm");
 
-            if (algorithm.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
+            //if (algorithm.Length == 0)
+            //    throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
 
-            //if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
+            //if (_keyWrapAsymmetricAlgorithm.Contains(algorithm))
             //{
-            //    EncryptionProvider encryptionProvider = CustomCryptoProvider.Create(algorithm, key) as EncryptionProvider;
-            //    if (encryptionProvider == null)
-            //        // TODO (Yan) : Add exception and throw
-            //        throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(EncryptionProvider));
+            //    switch (algorithm)
+            //    {
+            //        case SecurityAlgorithms.RsaPKCS1:
+            //        case SecurityAlgorithms.RsaOAEP:
+            //            return new RsaProvider(key, algorithm);
 
-            //    return encryptionProvider;
+            //        default:
+            //            throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
+            //    }
             //}
-
-            if (_keyWrapAsymmetricAlgorithm.Contains(algorithm))
-            {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.RsaPKCS1:
-                    case SecurityAlgorithms.RsaOAEP:
-                        return new RsaProvider(key, algorithm);
-
-                    default:
-                        throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-                }
-            }
 
             // TODO(Yan) : Add exception and throw
             throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
-        public virtual EncryptionProvider CreateForKeyEncryptionProvider(byte[] key, string algorithm)
+        // For symmetric key encryption
+        public virtual EncryptionProvider CreateForSymmerticKeyEncryptionProvider(byte[] key, string algorithm)
         {
-            return null;
+            throw new NotImplementedException();
         }
 
-        public virtual EncryptionProvider CreateForKeyEncryptionProvider(byte[] key, string algorithm, byte[] iv)
+        // For symmertic key decryption
+        public virtual EncryptionProvider CreateForSymmerticKeyEncryptionProvider(byte[] key, string algorithm, byte[] iv)
         {
-            return null;
+            throw new NotImplementedException();
         }
-        //public virtual EncryptionProvider CreateForEncrypting(SecurityKey key, string algorithm)
-        //{
-        //    if (algorithm == null)
-        //        throw LogHelper.LogArgumentNullException("algorithm");
-
-        //    if (algorithm.Length == 0)
-        //        throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-        //    if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
-        //    {
-        //        EncryptionProvider encryptionProvider = CustomCryptoProvider.Create(algorithm, key) as EncryptionProvider;
-        //        if (encryptionProvider == null)
-        //            // TODO (Yan) : Add exception and throw
-        //            throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider));
-
-        //        return encryptionProvider;
-        //    }
-
-        //    if (_keyWrapAlgorithm.Contains(algorithm))
-        //    {
-        //        switch (algorithm)
-        //        {
-        //            case SecurityAlgorithms.RsaPKCS1:
-        //            case SecurityAlgorithms.RsaOAEP:
-        //                return new RsaProvider(key, algorithm);
-
-        //            default:
-        //                // TODO (Yan) : Add exception and throw
-        //                throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm");
-        //        }
-        //    }
-
-        //    if (_contentEncryptAlgorithm.Contains(algorithm))
-        //    {
-
-        //        switch (algorithm)
-        //        {
-        //            case SecurityAlgorithms.Aes128CbcHmacSha256:
-        //            case SecurityAlgorithms.Aes256CbcHmacSha512:
-        //                return new AuthenticatedEncryptionProvider(key, algorithm, null, encodedProtectHeader);
-        //        }
-        //    }
-
-        //    // TODO (Yan) : Add exception and throw
-        //    throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-        //}
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
@@ -412,21 +334,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// When finished with a <see cref="IDecryptionProvider"/> call this method for cleanup. The default behavior is to call <see cref="IDecryptionProvider.Dispose()"/>
         /// </summary>
         /// <param name="decryptionProvider"><see cref="IDecryptionProvider"/> to be released.</param>
-        //public virtual void ReleaseDecryptionProvider(EncryptionProvider decryptionProvider)
-        //{
-        //    if (decryptionProvider != null)
-        //        decryptionProvider.Dispose();
-        //}
+        public virtual void ReleaseAuthenticatedEncryptionProvider(AuthenticatedEncryptionProvider authenticatedEncryptionProvider)
+        {
+            if (authenticatedEncryptionProvider != null)
+                authenticatedEncryptionProvider.Dispose();
+        }
 
         /// <summary>
         /// When finished with a <see cref="IEncryptionProvider"/> call this method for cleanup. The default behavior is to call <see cref="IEncryptionProvider.Dispose()"/>
         /// </summary>
         /// <param name="encryptionProvider"><see cref="IEncryptionProvider"/> to be released.</param>
-        //public virtual void ReleaseEncryptionProvider(EncryptionProvider encryptionProvider)
-        //{
-        //    if (encryptionProvider != null)
-        //        encryptionProvider.Dispose();
-        //}
+        public virtual void ReleaseEncryptionProvider(EncryptionProvider encryptionProvider)
+        {
+            if (encryptionProvider != null)
+                encryptionProvider.Dispose();
+        }
 
         /// <summary>
         /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose()"/>

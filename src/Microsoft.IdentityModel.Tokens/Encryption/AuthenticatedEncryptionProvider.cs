@@ -7,18 +7,13 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class AuthenticatedEncryptionProvider
+    public class AuthenticatedEncryptionProvider : IDisposable
     {
-        // Used for encrypting.
         private Aes _aes;
         private SymmetricSignatureProvider _symmetricSignatureProvider;
-    //    private byte[] _authenticationTag;
         private bool generateKey = false;
+        private bool _disposed;
 
-        // Used for decrypting.
- //      private AuthenticatedEncryptionParameters _authenticatedEncryptionParameters;
-
-        // For encryption
         public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (algorithm == null)
@@ -70,8 +65,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        // With this signature we don't need any out params,
-        // Caller has to generate iv.
         public virtual EncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
         {
             if (plaintext == null)
@@ -91,8 +84,6 @@ namespace Microsoft.IdentityModel.Tokens
             _aes.GenerateIV();
 
             var result = new EncryptionResult();
-
-            // result.CipherText = _aes.CreateEncryptor().TransformFinalBlock(plaintext, 0, plaintext.Length);
             result.CipherText = EncryptionUtilities.Transform(_aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
             result.Key = new byte[(_aes.KeySize >> 3) + (_symmetricSignatureProvider.Key.KeySize >> 3)];
             SymmetricSecurityKey hmacKey = _symmetricSignatureProvider.Key as SymmetricSecurityKey;
@@ -267,8 +258,18 @@ namespace Microsoft.IdentityModel.Tokens
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!_disposed)
             {
+                _disposed = true;
+
+                if (disposing)
+                {
+                    if (_aes != null && _disposed)
+                    {
+                        _aes.Dispose();
+                        _symmetricSignatureProvider.Dispose();
+                    }
+                }
             }
         }
     }
