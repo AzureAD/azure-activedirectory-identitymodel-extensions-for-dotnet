@@ -603,13 +603,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 // TODO (Yan): Add exception message.
                 throw LogHelper.LogException<InvalidOperationException>("Failed to create the token encryption provider.");
 
-            byte[] ciphertextBytes;
             EncryptionResult result;
             try
             {
                 // Encrypt plaintext
                 result = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(plaintext), Encoding.ASCII.GetBytes(encryptionHeader.Base64UrlEncode()));
-                ciphertextBytes = result.CipherText;
             }
             finally
             {
@@ -617,7 +615,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             string rawEncryptionHeader = encryptionHeader.Base64UrlEncode();
-            string rawCipherText = Base64UrlEncoder.Encode(ciphertextBytes);
+            string rawCipherText = Base64UrlEncoder.Encode(result.CipherText);
             string rawInitialVector = Base64UrlEncoder.Encode(result.InitialVector);
             string rawAuthenticationTag = Base64UrlEncoder.Encode(result.AuthenticationTag);
 
@@ -638,6 +636,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (keyEncryptionProvider == null)
                     // TODO (Yan): Add exception message.
                     throw LogHelper.LogException<InvalidOperationException>("Failed to create the key encryption provider.");
+
                 EncryptionResult encryptedResult;
                 try
                 {
@@ -829,8 +828,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // Validate signature if token is signed
             if (jwt.IsSigned)
             {
-                //this.ValidateSignature(jwt, validationParameters);
-                this.ValidateJwsTokenSignature(jwt, validationParameters);
+                this.ValidateTokenSignature(jwt, validationParameters);
             }
 
             validatedToken = jwt;
@@ -869,9 +867,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 bool nested = jwt.SigningCredentials != null;
                 string plaintext = nested ? new JwtSecurityToken(jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
-                JwtSecurityToken finalJwt = CreateEncryptedToken(plaintext, nested, jwt.EncryptingCredentials, jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature);
-
-                return finalJwt.RawData;
+                return CreateEncryptedToken(plaintext, nested, jwt.EncryptingCredentials, jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature).RawData;
             }
             else if (jwt.IsSigned)
             {
@@ -948,43 +944,11 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Decrypts a <see cref="JwtSecurityToken"/> representing a JWE token.
-        /// </summary>
-        /// <param name="jwt">The token to decrypt.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains decryption keys.</param>
-        //protected virtual void DecryptJweToken(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
-        //{
-        //    if (jwt == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(jwt));
-        //    if (validationParameters == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-        //    // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
-        //    string token = jwt.RawData;
-        //    string kid = jwt.Header.Kid;
-        //    SecurityKey securityKey = null;
-        //    if (validationParameters.TokenDecryptionKeyResolver != null)
-        //    {
-        //        securityKey = validationParameters.TokenDecryptionKeyResolver(token, jwt, kid, validationParameters);
-        //    }
-        //    else
-        //    {
-        //        securityKey = ResolveIssuerSigningKey(token, jwt, validationParameters);
-        //    }
-
-        //    if (securityKey == null)
-        //    {
-        //        // TODO (Yan): Should define a new SecurityTokenEncryptionKeyNotFoundException and a new message here
-        //        throw LogHelper.LogException<SecurityTokenSignatureKeyNotFoundException>(LogMessages.IDX10501, kid, jwt);
-        //    }
-        //}
-
-        /// <summary>
         /// Validates signature of a <see cref="JwtSecurityToken"/> representing a JWS token.
         /// </summary>
         /// <param name="jwt">The JWS token to validate.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
-        private void ValidateJwsTokenSignature(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        private void ValidateTokenSignature(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             if (jwt == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwt));
@@ -992,7 +956,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             // Validate signature
-            string token = jwt.IsEncrypted ? jwt.RawHeader + "." + jwt.RawPayload + "." + jwt.RawSignature ?? string.Empty : jwt.RawData;
+            string token = jwt.IsEncrypted ? jwt.RawHeader + "." + jwt.RawPayload + "." + (jwt.RawSignature ?? string.Empty) : jwt.RawData;
             if (validationParameters.SignatureValidator != null)
             {
                 var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
@@ -1033,7 +997,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="jwt">The token to validate.</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
-        protected virtual ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        private ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             if (jwt == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwt));
