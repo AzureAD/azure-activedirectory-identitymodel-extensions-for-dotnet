@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch
             {
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10106, json);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10106, json)));
             }
 
         }

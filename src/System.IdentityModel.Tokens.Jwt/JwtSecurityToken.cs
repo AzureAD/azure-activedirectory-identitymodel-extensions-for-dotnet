@@ -32,6 +32,7 @@ using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Globalization;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -244,7 +245,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (expires.HasValue && notBefore.HasValue)
             {
                 if (notBefore >= expires)
-                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10401, expires.Value, notBefore.Value);
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value)));
             }
 
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
@@ -525,7 +526,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), ex));
             }
 
             if (isNested)

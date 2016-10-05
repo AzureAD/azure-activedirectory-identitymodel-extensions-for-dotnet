@@ -147,5 +147,27 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get { return _certificate; }
         }
+
+        /// <summary>
+        /// Returns a bool indicating if this key is equivalent to another key.
+        /// </summary>
+        /// <return>true if the keys are equal; otherwise, false.</return>
+        public override bool Equals(object obj)
+        {
+            X509SecurityKey other = obj as X509SecurityKey;
+            if (other == null)
+                return false;
+
+            return other.Certificate.Thumbprint.ToString() == this._certificate.Thumbprint.ToString();
+        }
+
+        /// <summary>
+        /// Returns an int hash code.
+        /// </summary>
+        /// <return>An int hash code</return>
+        public override int GetHashCode()
+        {
+            return _certificate.GetHashCode();
+        }
     }
 }

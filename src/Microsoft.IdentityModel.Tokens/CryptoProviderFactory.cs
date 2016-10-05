@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 var hashAlgorithm = CustomCryptoProvider.Create(algorithm) as HashAlgorithm;
                 if (hashAlgorithm == null)
-                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10647, algorithm, typeof(HashAlgorithm));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10647, algorithm, typeof(HashAlgorithm))));
 
                 return hashAlgorithm;
             }
@@ -402,7 +402,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SHA512.Create();
             }
 
-            throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10640, algorithm);
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
         }
 
         private bool IsSupportedHashAlgorithm(string algorithm)
@@ -434,13 +434,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 SignatureProvider signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
                 if (signatureProvider == null)
-                    throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider))));
 
                 return signatureProvider;
             }
 
             if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10634, algorithm, key);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10634, algorithm, key)));
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
@@ -463,7 +463,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10600, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType());
+            throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10600, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
         }
     }
 }

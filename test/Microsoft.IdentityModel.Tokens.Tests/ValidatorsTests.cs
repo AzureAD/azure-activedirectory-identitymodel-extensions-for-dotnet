@@ -59,15 +59,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 List<string> audiences = new List<string> { "", IdentityUtilities.DefaultAudience };
                 List<string> invalidAudiences = new List<string> { "", IdentityUtilities.NotDefaultAudience };
+                Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidAudience", TestUtilities.SerializeAsSingleCommaDelimitedString(audiences) } };
 
                 var dataset = new TheoryData<List<string>, SecurityToken, TokenValidationParameters, ExpectedException>();
 
                 dataset.Add(null, null, null, ExpectedException.ArgumentNullException());
                 dataset.Add(null, null, new TokenValidationParameters { ValidateAudience = false }, ExpectedException.NoExceptionExpected);
                 dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10207:"));
-                dataset.Add(audiences, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"));
-                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.NotDefaultAudience }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"));
-                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = invalidAudiences }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"));
+                dataset.Add(audiences, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:", propertiesExpected: properties));
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.NotDefaultAudience }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:", propertiesExpected: properties));
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = invalidAudiences }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:", propertiesExpected: properties));
                 dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.DefaultAudience }, ExpectedException.NoExceptionExpected);
                 dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = audiences }, ExpectedException.NoExceptionExpected);
 
@@ -97,15 +98,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
                 List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
+                Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidIssuer", IdentityUtilities.DefaultIssuer } };
 
                 var dataset = new TheoryData<string, SecurityToken, TokenValidationParameters, ExpectedException>();
 
                 dataset.Add(null, null, null, ExpectedException.ArgumentNullException());
                 dataset.Add(null, null, new TokenValidationParameters { ValidateIssuer = false }, ExpectedException.NoExceptionExpected);
-                dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:"));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.NotDefaultIssuer }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"));
+                dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:", propertiesExpected: new Dictionary<string, object> { { "InvalidIssuer", null } }));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:", propertiesExpected: properties));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.NotDefaultIssuer }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
+                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
                 dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.DefaultIssuer }, ExpectedException.NoExceptionExpected);
                 dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = issuers }, ExpectedException.NoExceptionExpected);
 
@@ -135,6 +137,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
                 List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
+                DateTime? notBefore;
+                DateTime? expires;
 
                 //                           notbefore  expires    
                 var dataset = new TheoryData<DateTime?, DateTime?, SecurityToken, TokenValidationParameters, ExpectedException>();
@@ -142,15 +146,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(null, null, null, null, ExpectedException.ArgumentNullException());
                 dataset.Add(null, null, null, new TokenValidationParameters { ValidateLifetime = false }, ExpectedException.NoExceptionExpected);
                 dataset.Add(null, null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenNoExpirationException("IDX10225:"));
-                dataset.Add(DateTime.UtcNow + TimeSpan.FromHours(1), DateTime.UtcNow, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidLifetimeException("IDX10224:"));
-                dataset.Add(DateTime.UtcNow + TimeSpan.FromHours(1), DateTime.UtcNow + TimeSpan.FromHours(2), null, new TokenValidationParameters(), ExpectedException.SecurityTokenNotYetValidException("IDX10222:"));
+
+                notBefore = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromHours(1)).ToUniversalTime()));
+                expires = EpochTime.DateTime(EpochTime.GetIntDate(DateTime.UtcNow.ToUniversalTime()));
+                dataset.Add(notBefore, expires, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidLifetimeException("IDX10224:", propertiesExpected: new Dictionary<string, object> { { "NotBefore", notBefore }, { "Expires", expires } }));
+
+                notBefore = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromHours(1)).ToUniversalTime()));
+                expires = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromHours(2)).ToUniversalTime()));
+                dataset.Add(notBefore, expires, null, new TokenValidationParameters(), ExpectedException.SecurityTokenNotYetValidException("IDX10222:", propertiesExpected: new Dictionary<string, object> { { "NotBefore", notBefore } }));
+
                 dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow - TimeSpan.FromHours(1), null, new TokenValidationParameters(), ExpectedException.SecurityTokenExpiredException("IDX10223:"));
                 dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters(), ExpectedException.NoExceptionExpected);
 
                 // clock skew, positive then negative
                 dataset.Add(DateTime.UtcNow + TimeSpan.FromMinutes(2), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.NoExceptionExpected);
                 dataset.Add(DateTime.UtcNow - TimeSpan.FromMinutes(2), DateTime.UtcNow - TimeSpan.FromMinutes(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.NoExceptionExpected);
-                dataset.Add(DateTime.UtcNow + TimeSpan.FromMinutes(6), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.SecurityTokenNotYetValidException("IDX10222:"));
+
+                notBefore = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromMinutes(6)).ToUniversalTime()));
+                expires = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromHours(1)).ToUniversalTime()));
+                dataset.Add(notBefore, expires, null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.SecurityTokenNotYetValidException("IDX10222:", propertiesExpected: new Dictionary<string, object> { { "NotBefore", notBefore } }));
+
                 dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow - TimeSpan.FromMinutes(6), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.SecurityTokenExpiredException("IDX10223:"));
 
                 return dataset;
