@@ -983,7 +983,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (validationParameters.IssuerSigningKeyValidator != null)
                 {
                     if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
-                        throw LogHelper.LogException<SecurityTokenInvalidSigningKeyException>(LogMessages.IDX10232, jwt.SigningKey);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                        { SigningKey = jwt.SigningKey });
                 }
                 else
                 {
@@ -1029,7 +1030,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (validationParameters.LifetimeValidator != null)
                 {
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
-                        throw LogHelper.LogException<SecurityTokenInvalidLifetimeException>(LogMessages.IDX10230, jwt);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, jwt))
+                        { NotBefore = notBefore, Expires = expires });
                 }
                 else
                 {
