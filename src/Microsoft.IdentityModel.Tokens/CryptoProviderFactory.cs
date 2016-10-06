@@ -253,48 +253,6 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
         }
 
-        // For asymmertic key encryption/decryption
-        public virtual EncryptionProvider CreateForAsymmerticKeyEncryptionProvider(SecurityKey key, string algorithm)
-        {
-            throw new NotImplementedException();
-            //if (key == null)
-            //    throw LogHelper.LogArgumentNullException("algorithm");
-
-            //if (algorithm == null)
-            //    throw LogHelper.LogArgumentNullException("algorithm");
-
-            //if (algorithm.Length == 0)
-            //    throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-            //if (_keyWrapAsymmetricAlgorithm.Contains(algorithm))
-            //{
-            //    switch (algorithm)
-            //    {
-            //        case SecurityAlgorithms.RsaPKCS1:
-            //        case SecurityAlgorithms.RsaOAEP:
-            //            return new RsaProvider(key, algorithm);
-
-            //        default:
-            //            throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-            //    }
-            //}
-
-            // TODO(Yan) : Add exception and throw
-            throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
-        }
-
-        // For symmetric key encryption
-        public virtual EncryptionProvider CreateForSymmerticKeyEncryptionProvider(byte[] key, string algorithm)
-        {
-            throw new NotImplementedException();
-        }
-
-        // For symmertic key decryption
-        public virtual EncryptionProvider CreateForSymmerticKeyEncryptionProvider(byte[] key, string algorithm, byte[] iv)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
         /// </summary>
@@ -329,16 +287,6 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
             return CreateProvider(key, algorithm, false);
-        }
-
-        /// <summary>
-        /// When finished with a <see cref="IDecryptionProvider"/> call this method for cleanup. The default behavior is to call <see cref="IDecryptionProvider.Dispose()"/>
-        /// </summary>
-        /// <param name="decryptionProvider"><see cref="IDecryptionProvider"/> to be released.</param>
-        public virtual void ReleaseAuthenticatedEncryptionProvider(AuthenticatedEncryptionProvider authenticatedEncryptionProvider)
-        {
-            if (authenticatedEncryptionProvider != null)
-                authenticatedEncryptionProvider.Dispose();
         }
 
         /// <summary>

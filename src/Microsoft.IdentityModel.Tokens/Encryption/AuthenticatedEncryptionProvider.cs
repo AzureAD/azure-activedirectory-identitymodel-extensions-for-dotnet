@@ -7,62 +7,28 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class AuthenticatedEncryptionProvider : IDisposable
+    public class AuthenticatedEncryptionProvider
     {
-        private Aes _aes;
-        private SymmetricSignatureProvider _symmetricSignatureProvider;
-        private bool generateKey = false;
-        private bool _disposed;
+        private SymmetricSecurityKey _key;
+        private string _algorithm;
 
         public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
             if (algorithm == null)
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             if (algorithm.Length == 0)
                 throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
 
-            _aes = Aes.Create();
-            _aes.Mode = CipherMode.CBC;
-            _aes.Padding = PaddingMode.PKCS7;
+            _key = key as SymmetricSecurityKey;
+            if (_key == null)
+                throw LogHelper.LogArgumentException<ArgumentException>("key", "not symmetric key.");
 
-            string hashAlgorithm = GetHashAlgorithm(algorithm);
-
-            if (key == null)
-            {
-                // Need generate when encrypting every time.
-                generateKey = true;
-
-                int keySize = GetKeySize(algorithm);
-                _aes.KeySize = keySize;
-                // Use aes key as hmac key
-                _symmetricSignatureProvider = new SymmetricSignatureProvider(new SymmetricSecurityKey(_aes.Key), hashAlgorithm);
-            }
-            else
-            {
-                byte[] cek = null;
-                SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-                if (symmetricSecurityKey != null)
-                    cek = symmetricSecurityKey.Key;
-                else
-                {
-                    JsonWebKey jsonWebKey = key as JsonWebKey;
-                    if (jsonWebKey != null && jsonWebKey.K != null)
-                        cek = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
-                }
-
-                if (cek == null)
-                    // TODO (Yan) : Add log messages for this
-                    throw LogHelper.LogArgumentException<ArgumentException>(nameof(key), LogMessages.IDX10703);
-
-                ValidateKeySize(cek, algorithm);
-
-                byte[] aesKey;
-                byte[] hmacKey;
-                GetAlgorithmParameters(algorithm, cek, out aesKey, out hmacKey);
-                _aes.Key = aesKey;
-                _symmetricSignatureProvider = new SymmetricSignatureProvider(new SymmetricSecurityKey(hmacKey), hashAlgorithm);
-            }
+            ValidateKeySize(_key.Key, algorithm);
+            _algorithm = algorithm;
         }
 
         public virtual EncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
@@ -73,27 +39,23 @@ namespace Microsoft.IdentityModel.Tokens
             if (plaintext.Length == 0)
                 throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'plaintext'");
 
-            if (generateKey)
-            {
-                // Generate aes key every time.
-                _aes.GenerateKey();
-                _symmetricSignatureProvider.updateKey(new SymmetricSecurityKey(_aes.Key));
-            }
+            if (authenticatedData == null)
+                throw LogHelper.LogArgumentNullException("authenticatedData");
 
-            // Generate IV every time.
-            _aes.GenerateIV();
+            byte[] aesKey;
+            byte[] hmacKey;
+            GetAlgorithmParameters(_algorithm, _key.Key, out aesKey, out hmacKey);
+
+            Aes aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Key = aesKey;
+            SignatureProvider symmetricSignatureProvider = _key.CryptoProviderFactory.CreateForSigning(new SymmetricSecurityKey(hmacKey), GetHashAlgorithm(_algorithm));
 
             var result = new EncryptionResult();
-            result.CipherText = EncryptionUtilities.Transform(_aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
-            result.Key = new byte[(_aes.KeySize >> 3) + (_symmetricSignatureProvider.Key.KeySize >> 3)];
-            SymmetricSecurityKey hmacKey = _symmetricSignatureProvider.Key as SymmetricSecurityKey;
-            if (hmacKey == null)
-                throw LogHelper.LogException<ArgumentException>("HMAC key is not symmetric key.");
-
-            Array.Copy(hmacKey.Key, 0, result.Key, 0, hmacKey.Key.Length);
-            Array.Copy(_aes.Key, 0, result.Key, hmacKey.Key.Length, _aes.Key.Length);
-
-            result.InitialVector = _aes.IV;
+            result.CipherText = EncryptionUtilities.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
+            result.Key = _key.Key;
+            result.InitialVector = aes.IV;
 
             byte[] al = ConvertToBigEndian(authenticatedData.Length * 8);
             byte[] macBytes = new byte[authenticatedData.Length + result.InitialVector.Length + result.CipherText.Length + al.Length];
@@ -101,8 +63,8 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(result.InitialVector, 0, macBytes, authenticatedData.Length, result.InitialVector.Length);
             Array.Copy(result.CipherText, 0, macBytes, authenticatedData.Length + result.InitialVector.Length, result.CipherText.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + result.InitialVector.Length + result.CipherText.Length, al.Length);
-            byte[] macHash = _symmetricSignatureProvider.Sign(macBytes);
-            result.AuthenticationTag = new byte[hmacKey.Key.Length];
+            byte[] macHash = symmetricSignatureProvider.Sign(macBytes);
+            result.AuthenticationTag = new byte[hmacKey.Length];
             Array.Copy(macHash, result.AuthenticationTag, result.AuthenticationTag.Length);
 
             return result;
@@ -126,9 +88,12 @@ namespace Microsoft.IdentityModel.Tokens
             if (authenticationTag == null)
                 throw LogHelper.LogArgumentNullException("authenticationTag");
 
-            SymmetricSecurityKey hmacKey = _symmetricSignatureProvider.Key as SymmetricSecurityKey;
-            if (hmacKey == null)
-                throw LogHelper.LogException<ArgumentException>("HMAC key is not symmetric key.");
+            byte[] aesKey;
+            byte[] hmacKey;
+            GetAlgorithmParameters(_algorithm, _key.Key, out aesKey, out hmacKey);
+            SymmetricSignatureProvider symmetricSignatureProvider = _key.CryptoProviderFactory.CreateForVerifying(new SymmetricSecurityKey(hmacKey), GetHashAlgorithm(_algorithm)) as SymmetricSignatureProvider;
+            if (symmetricSignatureProvider == null)
+                throw LogHelper.LogException<InvalidCastException>("Cannot get SymmetricSignatureProvider.");
 
             // Verify authentication Tag
             byte[] al = ConvertToBigEndian(authenticatedData.Length * 8);
@@ -137,11 +102,15 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
-            if (!_symmetricSignatureProvider.Verify(macBytes, authenticationTag, hmacKey.Key.Length))
+            if (!symmetricSignatureProvider.Verify(macBytes, authenticationTag, hmacKey.Length))
                 throw LogHelper.LogException<ArgumentException>(string.Format("Failed to verify ciphertext with aad: '{0}'; iv: '{1}'; and authenticationTag: '{2}'.", Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag)));
 
-            _aes.IV = iv;
-            return EncryptionUtilities.Transform(_aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
+            Aes aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Key = aesKey;
+            aes.IV = iv;
+            return EncryptionUtilities.Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
         }
 
         private void GetAlgorithmParameters(string algorithm, byte[] key, out byte[] aes_key, out byte[] hmac_key)
@@ -218,7 +187,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 case SecurityAlgorithms.Aes128CbcHmacSha256:
                     {
-                        if ((key.Length << 3) < 256)
+                        if (key.Length != 32)
                             // TODO (Yan) : Add new exception to LogMessages and throw;
                             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, algorithm, key.Length << 3);
                         break;
@@ -226,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
                     {
-                        if ((key.Length << 3) < 512)
+                        if (key.Length != 64)
                             // TODO (Yan) : Add new exception to LogMessages and throw;
                             throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, algorithm, key.Length << 3);
                         break;
@@ -248,29 +217,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return temp;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-
-                if (disposing)
-                {
-                    if (_aes != null && _disposed)
-                    {
-                        _aes.Dispose();
-                        _symmetricSignatureProvider.Dispose();
-                    }
-                }
-            }
         }
     }
 }

@@ -335,7 +335,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.InboundClaimTypeMap.Clear();
             // Test alg = "dir"
             SecurityTokenDescriptor securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_JWE(ClaimSets.DefaultClaims);
-            var encodedJwt1 = handler.CreateEncodedJwt(securityTokenDescriptor);
+            var jwt1 = handler.CreateJwtSecurityToken(securityTokenDescriptor);
 
             TokenValidationParameters validationParameters =
                 new TokenValidationParameters
@@ -347,23 +347,38 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 };
 
             SecurityToken token = null;
-            var claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
+            var claimsPrincipal = handler.ValidateToken(jwt1.RawData, validationParameters, out token);
+            JwtSecurityToken jwt2 = token as JwtSecurityToken;
+
+            var context = new CompareContext();
+            var localContext = new CompareContext();
+            //bool b = IdentityComparer.AreEqual(jwt1.Claims, jwt2.Claims, localContext);
+            //b = IdentityComparer.AreEqual(jwt1.Payload, jwt2.Payload, localContext);
+
+            if (!IdentityComparer.AreEqual(jwt1.Payload, jwt2.Payload, localContext))
+            {
+                context.Diffs.Add("jwt1.Payload != jwt2.Payload");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            //  TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: Case '{0}'", createParams.Case), context.Diffs);
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: "), context.Diffs);
 
             // negative case for simple JWT
             validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
             token = null;
             try
             {
-                claimsPrincipal = handler.ValidateToken(encodedJwt1, validationParameters, out token);
+                claimsPrincipal = handler.ValidateToken(jwt1.RawData, validationParameters, out token);
             }
             catch (Exception)
             {
-                // Expected
+                // TODO (Yan) : Add decrypt failed exception which we expected.
             }
 
             // Nested JWT
             securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_NestedJWE(ClaimSets.DefaultClaims);
-            var encodedJwt2 = handler.CreateEncodedJwt(securityTokenDescriptor);
+            var jwt3 = handler.CreateJwtSecurityToken(securityTokenDescriptor);
             validationParameters =
                 new TokenValidationParameters
                 {
@@ -374,7 +389,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidIssuer = IdentityUtilities.DefaultIssuer,
                 };
 
-            claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
+            claimsPrincipal = handler.ValidateToken(jwt3.RawData, validationParameters, out token);
+            JwtSecurityToken jwt4 = token as JwtSecurityToken;
+            if (!IdentityComparer.AreEqual(jwt3.Payload, jwt4.Payload, localContext))
+            {
+                context.Diffs.Add("jwt3.Payload != jwt4.Payload");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            //  TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: Case '{0}'", createParams.Case), context.Diffs);
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: "), context.Diffs);
 
             // negative case for nestede JWT
             // Case 1: invalid signing key
@@ -382,7 +406,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:");
             try
             {
-                claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
+                claimsPrincipal = handler.ValidateToken(jwt3.RawData, validationParameters, out token);
             }
             catch (Exception ex)
             {
@@ -393,11 +417,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
             try
             {
-                claimsPrincipal = handler.ValidateToken(encodedJwt2, validationParameters, out token);
+                claimsPrincipal = handler.ValidateToken(jwt3.RawData, validationParameters, out token);
             }
             catch (Exception)
             {
-                // Expected
+                // TODO (Yan) : Add decrypt failed exception which we expected.
             }
         }
 

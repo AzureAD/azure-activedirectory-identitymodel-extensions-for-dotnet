@@ -569,7 +569,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (encryptingCredentials != null)
             {
                 // Create simple JWE or nested JWE
-                string plaintext = nested ? new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
+                string plaintext = nested ? string.Concat(rawHeader, ".", rawPayload, ".", rawSignature) : rawPayload;
                 return CreateEncryptedToken(plaintext, nested, encryptingCredentials, header, payload, rawHeader, rawPayload, rawSignature);
             }
             else
@@ -605,15 +605,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogException<InvalidOperationException>("Failed to create the token encryption provider.");
 
             EncryptionResult result;
-            try
-            {
-                // Encrypt plaintext
-                result = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(plaintext), Encoding.ASCII.GetBytes(encryptionHeader.Base64UrlEncode()));
-            }
-            finally
-            {
-                cryptoProviderFactory.ReleaseAuthenticatedEncryptionProvider(encryptionProvider);
-            }
+            // Encrypt plaintext
+            result = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(plaintext), Encoding.ASCII.GetBytes(encryptionHeader.Base64UrlEncode()));
 
             string rawEncryptionHeader = encryptionHeader.Base64UrlEncode();
             string rawCipherText = Base64UrlEncoder.Encode(result.CipherText);
@@ -623,33 +616,8 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawEncryptedKey = string.Empty;
             if (!isDirectKeyUsed)
             {
-                EncryptionProvider keyEncryptionProvider;
-                byte[] symmetricKey = GetSymmetricSecurityKey(encryptingCredentials.Key);
-                if (symmetricKey != null)
-                {
-                    keyEncryptionProvider = cryptoProviderFactory.CreateForSymmerticKeyEncryptionProvider(symmetricKey, encryptingCredentials.Alg);
-                }
-                else
-                {
-                    keyEncryptionProvider = cryptoProviderFactory.CreateForAsymmerticKeyEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                }
-
-                if (keyEncryptionProvider == null)
-                    // TODO (Yan): Add exception message.
-                    throw LogHelper.LogException<InvalidOperationException>("Failed to create the key encryption provider.");
-
-                EncryptionResult encryptedResult;
-                try
-                {
-                    // Encrypt key
-                    encryptedResult = keyEncryptionProvider.Encrypt(result.Key);
-                }
-                finally
-                {
-                    cryptoProviderFactory.ReleaseEncryptionProvider(keyEncryptionProvider);
-                }
-
-                rawEncryptedKey = Base64UrlEncoder.Encode(encryptedResult.Key);
+                // We don't support alg != "dir" now. Add logic here later.
+                throw new NotImplementedException();
             }
 
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
@@ -784,26 +752,8 @@ namespace System.IdentityModel.Tokens.Jwt
                         }
                         else
                         {
-                            // Decrypt key first
-                            EncryptionProvider decryptionProvider;
-                            byte[] symmetricKey = GetSymmetricSecurityKey(key);
-                            if (symmetricKey != null)
-                            {
-                                decryptionProvider = cryptoProviderFactory.CreateForSymmerticKeyEncryptionProvider(symmetricKey, jwt.EncryptionHeader.Alg, Base64UrlEncoder.DecodeBytes(jwt.EncryptionHeader.IV));
-                            }
-                            else
-                            {
-                                decryptionProvider = cryptoProviderFactory.CreateForAsymmerticKeyEncryptionProvider(key, jwt.EncryptionHeader.Alg);
-                            }
-
-                            try
-                            {
-                                cek = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawEncryptedKey));
-                            }
-                            finally
-                            {
-                                cryptoProviderFactory.ReleaseEncryptionProvider(decryptionProvider);
-                            }
+                            // We don't support alg != "dir" now. Add logic later.
+                            throw new NotImplementedException();
                         }
 
                         try
@@ -1502,14 +1452,7 @@ namespace System.IdentityModel.Tokens.Jwt
             byte[] authenticationTag = Base64UrlEncoder.DecodeBytes(jwt.RawAuthenticationTag);
             byte[] aad = Encoding.ASCII.GetBytes(jwt.RawEncryptionHeader);
             byte[] plaintextBytes;
-            try
-            {
-                plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawCiphertext), aad, iv, authenticationTag);
-            }
-            finally
-            {
-                   cryptoProviderFactory.ReleaseAuthenticatedEncryptionProvider(decryptionProvider);
-            }
+            plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawCiphertext), aad, iv, authenticationTag);
 
             string plaintext = Encoding.ASCII.GetString(plaintextBytes);
 

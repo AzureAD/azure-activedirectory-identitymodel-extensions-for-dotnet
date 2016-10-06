@@ -259,7 +259,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return Payload != null ? Payload.Actort : null; }
+            get { return Payload.Actort; }
         }
 
         /// <summary>
