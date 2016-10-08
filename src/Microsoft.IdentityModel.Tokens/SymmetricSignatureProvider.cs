@@ -96,31 +96,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
         }
 
-        internal void updateKey(SecurityKey key)
-        {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
-            if (key.KeySize < MinimumSymmetricKeySizeInBits)
-                throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10603, "null", MinimumSymmetricKeySizeInBits, key.KeySize);
-
-
-            byte[] keyBytes = null;
-            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
-                keyBytes = symmetricSecurityKey.Key;
-            else
-            {
-                JsonWebKey jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null)
-                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
-                else
-                    throw LogHelper.LogArgumentException<ArgumentException>("key", "Cannot get symmetric key from SecurityKey: {0}", key);
-            }
-
-            _keyedHash.Key = keyBytes;
-        }
-
         /// <summary>
         /// Gets or sets the minimum <see cref="SymmetricSecurityKey"/>.KeySize"/>.
         /// </summary>

@@ -41,27 +41,6 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static CryptoProviderFactory _default;
 
-        private static readonly HashSet<string> DefaultAsymmetrickeyWrapAlgorithm = new HashSet<string>()
-        {
-            { SecurityAlgorithms.RsaPKCS1 },
-            { SecurityAlgorithms.RsaOAEP }            
-        };
-
-        private static readonly HashSet<string> DefaultSymmetrickeyWrapAlgorithm = new HashSet<string>()
-        {
-            { SecurityAlgorithms.Aes128KW }
-        };
-
-        private static readonly HashSet<string> DefaultContentEncryptAlgorithm = new HashSet<string>()
-        {
-            { SecurityAlgorithms.Aes128CbcHmacSha256 },
-            { SecurityAlgorithms.Aes256CbcHmacSha512 }
-        };
-
-        private HashSet<string> _keyWrapAsymmetricAlgorithm;
-        private HashSet<string> _keyWrapSymmetricAlgorithm;
-        private HashSet<string> _contentEncryptAlgorithm;
-
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
         /// </summary>
@@ -97,9 +76,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public CryptoProviderFactory()
         {
-            _keyWrapAsymmetricAlgorithm = new HashSet<string>(DefaultAsymmetrickeyWrapAlgorithm);
-            _keyWrapSymmetricAlgorithm = new HashSet<string>(DefaultSymmetrickeyWrapAlgorithm);
-            _contentEncryptAlgorithm = new HashSet<string>(DefaultContentEncryptAlgorithm);
         }
 
         /// <summary>
@@ -111,10 +87,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
-            _keyWrapAsymmetricAlgorithm = new HashSet<string>(DefaultAsymmetrickeyWrapAlgorithm);
-            _keyWrapSymmetricAlgorithm = new HashSet<string>(DefaultSymmetrickeyWrapAlgorithm);
-            _contentEncryptAlgorithm = new HashSet<string>(DefaultContentEncryptAlgorithm);
             CustomCryptoProvider = other.CustomCryptoProvider;
+        }
+
+        public virtual bool IsAuthenticatedEncryptionAlgorithmSupported(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -229,24 +214,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         public virtual AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
-            if (algorithm == null)
-                throw LogHelper.LogArgumentNullException("algorithm");
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (algorithm.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'algorithm'");
-
-            if (_contentEncryptAlgorithm.Contains(algorithm))
+            if (IsAuthenticatedEncryptionAlgorithmSupported(algorithm))
             {
-                switch (algorithm)
-                {
-                    case SecurityAlgorithms.Aes128CbcHmacSha256:
-                    case SecurityAlgorithms.Aes256CbcHmacSha512:
-                        return new AuthenticatedEncryptionProvider(key, algorithm);
-
-                    default:
-                        // TODO (Yan) : Add exception and throw
-                        throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm");
-                }
+                return new AuthenticatedEncryptionProvider(key, algorithm);
             }
 
             // TODO (Yan) : Add exception and throw
@@ -287,16 +260,6 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
             return CreateProvider(key, algorithm, false);
-        }
-
-        /// <summary>
-        /// When finished with a <see cref="IEncryptionProvider"/> call this method for cleanup. The default behavior is to call <see cref="IEncryptionProvider.Dispose()"/>
-        /// </summary>
-        /// <param name="encryptionProvider"><see cref="IEncryptionProvider"/> to be released.</param>
-        public virtual void ReleaseEncryptionProvider(EncryptionProvider encryptionProvider)
-        {
-            if (encryptionProvider != null)
-                encryptionProvider.Dispose();
         }
 
         /// <summary>

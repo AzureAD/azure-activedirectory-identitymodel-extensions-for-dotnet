@@ -56,27 +56,28 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
                 throw LogHelper.LogArgumentNullException(nameof(jwtEncodedString));
 
-            bool isMatch = false;
-            // Quick fix prior to beta8, will add configuration in RC
-            var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
-            if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
-            {
-                regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
-            }
+            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
+            // [a], [b], [c], [d], [e], [f.g.h].
+            string[] tokenParts = jwtEncodedString.Split(new char[] {'.'}, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), jwtEncodedString)));
 
-            if (regexJws.IsMatch(jwtEncodedString))
-                isMatch = true;
-            else
+            bool isMatch = false;
+            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
-                if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                // Quick fix prior to beta8, will add configuration in RC
+                var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
+                if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
                 {
-                    regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
                 }
 
-                if (regexJwe.IsMatch(jwtEncodedString))
+                if (regexJws.IsMatch(jwtEncodedString))
                     isMatch = true;
-                else
+            }
+            else
+            {
+                if (tokenParts[1] == String.Empty)
                 {
                     var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
                     if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
@@ -85,6 +86,17 @@ namespace System.IdentityModel.Tokens.Jwt
                     }
 
                     if (regexDirAlgJwe.IsMatch(jwtEncodedString))
+                        isMatch = true;
+                }
+                else
+                {
+                    var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
+                    if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexJwe.IsMatch(jwtEncodedString))
                         isMatch = true;
                 }
             }
@@ -309,7 +321,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the <see cref="JwtHeader"/> associated with this instance if the token is signed.
         /// </summary>
-        public JwtHeader Header { get; private set; }
+        public JwtHeader Header { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="JwtHeader"/> associated with this instance if the token is encrypted.
@@ -389,24 +401,24 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawHeader { get; private set; }
+        public string RawHeader { get; internal set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawPayload { get; private set; }
+        public string RawPayload { get; internal set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawSignature { get; private set; }
+        public string RawSignature { get; internal set; }
 
         /// <summary>
-        /// Gets a flag indicating whether this token is signed(JWS).
+        /// Gets a flag indicating whether this token is JWS.
         /// </summary>
         public bool IsSigned => Header != null;
 
@@ -499,23 +511,15 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
         /// <param name="isNested">A flag indicating if jwtEncodedString is nested to this token.</param>
-        internal void Decode(string jwtEncodedString, bool isNested = false)
+        internal void Decode(string jwtEncodedString)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, jwtEncodedString);
-            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtPartNumber + 1);
-            if (tokenParts.Length == 1)
-            {
-                // TODO (Yan): Add a new log message for this
-                throw new ArgumentException("No parts found for this token. It could have been formatted in JSON which is currently nor supported.",
-                    nameof(jwtEncodedString));
-            }
 
-            // Numbers of parts exceeds maximum
-            if (tokenParts.Length > JwtConstants.MaxJwtPartNumber)
-            {
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString);
-            }
-
+            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
+            // [a], [b], [c], [d], [e], [f.g.h].
+            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), jwtEncodedString)));
 
             // Decode the header
             JwtHeader header;
@@ -529,34 +533,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), ex));
             }
 
-            if (isNested)
-            {
-                if (!string.IsNullOrWhiteSpace(header.Enc))
-                {
-                    // TODO (Yan): Add log message for this
-                    throw LogHelper.LogException<ArgumentException>("The nested token must be JWS.");
-                }
+            RawData = jwtEncodedString;
 
-                Header = header;
-                DecodeJws(tokenParts);
+            if (tokenParts.Length == JwtConstants.JweSegmentCount)
+            {
+                // The token is JWE
+                EncryptionHeader = header;
+                DecodeJwe(tokenParts);
             }
             else
             {
-                RawData = jwtEncodedString;
-
-                // Determine the token type
-                if (string.IsNullOrWhiteSpace(header.Enc))
-                {
-                    // The token is JWS
-                    Header = header;
-                    DecodeJws(tokenParts);
-                }
-                else
-                {
-                    // The token is JWE
-                    EncryptionHeader = header;
-                    DecodeJwe(tokenParts);
-                }
+                // The token is JWS
+                Header = header;
+                DecodeJws(tokenParts);
             }
         }
 
@@ -567,7 +556,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private void DecodeJws(string[] tokenParts)
         {
             // Verify the part number
-            if (tokenParts.Length != JwtConstants.JwsPartNumber)
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount)
             {
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
             }
@@ -608,7 +597,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private void DecodeJwe(string[] tokenParts)
         {
             // Verify the part number
-            if (tokenParts.Length != JwtConstants.JwePartNumber)
+            if (tokenParts.Length != JwtConstants.JweSegmentCount)
             {
                 // TODO (Yan): exception message
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);

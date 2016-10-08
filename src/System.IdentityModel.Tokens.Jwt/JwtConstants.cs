@@ -57,24 +57,24 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
 
-        public const string JweCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        public const string JweCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$";
 
         public const string JweCompactDirAlgSerializationRegex = @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
 
         /// <summary>
         /// The number of parts in a JWE token.
         /// </summary>
-        public const int JwePartNumber = 5;
+        public const int JweSegmentCount = 5;
 
         /// <summary>
         /// The number of parts in a JWS token.
         /// </summary>
-        public const int JwsPartNumber = 3;
+        public const int JwsSegmentCount = 3;
 
         /// <summary>
         /// The maximum number of parts in a JWT.
         /// </summary>
-        public const int MaxJwtPartNumber = 5;
+        public const int MaxJwtSegmentCount = 5;
 
         /// <summary>
         /// JWE header alg indicating a shared symmetric key is directly used as CEK.

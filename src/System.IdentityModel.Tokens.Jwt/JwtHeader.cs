@@ -43,8 +43,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
-            : this(null, null)
+            : base(StringComparer.Ordinal)
         {
+            this[JwtHeaderParameterNames.Alg] = SecurityAlgorithms.None;
+            Typ = JwtConstants.HeaderType;
         }
 
         /// <summary>
@@ -65,8 +67,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used creating a JWE Compact JSON.</param>
         /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
-        public JwtHeader(EncryptingCredentials encryptingCredentials, bool isNested)
-            : this(encryptingCredentials, null, isNested)
+        public JwtHeader(EncryptingCredentials encryptingCredentials)
+            : this(encryptingCredentials, null)
         {
         }
 
@@ -108,7 +110,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
-        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, bool isNested)
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap)
             : base(StringComparer.Ordinal)
         {
             if (encryptingCredentials == null)
@@ -129,8 +131,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 Kid = encryptingCredentials.Key.KeyId;
 
             Typ = JwtConstants.HeaderType;
-            if (isNested)
-                Cty = JwtConstants.HeaderType;
 
             EncryptingCredentials = encryptingCredentials;
         }
@@ -143,7 +143,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Alg);
+                return GetStandardClaim(JwtHeaderParameterNames.Alg);
             }
 
             private set
@@ -160,7 +160,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Cty);
+                return GetStandardClaim(JwtHeaderParameterNames.Cty);
             }
 
             private set
@@ -177,7 +177,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Enc);
+                return GetStandardClaim(JwtHeaderParameterNames.Enc);
             }
 
             private set
@@ -209,7 +209,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Typ);
+                return GetStandardClaim(JwtHeaderParameterNames.Typ);
             }
 
             private set
@@ -235,7 +235,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the thhumbprint of the certificate used to sign the token
+        /// Gets the thumbprint of the certificate used to sign the token
         /// </summary>
         public string X5t
         {
@@ -246,17 +246,8 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the compression  algorithm (Zip) of the token.
+        /// Gets the iv of symmetric key wrap.
         /// </summary>
-        /// <remarks>If the content mime type is not found, null is returned.</remarks>
-        public string Zip
-        {
-            get
-            {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Zip);
-            }
-        }
-
         public string IV
         {
             get
@@ -266,11 +257,11 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets a standart claim from the header.
+        /// Gets a standard claim from the header.
         /// A standard cliam is either a string or a value of another type serialized in JSON format.
         /// </summary>
         /// <param name="claimType">The key of the claim.</param>
-        /// <returns>The standart claim string; or null if not found.</returns>
+        /// <returns>The standard claim string; or null if not found.</returns>
         internal string GetStandardClaim(string claimType)
         {
             object value = null;

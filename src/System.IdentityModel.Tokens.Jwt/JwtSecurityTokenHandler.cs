@@ -319,8 +319,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">'tokenString' is null.</exception>
         public override bool CanReadToken(string tokenString)
         {
-            if (tokenString == null)
-                throw LogHelper.LogArgumentNullException("tokenString");
+            if (string.IsNullOrWhiteSpace(tokenString))
+                return false;
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
@@ -328,28 +328,28 @@ namespace System.IdentityModel.Tokens.Jwt
                 return false;
             }
 
-            // Quick fix prior to beta8, will add configuration in RC
-            bool isMatch = false;
-            // Quick fix prior to beta8, will add configuration in RC
-            var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
-            if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
-            {
-                regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
-            }
+            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
+            // [a], [b], [c], [d], [e], [f.g.h].
+            string[] tokenParts = tokenString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                return false;
 
-            if (regexJws.IsMatch(tokenString))
-                isMatch = true;
-            else
+            bool isMatch = false;
+            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
-                if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                // Quick fix prior to beta8, will add configuration in RC
+                var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
+                if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
                 {
-                    regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
                 }
 
-                if (regexJwe.IsMatch(tokenString))
+                if (regexJws.IsMatch(tokenString))
                     isMatch = true;
-                else
+            }
+            else
+            {
+                if (tokenParts[1] == String.Empty)
                 {
                     var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
                     if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
@@ -358,6 +358,17 @@ namespace System.IdentityModel.Tokens.Jwt
                     }
 
                     if (regexDirAlgJwe.IsMatch(tokenString))
+                        isMatch = true;
+                }
+                else
+                {
+                    var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
+                    if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexJwe.IsMatch(tokenString))
                         isMatch = true;
                 }
             }
@@ -594,7 +605,10 @@ namespace System.IdentityModel.Tokens.Jwt
                 // TODO (Yan): Add exception message.
                 throw LogHelper.LogException<ArgumentException>("EncryptingCredentials must contain a CryptoProviderFactory.");
 
-            JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, nested);
+            JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
+            if (nested)
+                encryptionHeader[JwtHeaderParameterNames.Cty] = JwtConstants.HeaderType;
+
             bool isDirectKeyUsed = JwtConstants.DirectKeyUseAlg.Equals(encryptionHeader.Alg, StringComparison.Ordinal);
 
             AuthenticatedEncryptionProvider encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(
@@ -696,12 +710,17 @@ namespace System.IdentityModel.Tokens.Jwt
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            // Decode token
-            JwtSecurityToken jwt = new JwtSecurityToken(token);
+            string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), token)));
 
-            // Decrypt token if encrypted
-            if (jwt.IsEncrypted)
+            JwtSecurityToken jwt = null;
+            if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
+                // The token is JWE.
+                // Decode token
+                jwt = new JwtSecurityToken(token);
+
                 string kid = jwt.EncryptionHeader.Kid;
                 IEnumerable<SecurityKey> securityKeys = null;
                 if (validationParameters.TokenDecryptionKeyResolver != null)
@@ -758,7 +777,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                         try
                         {
-                            if (Decrypt(jwt, cryptoProviderFactory, cek))
+                            if (Decrypt(jwt, cryptoProviderFactory, cek, validationParameters))
                                 break;
                         }
                         catch (Exception ex)
@@ -775,11 +794,39 @@ namespace System.IdentityModel.Tokens.Jwt
                         throw LogHelper.LogException<SecurityTokenInvalidSignatureException>("Decrypt failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.", keysAttempted, exceptionStrings);
                 }
             }
-
-            // Validate signature if token is signed
-            if (jwt.IsSigned)
+            else
             {
-                this.ValidateTokenSignature(jwt, validationParameters);
+                // the token is JWS
+                if (validationParameters.SignatureValidator != null)
+                {
+                    var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
+                    if (validatedJwtToken == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, token)));
+
+                    jwt = validatedJwtToken as JwtSecurityToken;
+                    if (jwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
+                }
+                else
+                {
+                    jwt = this.ValidateSignature(token, validationParameters);
+                    if (jwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10507, token)));
+                }
+
+                if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
+                {
+                    if (validationParameters.IssuerSigningKeyValidator != null)
+                    {
+                        if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                            { SigningKey = jwt.SigningKey });
+                    }
+                    else
+                    {
+                        ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                    }
+                }
             }
 
             validatedToken = jwt;
@@ -1428,7 +1475,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private bool Decrypt(JwtSecurityToken jwt, CryptoProviderFactory cryptoProviderFactory, byte[] cek)
+        private bool Decrypt(JwtSecurityToken jwt, CryptoProviderFactory cryptoProviderFactory, byte[] cek, TokenValidationParameters validationParameters)
         {
             if (!jwt.IsEncrypted)
             {
@@ -1455,15 +1502,56 @@ namespace System.IdentityModel.Tokens.Jwt
             plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawCiphertext), aad, iv, authenticationTag);
 
             string plaintext = Encoding.ASCII.GetString(plaintextBytes);
-
-            // Decode plaintext, it's either payload JSON or a nested JWS token
+            JwtSecurityToken verifiedJwt = null;
             if (jwt.EncryptionHeader.Cty != null)
             {
-                // Decode nested JWS
-                jwt.Decode(plaintext, true);
+                // Validate signature of JWS.
+                if (validationParameters.SignatureValidator != null)
+                {
+                    var validatedJwtToken = validationParameters.SignatureValidator(plaintext, validationParameters);
+                    if (validatedJwtToken == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, plaintext)));
+
+                    verifiedJwt = validatedJwtToken as JwtSecurityToken;
+                    if (verifiedJwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), plaintext)));
+                }
+                else
+                {
+                    verifiedJwt = ValidateSignature(plaintext, validationParameters);
+                    if (jwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10507, plaintext)));
+                }
+
+                if (verifiedJwt.SigningKey != null)
+                {
+                    jwt.SigningKey = verifiedJwt.SigningKey;
+                }
+
+                if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
+                {
+                    if (validationParameters.IssuerSigningKeyValidator != null)
+                    {
+                        if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                            { SigningKey = jwt.SigningKey });
+                    }
+                    else
+                    {
+                        ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                    }
+                }
+
+                // Set value to the existing jwt.
+                jwt.Header = verifiedJwt.Header;
+                jwt.Payload = verifiedJwt.Payload;
+                jwt.RawHeader = verifiedJwt.RawHeader;
+                jwt.RawPayload = verifiedJwt.RawPayload;
+                jwt.RawSignature = verifiedJwt.RawSignature;
             }
             else
             {
+                // The plaintext is payload JSON.
                 try
                 {
                     IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, plaintext);
