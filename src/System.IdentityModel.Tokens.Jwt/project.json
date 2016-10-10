@@ -1,13 +1,11 @@
 {
-  "version": "5.0.0-*",
+  "version": "5.0.1-*",
   "description": "Includes types that provide support for creating, serializing and validating JWT tokens.",
   "dependencies": {
-    "Microsoft.IdentityModel.Tokens": "5.0.0-*"
+    "Microsoft.IdentityModel.Tokens": "5.0.1-*"
   },
   "frameworks": {
-    "netstandard1.4": {
-      "imports": [ "portable-net451+win8" ]
-    },
+    "netstandard1.4": { },
     "net451": { }
   },
   "buildOptions": {
