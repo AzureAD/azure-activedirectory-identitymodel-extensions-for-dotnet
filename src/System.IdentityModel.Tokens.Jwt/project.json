@@ -5,9 +5,7 @@
     "Microsoft.IdentityModel.Tokens": "5.0.1-*"
   },
   "frameworks": {
-    "netstandard1.4": {
-      "imports": [ "portable-net451+win8" ]
-    },
+    "netstandard1.4": { },
     "net451": { }
   },
   "buildOptions": {

@@ -9,8 +9,7 @@
         "System.Globalization": "4.3.0-*",
         "System.IO": "4.3.0-*",
         "System.IO.FileSystem": "4.3.0-*"
-      },
-      "imports": [ "portable-net451+win8" ]
+      }
     },
     "net451": { }
   },

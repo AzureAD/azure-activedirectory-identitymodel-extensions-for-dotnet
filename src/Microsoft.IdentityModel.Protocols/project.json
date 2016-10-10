@@ -10,8 +10,7 @@
         "System.Collections.Specialized": "4.3.0-*",
         "System.Diagnostics.Contracts": "4.3.0-*",
         "System.Net.Http": "4.3.0-*"
-      },
-      "imports": [ "portable-net451+win8" ]
+      }
     },
     "net451": {
       "frameworkAssemblies": {

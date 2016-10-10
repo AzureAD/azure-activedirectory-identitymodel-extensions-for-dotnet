@@ -2,7 +2,7 @@
   "version": "5.0.1-*",
   "description": "Includes types that provide support for cryptographic operations.",
   "dependencies": {
-    "Microsoft.IdentityModel.Logging": "1.0.0-*",
+    "Microsoft.IdentityModel.Logging": "1.0.1-*",
     "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {
@@ -22,8 +22,7 @@
         "System.Text.RegularExpressions": "4.3.0-*",
         "System.Threading": "4.3.0-*",
         "System.Xml.ReaderWriter": "4.3.0-*"
-      },
-      "imports": [ "portable-net451+win8" ]
+      }
     },
     "net451": {
       "frameworkAssemblies": {

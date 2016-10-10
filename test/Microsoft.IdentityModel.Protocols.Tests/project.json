@@ -2,7 +2,6 @@
   "version": "2.0.1-*",
   "dependencies": {
     "Microsoft.IdentityModel.Tokens.Tests": "5.0.1-*",
-    "Microsoft.NETCore.Platforms": "1.1.0-*",
     "dotnet-test-xunit": "2.2.0-*",
     "xunit": "2.2.0-*"
   },
@@ -12,15 +11,11 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.1.0-*",
+          "version": "1.0.0-*",
           "type": "platform"
         },
         "System.Diagnostics.Process": "4.3.0-*"
-      },
-      "imports": [
-        "dnxcore50",
-        "portable-net451+win8"
-      ]
+      }
     },
     "net451": {
       "frameworkAssemblies": {

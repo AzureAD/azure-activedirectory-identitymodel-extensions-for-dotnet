@@ -9,8 +9,7 @@
       "dependencies": {
         "System.Runtime.Serialization.Primitives": "4.3.0-*",
         "System.Runtime.Serialization.Xml": "4.3.0-*"
-      },
-      "imports": [ "portable-net451+win8" ]
+      }
     },
     "net451": {
       "frameworkAssemblies": {

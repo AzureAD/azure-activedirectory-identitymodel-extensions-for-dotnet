@@ -28,7 +28,6 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.IO;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 using System.Globalization;
 
@@ -105,23 +104,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Contains(guid3, listener.TraceBuffer);
             Assert.Contains(guid4, listener.TraceBuffer);
             Assert.DoesNotContain(guid5, listener.TraceBuffer);
-        }
-
-        [Fact(DisplayName = "LogggerTests : LogMessage")]
-        public void LogMessage()
-        {
-            SampleListener listener = new SampleListener();
-            IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
-            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Verbose);
-
-            TokenValidationParameters validationParameters = new TokenValidationParameters()
-            {
-                ValidateAudience = false
-            };
-
-            // This should log a warning about not validating the audience
-            Validators.ValidateAudience(null, null, validationParameters);
-            Assert.Contains("IDX10233: ", listener.TraceBuffer);
         }
 
         [Fact]
