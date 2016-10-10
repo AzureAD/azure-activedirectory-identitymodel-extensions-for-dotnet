@@ -1,14 +1,14 @@
 {
-  "version": "5.0.0-*",
+  "version": "5.0.1-*",
   "description": "Includes types that provide support for Saml tokens.",
   "dependencies": {
-    "Microsoft.IdentityModel.Tokens": "5.0.0-*"
+    "Microsoft.IdentityModel.Tokens": "5.0.1-*"
   },
   "frameworks": {
     "netstandard1.4": {
       "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.1-rc3-*",
-        "System.Runtime.Serialization.Xml": "4.1.1-rc3-*"
+        "System.Runtime.Serialization.Primitives": "4.3.0-*",
+        "System.Runtime.Serialization.Xml": "4.3.0-*"
       },
       "imports": [ "portable-net451+win8" ]
     },

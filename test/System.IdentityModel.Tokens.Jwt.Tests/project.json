@@ -1,9 +1,9 @@
 {
-  "version": "5.0.0-*",
+  "version": "5.0.1-*",
   "dependencies": {
-    "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
-    "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests": "2.0.0-*",
-    "xunit": "2.1.0"
+    "Microsoft.IdentityModel.Tokens.Tests": "5.0.1-*",
+    "Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests": "2.0.1-*",
+    "xunit": "2.2.0-*"
   },
   "description": "System.IdentityModel.Tokens.Jwt.Tests",
   "testRunner": "xunit",
@@ -11,10 +11,10 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0",
+          "version": "1.1.0-*",
           "type": "platform"
         },
-        "System.Diagnostics.Process": "4.1.0-rc3-*"
+        "System.Diagnostics.Process": "4.3.0-*"
       },
       "imports": [
         "dnxcore50",
