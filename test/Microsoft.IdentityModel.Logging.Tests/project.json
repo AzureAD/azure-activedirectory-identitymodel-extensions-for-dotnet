@@ -1,10 +1,9 @@
 ﻿{
-  "version": "1.0.0-*",
+  "version": "1.0.1-*",
   "dependencies": {
-    "Microsoft.IdentityModel.Tokens.Tests": "5.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*",
-    "dotnet-test-xunit": "1.0.0-*",
-    "xunit": "2.1.0"
+    "Microsoft.IdentityModel.Logging": "1.0.1-*",
+    "dotnet-test-xunit": "2.2.0-*",
+    "xunit": "2.2.0-*"
   },
   "description": "Microsoft.IdentityModel.Logging.Tests",
   "testRunner": "xunit",
@@ -12,19 +11,14 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0",
-          "type": "platform"
-        },
-        "System.Diagnostics.Process": "4.1.0-rc3-*"
-      },
-      "imports": [
-        "dnxcore50",
-        "portable-net451+win8"
-      ]
+          "version": "1.0.0-*",
+          "type":"platform"
+        }
+      }
     },
     "net451": {
       "dependencies": {
-        "xunit.runner.console": "2.1.0",
+        "xunit.runner.console": "2.1.0"
       }
     }
   }

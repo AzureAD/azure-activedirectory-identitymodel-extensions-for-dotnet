@@ -50,13 +50,15 @@ $ErrorActionPreference = "Stop"
 
 function SetCoreFxVersion([string]$fileName, [string]$oldVersion, [string]$newVersion)
 {
+    Write-Host ""
+    Write-Host "============================"
+    Write-Host ">>> SetCoreFxVersion: " $fileName ", " $oldVersion ", " $newVersion
+
     $content = Get-Content -Path $fileName -raw;
-    if ($content.Contains("-rc3-"))
-    {
-        Write-Host ">>> SetCoreFxVersion: " $fileName ", " $oldVersion ", " $newVersion
-        $newContent = $content -replace $oldVersion, $newVersion;
-        Set-Content $fileName $newContent;
-    }
+    $newContent = $content -replace $oldVersion, $newVersion;
+    Set-Content $fileName $newContent;
+
+    Write-Host "============================"
 }
 
 if ($clean)
@@ -148,11 +150,11 @@ if ($updateCoreFxVersion -eq "YES")
 {
     Write-Host ""
     Write-Host "============================"
-    Write-Host "Update project.json"
+    Write-Host "updateCoreFxVersion"
     Write-Host ""
 
-    $rootNode = $buildConfiguration.projects
-    $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
+    Write-Host "root = $root"
+
     foreach($project in $projects) {
         $name = $project.name;
         SetCoreFxVersion "$root\src\$name\project.json" $coreFxOldVersion $coreFxNewVersion;

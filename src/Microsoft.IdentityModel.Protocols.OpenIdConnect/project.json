@@ -1,15 +1,14 @@
 ﻿{
-  "version": "2.0.0-*",
+  "version": "2.0.1-*",
   "description": "Includes types that provide support for OpenIdConnect protocol.",
   "dependencies": {
-    "Microsoft.IdentityModel.Protocols": "2.0.0-*"
+    "Microsoft.IdentityModel.Protocols": "2.0.1-*"
   },
   "frameworks": {
     "netstandard1.4": {
       "dependencies": {
-        "System.Dynamic.Runtime": "4.0.11-rc3-*"
-      },
-      "imports": [ "portable-net451+win8" ]
+        "System.Dynamic.Runtime": "4.3.0-*"
+      }
     },
     "net451": { }
   },

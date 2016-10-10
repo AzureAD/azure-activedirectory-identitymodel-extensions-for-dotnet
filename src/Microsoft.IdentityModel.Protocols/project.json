@@ -1,17 +1,16 @@
 {
-  "version": "2.0.0-*",
+  "version": "2.0.1-*",
   "description": "Provides types that are common across openidconnect and wsfed protocols.",
   "dependencies": {
-    "System.IdentityModel.Tokens.Jwt": "5.0.0-*"
+    "System.IdentityModel.Tokens.Jwt": "5.0.1-*"
   },
   "frameworks": {
     "netstandard1.4": {
       "dependencies": {
-        "System.Collections.Specialized": "4.0.1-rc3-*",
-        "System.Diagnostics.Contracts": "4.0.1-rc3-*",
-        "System.Net.Http": "4.1.0-rc3-*"
-      },
-      "imports": [ "portable-net451+win8" ]
+        "System.Collections.Specialized": "4.3.0-*",
+        "System.Diagnostics.Contracts": "4.3.0-*",
+        "System.Net.Http": "4.3.0-*"
+      }
     },
     "net451": {
       "frameworkAssemblies": {

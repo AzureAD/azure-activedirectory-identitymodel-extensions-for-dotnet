@@ -1,12 +1,11 @@
 {
-  "version": "5.0.0-*",
+  "version": "5.0.1-*",
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
-    "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*",
-    "System.IdentityModel.Tokens.Saml": "5.0.0-*",
-    "dotnet-test-xunit": "1.0.0-*",
-    "xunit": "2.1.0"
+    "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.1-*",
+    "System.IdentityModel.Tokens.Saml": "5.0.1-*",
+    "dotnet-test-xunit": "2.2.0-*",
+    "xunit": "2.2.0-*"
   },
   "description": "Microsoft.IdentityModel.Tokens.Tests",
   "testRunner": "xunit",
@@ -14,16 +13,11 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0",
+          "version": "1.0.0-*",
           "type": "platform"
         },
-        "System.Reflection.TypeExtensions": "4.1.0-rc3-*",
-        "System.Security.Cryptography.Algorithms": "4.2.0-rc3-*"
-      },
-      "imports": [
-        "dnxcore50",
-        "portable-net451+win8"
-      ]
+        "System.Security.Cryptography.Cng": "4.3.0-*"
+      }
     },
     "net451": {
       "frameworkAssemblies": {
