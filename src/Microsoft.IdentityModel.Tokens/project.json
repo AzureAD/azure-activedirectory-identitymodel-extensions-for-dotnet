@@ -16,7 +16,10 @@
         "System.Runtime.InteropServices.RuntimeInformation": "4.3.0-*",
         "System.Security.Claims": "4.3.0-*",
         "System.Security.Cryptography.Algorithms": "4.3.0-*",
-        "System.Security.Cryptography.Cng": "4.3.0-*",
+        "System.Security.Cryptography.Cng": {
+          "type" : "build",
+          "version" : "4.3.0-*"
+        },
         "System.Security.Cryptography.Csp": "4.3.0-*",
         "System.Security.Cryptography.X509Certificates": "4.3.0-*",
         "System.Text.RegularExpressions": "4.3.0-*",

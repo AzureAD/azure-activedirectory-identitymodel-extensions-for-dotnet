@@ -16,8 +16,7 @@
           "version": "1.0.0-*",
           "type": "platform"
         },
-        "System.Reflection.TypeExtensions": "4.3.0-*",
-        "System.Security.Cryptography.Algorithms": "4.3.0-*"
+        "System.Security.Cryptography.Cng": "4.3.0-*"
       }
     },
     "net451": {

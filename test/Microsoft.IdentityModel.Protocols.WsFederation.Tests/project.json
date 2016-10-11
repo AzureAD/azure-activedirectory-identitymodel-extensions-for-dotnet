@@ -14,8 +14,7 @@
           "version": "1.0.0-*",
           "type": "platform"
         },
-        "System.Diagnostics.Process": "4.3.0-*",
-        "System.Runtime": "4.3.0-*"
+        "System.Diagnostics.Process": "4.3.0-*"
       }
     },
     "net451": {
