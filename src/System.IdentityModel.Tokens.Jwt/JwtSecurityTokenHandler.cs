@@ -602,8 +602,7 @@ namespace System.IdentityModel.Tokens.Jwt
             CryptoProviderFactory cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
             if (cryptoProviderFactory == null)
-                // TODO (Yan): Add exception message.
-                throw LogHelper.LogException<ArgumentException>("EncryptingCredentials must contain a CryptoProviderFactory.");
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10733));
 
             JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
             if (nested)
@@ -615,8 +614,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 isDirectKeyUsed ? encryptingCredentials.Key : null,
                 encryptingCredentials.Enc);
             if (encryptionProvider == null)
-                // TODO (Yan): Add exception message.
-                throw LogHelper.LogException<InvalidOperationException>("Failed to create the token encryption provider.");
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10730));
 
             EncryptionResult result;
             // Encrypt plaintext
@@ -734,7 +732,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     if (key == null)
                     {
                         if (!string.IsNullOrEmpty(kid))
-                            throw LogHelper.LogException<SecurityTokenSignatureKeyNotFoundException>(LogMessages.IDX10501, kid, jwt);
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10501, kid, jwt)));
                     }
                     else
                     {
@@ -763,8 +761,7 @@ namespace System.IdentityModel.Tokens.Jwt
                             SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
                             if (symmetricSecurityKey == null)
                             {
-                                // TODO (Yan): Add a new exception massage
-                                throw LogHelper.LogException<ArgumentException>("The resolved key for direct use is not a symmetric key");
+                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10731));
                             }
 
                             cek = symmetricSecurityKey.Key;
@@ -790,8 +787,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     }
 
                     if (keysAttempted.Length > 0)
-                        // TODO (Yan) : Add need exception and log message.
-                        throw LogHelper.LogException<SecurityTokenInvalidSignatureException>("Decrypt failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.", keysAttempted, exceptionStrings);
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10732, exceptionStrings)));
                 }
             }
             else
@@ -880,8 +876,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
-            // TODO (Yan) : Add exception
-            throw LogHelper.LogArgumentException<ArgumentException>("token", "Invalid jwt token");
+            // TODO: [phuff] This exception message should go away when we re-write this method.
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(token), "Invalid jwt token"));
         }
 
         /// <summary>
@@ -959,11 +955,11 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedJwtToken == null)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10505, token);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, token)));
 
                 jwt = validatedJwtToken as JwtSecurityToken;
                 if (jwt == null)
-                    throw LogHelper.LogException<SecurityTokenInvalidSignatureException>(LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token);
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
             }
             else
             {
@@ -1041,7 +1037,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (validationParameters.AudienceValidator != null)
                 {
                     if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
-                        throw LogHelper.LogException<SecurityTokenInvalidAudienceException>(LogMessages.IDX10231, jwt.ToString());
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, jwt.ToString())));
                 }
                 else
                 {
@@ -1485,14 +1481,14 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (cryptoProviderFactory == null)
             {
-                throw LogHelper.LogException<ArgumentNullException>(nameof(cryptoProviderFactory));
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderFactory));
             }
 
             AuthenticatedEncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(new SymmetricSecurityKey(cek), jwt.EncryptionHeader.Enc);
             if (decryptionProvider == null)
             {
                 // TODO (Yan): Add exception message.
-                throw LogHelper.LogException<InvalidOperationException>("Failed to create decryption provider.");
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10647));
             }
 
             byte[] iv = Base64UrlEncoder.DecodeBytes(jwt.RawInitializationVector);
@@ -1559,7 +1555,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", plaintext, jwt.RawData);
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, plaintext, jwt.RawData), ex));
                 }
             }
 

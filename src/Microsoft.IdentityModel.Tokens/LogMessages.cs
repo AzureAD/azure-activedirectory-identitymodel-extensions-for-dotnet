@@ -69,15 +69,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";
 
         // Crypto Errors
-        internal const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type: '{4}'.";
-        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have less than: '{1}' bits. KeySize is: '{2}'.";
-        internal const string IDX10613 = "IDX10613: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than: '{0}'.";
-        internal const string IDX10623 = "IDX10623: The KeyedHashAlgorithm is null, cannot sign/verify data.";
-        internal const string IDX10624 = "IDX10624: Cannot sign 'input' byte array has length 0.";
-        internal const string IDX10625 = "IDX10625: Cannot verify signature 'input' byte array has length 0.";
-        internal const string IDX10626 = "IDX10626: Cannot verify signature 'signature' byte array has length 0.";
-        internal const string IDX10627 = "IDX10627: Cannot set the MinimumAsymmetricKeySizeInBitsForVerifying to less than: '{0}'.";
-        internal const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than: '{0}'.";
+        internal const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
+        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have fewer than '{1}' bits. KeySize: '{2}'.";
+        internal const string IDX10613 = "IDX10613: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than '{0}'.";
+        internal const string IDX10623 = "IDX10623: Cannot sign data because the KeyedHashAlgorithm is null.";
+        internal const string IDX10624 = "IDX10624: Cannot verify data because the KeyedHashAlgorithm is null.";
+        internal const string IDX10627 = "IDX10627: Cannot set the MinimumAsymmetricKeySizeInBitsForVerifying to less than '{0}'.";
+        internal const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than '{0}'.";
         internal const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\n\nSignatureAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
@@ -90,6 +88,12 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
         internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupported(Key: '{0}', Algorithm: '{1}'), but Create.(algorithm, key) as '{2}' == NULL.";
         internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}'), but Create.(algorithm) as '{1}' == NULL.";
+        internal const string IDX10648 = "IDX10648: The key provided must be a SymmetricSecurityKey";
+        internal const string IDX10649 = "IDX10649: Failed to create a SymmetricSignatureProvider for the algorithm '{0}'.";
+        internal const string IDX10650 = "IDX10650: Failed to verify ciphertext with aad: '{0}'; iv: '{1}'; and authenticationTag: '{2}'.";
+        internal const string IDX10651 = "IDX10651: The key length for the algorithm '{0]' cannot be less than '{1}'.";
+        internal const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
+        internal const string IDX10653 = "IDX10630: The key for encryption cannot be smaller than '{0}' bits. KeySize: '{1}'.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

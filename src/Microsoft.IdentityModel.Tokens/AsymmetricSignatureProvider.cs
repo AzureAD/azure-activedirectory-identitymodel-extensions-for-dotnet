@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return HashAlgorithmName.SHA512;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.Sha512;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
@@ -582,11 +582,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public override byte[] Sign(byte[] input)
         {
-            if (input == null)
+            if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException("input");
-
-            if (input.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10624));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
@@ -624,17 +621,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public override bool Verify(byte[] input, byte[] signature)
         {
-            if (input == null)
+            if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException("input");
 
-            if (signature == null)
+            if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException("signature");
-
-            if (input.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10625, "input"));
-
-            if (signature.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10626, "signature"));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));

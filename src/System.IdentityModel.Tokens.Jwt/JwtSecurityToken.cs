@@ -102,7 +102,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             if (!isMatch)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString)));
 
             Decode(jwtEncodedString);
         }
@@ -530,7 +530,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10729, tokenParts[0], jwtEncodedString), ex));
             }
 
             RawData = jwtEncodedString;
@@ -558,7 +558,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // Verify the part number
             if (tokenParts.Length != JwtConstants.JwsSegmentCount)
             {
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(RawData), RawData)));
             }
 
             // Decode the payload.
@@ -568,7 +568,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 // Don't support nested JWS
                 // TODO(Yan): Add a new error message indicating that nested token is not supported of JWS.
-                    throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10703, "payload", tokenParts[1], RawData);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData)));
             }
             else
             {
@@ -579,11 +579,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, "payload", tokenParts[1], RawData);
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData), ex));
                 }
             }
 
-            this.VerifyBase64UrlString(tokenParts[2], "signature", canBeEmpty: true);
+            this.VerifyBase64UrlString(tokenParts[2], TokenPart.signature, canBeEmpty: true);
 
             RawHeader = tokenParts[0];
             RawPayload = tokenParts[1];
@@ -599,14 +599,13 @@ namespace System.IdentityModel.Tokens.Jwt
             // Verify the part number
             if (tokenParts.Length != JwtConstants.JweSegmentCount)
             {
-                // TODO (Yan): exception message
                 throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
             }
 
-            this.VerifyBase64UrlString(tokenParts[1], "encrypted key", true);
-            this.VerifyBase64UrlString(tokenParts[2], "initial vector");
-            this.VerifyBase64UrlString(tokenParts[3], "cyphertext");
-            this.VerifyBase64UrlString(tokenParts[4], "authentication tag");
+            VerifyBase64UrlString(tokenParts[1], TokenPart.key, true);
+            VerifyBase64UrlString(tokenParts[2], TokenPart.initialVector);
+            VerifyBase64UrlString(tokenParts[3], TokenPart.cyphertext);
+            VerifyBase64UrlString(tokenParts[4], TokenPart.authenticationTag);
 
             RawEncryptionHeader = tokenParts[0];
             RawEncryptedKey = tokenParts[1];
@@ -621,7 +620,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="str">The string to verify.</param>
         /// <param name="description">The description of the string part.</param>
         /// <param name="canBeEmpty">A flag indicating wether the string can be null or empty.</param>
-        private void VerifyBase64UrlString(string str, string description, bool canBeEmpty = false)
+        private void VerifyBase64UrlString(string str, TokenPart part, bool canBeEmpty = false)
         {
             if (string.IsNullOrEmpty(str))
             {
@@ -630,7 +629,19 @@ namespace System.IdentityModel.Tokens.Jwt
                     return;
                 }
 
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10703, description, str, RawData);
+                switch(part)
+                {
+                    case TokenPart.key:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10725, str, RawData)));
+                    case TokenPart.initialVector:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10726, str, RawData)));
+                    case TokenPart.cyphertext:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10727, str, RawData)));
+                    case TokenPart.authenticationTag:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10728, str, RawData)));
+                    case TokenPart.signature:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10724, str, RawData)));
+                }
             }
 
             try
@@ -639,8 +650,32 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogException<ArgumentException>(ex, LogMessages.IDX10703, description, str, RawData);
+                switch (part)
+                {
+                    case TokenPart.key:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10725, str, RawData), ex));
+                    case TokenPart.initialVector:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10726, str, RawData), ex));
+                    case TokenPart.cyphertext:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10727, str, RawData), ex));
+                    case TokenPart.authenticationTag:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10728, str, RawData), ex));
+                    case TokenPart.signature:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10724, str, RawData), ex));
+                }
             }
+        }
+
+        /// <summary>
+        /// TokenParts used to customize the exception messages thrown from the private method VerifyBase64UrlString
+        /// </summary>
+        private enum TokenPart
+        {
+            authenticationTag = 1,
+            cyphertext = 2,
+            initialVector = 3,
+            key = 4,
+            signature = 5
         }
     }
 }

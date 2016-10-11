@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return new HMACSHA512(key);
 
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
             }
         }
 
@@ -160,11 +160,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException"><see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public override byte[] Sign(byte[] input)
         {
-            if (input == null)
+            if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException("input");
-
-            if (input.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10624));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
@@ -191,23 +188,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">If the internal <see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public override bool Verify(byte[] input, byte[] signature)
         {
-            if (input == null)
+            if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
-            if (signature == null)
+            if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
-
-            if (input.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10625));
-
-            if (signature.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10626));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
 
             if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10623));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
             return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
@@ -215,23 +206,17 @@ namespace Microsoft.IdentityModel.Tokens
 
         public bool Verify(byte[] input, byte[] signature, int length)
         {
-            if (input == null)
+            if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (signature == null)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
-            if (input.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10625);
-
-            if (signature.Length == 0)
-                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10626);
-
             if (_disposed)
-                throw LogHelper.LogException<ObjectDisposedException>(typeof(SymmetricSignatureProvider).ToString());
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
 
             if (_keyedHash == null)
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10623);
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
             byte[] hashBytes = new byte[length];

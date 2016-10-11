@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -28,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             _key = key as SymmetricSecurityKey;
             if (_key == null)
-                throw LogHelper.LogArgumentException<ArgumentException>("key", "not symmetric key.");
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10648, nameof(key)));
 
             ValidateKeySize(_key.Key, algorithm);
             _algorithm = algorithm;
@@ -36,14 +37,11 @@ namespace Microsoft.IdentityModel.Tokens
 
         public virtual EncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
         {
-            if (plaintext == null)
-                throw LogHelper.LogArgumentNullException("plaintext");
-
-            if (plaintext.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'plaintext'");
+            if (plaintext == null || plaintext.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(plaintext));
 
             if (authenticatedData == null)
-                throw LogHelper.LogArgumentNullException("authenticatedData");
+                throw LogHelper.LogArgumentNullException(nameof(authenticatedData));
 
             AuthenticatedKeys keys = GetAlgorithmParameters(_algorithm, _key.Key);
 
@@ -73,26 +71,22 @@ namespace Microsoft.IdentityModel.Tokens
 
         public virtual byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
-            if (ciphertext == null)
-                throw LogHelper.LogArgumentNullException("ciphertext");
-
-            if (ciphertext.Length == 0)
-                throw LogHelper.LogException<ArgumentException>("Cannot encrypt empty 'ciphertext'");
+            if (ciphertext == null || ciphertext.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(ciphertext));
 
             if (authenticatedData == null)
-                // TODO (Yan) : Add exception log message and throw;
-                throw LogHelper.LogArgumentNullException("authenticatedData");
+                throw LogHelper.LogArgumentNullException(nameof(authenticatedData));
 
             if (iv == null)
-                throw LogHelper.LogArgumentNullException("iv");
+                throw LogHelper.LogArgumentNullException(nameof(iv));
 
             if (authenticationTag == null)
-                throw LogHelper.LogArgumentNullException("authenticationTag");
+                throw LogHelper.LogArgumentNullException(nameof(authenticationTag));
 
             AuthenticatedKeys keys = GetAlgorithmParameters(_algorithm, _key.Key);
             SymmetricSignatureProvider symmetricSignatureProvider = _key.CryptoProviderFactory.CreateForVerifying(new SymmetricSecurityKey(keys.hmacKey), GetHashAlgorithm(_algorithm)) as SymmetricSignatureProvider;
             if (symmetricSignatureProvider == null)
-                throw LogHelper.LogException<InvalidCastException>("Cannot get SymmetricSignatureProvider.");
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10649, _algorithm)));
 
             // Verify authentication Tag
             byte[] al = ConvertToBigEndian(authenticatedData.Length * 8);
@@ -102,7 +96,7 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
             if (!symmetricSignatureProvider.Verify(macBytes, authenticationTag, keys.hmacKey.Length))
-                throw LogHelper.LogException<ArgumentException>(string.Format("Failed to verify ciphertext with aad: '{0}'; iv: '{1}'; and authenticationTag: '{2}'.", Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
 
             Aes aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
@@ -119,8 +113,7 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.Aes128CbcHmacSha256:
                     {
                         if (key.Length < 32)
-                            // TODO (Yan) : Add log message
-                            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10628, 256);
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10651, algorithm, 256)));
 
                         AuthenticatedKeys keys = new AuthenticatedKeys();
                         keys.hmacKey = new byte[16];
@@ -133,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
                     {
                         if (key.Length < 64)
-                            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key", LogMessages.IDX10628, 512);
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10651, algorithm, 512)));
 
                         AuthenticatedKeys keys = new AuthenticatedKeys();
                         keys.hmacKey = new byte[32];
@@ -145,7 +138,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 default:
                     {
-                        throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("algorithm", nameof(algorithm));
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
                     }
             }
         }
@@ -161,8 +154,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.HmacSha512;
 
                 default:
-                    //TODO (Yan) : Add new exception to logMessages and throw;
-                    throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), String.Format("Unsupported algorithm: {0}", algorithm));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
             }
         }
 
@@ -173,22 +165,19 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.Aes128CbcHmacSha256:
                     {
                         if (key.Length < 32)
-                            // TODO (Yan) : Add new exception to LogMessages and throw;
-                            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, algorithm, key.Length << 3);
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, 32, key.Length << 3)));
                         break;
                     }
 
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
                     {
                         if (key.Length < 64)
-                            // TODO (Yan) : Add new exception to LogMessages and throw;
-                            throw LogHelper.LogArgumentException<ArgumentOutOfRangeException>("key.KeySize", LogMessages.IDX10630, key, algorithm, key.Length << 3);
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, 64, key.Length << 3)));
                         break;
                     }
 
                 default:
-                    //TODO (Yan) : Add new exception to logMessages and throw;
-                    throw LogHelper.LogArgumentException<ArgumentException>(nameof(algorithm), String.Format("Unsupported algorithm: {0}", algorithm));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
             }
         }
 

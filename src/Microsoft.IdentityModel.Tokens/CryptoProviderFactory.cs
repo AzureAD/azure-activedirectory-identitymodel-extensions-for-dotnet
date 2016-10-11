@@ -222,8 +222,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return new AuthenticatedEncryptionProvider(key, algorithm);
             }
 
-            // TODO (Yan) : Add exception and throw
-            throw LogHelper.LogArgumentException<ArgumentException>(algorithm, "Unsupported algorithm.");
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         /// <summary>
