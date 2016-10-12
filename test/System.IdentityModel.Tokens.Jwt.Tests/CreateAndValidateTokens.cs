@@ -325,6 +325,106 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripTokens: Case '{0}'", createParams.Case), context.Diffs);
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        //       [Theory, MemberData(nameof(CreationJWEParams))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Fact]
+        public void RoundTripJWETokens(/*CreateAndValidateParams createJWEParams*/)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimTypeMap.Clear();
+            // Test alg = "dir"
+            SecurityTokenDescriptor securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_JWE(ClaimSets.DefaultClaims);
+            var jwt1 = handler.CreateJwtSecurityToken(securityTokenDescriptor);
+
+            TokenValidationParameters validationParameters =
+                new TokenValidationParameters
+                {
+                    TokenDecryptionKey = IdentityUtilities.DefaultSymmetricEncryptionKey,
+                    AuthenticationType = IdentityUtilities.DefaultAuthenticationType,
+                    ValidAudience = IdentityUtilities.DefaultAudience,
+                    ValidIssuer = IdentityUtilities.DefaultIssuer,
+                };
+
+            SecurityToken token = null;
+            var claimsPrincipal = handler.ValidateToken(jwt1.RawData, validationParameters, out token);
+            JwtSecurityToken jwt2 = token as JwtSecurityToken;
+
+            var context = new CompareContext();
+            var localContext = new CompareContext();
+            //bool b = IdentityComparer.AreEqual(jwt1.Claims, jwt2.Claims, localContext);
+            //b = IdentityComparer.AreEqual(jwt1.Payload, jwt2.Payload, localContext);
+
+            if (!IdentityComparer.AreEqual(jwt1.Payload, jwt2.Payload, localContext))
+            {
+                context.Diffs.Add("jwt1.Payload != jwt2.Payload");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            //  TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: Case '{0}'", createParams.Case), context.Diffs);
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: "), context.Diffs);
+
+            // negative case for simple JWT
+            validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
+            token = null;
+            try
+            {
+                claimsPrincipal = handler.ValidateToken(jwt1.RawData, validationParameters, out token);
+            }
+            catch (Exception)
+            {
+                // TODO (Yan) : Add decrypt failed exception which we expected.
+            }
+
+            // Nested JWT
+            securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_NestedJWE(ClaimSets.DefaultClaims);
+            var jwt3 = handler.CreateJwtSecurityToken(securityTokenDescriptor);
+            validationParameters =
+                new TokenValidationParameters
+                {
+                    TokenDecryptionKey = IdentityUtilities.DefaultSymmetricEncryptionKey,
+                    IssuerSigningKey = IdentityUtilities.DefaultSymmetricSigningKey,
+                    AuthenticationType = IdentityUtilities.DefaultAuthenticationType,
+                    ValidAudience = IdentityUtilities.DefaultAudience,
+                    ValidIssuer = IdentityUtilities.DefaultIssuer,
+                };
+
+            claimsPrincipal = handler.ValidateToken(jwt3.RawData, validationParameters, out token);
+            JwtSecurityToken jwt4 = token as JwtSecurityToken;
+            if (!IdentityComparer.AreEqual(jwt3.Payload, jwt4.Payload, localContext))
+            {
+                context.Diffs.Add("jwt3.Payload != jwt4.Payload");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            //  TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: Case '{0}'", createParams.Case), context.Diffs);
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: "), context.Diffs);
+
+            // negative case for nestede JWT
+            // Case 1: invalid signing key
+            validationParameters.IssuerSigningKey = IdentityUtilities.SymmetricEncryptionKey;
+            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:");
+            try
+            {
+                claimsPrincipal = handler.ValidateToken(jwt3.RawData, validationParameters, out token);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+
+            // Case 2: invalid EncryptionKey
+            validationParameters.TokenDecryptionKey = IdentityUtilities.SymmetricEncryptionKey;
+            try
+            {
+                claimsPrincipal = handler.ValidateToken(jwt3.RawData, validationParameters, out token);
+            }
+            catch (Exception)
+            {
+                // TODO (Yan) : Add decrypt failed exception which we expected.
+            }
+        }
+
         public static TheoryData<CreateAndValidateParams> CreationParams()
         {
             var createParams = new TheoryData<CreateAndValidateParams>();
@@ -384,6 +484,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExceptionType = null,
                 SecurityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor(ClaimSets.GetDefaultRoleClaims(handler)),
                 TokenValidationParameters = IdentityUtilities.DefaultSymmetricTokenValidationParameters
+            });
+
+            return createParams;
+        }
+
+        public static TheoryData<CreateAndValidateParams> CreationJWEParams()
+        {
+            var createParams = new TheoryData<CreateAndValidateParams>();
+            var expires = DateTime.UtcNow + TimeSpan.FromDays(1);
+            var handler = new JwtSecurityTokenHandler();
+            var nbf = DateTime.UtcNow;
+
+            SecurityTokenDescriptor securityTokenDescriptor = IdentityUtilities.DefaultSymmetricSecurityTokenDescriptor_JWE(ClaimSets.DefaultClaims);
+           // securityTokenDescriptor.EncryptingCredentials = new EncryptingCredentials(IdentityUtilities.DefaultSymmetricEncryptionKey, JwtConstants.DirectKeyUseAlg, Aes128CbcHmacSha256.AlgorithmName);
+            createParams.Add(new CreateAndValidateParams
+            {
+                Case = "ClaimSets.Simple_DirKey_JWE",
+                ExceptionType = null,
+                SecurityTokenDescriptor = securityTokenDescriptor,
+                TokenValidationParameters = IdentityUtilities.DefaultDirectKeyTokenValidationParameters
             });
 
             return createParams;

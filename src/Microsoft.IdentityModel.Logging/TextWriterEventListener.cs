@@ -27,6 +27,7 @@
 
 using System;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.IO;
 
 namespace Microsoft.IdentityModel.Logging

@@ -41,6 +41,11 @@ namespace Microsoft.IdentityModel.Tokens
         public string Audience { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="EncryptingCredentials"/> used to create a encrypted security token.
+        /// </summary>
+        public EncryptingCredentials EncryptingCredentials { get; set; }
+
+        /// <summary>
         /// Gets or sets the value of the 'expiration' claim.
         /// </summary>
         public DateTime? Expires { get; set; }
