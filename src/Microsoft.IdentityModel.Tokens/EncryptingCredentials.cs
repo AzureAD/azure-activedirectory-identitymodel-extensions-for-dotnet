@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,50 +25,67 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a symmetric security key.
+    /// A wrapper class for properties that are used for token encryption.
     /// </summary>
-    public class SymmetricSecurityKey : SecurityKey
+    public class EncryptingCredentials
     {
-        int _keySize;
-        byte[] _key;
-
         /// <summary>
-        /// Returns a new instance of <see cref="SymmetricSecurityKey"/> instance.
+        /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
         /// </summary>
-        /// <param name="key">The byte array of the key.</param>
-        public SymmetricSecurityKey(byte[] key)
+        /// <param name="key"><see cref="SecurityKey"/></param>
+        /// <param name="alg">The key encryption algorithm to apply.</param>
+        /// <param name="enc">The encryption algorithm to apply.</param>
+        public EncryptingCredentials(SecurityKey key, string alg, string enc)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (key.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10703));
+            if (string.IsNullOrWhiteSpace(alg))
+                throw LogHelper.LogArgumentNullException(nameof(alg));
 
-            _key = key.CloneByteArray();
-            _keySize = _key.Length * 8;
+            if (string.IsNullOrWhiteSpace(enc))
+                throw LogHelper.LogArgumentNullException(nameof(enc));
+
+            Alg = alg;
+            Enc = enc;
+            Key = key;
         }
 
         /// <summary>
-        /// Gets the key size.
+        /// Gets the algorithm which used for token encryption.
         /// </summary>
-        public override int KeySize
+        public string Alg
         {
-            get { return _keySize; }
+            get;
+            private set;
         }
 
         /// <summary>
-        /// Gets the byte array of the key.
+        /// Gets the algorithm which used for token encryption.
         /// </summary>
-        public virtual byte[] Key
+        public string Enc
         {
-            get { return _key.CloneByteArray(); }
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating encryition providers.
+        /// </summary>
+        public CryptoProviderFactory CryptoProviderFactory { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="SecurityKey"/> which used for signature valdiation.
+        /// </summary>
+        public SecurityKey Key
+        {
+            get;
+            private set;
         }
     }
 }

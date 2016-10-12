@@ -68,18 +68,18 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
         internal const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
         internal const string IDX10646 = "IDX10646: CryptoProviderFactory.CreateForSigning returned null for key: '{0}', signatureAlgorithm: '{1}'.";
+        internal const string IDX10647 = "IDX10647: Failed to create the decryption provider.";
 
         // JWT specific errors
         internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
         internal const string IDX10701 = "IDX10701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range.";
         internal const string IDX10702 = "IDX10702: Jwt header type specified, must be '{0}' or '{1}'.  Type received: '{2}'.";
-        internal const string IDX10703 = "IDX10703: Unable to decode the '{0}': '{1}' as Base64url encoded string. jwtEncodedString: '{2}'.";
         internal const string IDX10704 = "IDX10704: Cannot set inner IssuerTokenResolver to self.";
         internal const string IDX10705 = "IDX10705: The SigningKeyIdentifier was of type: '{0}' and was expected to be encoded as a Base64UrlEncoded string. See inner exception for more details.";
         internal const string IDX10706 = "IDX10706: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
         internal const string IDX10707 = "IDX10707: '{0}' cannot read this xml: '{1}'. The reader needs to be positioned at an element: '{2}', within the namespace: '{3}', with an attribute: '{4}' equal to one of the following: '{5}', '{6}'.";
-        internal const string IDX10708 = "IDX10708: '{0}' cannot read this string: '{1}'.\nThe string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
-        internal const string IDX10709 = "IDX10709: '{0}' is not well formed: '{1}'. The string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'.";
+        internal const string IDX10708 = "IDX10708: '{0}' cannot read this string: '{1}'.\nThe string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'; or compact JWE format, which is of the form: '<Base64UrlJWEProtectedHeader>.<OPTIONAL, Base64URLJWEEncryptedKey>.<Base64URLJWEInitializationVector>.<Base64URLJWECiphertext>.<Base64URLJWEAuthenticationTag>'.";
+        internal const string IDX10709 = "IDX10709: '{0}' is not well formed: '{1}'.\nThe string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'; or compact JWE format, which is of the form: '<Base64UrlJWEProtectedHeader>.<OPTIONAL, Base64URLJWEEncryptedKey>.<Base64URLJWEInitializationVector>.<Base64URLJWECiphertext>.<Base64URLJWEAuthenticationTag>'.";
         internal const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
         internal const string IDX10711 = "IDX10711: actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JWT";
         internal const string IDX10712 = "IDX10712: actor.BootstrapContext is null. Creating the token using actor.Claims.";
@@ -93,6 +93,18 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10720 = "IDX10720: Token string does not match the token format: header.payload.signature";
         internal const string IDX10721 = "IDX10721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX10722 = "IDX10722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
+        internal const string IDX10723 = "IDX10723: Unable to decode the payload '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10724 = "IDX10724: Unable to decode the signature '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10725 = "IDX10725: Unable to decode the encrypted key '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10726 = "IDX10726: Unable to decode the initial vector '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10727 = "IDX10727: Unable to decode the cyphertext '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10728 = "IDX10728: Unable to decode the authentication tag '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10729 = "IDX10729: Unable to decode the header '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
+        internal const string IDX10730 = "IDX10730: Failed to create the token encryption provider.";
+        internal const string IDX10731 = "IDX10731: The resolved key for direct use is not a symmetric key.";
+        internal const string IDX10732 = "IDX10732: Decryption failed with all keys. Exception messages caught during decryption: '{0}'.";
+        internal const string IDX10733 = "IDX10733: EncryptingCredentials must contain a CryptoProviderFactory.";
+
 
 #pragma warning restore 1591
 
