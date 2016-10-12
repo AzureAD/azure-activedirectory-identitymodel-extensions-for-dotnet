@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -46,6 +48,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// A string with "null" value.
         /// </summary>
         public const string Null = "null";
+
+        public static byte[] Transform(ICryptoTransform transform, byte[] input, int inputOffset, int inputLength)
+        {
+            if (transform.CanTransformMultipleBlocks)
+            {
+                return transform.TransformFinalBlock(input, inputOffset, inputLength);
+            }
+
+            using (MemoryStream messageStream = new MemoryStream())
+            using (CryptoStream cryptoStream =
+                new CryptoStream(messageStream, transform, CryptoStreamMode.Write))
+            {
+                cryptoStream.Write(input, inputOffset, inputLength);
+                cryptoStream.FlushFinalBlock();
+
+                return messageStream.ToArray();
+            }
+        }
 
         /// <summary>
         /// Creates a copy of the byte array.

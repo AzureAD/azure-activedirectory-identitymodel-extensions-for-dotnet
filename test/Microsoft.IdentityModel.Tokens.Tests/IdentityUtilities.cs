@@ -161,9 +161,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static string DefaultAuthorizedParty { get { return "http://relyingparty.azp.com"; } }
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
+        public static EncryptingCredentials DefaultSymmetricEncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_256_Sha2;
         public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
         public static SecurityKey DefaultAsymmetricSigningKey { get { return new X509SecurityKey(KeyingMaterial.DefaultCert_2048); } }
         public static SecurityKey DefaultSymmetricSigningKey {  get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
+        public static SecurityKey DefaultSymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
+        public static SecurityKey SymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256); } }
         public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); } }
         public const string DefaultClaimsIdentityLabel = "DefaultClaimsIdentityLabel";
         public const string DefaultClaimsIdentityLabelDup = "DefaultClaimsIdentityLabelDup";
@@ -242,6 +245,53 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor_JWE(List<Claim> claims)
+        {
+            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricEncryptingCredentials);
+            if (claims != null)
+                retval.Subject = new ClaimsIdentity(claims);
+
+            return retval;
+        }
+
+        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(EncryptingCredentials encryptingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                Audience = DefaultAudience,
+                Subject = ClaimSets.DefaultClaimsIdentity,
+                Issuer = DefaultIssuer,
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                NotBefore = DateTime.UtcNow,
+                EncryptingCredentials = encryptingCredentials
+            };
+        }
+
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor_NestedJWE(List<Claim> claims)
+        {
+            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials, DefaultSymmetricEncryptingCredentials);
+            if (claims != null)
+                retval.Subject = new ClaimsIdentity(claims);
+
+            return retval;
+        }
+
+        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                Audience = DefaultAudience,
+                Subject = ClaimSets.DefaultClaimsIdentity,
+                Issuer = DefaultIssuer,
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                NotBefore = DateTime.UtcNow,
+                SigningCredentials = signingCredentials,
+                EncryptingCredentials = encryptingCredentials
+            };
+        }
+
         public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
         {
             get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }
@@ -262,7 +312,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ValidIssuer = DefaultIssuer,
             };
         }
-        
+
+        /// <summary>
+        ///  For JWE with alg = "dir".
+        /// </summary>
+        public static TokenValidationParameters DefaultDirectKeyTokenValidationParameters
+        {
+            get { return DefaultTokenValidationParameters_JWE(DefaultSymmetricEncryptionKey); }
+        }
+
+        public static TokenValidationParameters DefaultTokenValidationParameters_JWE(SecurityKey key)
+        {
+            return new TokenValidationParameters
+            {
+                AuthenticationType = DefaultAuthenticationType,
+                TokenDecryptionKey = key,
+                ValidAudience = DefaultAudience,
+                ValidIssuer = DefaultIssuer,
+            };
+        }
+
         public static bool AudienceValidatorReturnsTrue(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
             return true;

@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -73,7 +74,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default constructor for <see cref="CryptoProviderFactory"/>.
         /// </summary>
-        public CryptoProviderFactory() { }
+        public CryptoProviderFactory()
+        {
+        }
 
         /// <summary>
         /// Constructor that creates a deep copy of given <see cref="CryptoProviderFactory"/> object.
@@ -85,6 +88,18 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
             CustomCryptoProvider = other.CustomCryptoProvider;
+        }
+
+        public virtual bool IsAuthenticatedEncryptionAlgorithmSupported(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -195,6 +210,19 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return false;
+        }
+
+        public virtual AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (IsAuthenticatedEncryptionAlgorithmSupported(algorithm))
+            {
+                return new AuthenticatedEncryptionProvider(key, algorithm);
+            }
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         /// <summary>

@@ -40,7 +40,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void Constructors()
         {
             var header1 = new JwtHeader();
-            var header2 = new JwtHeader(null);
+            SigningCredentials signingCredentials = null;
+            var header2 = new JwtHeader(signingCredentials);
 
             var context = new CompareContext();
             IdentityComparer.AreEqual(header1, header2, context);

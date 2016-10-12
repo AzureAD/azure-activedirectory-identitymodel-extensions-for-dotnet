@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Logging;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -42,8 +43,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
-            : this(null, null)
+            : base(StringComparer.Ordinal)
         {
+            this[JwtHeaderParameterNames.Alg] = SecurityAlgorithms.None;
+            Typ = JwtConstants.HeaderType;
         }
 
         /// <summary>
@@ -52,9 +55,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used creating a JWS Compact JSON.</param>
-        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials)
             : this(signingCredentials, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Alg }, { enc, EncryptingCredentials.Enc } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used creating a JWE Compact JSON.</param>
+        /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials)
+            : this(encryptingCredentials, null)
         {
         }
 
@@ -65,7 +79,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
-        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)
             : base(StringComparer.Ordinal)
         {
@@ -77,16 +90,49 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 string outboundAlg;
                 if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out outboundAlg))
-                    this[JwtHeaderParameterNames.Alg] = outboundAlg;
+                    Alg = outboundAlg;
                 else
-                    this[JwtHeaderParameterNames.Alg] = signingCredentials.Algorithm;
+                    Alg = signingCredentials.Algorithm;
 
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
-                    this[JwtHeaderParameterNames.Kid] = signingCredentials.Key.KeyId;
+                    Kid = signingCredentials.Key.KeyId;
             }
 
-            this[JwtHeaderParameterNames.Typ] = JwtConstants.HeaderType;
+            Typ = JwtConstants.HeaderType;
             SigningCredentials = signingCredentials;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap)
+            : base(StringComparer.Ordinal)
+        {
+            if (encryptingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
+
+            string outboundAlg;
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out outboundAlg))
+                Alg = outboundAlg;
+            else
+                Alg = encryptingCredentials.Alg;
+
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Enc, out outboundAlg))
+                Enc = outboundAlg;
+            else
+                Enc = encryptingCredentials.Enc;
+
+            if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
+                Kid = encryptingCredentials.Key.KeyId;
+
+            Typ = JwtConstants.HeaderType;
+
+            EncryptingCredentials = encryptingCredentials;
         }
 
         /// <summary>
@@ -97,7 +143,79 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Alg);
+                return GetStandardClaim(JwtHeaderParameterNames.Alg);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Alg] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the content mime type (Cty) of the token.
+        /// </summary>
+        /// <remarks>If the content mime type is not found, null is returned.</remarks>
+        public string Cty
+        {
+            get
+            {
+                return GetStandardClaim(JwtHeaderParameterNames.Cty);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Cty] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the encryption algorithm (Enc) of the token.
+        /// </summary>
+        /// <remarks>If the content mime type is not found, null is returned.</remarks>
+        public string Enc
+        {
+            get
+            {
+                return GetStandardClaim(JwtHeaderParameterNames.Enc);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Enc] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EncryptingCredentials"/> passed in the constructor.
+        /// </summary>
+        /// <remarks>This value may be null.</remarks>
+        public EncryptingCredentials EncryptingCredentials { get; private set; }
+
+        /// <summary>
+        /// Gets the iv of symmetric key wrap.
+        /// </summary>
+        public string IV
+        {
+            get
+            {
+                return GetStandardClaim(JwtHeaderParameterNames.IV);
+            }
+        }
+
+        /// <summary>
+        /// Gets the key identifier for the security key used to sign the token
+        /// </summary>
+        public string Kid
+        {
+            get
+            {
+                return GetStandardClaim(JwtHeaderParameterNames.Kid);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Kid] = value;
             }
         }
 
@@ -118,23 +236,17 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return this.GetStandardClaim(JwtHeaderParameterNames.Typ);
+                return GetStandardClaim(JwtHeaderParameterNames.Typ);
             }
-        }
 
-        /// <summary>
-        /// Gets the key identifier for the security key used to sign the token
-        /// </summary>
-        public string Kid
-        {
-            get
+            private set
             {
-                return GetStandardClaim(JwtHeaderParameterNames.Kid);
+                this[JwtHeaderParameterNames.Typ] = value;
             }
         }
 
         /// <summary>
-        /// Gets the thhumbprint of the certificate used to sign the token
+        /// Gets the thumbprint of the certificate used to sign the token
         /// </summary>
         public string X5t
         {
@@ -144,6 +256,43 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
+        /// </summary>
+        /// <param name="base64UrlEncodedJsonString">Base64url encoded JSON to deserialize.</param>
+        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        public static JwtHeader Base64UrlDeserialize(string base64UrlEncodedJsonString)
+        {
+            return JsonExtensions.DeserializeJwtHeader(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
+        }
+
+        /// <summary>
+        /// Encodes this instance as Base64UrlEncoded JSON.
+        /// </summary>
+        /// <returns>Base64UrlEncoded JSON.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
+        public virtual string Base64UrlEncode()
+        {
+            return Base64UrlEncoder.Encode(SerializeToJson());
+        }
+
+        /// <summary>
+        /// Deserialzes JSON into a <see cref="JwtHeader"/> instance.
+        /// </summary>
+        /// <param name="jsonString"> The JSON to deserialize.</param>
+        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
+        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
+        public static JwtHeader Deserialize(string jsonString)
+        {
+            return JsonExtensions.DeserializeJwtHeader(jsonString);
+        }
+        /// <summary>
+        /// Gets a standard claim from the header.
+        /// A standard cliam is either a string or a value of another type serialized in JSON format.
+        /// </summary>
+        /// <param name="claimType">The key of the claim.</param>
+        /// <returns>The standard claim string; or null if not found.</returns>
         internal string GetStandardClaim(string claimType)
         {
             object value = null;
@@ -169,38 +318,6 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual string SerializeToJson()
         {
             return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
-        }
-
-        /// <summary>
-        /// Encodes this instance as Base64UrlEncoded JSON.
-        /// </summary>
-        /// <returns>Base64UrlEncoded JSON.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
-        public virtual string Base64UrlEncode()
-        {
-            return Base64UrlEncoder.Encode(SerializeToJson());
-        }
-
-        /// <summary>
-        /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
-        /// </summary>
-        /// <param name="base64UrlEncodedJsonString">Base64url encoded JSON to deserialize.</param>
-        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
-        public static JwtHeader Base64UrlDeserialize(string base64UrlEncodedJsonString)
-        {
-            return JsonExtensions.DeserializeJwtHeader(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
-        }
-
-        /// <summary>
-        /// Deserialzes JSON into a <see cref="JwtHeader"/> instance.
-        /// </summary>
-        /// <param name="jsonString"> The JSON to deserialize.</param>
-        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
-        public static JwtHeader Deserialize(string jsonString)
-        {
-            return JsonExtensions.DeserializeJwtHeader(jsonString);
         }
     }
 }

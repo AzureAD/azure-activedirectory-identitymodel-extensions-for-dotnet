@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -31,6 +31,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Globalization;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -55,15 +56,53 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrWhiteSpace(jwtEncodedString))
                 throw LogHelper.LogArgumentNullException(nameof(jwtEncodedString));
 
-            // Quick fix prior to beta8, will add configuration in RC
-            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
-            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
+            // [a], [b], [c], [d], [e], [f.g.h].
+            string[] tokenParts = jwtEncodedString.Split(new char[] {'.'}, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), jwtEncodedString)));
+
+            bool isMatch = false;
+            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                // Quick fix prior to beta8, will add configuration in RC
+                var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
+                if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
+                {
+                    regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                }
+
+                if (regexJws.IsMatch(jwtEncodedString))
+                    isMatch = true;
+            }
+            else
+            {
+                if (tokenParts[1] == String.Empty)
+                {
+                    var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
+                    if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexDirAlgJwe.IsMatch(jwtEncodedString))
+                        isMatch = true;
+                }
+                else
+                {
+                    var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
+                    if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexJwe.IsMatch(jwtEncodedString))
+                        isMatch = true;
+                }
             }
 
-            if (!regex.IsMatch(jwtEncodedString))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString)));
+            if (!isMatch)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString)));
 
             Decode(jwtEncodedString);
         }
@@ -111,6 +150,59 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
         /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
+        /// <param name="rawHeader">base64urlencoded JwtHeader</param>
+        /// <param name="rawPayload">base64urlencoded JwtPayload</param>
+        /// <param name="rawSignature">base64urlencoded JwtSignature</param>
+        /// <exception cref="ArgumentNullException">'encryptionHeader' is null.</exception>
+        /// <exception cref="ArgumentNullException">'payload' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawInitialVector' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawCiphertext' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawAuthenticationTag' is null.</exception>
+        /// <exception cref="ArgumentException">'rawEncryptionHeader' or 'rawPayload' or is null or whitespace.</exception>
+        public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature,
+            JwtHeader encryptionHeader, string rawEncryptionHeader, string rawEncryptedKey, string rawInitialVector, string rawCiphertext, string rawAuthenticationTag)
+        {
+            if (encryptionHeader == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptionHeader));
+
+            if (payload == null)
+                throw LogHelper.LogArgumentNullException(nameof(payload));
+
+            if (string.IsNullOrWhiteSpace(rawEncryptionHeader))
+                throw LogHelper.LogArgumentNullException(nameof(rawEncryptionHeader));
+
+            if (string.IsNullOrWhiteSpace(rawPayload))
+                throw LogHelper.LogArgumentNullException(nameof(rawPayload));
+
+            if (rawInitialVector == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawInitialVector));
+
+            if (rawCiphertext == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawCiphertext));
+
+            if (rawAuthenticationTag == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawAuthenticationTag));
+
+            EncryptionHeader = encryptionHeader;
+            Header = header;
+            Payload = payload;
+            RawData = string.Join(".", rawEncryptionHeader, rawEncryptedKey, rawInitialVector, rawCiphertext, rawAuthenticationTag);
+
+            RawHeader = rawHeader;
+            RawPayload = rawPayload;
+            RawSignature = rawSignature;
+            RawEncryptionHeader = rawEncryptionHeader;
+            RawEncryptedKey = rawEncryptedKey;
+            RawInitializationVector = rawInitialVector;
+            RawCiphertext = rawCiphertext;
+            RawAuthenticationTag = rawAuthenticationTag;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the encoded <see cref="JwtHeader"/> and <see cref="JwtPayload"/>. The jwtEncodedString is the result of those operations.
+        /// </summary>
+        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
+        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
         public JwtSecurityToken(JwtHeader header, JwtPayload payload)
@@ -121,9 +213,33 @@ namespace System.IdentityModel.Tokens.Jwt
             if (payload == null)
                 throw LogHelper.LogArgumentNullException("payload");
 
-            Header = header;
+            if (header.Enc != null)
+            {
+                EncryptionHeader = header;
+            }
+            else
+            {
+                Header = header;
+            }
+
             Payload = payload;
             RawSignature = string.Empty;
+        }
+
+        public JwtSecurityToken(JwtHeader header, JwtHeader encryptionHeader, JwtPayload payload)
+        {
+            if (header == null)
+                throw LogHelper.LogArgumentNullException("header");
+
+            if (encryptionHeader == null)
+                throw LogHelper.LogArgumentNullException("encryptHeader");
+
+            if (payload == null)
+                throw LogHelper.LogArgumentNullException("payload");
+
+            Header = header;
+            EncryptionHeader = encryptionHeader;
+            Payload = payload;
         }
 
         /// <summary>
@@ -169,6 +285,8 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Gets the <see cref="Claim"/>(s) for this token.
+        /// If this is a JWE token, this property only returns the encrypted claims;
+        ///  the unencrypted claims should be read from the header seperately.
         /// </summary>
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
@@ -181,7 +299,15 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public virtual string EncodedHeader
         {
-            get { return Header.Base64UrlEncode(); }
+            get { return IsSigned ? Header.Base64UrlEncode() : string.Empty; }
+        }
+
+        /// <summary>
+        /// Gets the Base64UrlEncoded <see cref="JwtHeader"/> associated with this instance.
+        /// </summary>
+        public virtual string EncodedEncryptionHeader
+        {
+            get { return IsEncrypted ? EncryptionHeader.Base64UrlEncode() : string.Empty; }
         }
 
         /// <summary>
@@ -193,9 +319,14 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the <see cref="JwtHeader"/> associated with this instance.
+        /// Gets the <see cref="JwtHeader"/> associated with this instance if the token is signed.
         /// </summary>
-        public JwtHeader Header { get; private set; }
+        public JwtHeader Header { get; internal set; }
+
+        /// <summary>
+        /// Gets the <see cref="JwtHeader"/> associated with this instance if the token is encrypted.
+        /// </summary>
+        public JwtHeader EncryptionHeader { get; private set; }
 
         /// <summary>
         /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
@@ -217,8 +348,25 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
+        /// Note that if this JWT is nested, this property represnts the payload of the most inner token.
+        /// This property can be null if the content type of the most inner token is unrecognized, in that case
+        ///  the content of the token is the string returned by PlainText property.
         /// </summary>
-        public JwtPayload Payload { get; private set; }
+        public JwtPayload Payload { get; internal set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawAuthenticationTag { get; private set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawCiphertext { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -232,21 +380,52 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawHeader { get; private set; }
+        public string RawEncryptedKey { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawPayload { get; private set; }
+        public string RawEncryptionHeader { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawSignature { get; private set; }
+        public string RawInitializationVector { get; private set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawHeader { get; internal set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawPayload { get; internal set; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
+        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
+        public string RawSignature { get; internal set; }
+
+        /// <summary>
+        /// Gets a flag indicating whether this token is JWS.
+        /// </summary>
+        public bool IsSigned => Header != null;
+
+        /// <summary>
+        /// Gets a flag indicating whether this token is encrypted.
+        /// </summary>
+        public bool IsEncrypted => EncryptionHeader != null;
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/>s for this instance.
@@ -262,7 +441,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
-            get { return Header.Alg; }
+            get { return IsSigned ? Header.Alg : null; }
         }
 
         /// <summary>
@@ -270,7 +449,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get { return Header.SigningCredentials; }
+            get { return IsSigned ? Header.SigningCredentials : null; }
+        }
+
+        public EncryptingCredentials EncryptingCredentials
+        {
+            get { return IsEncrypted ? EncryptionHeader.EncryptingCredentials : null;  }
         }
 
         /// <summary>
@@ -312,64 +496,186 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return Header.SerializeToJson() + "." + Payload.SerializeToJson();
+            if (IsEncrypted)
+            {
+                return string.Join(".", EncryptionHeader.SerializeToJson(), IsSigned ? Header.SerializeToJson() : string.Empty, Payload.SerializeToJson());
+            }
+            else
+            {
+                return Header.SerializeToJson() + "." + Payload.SerializeToJson();
+            }
         }
 
         /// <summary>
-        /// Decodes the string into the header, payload and signature
+        /// Decodes the string into the header, payload and signature.
         /// </summary>
         /// <param name="jwtEncodedString">Base64Url encoded string.</param>
+        /// <param name="isNested">A flag indicating if jwtEncodedString is nested to this token.</param>
         internal void Decode(string jwtEncodedString)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, jwtEncodedString);
-            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, 4);
-            if (tokenParts.Length != 3)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, "jwtEncodedString", jwtEncodedString)));
 
+            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
+            // [a], [b], [c], [d], [e], [f.g.h].
+            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), jwtEncodedString)));
+
+            // Decode the header
+            JwtHeader header;
             try
             {
                 IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10717, tokenParts[0]);
-                Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
-
-                // if present, "typ" should be set to "JWT" or "http://openid.net/specs/jwt/1.0"
-                string type = Header.Typ;
-                if (type != null)
-                {
-                    if (!(StringComparer.Ordinal.Equals(type, JwtConstants.HeaderType) || StringComparer.Ordinal.Equals(type, JwtConstants.HeaderTypeAlt)))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10702, JwtConstants.HeaderType, JwtConstants.HeaderTypeAlt, type)));
-                }
+                header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "header", tokenParts[0], jwtEncodedString), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10729, tokenParts[0], jwtEncodedString), ex));
+            }
+
+            RawData = jwtEncodedString;
+
+            if (tokenParts.Length == JwtConstants.JweSegmentCount)
+            {
+                // The token is JWE
+                EncryptionHeader = header;
+                DecodeJwe(tokenParts);
+            }
+            else
+            {
+                // The token is JWS
+                Header = header;
+                DecodeJws(tokenParts);
+            }
+        }
+
+        /// <summary>
+        /// Decodes the payload and signature from the JWS parts.
+        /// </summary>
+        /// <param name="tokenParts">Parts of the JWS including the header.</param>
+        private void DecodeJws(string[] tokenParts)
+        {
+            // Verify the part number
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(RawData), RawData)));
+            }
+
+            // Decode the payload.
+            // If the media type of the payload is unspecified or "JSON", it should be able to be deserialized to JwtPayload property bag.
+            // We do not support other content types for JWS.
+            if (Header.Cty != null)
+            {
+                // Don't support nested JWS
+                // TODO(Yan): Add a new error message indicating that nested token is not supported of JWS.
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData)));
+            }
+            else
+            {
+                try
+                {
+                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
+                    Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData), ex));
+                }
+            }
+
+            this.VerifyBase64UrlString(tokenParts[2], TokenPart.signature, canBeEmpty: true);
+
+            RawHeader = tokenParts[0];
+            RawPayload = tokenParts[1];
+            RawSignature = tokenParts[2];
+        }
+
+        /// <summary>
+        /// Decodes the payload and signature from the JWE parts.
+        /// </summary>
+        /// <param name="tokenParts">Parts of the JWE including the header.</param>
+        private void DecodeJwe(string[] tokenParts)
+        {
+            // Verify the part number
+            if (tokenParts.Length != JwtConstants.JweSegmentCount)
+            {
+                throw LogHelper.LogException<ArgumentException>(LogMessages.IDX10709, nameof(RawData), RawData);
+            }
+
+            VerifyBase64UrlString(tokenParts[1], TokenPart.key, true);
+            VerifyBase64UrlString(tokenParts[2], TokenPart.initialVector);
+            VerifyBase64UrlString(tokenParts[3], TokenPart.cyphertext);
+            VerifyBase64UrlString(tokenParts[4], TokenPart.authenticationTag);
+
+            RawEncryptionHeader = tokenParts[0];
+            RawEncryptedKey = tokenParts[1];
+            RawInitializationVector = tokenParts[2];
+            RawCiphertext = tokenParts[3];
+            RawAuthenticationTag = tokenParts[4];
+        }
+
+        /// <summary>
+        /// Verifies that the given string is BASE64URL encoded.
+        /// </summary>
+        /// <param name="str">The string to verify.</param>
+        /// <param name="description">The description of the string part.</param>
+        /// <param name="canBeEmpty">A flag indicating wether the string can be null or empty.</param>
+        private void VerifyBase64UrlString(string str, TokenPart part, bool canBeEmpty = false)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                if (canBeEmpty)
+                {
+                    return;
+                }
+
+                switch(part)
+                {
+                    case TokenPart.key:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10725, str, RawData)));
+                    case TokenPart.initialVector:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10726, str, RawData)));
+                    case TokenPart.cyphertext:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10727, str, RawData)));
+                    case TokenPart.authenticationTag:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10728, str, RawData)));
+                    case TokenPart.signature:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10724, str, RawData)));
+                }
             }
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, tokenParts[1]);
-                Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
+                Base64UrlEncoder.DecodeBytes(str);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), ex));
-            }
-
-            if (!string.IsNullOrEmpty(tokenParts[2]))
-            {
-                try
+                switch (part)
                 {
-                    Base64UrlEncoder.DecodeBytes(tokenParts[2]);
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10703, "signature", tokenParts[2], jwtEncodedString), ex));
+                    case TokenPart.key:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10725, str, RawData), ex));
+                    case TokenPart.initialVector:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10726, str, RawData), ex));
+                    case TokenPart.cyphertext:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10727, str, RawData), ex));
+                    case TokenPart.authenticationTag:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10728, str, RawData), ex));
+                    case TokenPart.signature:
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10724, str, RawData), ex));
                 }
             }
+        }
 
-            RawData = jwtEncodedString;
-            RawHeader = tokenParts[0];
-            RawPayload = tokenParts[1];
-            RawSignature = tokenParts[2];
+        /// <summary>
+        /// TokenParts used to customize the exception messages thrown from the private method VerifyBase64UrlString
+        /// </summary>
+        private enum TokenPart
+        {
+            authenticationTag = 1,
+            cyphertext = 2,
+            initialVector = 3,
+            key = 4,
+            signature = 5
         }
     }
 }
