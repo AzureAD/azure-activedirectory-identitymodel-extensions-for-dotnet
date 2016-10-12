@@ -319,8 +319,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">'tokenString' is null.</exception>
         public override bool CanReadToken(string tokenString)
         {
-            if (tokenString == null)
-                throw LogHelper.LogArgumentNullException("tokenString");
+            if (string.IsNullOrWhiteSpace(tokenString))
+                return false;
 
             if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
             {
@@ -328,14 +328,52 @@ namespace System.IdentityModel.Tokens.Jwt
                 return false;
             }
 
-            // Quick fix prior to beta8, will add configuration in RC
-            var regex = new Regex(JwtConstants.JsonCompactSerializationRegex);
-            if (regex.MatchTimeout == Timeout.InfiniteTimeSpan)
+            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
+            // [a], [b], [c], [d], [e], [f.g.h].
+            string[] tokenParts = tokenString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                return false;
+
+            bool isMatch = false;
+            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                regex = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                // Quick fix prior to beta8, will add configuration in RC
+                var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
+                if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
+                {
+                    regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                }
+
+                if (regexJws.IsMatch(tokenString))
+                    isMatch = true;
+            }
+            else
+            {
+                if (tokenParts[1] == String.Empty)
+                {
+                    var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
+                    if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexDirAlgJwe.IsMatch(tokenString))
+                        isMatch = true;
+                }
+                else
+                {
+                    var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
+                    if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
+                    {
+                        regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                    }
+
+                    if (regexJwe.IsMatch(tokenString))
+                        isMatch = true;
+                }
             }
 
-            if( !regex.IsMatch(tokenString))
+            if (!isMatch)
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
                 return false;
@@ -361,7 +399,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials).RawData;
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials).RawData;
         }
 
         /// <summary>
@@ -385,7 +424,32 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
         public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials).RawData;
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null).RawData;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="JwtSecurityToken"/>
+        /// </summary>
+        /// <param name="issuer">The issuer of the token.</param>
+        /// <param name="audience">The audience for this token.</param>
+        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">The notbefore time for this token.</param>
+        /// <param name="expires">The expiration time for this token.</param>
+        /// <param name="issuedAt">The issue time for this token.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
+        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
+        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
+        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
+        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign the JSON.</para>
+        /// </remarks>
+        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
+        {
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials).RawData;
         }
 
         /// <summary>
@@ -405,7 +469,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials);
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials);
         }
 
         /// <summary>
@@ -427,9 +492,35 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
-        public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
+        //public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
+        //{
+        //    return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null);
+        //}
+
+        /// <summary>
+        /// Creates a <see cref="JwtSecurityToken"/>
+        /// </summary>
+        /// <param name="issuer">The issuer of the token.</param>
+        /// <param name="audience">The audience for this token.</param>
+        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
+        /// <param name="notBefore">The notbefore time for this token.</param>
+        /// <param name="expires">The expiration time for this token.</param>
+        /// <param name="issuedAt">The issue time for this token.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
+        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
+        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
+        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
+        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
+        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
+        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
+        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
+        /// <para><see cref="EncryptingCredentials.EncryptingCredentials(SecurityKey, string, string)"/> is used to encrypt <see cref="JwtSecurityToken.RawData"/> or <see cref="JwtSecurityToken.RawPayload"/> .</para>
+        /// </remarks>
+        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null, EncryptingCredentials encryptingCredentials = null)
         {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials);
+            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials);
         }
 
         /// <summary>
@@ -449,10 +540,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials);
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials);
         }
 
-        private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
+        private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
             if (SetDefaultTimesOnTokenCreation)
             {
@@ -469,21 +561,79 @@ namespace System.IdentityModel.Tokens.Jwt
 
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
-            JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
+            JwtHeader header = signingCredentials == null ? null : new JwtHeader(signingCredentials, OutboundAlgorithmMap);
 
             if (subject?.Actor != null)
             {
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
             }
 
-            string rawHeader = header.Base64UrlEncode();
+            string rawHeader = header == null ? null : header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = string.Empty;
-            if (signingCredentials != null)
+            bool nested = signingCredentials != null;
+            if (nested)
                 rawSignature = CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
-            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+
+            if (encryptingCredentials != null)
+            {
+                // Create simple JWE or nested JWE
+                string plaintext = nested ? string.Concat(rawHeader, ".", rawPayload, ".", rawSignature) : rawPayload;
+                return CreateEncryptedToken(plaintext, nested, encryptingCredentials, header, payload, rawHeader, rawPayload, rawSignature);
+            }
+            else
+            {
+                // Create JWS
+                if (header == null)
+                {
+                    header = new JwtHeader(signingCredentials, OutboundAlgorithmMap);
+                    rawHeader = header.Base64UrlEncode();
+                }
+
+                return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
+            }
+        }
+
+        private JwtSecurityToken CreateEncryptedToken(string plaintext, bool nested, EncryptingCredentials encryptingCredentials,
+            JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
+        {
+            CryptoProviderFactory cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
+
+            if (cryptoProviderFactory == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10733));
+
+            JwtHeader encryptionHeader = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
+            if (nested)
+                encryptionHeader[JwtHeaderParameterNames.Cty] = JwtConstants.HeaderType;
+
+            bool isDirectKeyUsed = JwtConstants.DirectKeyUseAlg.Equals(encryptionHeader.Alg, StringComparison.Ordinal);
+
+            AuthenticatedEncryptionProvider encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(
+                isDirectKeyUsed ? encryptingCredentials.Key : null,
+                encryptingCredentials.Enc);
+            if (encryptionProvider == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10730));
+
+            EncryptionResult result;
+            // Encrypt plaintext
+            result = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(plaintext), Encoding.ASCII.GetBytes(encryptionHeader.Base64UrlEncode()));
+
+            string rawEncryptionHeader = encryptionHeader.Base64UrlEncode();
+            string rawCipherText = Base64UrlEncoder.Encode(result.CipherText);
+            string rawInitialVector = Base64UrlEncoder.Encode(result.InitialVector);
+            string rawAuthenticationTag = Base64UrlEncoder.Encode(result.AuthenticationTag);
+
+            string rawEncryptedKey = string.Empty;
+            if (!isDirectKeyUsed)
+            {
+                // We don't support alg != "dir" now. Add logic here later.
+                throw new NotImplementedException();
+            }
+
+            return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature,
+                encryptionHeader, rawEncryptionHeader, rawEncryptedKey, rawInitialVector, rawCipherText, rawAuthenticationTag);
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
@@ -558,108 +708,125 @@ namespace System.IdentityModel.Tokens.Jwt
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
+            string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), token)));
+
             JwtSecurityToken jwt = null;
-
-            if (validationParameters.SignatureValidator != null)
+            if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
-                if (validatedJwtToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, token)));
+                // The token is JWE.
+                // Decode token
+                jwt = new JwtSecurityToken(token);
 
-                jwt = validatedJwtToken as JwtSecurityToken;
-                if (jwt == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
+                string kid = jwt.EncryptionHeader.Kid;
+                IEnumerable<SecurityKey> securityKeys = null;
+                if (validationParameters.TokenDecryptionKeyResolver != null)
+                {
+                    SecurityKey key = validationParameters.TokenDecryptionKeyResolver(token, jwt, jwt.EncryptionHeader.Kid, validationParameters);
+                    securityKeys = new List<SecurityKey> { key };
+                }
+                else
+                {
+                    var key = ResolveTokenDecryptionKey(token, jwt, validationParameters);
+                    if (key == null)
+                    {
+                        if (!string.IsNullOrEmpty(kid))
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10501, kid, jwt)));
+                    }
+                    else
+                    {
+                        securityKeys = new List<SecurityKey> { key };
+                    }
+                }
+
+                if (securityKeys == null)
+                {
+                    // Try all keys since there is no keyidentifier
+                    securityKeys = GetAllDecryptionKeys(validationParameters);
+                }
+                
+                if (securityKeys != null)
+                {
+                    StringBuilder exceptionStrings = new StringBuilder();
+                    StringBuilder keysAttempted = new StringBuilder();
+
+                    byte[] cek;
+                    foreach (SecurityKey key in securityKeys)
+                    {
+                        CryptoProviderFactory cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                        if (JwtConstants.DirectKeyUseAlg.Equals(jwt.EncryptionHeader.Alg, StringComparison.Ordinal))
+                        {
+                            // Use key as CEK directly
+                            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+                            if (symmetricSecurityKey == null)
+                            {
+                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10731));
+                            }
+
+                            cek = symmetricSecurityKey.Key;
+                        }
+                        else
+                        {
+                            // We don't support alg != "dir" now. Add logic later.
+                            throw new NotImplementedException();
+                        }
+
+                        try
+                        {
+                            if (Decrypt(jwt, cryptoProviderFactory, cek, validationParameters))
+                                break;
+                        }
+                        catch (Exception ex)
+                        {
+                            exceptionStrings.AppendLine(ex.ToString());
+                        }
+
+                        if (key != null)
+                            keysAttempted.AppendLine(Base64UrlEncoder.Encode(cek));
+                    }
+
+                    if (keysAttempted.Length > 0)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10732, exceptionStrings)));
+                }
             }
             else
             {
-                jwt = ValidateSignature(token, validationParameters);
-                if (jwt == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10507, token)));
-            }
-
-            if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
-            {
-                if (validationParameters.IssuerSigningKeyValidator != null)
+                // the token is JWS
+                if (validationParameters.SignatureValidator != null)
                 {
-                    if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                    var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
+                    if (validatedJwtToken == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, token)));
+
+                    jwt = validatedJwtToken as JwtSecurityToken;
+                    if (jwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
+                }
+                else
+                {
+                    jwt = this.ValidateSignature(token, validationParameters);
+                    if (jwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10507, token)));
+                }
+
+                if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
+                {
+                    if (validationParameters.IssuerSigningKeyValidator != null)
+                    {
+                        if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
                             { SigningKey = jwt.SigningKey });
-                }
-                else
-                {
-                    ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
-                }
-            }
-
-            DateTime? notBefore = null;
-            if (jwt.Payload.Nbf != null)
-            {
-                notBefore = new DateTime?(jwt.ValidFrom);
-            }
-
-            DateTime? expires = null;
-            if (jwt.Payload.Exp != null)
-            {
-                expires = new DateTime?(jwt.ValidTo);
-            }
-
-            if (validationParameters.ValidateLifetime)
-            {
-                if (validationParameters.LifetimeValidator != null)
-                {
-                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, jwt))
-                        { NotBefore = notBefore, Expires = expires });
-                }
-                else
-                {
-                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
+                    }
+                    else
+                    {
+                        ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                    }
                 }
             }
 
-            if (validationParameters.ValidateAudience)
-            {
-                if (validationParameters.AudienceValidator != null)
-                {
-                    if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, jwt.ToString()))
-                            { InvalidAudience = String.Join(", ", jwt.Audiences)});
-                }
-                else
-                {
-                    this.ValidateAudience(jwt.Audiences, jwt, validationParameters);
-                }
-            }
-
-            string issuer = jwt.Issuer;
-            if (validationParameters.ValidateIssuer)
-            {
-                if (validationParameters.IssuerValidator != null)
-                {
-                    issuer = validationParameters.IssuerValidator(issuer, jwt, validationParameters);
-                }
-                else
-                {
-                    issuer = ValidateIssuer(issuer, jwt, validationParameters);
-                }
-            }
-
-            Validators.ValidateTokenReplay(token, expires, validationParameters);
-            if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
-            {
-                SecurityToken actor = null;
-                ValidateToken(jwt.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out actor);
-            }
-
-            ClaimsIdentity identity = CreateClaimsIdentity(jwt, issuer, validationParameters);
-            if (validationParameters.SaveSigninToken)
-            {
-                identity.BootstrapContext = token;
-            }
-
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10241, token);
             validatedToken = jwt;
-            return new ClaimsPrincipal(identity);
+            return this.ValidateTokenPayload(jwt, validationParameters);
         }
 
         /// <summary>
@@ -681,11 +848,36 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwt == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()), nameof(token)));
 
+            if (jwt.RawData != null)
+                return jwt.RawData;
+
             string signingInput = string.Concat(jwt.EncodedHeader, ".", jwt.EncodedPayload);
-            if (jwt.SigningCredentials == null)
-                return signingInput + ".";
-            else
-                return signingInput + "." + CreateEncodedSignature(signingInput, jwt.SigningCredentials);
+            if (jwt.IsEncrypted)
+            {
+                // For jwe
+                string rawHeader = jwt.Header == null ? null : jwt.Header.Base64UrlEncode();
+                string rawPayload = jwt.Payload.Base64UrlEncode();
+                string rawSignature = string.Empty;
+
+                bool nested = jwt.SigningCredentials != null;
+                string plaintext = nested ? new JwtSecurityToken(jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature).RawData : rawPayload;
+                return CreateEncryptedToken(plaintext, nested, jwt.EncryptingCredentials, jwt.Header, jwt.Payload, rawHeader, rawPayload, rawSignature).RawData;
+            }
+            else if (jwt.IsSigned)
+            {
+                // for jws
+                if (jwt.SigningCredentials == null)
+                {
+                    return signingInput + ".";
+                }
+                else
+                {
+                    return signingInput + "." + CreateEncodedSignature(signingInput, jwt.SigningCredentials);
+                }
+            }
+
+            // TODO: [phuff] This exception message should go away when we re-write this method.
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(token), "Invalid jwt token"));
         }
 
         /// <summary>
@@ -746,12 +938,149 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Validates signature of a <see cref="JwtSecurityToken"/> representing a JWS token.
+        /// </summary>
+        /// <param name="jwt">The JWS token to validate.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
+        private void ValidateTokenSignature(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        {
+            if (jwt == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwt));
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            // Validate signature
+            string token = jwt.IsEncrypted ? jwt.RawHeader + "." + jwt.RawPayload + "." + (jwt.RawSignature ?? string.Empty) : jwt.RawData;
+            if (validationParameters.SignatureValidator != null)
+            {
+                var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
+                if (validatedJwtToken == null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, token)));
+
+                jwt = validatedJwtToken as JwtSecurityToken;
+                if (jwt == null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
+            }
+            else
+            {
+                JwtSecurityToken verifiedJwt = ValidateSignature(token, validationParameters);
+                if (verifiedJwt.SigningKey != null)
+                {
+                    jwt.SigningKey = verifiedJwt.SigningKey;
+                }
+            }
+
+            // Validate signing key
+            if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
+            {
+                if (validationParameters.IssuerSigningKeyValidator != null)
+                {
+                    if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                        { SigningKey = jwt.SigningKey });
+                }
+                else
+                {
+                    ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the JSON payload of a <see cref="JwtSecurityToken"/>.
+        /// </summary>
+        /// <param name="jwt">The token to validate.</param>
+        /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
+        /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
+        private ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        {
+            if (jwt == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwt));
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            // It is possible that the token does not contain a JSON payload; there's no claims in that case.
+            if (jwt.Payload == null)
+            {
+                return null;
+            }
+
+            string token = jwt.RawData;
+            DateTime? notBefore = null;
+            if (jwt.Payload.Nbf != null)
+            {
+                notBefore = new DateTime?(jwt.ValidFrom);
+            }
+
+            DateTime? expires = null;
+            if (jwt.Payload.Exp != null)
+            {
+                expires = new DateTime?(jwt.ValidTo);
+            }
+
+            if (validationParameters.ValidateLifetime)
+            {
+                if (validationParameters.LifetimeValidator != null)
+                {
+                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, jwt))
+                        { NotBefore = notBefore, Expires = expires });
+                }
+                else
+                {
+                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
+                }
+            }
+
+            if (validationParameters.ValidateAudience)
+            {
+                if (validationParameters.AudienceValidator != null)
+                {
+                    if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, jwt.ToString())));
+                }
+                else
+                {
+                    this.ValidateAudience(jwt.Audiences, jwt, validationParameters);
+                }
+            }
+
+            string issuer = jwt.Issuer;
+            if (validationParameters.ValidateIssuer)
+            {
+                if (validationParameters.IssuerValidator != null)
+                {
+                    issuer = validationParameters.IssuerValidator(issuer, jwt, validationParameters);
+                }
+                else
+                {
+                    issuer = ValidateIssuer(issuer, jwt, validationParameters);
+                }
+            }
+
+            Validators.ValidateTokenReplay(token, expires, validationParameters);
+            if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
+            {
+                SecurityToken actor = null;
+                ValidateToken(jwt.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out actor);
+            }
+
+            ClaimsIdentity identity = CreateClaimsIdentity(jwt, issuer, validationParameters);
+            if (validationParameters.SaveSigninToken)
+            {
+                identity.BootstrapContext = token;
+            }
+
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10241, token);
+            return new ClaimsPrincipal(identity);
+        }
+
+        /// <summary>
         /// Validates that the signature, if found and / or required is valid.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed 
-        /// using 'JSON Web Signature' (JWS).</param>
+        /// <param name="jwt">A <see cref="JwtSecurityToken"/> representing a JWS token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
-        /// <exception cref="ArgumentNullException">If 'token is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If 'jwt is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters is null.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
@@ -848,6 +1177,18 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (validationParameters.IssuerSigningKeys != null)
                 foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+                    yield return securityKey;
+        }
+        
+        private IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
+        {
+            // TODO (Yan) : Add log message
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10243);
+            if (validationParameters.TokenDecryptionKey != null)
+                yield return validationParameters.TokenDecryptionKey;
+
+            if (validationParameters.TokenDecryptionKeys != null)
+                foreach (SecurityKey securityKey in validationParameters.TokenDecryptionKeys)
                     yield return securityKey;
         }
 
@@ -1065,6 +1406,176 @@ namespace System.IdentityModel.Tokens.Jwt
                         }
                     }
                 }
+            }
+
+            return null;
+        }
+
+        protected virtual SecurityKey ResolveTokenDecryptionKey(string token, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException("validationParameters");
+
+            if (securityToken == null)
+                throw LogHelper.LogArgumentNullException("securityToken");
+
+            if (!string.IsNullOrEmpty(securityToken.EncryptionHeader.Kid))
+            {
+                string kid = securityToken.EncryptionHeader.Kid;
+                if (validationParameters.TokenDecryptionKey != null && string.Equals(validationParameters.TokenDecryptionKey.KeyId, kid, StringComparison.Ordinal))
+                {
+                    return validationParameters.TokenDecryptionKey;
+                }
+
+                if (validationParameters.TokenDecryptionKeys != null)
+                {
+                    foreach (SecurityKey decryptionKey in validationParameters.TokenDecryptionKeys)
+                    {
+                        if (decryptionKey != null && string.Equals(decryptionKey.KeyId, kid, StringComparison.Ordinal))
+                        {
+                            return decryptionKey;
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(securityToken.EncryptionHeader.X5t))
+            {
+                string x5t = securityToken.EncryptionHeader.X5t;
+                if (validationParameters.TokenDecryptionKey != null)
+                {
+                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, x5t, StringComparison.Ordinal))
+                    {
+                        return validationParameters.TokenDecryptionKey;
+                    }
+
+                    X509SecurityKey x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
+                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.Ordinal))
+                    {
+                        return validationParameters.TokenDecryptionKey;
+                    }
+                }
+
+                if (validationParameters.TokenDecryptionKeys != null)
+                {
+                    foreach (SecurityKey decryptionKey in validationParameters.TokenDecryptionKeys)
+                    {
+                        if (decryptionKey != null && string.Equals(decryptionKey.KeyId, x5t, StringComparison.Ordinal))
+                        {
+                            return decryptionKey;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private bool Decrypt(JwtSecurityToken jwt, CryptoProviderFactory cryptoProviderFactory, byte[] cek, TokenValidationParameters validationParameters)
+        {
+            if (!jwt.IsEncrypted)
+            {
+                // Nothing to do if the token is not encrypted.
+                return false;
+            }
+
+            if (cryptoProviderFactory == null)
+            {
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderFactory));
+            }
+
+            AuthenticatedEncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(new SymmetricSecurityKey(cek), jwt.EncryptionHeader.Enc);
+            if (decryptionProvider == null)
+            {
+                // TODO (Yan): Add exception message.
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10647));
+            }
+
+            byte[] iv = Base64UrlEncoder.DecodeBytes(jwt.RawInitializationVector);
+            byte[] authenticationTag = Base64UrlEncoder.DecodeBytes(jwt.RawAuthenticationTag);
+            byte[] aad = Encoding.ASCII.GetBytes(jwt.RawEncryptionHeader);
+            byte[] plaintextBytes;
+            plaintextBytes = decryptionProvider.Decrypt(Base64UrlEncoder.DecodeBytes(jwt.RawCiphertext), aad, iv, authenticationTag);
+
+            string plaintext = Encoding.ASCII.GetString(plaintextBytes);
+            JwtSecurityToken verifiedJwt = null;
+            if (jwt.EncryptionHeader.Cty != null)
+            {
+                // Validate signature of JWS.
+                if (validationParameters.SignatureValidator != null)
+                {
+                    var validatedJwtToken = validationParameters.SignatureValidator(plaintext, validationParameters);
+                    if (validatedJwtToken == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10505, plaintext)));
+
+                    verifiedJwt = validatedJwtToken as JwtSecurityToken;
+                    if (verifiedJwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), plaintext)));
+                }
+                else
+                {
+                    verifiedJwt = ValidateSignature(plaintext, validationParameters);
+                    if (jwt == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10507, plaintext)));
+                }
+
+                if (verifiedJwt.SigningKey != null)
+                {
+                    jwt.SigningKey = verifiedJwt.SigningKey;
+                }
+
+                if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
+                {
+                    if (validationParameters.IssuerSigningKeyValidator != null)
+                    {
+                        if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey))
+                            { SigningKey = jwt.SigningKey });
+                    }
+                    else
+                    {
+                        ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+                    }
+                }
+
+                // Set value to the existing jwt.
+                jwt.Header = verifiedJwt.Header;
+                jwt.Payload = verifiedJwt.Payload;
+                jwt.RawHeader = verifiedJwt.RawHeader;
+                jwt.RawPayload = verifiedJwt.RawPayload;
+                jwt.RawSignature = verifiedJwt.RawSignature;
+            }
+            else
+            {
+                // The plaintext is payload JSON.
+                try
+                {
+                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10718, plaintext);
+                    jwt.Payload = JwtPayload.Base64UrlDeserialize(plaintext);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, plaintext, jwt.RawData), ex));
+                }
+            }
+
+            return true;
+        }
+
+        private byte[] GetSymmetricSecurityKey(SecurityKey key)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            // try to use the provided key directly.
+            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+            if (symmetricSecurityKey != null)
+                return symmetricSecurityKey.Key;
+            else
+            {
+                JsonWebKey jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey != null && jsonWebKey.K != null)
+                    return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
             }
 
             return null;

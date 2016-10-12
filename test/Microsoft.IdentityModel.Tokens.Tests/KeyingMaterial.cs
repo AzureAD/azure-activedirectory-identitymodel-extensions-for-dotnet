@@ -156,6 +156,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256);
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_256_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
 
         // used in negative cases
         public static string SymmetricKeyEncoded2_256 = "VbbbbmlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
@@ -166,7 +167,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         // These signingCreds have algorithms and hashs that are not supported
         public static SigningCredentials SymmetricSigningCreds_256_Rsa256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaSha256Signature);
-        //public static SigningCredentials SymmetricSigningCreds_2048RSA_H256_Sha2 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.HmacSha256Signature);
 
         public static X509Certificate2 X509Certificate1;
         public static X509Certificate2 X509Certificate2;
