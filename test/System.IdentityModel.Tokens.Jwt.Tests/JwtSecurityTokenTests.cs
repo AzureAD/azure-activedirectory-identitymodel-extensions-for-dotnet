@@ -72,127 +72,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
-        public void EncodedStringConstruction()
-        {
-            Console.WriteLine("Entering: JwtSecurityToken_EncodedStringConstruction");
-            string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: OverClaims",
-                EncodedString = EncodedJwts.OverClaims,
-                ExpectedException = ExpectedException.NoExceptionExpected,
-            });
-
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: InvalidPayloadFormat",
-                EncodedString = EncodedJwts.InvalidPayload,
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10723:", inner: typeof(FormatException)),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: null",
-                EncodedString = null,
-                ExpectedException = ExpectedException.ArgumentNullException(),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: string.Empty",
-                EncodedString = string.Empty,
-                ExpectedException = ExpectedException.ArgumentNullException(),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: single character: '1'",
-                EncodedString = "1",
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: two parts each a single character: '1.2'",
-                EncodedString = "1.2",
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: header is not encoded properly: '123'",
-                EncodedString = string.Format("{0}.{1}.{2}", "123", tokenParts[1], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10729:", inner: typeof(Newtonsoft.Json.JsonReaderException)),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: header is not encoded properly: '123=='",
-                EncodedString = string.Format("{0}.{1}.{2}", "123==", tokenParts[1], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709"),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: payload is not encoded correctly: '123'",
-                EncodedString = string.Format("{1}.{0}.{2}", "123", tokenParts[0], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10723:", inner: typeof(Newtonsoft.Json.JsonReaderException)),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: payload is not encoded properly: '123=='",
-                EncodedString = string.Format("{1}.{0}.{2}", "123==", tokenParts[0], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: valid encoding, NO signature (JWT_AsymmetricSigned_AcsV2)",
-                EncodedString = string.Format("{0}.{1}.", tokenParts[0], tokenParts[1]),
-                ExpectedException = ExpectedException.NoExceptionExpected,
-            });
-
-            RunEncodedTest(new JwtSecurityTokenTestVariation
-            {
-                Name = "EncodedString: invalid encoding, 4 parts",
-                EncodedString = string.Format("{0}.{1}.{2}.{3}", tokenParts[0], tokenParts[1], tokenParts[2], tokenParts[2]),
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
-            });
-        }
-
-        private void RunEncodedTest(JwtSecurityTokenTestVariation variation)
-        {
-            JwtSecurityToken jwt = null;
-            Console.WriteLine(string.Format("Variation: {0}", variation.Name));
-            try
-            {
-                jwt = new JwtSecurityToken(variation.EncodedString);
-                IEnumerable<Claim> claims = jwt.Payload.Claims;
-                variation.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                variation.ExpectedException.ProcessException(ex);
-            }
-
-            // ensure we can get to every property
-            if (jwt != null && (variation.ExpectedException == null || variation.ExpectedException.TypeExpected == null))
-            {
-                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwt, variation.Name);
-            }
-
-            if (null != variation.ExpectedJwtSecurityToken)
-            {
-                Assert.True(
-                    IdentityComparer.AreEqual(variation.ExpectedJwtSecurityToken, jwt),
-                    string.Format("Testcase: {0}.  JWTSecurityTokens are not equal.", variation.Name));
-            }
-        }
-
-        [Fact( DisplayName = "JwtSecurityTokenTests:: Constructors")]
         public void Constructors()
         {
             Console.WriteLine("Entering: JwtSecurityToken_Constructor");
@@ -288,6 +167,94 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
             }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidEncodedSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ValidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                var jwtToken = new JwtSecurityToken(jwt);
+                ee.ProcessNoException();
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, testId);
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, string, ExpectedException> ValidEncodedSegmentsData()
+        {
+            return JwtTestData.ValidEncodedSegmentsData();
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidEncodedSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void InvalidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                var jwtToken = new JwtSecurityToken(jwt);
+                ee.ProcessNoException();
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, testId);
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, string, ExpectedException> InvalidEncodedSegmentsData()
+        {
+            return JwtTestData.InvalidEncodedSegmentsData("");
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidNumberOfSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void InvalidNumberOfSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                new JwtSecurityToken(jwt);
+
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, string, ExpectedException> InvalidNumberOfSegmentsData()
+        {
+            return JwtTestData.InvalidNumberOfSegmentsData("IDX10709:");
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidRegExSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void InvalidRegExSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                new JwtSecurityToken(jwt);
+
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, string, ExpectedException> InvalidRegExSegmentsData()
+        {
+            return JwtTestData.InvalidRegExSegmentsData("IDX10709:");
         }
     }
 }
