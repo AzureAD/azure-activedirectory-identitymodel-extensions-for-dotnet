@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -35,7 +36,6 @@ using System.Threading;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -46,17 +46,15 @@ namespace System.IdentityModel.Tokens.Jwt
     {
         private delegate bool CertMatcher(X509Certificate2 cert);
 
-        // Summary:
-        //     The claim properties namespace.
-        private const string Namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
-        private static string shortClaimTypeProperty = Namespace + "/ShortTypeName";
-        private static string jsonClaimTypeProperty = Namespace + "/json_type";
-        private static string[] tokenTypeIdentifiers = { JwtConstants.TokenTypeAlt, JwtConstants.TokenType };
-        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
-        private IDictionary<string, string> _inboundClaimTypeMap;
-        private IDictionary<string, string> _outboundClaimTypeMap;
         private ISet<string> _inboundClaimFilter;
+        private IDictionary<string, string> _inboundClaimTypeMap;
+        private static string _jsonClaimTypeProperty = _namespace + "/json_type";
+        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+        private const string _namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
+        private IDictionary<string, string> _outboundClaimTypeMap;
+        private IDictionary<string, string> _outboundAlgorithmMap = null;
+        private static string _shortClaimTypeProperty = _namespace + "/ShortTypeName";
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -78,8 +76,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public static ISet<string> DefaultInboundClaimFilter = ClaimTypeMapping.InboundClaimFilter;
 
-        private IDictionary<string, string> _outboundAlgorithmMap = null;
-
         /// <summary>
         /// Default JwtHeader algorithm mapping
         /// </summary>
@@ -92,7 +88,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
             DefaultOutboundAlgorithmMap = new Dictionary<string, string>
-             {
+            {
                  { SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256 },
                  { SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384 },
                  { SecurityAlgorithms.EcdsaSha512Signature, SecurityAlgorithms.EcdsaSha512 },
@@ -103,7 +99,6 @@ namespace System.IdentityModel.Tokens.Jwt
                  { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
                  { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
              };
-
         }
 
         /// <summary>
@@ -115,7 +110,6 @@ namespace System.IdentityModel.Tokens.Jwt
             _outboundClaimTypeMap = new Dictionary<string, string>(DefaultOutboundClaimTypeMap);
             _inboundClaimFilter = new HashSet<string>(DefaultInboundClaimFilter);
             _outboundAlgorithmMap = new Dictionary<string, string>(DefaultOutboundAlgorithmMap);
-            SetDefaultTimesOnTokenCreation = true;
         }
 
         /// <summary>
@@ -205,7 +199,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return shortClaimTypeProperty;
+                return _shortClaimTypeProperty;
             }
 
             set
@@ -213,7 +207,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (string.IsNullOrWhiteSpace(value))
                     throw LogHelper.LogArgumentNullException("value");
 
-                shortClaimTypeProperty = value;
+                _shortClaimTypeProperty = value;
             }
         }
 
@@ -226,7 +220,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             get
             {
-                return jsonClaimTypeProperty;
+                return _jsonClaimTypeProperty;
             }
 
             set
@@ -234,7 +228,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (string.IsNullOrWhiteSpace(value))
                     throw LogHelper.LogArgumentNullException("value");
 
-                jsonClaimTypeProperty = value;
+                _jsonClaimTypeProperty = value;
             }
         }
 
@@ -322,64 +316,30 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrWhiteSpace(tokenString))
                 return false;
 
-            if (tokenString.Length * 2 > this.MaximumTokenSizeInBytes)
+            if (tokenString.Length * 2 > MaximumTokenSizeInBytes)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10719, tokenString.Length);
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10209, tokenString.Length, MaximumTokenSizeInBytes);
                 return false;
             }
 
-            // Set the maximum number of return substrings to MaxJwtSegmentCount + 1 is for saving time. E.g. when the string like a.b.c.d.e.f.g.h, the return value would be
-            // [a], [b], [c], [d], [e], [f.g.h].
+            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
+            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
+            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
             string[] tokenParts = tokenString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
-                return false;
-
-            bool isMatch = false;
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                // Quick fix prior to beta8, will add configuration in RC
-                var regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex);
-                if (regexJws.MatchTimeout == Timeout.InfiniteTimeSpan)
-                {
-                    regexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
-                }
-
-                if (regexJws.IsMatch(tokenString))
-                    isMatch = true;
+                return Regex.IsMatch(tokenString, JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
             }
-            else
+            else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                if (tokenParts[1] == String.Empty)
-                {
-                    var regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex);
-                    if (regexDirAlgJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
-                    {
-                        regexDirAlgJwe = new Regex(JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
-                    }
-
-                    if (regexDirAlgJwe.IsMatch(tokenString))
-                        isMatch = true;
-                }
+                if (tokenParts[1] == string.Empty)
+                    return Regex.IsMatch(tokenString, JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
                 else
-                {
-                    var regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex);
-                    if (regexJwe.MatchTimeout == Timeout.InfiniteTimeSpan)
-                    {
-                        regexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.None, TimeSpan.FromMilliseconds(100));
-                    }
-
-                    if (regexJwe.IsMatch(tokenString))
-                        isMatch = true;
-                }
+                    return Regex.IsMatch(tokenString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
             }
 
-            if (!isMatch)
-            {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
-                return false;
-            }
-
-            return true;
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
+            return false;
         }
 
         /// <summary>
@@ -546,7 +506,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
-            if (SetDefaultTimesOnTokenCreation)
+            if (SetDefaultTimesOnTokenCreation && (!expires.HasValue || !issuedAt.HasValue || !notBefore.HasValue))
             {
                 DateTime now = DateTime.UtcNow;
                 if (!expires.HasValue)
@@ -565,7 +525,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (subject?.Actor != null)
             {
-                payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, this.CreateActorValue(subject.Actor)));
+                payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, CreateActorValue(subject.Actor)));
             }
 
             string rawHeader = header == null ? null : header.Base64UrlEncode();
@@ -659,8 +619,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>The <see cref="JwtSecurityToken"/></returns>
         public JwtSecurityToken ReadJwtToken(string token)
         {
-            if (token == null)
-                throw LogHelper.LogArgumentNullException("token");
+            if (string.IsNullOrEmpty(token))
+                throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
@@ -669,7 +629,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10708, GetType(), token)));
 
             var jwt = new JwtSecurityToken();
-            jwt.Decode(token);
+            jwt.Decode(token.Split('.'), token);
             return jwt;
         }
 
@@ -1586,7 +1546,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <remarks>See: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
         [DefaultValue(true)]
-        public bool SetDefaultTimesOnTokenCreation { get; set; }
+        public bool SetDefaultTimesOnTokenCreation { get; set; } = true;
 
         /// <summary>
         /// Validates the <see cref="JwtSecurityToken.SigningKey"/> is an expected value.

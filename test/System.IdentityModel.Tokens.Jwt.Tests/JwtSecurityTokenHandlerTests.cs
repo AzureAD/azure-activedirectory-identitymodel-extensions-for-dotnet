@@ -509,31 +509,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
-        public void ReadJwtTokens()
+        public void MaximumTokenSizeInBytes()
         {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            JwtSecurityToken jwt;
-
-            jwt = RunReadStringVariation(null, tokenHandler, ExpectedException.ArgumentNullException());
-            jwt = RunReadStringVariation(EncodedJwts.Asymmetric_LocalSts, new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 }, ExpectedException.ArgumentException(substringExpected: "IDX10209:"));
-            jwt = RunReadStringVariation("SignedEncodedJwts.Asymmetric_LocalSts", tokenHandler, ExpectedException.ArgumentException(substringExpected: "IDX10708"));
-            jwt = RunReadStringVariation(EncodedJwts.Asymmetric_LocalSts, tokenHandler, ExpectedException.NoExceptionExpected);
-        }
-
-        private JwtSecurityToken RunReadStringVariation(string securityToken, JwtSecurityTokenHandler tokenHandler, ExpectedException expectedException)
-        {
-            JwtSecurityToken retVal = null;
+            var handler = new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 };
+            var ee = ExpectedException.ArgumentException(substringExpected: "IDX10209:");
             try
             {
-                retVal = tokenHandler.ReadToken(securityToken) as JwtSecurityToken;
-                expectedException.ProcessNoException();
+                handler.ReadToken(EncodedJwts.Asymmetric_LocalSts);
+                ee.ProcessNoException();
             }
             catch (Exception ex)
             {
-                expectedException.ProcessException(ex);
+                ee.ProcessException(ex);
             }
-
-            return retVal;
         }
 
         [Fact]
@@ -638,9 +626,104 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(IdentityComparer.AreEqual(claimsPrincipal, tokenHandler.ValidateToken(context, validationParameters, out validatedToken)));
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidEncodedSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void CanReadValidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        {
+            Assert.True((new JwtSecurityTokenHandler()).CanReadToken(jwt));
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidEncodedSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadValidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                (new JwtSecurityTokenHandler()).ReadToken(jwt);
+                ee.ProcessNoException();
+            }
+            catch(Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        private static TheoryData<string, string, ExpectedException> ValidEncodedSegmentsData()
+        {
+            return JwtTestData.ValidEncodedSegmentsData();
+        }
+
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidNumberOfSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadInvalidNumberOfSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                handler.ReadJwtToken(jwt);
+
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidNumberOfSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void CanReadInvalidNumberOfSegment(string testId, string jwt, ExpectedException ee)
+        {
+            Assert.False((new JwtSecurityTokenHandler()).CanReadToken(jwt));
+        }
+
+        public static TheoryData<string, string, ExpectedException> InvalidNumberOfSegmentsData()
+        {
+            return JwtTestData.InvalidNumberOfSegmentsData("IDX10708:");
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidRegExSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void CanReadInvalidRegExSegments(string testId, string jwt, ExpectedException ee)
+        {
+            Assert.False((new JwtSecurityTokenHandler()).CanReadToken(jwt));
+        }
+
+        public static TheoryData<string, string, ExpectedException> InvalidRegExSegmentsData()
+        {
+            return JwtTestData.InvalidRegExSegmentsData("IDX10709:");
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(InvalidEncodedSegmentsData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadInvalidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        {
+            try
+            {
+                (new JwtSecurityTokenHandler()).ReadToken(jwt);
+                ee.ProcessNoException();
+            }
+            catch(Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, string, ExpectedException> InvalidEncodedSegmentsData()
+        {
+            return JwtTestData.InvalidEncodedSegmentsData("IDX10709:");
+        }
+
 
         [Fact]
-        public void ReadToken()
+        public void MaximumTokenSize()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             ExpectedException expectedException = ExpectedException.ArgumentOutOfRangeException();
@@ -653,36 +736,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 expectedException.ProcessException(ex);
             }
-
-            Assert.False(handler.CanReadToken("1"), string.Format("Expected JWTSecurityTokenHandler.CanReadToken to be false"));
-
-            expectedException = ExpectedException.ArgumentException(substringExpected: "IDX10708:");
-            try
-            {
-                handler.ReadToken("1");
-                expectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                expectedException.ProcessException(ex);
-            }
-        }
-
-        private ClaimsPrincipal RunReadTokenVariation(string securityToken, TokenValidationParameters validationParameters, JwtSecurityTokenHandler tokenHandler, ExpectedException expectedException)
-        {
-            ClaimsPrincipal retVal = null;
-            try
-            {
-                SecurityToken validatedToken;
-                retVal = tokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                expectedException.ProcessException(ex);
-            }
-
-            return retVal;
         }
 
         [Fact]
