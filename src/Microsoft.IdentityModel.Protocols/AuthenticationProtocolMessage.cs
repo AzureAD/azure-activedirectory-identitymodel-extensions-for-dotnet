@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException(value);
+                    throw LogHelper.LogArgumentNullException("value");
 
                 _issuerAddress = value;
             }

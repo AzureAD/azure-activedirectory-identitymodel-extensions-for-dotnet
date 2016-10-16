@@ -378,14 +378,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
                 P = "_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk",
                 Q = "7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c",
-                Kty = "RSA"
+                Kty = JsonWebAlgorithmsKeyTypes.RSA
             };
 
             JsonWebKeyRsa256Public = new JsonWebKey
             {
                 E = "AQAB",
                 N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
-                Kty = "RSA"
+                Kty = JsonWebAlgorithmsKeyTypes.RSA
             };
 
             JsonWebKeyEcdsa256 = new JsonWebKey
@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
                 Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
                 D = "OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4TQ",
-                Kty = "EC"
+                Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
             };
 
             JsonWebKeyEcdsa256Public = new JsonWebKey
@@ -402,13 +402,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Crv = "P-256",
                 X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
                 Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
-                Kty = "EC"
+                Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
             };
 
             JsonWebKeySymmetric256 = new JsonWebKey
             {
-                Kty = JsonWebAlgorithmsKeyTypes.Octet,
-                K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
+                K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=",
+                Kty = JsonWebAlgorithmsKeyTypes.Octet
             };
         }
     }
