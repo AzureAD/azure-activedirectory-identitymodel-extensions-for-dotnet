@@ -69,12 +69,12 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10604 = "IDX10604: Decryption failed. Exception: '{0}'.";
         internal const string IDX10605 = "IDX10605: Decryption failed. Only 'dir' is currently supported. JWE alg is: '{0}'.";
         internal const string IDX10606 = "IDX10606: Decryption failed. To decrypt a JWE there must be 5 parts. 'tokenParts' is of length: '{0}'.";
-        internal const string IDX10607 = "IDX10607: Decryption: skipping key: '{0}', both validationParameters.CryptoProviderFactory and key.CryptoProviderFactory are null.";
-        internal const string IDX10608 = "IDX10608: Decryption: skipping key: '{0}', it is not a '{1}'.";
-        internal const string IDX10609 = "IDX10609: Decryption: failed: Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
-        internal const string IDX10610 = "IDX10610: Decryption: failed to create the decryption provider. Key: '{0}', Algorithm: '{1}'.";
-        internal const string IDX10611 = "IDX10611: Decryption: Algorithm (enc) is not supported: '{0}'.";
-        internal const string IDX10612 = "IDX10612: Decryption: Header.Enc is null or empty, it must be specified.";
+        internal const string IDX10607 = "IDX10607: Decryption skipping key: '{0}', both validationParameters.CryptoProviderFactory and key.CryptoProviderFactory are null.";
+        internal const string IDX10608 = "IDX10608: Decryption skipping key: '{0}', it is not a '{1}'.";
+        internal const string IDX10609 = "IDX10609: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
+        internal const string IDX10610 = "IDX10610: Decryption failed. Could not create decryption provider. Key: '{0}', Algorithm: '{1}'.";
+        internal const string IDX10611 = "IDX10611: Decryption failed. Algorithm (enc) is not supported: '{0}'.";
+        internal const string IDX10612 = "IDX10612: Decryption failed. Header.Enc is null or empty, it must be specified.";
         internal const string IDX10613 = "IDX10613: Decryption failed. JwtHeader (tokenParts[0]) is null or empty.";
         internal const string IDX10614 = "IDX10614: Decryption failed. JwtHeader.Base64UrlDeserialize(tokenParts[0]): '{0}'. Inner exception: '{1}'.";
 
