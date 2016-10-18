@@ -32,50 +32,51 @@ namespace Microsoft.IdentityModel.Tokens
     #if DESKTOPNET45
         [Serializable]
     #endif
+
     /// <summary>
-    /// Throw this exception when a received Security Token has an invalid issuer signing key.
+    /// Represents a security token exception.
     /// </summary>
-    public class SecurityTokenInvalidSigningKeyException : SecurityTokenValidationException
+    public class SecurityTokenDecryptionFailedException : SecurityTokenException
     {
         /// <summary>
-        /// Gets or sets the SigningKey that was found invalid.
+        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class.
         /// </summary>
-        public SecurityKey SigningKey { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
-        /// </summary>
-        public SecurityTokenInvalidSigningKeyException()
-            : base("SecurityToken has invalid issuer signing key.")
+        public SecurityTokenDecryptionFailedException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
+        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class with a specified error message.
         /// </summary>
-        public SecurityTokenInvalidSigningKeyException(string message)
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+        public SecurityTokenDecryptionFailedException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
+        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class with a specified error message
+        /// and a reference to the inner exception that is the cause of this exception.
         /// </summary>
-        public SecurityTokenInvalidSigningKeyException(string message, Exception inner)
-            : base(message, inner)
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+        /// <param name="innerException">The <see cref="Exception"/> that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+        public SecurityTokenDecryptionFailedException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 
 #if DESKTOPNET45
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidSigningKeyException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected SecurityTokenInvalidSigningKeyException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenDecryptionFailedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 #endif
+
     }
 }

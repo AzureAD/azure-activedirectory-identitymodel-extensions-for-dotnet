@@ -29,50 +29,48 @@ using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    #if DESKTOPNET45
+#if DESKTOPNET45
         [Serializable]
-    #endif
+#endif
     /// <summary>
-    /// Throw this exception when a received Security Token has an invalid issuer signing key.
+    /// This exception is thrown when a security token contained a key identifier but the key was not found by the runtime 
+    /// when decrypting a token.
     /// </summary>
-    public class SecurityTokenInvalidSigningKeyException : SecurityTokenValidationException
+    public class SecurityTokenEncryptionKeyNotFoundException : SecurityTokenDecryptionFailedException
     {
         /// <summary>
-        /// Gets or sets the SigningKey that was found invalid.
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionKeyNotFoundException"/> class.
         /// </summary>
-        public SecurityKey SigningKey { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
-        /// </summary>
-        public SecurityTokenInvalidSigningKeyException()
-            : base("SecurityToken has invalid issuer signing key.")
+        public SecurityTokenEncryptionKeyNotFoundException()
+            : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionKeyNotFoundException"/> class.
         /// </summary>
-        public SecurityTokenInvalidSigningKeyException(string message)
+        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        public SecurityTokenEncryptionKeyNotFoundException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionKeyNotFoundException"/> class.
         /// </summary>
-        public SecurityTokenInvalidSigningKeyException(string message, Exception inner)
-            : base(message, inner)
+        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public SecurityTokenEncryptionKeyNotFoundException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
-
 #if DESKTOPNET45
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidSigningKeyException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionKeyNotFoundException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected SecurityTokenInvalidSigningKeyException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenEncryptionKeyNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

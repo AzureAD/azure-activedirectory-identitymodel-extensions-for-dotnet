@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static string DefaultAuthorizedParty { get { return "http://relyingparty.azp.com"; } }
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
-        public static EncryptingCredentials DefaultSymmetricEncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_256_Sha2;
+        public static EncryptingCredentials DefaultSymmetricEncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2;
         public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
         public static SecurityKey DefaultAsymmetricSigningKey { get { return new X509SecurityKey(KeyingMaterial.DefaultCert_2048); } }
         public static SecurityKey DefaultSymmetricSigningKey {  get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static string DefaultSubject = "DefaultSubject";
         public static string DefaultSymmetricJwt
         {
-            get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2)); }
+            get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2)); }
         }
 
         public static string DefaultJwt(SecurityTokenDescriptor tokenDescriptor)
@@ -214,81 +214,43 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
         }
 
-        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor(List<Claim> claims)
-        {
-            var retval = DefaultSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials);
-            if (claims != null)
-                retval.Subject = new ClaimsIdentity(claims);
-
-            return retval;
-        }
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor(List<Claim> claims)
-        {
-            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials);
-            if (claims != null)
-                retval.Subject = new ClaimsIdentity(claims);
-
-            return retval;
-        }
-
         public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
         {
-            return new SecurityTokenDescriptor
-            {
-                Audience = DefaultAudience,
-                Subject = ClaimSets.DefaultClaimsIdentity,
-                Issuer = DefaultIssuer,
-                IssuedAt = DateTime.UtcNow,
-                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                NotBefore = DateTime.UtcNow,
-                SigningCredentials = signingCredentials
-            };
-        }
-
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor_JWE(List<Claim> claims)
-        {
-            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricEncryptingCredentials);
-            if (claims != null)
-                retval.Subject = new ClaimsIdentity(claims);
-
-            return retval;
+            return DefaultSecurityTokenDescriptor(null, signingCredentials, null);
         }
 
         public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(EncryptingCredentials encryptingCredentials)
         {
-            return new SecurityTokenDescriptor
-            {
-                Audience = DefaultAudience,
-                Subject = ClaimSets.DefaultClaimsIdentity,
-                Issuer = DefaultIssuer,
-                IssuedAt = DateTime.UtcNow,
-                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                NotBefore = DateTime.UtcNow,
-                EncryptingCredentials = encryptingCredentials
-            };
+            return DefaultSecurityTokenDescriptor(encryptingCredentials, null, null);
         }
 
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor_NestedJWE(List<Claim> claims)
+        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor(List<Claim> claims)
         {
-            var retval = DefaultSecurityTokenDescriptor(DefaultSymmetricSigningCredentials, DefaultSymmetricEncryptingCredentials);
-            if (claims != null)
-                retval.Subject = new ClaimsIdentity(claims);
-
-            return retval;
+            return DefaultSecurityTokenDescriptor(null, DefaultAsymmetricSigningCredentials, claims);
         }
 
-        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor(List<Claim> claims)
+        {
+            return DefaultSecurityTokenDescriptor(null, DefaultSymmetricSigningCredentials, claims);
+        }
+
+        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptorJWE(List<Claim> claims)
+        {
+            return DefaultSecurityTokenDescriptor(DefaultSymmetricEncryptingCredentials, DefaultSymmetricSigningCredentials, claims);
+        }
+
+        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(EncryptingCredentials encryptingCredentials, SigningCredentials signingCredentials, List<Claim> claims)
         {
             return new SecurityTokenDescriptor
             {
                 Audience = DefaultAudience,
-                Subject = ClaimSets.DefaultClaimsIdentity,
+                EncryptingCredentials = encryptingCredentials,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
                 Issuer = DefaultIssuer,
                 IssuedAt = DateTime.UtcNow,
-                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                EncryptingCredentials = encryptingCredentials
+                Subject = claims == null ? ClaimSets.DefaultClaimsIdentity : new ClaimsIdentity(claims)
             };
         }
 
