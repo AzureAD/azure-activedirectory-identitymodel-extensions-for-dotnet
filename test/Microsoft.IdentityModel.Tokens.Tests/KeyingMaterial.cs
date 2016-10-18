@@ -68,6 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static X509SecurityKey X509SecurityKeySelfSigned2048_SHA512 = new X509SecurityKey(CertSelfSigned2048_SHA512);
         public static X509Certificate2 CertSelfSigned2048_SHA512_Public = new X509Certificate2(Convert.FromBase64String(SelfSigned2048_SHA512_Public), "SelfSigned2048_SHA512");
         public static X509SecurityKey X509SecurityKeySelfSigned2048_SHA512_Public = new X509SecurityKey(CertSelfSigned2048_SHA512_Public);
+        public static SigningCredentials X509SigningCreds_SelfSigned2048_SHA512 = new SigningCredentials(X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.RsaSha512);
 
         // all asymmetric material has private key unless public is included in variable name
         public const string CertPassword = "abcd";
@@ -154,9 +155,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static string DefaultSymmetricKeyEncoded_256 = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);
-        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256) { KeyId = "DefaultSymmetricSecurityKey_256" };
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature);
-        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_256_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
 
         // used in negative cases
         public static string SymmetricKeyEncoded2_256 = "VbbbbmlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";

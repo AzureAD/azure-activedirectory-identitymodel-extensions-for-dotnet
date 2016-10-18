@@ -44,16 +44,6 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate bool AudienceValidator(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
-    /// Definition for TokenDecryptionKeyResolver.
-    /// </summary>
-    /// <param name="token">The <see cref="string"/> representation of the token to be decrypted.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> to be decrypted. It may be null.</param>
-    /// <param name="kid">A key identifier. It may be null.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    /// <returns>A <see cref="SecurityKey"/> to use when decrypting the token.</returns>
-    public delegate SecurityKey TokenDecryptionKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
-
-    /// <summary>
     /// Definition for IssuerSigningKeyResolver.
     /// </summary>
     /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
@@ -96,6 +86,16 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="token">A securityToken with a signature.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     public delegate SecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for TokenDecryptionKeyResolver.
+    /// </summary>
+    /// <param name="token">The <see cref="string"/> representation of the token to be decrypted.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> to be decrypted. The runtime by default passes null.</param>
+    /// <param name="kid">A key identifier. It may be null.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns>A <see cref="SecurityKey"/> to use when decrypting the token.</returns>
+    public delegate IEnumerable<SecurityKey> TokenDecryptionKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
