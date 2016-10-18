@@ -26,13 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Globalization;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -123,52 +121,51 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the encoded <see cref="JwtHeader"/> and <see cref="JwtPayload"/>. The jwtEncodedString is the result of those operations.
+        /// Initializes an instance of <see cref="JwtSecurityToken"/> where the <see cref="JwtHeader"/> contains the crypto algorithms applied to the innerToken <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
-        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
+        /// <param name="header">Defines cryptographic operations applied to the 'innerToken'.</param>
+        /// <param name="innerToken"></param>
         /// <param name="rawHeader">base64urlencoded JwtHeader</param>
-        /// <param name="rawPayload">base64urlencoded JwtPayload</param>
-        /// <param name="rawSignature">base64urlencoded JwtSignature</param>
-        /// <exception cref="ArgumentNullException">'encryptionHeader' is null.</exception>
-        /// <exception cref="ArgumentNullException">'payload' is null.</exception>
-        /// <exception cref="ArgumentNullException">'rawInitialVector' is null.</exception>
-        /// <exception cref="ArgumentNullException">'rawCiphertext' is null.</exception>
-        /// <exception cref="ArgumentNullException">'rawAuthenticationTag' is null.</exception>
-        /// <exception cref="ArgumentException">'rawEncryptionHeader' or 'rawPayload' or is null or whitespace.</exception>
-        public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature,
-            JwtHeader encryptionHeader, string rawEncryptionHeader, string rawEncryptedKey, string rawInitialVector, string rawCiphertext, string rawAuthenticationTag)
+        /// <param name="rawInitialVector">base64urlencoded initialization vector.</param>
+        /// <param name="rawCiphertext">base64urlencoded encrypted innerToken</param>
+        /// <param name="rawAuthenticationTag">base64urlencoded authentication tag.</param>
+        /// <exception cref="ArgumentNullException">'header' is null.</exception>
+        /// <exception cref="ArgumentNullException">'innerToken' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawHeader' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawEncryptedKey' is null.</exception>
+        /// <exception cref="ArgumentNullException">'rawInitialVector' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'rawCiphertext' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'rawAuthenticationTag' is null or whitespace.</exception>
+        public JwtSecurityToken(JwtHeader header,
+                                JwtSecurityToken innerToken,
+                                string rawHeader,
+                                string rawEncryptedKey,
+                                string rawInitialVector,
+                                string rawCiphertext,
+                                string rawAuthenticationTag)
         {
-            if (encryptionHeader == null)
-                throw LogHelper.LogArgumentNullException(nameof(encryptionHeader));
+            if (header == null)
+                throw LogHelper.LogArgumentNullException(nameof(header));
 
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            if (innerToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(innerToken));
 
-            if (string.IsNullOrWhiteSpace(rawEncryptionHeader))
-                throw LogHelper.LogArgumentNullException(nameof(rawEncryptionHeader));
+            if (rawEncryptedKey == null)
+                throw LogHelper.LogArgumentNullException(nameof(rawEncryptedKey));
 
-            if (string.IsNullOrWhiteSpace(rawPayload))
-                throw LogHelper.LogArgumentNullException(nameof(rawPayload));
-
-            if (rawInitialVector == null)
+            if (string.IsNullOrEmpty(rawInitialVector))
                 throw LogHelper.LogArgumentNullException(nameof(rawInitialVector));
 
-            if (rawCiphertext == null)
+            if (string.IsNullOrEmpty(rawCiphertext))
                 throw LogHelper.LogArgumentNullException(nameof(rawCiphertext));
 
-            if (rawAuthenticationTag == null)
+            if (string.IsNullOrEmpty(rawAuthenticationTag))
                 throw LogHelper.LogArgumentNullException(nameof(rawAuthenticationTag));
 
-            EncryptionHeader = encryptionHeader;
             Header = header;
-            Payload = payload;
-            RawData = string.Join(".", rawEncryptionHeader, rawEncryptedKey, rawInitialVector, rawCiphertext, rawAuthenticationTag);
-
+            InnerToken = innerToken;
+            RawData = string.Join(".", rawHeader, rawEncryptedKey, rawInitialVector, rawCiphertext, rawAuthenticationTag);
             RawHeader = rawHeader;
-            RawPayload = rawPayload;
-            RawSignature = rawSignature;
-            RawEncryptionHeader = rawEncryptionHeader;
             RawEncryptedKey = rawEncryptedKey;
             RawInitializationVector = rawInitialVector;
             RawCiphertext = rawCiphertext;
@@ -190,33 +187,9 @@ namespace System.IdentityModel.Tokens.Jwt
             if (payload == null)
                 throw LogHelper.LogArgumentNullException("payload");
 
-            if (header.Enc != null)
-            {
-                EncryptionHeader = header;
-            }
-            else
-            {
-                Header = header;
-            }
-
+            Header = header;
             Payload = payload;
             RawSignature = string.Empty;
-        }
-
-        public JwtSecurityToken(JwtHeader header, JwtHeader encryptionHeader, JwtPayload payload)
-        {
-            if (header == null)
-                throw LogHelper.LogArgumentNullException("header");
-
-            if (encryptionHeader == null)
-                throw LogHelper.LogArgumentNullException("encryptHeader");
-
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException("payload");
-
-            Header = header;
-            EncryptionHeader = encryptionHeader;
-            Payload = payload;
         }
 
         /// <summary>
@@ -276,15 +249,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public virtual string EncodedHeader
         {
-            get { return IsSigned ? Header.Base64UrlEncode() : string.Empty; }
-        }
-
-        /// <summary>
-        /// Gets the Base64UrlEncoded <see cref="JwtHeader"/> associated with this instance.
-        /// </summary>
-        public virtual string EncodedEncryptionHeader
-        {
-            get { return IsEncrypted ? EncryptionHeader.Base64UrlEncode() : string.Empty; }
+            get { return Header.Base64UrlEncode(); }
         }
 
         /// <summary>
@@ -299,11 +264,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the <see cref="JwtHeader"/> associated with this instance if the token is signed.
         /// </summary>
         public JwtHeader Header { get; internal set; }
-
-        /// <summary>
-        /// Gets the <see cref="JwtHeader"/> associated with this instance if the token is encrypted.
-        /// </summary>
-        public JwtHeader EncryptionHeader { get; private set; }
 
         /// <summary>
         /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
@@ -325,11 +285,16 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
-        /// Note that if this JWT is nested, this property represnts the payload of the most inner token.
+        /// Note that if this JWT is nested ( <see cref="JwtSecurityToken.InnerToken"/> != null, this property represnts the payload of the most inner token.
         /// This property can be null if the content type of the most inner token is unrecognized, in that case
         ///  the content of the token is the string returned by PlainText property.
         /// </summary>
         public JwtPayload Payload { get; internal set; }
+
+        /// <summary>
+        /// Gets the <see cref="JwtSecurityToken"/> associated with this instance.
+        /// </summary>
+        public JwtSecurityToken InnerToken { get; internal set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -395,16 +360,6 @@ namespace System.IdentityModel.Tokens.Jwt
         public string RawSignature { get; internal set; }
 
         /// <summary>
-        /// Gets a flag indicating whether this token is JWS.
-        /// </summary>
-        public bool IsSigned => Header != null;
-
-        /// <summary>
-        /// Gets a flag indicating whether this token is encrypted.
-        /// </summary>
-        public bool IsEncrypted => EncryptionHeader != null;
-
-        /// <summary>
         /// Gets the <see cref="SecurityKey"/>s for this instance.
         /// </summary>
         public override SecurityKey SecurityKey
@@ -418,7 +373,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If there is a <see cref="SigningCredentials"/> associated with this instance, a value will be returned.  Null otherwise.</remarks>
         public string SignatureAlgorithm
         {
-            get { return IsSigned ? Header.Alg : null; }
+            get { return Header.Alg; }
         }
 
         /// <summary>
@@ -426,12 +381,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get { return IsSigned ? Header.SigningCredentials : null; }
+            get { return Header.SigningCredentials; }
         }
 
         public EncryptingCredentials EncryptingCredentials
         {
-            get { return IsEncrypted ? EncryptionHeader.EncryptingCredentials : null;  }
+            get { return Header.EncryptingCredentials;  }
         }
 
         /// <summary>
@@ -473,14 +428,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            if (IsEncrypted)
-            {
-                return string.Join(".", EncryptionHeader.SerializeToJson(), IsSigned ? Header.SerializeToJson() : string.Empty, Payload.SerializeToJson());
-            }
-            else
-            {
-                return Header.SerializeToJson() + "." + Payload.SerializeToJson();
-            }
+            return Header.SerializeToJson() + "." + Payload.SerializeToJson();
         }
 
         /// <summary>
@@ -506,7 +454,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 // The token is JWE
-                EncryptionHeader = header;
+                //EncryptionHeader = header;
                 DecodeJwe(tokenParts);
             }
             else

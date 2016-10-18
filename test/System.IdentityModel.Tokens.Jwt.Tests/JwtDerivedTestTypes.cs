@@ -158,6 +158,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
     public class PublicJwtSecurityTokenHandler : JwtSecurityTokenHandler
     {
+        public void DecryptTokenPublic(string token, string[] tokenParts, TokenValidationParameters validationParameters)
+        {
+            base.DecryptToken(token, tokenParts, validationParameters);
+        }
+
         public void ValidateAudiencePublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             base.ValidateAudience(new string[]{jwt.Issuer}, jwt, validationParameters);
