@@ -54,14 +54,14 @@ namespace Microsoft.IdentityModel.Tokens
             var result = new EncryptionResult();
             result.CipherText = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
             result.Key = _key.Key;
-            result.InitialVector = aes.IV;
+            result.InitializationVector = aes.IV;
 
             byte[] al = ConvertToBigEndian(authenticatedData.Length * 8);
-            byte[] macBytes = new byte[authenticatedData.Length + result.InitialVector.Length + result.CipherText.Length + al.Length];
+            byte[] macBytes = new byte[authenticatedData.Length + result.InitializationVector.Length + result.CipherText.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
-            Array.Copy(result.InitialVector, 0, macBytes, authenticatedData.Length, result.InitialVector.Length);
-            Array.Copy(result.CipherText, 0, macBytes, authenticatedData.Length + result.InitialVector.Length, result.CipherText.Length);
-            Array.Copy(al, 0, macBytes, authenticatedData.Length + result.InitialVector.Length + result.CipherText.Length, al.Length);
+            Array.Copy(result.InitializationVector, 0, macBytes, authenticatedData.Length, result.InitializationVector.Length);
+            Array.Copy(result.CipherText, 0, macBytes, authenticatedData.Length + result.InitializationVector.Length, result.CipherText.Length);
+            Array.Copy(al, 0, macBytes, authenticatedData.Length + result.InitializationVector.Length + result.CipherText.Length, al.Length);
             byte[] macHash = symmetricSignatureProvider.Sign(macBytes);
             result.AuthenticationTag = new byte[keys.hmacKey.Length];
             Array.Copy(macHash, result.AuthenticationTag, result.AuthenticationTag.Length);

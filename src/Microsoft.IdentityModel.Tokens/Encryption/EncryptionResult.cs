@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public byte[] CipherText { get; set; }
 
-        public byte[] InitialVector { get; set; }
+        public byte[] InitializationVector { get; set; }
 
         public byte[] AuthenticationTag { get; set; }
     }

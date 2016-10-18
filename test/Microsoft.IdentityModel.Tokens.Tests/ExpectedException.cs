@@ -70,6 +70,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return new ExpectedException(typeExpected: typeof(CryptographicException), substringExpected: substringExpected, innerTypeExpected: inner);
         }
 
+        public static ExpectedException SecurityTokenDecryptionFailedException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(SecurityTokenDecryptionFailedException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
         {
             return new ExpectedException(typeExpected: typeof(InvalidOperationException), substringExpected: substringExpected, innerTypeExpected: inner);
@@ -202,6 +207,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.True(false, err);
         }
 
+        public static ExpectedException SecurityTokenEncryptionKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(SecurityTokenEncryptionKeyNotFoundException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
         public static ExpectedException SecurityTokenException(string substringExpected = null, Type innertypeExpected = null)
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenException), substringExpected: substringExpected, innerTypeExpected: innertypeExpected);
@@ -211,6 +221,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenExpiredException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
+
         public static ExpectedException SecurityTokenInvalidAudienceException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
             return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidAudienceException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
