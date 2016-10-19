@@ -561,7 +561,7 @@ namespace System.IdentityModel.Tokens.Jwt
                             header.Base64UrlEncode(),
                             string.Empty,
                             Base64UrlEncoder.Encode(encryptionResult.InitializationVector),
-                            Base64UrlEncoder.Encode(encryptionResult.CipherText),
+                            Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
                             Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
         }
 

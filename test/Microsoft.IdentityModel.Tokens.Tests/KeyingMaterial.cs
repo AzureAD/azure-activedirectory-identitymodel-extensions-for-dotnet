@@ -153,16 +153,70 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static readonly JsonWebKey JsonWebKeyEcdsa256Public;
         public static readonly JsonWebKey JsonWebKeySymmetric256;
 
+        // SymmetricKeys
+        public static string DefaultSymmetricKeyEncoded_128 = "00FBopST3JAf7QHhMFFXkg==";
+        public static byte[] DefaultSymmetricKeyBytes_128 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_128);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_128 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_128) { KeyId = "DefaultSymmetricSecurityKey_128" };
+
         public static string DefaultSymmetricKeyEncoded_256 = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256) { KeyId = "DefaultSymmetricSecurityKey_256" };
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature);
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
 
-        // used in negative cases
-        public static string SymmetricKeyEncoded2_256 = "VbbbbmlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
+        public static string DefaultSymmetricKeyEncoded_384 = "Q6o4CQLPygAD+Dj6psJNJjCadf1+ZA6ggW2OzqAJ1Kq9orrXZmXUi8mMrYI4T3u8";
+        public static byte[] DefaultSymmetricKeyBytes_384 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_384);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_384 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_384) { KeyId = "DefaultSymmetricSecurityKey_384" };
+        public static SigningCredentials DefaultSymmetricSigningCreds_384_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_384, SecurityAlgorithms.HmacSha256Signature);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes256_Sha512_384 = new EncryptingCredentials(DefaultSymmetricSecurityKey_384, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string DefaultSymmetricKeyEncoded_512 = "/N8zPTrtwbh1ftQH4frI74akNpRAiJDWssebaGWGit7kwj/4RF/3tGXQppRAvQGMe2CFhXXCN3NOXYpyUVlT7w==";
+        public static byte[] DefaultSymmetricKeyBytes_512 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_512);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_512 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_512) { KeyId = "DefaultSymmetricSecurityKey_512" };
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes256_Sha512_512 = new EncryptingCredentials(DefaultSymmetricSecurityKey_512, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string DefaultSymmetricKeyEncoded_768 = "bEgppKgpryhZigwgV2u/gzS4t8DE0JZBFny3nO6A9kYwA0s5/lU8Bp5ZmbhRmQss3sTJcwxJHZyy6I0scRM62ZTF71QghYXee7Aiazfe8Hxwir0ptoI65+WuhxbHEJSK";
+        public static byte[] DefaultSymmetricKeyBytes_768 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_768);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_768 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_768) { KeyId = "DefaultSymmetricSecurityKey_768" };
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes256_Sha512_768 = new EncryptingCredentials(DefaultSymmetricSecurityKey_768, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string DefaultSymmetricKeyEncoded_1024 = "3bIgChZlnpg9lkM5zdy1F+HMOOxIGJuseTDSz3Z6Yq99RFZ7uUuCWNbii9tidRbNQSkNYqPPA8UWc5Hmks4hwzSUu4mFOl6WSt8WZoy/SgMZBY5NbAALrkCQZEW5nMYIwMenzbmNRwfKdxjEuZ04VimNzIw/01YziA1J9NUZ3K0=";
+        public static byte[] DefaultSymmetricKeyBytes_1024 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_1024);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_1024 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_1024) { KeyId = "DefaultSymmetricSecurityKey_1024" };
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes256_Sha512_1024 = new EncryptingCredentials(DefaultSymmetricSecurityKey_1024, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string SymmetricKeyEncoded_128 = "00FBopST3JAf7QHhMFFXkg==";
+        public static byte[] SymmetricKeyBytes_128 = Convert.FromBase64String(SymmetricKeyEncoded_128);
+        public static SymmetricSecurityKey SymmetricSecurityKey_128 = new SymmetricSecurityKey(SymmetricKeyBytes_128) { KeyId = "SymmetricSecurityKey_128" };
+
+        public static string SymmetricKeyEncoded_256 = "i3Y91sux00iRc5zua4rSXNmQtWe8QItrTxOANNyMH3U=";
+        public static byte[] SymmetricKeyBytes_256 = Convert.FromBase64String(SymmetricKeyEncoded_256);
+        public static SymmetricSecurityKey SymmetricSecurityKey_256 = new SymmetricSecurityKey(SymmetricKeyBytes_256) { KeyId = "SymmetricSecurityKey_256" };
+        public static EncryptingCredentials SymmetricEncryptingCreds_Aes128_Sha2_256 = new EncryptingCredentials(SymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string SymmetricKeyEncoded_384 = "Q6o4CQLPygAD+Dj6psJNJjCadf1+ZA6ggW2OzqAJ1Kq9orrXZmXUi8mMrYI4T3u8";
+        public static byte[] SymmetricKeyBytes_384 = Convert.FromBase64String(SymmetricKeyEncoded_384);
+        public static SymmetricSecurityKey SymmetricSecurityKey_384 = new SymmetricSecurityKey(SymmetricKeyBytes_384) { KeyId = "SymmetricSecurityKey_384" };
+        public static EncryptingCredentials SymmetricEncryptingCreds_Aes256_Sha512_384 = new EncryptingCredentials(DefaultSymmetricSecurityKey_384, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string SymmetricKeyEncoded_512 = "/N8zPTrtwbh1ftQH4frI74akNpRAiJDWssebaGWGit7kwj/4RF/3tGXQppRAvQGMe2CFhXXCN3NOXYpyUVlT7w==";
+        public static byte[] SymmetricKeyBytes_512 = Convert.FromBase64String(SymmetricKeyEncoded_512);
+        public static SymmetricSecurityKey SymmetricSecurityKey_512 = new SymmetricSecurityKey(SymmetricKeyBytes_512) { KeyId = "SymmetricSecurityKey_512" };
+        public static EncryptingCredentials SymmetricEncryptingCreds_Aes256_Sha512_512 = new EncryptingCredentials(DefaultSymmetricSecurityKey_512, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string SymmetricKeyEncoded_768 = "bEgppKgpryhZigwgV2u/gzS4t8DE0JZBFny3nO6A9kYwA0s5/lU8Bp5ZmbhRmQss3sTJcwxJHZyy6I0scRM62ZTF71QghYXee7Aiazfe8Hxwir0ptoI65+WuhxbHEJSK";
+        public static byte[] SymmetricKeyBytes_768 = Convert.FromBase64String(SymmetricKeyEncoded_768);
+        public static SymmetricSecurityKey SymmetricSecurityKey_768 = new SymmetricSecurityKey(SymmetricKeyBytes_768) { KeyId = "SymmetricSecurityKey_768" };
+        public static EncryptingCredentials SymmetricEncryptingCreds_Aes256_Sha512_768 = new EncryptingCredentials(DefaultSymmetricSecurityKey_768, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string SymmetricKeyEncoded_1024 = "3bIgChZlnpg9lkM5zdy1F+HMOOxIGJuseTDSz3Z6Yq99RFZ7uUuCWNbii9tidRbNQSkNYqPPA8UWc5Hmks4hwzSUu4mFOl6WSt8WZoy/SgMZBY5NbAALrkCQZEW5nMYIwMenzbmNRwfKdxjEuZ04VimNzIw/01YziA1J9NUZ3K0=";
+        public static byte[] SymmetricKeyBytes_1024 = Convert.FromBase64String(SymmetricKeyEncoded_1024);
+        public static SymmetricSecurityKey SymmetricSecurityKey_1024 = new SymmetricSecurityKey(SymmetricKeyBytes_1024) { KeyId = "SymmetricSecurityKey_1024" };
+        public static EncryptingCredentials SymmetricEncryptingCreds_Aes256_Sha512_1024 = new EncryptingCredentials(DefaultSymmetricSecurityKey_1024, "dir", SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        public static string SymmetricKeyEncoded2_256 = "i3Y91sux00iRc5zua4rSXNmQtWe8QItrTxOANNyMH3U=";
         public static byte[] SymmetricKeyBytes2_256 = Convert.FromBase64String(SymmetricKeyEncoded2_256);
-        public static SymmetricSecurityKey SymmetricSecurityKey2_256 = new SymmetricSecurityKey(SymmetricKeyBytes2_256);
+        public static SymmetricSecurityKey SymmetricSecurityKey2_256 = new SymmetricSecurityKey(SymmetricKeyBytes2_256) { KeyId = "SymmetricSecurityKey2_256" };
 
         public static SymmetricSecurityKey SymmetricSecurityKey_56 = new SymmetricSecurityKey(new byte[7]);
 
