@@ -200,5 +200,15 @@ namespace Microsoft.IdentityModel.Tokens
 
             return result == 0;
         }
+
+        internal static byte[] ConvertToBigEndian(long i)
+        {
+            byte[] temp = BitConverter.GetBytes(i);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(temp);
+
+            return temp;
+        }
+
     }
 }
