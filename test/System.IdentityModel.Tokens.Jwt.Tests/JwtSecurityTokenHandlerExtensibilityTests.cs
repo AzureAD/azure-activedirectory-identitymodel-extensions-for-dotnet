@@ -69,9 +69,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(new TheoryParams("Test7", "a.b.c.d.e", new string[4], Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, ExpectedException.SecurityTokenException("IDX10606:")));
             theoryData.Add(new TheoryParams("Test8", "a.b.c.d.e", new string[6], Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, ExpectedException.SecurityTokenException("IDX10606:")));
             tokenParts = new string[5] { "", "", "", "", "" };
-            theoryData.Add(new TheoryParams("Test9", "a.b.c.d.e", tokenParts, Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, new ExpectedException(typeof(SecurityTokenException), "IDX10613:") { Verbose = true }));
+            theoryData.Add(new TheoryParams("Test9", "a.b.c.d.e", tokenParts, Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, new ExpectedException(typeof(SecurityTokenException), "IDX10613:")));
             tokenParts = new string[5] { "%%%", "", "", "", "" };
-            theoryData.Add(new TheoryParams("Test10", "a.b.c.d.e", tokenParts, Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, new ExpectedException(typeof(SecurityTokenException), "IDX10614:") { Verbose = true }));
+            theoryData.Add(new TheoryParams("Test10", "a.b.c.d.e", tokenParts, Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, new ExpectedException(typeof(SecurityTokenException), "IDX10614:")));
 
             return theoryData;
         }
