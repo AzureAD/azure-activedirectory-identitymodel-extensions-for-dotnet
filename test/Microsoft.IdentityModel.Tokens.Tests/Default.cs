@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static TokenValidationParameters AsymmetricEncryptSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(SymmetricEncryptionKey, AsymmetricSigningKey); }
+            get { return TokenValidationParameters(SymmetricEncryptionKey256, AsymmetricSigningKey); }
         }
 
         public static TokenValidationParameters AsymmetricSignTokenValidationParameters
@@ -212,13 +212,66 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        public static SecurityKey SymmetricEncryptionKey
+        public static SymmetricSecurityKey SymmetricEncryptionKey128
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key)
+                {
+                    KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_128.KeyId
+                };
+            }
+        }
+        public static SymmetricSecurityKey SymmetricEncryptionKey256
         {
             get
             {
                 return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256.Key)
                 {
                     KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId
+                };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricEncryptionKey384
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_384.Key)
+                {
+                    KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_384.KeyId
+                };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricEncryptionKey512
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_512.Key)
+                {
+                    KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_512.KeyId
+                };
+            }
+        }
+        public static SymmetricSecurityKey SymmetricEncryptionKey768
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_768.Key)
+                {
+                    KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_768.KeyId
+                };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricEncryptionKey1024
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_1024.Key)
+                {
+                    KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_1024.KeyId
                 };
             }
         }
@@ -266,7 +319,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static TokenValidationParameters SymmetricEncyptSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(SymmetricEncryptionKey, SymmetricSigningKey); }
+            get { return TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey); }
         }
 
         public static TokenValidationParameters TokenValidationParameters(SecurityKey encryptionKey, SecurityKey signingKey)
