@@ -197,8 +197,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             byte[] aesKey = new byte[keyLength];
             byte[] hmacKey = new byte[keyLength];
-            Array.Copy(key.Key, 16, aesKey, 0, 16);
-            Array.Copy(key.Key, hmacKey, 16);
+            Array.Copy(key.Key, keyLength, aesKey, 0, keyLength);
+            Array.Copy(key.Key, hmacKey, keyLength);
             return new AuthenticatedKeys()
             {
                 AesKey = new SymmetricSecurityKey(aesKey),
