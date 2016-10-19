@@ -34,45 +34,45 @@ namespace Microsoft.IdentityModel.Tokens
     #endif
 
     /// <summary>
-    /// Represents a security token exception when decryption failed.
+    /// Represents a security token exception when encryption failed.
     /// </summary>
-    public class SecurityTokenDecryptionFailedException : SecurityTokenException
+    public class SecurityTokenEncryptionFailedException : SecurityTokenException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionFailedException"/> class.
         /// </summary>
-        public SecurityTokenDecryptionFailedException()
+        public SecurityTokenEncryptionFailedException()
             : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class with a specified error message.
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionFailedException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
-        public SecurityTokenDecryptionFailedException(string message)
+        public SecurityTokenEncryptionFailedException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class with a specified error message
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionFailedException"/> class with a specified error message
         /// and a reference to the inner exception that is the cause of this exception.
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">The <see cref="Exception"/> that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
-        public SecurityTokenDecryptionFailedException(string message, Exception innerException)
+        public SecurityTokenEncryptionFailedException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
 #if DESKTOPNET45
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenDecryptionFailedException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenEncryptionFailedException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected SecurityTokenDecryptionFailedException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenEncryptionFailedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

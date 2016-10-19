@@ -55,6 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'algorithm' is null or whitespace.</exception>
         /// <exception cref="ArgumentOutOfRangeException">key size is not large enough.</exception>
         /// <exception cref="ArgumentException">'algorithm' is not supported.</exception>
+        /// <exception cref="ArgumentException">a symmetricSignatureProvider is not created.</exception>
         /// </summary>
         public AuthenticatedEncryptionProvider(SymmetricSecurityKey key, string algorithm)
         {
@@ -71,24 +72,25 @@ namespace Microsoft.IdentityModel.Tokens
             // TODO - should we throw here?
             _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hashAlgorithm) as SymmetricSignatureProvider;
             if (_symmetricSignatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10649, Algorithm)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10649, Algorithm)));
 
             Key = key;
             Algorithm = algorithm;
         }
 
         /// <summary>
-        /// Gets the encryption algorithm.
+        /// Gets the encryption algorithm that is being used.
         /// </summary>
         public string Algorithm { get; private set; }
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="AuthenticatedEncryptionProvider"/>.
         /// </summary>
+        /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
         public string Context { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SymmetricSecurityKey"/>.
+        /// Gets the <see cref="SymmetricSecurityKey"/> that is being used.
         /// </summary>
         public SymmetricSecurityKey Key { get; private set; }
 
@@ -100,6 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><see cref="AuthenticatedEncryptionResult"/>containing ciphertext, iv, authenticationtag.</returns>
         /// <exception cref="ArgumentNullException">plaintext is null or empty.</exception>
         /// <exception cref="ArgumentNullException">authenticationData is null or empty.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">AES crypto operation threw. See inner exception for details.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
         {
             if (plaintext == null || plaintext.Length == 0)
@@ -112,13 +115,19 @@ namespace Microsoft.IdentityModel.Tokens
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
             aes.Key = _authenticatedkeys.AesKey.Key;
-
             AuthenticatedEncryptionResult result = new AuthenticatedEncryptionResult();
-            result.Ciphertext = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
-            result.Key = Key;
-            result.InitializationVector = aes.IV;
+            try
+            {
+                result.Ciphertext = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
+                result.Key = Key;
+                result.InitializationVector = aes.IV;
+            }
+            catch(Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10654, ex)));
+            }
 
-            byte[] al = ConvertToBigEndian(authenticatedData.Length * 8);
+            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
             byte[] macBytes = new byte[authenticatedData.Length + result.InitializationVector.Length + result.Ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
             Array.Copy(result.InitializationVector, 0, macBytes, authenticatedData.Length, result.InitializationVector.Length);
@@ -131,22 +140,36 @@ namespace Microsoft.IdentityModel.Tokens
             return result;
         }
 
+        /// <summary>
+        /// Decrypts ciphertext into plaintext
+        /// </summary>
+        /// <param name="ciphertext">the encrypted text to decrypt.</param>
+        /// <param name="authenticatedData">the authenticateData that is used in verification.</param>
+        /// <param name="iv">the initialization vector used when creating the ciphertext.</param>
+        /// <param name="authenticationTag">the authenticationTag that was created during the encyption.</param>
+        /// <returns>decrypted ciphertext</returns>
+        /// <exception cref="ArgumentNullException">'ciphertext' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">'authenticatedData' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">'iv' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">'authenticationTag' is null or empty.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">signature over authenticationTag fails to verify.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">AES crypto operation threw. See inner exception.</exception>
         public virtual byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             if (ciphertext == null || ciphertext.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(ciphertext));
 
-            if (authenticatedData == null)
+            if (authenticatedData == null || authenticatedData.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticatedData));
 
-            if (iv == null)
+            if (iv == null || iv.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(iv));
 
-            if (authenticationTag == null)
+            if (authenticationTag == null || authenticationTag.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticationTag));
 
             // Verify authentication Tag
-            byte[] al = ConvertToBigEndian(authenticatedData.Length * 8);
+            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
             byte[] macBytes = new byte[authenticatedData.Length + iv.Length + ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
@@ -160,7 +183,6 @@ namespace Microsoft.IdentityModel.Tokens
             aes.Padding = PaddingMode.PKCS7;
             aes.Key = _authenticatedkeys.AesKey.Key;
             aes.IV = iv;
-
             byte[] plainText = null;
             try
             {
@@ -208,49 +230,34 @@ namespace Microsoft.IdentityModel.Tokens
 
         private string GetHashAlgorithm(string algorithm)
         {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
                     return SecurityAlgorithms.HmacSha256;
 
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
                     return SecurityAlgorithms.HmacSha512;
 
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
-            }
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         private void ValidateKeySize(byte[] key, string algorithm)
         {
-            switch (algorithm)
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
             {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
-                {
-                    if (key.Length < 32)
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes128CbcHmacSha256, 256, key.Length << 3)));
-                    break;
-                }
+                if (key.Length < 32)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes128CbcHmacSha256, 256, key.Length << 3)));
 
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
-                {
-                    if (key.Length < 64)
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes256CbcHmacSha512, 512, key.Length << 3)));
-                    break;
-                }
-
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+                return;
             }
-        }
 
-        private static byte[] ConvertToBigEndian(long i)
-        {
-            byte[] temp = BitConverter.GetBytes(i);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(temp);
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
+            {
+                if (key.Length < 64)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes256CbcHmacSha512, 512, key.Length << 3)));
 
-            return temp;
+                return;
+            }
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
     }
 }
