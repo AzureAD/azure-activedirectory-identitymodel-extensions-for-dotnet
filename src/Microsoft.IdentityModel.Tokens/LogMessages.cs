@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal static class LogMessages
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
@@ -88,12 +88,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
         internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupported(Key: '{0}', Algorithm: '{1}'), but Create.(algorithm, key) as '{2}' == NULL.";
         internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}'), but Create.(algorithm) as '{1}' == NULL.";
-        internal const string IDX10648 = "IDX10648: The key provided must be a SymmetricSecurityKey";
+        internal const string IDX10648 = "IDX10648: The SecurityKey provided for AuthenticatedEncryption must be a SymmetricSecurityKey. Type is: '{0}'.";
         internal const string IDX10649 = "IDX10649: Failed to create a SymmetricSignatureProvider for the algorithm '{0}'.";
         internal const string IDX10650 = "IDX10650: Failed to verify ciphertext with aad: '{0}'; iv: '{1}'; and authenticationTag: '{2}'.";
         internal const string IDX10651 = "IDX10651: The key length for the algorithm '{0]' cannot be less than '{1}'.";
         internal const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
-        internal const string IDX10653 = "IDX10630: The key for encryption cannot be smaller than '{0}' bits. KeySize: '{1}'.";
+        internal const string IDX10653 = "IDX10653: The encryption provider '{0}' requires a key size of at least '{1}' bits. The key provided is of size: '{2}'.";
+        internal const string IDX10654 = "IDX10654: Decryption failed, exception from crypto operation: '{0}'.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

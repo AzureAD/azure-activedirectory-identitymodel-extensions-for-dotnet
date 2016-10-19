@@ -26,10 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
-using System.Collections.Generic;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -212,15 +211,30 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="AuthenticatedEncryptionProvider"/> for a specific &lt;SecurityKey, Algorithm>.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to use.</param>
+        /// <returns>an instance of <see cref="AuthenticatedEncryptionProvider"/></returns>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentException">'key' is not a <see cref="SymmetricSecurityKey"/>.</exception>
+        /// <exception cref="ArgumentException">'algorithm' is not supported.</exception>
         public virtual AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
-            if (string.IsNullOrWhiteSpace(algorithm))
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
+            SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
+            if (symmetricKey == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10648, key.GetType())));
+
             if (IsAuthenticatedEncryptionAlgorithmSupported(algorithm))
-            {
-                return new AuthenticatedEncryptionProvider(key, algorithm);
-            }
+                return new AuthenticatedEncryptionProvider(symmetricKey, algorithm);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }

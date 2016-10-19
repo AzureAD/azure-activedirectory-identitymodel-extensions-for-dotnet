@@ -406,5 +406,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return bytes;
         }
+
+        public static void XORBytes(byte[] bytes)
+        {
+            for (int i=0; i < bytes.Length-1; i++)
+            {
+                bytes[i] = (byte)(bytes[i] ^ bytes[i + 1]);
+            }
+        }
     }
 }
