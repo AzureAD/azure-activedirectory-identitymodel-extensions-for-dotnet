@@ -229,63 +229,28 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     }
 #endif
 
-    public class NotAsymmetricOrSymmetricSecurityKey : SecurityKey
+    /// <summary>
+    /// Helpful for extensibility testing for errors.
+    /// </summary>
+    public class AlwaysReturnNullCryptoProviderFactory : CryptoProviderFactory
     {
-        public override int KeySize
+        public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
         {
-            get { throw new NotImplementedException(); }
+            return null;
         }
 
-        public static SecurityKey New { get { return new NotAsymmetricOrSymmetricSecurityKey(); } }
-    }
-
-    public class ReturnNullSymmetricSecurityKey : SymmetricSecurityKey
-    {
-        public ReturnNullSymmetricSecurityKey(byte[] keyBytes)
-            : base(keyBytes)
-        { }
-
-        public SymmetricSecurityKey SymmetricSecurityKey { get; set; }
-
-        public override byte[] Key
+        public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
-            get
-            {
-                if (SymmetricSecurityKey == null)
-                {
-                    return null;
-                }
-
-                return SymmetricSecurityKey.Key;
-            }
-        }
-
-        public override int KeySize
-        {
-            get
-            {
-                if (SymmetricSecurityKey != null)
-                {
-                    return SymmetricSecurityKey.KeySize;
-                }
-
-                return 256;
-            }
+            return null;
         }
     }
 
-    public class ReturnNullAsymmetricSecurityKey : AsymmetricSecurityKey
+    public class AuthenticatedEncryptionProviderPublic : AuthenticatedEncryptionProvider
     {
-        public ReturnNullAsymmetricSecurityKey() { }
-
-        public override bool HasPrivateKey
+        public AuthenticatedEncryptionProviderPublic(SymmetricSecurityKey key, string algorithm)
+            : base(key, algorithm)
         {
-            get { throw new NotImplementedException(); }
-        }
 
-        public override int KeySize
-        {
-            get { throw new NotImplementedException(); }
         }
     }
 
@@ -304,42 +269,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public override bool HasPrivateKey
         {
             get { return _key.HasPrivateKey; }
-        }
-
-        public override int KeySize { get { return _key.KeySize; } }
-
-    }
-
-    /// <summary>
-    /// This works that is a parameter is null, we throw the exception when asked for the property
-    /// </summary>
-    public class FaultingSymmetricSecurityKey : SymmetricSecurityKey
-    {
-        Exception _throwMe;
-        KeyedHashAlgorithm _keyedHash;
-        SymmetricSecurityKey _key;
-        SymmetricAlgorithm _agorithm;
-        byte[] _keyBytes;
-
-        public FaultingSymmetricSecurityKey(SymmetricSecurityKey key, Exception throwMe, SymmetricAlgorithm algorithm = null, KeyedHashAlgorithm keyedHash = null, byte[] keyBytes = null)
-            : base(keyBytes)
-        {
-            _throwMe = throwMe;
-            _key = key;
-            _keyedHash = keyedHash;
-            _agorithm = algorithm;
-            _keyBytes = keyBytes;
-        }
-
-        public override byte[] Key
-        {
-            get
-            {
-                if (_throwMe != null)
-                    throw _throwMe;
-
-                return _keyBytes;
-            }
         }
 
         public override int KeySize { get { return _key.KeySize; } }
@@ -393,18 +322,97 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     }
 
     /// <summary>
-    /// Helpful for extensibility testing for errors.
+    /// This works that is a parameter is null, we throw the exception when asked for the property
     /// </summary>
-    public class AlwaysReturnNullCryptoProviderFactory : CryptoProviderFactory
+    public class FaultingSymmetricSecurityKey : SymmetricSecurityKey
     {
-        public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
+        Exception _throwMe;
+        KeyedHashAlgorithm _keyedHash;
+        SymmetricSecurityKey _key;
+        SymmetricAlgorithm _agorithm;
+        byte[] _keyBytes;
+
+        public FaultingSymmetricSecurityKey(SymmetricSecurityKey key, Exception throwMe, SymmetricAlgorithm algorithm = null, KeyedHashAlgorithm keyedHash = null, byte[] keyBytes = null)
+            : base(keyBytes)
         {
-            return null;
+            _throwMe = throwMe;
+            _key = key;
+            _keyedHash = keyedHash;
+            _agorithm = algorithm;
+            _keyBytes = keyBytes;
         }
 
-        public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
+        public override byte[] Key
         {
-            return null;
+            get
+            {
+                if (_throwMe != null)
+                    throw _throwMe;
+
+                return _keyBytes;
+            }
+        }
+
+        public override int KeySize { get { return _key.KeySize; } }
+    }
+
+    public class NotAsymmetricOrSymmetricSecurityKey : SecurityKey
+    {
+        public override int KeySize
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public static SecurityKey New { get { return new NotAsymmetricOrSymmetricSecurityKey(); } }
+    }
+
+    public class ReturnNullAsymmetricSecurityKey : AsymmetricSecurityKey
+    {
+        public ReturnNullAsymmetricSecurityKey() { }
+
+        public override bool HasPrivateKey
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override int KeySize
+        {
+            get { throw new NotImplementedException(); }
+        }
+    }
+
+    public class ReturnNullSymmetricSecurityKey : SymmetricSecurityKey
+    {
+        public ReturnNullSymmetricSecurityKey(byte[] keyBytes)
+            : base(keyBytes)
+        { }
+
+        public SymmetricSecurityKey SymmetricSecurityKey { get; set; }
+
+        public override byte[] Key
+        {
+            get
+            {
+                if (SymmetricSecurityKey == null)
+                {
+                    return null;
+                }
+
+                return SymmetricSecurityKey.Key;
+            }
+        }
+
+        public override int KeySize
+        {
+            get
+            {
+                if (SymmetricSecurityKey != null)
+                {
+                    return SymmetricSecurityKey.KeySize;
+                }
+
+                return 256;
+            }
         }
     }
 }
