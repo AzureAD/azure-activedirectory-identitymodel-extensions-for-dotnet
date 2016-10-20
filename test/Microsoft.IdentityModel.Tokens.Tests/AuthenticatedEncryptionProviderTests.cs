@@ -26,23 +26,30 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
     /// Tests for AuthenticatedEncryptionProvider
-    /// 1. Constructors
+    /// Constructors
     ///     - validate parameters (null, empty)
     ///     - algorithms supported
     ///     - key size
     ///     - properties are set correctly (Algorithm, Context, Key)
-    /// 2. EncryptDecrypt
+    /// EncryptDecrypt
     ///     - positive tests for keys (256, 384, 512, 768, 1024) X Algorithms supported.
     ///     - parameter validation for Encrypt
-    /// 3. Decrypt
+    /// Decrypt
     ///     - negative tests for tampering of (ciphertest, iv, authenticationtag, authenticateddata)
     ///     - parameter validataion for Decrypt
+    /// DecryptMismatch
+    ///     - negative tests for switching (keys, algorithms)
+    /// EncryptVirtual
+    ///     - tests virtual method was called
+    /// DecryptVirtual
+    ///     - tests virtual method was called
     /// </summary>
     public class AuthenticatedEncryptionProviderTests
     {
@@ -92,6 +99,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("DecryptTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -215,6 +223,111 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     IV = iv
                 },
                 Provider = provider,
+                TestId = testId
+            });
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("DecryptMismatchTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void DecryptMismatch(AuthenticatedEncryptionTestParams theoryParams)
+        {
+            try
+            {
+                theoryParams.Provider.Decrypt(theoryParams.EncryptionResults.Ciphertext, theoryParams.AuthenticatedData, theoryParams.EncryptionResults.IV, theoryParams.EncryptionResults.AuthenticationTag);
+                theoryParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryParams.EE.ProcessException(ex);
+            }
+        }
+        public static TheoryData<AuthenticatedEncryptionTestParams> DecryptMismatchTheoryData()
+        {
+            var theoryData = new TheoryData<AuthenticatedEncryptionTestParams>();
+            var keys128 = new List<SymmetricSecurityKey> { Default.SymmetricEncryptionKey256, Default.SymmetricEncryptionKey384, Default.SymmetricEncryptionKey512, Default.SymmetricEncryptionKey768, Default.SymmetricEncryptionKey1024 };
+            var keys256 = new List<SymmetricSecurityKey> { Default.SymmetricEncryptionKey512, Default.SymmetricEncryptionKey768, Default.SymmetricEncryptionKey1024 };
+            var keys128_256 = new List<SymmetricSecurityKey> { Default.SymmetricEncryptionKey512, Default.SymmetricEncryptionKey768, Default.SymmetricEncryptionKey1024, Default.SymmetricEncryptionKey256, Default.SymmetricEncryptionKey384 };
+
+            for (int i = 0; i < keys128.Count - 1; i++)
+                for(int j = i + 1; j < keys128.Count; j++)
+                    AddDecryptMismatchTheoryData(
+                        "Test1-" + i.ToString() + "-" + j.ToString(),
+                        keys128[i],
+                        keys128[j],
+                        SecurityAlgorithms.Aes128CbcHmacSha256,
+                        SecurityAlgorithms.Aes128CbcHmacSha256,
+                        ExpectedException.SecurityTokenDecryptionFailedException(),
+                        theoryData);
+
+            for (int i = keys128.Count - 1; i > 0; i--)
+                for (int j = i - 1; j > -1; j--)
+                    AddDecryptMismatchTheoryData(
+                        "Test2-" + i.ToString() + "-" + j.ToString(),
+                        keys128[i],
+                        keys128[j],
+                        SecurityAlgorithms.Aes128CbcHmacSha256,
+                        SecurityAlgorithms.Aes128CbcHmacSha256,
+                        ExpectedException.SecurityTokenDecryptionFailedException(),
+                        theoryData);
+
+            for (int i = 0; i < keys256.Count - 1; i++)
+                for (int j = i + 1; j < keys256.Count; j++)
+                    AddDecryptMismatchTheoryData(
+                        "Test3-" + i.ToString() + "-" + j.ToString(),
+                        keys256[i],
+                        keys256[j],
+                        SecurityAlgorithms.Aes256CbcHmacSha512,
+                        SecurityAlgorithms.Aes256CbcHmacSha512,
+                        ExpectedException.SecurityTokenDecryptionFailedException(),
+                        theoryData);
+
+            for (int i = keys256.Count - 1; i > 0; i--)
+                for (int j = i - 1; j > -1; j--)
+                    AddDecryptMismatchTheoryData(
+                        "Test4-" + i.ToString() + "-" + j.ToString(),
+                        keys256[i],
+                        keys256[j],
+                        SecurityAlgorithms.Aes256CbcHmacSha512,
+                        SecurityAlgorithms.Aes256CbcHmacSha512,
+                        ExpectedException.SecurityTokenDecryptionFailedException(),
+                        theoryData);
+
+            for (int i = 0; i < keys256.Count - 1; i++)
+                for (int j = 0; j < keys128.Count; j++)
+                    AddDecryptMismatchTheoryData(
+                        "Test5-" + i.ToString() + "-" + j.ToString(),
+                        keys128[j],
+                        keys256[i],
+                        SecurityAlgorithms.Aes128CbcHmacSha256,
+                        SecurityAlgorithms.Aes256CbcHmacSha512,
+                        ExpectedException.SecurityTokenDecryptionFailedException(),
+                        theoryData);
+
+            return theoryData;
+        }
+
+        private static void AddDecryptMismatchTheoryData(
+            string testId,
+            SymmetricSecurityKey decryptKey,
+            SymmetricSecurityKey encryptkey,
+            string decryptAlgorithm,
+            string encryptAlgorithm,
+            ExpectedException ee,
+            TheoryData<AuthenticatedEncryptionTestParams> theoryData)
+        {
+            var authenticatedData = Guid.NewGuid().ToByteArray();
+            var plainText = Guid.NewGuid().ToByteArray();
+            var provider = new AuthenticatedEncryptionProvider(encryptkey, encryptAlgorithm);
+            var results = provider.Encrypt(plainText, authenticatedData);
+            theoryData.Add(new AuthenticatedEncryptionTestParams
+            {
+                AuthenticatedData = authenticatedData,
+                DecryptAlgorithm = decryptAlgorithm,
+                DecryptKey = decryptKey,
+                EE = ee,
+                EncryptionResults = results,
+                Provider = new AuthenticatedEncryptionProvider(decryptKey, decryptAlgorithm),
                 TestId = testId
             });
         }

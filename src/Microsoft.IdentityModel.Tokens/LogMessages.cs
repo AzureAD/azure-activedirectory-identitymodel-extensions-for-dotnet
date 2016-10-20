@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10650 = "IDX10650: Failed to verify ciphertext with aad: '{0}'; iv: '{1}'; and authenticationTag: '{2}'.";
         internal const string IDX10651 = "IDX10651: The key length for the algorithm '{0]' cannot be less than '{1}'.";
         internal const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
-        internal const string IDX10653 = "IDX10653: The encryption provider '{0}' requires a key size of at least '{1}' bits. The key provided is of size: '{2}'.";
+        internal const string IDX10653 = "IDX10653: The encryption algorithm '{0}' requires a key size of at least '{1}' bits. Key '{2}', is of size: '{3}'.";
         internal const string IDX10654 = "IDX10654: Decryption failed, exception from crypto operation: '{0}'.";
 
         // security keys
