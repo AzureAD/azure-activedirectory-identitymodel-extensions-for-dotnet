@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
             _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
             _hashAlgorithm = GetHashAlgorithm(algorithm);
 
-            // TODO - should we throw here?
+            // TODO - should we defer and use CreateForSigning for encrypt, CreateForVerifying for decrypt?
             _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hashAlgorithm) as SymmetricSignatureProvider;
             if (_symmetricSignatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10649, Algorithm)));
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 result.Ciphertext = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
                 result.Key = Key;
-                result.InitializationVector = aes.IV;
+                result.IV = aes.IV;
             }
             catch(Exception ex)
             {
@@ -128,11 +128,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
-            byte[] macBytes = new byte[authenticatedData.Length + result.InitializationVector.Length + result.Ciphertext.Length + al.Length];
+            byte[] macBytes = new byte[authenticatedData.Length + result.IV.Length + result.Ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
-            Array.Copy(result.InitializationVector, 0, macBytes, authenticatedData.Length, result.InitializationVector.Length);
-            Array.Copy(result.Ciphertext, 0, macBytes, authenticatedData.Length + result.InitializationVector.Length, result.Ciphertext.Length);
-            Array.Copy(al, 0, macBytes, authenticatedData.Length + result.InitializationVector.Length + result.Ciphertext.Length, al.Length);
+            Array.Copy(result.IV, 0, macBytes, authenticatedData.Length, result.IV.Length);
+            Array.Copy(result.Ciphertext, 0, macBytes, authenticatedData.Length + result.IV.Length, result.Ciphertext.Length);
+            Array.Copy(al, 0, macBytes, authenticatedData.Length + result.IV.Length + result.Ciphertext.Length, al.Length);
             byte[] macHash = _symmetricSignatureProvider.Sign(macBytes);
             result.AuthenticationTag = new byte[_authenticatedkeys.HmacKey.Key.Length];
             Array.Copy(macHash, result.AuthenticationTag, result.AuthenticationTag.Length);
@@ -183,22 +183,18 @@ namespace Microsoft.IdentityModel.Tokens
             aes.Padding = PaddingMode.PKCS7;
             aes.Key = _authenticatedkeys.AesKey.Key;
             aes.IV = iv;
-            byte[] plainText = null;
             try
             {
-                plainText = Utility.Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
+                return Utility.Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10654, ex)));
             }
-
-            return plainText;
         }
 
         private AuthenticatedKeys GetAlgorithmParameters(SymmetricSecurityKey key, string algorithm)
         {
-
             int keyLength = 16;
             if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal))
             {
