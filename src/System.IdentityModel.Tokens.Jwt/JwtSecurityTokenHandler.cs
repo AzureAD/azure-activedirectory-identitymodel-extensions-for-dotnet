@@ -560,7 +560,7 @@ namespace System.IdentityModel.Tokens.Jwt
                             innerJwt,
                             header.Base64UrlEncode(),
                             string.Empty,
-                            Base64UrlEncoder.Encode(encryptionResult.InitializationVector),
+                            Base64UrlEncoder.Encode(encryptionResult.IV),
                             Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
                             Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
         }

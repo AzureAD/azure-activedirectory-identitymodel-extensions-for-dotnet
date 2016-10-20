@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the initialization vector.
         /// </summary>
-        public byte[] InitializationVector { get; set; }
+        public byte[] IV { get; set; }
 
         /// <summary>
         /// Gets or sets the authentication tag
