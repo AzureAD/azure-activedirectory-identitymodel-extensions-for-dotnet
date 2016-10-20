@@ -36,6 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     ///     - validate parameters (null, empty)
     ///     - algorithms supported
     ///     - key size
+    ///     - properties are set correctly (Algorithm, Context, Key)
     /// 2. EncryptDecrypt
     ///     - positive tests for keys (256, 384, 512, 768, 1024) X Algorithms supported.
     ///     - parameter validation for Encrypt
@@ -52,8 +53,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                new AuthenticatedEncryptionProvider(key, algorithm);
+                var context = Guid.NewGuid().ToString();
+                var provider = new AuthenticatedEncryptionProvider(key, algorithm) { Context = context };
+
                 ee.ProcessNoException();
+
+                Assert.Equal(provider.Algorithm, algorithm);
+                Assert.Equal(provider.Context, context);
+                Assert.True(ReferenceEquals(provider.Key, key));
             }
             catch (Exception ex)
             {
@@ -74,100 +81,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
             theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
 
-            return theoryData;
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("EncryptDecryptTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void EncryptDecrypt(AuthenticatedEncryptionTestParams theoryParams)
-        {
-            try
+            // set key.CryptoProviderFactory that return null when creating SignatureProvider
+            var key = Default.SymmetricEncryptionKey256;
+            key.CryptoProviderFactory = new DerivedCryptoProviderFactory
             {
-                // use a different provider for encrypting and decrypting to ensure key creation / privated vars are set correctly
-                var encryptionProvider = new AuthenticatedEncryptionProvider(theoryParams.EncryptKey, theoryParams.DecryptAlgorithm);
-                var decryptionProvider = new AuthenticatedEncryptionProvider(theoryParams.DecryptKey, theoryParams.EncryptAlgorithm);
-                var results = encryptionProvider.Encrypt(theoryParams.Plaintext, theoryParams.AuthenticatedData);
-                var cleartext = decryptionProvider.Decrypt(results.Ciphertext, theoryParams.AuthenticatedData, results.InitializationVector, results.AuthenticationTag);
-
-                Assert.True(Utility.AreEqual(theoryParams.Plaintext, cleartext), "theoryParams.PlainText != clearText");
-
-                theoryParams.EE.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryParams.EE.ProcessException(ex);
-            }
-        }
-
-        public static TheoryData<AuthenticatedEncryptionTestParams> EncryptDecryptTheoryData()
-        {
-            var theoryData = new TheoryData<AuthenticatedEncryptionTestParams>();
-
-            AddEncryptDecryptTheoryData("Test1", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey256, theoryData);
-            AddEncryptDecryptTheoryData("Test2", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey384, theoryData);
-            AddEncryptDecryptTheoryData("Test3", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey512, theoryData);
-            AddEncryptDecryptTheoryData("Test4", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey768, theoryData);
-            AddEncryptDecryptTheoryData("Test5", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey1024, theoryData);
-            AddEncryptDecryptTheoryData("Test6", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey512, theoryData);
-            AddEncryptDecryptTheoryData("Test7", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey768, theoryData);
-            AddEncryptDecryptTheoryData("Test8", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey1024, theoryData);
-
-            // parameter checking
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = Guid.NewGuid().ToByteArray(),
-                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                DecryptKey = Default.SymmetricEncryptionKey256,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                EncryptKey = Default.SymmetricEncryptionKey256,
-                Plaintext = null,
-                TestId = "Test9"
-            });
-
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = Guid.NewGuid().ToByteArray(),
-                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                DecryptKey = Default.SymmetricEncryptionKey256,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                EncryptKey = Default.SymmetricEncryptionKey256,
-                Plaintext = new byte[0],
-                TestId = "Test10"
-            });
-
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = null,
-                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                DecryptKey = Default.SymmetricEncryptionKey256,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                EncryptKey = Default.SymmetricEncryptionKey256,
-                Plaintext = Guid.NewGuid().ToByteArray(),
-                TestId = "Test11"
-            });
+                SymmetricSignatureProviderForSigning = null,
+                SymmetricSignatureProviderForVerifying = null
+            };
+            theoryData.Add("Test9", key, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentException("IDX10649:"));
 
             return theoryData;
         }
-
-        private static void AddEncryptDecryptTheoryData(string testId, string algorithm, SymmetricSecurityKey key, TheoryData<AuthenticatedEncryptionTestParams> theoryData)
-        {
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = Guid.NewGuid().ToByteArray(),
-                DecryptAlgorithm = algorithm,
-                DecryptKey = key,
-                EE = ExpectedException.NoExceptionExpected,
-                EncryptAlgorithm = algorithm,
-                EncryptKey = key,
-                Plaintext = Guid.NewGuid().ToByteArray(),
-                TestId = "AddEncryptDecryptTheoryData_" + testId
-            });
-        }
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("DecryptTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -175,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                theoryParams.Provider.Decrypt(theoryParams.EncryptionResults.Ciphertext, theoryParams.AuthenticatedData, theoryParams.EncryptionResults.InitializationVector, theoryParams.EncryptionResults.AuthenticationTag);
+                theoryParams.Provider.Decrypt(theoryParams.EncryptionResults.Ciphertext, theoryParams.AuthenticatedData, theoryParams.EncryptionResults.IV, theoryParams.EncryptionResults.AuthenticationTag);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -188,101 +112,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<AuthenticatedEncryptionTestParams>();
 
-            // test tampering of iv, ciphertext, authenticationData, authenticationTag
-            AddDecryptTheoryData("Test1", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey256, theoryData);
-            AddDecryptTheoryData("Test2", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey384, theoryData);
-            AddDecryptTheoryData("Test3", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey512, theoryData);
-            AddDecryptTheoryData("Test4", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey768, theoryData);
-            AddDecryptTheoryData("Test5", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey1024, theoryData);
-            AddDecryptTheoryData("Test6", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey512, theoryData);
-            AddDecryptTheoryData("Test7", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey768, theoryData);
-            AddDecryptTheoryData("Test8", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey1024, theoryData);
+            // tampering: AuthenticatedData, AuthenticationTag, Ciphertext, InitializationVector
+            AddDecryptTamperedTheoryData("Test1", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256, theoryData);
+            AddDecryptTamperedTheoryData("Test2", Default.SymmetricEncryptionKey384, SecurityAlgorithms.Aes128CbcHmacSha256, theoryData);
+            AddDecryptTamperedTheoryData("Test3", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes128CbcHmacSha256, theoryData);
+            AddDecryptTamperedTheoryData("Test4", Default.SymmetricEncryptionKey768, SecurityAlgorithms.Aes128CbcHmacSha256, theoryData);
+            AddDecryptTamperedTheoryData("Test5", Default.SymmetricEncryptionKey1024, SecurityAlgorithms.Aes128CbcHmacSha256, theoryData);
+            AddDecryptTamperedTheoryData("Test6", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes256CbcHmacSha512, theoryData);
+            AddDecryptTamperedTheoryData("Test7", Default.SymmetricEncryptionKey768, SecurityAlgorithms.Aes256CbcHmacSha512, theoryData);
+            AddDecryptTamperedTheoryData("Test8", Default.SymmetricEncryptionKey1024, SecurityAlgorithms.Aes256CbcHmacSha512, theoryData);
 
-            // parameter checking
-            var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey1024, SecurityAlgorithms.Aes256CbcHmacSha512);
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = null,
-                DecryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    Ciphertext = null,
-                    AuthenticationTag = null
-                },
-                Provider = provider,
-                TestId = "Test9"
-            });
-
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = null,
-                DecryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    AuthenticationTag = null,
-                    Ciphertext = new byte[0],
-                    InitializationVector = null
-                },
-                Provider = provider,
-                TestId = "Test10"
-            });
-
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = null,
-                DecryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    AuthenticationTag = null,
-                    Ciphertext = new byte[10],
-                    InitializationVector = null
-                },
-                Provider = provider,
-                TestId = "Test11"
-            });
-
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = new byte[10],
-                DecryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    AuthenticationTag = null,
-                    Ciphertext = new byte[10],
-                    InitializationVector = null
-                },
-                Provider = provider,
-                TestId = "Test12"
-            });
-
-            theoryData.Add(new AuthenticatedEncryptionTestParams
-            {
-                AuthenticatedData = new byte[10],
-                DecryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EE = ExpectedException.ArgumentNullException(),
-                EncryptAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    AuthenticationTag = null,
-                    Ciphertext = new byte[10],
-                    InitializationVector = new byte[10]
-                },
-                Provider = provider,
-                TestId = "Test13"
-            });
+            // parameter check: AuthenticatedData, AuthenticationTag, Ciphertext, InitializationVector - null / size 0
+            AddDecryptParameterCheckTheoryData("Test9", null, new byte[1], new byte[1], new byte[1], theoryData);
+            AddDecryptParameterCheckTheoryData("Test10", new byte[0], new byte[1], new byte[1], new byte[1], theoryData);
+            AddDecryptParameterCheckTheoryData("Test11", new byte[1], null, new byte[1], new byte[1], theoryData);
+            AddDecryptParameterCheckTheoryData("Test12", new byte[1], new byte[0], new byte[1], new byte[1], theoryData);
+            AddDecryptParameterCheckTheoryData("Test13", new byte[1], new byte[1], null, new byte[1], theoryData);
+            AddDecryptParameterCheckTheoryData("Test14", new byte[1], new byte[1], new byte[0], new byte[1], theoryData);
+            AddDecryptParameterCheckTheoryData("Test15", new byte[1], new byte[1], new byte[1], null, theoryData);
+            AddDecryptParameterCheckTheoryData("Test16", new byte[1], new byte[1], new byte[1], new byte[0], theoryData);
 
             return theoryData;
         }
 
-        private static void AddDecryptTheoryData(string testId, string algorithm, SymmetricSecurityKey key, TheoryData<AuthenticatedEncryptionTestParams> theoryData)
+        private static void AddDecryptTamperedTheoryData(string testId, SymmetricSecurityKey key, string algorithm, TheoryData<AuthenticatedEncryptionTestParams> theoryData)
         {
             var authenticatedData = Guid.NewGuid().ToByteArray();
             var plainText = Guid.NewGuid().ToByteArray();
@@ -303,7 +156,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             results = provider.Encrypt(plainText, authenticatedData);
-            TestUtilities.XORBytes(results.InitializationVector);
+            TestUtilities.XORBytes(results.IV);
             theoryData.Add(new AuthenticatedEncryptionTestParams
             {
                 AuthenticatedData = authenticatedData,
@@ -346,6 +199,123 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Provider = provider,
                 TestId = "AddDecryptTheoryData4_" + testId
             });
+        }
+
+        private static void AddDecryptParameterCheckTheoryData(string testId, byte[] authenticatedData, byte[] authenticationTag, byte[] cipherText, byte[] iv, TheoryData<AuthenticatedEncryptionTestParams> theoryData)
+        {
+            var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            theoryData.Add(new AuthenticatedEncryptionTestParams
+            {
+                AuthenticatedData = authenticatedData,
+                EE = ExpectedException.ArgumentNullException(),
+                EncryptionResults = new AuthenticatedEncryptionResult
+                {
+                    AuthenticationTag = authenticationTag,
+                    Ciphertext = cipherText,
+                    IV = iv
+                },
+                Provider = provider,
+                TestId = testId
+            });
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("EncryptDecryptTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void EncryptDecrypt(AuthenticatedEncryptionTestParams theoryParams)
+        {
+            try
+            {
+                // use a different provider for encrypting and decrypting to ensure key creation / privated vars are set correctly
+                var encryptionProvider = new AuthenticatedEncryptionProvider(theoryParams.EncryptKey, theoryParams.DecryptAlgorithm);
+                var decryptionProvider = new AuthenticatedEncryptionProvider(theoryParams.DecryptKey, theoryParams.EncryptAlgorithm);
+                var results = encryptionProvider.Encrypt(theoryParams.Plaintext, theoryParams.AuthenticatedData);
+                var cleartext = decryptionProvider.Decrypt(results.Ciphertext, theoryParams.AuthenticatedData, results.IV, results.AuthenticationTag);
+
+                Assert.True(Utility.AreEqual(theoryParams.Plaintext, cleartext), "theoryParams.PlainText != clearText");
+
+                theoryParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryParams.EE.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<AuthenticatedEncryptionTestParams> EncryptDecryptTheoryData()
+        {
+            var theoryData = new TheoryData<AuthenticatedEncryptionTestParams>();
+
+            // round trip positive tests
+            AddEncryptDecryptTheoryData("Test1", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey256, theoryData);
+            AddEncryptDecryptTheoryData("Test2", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey384, theoryData);
+            AddEncryptDecryptTheoryData("Test3", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey512, theoryData);
+            AddEncryptDecryptTheoryData("Test4", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey768, theoryData);
+            AddEncryptDecryptTheoryData("Test5", SecurityAlgorithms.Aes128CbcHmacSha256, Default.SymmetricEncryptionKey1024, theoryData);
+            AddEncryptDecryptTheoryData("Test6", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey512, theoryData);
+            AddEncryptDecryptTheoryData("Test7", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey768, theoryData);
+            AddEncryptDecryptTheoryData("Test8", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey1024, theoryData);
+
+            // Encrypt parameter checking
+            AddEncryptParameterCheckTheoryData("Test9",  null,        new byte[1], theoryData);
+            AddEncryptParameterCheckTheoryData("Test10", new byte[0], new byte[1], theoryData);
+            AddEncryptParameterCheckTheoryData("Test11", new byte[1], null,        theoryData);
+            AddEncryptParameterCheckTheoryData("Test12", new byte[1], new byte[0], theoryData);
+
+            return theoryData;
+        }
+
+        private static void AddEncryptDecryptTheoryData(string testId, string algorithm, SymmetricSecurityKey key, TheoryData<AuthenticatedEncryptionTestParams> theoryData)
+        {
+            theoryData.Add(new AuthenticatedEncryptionTestParams
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = algorithm,
+                DecryptKey = key,
+                EE = ExpectedException.NoExceptionExpected,
+                EncryptAlgorithm = algorithm,
+                EncryptKey = key,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "AddEncryptDecryptTheoryData_" + testId
+            });
+        }
+
+        private static void AddEncryptParameterCheckTheoryData(string testId, byte[] authenticatedData, byte[] plainText, TheoryData<AuthenticatedEncryptionTestParams> theoryData)
+        {
+            var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            theoryData.Add(new AuthenticatedEncryptionTestParams
+            {
+                AuthenticatedData = authenticatedData,
+                EE = ExpectedException.ArgumentNullException(),
+                EncryptionResults = new AuthenticatedEncryptionResult
+                {
+                    AuthenticationTag = new byte[1],
+                    Ciphertext = new byte[1],
+                    IV = new byte[1],
+                },
+                Plaintext = plainText,
+                Provider = provider,
+                TestId = testId
+            });
+        }
+
+        [Fact]
+        public void DecryptVirtual()
+        {
+            var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            var authenticatedData = Guid.NewGuid().ToByteArray();
+            var results = provider.Encrypt(Guid.NewGuid().ToByteArray(), authenticatedData);
+            var derivedProvider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            derivedProvider.Decrypt(results.Ciphertext, authenticatedData, results.IV, results.AuthenticationTag);
+            Assert.True(derivedProvider.DecryptCalled);
+        }
+
+        [Fact]
+        public void EncryptVirtual()
+        {
+            var provider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            provider.Encrypt(Guid.NewGuid().ToByteArray(), Guid.NewGuid().ToByteArray());
+            Assert.True(provider.EncryptCalled);
         }
 
         public class AuthenticatedEncryptionTestParams
