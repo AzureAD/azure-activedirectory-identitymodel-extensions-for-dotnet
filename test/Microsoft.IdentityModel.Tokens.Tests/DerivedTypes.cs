@@ -232,36 +232,55 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// <summary>
     /// Helpful for extensibility testing for errors.
     /// </summary>
-    public class AlwaysReturnNullCryptoProviderFactory : CryptoProviderFactory
+    public class DerivedCryptoProviderFactory : CryptoProviderFactory
     {
+        public SymmetricSignatureProvider SymmetricSignatureProviderForSigning { get; set; }
+
+        public SymmetricSignatureProvider SymmetricSignatureProviderForVerifying { get; set; }
+
         public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
         {
-            return null;
+            return SymmetricSignatureProviderForSigning;
         }
 
         public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
-            return null;
+            return SymmetricSignatureProviderForVerifying;
         }
     }
 
-    public class AuthenticatedEncryptionProviderPublic : AuthenticatedEncryptionProvider
+    public class DerivedAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider
     {
-        public AuthenticatedEncryptionProviderPublic(SymmetricSecurityKey key, string algorithm)
+        public DerivedAuthenticatedEncryptionProvider(SymmetricSecurityKey key, string algorithm)
             : base(key, algorithm)
         {
+        }
 
+        public bool DecryptCalled { get; set; } = false;
+
+        public bool EncryptCalled { get; set; } = false;
+
+        public override byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
+        {
+            DecryptCalled = true;
+            return base.Decrypt(ciphertext, authenticatedData, iv, authenticationTag);
+        }
+
+        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+        {
+            EncryptCalled = true;
+            return base.Encrypt(plaintext, authenticatedData);
         }
     }
 
     /// <summary>
     /// Useful for trigging an exception.
     /// </summary>
-    public class FaultingAsymmetricSecurityKey : AsymmetricSecurityKey
+    public class DerivedAsymmetricSecurityKey : AsymmetricSecurityKey
     {
         AsymmetricSecurityKey _key;
 
-        public FaultingAsymmetricSecurityKey(AsymmetricSecurityKey key = null, AsymmetricAlgorithm agorithm = null, bool hasPrivateKey = false)
+        public DerivedAsymmetricSecurityKey(AsymmetricSecurityKey key = null, AsymmetricAlgorithm agorithm = null, bool hasPrivateKey = false)
         {
             _key = key;
         }
