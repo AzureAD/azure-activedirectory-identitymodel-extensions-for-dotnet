@@ -398,7 +398,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(CreationJWEParams))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, JwtSecurityToken jwtToken, ExpectedException ee)
+        public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
@@ -422,15 +422,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, JwtSecurityToken, ExpectedException> CreationJWEParams()
+        public static TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, ExpectedException> CreationJWEParams()
         {
-            var theoryData = new TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, JwtSecurityToken, ExpectedException>();
+            var theoryData = new TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, ExpectedException>();
 
             theoryData.Add(
                 "Test1",
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 Default.SymmetricEncyptSignTokenValidationParameters,
-                null,
                 ExpectedException.NoExceptionExpected
             );
 
@@ -438,7 +437,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 "Test2",
                 Default.SecurityTokenDescriptor(Default.SymmetricEncryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(Default.SymmetricEncryptionKey256, Default.SymmetricSigningKey),
-                null,
                 ExpectedException.NoExceptionExpected
             );
 
@@ -451,7 +449,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = NotDefault.SymmetricSigningKey,
                     TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                 },
-                null,
                 ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
             );
 
@@ -464,7 +461,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = Default.SymmetricSigningKey,
                     TokenDecryptionKey = NotDefault.SymmetricEncryptionKey,
                 },
-                null,
                 ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:")
             );
 

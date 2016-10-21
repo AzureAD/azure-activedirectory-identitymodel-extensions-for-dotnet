@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual string GetParameter(string parameter)
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogArgumentNullException("parameter");
+                throw LogHelper.LogArgumentNullException(nameof(parameter));
 
             string value = null;
             _parameters.TryGetValue(parameter, out value);
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols
         public void SetParameter(string parameter, string value) 
         {
             if (string.IsNullOrEmpty(parameter))
-                throw LogHelper.LogArgumentNullException("parameter");
+                throw LogHelper.LogArgumentNullException(nameof(parameter));
 
             if (value == null)
             {
