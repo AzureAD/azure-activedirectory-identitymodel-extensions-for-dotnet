@@ -43,7 +43,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             try
             {
-                theoryParams.TokenHandler.DecryptTokenPublic(theoryParams.Token, theoryParams.TokenParts, theoryParams.ValidationParameters);
+                theoryParams.TokenHandler.DecryptTokenPublic(theoryParams.Token, theoryParams.ValidationParameters);
             }
             catch (Exception ex)
             {
@@ -54,43 +54,45 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public static TheoryData<TheoryParams> DecryptTokenTheoryData()
         {
             var theoryData = new TheoryData<TheoryParams>();
+
             var tokenHandler = new PublicJwtSecurityTokenHandler();
-            var tokenParts = new string[5] { "", "", "", "", "" };
-            var header = new JwtHeader();
-            header[JwtHeaderParameterNames.Enc] = JwtConstants.DirectKeyUseAlg;
 
             // Parameter validation
-            theoryData.Add(new TheoryParams("Test1", null, null, null, tokenHandler, ExpectedException.ArgumentNullException()));
-            theoryData.Add(new TheoryParams("Test2", "", null, null, tokenHandler, ExpectedException.ArgumentNullException()));
-            theoryData.Add(new TheoryParams("Test3", "a.b.c.d.e", null, null, tokenHandler, ExpectedException.ArgumentNullException()));
-            theoryData.Add(new TheoryParams("Test4", "a.b.c.d.e", new string[2], null, tokenHandler, ExpectedException.ArgumentNullException()));
-            theoryData.Add(new TheoryParams("Test5", "a.b.c.d.e", new string[2], Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, ExpectedException.SecurityTokenException("IDX10606:")));
-            theoryData.Add(new TheoryParams("Test6", "a.b.c.d.e", new string[3], Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, ExpectedException.SecurityTokenException("IDX10606:")));
-            theoryData.Add(new TheoryParams("Test7", "a.b.c.d.e", new string[4], Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, ExpectedException.SecurityTokenException("IDX10606:")));
-            theoryData.Add(new TheoryParams("Test8", "a.b.c.d.e", new string[6], Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, ExpectedException.SecurityTokenException("IDX10606:")));
-            tokenParts = new string[5] { "", "", "", "", "" };
-            theoryData.Add(new TheoryParams("Test9", "a.b.c.d.e", tokenParts, Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, new ExpectedException(typeof(SecurityTokenException), "IDX10613:")));
-            tokenParts = new string[5] { "%%%", "", "", "", "" };
-            theoryData.Add(new TheoryParams("Test10", "a.b.c.d.e", tokenParts, Default.AsymmetricEncryptSignTokenValidationParameters, tokenHandler, new ExpectedException(typeof(SecurityTokenException), "IDX10614:")));
+            theoryData.Add(new TheoryParams("Test1", null, new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentNullException()));
+            theoryData.Add(new TheoryParams("Test2", new JwtSecurityToken(), null, tokenHandler, ExpectedException.ArgumentNullException()));
+            theoryData.Add(new TheoryParams("Test3", new JwtSecurityToken(), new TokenValidationParameters(), tokenHandler, ExpectedException.SecurityTokenException()));
+
+            // Enc empty
+            var header = new JwtHeader();
+            header[JwtHeaderParameterNames.Enc] = "";
+            theoryData.Add(new TheoryParams("Test4", new JwtSecurityToken(), new TokenValidationParameters(), tokenHandler, ExpectedException.SecurityTokenException()));
+
+            // Alg empty
+            header = new JwtHeader();
+            header[JwtHeaderParameterNames.Enc] = SecurityAlgorithms.Aes128CbcHmacSha256;
+            theoryData.Add(new TheoryParams("Test5", new JwtSecurityToken(), new TokenValidationParameters(), tokenHandler, ExpectedException.SecurityTokenException()));
+
+            // Alg not supproted
+            header = new JwtHeader();
+            header[JwtHeaderParameterNames.Alg] = SecurityAlgorithms.Aes128KW;
+            theoryData.Add(new TheoryParams("Test6", new JwtSecurityToken(), new TokenValidationParameters(), tokenHandler, ExpectedException.SecurityTokenException()));
 
             return theoryData;
         }
 
         public class TheoryParams
         {
-            public TheoryParams(string testId, string token, string[] tokenParts, TokenValidationParameters validationParamters, PublicJwtSecurityTokenHandler tokenHandler, ExpectedException ee)
+            public TheoryParams(string testId, JwtSecurityToken token, TokenValidationParameters validationParamters, PublicJwtSecurityTokenHandler tokenHandler, ExpectedException ee)
             {
                 TestId = testId;
                 Token = token;
-                TokenParts = tokenParts;
                 TokenHandler = tokenHandler;
                 ValidationParameters = validationParamters;
                 EE = ee;
             }
 
             public string TestId { get; set; }
-            public string  Token { get; set; }
-            public string[]  TokenParts { get; set; }
+            public JwtSecurityToken Token { get; set; }
             public PublicJwtSecurityTokenHandler TokenHandler { get; set; }
             public TokenValidationParameters ValidationParameters { get; set; }
             public ExpectedException EE { get; set; }
