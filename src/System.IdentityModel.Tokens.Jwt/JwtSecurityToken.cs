@@ -39,6 +39,8 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public class JwtSecurityToken : SecurityToken
     {
+        private JwtPayload _payload;
+
         /// <summary>
         /// Initializes a new instance of <see cref="JwtSecurityToken"/> from a string in JWS Compact serialized format.
         /// </summary>
@@ -140,7 +142,7 @@ namespace System.IdentityModel.Tokens.Jwt
                                 JwtSecurityToken innerToken,
                                 string rawHeader,
                                 string rawEncryptedKey,
-                                string rawInitialVector,
+                                string rawInitializationVector,
                                 string rawCiphertext,
                                 string rawAuthenticationTag)
         {
@@ -153,8 +155,8 @@ namespace System.IdentityModel.Tokens.Jwt
             if (rawEncryptedKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(rawEncryptedKey));
 
-            if (string.IsNullOrEmpty(rawInitialVector))
-                throw LogHelper.LogArgumentNullException(nameof(rawInitialVector));
+            if (string.IsNullOrEmpty(rawInitializationVector))
+                throw LogHelper.LogArgumentNullException(nameof(rawInitializationVector));
 
             if (string.IsNullOrEmpty(rawCiphertext))
                 throw LogHelper.LogArgumentNullException(nameof(rawCiphertext));
@@ -164,10 +166,10 @@ namespace System.IdentityModel.Tokens.Jwt
 
             Header = header;
             InnerToken = innerToken;
-            RawData = string.Join(".", rawHeader, rawEncryptedKey, rawInitialVector, rawCiphertext, rawAuthenticationTag);
+            RawData = string.Join(".", rawHeader, rawEncryptedKey, rawInitializationVector, rawCiphertext, rawAuthenticationTag);
             RawHeader = rawHeader;
             RawEncryptedKey = rawEncryptedKey;
-            RawInitializationVector = rawInitialVector;
+            RawInitializationVector = rawInitializationVector;
             RawCiphertext = rawCiphertext;
             RawAuthenticationTag = rawAuthenticationTag;
         }
@@ -289,7 +291,18 @@ namespace System.IdentityModel.Tokens.Jwt
         /// This property can be null if the content type of the most inner token is unrecognized, in that case
         ///  the content of the token is the string returned by PlainText property.
         /// </summary>
-        public JwtPayload Payload { get; internal set; }
+        public JwtPayload Payload {
+            get
+            {
+                if (InnerToken != null)
+                    return InnerToken.Payload;
+                return _payload;
+            }
+            internal set
+            {
+                _payload = value;
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="JwtSecurityToken"/> associated with this instance.
@@ -323,13 +336,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
         public string RawEncryptedKey { get; private set; }
-
-        /// <summary>
-        /// Gets the original raw data of this instance when it was created.
-        /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
-        /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawEncryptionHeader { get; private set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -505,7 +511,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="tokenParts">Parts of the JWE including the header.</param>
         private void DecodeJwe(string[] tokenParts)
         {
-            RawEncryptionHeader = tokenParts[0];
+            RawHeader = tokenParts[0];
             RawEncryptedKey = tokenParts[1];
             RawInitializationVector = tokenParts[2];
             RawCiphertext = tokenParts[3];
