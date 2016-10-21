@@ -32,7 +32,6 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -304,13 +303,16 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Determines if the string is a well formed Json Web token (see: http://tools.ietf.org/html/rfc7519 )
         /// </summary>
         /// <param name="tokenString">String that should represent a valid JSON Web Token.</param>
-        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/>( token, @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$" ).
+        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of
+        /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE ('dir'): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE (encryptkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
         /// </remarks>
         /// <returns>
-        /// <para>'true' if the token is in JSON compact serialization format.</para>
+        /// <para>'false' if the token is null or whitespace.</para>
         /// <para>'false' if token.Length * 2 >  <see cref="MaximumTokenSizeInBytes"/>.</para>
+        /// <para>'true' if the token is in JSON compact serialization format.</para>
         /// </returns>
-        /// <exception cref="ArgumentNullException">'tokenString' is null.</exception>
         public override bool CanReadToken(string tokenString)
         {
             if (string.IsNullOrWhiteSpace(tokenString))
@@ -586,6 +588,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="token">A 'JSON Web Token' (JWT). May be signed as per 'JSON Web Signature' (JWS).</param>
         /// <returns>The <see cref="JwtSecurityToken"/></returns>
+        /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
+        /// <exception cref="ArgumentException">'token.Length * 2' > MaximumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)" returns false./></exception>
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -635,8 +640,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentException">'token.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentNullException">token.Length * 2 > MamimumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException">'token' does not have 3 or 5 parts.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
+        /// <remarks><see cref="ReadToken(string)"/> for additional exceptions.</remarks>
         public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -645,17 +652,16 @@ namespace System.IdentityModel.Tokens.Jwt
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), token)));
 
-            var header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                var decryptedJwt = DecryptToken(token, tokenParts, validationParameters);
+                var decryptedJwt = DecryptToken(ReadJwtToken(token), validationParameters);
                 validatedToken = ValidateSignature(decryptedJwt, validationParameters);
             }
             else
@@ -674,18 +680,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
         private ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            string token = jwt.RawData;
-            DateTime? notBefore = null;
-            if (jwt.Payload.Nbf != null)
-            {
-                notBefore = new DateTime?(jwt.ValidFrom);
-            }
-
-            DateTime? expires = null;
-            if (jwt.Payload.Exp != null)
-            {
-                expires = new DateTime?(jwt.ValidTo);
-            }
+            DateTime? expires = (jwt.Payload.Exp == null) ? null : new DateTime?(jwt.ValidTo);
+            DateTime? notBefore = (jwt.Payload.Nbf == null) ? null : new DateTime?(jwt.ValidFrom);
 
             if (validationParameters.ValidateLifetime)
             {
@@ -727,7 +723,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
-            Validators.ValidateTokenReplay(token, expires, validationParameters);
+            Validators.ValidateTokenReplay(jwt.RawData, expires, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
             {
                 SecurityToken actor = null;
@@ -749,11 +745,9 @@ namespace System.IdentityModel.Tokens.Jwt
 
             ClaimsIdentity identity = CreateClaimsIdentity(jwt, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
-            {
-                identity.BootstrapContext = token;
-            }
+                identity.BootstrapContext = jwt.RawData;
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10241, token);
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10241, jwt.RawData);
             return new ClaimsPrincipal(identity);
         }
 
@@ -895,7 +889,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 return validatedJwt;
             }
 
-            // TODO we only need the header here, until validated
             JwtSecurityToken jwt = ReadJwtToken(token);
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwt.RawHeader + "." + jwt.RawPayload);
             if (string.IsNullOrEmpty(jwt.RawSignature))
@@ -906,8 +899,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     return jwt;
             }
 
-            bool keyMatched = false;
-           
+            bool keyMatched = false;           
             IEnumerable<SecurityKey> securityKeys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -1264,21 +1256,18 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private string DecryptToken(string algorithm, string[] tokenParts, CryptoProviderFactory cryptoProviderFactory, SymmetricSecurityKey key)
+        private string DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SymmetricSecurityKey key)
         {
-            if (!cryptoProviderFactory.IsAuthenticatedEncryptionAlgorithmSupported(algorithm))
-                IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10611, algorithm);
-
-            var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, algorithm);
+            var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Header.Enc);
             if (decryptionProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10610, key, algorithm)));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10610, key, jwtToken.Header.Enc)));
 
             return UTF8Encoding.UTF8.GetString(
                 decryptionProvider.Decrypt(
-                    Base64UrlEncoder.DecodeBytes(tokenParts[3]),
-                    Encoding.ASCII.GetBytes(tokenParts[0]),
-                    Base64UrlEncoder.DecodeBytes(tokenParts[2]),
-                    Base64UrlEncoder.DecodeBytes(tokenParts[4])
+                    Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
+                    Encoding.ASCII.GetBytes(jwtToken.RawEncryptionHeader),
+                    Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
+                    Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag)
                 ));
         }
 
@@ -1294,50 +1283,31 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">if tokenParts.Length != 5.</exception>
         /// <exception cref="SecurityTokenException">if 'header.enc' is null or empty.</exception>
-        /// <exception cref="NotSupportedException">if 'header.alg' is not equal to 'dir'.</exception>
+        /// <exception cref="SecurityTokenException">if 'header.alg' is not equal to 'dir'.</exception>
         /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'header.kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
-        protected string DecryptToken(string token, string[] tokenParts, TokenValidationParameters validationParameters)
+        protected string DecryptToken(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
-            if (string.IsNullOrEmpty(token))
-                throw LogHelper.LogArgumentNullException(nameof(token));
-
-            if (tokenParts == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenParts));
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (tokenParts.Length != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10606, tokenParts.Length)));
-
-            if (string.IsNullOrEmpty(tokenParts[0]))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10613, tokenParts.Length)));
-
-            JwtHeader header;
-            try
-            {
-                header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
-            }
-            catch(Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10614, tokenParts[0], ex)));
-            }
-
-            if (string.IsNullOrEmpty(header.Enc))
+            if (string.IsNullOrEmpty(jwtToken.Header.Enc))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10612)));
 
-            if (!JwtConstants.DirectKeyUseAlg.Equals(header.Alg, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10605, header.Alg)));
+            if (!JwtConstants.DirectKeyUseAlg.Equals(jwtToken.Header.Alg, StringComparison.Ordinal))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10605, jwtToken.Header.Alg)));
 
             IEnumerable<SecurityKey> securityKeys = null;
             if (validationParameters.TokenDecryptionKeyResolver != null)
             {
-                securityKeys = validationParameters.TokenDecryptionKeyResolver(token, null, header.Kid, validationParameters);
+                securityKeys = validationParameters.TokenDecryptionKeyResolver(jwtToken.RawData, jwtToken, jwtToken.Header.Kid, validationParameters);
             }
             else
             {
-                var securityKey = ResolveTokenDecryptionKey(token, header, validationParameters);
+                var securityKey = ResolveTokenDecryptionKey(jwtToken.RawData, jwtToken.Header, validationParameters);
                 if (securityKey != null)
                     securityKeys = new List<SecurityKey> { securityKey };
             }
@@ -1363,6 +1333,12 @@ namespace System.IdentityModel.Tokens.Jwt
                     continue;
                 }
 
+                if (!cryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Enc, key))
+                {
+                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10611, jwtToken.Header.Enc);
+                    continue;
+                }
+
                 var cek = key as SymmetricSecurityKey;
                 if (cek == null)
                 {
@@ -1372,7 +1348,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 try
                 {
-                    return DecryptToken(header.Enc, tokenParts, cryptoProviderFactory, cek);
+                    return DecryptToken(jwtToken, cryptoProviderFactory, cek);
                 }
                 catch (Exception ex)
                 {
@@ -1384,7 +1360,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10609, keysAttempted, exceptionStrings, token)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10609, keysAttempted, exceptionStrings, jwtToken.RawData)));
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogMessages.IDX10600));
         }
