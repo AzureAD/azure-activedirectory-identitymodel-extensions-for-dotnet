@@ -1265,7 +1265,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return UTF8Encoding.UTF8.GetString(
                 decryptionProvider.Decrypt(
                     Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
-                    Encoding.ASCII.GetBytes(jwtToken.RawEncryptionHeader),
+                    Encoding.ASCII.GetBytes(jwtToken.RawHeader),
                     Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
                     Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag)
                 ));
