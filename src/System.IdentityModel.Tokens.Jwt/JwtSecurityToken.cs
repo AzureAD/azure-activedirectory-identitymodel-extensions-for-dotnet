@@ -445,12 +445,9 @@ namespace System.IdentityModel.Tokens.Jwt
         internal void Decode(string[] tokenParts, string rawData)
         {
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, rawData);
-
-            // Decode the header
-            JwtHeader header;
             try
             {
-                header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
+                Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
             }
             catch (Exception ex)
             {
@@ -458,17 +455,9 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
-            {
-                // The token is JWE
-                //EncryptionHeader = header;
                 DecodeJwe(tokenParts);
-            }
             else
-            {
-                // The token is JWS
-                Header = header;
                 DecodeJws(tokenParts);
-            }
 
             RawData = rawData;
         }
@@ -479,25 +468,17 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="tokenParts">Parts of the JWS including the header.</param>
         private void DecodeJws(string[] tokenParts)
         {
-            // Decode the payload.
-            // If the media type of the payload is unspecified or "JSON", it should be able to be deserialized to JwtPayload property bag.
             // We do not support other content types for JWS.
             if (Header.Cty != null)
-            {
-                // Don't support nested JWS
-                // TODO(Yan): Add a new error message indicating that nested token is not supported of JWS.
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData)));
-            }
-            else
+
+            try
             {
-                try
-                {
-                    Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData), ex));
-                }
+                Payload = JwtPayload.Base64UrlDeserialize(tokenParts[1]);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData), ex));
             }
 
             RawHeader = tokenParts[0];
