@@ -105,7 +105,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10716 = "IDX10716: Decoding token: '{0}' into header, payload and signature.";
         internal const string IDX10717 = "IDX10717: Deserializing header: '{0}' from the token.";
         internal const string IDX10718 = "IDX10718: Deserializing payload: '{0}' from the token.";
-        internal const string IDX10720 = "IDX10720: Token string does not match the token format: header.payload.signature";
+        internal const string IDX10720 = "IDX10720: Token string does not match the token formats: JWE (header.encryptedKey.iv.ciphertext.tag) or JWS (header.payload.signature)";
         internal const string IDX10721 = "IDX10721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX10722 = "IDX10722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
         internal const string IDX10723 = "IDX10723: Unable to decode the payload '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
