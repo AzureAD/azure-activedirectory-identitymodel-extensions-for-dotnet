@@ -89,18 +89,6 @@ namespace Microsoft.IdentityModel.Tokens
             CustomCryptoProvider = other.CustomCryptoProvider;
         }
 
-        public virtual bool IsAuthenticatedEncryptionAlgorithmSupported(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
-                    return true;
-            }
-
-            return false;
-        }
-
         /// <summary>
         /// Answers if an algorithm is supported
         /// </summary>
@@ -199,6 +187,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             switch (algorithm)
             {
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha512Signature:
@@ -233,7 +223,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (symmetricKey == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10648, key.GetType())));
 
-            if (IsAuthenticatedEncryptionAlgorithmSupported(algorithm))
+            if (IsSupportedAlgorithm (algorithm, key))
                 return new AuthenticatedEncryptionProvider(symmetricKey, algorithm);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
