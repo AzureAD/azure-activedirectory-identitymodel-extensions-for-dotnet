@@ -169,7 +169,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 else
                     outerJwt = new JwtSecurityToken(jwt);
 
-                outerTokenVariation.ExpectedException.ProcessNoException();
+                ee.ProcessNoException();
             }
             catch (Exception ex)
             {
@@ -300,8 +300,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 RawAuthenticationTag = rawAuthenticationTag
             };
 
-            dataSet.Add("Dir enc outer token 4- Construct by parts", dirOuter2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
-            //dataSet.Add("Dir enc outer token 4- Construct by string", dirOuter2, innerToken, EncodedJwts.InvalidJweDirect, ExpectedException.NoExceptionExpected);
+            dataSet.Add("Dir enc outer token 4- Construct by parts", dirOuter3, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            //dataSet.Add("Dir enc outer token 4- Construct by string", dirOuter3, innerToken, EncodedJwts.InvalidJweDirect, ExpectedException.NoExceptionExpected);
 
             ParseJweParts(EncodedJwts.InvalidJweDirect2, out rawHeader, out rawEncryptedKey, out rawInitializationVector, out rawCipherText, out rawAuthenticationTag);
             JwtSecurityTokenTestVariation dirOuter4 = new JwtSecurityTokenTestVariation
@@ -314,8 +314,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 RawAuthenticationTag = rawAuthenticationTag
             };
 
-            dataSet.Add("Dir enc outer token 5- Construct by parts", dirOuter2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
-            //dataSet.Add("Dir enc outer token 5- Construct by string", dirOuter2, innerToken, EncodedJwts.InvalidJweDirect2, ExpectedException.NoExceptionExpected);
+            dataSet.Add("Dir enc outer token 5- Construct by parts", dirOuter4, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            //dataSet.Add("Dir enc outer token 5- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJweDirect2, ExpectedException.NoExceptionExpected);
+
+            dataSet.Add("Invalid outer token 1- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 2- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 3- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
 
             return dataSet;
         }
