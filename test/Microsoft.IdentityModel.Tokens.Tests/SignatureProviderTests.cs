@@ -32,6 +32,21 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+    public class SignatureProviderTestParams
+    {
+        public string Algorithm { get; set; }
+        public ExpectedException EE { get; set; }
+        public SecurityKey Key { get; set; }
+        public byte[] RawBytes { get; set; }
+        public bool ShouldVerify { get; set; }
+        public byte[] Signature { get; set; }
+        public string TestId { get; set; }
+        public override string ToString()
+        {
+            return TestId + ", " + Algorithm + ", " + Key;
+        }
+    }
+
     /// <summary>
     /// This class tests:
     /// CryptoProviderFactory
@@ -68,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Key size checks
             FactoryCreateFor("Signing: AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-            FactoryCreateFor("Signing: SymmetricKeySize Key to small", KeyingMaterial.SymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10603:"));
+            FactoryCreateFor("Signing: SymmetricKeySize Key to small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10603:"));
 
             FactoryCreateFor("Signing: SymmetricKeySize Key", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.NoExceptionExpected);
             FactoryCreateFor("Verifying: SymmetricKeySize Key", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.NoExceptionExpected);
@@ -76,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // extensibility tests
             // smaller key sizes but no exceptions using custom crypto factory
             FactoryCreateFor("Signing: AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature }), ExpectedException.NoExceptionExpected);
-            FactoryCreateFor("Signing: SymmetricKeySize Key to small", KeyingMaterial.SymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.HmacSha256Signature }), ExpectedException.NoExceptionExpected);
+            FactoryCreateFor("Signing: SymmetricKeySize Key to small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.HmacSha256Signature }), ExpectedException.NoExceptionExpected);
         }
 
         private void FactoryCreateFor(string testcase, SecurityKey key, string algorithm, CryptoProviderFactory factory, ExpectedException expectedException)
@@ -175,12 +190,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes, ExpectedException.NoExceptionExpected, errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256, rawBytes, ExpectedException.InvalidOperationException("IDX10638:"), errors);
 
-            // Symmetric
-            SymmetricSignatureProvidersSignVariation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, null, ExpectedException.ArgumentNullException(), errors);
-            SymmetricSignatureProvidersSignVariation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, new byte[0], ExpectedException.ArgumentNullException(), errors);
-            SymmetricSignatureProvidersSignVariation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
-            SymmetricSignatureProvidersSignVariation(KeyingMaterial.SymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, rawBytes, ExpectedException.ArgumentOutOfRangeException("IDX10603:"), errors);
-            SymmetricSignatureProvidersSignVariation(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
             TestUtilities.AssertFailIfErrors("SignatureProviders_Sign", errors);
         }
 
@@ -419,16 +428,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // no errors
             SymmetricSignatureProvider_ConstructorVariation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, ExpectedException.NoExceptionExpected);
             SymmetricSignatureProvider_ConstructorVariation(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, ExpectedException.NoExceptionExpected);
+
             // null key
             SymmetricSignatureProvider_ConstructorVariation(null, SecurityAlgorithms.HmacSha256Signature, ExpectedException.ArgumentNullException());
+
             // empty algorithm
             SymmetricSignatureProvider_ConstructorVariation(KeyingMaterial.DefaultSymmetricSecurityKey_256, string.Empty, ExpectedException.ArgumentException());
+
             // unsupported algorithm
             SymmetricSignatureProvider_ConstructorVariation(KeyingMaterial.DefaultSymmetricSecurityKey_256, "unknown algorithm", ExpectedException.ArgumentException("IDX10634:"));
+
             // smaller key < 256 bytes
-            SymmetricSignatureProvider_ConstructorVariation(KeyingMaterial.SymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, ExpectedException.ArgumentOutOfRangeException("IDX10603"));
+            SymmetricSignatureProvider_ConstructorVariation(Default.SymmetricSigningKey56, SecurityAlgorithms.HmacSha256Signature, ExpectedException.ArgumentOutOfRangeException("IDX10603"));
+            SymmetricSignatureProvider_ConstructorVariation(Default.SymmetricSigningKey64, SecurityAlgorithms.HmacSha256Signature, ExpectedException.ArgumentOutOfRangeException("IDX10603"));
+
             // GetKeyedHashAlgorithm throws
-            SymmetricSecurityKey key = new FaultingSymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, new CryptographicException("hi from inner"), null, null, KeyingMaterial.DefaultSymmetricKeyBytes_256);
+            SymmetricSecurityKey key = new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key);
             SymmetricSignatureProvider_ConstructorVariation(key, SecurityAlgorithms.HmacSha256Signature, ExpectedException.InvalidOperationException("IDX10634:", typeof(CryptographicException)));
         }
 
@@ -489,57 +504,309 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact]
-        public void SymmetricSignatureProvider_Verify()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(SymmetricSignatureProviderVerifyTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SymmetricSignatureProvidersVerify(SignatureProviderTestParams testParams)
         {
-            List<string> errors = new List<string>();
+            try
+            {
+                SymmetricSignatureProvider provider = new SymmetricSignatureProvider(testParams.Key, testParams.Algorithm);
+                if (provider.Verify(testParams.RawBytes, testParams.Signature) != testParams.ShouldVerify)
+                    Assert.True(false, testParams.TestId + " - SignatureProvider.Verify did not return expected: " + testParams.ShouldVerify + " , algorithm: " + testParams.Algorithm);
+
+                testParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                testParams.EE.ProcessException(ex);
+            }
+        }
+        #endregion
+
+        public static TheoryData <SignatureProviderTestParams> SymmetricSignatureProviderVerifyTheoryData()
+        {
+            var theoryData = new TheoryData<SignatureProviderTestParams>();
+
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, null, null, ExpectedException.ArgumentNullException(), errors, false);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, new byte[0], null, ExpectedException.ArgumentNullException(), errors, false);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, new byte[0], new byte[0], ExpectedException.ArgumentNullException(), errors, false);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, new byte[1], new byte[0], ExpectedException.ArgumentNullException(), errors, false);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, new byte[1], new byte[1], ExpectedException.NoExceptionExpected, errors, false);
+            #region Parameter Validation
 
-            var signature = GetSignatureFromSymmetricKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, rawBytes);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            // wrong algorithm
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-            // wrong key
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = null,
+                ShouldVerify = false,
+                Signature = new byte[1],
+                TestId = "Test1"
+            });
 
-            signature = GetSignatureFromSymmetricKey(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha512Signature, rawBytes);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = new byte[0],
+                ShouldVerify = false,
+                Signature = new byte[1],
+                TestId = "Test2"
+            });
 
-            signature = GetSignatureFromSymmetricKey(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256Signature, rawBytes);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            SymmetricSignatureProviders_Verify_Variation(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = new byte[1],
+                ShouldVerify = false,
+                Signature = null,
+                TestId = "Test3"
+            });
 
-            TestUtilities.AssertFailIfErrors("SymmetricSignatureProvider_Verify", errors);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.ArgumentNullException(),
+                RawBytes = new byte[1],
+                Key = Default.SymmetricSigningKey256,
+                ShouldVerify = false,
+                Signature = new byte[0],
+                TestId = "Test4"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = new byte[1],
+                ShouldVerify = false,
+                Signature = new byte[1],
+                TestId = "Test5"
+            });
+
+            #endregion Parameter Validation
+
+            #region positive tests
+
+            // HmacSha256 <-> HmacSha256Signature
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = Default.SymmetricSigningKey256,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha256Signature, rawBytes),
+                TestId = "Test6"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha256, rawBytes),
+                TestId = "Test7"
+            });
+
+            // HmacSha384 <-> HmacSha384Signature
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha384Signature, rawBytes),
+                TestId = "Test8"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha384Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha384, rawBytes),
+                TestId = "Test9"
+            });
+
+            // HmacSha512 <-> HmacSha512Signature
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha512,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha512Signature, rawBytes),
+                TestId = "Test10"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha512Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha512, rawBytes),
+                TestId = "Test11"
+            });
+
+            // JsonWebKey
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.JsonWebKeySymmetric256,
+                RawBytes = rawBytes,
+                ShouldVerify = true,
+                Signature = GetSignatureFromSymmetricKey(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256Signature, rawBytes),
+                TestId = "Test11",
+            });
+
+            #endregion positive tests
+
+            #region negative tests
+
+            // different algorithm
+            // HmacSha256 -> HmacSha384
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha384, rawBytes),
+                TestId = "Test12",
+            });
+
+            // HmacSha256 -> HmacSha512
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha512, rawBytes),
+                TestId = "Test13",
+            });
+
+            // HmacSha384 -> HmacSha512
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha512, rawBytes),
+                TestId = "Test14",
+            });
+
+            // Default.SymmetricSigningKey256 -> NotDefault.SymmetricSigningKey256
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = NotDefault.SymmetricSigningKey256,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha256, rawBytes),
+                TestId = "Test15"
+            });
+
+            // Default.SymmetricSigningKey256 -> Default.SymmetricSigningKey384
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = Default.SymmetricSigningKey384,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey256, SecurityAlgorithms.HmacSha384, rawBytes),
+                TestId = "Test16",
+            });
+
+            // Default.SymmetricSigningKey384 -> NotDefault.SymmetricSigningKey384
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = NotDefault.SymmetricSigningKey384,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey384, SecurityAlgorithms.HmacSha384, rawBytes),
+                TestId = "Test17"
+            });
+
+            // Default.SymmetricSigningKey384 -> Default.SymmetricSigningKey512
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = NotDefault.SymmetricSigningKey384,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey384, SecurityAlgorithms.HmacSha384, rawBytes),
+                TestId = "Test18"
+            });
+
+            // Default.SymmetricSigningKey512 -> NoDefault.SymmetricSigningKey512
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha512,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = NotDefault.SymmetricSigningKey512,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey512, SecurityAlgorithms.HmacSha512, rawBytes),
+                TestId = "Test19"
+            });
+
+            // Default.SymmetricSigningKey512 -> Default.SymmetricSigningKey1024
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha512,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = NotDefault.SymmetricSigningKey1024,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(Default.SymmetricSigningKey1024, SecurityAlgorithms.HmacSha512, rawBytes),
+                TestId = "Test20"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.JsonWebKeySymmetric256,
+                RawBytes = rawBytes,
+                ShouldVerify = false,
+                Signature = GetSignatureFromSymmetricKey(KeyingMaterial.JsonWebKeySymmetric256_2, SecurityAlgorithms.HmacSha256, rawBytes),
+                TestId = "Test21",
+            });
+
+            #endregion  negative tests
+
+            return theoryData;
         }
-        private byte[] GetSignatureFromSymmetricKey(SecurityKey key, string algorithm, byte[] rawBytes)
+
+        private static byte[] GetSignatureFromSymmetricKey(SecurityKey key, string algorithm, byte[] rawBytes)
         {
             SymmetricSignatureProvider provider = new SymmetricSignatureProvider(key, algorithm);
             return provider.Sign(rawBytes);
         }
-
-        private void SymmetricSignatureProviders_Verify_Variation(SecurityKey key, string algorithm, byte[] rawBytes, byte[] signature, ExpectedException ee, List<string> errors, bool shouldSignatureSucceed)
-        {
-            try
-            {
-                SymmetricSignatureProvider provider = new SymmetricSignatureProvider(key, algorithm);
-                if (provider.Verify(rawBytes, signature) != shouldSignatureSucceed)
-                    errors.Add("SignatureProvider.Verify did not return expected: " + shouldSignatureSucceed + " , algorithm: " + algorithm);
-
-                ee.ProcessNoException(errors);
-            }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex, errors);
-            }
-        }
-        #endregion
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(KeyDisposeData))]
