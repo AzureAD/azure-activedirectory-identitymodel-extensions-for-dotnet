@@ -844,7 +844,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // "BinaryKey 56Bits",
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.SymmetricSecurityKey_56);
+            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_56);
             TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts")), validationParameters, tokenHandler, expectedException);
         }
 

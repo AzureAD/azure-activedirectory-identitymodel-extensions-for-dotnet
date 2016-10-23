@@ -127,8 +127,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="header">Defines cryptographic operations applied to the 'innerToken'.</param>
         /// <param name="innerToken"></param>
+        /// <param name="rawEncryptedKey">base64urlencoded key</param>
         /// <param name="rawHeader">base64urlencoded JwtHeader</param>
-        /// <param name="rawInitialVector">base64urlencoded initialization vector.</param>
+        /// <param name="rawInitializationVector">base64urlencoded initialization vector.</param>
         /// <param name="rawCiphertext">base64urlencoded encrypted innerToken</param>
         /// <param name="rawAuthenticationTag">base64urlencoded authentication tag.</param>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>
@@ -383,13 +384,16 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the <see cref="SigningCredentials"/> associated with this instance.
+        /// Gets the <see cref="SigningCredentials"/> to use when writing this token.
         /// </summary>
         public SigningCredentials SigningCredentials
         {
             get { return Header.SigningCredentials; }
         }
 
+        /// <summary>
+        /// Gets teh <see cref="EncryptingCredentials"/> to use when writing this token.
+        /// </summary>
         public EncryptingCredentials EncryptingCredentials
         {
             get { return Header.EncryptingCredentials;  }
@@ -431,7 +435,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Serializes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
         /// </summary>
-        /// <returns>A string containing the header and payload in JSON format</returns>
+        /// <returns>A string containing the header and payload in JSON format.</returns>
         public override string ToString()
         {
             return Header.SerializeToJson() + "." + Payload.SerializeToJson();
@@ -466,6 +470,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Decodes the payload and signature from the JWS parts.
         /// </summary>
         /// <param name="tokenParts">Parts of the JWS including the header.</param>
+        /// <remarks>Assumes Header has already been set.</remarks>
         private void DecodeJws(string[] tokenParts)
         {
             // We do not support other content types for JWS.
@@ -490,6 +495,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Decodes the payload and signature from the JWE parts.
         /// </summary>
         /// <param name="tokenParts">Parts of the JWE including the header.</param>
+        /// <remarks>Assumes Header has already been set.</remarks>
         private void DecodeJwe(string[] tokenParts)
         {
             RawHeader = tokenParts[0];

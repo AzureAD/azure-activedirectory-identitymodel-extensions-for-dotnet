@@ -445,30 +445,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="expires">The expiration time for this token.</param>
         /// <param name="issuedAt">The issue time for this token.</param>
         /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
-        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
-        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
-        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
-        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
-        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
-        /// </remarks>
-        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
-        //public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
-        //{
-        //    return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null);
-        //}
-
-        /// <summary>
-        /// Creates a <see cref="JwtSecurityToken"/>
-        /// </summary>
-        /// <param name="issuer">The issuer of the token.</param>
-        /// <param name="audience">The audience for this token.</param>
-        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">The notbefore time for this token.</param>
-        /// <param name="expires">The expiration time for this token.</param>
-        /// <param name="issuedAt">The issue time for this token.</param>
-        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
         /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
@@ -590,7 +566,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>The <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length * 2' > MaximumTokenSizeInBytes.</exception>
-        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)" returns false./></exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -857,7 +833,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Validates that the signature, if found and / or required is valid.
         /// </summary>
-        /// <param name="jwt">A <see cref="JwtSecurityToken"/> representing a JWS token.</param>
+        /// <param name="token">A JWS token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
         /// <exception cref="ArgumentNullException">If 'jwt is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters is null.</exception>
@@ -1140,21 +1116,21 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
-        /// <param name="securityToken">The <SecurityToken> that is being validated.</SecurityToken></param>
+        /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException("validationParameters");
 
-            if (securityToken == null)
+            if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException("securityToken");
 
-            if (!string.IsNullOrEmpty(securityToken.Header.Kid))
+            if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
             {
-                string kid = securityToken.Header.Kid;
+                string kid = jwtToken.Header.Kid;
                 if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, StringComparison.Ordinal))
                 {
                     return validationParameters.IssuerSigningKey;
@@ -1172,9 +1148,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
-            if (!string.IsNullOrEmpty(securityToken.Header.X5t))
+            if (!string.IsNullOrEmpty(jwtToken.Header.X5t))
             {
-                string x5t = securityToken.Header.X5t;
+                string x5t = jwtToken.Header.X5t;
                 if (validationParameters.IssuerSigningKey != null)
                 {
                     if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, StringComparison.Ordinal))
@@ -1204,37 +1180,45 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        protected virtual SecurityKey ResolveTokenDecryptionKey(string token, JwtHeader header, TokenValidationParameters validationParameters)
+        /// <summary>
+        /// Returns a <see cref="SecurityKey"/> to use when decryption a JWE.
+        /// </summary>
+        /// <param name="token">The <see cref="string"/> the token that is being decrypted.</param>
+        /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> that is being decrypted.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        protected virtual SecurityKey ResolveTokenDecryptionKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
-            if (header == null)
-                throw LogHelper.LogArgumentNullException(nameof(header));
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (!string.IsNullOrEmpty(header.Kid))
+            if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
             {
-                if (validationParameters.TokenDecryptionKey != null && string.Equals(validationParameters.TokenDecryptionKey.KeyId, header.Kid, StringComparison.Ordinal))
+                if (validationParameters.TokenDecryptionKey != null && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Header.Kid, StringComparison.Ordinal))
                     return validationParameters.TokenDecryptionKey;
 
                 if (validationParameters.TokenDecryptionKeys != null)
                 {
                     foreach (var key in validationParameters.TokenDecryptionKeys)
                     {
-                        if (key != null && string.Equals(key.KeyId, header.Kid, StringComparison.Ordinal))
+                        if (key != null && string.Equals(key.KeyId, jwtToken.Header.Kid, StringComparison.Ordinal))
                             return key;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(header.X5t))
+                if (!string.IsNullOrEmpty(jwtToken.Header.X5t))
                 {
                     if (validationParameters.TokenDecryptionKey != null)
                     {
-                        if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, header.X5t, StringComparison.Ordinal))
+                        if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Header.X5t, StringComparison.Ordinal))
                             return validationParameters.TokenDecryptionKey;
 
                         X509SecurityKey x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
-                        if (x509Key != null && string.Equals(x509Key.X5t, header.X5t, StringComparison.Ordinal))
+                        if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.Header.X5t, StringComparison.Ordinal))
                             return validationParameters.TokenDecryptionKey;
                     }
 
@@ -1242,11 +1226,11 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         foreach (var key in validationParameters.TokenDecryptionKeys)
                         {
-                            if (key != null && string.Equals(key.KeyId, header.X5t, StringComparison.Ordinal))
+                            if (key != null && string.Equals(key.KeyId, jwtToken.Header.X5t, StringComparison.Ordinal))
                                 return key;
 
                             X509SecurityKey x509Key = key as X509SecurityKey;
-                            if (x509Key != null && string.Equals(x509Key.X5t, header.X5t, StringComparison.Ordinal))
+                            if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.Header.X5t, StringComparison.Ordinal))
                                 return key;
                         }
                     }
@@ -1274,17 +1258,14 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Decrypts a JWE and returns the clear text 
         /// </summary>
-        /// <param name="token">the JWE that contains the cypher text.</param>
-        /// <param name="tokenParts">array of strings representing the five parts of a JWE.</param>
+        /// <param name="jwtToken">the JWE that contains the cypher text.</param>
         /// <param name="validationParameters">contains crypto material.</param>
         /// <returns>the decoded / cleartext contents of the JWE.</returns>
-        /// <exception cref="ArgumentNullException">if 'token' is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if 'tokenParts' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'jwtToken' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenException">if tokenParts.Length != 5.</exception>
-        /// <exception cref="SecurityTokenException">if 'header.enc' is null or empty.</exception>
-        /// <exception cref="SecurityTokenException">if 'header.alg' is not equal to 'dir'.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'header.kid' is not null AND decryption fails.</exception>
+        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
+        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.alg' is not equal to 'dir'.</exception>
+        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         protected string DecryptToken(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
@@ -1307,7 +1288,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             else
             {
-                var securityKey = ResolveTokenDecryptionKey(jwtToken.RawData, jwtToken.Header, validationParameters);
+                var securityKey = ResolveTokenDecryptionKey(jwtToken.RawData, jwtToken, validationParameters);
                 if (securityKey != null)
                     securityKeys = new List<SecurityKey> { securityKey };
             }

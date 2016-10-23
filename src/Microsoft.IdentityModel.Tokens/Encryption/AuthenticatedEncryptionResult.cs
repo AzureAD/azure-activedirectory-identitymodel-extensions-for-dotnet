@@ -28,12 +28,12 @@
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Contains the results of <see cref="AuthenticatedEncryptionProvider.Encrypt(byte[], byte[])"> operation.
+    /// Contains the results of <see cref="AuthenticatedEncryptionProvider.Encrypt(byte[], byte[])"/> operation.
     /// </summary>
     public class AuthenticatedEncryptionResult
     {
         /// <summary>
-        /// Gets or sets the key bytes.
+        /// Gets or sets the <see cref="SymmetricSecurityKey"/>.
         /// </summary>
         public SymmetricSecurityKey Key { get; set; }
 
