@@ -436,7 +436,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(
                 "Test2",
                 Default.SecurityTokenDescriptor(Default.SymmetricEncryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
-                Default.TokenValidationParameters(Default.SymmetricEncryptionKey256, Default.SymmetricSigningKey),
+                Default.TokenValidationParameters(Default.SymmetricEncryptionKey256, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
             );
 
@@ -446,7 +446,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 new TokenValidationParameters
                 {
-                    IssuerSigningKey = NotDefault.SymmetricSigningKey,
+                    IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                     TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                 },
                 ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
@@ -458,7 +458,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 new TokenValidationParameters
                 {
-                    IssuerSigningKey = Default.SymmetricSigningKey,
+                    IssuerSigningKey = Default.SymmetricSigningKey256,
                     TokenDecryptionKey = NotDefault.SymmetricEncryptionKey,
                 },
                 ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:")
