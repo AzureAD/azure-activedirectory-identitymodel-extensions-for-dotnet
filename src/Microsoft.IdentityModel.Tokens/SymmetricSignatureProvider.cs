@@ -194,23 +194,33 @@ namespace Microsoft.IdentityModel.Tokens
             if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
-            if (_disposed)
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
-
-            if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
-
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
-            return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
+            return Verify(input, signature, signature.Length);
         }
 
+        /// <summary>
+        /// Verifies that a signature created over the 'input' matches the signature. Using <see cref="SymmetricSecurityKey"/> and 'algorithm' passed to <see cref="SymmetricSignatureProvider( SecurityKey, string )"/>.
+        /// </summary>
+        /// <param name="input">The bytes to verify.</param>
+        /// <param name="signature">signature to compare against.</param>
+        /// <param name="length">number of bytes of signature to use.</param>
+        /// <returns>true if computed signature matches the signature parameter, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">'input' is null.</exception>
+        /// <exception cref="ArgumentNullException">'signature' is null.</exception>
+        /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
+        /// <exception cref="ArgumentException">'signature.Length' == 0. </exception>
+        /// <exception cref="ArgumentException">'length &lt; 1'</exception>
+        /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public bool Verify(byte[] input, byte[] signature, int length)
         {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
-            if (signature == null)
+            if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
+
+            if (length < 1)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10655, length)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
@@ -219,9 +229,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
-            byte[] hashBytes = new byte[length];
-            Array.Copy(_keyedHash.ComputeHash(input), hashBytes, length);
-            return Utility.AreEqual(signature, hashBytes);
+            return Utility.AreEqual(signature, _keyedHash.ComputeHash(input), length);
         }
 
         #region IDisposable Members

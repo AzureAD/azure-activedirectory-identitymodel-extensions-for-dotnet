@@ -130,14 +130,39 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get { return new SigningCredentials(new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256), SecurityAlgorithms.HmacSha256); }
         }
 
-        public static SecurityKey SymmetricSigningKey
+        public static SecurityKey SymmetricSigningKey128
         {
-            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256); }
+            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_128) { KeyId = KeyingMaterial.SymmetricSecurityKey2_128.KeyId }; }
+        }
+
+        public static SecurityKey SymmetricSigningKey256
+        {
+            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256) { KeyId = KeyingMaterial.SymmetricSecurityKey2_256.KeyId }; }
+        }
+
+        public static SecurityKey SymmetricSigningKey384
+        {
+            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_384) { KeyId = KeyingMaterial.SymmetricSecurityKey2_384.KeyId }; }
+        }
+
+        public static SecurityKey SymmetricSigningKey512
+        {
+            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_512) { KeyId = KeyingMaterial.SymmetricSecurityKey2_512.KeyId }; }
+        }
+
+        public static SecurityKey SymmetricSigningKey768
+        {
+            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_768) { KeyId = KeyingMaterial.SymmetricSecurityKey2_768.KeyId }; }
+        }
+
+        public static SecurityKey SymmetricSigningKey1024
+        {
+            get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_1024) { KeyId = KeyingMaterial.SymmetricSecurityKey2_1024.KeyId }; }
         }
 
         public static TokenValidationParameters SymmetricEncrytpSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(SymmetricEncryptionKey, SymmetricSigningKey); }
+            get { return TokenValidationParameters(SymmetricEncryptionKey, SymmetricSigningKey256); }
         }
 
         public static TokenValidationParameters TokenValidationParameters(SecurityKey encryptionKey, SecurityKey signingKey)

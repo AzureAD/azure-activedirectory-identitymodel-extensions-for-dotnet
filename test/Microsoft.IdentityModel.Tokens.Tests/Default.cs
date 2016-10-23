@@ -222,6 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
             }
         }
+
         public static SymmetricSecurityKey SymmetricEncryptionKey256
         {
             get
@@ -306,20 +307,72 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        public static SecurityKey SymmetricSigningKey
+        public static SymmetricSecurityKey SymmetricSigningKey56
         {
             get
             {
-                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256.Key)
-                {
-                    KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId
-                };
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_56.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_56.KeyId };
+            }
+        }
+        public static SymmetricSecurityKey SymmetricSigningKey64
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_64.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_64.KeyId };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricSigningKey128
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_128.KeyId };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricSigningKey256
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricSigningKey384
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_384.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_384.KeyId };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricSigningKey512
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_512.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_512.KeyId };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricSigningKey768
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_768.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_768.KeyId };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricSigningKey1024
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_1024.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_1024.KeyId };
             }
         }
 
         public static TokenValidationParameters SymmetricEncyptSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey); }
+            get { return TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey256); }
         }
 
         public static TokenValidationParameters TokenValidationParameters(SecurityKey encryptionKey, SecurityKey signingKey)
