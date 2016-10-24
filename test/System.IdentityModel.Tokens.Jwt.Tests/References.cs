@@ -28,10 +28,202 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
+    public static class RFC7520References
+    {
+        // references from https://tools.ietf.org/html/rfc7520
+        public static JsonWebKey ECDsaPrivateKey
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Crv = "P-521",
+                    D = "AAhRON2r9cqXX1hg-RoI6R1tX5p2rUAYdmpHZoC1XNM56KtscrX6zbKipQrCW9CGZH3T4ubpnoTKLDYJ_fF3_rJt",
+                    KeyId = "bilbo.baggins@hobbiton.example",
+                    Kty = "EC",
+                    X = "AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt",
+                    Y = "AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"
+                };
+            }
+        }
+        public static JsonWebKey ECDsaPublicKey
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Crv = "P-521",
+                    KeyId = "bilbo.baggins@hobbiton.example",
+                    Kty = "EC",
+                    Use = "sig",
+                    X = "AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt",
+                    Y = "AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"
+                };
+            }
+        }
+
+        public static string ES512Encoded
+        {
+            get { return "eyJhbGciOiJFUzUxMiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9"; }
+        }
+
+        public static string ES512Header
+        {
+            get { return "{\"alg\":\"ES512\",\"kid\":\"bilbo.baggins@hobbiton.example\"}"; }
+        }
+
+        public static string ES512SignatureEncoded
+        {
+            get { return "AE_R_YZCChjn4791jSQCrdPZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDDyYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2"; }
+        }
+
+        public static JwtHeader ES512JwtHeader
+        {
+            get
+            {
+                var header = new JwtHeader();
+                header.Clear();
+                header["alg"] = "ES512";
+                header["kid"] = "bilbo.baggins@hobbiton.example";
+                return header;
+            }
+        }
+
+        public static string Payload
+        {
+            get { return "It\u2019s a dangerous business, Frodo, going out your door. You step onto the road, and if you don't keep your feet, there\u2019s no knowing where you might be swept off to."; }
+        }
+
+        public static string PayloadEncoded
+        {
+            get { return "SXTigJlzIGEgZGFuZ2Vyb3VzIGJ1c2luZXNzLCBGcm9kbywgZ29pbmcgb3V0IHlvdXIgZG9vci4gWW91IHN0ZXAgb250byB0aGUgcm9hZCwgYW5kIGlmIHlvdSBkb24ndCBrZWVwIHlvdXIgZmVldCwgdGhlcmXigJlzIG5vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4"; }
+        }
+
+        public static string RSAHeader
+        {
+            get { return "{\"alg\":\"RS256\",\"kid\":\"bilbo.baggins@hobbiton.example\"}"; }
+        }
+
+        public static string RSAHeaderEncoded
+        {
+            get { return "eyJhbGciOiJSUzI1NiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9"; }
+        }
+
+        public static JwtHeader RSAJwtHeader
+        {
+            get
+            {
+                var header = new JwtHeader();
+                header.Clear();
+                header["alg"] = "RS256";
+                header["kid"] = "bilbo.baggins@hobbiton.example";
+                return header;
+            }
+        }
+
+        public static JsonWebKey RSAPrivateKey
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    D = "bWUC9B-EFRIo8kpGfh0ZuyGPvMNKvYWNtB_ikiH9k20eT-O1q_I78eiZkpXxXQ0UTEs2LsNRS-8uJbvQ-A1irkwMSMkK1J3XTGgdrhCku9gRldY7sNA_AKZGh-Q661_42rINLRCe8W-nZ34ui_qOfkLnK9QWDDqpaIsA-bMwWWSDFu2MUBYwkHTMEzLYGqOe04noqeq1hExBTHBOBdkMXiuFhUq1BU6l-DqEiWxqg82sXt2h-LMnT3046AOYJoRioz75tSUQfGCshWTBnP5uDjd18kKhyv07lhfSJdrPdM5Plyl21hsFf4L_mHCuoFau7gdsPfHPxxjVOcOpBrQzwQ",
+                    DP = "B8PVvXkvJrj2L-GYQ7v3y9r6Kw5g9SahXBwsWUzp19TVlgI-YV85q1NIb1rxQtD-IsXXR3-TanevuRPRt5OBOdiMGQp8pbt26gljYfKU_E9xn-RULHz0-ed9E9gXLKD4VGngpz-PfQ_q29pk5xWHoJp009Qf1HvChixRX59ehik",
+                    DQ = "CLDmDGduhylc9o7r84rEUVn7pzQ6PF83Y-iBZx5NT-TpnOZKF1pErAMVeKzFEl41DlHHqqBLSM0W1sOFbwTxYWZDm6sI6og5iTbwQGIC3gnJKbi_7k_vJgGHwHxgPaX2PnvP-zyEkDERuf-ry4c_Z11Cq9AqC2yeL6kdKT1cYF8",
+                    E = "AQAB",
+                    KeyId = "bilbo.baggins@hobbiton.example",
+                    Kty = "RSA",
+                    N = "n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dApr5ydQLrHqkHHig3RBordaZ6Aj-oBHqFEHYpPe7Tpe-OfVfHd1E6cS6M1FZcD1NNLYD5lFHpPI9bTwJlsde3uhGqC0ZCuEHg8lhzwOHrtIQbS0FVbb9k3-tVTU4fg_3L_vniUFAKwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw",
+                    P = "3Slxg_DwTXJcb6095RoXygQCAZ5RnAvZlno1yhHtnUex_fp7AZ_9nRaO7HX_-SFfGQeutao2TDjDAWU4Vupk8rw9JR0AzZ0N2fvuIAmr_WCsmGpeNqQnev1T7IyEsnh8UMt-n5CafhkikzhEsrmndH6LxOrvRJlsPp6Zv8bUq0k",
+                    Q = "uKE2dh-cTf6ERF4k4e_jy78GfPYUIaUyoSSJuBzp3Cubk3OCqs6grT8bR_cu0Dm1MZwWmtdqDyI95HrUeq3MP15vMMON8lHTeZu2lmKvwqW7anV5UzhM1iZ7z4yMkuUwFWoBvyY898EXvRD-hdqRxHlSqAZ192zB3pVFJ0s7pFc",
+                    QI = "3PiqvXQN0zwMeE-sBvZgi289XP9XCQF3VWqPzMKnIgQp7_Tugo6-NZBKCQsMf3HaEGBjTVJs_jcK8-TRXvaKe-7ZMaQj8VfBdYkssbu0NKDDhjJ-GtiseaDVWt7dcH0cfwxgFUHpQh7FoCrjFJ6h6ZEpMF6xmujs4qMpPz8aaI4",
+                    Use = "sig"
+                };
+            }
+        }
+
+        public static JsonWebKey RSAPublicKey
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    KeyId = "bilbo.baggins@hobbiton.example",
+                    Kty = "RSA",
+                    E = "AQAB",
+                    N = "n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dApr5ydQLrHqkHHig3RBordaZ6Aj-oBHqFEHYpPe7Tpe-OfVfHd1E6cS6M1FZcD1NNLYD5lFHpPI9bTwJlsde3uhGqC0ZCuEHg8lhzwOHrtIQbS0FVbb9k3-tVTU4fg_3L_vniUFAKwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw",
+                    Use = "sig"
+                };
+            }
+        }
+
+        public static string RSASignatureEncoded
+        {
+            get { return "MRjdkly7_-oTPTS3AXP41iQIGKa80A0ZmTuV5MEaHoxnW2e5CZ5NlKtainoFmKZopdHM1O2U4mwzJdQx996ivp83xuglII7PNDi84wnB-BDkoBwA78185hX-Es4JIwmDLJK3lfWRa-XtL0RnltuYv746iYTh_qHRD68BNt1uSNCrUCTJDt5aAE6x8wW1Kt9eRo4QPocSadnHXFxnt8Is9UzpERV0ePPQdLuW3IS_de3xyIrDaLGdjluPxUAhb6L2aXic1U12podGU0KLUQSE_oI-ZnmKJ3F4uOZDnd6QZWJushZ41Axf_fcIe8u9ipH84ogoree7vjbU5y18kDquDg"; }
+        }
+
+        public static string SymmetricHeader
+        {
+            get { return "{\"alg\":\"HS256\",\"kid\":\"018c0ae5-4d9b-471b-bfd6-eef314bc7037\"}"; }
+        }
+
+        public static string SymmetricHeaderEncoded
+        {
+            get { return "eyJhbGciOiJIUzI1NiIsImtpZCI6IjAxOGMwYWU1LTRkOWItNDcxYi1iZmQ2LWVlZjMxNGJjNzAzNyJ9"; }
+        }
+
+        public static JwtHeader SymmetricJwtHeader
+        {
+            get
+            {
+                var header = new JwtHeader();
+                header.Clear();
+                header["alg"] = "HS256";
+                header["kid"] = "018c0ae5-4d9b-471b-bfd6-eef314bc7037";
+                return header;
+            }
+        }
+
+        public static JsonWebKey SymmetricKeyEnc
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Alg = "A256GCM",
+                    K = "AAPapAv4LbFbiVawEjagUBluYqN5rhna-8nuldDvOx8",
+                    KeyId = "1e571774-2e08-40da-8308-e8d68773842d",
+                    Kty = "oct",
+                    Use = "sig"
+                };
+            }
+        }
+        public static JsonWebKey SymmetricKeyMac
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Alg = "HS256",
+                    K = "hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg",
+                    KeyId = "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
+                    Kty = "oct",
+                    Use = "sig"
+                };
+            }
+        }
+
+        public static string SymmetricSignatureEncoded
+        {
+            get { return "s0h6KThzkfBBBkLspW1h84VsJZFTsPPqMDA7g1Md7p0"; }
+        }
+    }
+
     public static class EncodedJwts
     {
         public static string Asymmetric_LocalSts =  @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1ZCI6Imh0dHA6Ly9Db250b3NvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2NvdW50cnkiOiJVU0EiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyQGNvbnRvc28uY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZ2l2ZW5uYW1lIjoiVG9ueSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2hvbWVwaG9uZSI6IjU1NS4xMjEyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMiLCJzdWIiOiJib2IifQ.QW0Wfw-R5n3BHXE0vG-0giRFeB6W9oFrWJyFTaLI0qICDYx3yZ2eLXJ3zNFLVf3OG-MqytN5tqUdNfK1mRzeubqvdODHLFX36e1o3X8DR_YumyyQvgSeTJ0wwqT8PowbE3nbKfiX4TtJ4jffBelGKnL6vdx3AU2cwvLfSVp8ppA";
