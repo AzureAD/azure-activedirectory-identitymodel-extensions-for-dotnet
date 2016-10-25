@@ -105,6 +105,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenEncryptionFailedException">AES crypto operation threw. See inner exception for details.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
         {
+            return Encrypt(plaintext, authenticatedData, null);
+        }
+
+        /// <summary>
+        /// Encrypts the 'plaintext'
+        /// </summary>
+        /// <param name="plaintext">the data to be encrypted.</param>
+        /// <param name="authenticatedData">will be combined with iv and ciphertext to create an authenticationtag.</param>
+        /// <param name="iv">initialization vector for encryption.</param>
+        /// <returns><see cref="AuthenticatedEncryptionResult"/>containing ciphertext, iv, authenticationtag.</returns>
+        /// <exception cref="ArgumentNullException">plaintext is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">authenticationData is null or empty.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">AES crypto operation threw. See inner exception for details.</exception>
+        public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
+        {
             if (plaintext == null || plaintext.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(plaintext));
 
@@ -115,6 +130,9 @@ namespace Microsoft.IdentityModel.Tokens
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
             aes.Key = _authenticatedkeys.AesKey.Key;
+            if (iv != null)
+                aes.IV = iv;
+
             AuthenticatedEncryptionResult result = new AuthenticatedEncryptionResult();
             try
             {
