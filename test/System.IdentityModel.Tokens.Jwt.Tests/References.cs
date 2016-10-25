@@ -33,178 +33,275 @@ using Newtonsoft.Json;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
+    /// <summary>
+    /// references from https://tools.ietf.org/html/rfc7520
+    /// </summary>
     public static class RFC7520References
     {
         #region Keys
-        // references from https://tools.ietf.org/html/rfc7520
-        public static JsonWebKey ECDsaPrivateKey
+
+        // 3.1. EC Public Key
+        // https://tools.ietf.org/html/rfc7520#section-3.1
+        public static string ECDsaPublicKeyJson
         {
             get
             {
-                return new JsonWebKey
-                {
-                    Crv = "P-521",
-                    D = "AAhRON2r9cqXX1hg-RoI6R1tX5p2rUAYdmpHZoC1XNM56KtscrX6zbKipQrCW9CGZH3T4ubpnoTKLDYJ_fF3_rJt",
-                    KeyId = "bilbo.baggins@hobbiton.example",
-                    Kty = "EC",
-                    X = "AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt",
-                    Y = "AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"
-                };
+                return @"{
+                    ""kty"": ""EC"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""crv"": ""P-521"",
+                    ""x"": ""AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt"",
+                    ""y"": ""AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1""}";
             }
         }
 
+        // 3.1. EC Public Key
+        // https://tools.ietf.org/html/rfc7520#section-3.1
         public static JsonWebKey ECDsaPublicKey
         {
             get
             {
+                return new JsonWebKey(ECDsaPublicKeyJson);
+            }
+        }
+
+        // 3.2. EC Private Key Json
+        // https://tools.ietf.org/html/rfc7520#section-3.2
+        public static string ECDsaPrivateKeyJson
+        {
+            get
+            {
+                return @"{
+                    ""kty"": ""EC"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""crv"": ""P-521"",
+                    ""x"": ""AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt"",
+                    ""y"": ""AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"",
+                    ""d"": ""AAhRON2r9cqXX1hg-RoI6R1tX5p2rUAYdmpHZoC1XNM56KtscrX6zbKipQrCW9CGZH3T4ubpnoTKLDYJ_fF3_rJt""}";
+            }
+        }
+
+        // 3.2. EC Private Key
+        // https://tools.ietf.org/html/rfc7520#section-3.2
+        public static JsonWebKey ECDsaPrivateKey
+        {
+            get
+            {
+                return new JsonWebKey(ECDsaPrivateKeyJson);
+            }
+        }
+
+        // 3.3.  RSA Public Key Json
+        // https://tools.ietf.org/html/rfc7520#section-3.3
+        public static string RSASigningPublicKeyJson
+        {
+            get
+            {
+                return @"{
+                    ""kty"": ""RSA"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""n"": ""n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dApr5ydQLrHqkHHig3RBordaZ6Aj-oBHqFEHYpPe7Tpe-OfVfHd1E6cS6M1FZcD1NNLYD5lFHpPI9bTwJlsde3uhGqC0ZCuEHg8lhzwOHrtIQbS0FVbb9k3-tVTU4fg_3L_vniUFAKwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw"",
+                    ""e"": ""AQAB"" }";
+            }
+        }
+
+        // 3.3.  RSA Public Key
+        // https://tools.ietf.org/html/rfc7520#section-3.3
+        public static JsonWebKey RSASigningPublicKey
+        {
+            get
+            {
+                return new JsonWebKey(RSASigningPublicKeyJson);
+            }
+        }
+
+        // 3.4.  RSA Private Key Json
+        // https://tools.ietf.org/html/rfc7520#section-3.4
+        public static string RSASigningPrivateKeyJson
+        {
+            get
+            {
+                return @"{
+                    ""kty"": ""RSA"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""n"": ""n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dApr5ydQLrHqkHHig3RBordaZ6Aj-oBHqFEHYpPe7Tpe-OfVfHd1E6cS6M1FZcD1NNLYD5lFHpPI9bTwJlsde3uhGqC0ZCuEHg8lhzwOHrtIQbS0FVbb9k3-tVTU4fg_3L_vniUFAKwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw"",
+                    ""e"": ""AQAB"",
+                    ""d"": ""bWUC9B-EFRIo8kpGfh0ZuyGPvMNKvYWNtB_ikiH9k20eT-O1q_I78eiZkpXxXQ0UTEs2LsNRS-8uJbvQ-A1irkwMSMkK1J3XTGgdrhCku9gRldY7sNA_AKZGh-Q661_42rINLRCe8W-nZ34ui_qOfkLnK9QWDDqpaIsA-bMwWWSDFu2MUBYwkHTMEzLYGqOe04noqeq1hExBTHBOBdkMXiuFhUq1BU6l-DqEiWxqg82sXt2h-LMnT3046AOYJoRioz75tSUQfGCshWTBnP5uDjd18kKhyv07lhfSJdrPdM5Plyl21hsFf4L_mHCuoFau7gdsPfHPxxjVOcOpBrQzwQ"",
+                    ""p"": ""3Slxg_DwTXJcb6095RoXygQCAZ5RnAvZlno1yhHtnUex_fp7AZ_9nRaO7HX_-SFfGQeutao2TDjDAWU4Vupk8rw9JR0AzZ0N2fvuIAmr_WCsmGpeNqQnev1T7IyEsnh8UMt-n5CafhkikzhEsrmndH6LxOrvRJlsPp6Zv8bUq0k"",
+                    ""q"": ""uKE2dh-cTf6ERF4k4e_jy78GfPYUIaUyoSSJuBzp3Cubk3OCqs6grT8bR_cu0Dm1MZwWmtdqDyI95HrUeq3MP15vMMON8lHTeZu2lmKvwqW7anV5UzhM1iZ7z4yMkuUwFWoBvyY898EXvRD-hdqRxHlSqAZ192zB3pVFJ0s7pFc"",
+                    ""dp"": ""B8PVvXkvJrj2L-GYQ7v3y9r6Kw5g9SahXBwsWUzp19TVlgI-YV85q1NIb1rxQtD-IsXXR3-TanevuRPRt5OBOdiMGQp8pbt26gljYfKU_E9xn-RULHz0-ed9E9gXLKD4VGngpz-PfQ_q29pk5xWHoJp009Qf1HvChixRX59ehik"",
+                    ""dq"": ""CLDmDGduhylc9o7r84rEUVn7pzQ6PF83Y-iBZx5NT-TpnOZKF1pErAMVeKzFEl41DlHHqqBLSM0W1sOFbwTxYWZDm6sI6og5iTbwQGIC3gnJKbi_7k_vJgGHwHxgPaX2PnvP-zyEkDERuf-ry4c_Z11Cq9AqC2yeL6kdKT1cYF8"",
+                    ""qi"": ""3PiqvXQN0zwMeE-sBvZgi289XP9XCQF3VWqPzMKnIgQp7_Tugo6-NZBKCQsMf3HaEGBjTVJs_jcK8-TRXvaKe-7ZMaQj8VfBdYkssbu0NKDDhjJ-GtiseaDVWt7dcH0cfwxgFUHpQh7FoCrjFJ6h6ZEpMF6xmujs4qMpPz8aaI4"" }";
+            }
+        }
+
+        // 3.4.  RSA Private Key
+        // https://tools.ietf.org/html/rfc7520#section-3.4
+        public static JsonWebKey RSASigningPrivateKey
+        {
+            get
+            {
+                return new JsonWebKey(RSASigningPrivateKeyJson);
+            }
+        }
+
+        // 3.5.  Symmetric Key(MAC Computation)
+        // https://tools.ietf.org/html/rfc7520#section-3.5
+        public static string SymmetricKeyMacJson
+        {
+            get
+            {
+                return @"{
+                    ""kty"": ""oct"",
+                    ""kid"": ""018c0ae5-4d9b-471b-bfd6-eef314bc7037"",
+                    ""use"": ""sig"",
+                    ""alg"": ""HS256"",
+                    ""k"": ""hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg""}";
+            }
+        }
+
+        // 3.5.  Symmetric Key(MAC Computation)
+        // https://tools.ietf.org/html/rfc7520#section-3.5
+        public static JsonWebKey SymmetricKeyMac
+        {
+            get
+            {
                 return new JsonWebKey
                 {
-                    Crv = "P-521",
-                    KeyId = "bilbo.baggins@hobbiton.example",
-                    Kty = "EC",
-                    Use = "sig",
-                    X = "AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt",
-                    Y = "AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"
+                    Alg = "HS256",
+                    K = "hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg",
+                    KeyId = "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
+                    Kty = "oct",
+                    Use = "sig"
                 };
             }
         }
 
-        public static string ES512Encoded
-        {
-            get { return "eyJhbGciOiJFUzUxMiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9"; }
-        }
-
-        public static string ES512Header
-        {
-            get { return "{\"alg\":\"ES512\",\"kid\":\"bilbo.baggins@hobbiton.example\"}"; }
-        }
-
-        public static string ES512SignatureEncoded
-        {
-            get { return "AE_R_YZCChjn4791jSQCrdPZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDDyYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2"; }
-        }
-
-        public static JwtHeader ES512JwtHeader
+        // 3.6.  Symmetric Key(Encryption)
+        // https://tools.ietf.org/html/rfc7520#section-3.6
+        public static string SymmetricKeyEncJson
         {
             get
             {
-                var header = new JwtHeader();
-                header.Clear();
-                header["alg"] = "ES512";
-                header["kid"] = "bilbo.baggins@hobbiton.example";
-                return header;
+                return @"{
+                    ""kty"": ""oct"",
+                    ""kid"": ""1e571774-2e08-40da-8308-e8d68773842d"",
+                    ""use"": ""enc"",
+                    ""alg"": ""A256GCM"",
+                    ""k"": ""AAPapAv4LbFbiVawEjagUBluYqN5rhna-8nuldDvOx8"" }";
+            }
+        }
+
+        // 3.6.  Symmetric Key(Encryption)
+        // https://tools.ietf.org/html/rfc7520#section-3.6
+        public static JsonWebKey SymmetricKeyEnc
+        {
+            get
+            {
+                return new JsonWebKey(SymmetricKeyEncJson);
+            }
+        }
+
+        // 5.1.1  Key Encryption Using RSA v1.5 and AES-HMAC-SHA2
+        // https://tools.ietf.org/html/rfc7520#section-5.1.1
+        public static string RSA_1_5_PrivateKeyJson
+        {
+            get
+            {
+                return @"{
+                    ""kty"":""RSA"",
+                    ""kid"":""frodo.baggins@hobbiton.example"",
+                    ""use"":""enc"",
+                    ""n"":""maxhbsmBtdQ3CNrKvprUE6n9lYcregDMLYNeTAWcLj8NnPU9XIYegTHVHQjxKDSHP2l-F5jS7sppG1wgdAqZyhnWvXhYNvcM7RfgKxqNx_xAHx6f3yy7s-M9PSNCwPC2lh6UAkR4I00EhV9lrypM9Pi4lBUop9t5fS9W5UNwaAllhrd-osQGPjIeI1deHTwx-ZTHu3C60Pu_LJIl6hKn9wbwaUmA4cR5Bd2pgbaY7ASgsjCUbtYJaNIHSoHXprUdJZKUMAzV0WOKPfA6OPI4oypBadjvMZ4ZAj3BnXaSYsEZhaueTXvZB4eZOAjIyh2e_VOIKVMsnDrJYAVotGlvMQ"",
+                    ""e"":""AQAB"",
+                    ""d"":""Kn9tgoHfiTVi8uPu5b9TnwyHwG5dK6RE0uFdlpCGnJN7ZEi963R7wybQ1PLAHmpIbNTztfrheoAniRV1NCIqXaW_qS461xiDTp4ntEPnqcKsyO5jMAji7-CL8vhpYYowNFvIesgMoVaPRYMYT9TW63hNM0aWs7USZ_hLg6Oe1mY0vHTI3FucjSM86Nff4oIENt43r2fspgEPGRrdE6fpLc9Oaq-qeP1GFULimrRdndm-P8q8kvN3KHlNAtEgrQAgTTgz80S-3VD0FgWfgnb1PNmiuPUxO8OpI9KDIfu_acc6fg14nsNaJqXe6RESvhGPH2afjHqSy_Fd2vpzj85bQQ"",
+                    ""p"":""2DwQmZ43FoTnQ8IkUj3BmKRf5Eh2mizZA5xEJ2MinUE3sdTYKSLtaEoekX9vbBZuWxHdVhM6UnKCJ_2iNk8Z0ayLYHL0_G21aXf9-unynEpUsH7HHTklLpYAzOOx1ZgVljoxAdWNn3hiEFrjZLZGS7lOH-a3QQlDDQoJOJ2VFmU"",
+                    ""q"":""te8LY4-W7IyaqH1ExujjMqkTAlTeRbv0VLQnfLY2xINnrWdwiQ93_VF099aP1ESeLja2nw-6iKIe-qT7mtCPozKfVtUYfz5HrJ_XY2kfexJINb9lhZHMv5p1skZpeIS-GPHCC6gRlKo1q-idn_qxyusfWv7WAxlSVfQfk8d6Et0"",
+                    ""dp"":""UfYKcL_or492vVc0PzwLSplbg4L3-Z5wL48mwiswbpzOyIgd2xHTHQmjJpFAIZ8q-zf9RmgJXkDrFs9rkdxPtAsL1WYdeCT5c125Fkdg317JVRDo1inX7x2Kdh8ERCreW8_4zXItuTl_KiXZNU5lvMQjWbIw2eTx1lpsflo0rYU"",
+                    ""dq"":""iEgcO-QfpepdH8FWd7mUFyrXdnOkXJBCogChY6YKuIHGc_p8Le9MbpFKESzEaLlN1Ehf3B6oGBl5Iz_ayUlZj2IoQZ82znoUrpa9fVYNot87ACfzIG7q9Mv7RiPAderZi03tkVXAdaBau_9vs5rS-7HMtxkVrxSUvJY14TkXlHE"",
+                    ""qi"":""kC-lzZOqoFaZCr5l0tOVtREKoVqaAYhQiqIRGL-MzS4sCmRkxm5vZlXYx6RtE1n_AagjqajlkjieGlxTTThHD8Iga6foGBMaAr5uR1hGQpSc7Gl7CF1DZkBJMTQN6EshYzZfxW08mIO8M6Rzuh0beL6fG9mkDcIyPrBXx2bQ_mM""}";
+            }
+        }
+
+        // 5.1.1  Key Encryption Using RSA v1.5 and AES-HMAC-SHA2
+        // https://tools.ietf.org/html/rfc7520#section-5.1.1
+        public static JsonWebKey RSA_1_5_PrivateKey
+        {
+            get
+            {
+                return new JsonWebKey(RSA_1_5_PrivateKeyJson);
+            }
+        }
+
+        // 5.2.1.  Key Encryption Using RSA v1.5 and A256GCM
+        // https://tools.ietf.org/html/rfc7520#section-5.2.1
+        public static string RSA_OEAP_PrivateKeyJson
+        {
+            get
+            {
+                return @"{
+                    ""kty"": ""RSA"",
+                    ""kid"": ""samwise.gamgee@hobbiton.example"",
+                    ""use"": ""enc"",
+                    ""n"": ""wbdxI55VaanZXPY29Lg5hdmv2XhvqAhoxUkanfzf2-5zVUxa6prHRrI4pP1AhoqJRlZfYtWWd5mmHRG2pAHIlh0ySJ9wi0BioZBl1XP2e-C-FyXJGcTy0HdKQWlrfhTm42EW7Vv04r4gfao6uxjLGwfpGrZLarohiWCPnkNrg71S2CuNZSQBIPGjXfkmIy2tl_VWgGnL22GplyXj5YlBLdxXp3XeStsqo571utNfoUTU8E4qdzJ3U1DItoVkPGsMwlmmnJiwA7sXRItBCivR4M5qnZtdw-7v4WuR4779ubDuJ5nalMv2S66-RPcnFAzWSKxtBDnFJJDGIUe7Tzizjg1nms0Xq_yPub_UOlWn0ec85FCft1hACpWG8schrOBeNqHBODFskYpUc2LC5JA2TaPF2dA67dg1TTsC_FupfQ2kNGcE1LgprxKHcVWYQb86B-HozjHZcqtauBzFNV5tbTuB-TpkcvJfNcFLlH3b8mb-H_ox35FjqBSAjLKyoeqfKTpVjvXhd09knwgJf6VKq6UC418_TOljMVfFTWXUxlnfhOOnzW6HSSzD1c9WrCuVzsUMv54szidQ9wf1cYWf3g5qFDxDQKis99gcDaiCAwM3yEBIzuNeeCa5dartHDb1xEB_HcHSeYbghbMjGfasvKn0aZRsnTyC0xhWBlsolZE"",
+                    ""e"": ""AQAB"",
+                    ""alg"": ""RSA-OAEP"",
+                    ""d"": ""n7fzJc3_WG59VEOBTkayzuSMM780OJQuZjN_KbH8lOZG25ZoA7T4Bxcc0xQn5oZE5uSCIwg91oCt0JvxPcpmqzaJZg1nirjcWZ-oBtVk7gCAWq-B3qhfF3izlbkosrzjHajIcY33HBhsy4_WerrXg4MDNE4HYojy68TcxT2LYQRxUOCf5TtJXvM8olexlSGtVnQnDRutxEUCwiewfmmrfveEogLx9EA-KMgAjTiISXxqIXQhWUQX1G7v_mV_Hr2YuImYcNcHkRvp9E7ook0876DhkO8v4UOZLwA1OlUX98mkoqwc58A_Y2lBYbVx1_s5lpPsEqbbH-nqIjh1fL0gdNfihLxnclWtW7pCztLnImZAyeCWAG7ZIfv-Rn9fLIv9jZ6r7r-MSH9sqbuziHN2grGjD_jfRluMHa0l84fFKl6bcqN1JWxPVhzNZo01yDF-1LiQnqUYSepPf6X3a2SOdkqBRiquE6EvLuSYIDpJq3jDIsgoL8Mo1LoomgiJxUwL_GWEOGu28gplyzm-9Q0U0nyhEf1uhSR8aJAQWAiFImWH5W_IQT9I7-yrindr_2fWQ_i1UgMsGzA7aOGzZfPljRy6z-tY_KuBG00-28S_aWvjyUc-Alp8AUyKjBZ-7CWH32fGWK48j1t-zomrwjL_mnhsPbGs0c9WsWgRzI-K8gE"",
+                    ""p"": ""7_2v3OQZzlPFcHyYfLABQ3XP85Es4hCdwCkbDeltaUXgVy9l9etKghvM4hRkOvbb01kYVuLFmxIkCDtpi-RFNhO1AoiJhYZj69hjmMRXx-x56HO9cnXNbmzNSCFCKnQmn4GQLmRj9sfbZRqL94bbtE4_e0Zrpo8RNo8vxRLqQNwIy85fc6BRgBJomt8QdQvIgPgWCv5HoQ"",
+                    ""q"": ""zqOHk1P6WN_rHuM7ZF1cXH0x6RuOHq67WuHiSknqQeefGBA9PWs6ZyKQCO-O6mKXtcgE8_Q_hA2kMRcKOcvHil1hqMCNSXlflM7WPRPZu2qCDcqssd_uMbP-DqYthH_EzwL9KnYoH7JQFxxmcv5An8oXUtTwk4knKjkIYGRuUwfQTus0w1NfjFAyxOOiAQ37ussIcE6C6ZSsM3n41UlbJ7TCqewzVJaPJN5cxjySPZPD3Vp01a9YgAD6a3IIaKJdIxJS1ImnfPevSJQBE79-EXe2kSwVgOzvt-gsmM29QQ8veHy4uAqca5dZzMs7hkkHtw1z0jHV90epQJJlXXnH8Q"",
+                    ""dp"": ""19oDkBh1AXelMIxQFm2zZTqUhAzCIr4xNIGEPNoDt1jK83_FJA-xnx5kA7-1erdHdms_Ef67HsONNv5A60JaR7w8LHnDiBGnjdaUmmuO8XAxQJ_ia5mxjxNjS6E2yD44USo2JmHvzeeNczq25elqbTPLhUpGo1IZuG72FZQ5gTjXoTXC2-xtCDEUZfaUNh4IeAipfLugbpe0JAFlFfrTDAMUFpC3iXjxqzbEanflwPvj6V9iDSgjj8SozSM0dLtxvu0LIeIQAeEgT_yXcrKGmpKdSO08kLBx8VUjkbv_3Pn20Gyu2YEuwpFlM_H1NikuxJNKFGmnAq9LcnwwT0jvoQ"",
+                    ""dq"": ""S6p59KrlmzGzaQYQM3o0XfHCGvfqHLYjCO557HYQf72O9kLMCfd_1VBEqeD-1jjwELKDjck8kOBl5UvohK1oDfSP1DleAy-cnmL29DqWmhgwM1ip0CCNmkmsmDSlqkUXDi6sAaZuntyukyflI-qSQ3C_BafPyFaKrt1fgdyEwYa08pESKwwWisy7KnmoUvaJ3SaHmohFS78TJ25cfc10wZ9hQNOrIChZlkiOdFCtxDqdmCqNacnhgE3bZQjGp3n83ODSz9zwJcSUvODlXBPc2AycH6Ci5yjbxt4Ppox_5pjm6xnQkiPgj01GpsUssMmBN7iHVsrE7N2iznBNCeOUIQ"",
+                    ""qi"": ""FZhClBMywVVjnuUud-05qd5CYU0dK79akAgy9oX6RX6I3IIIPckCciRrokxglZn-omAY5CnCe4KdrnjFOT5YUZE7G_Pg44XgCXaarLQf4hl80oPEf6-jJ5Iy6wPRx7G2e8qLxnh9cOdf-kRqgOS3F48Ucvw3ma5V6KGMwQqWFeV31XtZ8l5cVI-I3NzBS7qltpUVgz2Ju021eyc7IlqgzR98qKONl27DuEES0aK0WE97jnsyO27Yp88Wa2RiBrEocM89QZI1seJiGDizHRUP4UZxw9zsXww46wy0P6f9grnYp7t8LkyDDk8eoI4KX6SNMNVcyVS9IWjlq8EzqZEKIA""}";
+            }
+        }
+
+        // 5.2.1.  Key Encryption Using RSA v1.5 and A256GCM
+        // https://tools.ietf.org/html/rfc7520#section-5.2.1
+        public static JsonWebKey RSA_OEAP_PrivateKey
+        {
+            get
+            {
+                return new JsonWebKey(RSA_OEAP_PrivateKeyJson);
             }
         }
 
         #endregion Keys
 
+        // 4.  JSON Web Signature Examples
+        // https://tools.ietf.org/html/rfc7520#section-4
         public static string Payload
         {
             get { return "It\u2019s a dangerous business, Frodo, going out your door. You step onto the road, and if you don't keep your feet, there\u2019s no knowing where you might be swept off to."; }
         }
 
+        // 4.  JSON Web Signature Examples
+        // https://tools.ietf.org/html/rfc7520#section-4
         public static string PayloadEncoded
         {
             get { return "SXTigJlzIGEgZGFuZ2Vyb3VzIGJ1c2luZXNzLCBGcm9kbywgZ29pbmcgb3V0IHlvdXIgZG9vci4gWW91IHN0ZXAgb250byB0aGUgcm9hZCwgYW5kIGlmIHlvdSBkb24ndCBrZWVwIHlvdXIgZmVldCwgdGhlcmXigJlzIG5vIGtub3dpbmcgd2hlcmUgeW91IG1pZ2h0IGJlIHN3ZXB0IG9mZiB0by4"; }
         }
 
-        // 5.1.  Key Encryption Using RSA v1.5 and AES-HMAC-SHA2
-        // "alg" parameter of "RSA1_5".
-        // "enc" parameter of "A128CBC-HS256".
+        #region 4.1.2
 
-        public static string RSA_1_5_IV
+        // 4.1.2.  Signing Operation
+        // https://tools.ietf.org/html/rfc7520#section-4.1.2
+        public static string RSAHeaderJson
         {
-            get { return "bbd5sTkYwhAIqfHsx8DayA"; }
-        }
-
-        public static string RSA_1_5_CEK
-        {
-            get { return "3qyTVhIWt5juqZUCpfRqpvauwB956MEJL2Rt-8qXKSo"; }
-        }
-
-        public static string RSA_1_5_CEKEncrypted
-        {
-            get { return "laLxI0j-nLH-_BgLOXMozKxmy9gffy2gTdvqzfTihJBuuzxg0V7yk1WClnQePFvG2K-pvSlWc9BRIazDrn50RcRai__3TDON395H3c62tIouJJ4XaRvYHFjZTZ2GXfz8YAImcc91Tfk0WXC2F5Xbb71ClQ1DDH151tlpH77f2ff7xiSxh9oSewYrcGTSLUeeCt36r1Kt3OSj7EyBQXoZlN7IxbyhMAfgIe7Mv1rOTOI5I8NQqeXXW8VlzNmoxaGMny3YnGir5Wf6Qt2nBq4qDaPdnaAuuGUGEecelIO1wx1BpyIfgvfjOhMBs9M8XL223Fg47xlGsMXdfuY-4jaqVw"; }
-        }
-
-        public static string RSA_1_5_ProtectedHeader
-        {
-            get
-            {
-                return "{\"alg\":\"RSA1_5\",\"kid\":\"frodo.baggins@hobbiton.example\",\"enc\":\"A128CBC-HS256\"}";
-            }
-        }
-
-        public static string RSA_1_5_ProtectedHeaderEncoded
-        {
-            get
-            {
-                return "eyJhbGciOiJSU0ExXzUiLCJraWQiOiJmcm9kby5iYWdnaW5zQGhvYmJpdG9uLmV4YW1wbGUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0";
-            }
-        }
-
-        public static string RSA_1_5_AuthenticationTag
-        {
-            get
-            {
-                return "kvKuFBXHe5mQr4lqgobAUg";
-            }
-        }
-
-        public static string RSA_1_5_JWE
-        {
-            get
-            {
-                return "eyJhbGciOiJSU0ExXzUiLCJraWQiOiJmcm9kby5iYWdnaW5zQGhvYmJpdG9uLmV4YW1wbGUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
-                     + "laLxI0j-nLH-_BgLOXMozKxmy9gffy2gTdvqzfTihJBuuzxg0V7yk1WClnQePFvG2K-pvSlWc9BRIazDrn50RcRai__3TDON395H3c62tIouJJ4XaRvYHFjZTZ2GXfz8YAImcc91Tfk0WXC2F5Xbb71ClQ1DDH151tlpH77f2ff7xiSxh9oSewYrcGTSLUeeCt36r1Kt3OSj7EyBQXoZlN7IxbyhMAfgIe7Mv1rOTOI5I8NQqeXXW8VlzNmoxaGMny3YnGir5Wf6Qt2nBq4qDaPdnaAuuGUGEecelIO1wx1BpyIfgvfjOhMBs9M8XL223Fg47xlGsMXdfuY-4jaqVw."
-                     + "bbd5sTkYwhAIqfHsx8DayA."
-                     + "0fys_TY_na7f8dwSfXLiYdHaA2DxUjD67ieF7fcVbIR62JhJvGZ4_FNVSiGc_raa0HnLQ6s1P2sv3Xzl1p1l_o5wR_RsSzrS8Z-wnI3Jvo0mkpEEnlDmZvDu_k8OWzJv7eZVEqiWKdyVzFhPpiyQU28GLOpRc2VbVbK4dQKPdNTjPPEmRqcaGeTWZVyeSUvf5k59yJZxRuSvWFf6KrNtmRdZ8R4mDOjHSrM_s8uwIFcqt4r5GX8TKaI0zT5CbL5Qlw3sRc7u_hg0yKVOiRytEAEs3vZkcfLkP6nbXdC_PkMdNS-ohP78T2O6_7uInMGhFeX4ctHG7VelHGiT93JfWDEQi5_V9UN1rhXNrYu-0fVMkZAKX3VWi7lzA6BP430m."
-                     + "kvKuFBXHe5mQr4lqgobAUg";
-            }
-        }
-
-        public static string RSA_1_5_CipherText
-        {
-            get
-            {
-                return "0fys_TY_na7f8dwSfXLiYdHaA2DxUjD67ieF7fcVbIR62JhJvGZ4_FNVSiGc_raa0HnLQ6s1P2sv3Xzl1p1l_o5wR_RsSzrS8Z-wnI3Jvo0mkpEEnlDmZvDu_k8OWzJv7eZVEqiWKdyVzFhPpiyQU28GLOpRc2VbVbK4dQKPdNTjPPEmRqcaGeTWZVyeSUvf5k59yJZxRuSvWFf6KrNtmRdZ8R4mDOjHSrM_s8uwIFcqt4r5GX8TKaI0zT5CbL5Qlw3sRc7u_hg0yKVOiRytEAEs3vZkcfLkP6nbXdC_PkMdNS-ohP78T2O6_7uInMGhFeX4ctHG7VelHGiT93JfWDEQi5_V9UN1rhXNrYu-0fVMkZAKX3VWi7lzA6BP430m";
-            }
-        }
-
-        public static JsonWebKey RSA_1_5_PrivateKey
-        {
-            get
-            {
-                return new JsonWebKey
-                {
-                    D = "Kn9tgoHfiTVi8uPu5b9TnwyHwG5dK6RE0uFdlpCGnJN7ZEi963R7wybQ1PLAHmpIbNTztfrheoAniRV1NCIqXaW_qS461xiDTp4ntEPnqcKsyO5jMAji7-CL8vhpYYowNFvIesgMoVaPRYMYT9TW63hNM0aWs7USZ_hLg6Oe1mY0vHTI3FucjSM86Nff4oIENt43r2fspgEPGRrdE6fpLc9Oaq-qeP1GFULimrRdndm-P8q8kvN3KHlNAtEgrQAgTTgz80S-3VD0FgWfgnb1PNmiuPUxO8OpI9KDIfu_acc6fg14nsNaJqXe6RESvhGPH2afjHqSy_Fd2vpzj85bQQ",
-                    DP = "UfYKcL_or492vVc0PzwLSplbg4L3-Z5wL48mwiswbpzOyIgd2xHTHQmjJpFAIZ8q-zf9RmgJXkDrFs9rkdxPtAsL1WYdeCT5c125Fkdg317JVRDo1inX7x2Kdh8ERCreW8_4zXItuTl_KiXZNU5lvMQjWbIw2eTx1lpsflo0rYU",
-                    DQ = "iEgcO-QfpepdH8FWd7mUFyrXdnOkXJBCogChY6YKuIHGc_p8Le9MbpFKESzEaLlN1Ehf3B6oGBl5Iz_ayUlZj2IoQZ82znoUrpa9fVYNot87ACfzIG7q9Mv7RiPAderZi03tkVXAdaBau_9vs5rS-7HMtxkVrxSUvJY14TkXlHE",
-                    E = "AQAB",
-                    KeyId = "frodo.baggins@hobbiton.example",
-                    Kty = "RSA",
-                    N = "maxhbsmBtdQ3CNrKvprUE6n9lYcregDMLYNeTAWcLj8NnPU9XIYegTHVHQjxKDSHP2l-F5jS7sppG1wgdAqZyhnWvXhYNvcM7RfgKxqNx_xAHx6f3yy7s-M9PSNCwPC2lh6UAkR4I00EhV9lrypM9Pi4lBUop9t5fS9W5UNwaAllhrd-osQGPjIeI1deHTwx-ZTHu3C60Pu_LJIl6hKn9wbwaUmA4cR5Bd2pgbaY7ASgsjCUbtYJaNIHSoHXprUdJZKUMAzV0WOKPfA6OPI4oypBadjvMZ4ZAj3BnXaSYsEZhaueTXvZB4eZOAjIyh2e_VOIKVMsnDrJYAVotGlvMQ",
-                    P = "2DwQmZ43FoTnQ8IkUj3BmKRf5Eh2mizZA5xEJ2MinUE3sdTYKSLtaEoekX9vbBZuWxHdVhM6UnKCJ_2iNk8Z0ayLYHL0_G21aXf9-unynEpUsH7HHTklLpYAzOOx1ZgVljoxAdWNn3hiEFrjZLZGS7lOH-a3QQlDDQoJOJ2VFmU",
-                    Q = "te8LY4-W7IyaqH1ExujjMqkTAlTeRbv0VLQnfLY2xINnrWdwiQ93_VF099aP1ESeLja2nw-6iKIe-qT7mtCPozKfVtUYfz5HrJ_XY2kfexJINb9lhZHMv5p1skZpeIS-GPHCC6gRlKo1q-idn_qxyusfWv7WAxlSVfQfk8d6Et0",
-                    QI = "kC-lzZOqoFaZCr5l0tOVtREKoVqaAYhQiqIRGL-MzS4sCmRkxm5vZlXYx6RtE1n_AagjqajlkjieGlxTTThHD8Iga6foGBMaAr5uR1hGQpSc7Gl7CF1DZkBJMTQN6EshYzZfxW08mIO8M6Rzuh0beL6fG9mkDcIyPrBXx2bQ_mM",
-                    Use = "enc"
-                };
-            }
-        }
-
-        public static string RSAEncoded
-        {
-            get { return RSAHeaderEncoded + "." + PayloadEncoded; }
-        }
-
-        public static string RSAHeader
-        {
-            get { return "{\"alg\":\"RS256\",\"kid\":\"bilbo.baggins@hobbiton.example\"}"; }
+            get { return @"{""alg"":""RS256"",""kid"":""bilbo.baggins@hobbiton.example""}"; }
         }
 
         public static string RSAHeaderEncoded
         {
             get { return "eyJhbGciOiJSUzI1NiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9"; }
+        }
+
+        public static string RSAEncoded
+        {
+            get { return RSAHeaderEncoded + "." + PayloadEncoded; }
         }
 
         public static JwtHeader RSAJwtHeader
@@ -219,55 +316,59 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static JsonWebKey RSASigningPrivateKey
-        {
-            get
-            {
-                return new JsonWebKey
-                {
-                    D = "bWUC9B-EFRIo8kpGfh0ZuyGPvMNKvYWNtB_ikiH9k20eT-O1q_I78eiZkpXxXQ0UTEs2LsNRS-8uJbvQ-A1irkwMSMkK1J3XTGgdrhCku9gRldY7sNA_AKZGh-Q661_42rINLRCe8W-nZ34ui_qOfkLnK9QWDDqpaIsA-bMwWWSDFu2MUBYwkHTMEzLYGqOe04noqeq1hExBTHBOBdkMXiuFhUq1BU6l-DqEiWxqg82sXt2h-LMnT3046AOYJoRioz75tSUQfGCshWTBnP5uDjd18kKhyv07lhfSJdrPdM5Plyl21hsFf4L_mHCuoFau7gdsPfHPxxjVOcOpBrQzwQ",
-                    DP = "B8PVvXkvJrj2L-GYQ7v3y9r6Kw5g9SahXBwsWUzp19TVlgI-YV85q1NIb1rxQtD-IsXXR3-TanevuRPRt5OBOdiMGQp8pbt26gljYfKU_E9xn-RULHz0-ed9E9gXLKD4VGngpz-PfQ_q29pk5xWHoJp009Qf1HvChixRX59ehik",
-                    DQ = "CLDmDGduhylc9o7r84rEUVn7pzQ6PF83Y-iBZx5NT-TpnOZKF1pErAMVeKzFEl41DlHHqqBLSM0W1sOFbwTxYWZDm6sI6og5iTbwQGIC3gnJKbi_7k_vJgGHwHxgPaX2PnvP-zyEkDERuf-ry4c_Z11Cq9AqC2yeL6kdKT1cYF8",
-                    E = "AQAB",
-                    KeyId = "bilbo.baggins@hobbiton.example",
-                    Kty = "RSA",
-                    N = "n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dApr5ydQLrHqkHHig3RBordaZ6Aj-oBHqFEHYpPe7Tpe-OfVfHd1E6cS6M1FZcD1NNLYD5lFHpPI9bTwJlsde3uhGqC0ZCuEHg8lhzwOHrtIQbS0FVbb9k3-tVTU4fg_3L_vniUFAKwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw",
-                    P = "3Slxg_DwTXJcb6095RoXygQCAZ5RnAvZlno1yhHtnUex_fp7AZ_9nRaO7HX_-SFfGQeutao2TDjDAWU4Vupk8rw9JR0AzZ0N2fvuIAmr_WCsmGpeNqQnev1T7IyEsnh8UMt-n5CafhkikzhEsrmndH6LxOrvRJlsPp6Zv8bUq0k",
-                    Q = "uKE2dh-cTf6ERF4k4e_jy78GfPYUIaUyoSSJuBzp3Cubk3OCqs6grT8bR_cu0Dm1MZwWmtdqDyI95HrUeq3MP15vMMON8lHTeZu2lmKvwqW7anV5UzhM1iZ7z4yMkuUwFWoBvyY898EXvRD-hdqRxHlSqAZ192zB3pVFJ0s7pFc",
-                    QI = "3PiqvXQN0zwMeE-sBvZgi289XP9XCQF3VWqPzMKnIgQp7_Tugo6-NZBKCQsMf3HaEGBjTVJs_jcK8-TRXvaKe-7ZMaQj8VfBdYkssbu0NKDDhjJ-GtiseaDVWt7dcH0cfwxgFUHpQh7FoCrjFJ6h6ZEpMF6xmujs4qMpPz8aaI4",
-                    Use = "sig"
-                };
-            }
-        }
-
-        public static JsonWebKey RSASigningPublicKey
-        {
-            get
-            {
-                return new JsonWebKey
-                {
-                    KeyId = "bilbo.baggins@hobbiton.example",
-                    Kty = "RSA",
-                    E = "AQAB",
-                    N = "n4EPtAOCc9AlkeQHPzHStgAbgs7bTZLwUBZdR8_KuKPEHLd4rHVTeT-O-XV2jRojdNhxJWTDvNd7nqQ0VEiZQHz_AJmSCpMaJMRBSFKrKb2wqVwGU_NsYOYL-QtiWN2lbzcEe6XC0dApr5ydQLrHqkHHig3RBordaZ6Aj-oBHqFEHYpPe7Tpe-OfVfHd1E6cS6M1FZcD1NNLYD5lFHpPI9bTwJlsde3uhGqC0ZCuEHg8lhzwOHrtIQbS0FVbb9k3-tVTU4fg_3L_vniUFAKwuCLqKnS2BYwdq_mzSnbLY7h_qixoR7jig3__kRhuaxwUkRz5iaiQkqgc5gHdrNP5zw",
-                    Use = "sig"
-                };
-            }
-        }
-
         public static string RSASignatureEncoded
         {
             get { return "MRjdkly7_-oTPTS3AXP41iQIGKa80A0ZmTuV5MEaHoxnW2e5CZ5NlKtainoFmKZopdHM1O2U4mwzJdQx996ivp83xuglII7PNDi84wnB-BDkoBwA78185hX-Es4JIwmDLJK3lfWRa-XtL0RnltuYv746iYTh_qHRD68BNt1uSNCrUCTJDt5aAE6x8wW1Kt9eRo4QPocSadnHXFxnt8Is9UzpERV0ePPQdLuW3IS_de3xyIrDaLGdjluPxUAhb6L2aXic1U12podGU0KLUQSE_oI-ZnmKJ3F4uOZDnd6QZWJushZ41Axf_fcIe8u9ipH84ogoree7vjbU5y18kDquDg"; }
         }
 
+        #endregion 4.1.2
+
+        #region 4.3.2
+
+        // 4.3.2.  Signing Operation
+        // https://tools.ietf.org/html/rfc7520#section-4.3.2
+
+        public static string ES512HeaderJson
+        {
+            get { return @"{""alg"":""ES512"",""kid"":""bilbo.baggins@hobbiton.example""}"; }
+        }
+
+        public static string ES512HeaderEncoded
+        {
+            get { return "eyJhbGciOiJFUzUxMiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9"; }
+        }
+
+        public static JwtHeader ES512JwtHeader
+        {
+            get
+            {
+                var header = new JwtHeader();
+                header.Clear();
+                header["alg"] = "ES512";
+                header["kid"] = "bilbo.baggins@hobbiton.example";
+                return header;
+            }
+        }
+
+        public static string ES512SignatureEncoded
+        {
+            get { return "AE_R_YZCChjn4791jSQCrdPZCNYqHXCTZH0-JZGYNlaAjP2kqaluUIIUnC9qvbu9Plon7KRTzoNEuT4Va2cmL1eJAQy3mtPBu_u_sDDyYjnAMDxXPn7XrT0lw-kvAD890jl8e2puQens_IEKBpHABlsbEPX6sFY8OcGDqoRuBomu9xQ2"; }
+        }
+
+        #endregion 4.3.2
+
+        #region 4.4.2
+
+        //4.4.2.  Signing Operation
+        //https://tools.ietf.org/html/rfc7520#section-4.4.1
         public static string SymmetricEncoded
         {
             get { return SymmetricHeaderEncoded + "." + PayloadEncoded; }
         }
 
-        public static string SymmetricHeader
+        public static string SymmetricHeaderJson
         {
-            get { return "{\"alg\":\"HS256\",\"kid\":\"018c0ae5-4d9b-471b-bfd6-eef314bc7037\"}"; }
+            get { return @"{""alg"":""HS256"",""kid"":""018c0ae5-4d9b-471b-bfd6-eef314bc7037""}"; }
         }
 
         public static string SymmetricHeaderEncoded
@@ -287,39 +388,78 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static JsonWebKey SymmetricKeyEnc
-        {
-            get
-            {
-                return new JsonWebKey
-                {
-                    Alg = "A256GCM",
-                    K = "AAPapAv4LbFbiVawEjagUBluYqN5rhna-8nuldDvOx8",
-                    KeyId = "1e571774-2e08-40da-8308-e8d68773842d",
-                    Kty = "oct",
-                    Use = "sig"
-                };
-            }
-        }
-        public static JsonWebKey SymmetricKeyMac
-        {
-            get
-            {
-                return new JsonWebKey
-                {
-                    Alg = "HS256",
-                    K = "hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg",
-                    KeyId = "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
-                    Kty = "oct",
-                    Use = "sig"
-                };
-            }
-        }
-
         public static string SymmetricSignatureEncoded
         {
             get { return "s0h6KThzkfBBBkLspW1h84VsJZFTsPPqMDA7g1Md7p0"; }
         }
+
+        #endregion 4.4.2
+
+        #region 5.1
+
+        // 5.1.2.  Generated Factors
+        // https://tools.ietf.org/html/rfc7520#section-5.1.2
+        public static string RSA_1_5_CEKEncoded
+        {
+            get { return "3qyTVhIWt5juqZUCpfRqpvauwB956MEJL2Rt-8qXKSo"; }
+        }
+
+        public static string RSA_1_5_IVEncoded
+        {
+            get { return "bbd5sTkYwhAIqfHsx8DayA"; }
+        }
+
+        // 5.1.3.  Encrypting the Key
+        public static string RSA_1_5_CEKEncryptedEncoded
+        {
+            get { return "laLxI0j-nLH-_BgLOXMozKxmy9gffy2gTdvqzfTihJBuuzxg0V7yk1WClnQePFvG2K-pvSlWc9BRIazDrn50RcRai__3TDON395H3c62tIouJJ4XaRvYHFjZTZ2GXfz8YAImcc91Tfk0WXC2F5Xbb71ClQ1DDH151tlpH77f2ff7xiSxh9oSewYrcGTSLUeeCt36r1Kt3OSj7EyBQXoZlN7IxbyhMAfgIe7Mv1rOTOI5I8NQqeXXW8VlzNmoxaGMny3YnGir5Wf6Qt2nBq4qDaPdnaAuuGUGEecelIO1wx1BpyIfgvfjOhMBs9M8XL223Fg47xlGsMXdfuY-4jaqVw"; }
+        }
+
+        public static string RSA_1_5_ProtectedHeaderJSON
+        {
+            get
+            {
+                return @"{""alg"":""RSA1_5"",""kid"":""frodo.baggins@hobbiton.example"",""enc"":""A128CBC-HS256""}";
+            }
+        }
+
+        public static string RSA_1_5_ProtectedHeaderEncoded
+        {
+            get
+            {
+                return "eyJhbGciOiJSU0ExXzUiLCJraWQiOiJmcm9kby5iYWdnaW5zQGhvYmJpdG9uLmV4YW1wbGUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0";
+            }
+        }
+
+        public static string RSA_1_5_CipherTextEncoded
+        {
+            get
+            {
+                return "0fys_TY_na7f8dwSfXLiYdHaA2DxUjD67ieF7fcVbIR62JhJvGZ4_FNVSiGc_raa0HnLQ6s1P2sv3Xzl1p1l_o5wR_RsSzrS8Z-wnI3Jvo0mkpEEnlDmZvDu_k8OWzJv7eZVEqiWKdyVzFhPpiyQU28GLOpRc2VbVbK4dQKPdNTjPPEmRqcaGeTWZVyeSUvf5k59yJZxRuSvWFf6KrNtmRdZ8R4mDOjHSrM_s8uwIFcqt4r5GX8TKaI0zT5CbL5Qlw3sRc7u_hg0yKVOiRytEAEs3vZkcfLkP6nbXdC_PkMdNS-ohP78T2O6_7uInMGhFeX4ctHG7VelHGiT93JfWDEQi5_V9UN1rhXNrYu-0fVMkZAKX3VWi7lzA6BP430m";
+            }
+        }
+
+        public static string RSA_1_5_AuthenticationTagEncoded
+        {
+            get
+            {
+                return "kvKuFBXHe5mQr4lqgobAUg";
+            }
+        }
+
+        public static string RSA_1_5_JWE
+        {
+            get
+            {
+                return "eyJhbGciOiJSU0ExXzUiLCJraWQiOiJmcm9kby5iYWdnaW5zQGhvYmJpdG9uLmV4YW1wbGUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
+                     + "laLxI0j-nLH-_BgLOXMozKxmy9gffy2gTdvqzfTihJBuuzxg0V7yk1WClnQePFvG2K-pvSlWc9BRIazDrn50RcRai__3TDON395H3c62tIouJJ4XaRvYHFjZTZ2GXfz8YAImcc91Tfk0WXC2F5Xbb71ClQ1DDH151tlpH77f2ff7xiSxh9oSewYrcGTSLUeeCt36r1Kt3OSj7EyBQXoZlN7IxbyhMAfgIe7Mv1rOTOI5I8NQqeXXW8VlzNmoxaGMny3YnGir5Wf6Qt2nBq4qDaPdnaAuuGUGEecelIO1wx1BpyIfgvfjOhMBs9M8XL223Fg47xlGsMXdfuY-4jaqVw."
+                     + "bbd5sTkYwhAIqfHsx8DayA."
+                     + "0fys_TY_na7f8dwSfXLiYdHaA2DxUjD67ieF7fcVbIR62JhJvGZ4_FNVSiGc_raa0HnLQ6s1P2sv3Xzl1p1l_o5wR_RsSzrS8Z-wnI3Jvo0mkpEEnlDmZvDu_k8OWzJv7eZVEqiWKdyVzFhPpiyQU28GLOpRc2VbVbK4dQKPdNTjPPEmRqcaGeTWZVyeSUvf5k59yJZxRuSvWFf6KrNtmRdZ8R4mDOjHSrM_s8uwIFcqt4r5GX8TKaI0zT5CbL5Qlw3sRc7u_hg0yKVOiRytEAEs3vZkcfLkP6nbXdC_PkMdNS-ohP78T2O6_7uInMGhFeX4ctHG7VelHGiT93JfWDEQi5_V9UN1rhXNrYu-0fVMkZAKX3VWi7lzA6BP430m."
+                     + "kvKuFBXHe5mQr4lqgobAUg";
+            }
+        }
+
+        #endregion 5.1
     }
 
     public static class EncodedJwts
