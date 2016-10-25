@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
@@ -69,17 +70,87 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal), "encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal)");
         }
 
-        public static TheoryData<string, object, string> JwtEncodingTheoryData
+        public static TheoryData<string, JwtHeader, string> JwtEncodingTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<string, object, string>();
+                var theoryData = new TheoryData<string, JwtHeader, string>();
 
                 theoryData.Add("Test1", RFC7520References.ES512JwtHeader, RFC7520References.ES512Encoded);
                 theoryData.Add("Test2", RFC7520References.RSAJwtHeader, RFC7520References.RSAHeaderEncoded);
                 theoryData.Add("Test3", RFC7520References.SymmetricJwtHeader, RFC7520References.SymmetricHeaderEncoded);
 
                 return theoryData;
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("JwtSigningTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void JwtSigning(JwtSigningTestParams testParams)
+        {
+            var providerForSigning = CryptoProviderFactory.Default.CreateForSigning(testParams.PrivateKey, testParams.Algorithm);
+            var providerForVerifying = CryptoProviderFactory.Default.CreateForVerifying(testParams.PublicKey, testParams.Algorithm);
+            var signatureBytes = providerForSigning.Sign(Encoding.UTF8.GetBytes(testParams.EncodedData));
+            var encodedSignature = Base64UrlEncoder.Encode(signatureBytes);
+
+            Assert.True(testParams.EncodedSignature.Equals(encodedSignature, StringComparison.Ordinal), "encodedSignature != testParams.EncodedSignature");
+            Assert.True(providerForVerifying.Verify(Encoding.UTF8.GetBytes(testParams.EncodedData), Base64UrlEncoder.DecodeBytes(testParams.EncodedSignature)), "Verify Failed");
+        }
+
+        public static TheoryData<JwtSigningTestParams> JwtSigningTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<JwtSigningTestParams>();
+
+                theoryData.Add(new JwtSigningTestParams
+                {
+                    Algorithm = RFC7520References.RSAJwtHeader.Alg,
+                    EncodedData = RFC7520References.RSAEncoded,
+                    EncodedSignature = RFC7520References.RSASignatureEncoded,
+                    PrivateKey = RFC7520References.RSASigningPrivateKey,
+                    PublicKey = RFC7520References.RSASigningPublicKey,
+                    TestId = "Test1"
+                });
+
+                // clr runtime is failing to create the key.
+                //theoryData.Add(new JwtSigningTestParams
+                //{
+                //    Algorithm = RFC7520References.ES512JwtHeader.Alg,
+                //    EncodedData = RFC7520References.ES512Encoded,
+                //    EncodedSignature = RFC7520References.ES512SignatureEncoded,
+                //    PrivateKey = RFC7520References.ECDsaPrivateKey,
+                //    PublicKey = RFC7520References.ECDsaPublicKey,
+                //    TestId = "Test2"
+                //});
+
+                theoryData.Add(new JwtSigningTestParams
+                {
+                    Algorithm = RFC7520References.SymmetricJwtHeader.Alg,
+                    EncodedData = RFC7520References.SymmetricEncoded,
+                    EncodedSignature = RFC7520References.SymmetricSignatureEncoded,
+                    PrivateKey = RFC7520References.SymmetricKeyMac,
+                    PublicKey = RFC7520References.SymmetricKeyMac,
+                    TestId = "Test3"
+                });
+
+                return theoryData;
+            }
+        }
+
+        public class JwtSigningTestParams
+        {
+            public string Algorithm { get; set; }
+            public string EncodedData { get; set; }
+            public string EncodedSignature { get; set; }
+            public SecurityKey PrivateKey { get; set; }
+            public SecurityKey PublicKey { get; set; }
+            public string TestId { get; set; }
+
+            public override string ToString()
+            {
+                return TestId + ", " + PrivateKey.KeyId + ", " + PublicKey.KeyId;
             }
         }
     }
