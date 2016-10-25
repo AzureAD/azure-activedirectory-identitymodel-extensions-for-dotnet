@@ -53,9 +53,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var theoryData = new TheoryData<string, string, string>();
 
                 theoryData.Add("Test1", RFC7520References.Payload, RFC7520References.PayloadEncoded);
-                theoryData.Add("Test2", RFC7520References.RSAHeader, RFC7520References.RSAHeaderEncoded);
-                theoryData.Add("Test3", RFC7520References.ES512Header, RFC7520References.ES512Encoded);
-                theoryData.Add("Test4", RFC7520References.SymmetricHeader, RFC7520References.SymmetricHeaderEncoded);
+                theoryData.Add("Test2", RFC7520References.RSAHeaderJson, RFC7520References.RSAHeaderEncoded);
+                theoryData.Add("Test3", RFC7520References.ES512HeaderJson, RFC7520References.ES512HeaderEncoded);
+                theoryData.Add("Test4", RFC7520References.SymmetricHeaderJson, RFC7520References.SymmetricHeaderEncoded);
 
                 return theoryData;
             }
@@ -75,7 +75,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 var theoryData = new TheoryData<string, JwtHeader, string>();
 
-                theoryData.Add("Test1", RFC7520References.ES512JwtHeader, RFC7520References.ES512Encoded);
+                theoryData.Add("Test1", RFC7520References.ES512JwtHeader, RFC7520References.ES512HeaderEncoded);
                 theoryData.Add("Test2", RFC7520References.RSAJwtHeader, RFC7520References.RSAHeaderEncoded);
                 theoryData.Add("Test3", RFC7520References.SymmetricJwtHeader, RFC7520References.SymmetricHeaderEncoded);
 
