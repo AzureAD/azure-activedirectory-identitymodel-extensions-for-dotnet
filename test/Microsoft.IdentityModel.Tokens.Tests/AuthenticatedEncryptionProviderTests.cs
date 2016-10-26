@@ -216,12 +216,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 AuthenticatedData = authenticatedData,
                 EE = ExpectedException.ArgumentNullException(),
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    AuthenticationTag = authenticationTag,
-                    Ciphertext = cipherText,
-                    IV = iv
-                },
+                EncryptionResults = new AuthenticatedEncryptionResult(Default.SymmetricEncryptionKey256, cipherText, iv, authenticationTag),
                 Provider = provider,
                 TestId = testId
             });
@@ -400,12 +395,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 AuthenticatedData = authenticatedData,
                 EE = ExpectedException.ArgumentNullException(),
-                EncryptionResults = new AuthenticatedEncryptionResult
-                {
-                    AuthenticationTag = new byte[1],
-                    Ciphertext = new byte[1],
-                    IV = new byte[1],
-                },
+                EncryptionResults = new AuthenticatedEncryptionResult(Default.SymmetricEncryptionKey256, new byte[1], new byte[1], new byte[1]),
                 Plaintext = plainText,
                 Provider = provider,
                 TestId = testId

@@ -133,12 +133,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (iv != null)
                 aes.IV = iv;
 
-            AuthenticatedEncryptionResult result = new AuthenticatedEncryptionResult();
+            byte[] ciphertext;
             try
             {
-                result.Ciphertext = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
-                result.Key = Key;
-                result.IV = aes.IV;
+                ciphertext = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
             }
             catch(Exception ex)
             {
@@ -146,16 +144,16 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
-            byte[] macBytes = new byte[authenticatedData.Length + result.IV.Length + result.Ciphertext.Length + al.Length];
+            byte[] macBytes = new byte[authenticatedData.Length + aes.IV.Length + ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
-            Array.Copy(result.IV, 0, macBytes, authenticatedData.Length, result.IV.Length);
-            Array.Copy(result.Ciphertext, 0, macBytes, authenticatedData.Length + result.IV.Length, result.Ciphertext.Length);
-            Array.Copy(al, 0, macBytes, authenticatedData.Length + result.IV.Length + result.Ciphertext.Length, al.Length);
+            Array.Copy(aes.IV, 0, macBytes, authenticatedData.Length, aes.IV.Length);
+            Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + aes.IV.Length, ciphertext.Length);
+            Array.Copy(al, 0, macBytes, authenticatedData.Length + aes.IV.Length + ciphertext.Length, al.Length);
             byte[] macHash = _symmetricSignatureProvider.Sign(macBytes);
-            result.AuthenticationTag = new byte[_authenticatedkeys.HmacKey.Key.Length];
-            Array.Copy(macHash, result.AuthenticationTag, result.AuthenticationTag.Length);
+            var authenticationTag = new byte[_authenticatedkeys.HmacKey.Key.Length];
+            Array.Copy(macHash, authenticationTag, authenticationTag.Length);
 
-            return result;
+            return new AuthenticatedEncryptionResult(Key, ciphertext, aes.IV, authenticationTag);
         }
 
         /// <summary>

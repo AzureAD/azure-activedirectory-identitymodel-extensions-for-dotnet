@@ -73,19 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                byte[] keyBytes = null;
-
-                SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-                if (symmetricSecurityKey != null)
-                    keyBytes = symmetricSecurityKey.Key;
-                else
-                {
-                    JsonWebKey jsonWebKey = key as JsonWebKey;
-                    if (jsonWebKey != null && jsonWebKey.K != null)
-                        keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
-                }
-
-                _keyedHash = GetKeyedHashAlgorithm(algorithm, keyBytes);
+                _keyedHash = GetKeyedHashAlgorithm(algorithm, GetKeyBytes(key));
             }
             catch (Exception ex)
             {
@@ -117,36 +105,41 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Called to obtain the byte[] needed to create a <see cref="KeyedHashAlgorithm"/>
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/>that will be used to obtain the byte[].</param>
+        /// <returns><see cref="byte"/>[] that is used to populated the KeyedHashAlgorithm.</returns>
+        /// <exception cref="ArgumentNullException">if key is null.</exception>
+        /// <exception cref="ArgumentException">if byte[] can not be obtained from SecurityKey.</exception>
+        /// <remarks><see cref="SymmetricSecurityKey"/> and <see cref="JsonWebKey"/> are supported.
+        /// <para>For <see cref="SymmetricSecurityKey.Key"/>is returned for a <see cref="SymmetricSecurityKey"/></para>
+        /// <para>For Base64UrlEncoder.DecodeBytes is called with <see cref="JsonWebKey.K"/> if <see cref="JsonWebKey.Kty"/> == JsonWebAlgorithmsKeyTypes.Octet</para>
+        /// </remarks>
+        protected virtual byte[] GetKeyBytes(SecurityKey key)
+        {
+            if (key == null)
+                LogHelper.LogArgumentNullException(nameof(key));
+
+            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+            if (symmetricSecurityKey != null)
+                return symmetricSecurityKey.Key;
+
+            JsonWebKey jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, key)));
+        }
+
+        /// <summary>
         /// Returns the <see cref="KeyedHashAlgorithm"/>.
         /// </summary>
         /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
-        /// <param name="key">The byte array of the key.</param>
+        /// <param name="keyBytes">The byte array of the key.</param>
         /// <returns></returns>
-        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] key)
+        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] keyBytes)
         {
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
-
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha256:
-                    return new HMACSHA256(key);
-
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha384:
-                    return new HMACSHA384(key);
-
-                case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HmacSha512:
-                    return new HMACSHA512(key);
-
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
-            }
+            return Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(keyBytes, algorithm);
         }
 
         /// <summary>

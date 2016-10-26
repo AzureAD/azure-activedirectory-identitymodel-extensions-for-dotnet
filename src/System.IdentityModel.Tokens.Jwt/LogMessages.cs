@@ -50,10 +50,10 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10243 = "IDX10243: Reading issuer signing keys from validaiton parameters.";
         internal const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
 
-        // SecurityTokenHandler messages
+        // token creation
         internal const string IDX10401 = "IDX10401: Expires: '{0}' must be after NotBefore: '{1}'.";
 
-        // SignatureValidation
+        // signature creation / validation
         internal const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
         internal const string IDX10501 = "IDX10501: Signature validation failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
         internal const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
@@ -61,8 +61,9 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
         internal const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
         internal const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
+        internal const string IDX10508 = "IDX10508: Signing JWT is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
 
-        // Encryption / Decryption
+        // encryption / decryption
         internal const string IDX10600 = "IDX10600: Decryption failed. There are no security keys for decryption.";
         internal const string IDX10601 = "IDX10601: Decryption failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
         internal const string IDX10603 = "IDX10603: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
@@ -73,12 +74,12 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10608 = "IDX10608: Decryption skipping key: '{0}', it is not a '{1}'.";
         internal const string IDX10609 = "IDX10609: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         internal const string IDX10610 = "IDX10610: Decryption failed. Could not create decryption provider. Key: '{0}', Algorithm: '{1}'.";
-        internal const string IDX10611 = "IDX10611: Decryption failed. Algorithm (enc) is not supported: '{0}'.";
+        internal const string IDX10611 = "IDX10611: Decryption failed. Encryption is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
         internal const string IDX10612 = "IDX10612: Decryption failed. Header.Enc is null or empty, it must be specified.";
         internal const string IDX10613 = "IDX10613: Decryption failed. JwtHeader (tokenParts[0]) is null or empty.";
         internal const string IDX10614 = "IDX10614: Decryption failed. JwtHeader.Base64UrlDeserialize(tokenParts[0]): '{0}'. Inner exception: '{1}'.";
 
-        // Crypto Errors
+        // crypto errors
         internal const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
         internal const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
@@ -89,11 +90,7 @@ namespace System.IdentityModel.Tokens.Jwt
         // JWT specific errors
         internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
         internal const string IDX10701 = "IDX10701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range.";
-        internal const string IDX10702 = "IDX10702: Jwt header type specified, must be '{0}' or '{1}'.  Type received: '{2}'.";
-        internal const string IDX10704 = "IDX10704: Cannot set inner IssuerTokenResolver to self.";
-        internal const string IDX10705 = "IDX10705: The SigningKeyIdentifier was of type: '{0}' and was expected to be encoded as a Base64UrlEncoded string. See inner exception for more details.";
         internal const string IDX10706 = "IDX10706: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
-        internal const string IDX10707 = "IDX10707: '{0}' cannot read this xml: '{1}'. The reader needs to be positioned at an element: '{2}', within the namespace: '{3}', with an attribute: '{4}' equal to one of the following: '{5}', '{6}'.";
         internal const string IDX10708 = "IDX10708: '{0}' cannot read this string: '{1}'.\nThe string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'; or compact JWE format, which is of the form: '<Base64UrlJWEProtectedHeader>.<OPTIONAL, Base64URLJWEEncryptedKey>.<Base64URLJWEInitializationVector>.<Base64URLJWECiphertext>.<Base64URLJWEAuthenticationTag>'.";
         internal const string IDX10709 = "IDX10709: '{0}' is not well formed: '{1}'.\nThe string needs to be in compact JSON format, which is of the form: '<Base64UrlEncodedHeader>.<Base64UrlEndcodedPayload>.<OPTIONAL, Base64UrlEncodedSignature>'; or compact JWE format, which is of the form: '<Base64UrlJWEProtectedHeader>.<OPTIONAL, Base64URLJWEEncryptedKey>.<Base64URLJWEInitializationVector>.<Base64URLJWECiphertext>.<Base64URLJWEAuthenticationTag>'.";
         internal const string IDX10710 = "IDX10710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
