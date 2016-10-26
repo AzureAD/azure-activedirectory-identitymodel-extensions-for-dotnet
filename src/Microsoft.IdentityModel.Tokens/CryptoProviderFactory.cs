@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="ArgumentException">'key' is not a <see cref="SymmetricSecurityKey"/>.</exception>
-        /// <exception cref="ArgumentException">'algorithm' is not supported.</exception>
+        /// <exception cref="ArgumentException">'algorithm, key' pair is not supported.</exception>
         public virtual AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -219,14 +219,23 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
+            {
+                var cryptoProvider = CustomCryptoProvider.Create(algorithm, key) as AuthenticatedEncryptionProvider;
+                if (cryptoProvider == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(AuthenticatedEncryptionProvider))));
+
+                return cryptoProvider;
+            }
+
+            var symmetricKey = key as SymmetricSecurityKey;
             if (symmetricKey == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10648, key.GetType())));
 
-            if (IsSupportedAlgorithm (algorithm, key))
+            if (IsSupportedAlgorithm(algorithm, key))
                 return new AuthenticatedEncryptionProvider(symmetricKey, algorithm);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         /// <summary>
@@ -235,8 +244,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> to use for signing.</param>
         /// <param name="algorithm">The algorithm to use for signing.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
-        /// <exception cref="ArgumentException">'algorithm' contains only whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="AsymmetricSecurityKey"/>' is too small.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="SymmetricSecurityKey"/> is too small.</exception>
         /// <exception cref="ArgumentException"><see cref="SecurityKey"/> is not a <see cref="AsymmetricSecurityKey"/> or a <see cref="SymmetricSecurityKey"/>.</exception>
@@ -246,7 +254,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public virtual SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
         {
-            return CreateProvider(key, algorithm, true);
+            return CreateSignatureProvider(key, algorithm, true);
         }
 
         /// <summary>
@@ -255,14 +263,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> to use for signing.</param>
         /// <param name="algorithm">The algorithm to use for verifying.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">'algorithm' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="AsymmetricSecurityKey"/> is too small.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="SymmetricSecurityKey"/> is too small.</exception>
         /// <exception cref="ArgumentException"><see cref="SecurityKey"/>' is not a <see cref="AsymmetricSecurityKey"/> or a <see cref="SymmetricSecurityKey"/>.</exception>
         /// <remarks>When finished with the <see cref="SignatureProvider"/> call <see cref="ReleaseSignatureProvider(SignatureProvider)"/>.</remarks>
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
-            return CreateProvider(key, algorithm, false);
+            return CreateSignatureProvider(key, algorithm, false);
         }
 
         /// <summary>
@@ -291,8 +299,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="algorithm">the name of the hash algorithm to create.</param>
         /// <returns>A <see cref="HashAlgorithm"/></returns>
         /// <remarks>When finished with the <see cref="HashAlgorithm"/> call <see cref="ReleaseHashAlgorithm(HashAlgorithm)"/>.</remarks>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">'algorithm' is not supported.</exception>
         public virtual HashAlgorithm CreateHashAlgorithm(string algorithm)
         {
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
             {
                 var hashAlgorithm = CustomCryptoProvider.Create(algorithm) as HashAlgorithm;
@@ -320,36 +333,65 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10640, algorithm)));
         }
 
-        private bool IsSupportedHashAlgorithm(string algorithm)
+        /// <summary>
+        /// Returns a <see cref="KeyedHashAlgorithm"/> for a specific algorithm.
+        /// </summary>
+        /// <param name="algorithm">the keyed hash algorithm to create.</param>
+        /// <param name="keyBytes">bytes to use to create the Keyed Hash</param>
+        /// <returns>A <see cref="HashAlgorithm"/></returns>
+        /// <remarks>When finished with the <see cref="HashAlgorithm"/> call <see cref="ReleaseHashAlgorithm(HashAlgorithm)"/>.</remarks>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">'algorithm' is not supported.</exception>
+        // TODO does key param need to be a SecurityKey? do we need to support JsonWebKey here or just SymmetricSecurityKey OR byte[]?
+        public virtual KeyedHashAlgorithm CreateKeyedHashAlgorithm(byte[] keyBytes, string algorithm)
         {
+            if (keyBytes == null)
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, keyBytes))
+            {
+                var keyedHashAlgorithm = CustomCryptoProvider.Create(algorithm, keyBytes) as KeyedHashAlgorithm;
+                if (keyedHashAlgorithm == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10647, algorithm, typeof(KeyedHashAlgorithm))));
+
+                return keyedHashAlgorithm;
+            }
+
             switch (algorithm)
             {
-                case SecurityAlgorithms.Sha256:
-                case SecurityAlgorithms.Sha256Digest:
-                case SecurityAlgorithms.Sha384:
-                case SecurityAlgorithms.Sha384Digest:
-                case SecurityAlgorithms.Sha512:
-                case SecurityAlgorithms.Sha512Digest:
-                    return true;
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HmacSha256:
+                    return new HMACSHA256(keyBytes);
+
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HmacSha384:
+                    return new HMACSHA384(keyBytes);
+
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.HmacSha512:
+                    return new HMACSHA512(keyBytes);
 
                 default:
-                    return false;
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10657, algorithm)));
             }
         }
 
-        private SignatureProvider CreateProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
+        private SignatureProvider CreateSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (string.IsNullOrWhiteSpace(algorithm))
+            if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
                 SignatureProvider signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
                 if (signatureProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, key, algorithm, typeof(SignatureProvider))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
                 return signatureProvider;
             }
@@ -378,7 +420,25 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
+            // TODO improve this message. Nothing about JsonWebKey is mentioned.
             throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10600, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
+        }
+
+        private bool IsSupportedHashAlgorithm(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.Sha256:
+                case SecurityAlgorithms.Sha256Digest:
+                case SecurityAlgorithms.Sha384:
+                case SecurityAlgorithms.Sha384Digest:
+                case SecurityAlgorithms.Sha512:
+                case SecurityAlgorithms.Sha512Digest:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
     }
 }

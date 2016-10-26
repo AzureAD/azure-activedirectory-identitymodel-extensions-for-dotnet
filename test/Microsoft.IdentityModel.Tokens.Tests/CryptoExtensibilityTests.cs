@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SigningCredentialsDataSet")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void CryptoProviderOrderingWhenVerifying(TokenValidationParameters validationParameters, string jwt)
+        public void CryptoProviderOrderingWhenVerifying(string testId, TokenValidationParameters validationParameters, string jwt)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken token = null;
@@ -134,33 +134,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        public static TheoryData<TokenValidationParameters, string> SigningCredentialsDataSet
+        public static TheoryData<string, TokenValidationParameters, string> SigningCredentialsDataSet
         {
             get
             {
-                var dataset = new TheoryData<TokenValidationParameters, string>();
-                var jwt = IdentityUtilities.DefaultAsymmetricJwt;
+                var dataset = new TheoryData<string, TokenValidationParameters, string>();
 
-                var validationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters;
+                var validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.IssuerSigningKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { "RS256" })
+                {
+                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
+                };
+
+                dataset.Add("Test1", validationParameters, Default.AsymmetricJwt);
+
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { "RS256" })
+                {
+                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
+                };
+
+                // this is only set to check that it wasn't called
                 validationParameters.IssuerSigningKey.CryptoProviderFactory = new CustomCryptoProviderFactory()
                 {
                     SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
                 };
 
-                dataset.Add(validationParameters, jwt);
-
-                validationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters;
-                validationParameters.IssuerSigningKey.CryptoProviderFactory = new CustomCryptoProviderFactory()
-                {
-                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
-                };
-
-                validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory()
-                {
-                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
-                };
-
-                dataset.Add(validationParameters, jwt);
+                dataset.Add("Test2", validationParameters, Default.AsymmetricJwt);
 
                 return dataset;
             }
