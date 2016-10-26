@@ -402,17 +402,20 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
-            var jwt1 = handler.CreateJwtSecurityToken(tokenDescriptor);
+            var jweCreatedInMemory = handler.CreateJwtSecurityToken(tokenDescriptor);
             try
             {
                 SecurityToken token = null;
-                var claimsPrincipal = handler.ValidateToken(jwt1.RawData, validationParameters, out token);
+                var claimsPrincipal = handler.ValidateToken(jweCreatedInMemory.RawData, validationParameters, out token);
                 ee.ProcessNoException();
-                JwtSecurityToken jwt2 = token as JwtSecurityToken;
+                var jweValidated = token as JwtSecurityToken;
 
                 var context = new CompareContext();
-                if (!IdentityComparer.AreEqual(jwt1.InnerToken.Payload, jwt2.Payload, context))
-                    context.Diffs.Add("jwt1.Payload != jwt2.Payload");
+                if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, jweValidated.Payload, context))
+                    context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.Payload");
+
+                if (jweValidated.InnerToken == null)
+                    context.Diffs.Add("jweValidated.InnerToken == null");
 
                 TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: "), context.Diffs);
             }

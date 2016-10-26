@@ -33,23 +33,38 @@ namespace Microsoft.IdentityModel.Tokens
     public class AuthenticatedEncryptionResult
     {
         /// <summary>
-        /// Gets or sets the <see cref="SymmetricSecurityKey"/>.
+        /// Initializes a new <see cref="AuthenticatedEncryptionResult"/>
         /// </summary>
-        public SymmetricSecurityKey Key { get; set; }
+        /// <param name="key">the <see cref="SymmetricSecurityKey"/> used during <see cref="AuthenticatedEncryptionProvider.Encrypt(byte[], byte[])"/></param>
+        /// <param name="ciphertext">protected text.</param>
+        /// <param name="iv">the initialization vector used.</param>
+        /// <param name="authenticationTag">the bytes that need be passed to <see cref="AuthenticatedEncryptionProvider.Decrypt(byte[], byte[], byte[], byte[])"/>.</param>
+        public AuthenticatedEncryptionResult(SymmetricSecurityKey key, byte[] ciphertext, byte[] iv, byte[] authenticationTag)
+        {
+            Key = key;
+            Ciphertext = ciphertext;
+            IV = iv;
+            AuthenticationTag = authenticationTag;
+        }
 
         /// <summary>
-        /// Gets or sets the Ciphertext.
+        /// Gets the <see cref="SymmetricSecurityKey"/>.
         /// </summary>
-        public byte[] Ciphertext { get; set; }
+        public SymmetricSecurityKey Key { get; private set; }
 
         /// <summary>
-        /// Gets or sets the initialization vector.
+        /// Gets the Ciphertext.
         /// </summary>
-        public byte[] IV { get; set; }
+        public byte[] Ciphertext { get; private set; }
 
         /// <summary>
-        /// Gets or sets the authentication tag
+        /// Gets the initialization vector.
         /// </summary>
-        public byte[] AuthenticationTag { get; set; }
+        public byte[] IV { get; private set; }
+
+        /// <summary>
+        /// Gets the authentication tag
+        /// </summary>
+        public byte[] AuthenticationTag { get; private set; }
     }
 }
