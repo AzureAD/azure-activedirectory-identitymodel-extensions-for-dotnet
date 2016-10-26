@@ -300,13 +300,14 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Determines if the string is a well formed Json Web token (see: http://tools.ietf.org/html/rfc7519 )
+        /// Determines if the string is a well formed Json Web Token (JWT).
+        /// <para>see: http://tools.ietf.org/html/rfc7519 </para>
         /// </summary>
-        /// <param name="tokenString">String that should represent a valid JSON Web Token.</param>
-        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of
+        /// <param name="tokenString">String that should represent a valid JWT.</param>
+        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of:
         /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
-        /// <para>JWE ('dir'): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
-        /// <para>JWE (encryptkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
+        /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
         /// </remarks>
         /// <returns>
         /// <para>'false' if the token is null or whitespace.</para>
@@ -348,7 +349,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Returns a Json Web Token (JWT).
         /// </summary>
         /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
-        /// <remarks><see cref="SecurityTokenDescriptor.SigningCredentials"/> is used to sign the JSON.</remarks>
+        /// <remarks>A JWS and JWE can be returned.
+        /// <para>If <see cref="SecurityTokenDescriptor.EncryptingCredentials"/>is provided, then a JWE will be created.</para>
+        /// <para>If <see cref="SecurityTokenDescriptor.SigningCredentials"/> is provided then a JWS will be created.</para>
+        /// <para>If both are provided then a JWE with an embeded JWS will be created.</para>
+        /// </remarks>
         public virtual string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
@@ -366,7 +371,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Creates a <see cref="JwtSecurityToken"/>
+        /// Creates a JWT in 'Compact Serialization Format'.
         /// </summary>
         /// <param name="issuer">The issuer of the token.</param>
         /// <param name="audience">The audience for this token.</param>
@@ -375,39 +380,35 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="expires">The expiration time for this token.</param>
         /// <param name="issuedAt">The issue time for this token.</param>
         /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
-        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
+        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. See <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
-        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
-        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign the JSON.</para>
+        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change outbound Json .</para>
+        /// <para>If <see cref="SigningCredentials"/> is provided, then a JWS will be created.</para>
         /// </remarks>
-        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        /// <returns>A Base64UrlEncoded string in 'Compact Serialization Format'.</returns>
         public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null).RawData;
         }
 
         /// <summary>
-        /// Creates a <see cref="JwtSecurityToken"/>
+        /// Creates a JWT in 'Compact Serialization Format'.
         /// </summary>
         /// <param name="issuer">The issuer of the token.</param>
         /// <param name="audience">The audience for this token.</param>
         /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">The notbefore time for this token.</param>
-        /// <param name="expires">The expiration time for this token.</param>
-        /// <param name="issuedAt">The issue time for this token.</param>
-        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
-        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
+        /// <param name="notBefore">Translated into 'epoch time' and assigned to 'nbf'.</param>
+        /// <param name="expires">Translated into 'epoch time' and assigned to 'exp'.</param>
+        /// <param name="issuedAt">Translated into 'epoch time' and assigned to 'iat'.</param>
+        /// <param name="signingCredentials">Contains cryptographic material for signint.</param>
+        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting.</param>
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
-        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
-        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign the JSON.</para>
+        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change outbound Json .</para>
         /// </remarks>
-        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
+        /// <returns>A Base64UrlEncoded string in 'Compact Serialization Format'.</returns>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
         public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
@@ -562,11 +563,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Convert string into <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT). May be signed as per 'JSON Web Signature' (JWS).</param>
-        /// <returns>The <see cref="JwtSecurityToken"/></returns>
+        /// <param name="token">A 'JSON Web Token' (JWT) in Compact Serialization JWS or JWE format.</param>
+        /// <returns>A <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length * 2' > MaximumTokenSizeInBytes.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
+        /// <remarks>If the string is in JWE Compact Serialization format, only the protected header will be deserialized.
+        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -637,15 +640,19 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                var decryptedJwt = DecryptToken(ReadJwtToken(token), validationParameters);
-                validatedToken = ValidateSignature(decryptedJwt, validationParameters);
+                var jwtToken = ReadJwtToken(token);
+                var decryptedJwt = DecryptToken(jwtToken, validationParameters);
+                var innerToken = ValidateSignature(decryptedJwt, validationParameters);
+                ValidateTokenPayload(innerToken, validationParameters);
+                jwtToken.InnerToken = innerToken;
+                validatedToken = jwtToken;
+                return ValidateTokenPayload(innerToken, validationParameters);
             }
             else
             {
                 validatedToken = ValidateSignature(token, validationParameters);
+                return ValidateTokenPayload(validatedToken as JwtSecurityToken, validationParameters);
             }
-
-            return ValidateTokenPayload(validatedToken as JwtSecurityToken, validationParameters);
         }
 
         /// <summary>
@@ -816,6 +823,12 @@ namespace System.IdentityModel.Tokens.Jwt
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, TokenValidationParameters validationParameters)
         {
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+            if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
+            {
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10508, algorithm, key);
+                return false;
+            }
+
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10636, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm))));
@@ -1316,7 +1329,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Enc, key))
                 {
-                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10611, jwtToken.Header.Enc);
+                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10611, jwtToken.Header.Enc, key);
                     continue;
                 }
 
