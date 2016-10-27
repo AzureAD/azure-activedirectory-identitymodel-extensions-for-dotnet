@@ -53,8 +53,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to use.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
-        /// <exception cref="ArgumentException">'algorithm' contains only whitespace.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException">'<see cref="SecurityKey"/>.KeySize' is smaller than <see cref="SymmetricSignatureProvider.MinimumSymmetricKeySizeInBits"/>.</exception>
         /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> throws.</exception>
@@ -73,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                _keyedHash = GetKeyedHashAlgorithm(algorithm, GetKeyBytes(key));
+                _keyedHash = GetKeyedHashAlgorithm(GetKeyBytes(key), algorithm);
             }
             catch (Exception ex)
             {
@@ -94,7 +92,6 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return _minimumSymmetricKeySizeInBits;
             }
-
             set
             {
                 if (value < DefaultMinimumSymmetricKeySizeInBits)
@@ -110,10 +107,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key"><see cref="SecurityKey"/>that will be used to obtain the byte[].</param>
         /// <returns><see cref="byte"/>[] that is used to populated the KeyedHashAlgorithm.</returns>
         /// <exception cref="ArgumentNullException">if key is null.</exception>
-        /// <exception cref="ArgumentException">if byte[] can not be obtained from SecurityKey.</exception>
+        /// <exception cref="ArgumentException">if a byte[] can not be obtained from SecurityKey.</exception>
         /// <remarks><see cref="SymmetricSecurityKey"/> and <see cref="JsonWebKey"/> are supported.
-        /// <para>For <see cref="SymmetricSecurityKey.Key"/>is returned for a <see cref="SymmetricSecurityKey"/></para>
-        /// <para>For Base64UrlEncoder.DecodeBytes is called with <see cref="JsonWebKey.K"/> if <see cref="JsonWebKey.Kty"/> == JsonWebAlgorithmsKeyTypes.Octet</para>
+        /// <para>For a <see cref="SymmetricSecurityKey"/> .Key is returned</para>
+        /// <para>For a <see cref="JsonWebKey"/>Base64UrlEncoder.DecodeBytes is called with <see cref="JsonWebKey.K"/> if <see cref="JsonWebKey.Kty"/> == JsonWebAlgorithmsKeyTypes.Octet</para>
         /// </remarks>
         protected virtual byte[] GetKeyBytes(SecurityKey key)
         {
@@ -137,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
         /// <param name="keyBytes">The byte array of the key.</param>
         /// <returns></returns>
-        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(string algorithm, byte[] keyBytes)
+        protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(byte[] keyBytes, string algorithm)
         {
             return Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(keyBytes, algorithm);
         }
