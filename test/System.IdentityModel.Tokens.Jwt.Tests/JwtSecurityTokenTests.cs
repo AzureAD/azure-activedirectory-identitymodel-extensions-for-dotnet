@@ -147,7 +147,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // create inner token
             try
             {
-                innerJwt = CreateToken(innerTokenVariation);
+                if (innerTokenVariation != null)
+                    innerJwt = CreateToken(innerTokenVariation);
             }
             catch (Exception ex)
             {
@@ -202,7 +203,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(innerJwt, testId);
                 }
 
-                if (null != innerTokenVariation.ExpectedJwtSecurityToken)
+                if (null != innerTokenVariation && null != innerTokenVariation.ExpectedJwtSecurityToken)
                 {
                     Assert.True(IdentityComparer.AreEqual(innerTokenVariation.ExpectedJwtSecurityToken, innerJwt));
                 }
@@ -255,73 +256,52 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.ArgumentNullException()
             );
 
-            string rawHeader, rawEncryptedKey, rawInitializationVector, rawCipherText, rawAuthenticationTag;
-            ParseJweParts(EncodedJwts.ValidJweDirect, out rawHeader, out rawEncryptedKey, out rawInitializationVector, out rawCipherText, out rawAuthenticationTag);
-            JwtSecurityTokenTestVariation dirOuter = new JwtSecurityTokenTestVariation
-            {
-                Header = new JwtHeader(Default.SymmetricEncryptingCredentials),
-                RawHeader = rawHeader,
-                RawEncryptedKey = rawEncryptedKey,
-                RawInitializationVector = rawInitializationVector,
-                RawCiphertext = rawCipherText,
-                RawAuthenticationTag = rawAuthenticationTag
-            };
             JwtSecurityTokenTestVariation innerToken = new JwtSecurityTokenTestVariation
             {
                 NotBefore = DateTime.MinValue,
                 Expires = DateTime.UtcNow,
             };
 
-            dataSet.Add("Dir enc outer token 1- Construct by parts", dirOuter, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
-            //dataSet.Add("Dir enc outer token 1- Construct by string", dirOuter, innerToken, EncodedJwts.ValidJweDirect, ExpectedException.NoExceptionExpected);
+            JwtSecurityTokenTestVariation outerValidJweDirect = CreateVariationOnToken(EncodedJwts.ValidJweDirect);
+            dataSet.Add("ValidJweDirect- Construct by parts", outerValidJweDirect, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJweDirect- Construct by string", outerValidJweDirect, null, EncodedJwts.ValidJweDirect, ExpectedException.NoExceptionExpected);
 
-            ParseJweParts(EncodedJwts.InvalidJweDirect, out rawHeader, out rawEncryptedKey, out rawInitializationVector, out rawCipherText, out rawAuthenticationTag);
-            JwtSecurityTokenTestVariation dirOuter2 = new JwtSecurityTokenTestVariation
-            {
-                Header = new JwtHeader(Default.SymmetricEncryptingCredentials),
-                RawHeader = rawHeader,
-                RawEncryptedKey = rawEncryptedKey,
-                RawInitializationVector = rawInitializationVector,
-                RawCiphertext = rawCipherText,
-                RawAuthenticationTag = rawAuthenticationTag
-            };
+            JwtSecurityTokenTestVariation outerValidJweDirect2 = CreateVariationOnToken(EncodedJwts.ValidJweDirect2);
+            dataSet.Add("ValidJweDirect2- Construct by parts", outerValidJweDirect2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJweDirect2- Construct by string", outerValidJweDirect2, null, EncodedJwts.ValidJweDirect2, ExpectedException.NoExceptionExpected);
 
-            dataSet.Add("Dir enc outer token 3- Construct by parts", dirOuter2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
-            //dataSet.Add("Dir enc outer token 3- Construct by string", dirOuter2, innerToken, EncodedJwts.InvalidJweDirect, ExpectedException.NoExceptionExpected);
+            JwtSecurityTokenTestVariation outerValidJwe = CreateVariationOnToken(EncodedJwts.ValidJwe);
+            dataSet.Add("ValidJwe- Construct by parts", outerValidJwe, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJwe- Construct by string", outerValidJwe, null, EncodedJwts.ValidJwe, ExpectedException.NoExceptionExpected);
 
-            ParseJweParts(EncodedJwts.InvalidJweDirect, out rawHeader, out rawEncryptedKey, out rawInitializationVector, out rawCipherText, out rawAuthenticationTag);
-            JwtSecurityTokenTestVariation dirOuter3 = new JwtSecurityTokenTestVariation
-            {
-                Header = new JwtHeader(Default.SymmetricEncryptingCredentials),
-                RawHeader = rawHeader,
-                RawEncryptedKey = rawEncryptedKey,
-                RawInitializationVector = rawInitializationVector,
-                RawCiphertext = rawCipherText,
-                RawAuthenticationTag = rawAuthenticationTag
-            };
+            JwtSecurityTokenTestVariation outerValidJwe2 = CreateVariationOnToken(EncodedJwts.ValidJwe2);
+            dataSet.Add("ValidJwe2- Construct by parts", outerValidJwe2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJwe2- Construct by string", outerValidJwe2, null, EncodedJwts.ValidJwe2, ExpectedException.NoExceptionExpected);
 
-            dataSet.Add("Dir enc outer token 4- Construct by parts", dirOuter3, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
-            //dataSet.Add("Dir enc outer token 4- Construct by string", dirOuter3, innerToken, EncodedJwts.InvalidJweDirect, ExpectedException.NoExceptionExpected);
-
-            ParseJweParts(EncodedJwts.InvalidJweDirect2, out rawHeader, out rawEncryptedKey, out rawInitializationVector, out rawCipherText, out rawAuthenticationTag);
-            JwtSecurityTokenTestVariation dirOuter4 = new JwtSecurityTokenTestVariation
-            {
-                Header = new JwtHeader(Default.SymmetricEncryptingCredentials),
-                RawHeader = rawHeader,
-                RawEncryptedKey = rawEncryptedKey,
-                RawInitializationVector = rawInitializationVector,
-                RawCiphertext = rawCipherText,
-                RawAuthenticationTag = rawAuthenticationTag
-            };
-
-            dataSet.Add("Dir enc outer token 5- Construct by parts", dirOuter4, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
-            //dataSet.Add("Dir enc outer token 5- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJweDirect2, ExpectedException.NoExceptionExpected);
-
-            dataSet.Add("Invalid outer token 1- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 2- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 3- Construct by string", dirOuter4, innerToken, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            // Hand in a valid variation. We should fail before the variation is used.
+            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
 
             return dataSet;
+        }
+
+        private static JwtSecurityTokenTestVariation CreateVariationOnToken(string jwt)
+        {
+            string rawHeader, rawEncryptedKey, rawInitializationVector, rawCipherText, rawAuthenticationTag;
+            ParseJweParts(jwt, out rawHeader, out rawEncryptedKey, out rawInitializationVector, out rawCipherText, out rawAuthenticationTag);
+            return new JwtSecurityTokenTestVariation
+            {
+                Header = new JwtHeader(Default.SymmetricEncryptingCredentials),
+                RawHeader = rawHeader,
+                RawEncryptedKey = rawEncryptedKey,
+                RawInitializationVector = rawInitializationVector,
+                RawCiphertext = rawCipherText,
+                RawAuthenticationTag = rawAuthenticationTag
+            };
         }
 
         private static void CheckOuterTokenProperties(JwtSecurityToken token, JwtSecurityTokenTestVariation variation)
