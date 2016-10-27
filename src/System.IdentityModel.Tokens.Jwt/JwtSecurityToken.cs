@@ -67,16 +67,8 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                if (tokenParts[1] == string.Empty)
-                {
-                    if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
-                }
-                else
-                {
-                    if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
-                }
+                if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
             }
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
@@ -224,7 +216,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
         public string Actor
         {
-            get { return Payload.Actort; }
+            get
+            {
+                if (Payload != null)
+                    return Payload.Actort;
+                return String.Empty;
+            }
         }
 
         /// <summary>
@@ -233,7 +230,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'audience' claim is not found, enumeration will be empty.</remarks>
         public IEnumerable<string> Audiences
         {
-            get { return Payload.Aud; }
+            get {
+                if (Payload != null)
+                    return Payload.Aud;
+                return new List<string>();
+            }
         }
 
         /// <summary>
@@ -244,7 +245,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get { return Payload.Claims; }
+            get {
+                if (Payload != null)
+                    return Payload.Claims;
+                return new List<Claim>();
+            }
         }
 
         /// <summary>
@@ -260,7 +265,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public virtual string EncodedPayload
         {
-            get { return Payload.Base64UrlEncode(); }
+            get
+            {
+                if (Payload != null)
+                    return Payload.Base64UrlEncode();
+                return String.Empty;
+            }
         }
 
         /// <summary>
@@ -274,7 +284,13 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
         public override string Id
         {
-            get { return Payload.Jti; }
+            get
+            {
+                if (Payload != null)
+                    return Payload.Jti;
+                return String.Empty;
+
+            }
         }
 
         /// <summary>
@@ -283,7 +299,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
         public override string Issuer
         {
-            get { return Payload.Iss; }
+            get
+            {
+                if (Payload != null)
+                    return Payload.Iss;
+                return String.Empty;
+            }
         }
 
         /// <summary>
@@ -411,7 +432,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
         public string Subject
         {
-            get { return Payload.Sub; }
+            get
+            {
+                if (Payload != null)
+                    return Payload.Sub;
+                return String.Empty;
+            }
         }
 
         /// <summary>
@@ -420,7 +446,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom
         {
-            get { return Payload.ValidFrom; }
+            get
+            {
+                if (Payload != null)
+                    return Payload.ValidFrom;
+                return DateTime.MinValue;
+            }
         }
 
         /// <summary>
@@ -429,7 +460,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'expiration' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidTo
         {
-            get { return Payload.ValidTo; }
+            get
+            {
+                if (Payload != null)
+                    return Payload.ValidTo;
+                return DateTime.MinValue;
+            }
         }
 
         /// <summary>
@@ -438,7 +474,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A string containing the header and payload in JSON format.</returns>
         public override string ToString()
         {
-            return Header.SerializeToJson() + "." + Payload.SerializeToJson();
+            if (Payload != null)
+                return Header.SerializeToJson() + "." + Payload.SerializeToJson();
+            else
+                return Header.SerializeToJson() + ".";
         }
 
         /// <summary>
