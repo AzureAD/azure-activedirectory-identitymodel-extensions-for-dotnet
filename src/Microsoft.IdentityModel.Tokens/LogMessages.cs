@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // Crypto Errors
         internal const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
-        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' cannot have fewer than '{1}' bits. KeySize: '{2}'.";
+        internal const string IDX10603 = "IDX10603: The algorithm: '{0}' requires the SecurityKey.KeySize to be greater than '{1}' bits. KeySize reported: '{2}'.";
         internal const string IDX10613 = "IDX10613: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than '{0}'.";
         internal const string IDX10623 = "IDX10623: Cannot sign data because the KeyedHashAlgorithm is null.";
         internal const string IDX10624 = "IDX10624: Cannot verify data because the KeyedHashAlgorithm is null.";
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than '{0}'.";
         internal const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
-        internal const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\n\nSignatureAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
+        internal const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
         internal const string IDX10638 = "IDX10638: Cannot created the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         internal const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         internal const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
