@@ -662,7 +662,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 (new JwtSecurityTokenHandler()).ReadToken(jwt);
                 ee.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex);
             }
@@ -672,7 +672,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             return JwtTestData.ValidEncodedSegmentsData();
         }
-
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(InvalidNumberOfSegmentsData))]
@@ -702,7 +701,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public static TheoryData<string, string, ExpectedException> InvalidNumberOfSegmentsData()
         {
-            return JwtTestData.InvalidNumberOfSegmentsData("IDX10708:");
+            return JwtTestData.InvalidNumberOfSegmentsData("IDX10709:");
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -728,7 +727,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 (new JwtSecurityTokenHandler()).ReadToken(jwt);
                 ee.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex);
             }
@@ -738,7 +737,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             return JwtTestData.InvalidEncodedSegmentsData("IDX10709:");
         }
-
 
         [Fact]
         public void MaximumTokenSize()
@@ -918,7 +916,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // "Jwt.Audience == null"
             TokenValidationParameters validationParameters = new TokenValidationParameters() { ValidateIssuer = false, RequireExpirationTime = false, RequireSignedTokens = false };
-            properties.Add("InvalidAudience", "empty"); 
+            properties.Add("InvalidAudience", "empty");
             ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10208", propertiesExpected: properties);
             string jwt = tokenHandler.CreateJwtSecurityToken(issuer: "http://www.GotJwt.com", audience: null).RawData;
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
@@ -1020,5 +1018,155 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 throw new NotImplementedException();
             }
         }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(WriteTokenTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void WriteToken(WriteJwtTokenParams testParams)
+        {
+            try
+            {
+                var token = testParams.TokenHandler.WriteToken(testParams.Token);
+                if (testParams.TokenType == TokenType.JWE)
+                    Assert.True(token.Split('.').Length == 5);
+                else
+                    Assert.True(token.Split('.').Length == 3);
+
+                testParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                testParams.EE.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<WriteJwtTokenParams> WriteTokenTheoryData()
+        {
+            var theoryData = new TheoryData<WriteJwtTokenParams>();
+            var handler = new JwtSecurityTokenHandler();
+
+            theoryData.Add(new WriteJwtTokenParams()
+            {
+                EE = ExpectedException.ArgumentNullException(),
+                TestId = "Test1",
+                Token = null,
+                TokenHandler = handler
+            });
+
+            theoryData.Add(new WriteJwtTokenParams
+            {
+                EE = ExpectedException.ArgumentException("IDX10706:"),
+                TestId = "Test2",
+                Token = new CustomSecurityToken()
+            });
+
+            theoryData.Add(new WriteJwtTokenParams
+            {
+                EE = ExpectedException.ArgumentException("IDX10706:"),
+                TestId = "Test3",
+                Token = new CustomSecurityToken()
+            });
+
+            theoryData.Add(new WriteJwtTokenParams
+            {
+                EE = ExpectedException.SecurityTokenEncryptionFailedException("IDX10736:"),
+                TestId = "Test4",
+                Token = new JwtSecurityToken(
+                                new JwtHeader(Default.SymmetricSigningCredentials),
+                                new JwtSecurityToken(),
+                                "ey",
+                                "ey",
+                                "ey",
+                                "ey",
+                                "ey")
+            });
+
+            theoryData.Add(new WriteJwtTokenParams
+            {
+                EE = ExpectedException.SecurityTokenEncryptionFailedException("IDX10735:"),
+                TestId = "Test5",
+                Token = new JwtSecurityToken(
+                                new JwtHeader(),
+                                new JwtSecurityToken(),
+                                "ey",
+                                "ey",
+                                "ey",
+                                "ey",
+                                "ey")
+            });
+
+            var header = new JwtHeader(Default.SymmetricSigningCredentials);
+            var payload = new JwtPayload();
+            theoryData.Add(new WriteJwtTokenParams
+            {
+                TestId = "Test6",
+                Token = new JwtSecurityToken(
+                    new JwtHeader(Default.SymmetricEncryptingCredentials),
+                    new JwtSecurityToken(header, payload),
+                    "ey",
+                    "ey",
+                    "ey",
+                    "ey",
+                    "ey"),
+                TokenType = TokenType.JWE
+            });
+
+            theoryData.Add(new WriteJwtTokenParams()
+            {
+                TestId = "Test7",
+                Token = new JwtSecurityToken(
+                    new JwtHeader(Default.SymmetricSigningCredentials),
+                    new JwtPayload() ),
+                TokenType = TokenType.JWS
+            });
+
+            header = new JwtHeader(Default.SymmetricSigningCredentials);
+            payload = new JwtPayload();
+            var innerToken = new JwtSecurityToken(
+                    header,
+                    new JwtSecurityToken(header, payload),
+                    "ey",
+                    "ey",
+                    "ey",
+                    "ey",
+                    "ey");
+
+            theoryData.Add(new WriteJwtTokenParams
+            {
+                TestId = "Test8",
+                Token = new JwtSecurityToken(
+                        new JwtHeader(Default.SymmetricEncryptingCredentials),
+                            innerToken,
+                            "ey",
+                            "ey",
+                            "ey",
+                            "ey",
+                            "ey"),
+                TokenType = TokenType.JWE
+            });
+
+            return theoryData;
+        }
+    }
+
+    public enum TokenType
+    {
+        JWE,
+        JWS
+    }
+
+    public class WriteJwtTokenParams
+    {
+        public bool ExpectSignature { get; set; } = false;
+
+        public ExpectedException EE { get; set; } = ExpectedException.NoExceptionExpected;
+
+        public string TestId { get; set; }
+
+        public SecurityToken Token { get; set; }
+
+        public JwtSecurityTokenHandler TokenHandler { get; set; } = new JwtSecurityTokenHandler();
+
+        public TokenType TokenType { get; set; }
     }
 }
