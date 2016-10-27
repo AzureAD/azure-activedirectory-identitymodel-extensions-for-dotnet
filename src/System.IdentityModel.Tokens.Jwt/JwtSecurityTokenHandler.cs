@@ -514,7 +514,6 @@ namespace System.IdentityModel.Tokens.Jwt
             if (encryptingCredentials != null)
                 return CreateEncryptedToken(new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature), encryptingCredentials);
             else
-
                 return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
         }
 
@@ -525,23 +524,33 @@ namespace System.IdentityModel.Tokens.Jwt
             if (cryptoProviderFactory == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10733));
 
+            if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Enc, encryptingCredentials.Key))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10615, innerJwt.Header.Enc, encryptingCredentials.Key)));
+
             var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
             if (!JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10734));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10734));
 
             var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Enc);
             if (encryptionProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10730));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
 
-            var encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
-            return new JwtSecurityToken(
-                            header,
-                            innerJwt,
-                            header.Base64UrlEncode(),
-                            string.Empty,
-                            Base64UrlEncoder.Encode(encryptionResult.IV),
-                            Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
-                            Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
+            try
+            {
+                var encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
+                return new JwtSecurityToken(
+                                header,
+                                innerJwt,
+                                header.Base64UrlEncode(),
+                                string.Empty,
+                                Base64UrlEncoder.Encode(encryptionResult.IV),
+                                Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
+                                Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
+            }
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
@@ -561,14 +570,14 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Convert string into <see cref="JwtSecurityToken"/>.
+        /// Converts a string into an instance of <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) in Compact Serialization JWS or JWE format.</param>
+        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length * 2' > MaximumTokenSizeInBytes.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
-        /// <remarks>If the string is in JWE Compact Serialization format, only the protected header will be deserialized.
+        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
         public JwtSecurityToken ReadJwtToken(string token)
         {
@@ -579,7 +588,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             if (!CanReadToken(token))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10708, GetType(), token)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, token)));
 
             var jwt = new JwtSecurityToken();
             jwt.Decode(token.Split('.'), token);
@@ -587,14 +596,15 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Reads a token encoded in JSON Compact serialized format.
+        /// Converts a string into an instance of <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT). May be signed as per 'JSON Web Signature' (JWS).</param>
-        /// <remarks>
-        /// The JWT must be encoded using Base64UrlEncoding of the UTF-8 representation of the JWT: Header, Payload and Signature.
-        /// The contents of the JWT returned are not validated in any way, the token is simply decoded. Use ValidateToken to validate the JWT.
-        /// </remarks>
+        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
+        /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
+        /// <exception cref="ArgumentException">'token.Length * 2' > MaximumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
+        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
+        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
         public override SecurityToken ReadToken(string token)
         {
             return ReadJwtToken(token);
@@ -606,15 +616,16 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="reader"><see cref="XmlReader"/>.</param>
         /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
         /// <returns>The <see cref="SecurityToken"/></returns>
+        /// <remarks>This method is not current supported.</remarks>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Reads and validates a token encoded in JSON Compact serialized format.
+        /// Reads and validates a 'JSON Web Token' (JWT) encoded as a JWS or JWE in Compact Serialized Format.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) that has been encoded as a JSON object. May be signed using 'JSON Web Signature' (JWS).</param>
+        /// <param name="token">the JWT encoded as JWE or JWS</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
@@ -636,7 +647,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, GetType(), token)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, token)));
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
@@ -735,15 +746,21 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Writes the <see cref="JwtSecurityToken"/> as a JSON Compact serialized format string.
+        /// Serializes a <see cref="JwtSecurityToken"/> into a JWT in Compact Serialization Format.
         /// </summary>
         /// <param name="token"><see cref="JwtSecurityToken"/> to serialize.</param>
         /// <remarks>
-        /// <para>If the <see cref="JwtSecurityToken.SigningCredentials"/> are not null, the encoding will contain a signature.</para>
+        /// <para>The JWT will be serialized as a JWE or JWS.</para>
+        /// <para><see cref="JwtSecurityToken.Payload"/> will be used to create the JWT. If there is an inner token, the inner token's payload will be used.</para>
+        /// <para>If either <see cref="JwtSecurityToken.SigningCredentials"/> or <see cref="JwtSecurityToken.InnerToken"/>.SigningCredentials are set, the JWT will be signed.</para>
+        /// <para>If <see cref="JwtSecurityToken.EncryptingCredentials"/> is set, a JWE will be created using the JWT above as the plaintext.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">'token' is null.</exception>
         /// <exception cref="ArgumentException">'token' is not a not <see cref="JwtSecurityToken"/>.</exception>
-        /// <returns>The <see cref="JwtSecurityToken"/> as a signed (if <see cref="SigningCredentials"/> exist) encoded string.</returns>
+        /// <exception cref="SecurityTokenEncryptionFailedException">both <see cref="JwtSecurityToken.SigningCredentials"/> and <see cref="JwtSecurityToken.InnerToken"/> are set.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">both <see cref="JwtSecurityToken.InnerToken"/> and <see cref="JwtSecurityToken.InnerToken"/>.EncryptingCredentials are set.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if <see cref="JwtSecurityToken.InnerToken"/> is set and <see cref="JwtSecurityToken.EncryptingCredentials"/> is not set.</exception>
+        /// <returns>A JWE or JWS in 'Compact Serialization Format'.</returns>
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
@@ -753,29 +770,35 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()), nameof(token)));
 
-            var payload = jwtToken.InnerToken == null ? jwtToken.Payload : jwtToken.InnerToken.Payload;
-            var encodedPayload = jwtToken.InnerToken == null ? jwtToken.EncodedPayload : jwtToken.InnerToken.EncodedPayload;
+            var encodedPayload = jwtToken.EncodedPayload;
             var encodedSignature = string.Empty;
             var encodedHeader = string.Empty;
             if (jwtToken.InnerToken != null)
             {
+                if (jwtToken.SigningCredentials != null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10736));
+
+                if (jwtToken.InnerToken.Header.EncryptingCredentials != null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10737));
+
                 if (jwtToken.Header.EncryptingCredentials == null)
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10735));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10735));
 
-                encodedHeader = jwtToken.InnerToken.EncodedHeader;
-                if (jwtToken.InnerToken.Header.SigningCredentials != null)
-                    encodedSignature =  CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.InnerToken.SigningCredentials);
+                if (jwtToken.InnerToken.SigningCredentials != null)
+                    encodedSignature = CreateEncodedSignature(string.Concat(jwtToken.InnerToken.EncodedHeader, ".", jwtToken.EncodedPayload), jwtToken.InnerToken.SigningCredentials);
 
-                return CreateEncryptedToken(new JwtSecurityToken(jwtToken.InnerToken.Header, jwtToken.InnerToken.Payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
+                return CreateEncryptedToken(new JwtSecurityToken(jwtToken.InnerToken.Header, jwtToken.InnerToken.Payload, jwtToken.InnerToken.EncodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
             }
 
+            // if EncryptingCredentials isn't set, then we need to create JWE
+            // first create a new header with the SigningCredentials, Create a JWS then wrap it in a JWE
             var header = jwtToken.EncryptingCredentials == null ? jwtToken.Header : new JwtHeader(jwtToken.SigningCredentials);
             encodedHeader = header.Base64UrlEncode();
             if (jwtToken.SigningCredentials != null)
                 encodedSignature =  CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
 
             if (jwtToken.EncryptingCredentials != null)
-                return CreateEncryptedToken(new JwtSecurityToken(header, payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
+                return CreateEncryptedToken(new JwtSecurityToken(header, jwtToken.Payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
             else
                 return string.Concat(encodedHeader, ".", encodedPayload, ".", encodedSignature);
         }
