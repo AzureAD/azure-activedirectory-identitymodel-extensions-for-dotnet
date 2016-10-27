@@ -335,10 +335,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                if (tokenParts[1] == string.Empty)
-                    return Regex.IsMatch(tokenString, JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
-                else
-                    return Regex.IsMatch(tokenString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+                return Regex.IsMatch(tokenString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
             }
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);

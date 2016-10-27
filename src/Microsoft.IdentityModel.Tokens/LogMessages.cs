@@ -86,19 +86,19 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
         internal const string IDX10644 = "IDX10644: Crypto operation not supported.";
         internal const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
-        internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}', Key: '{1}'), but Create.(algorithm, key) as '{2}' == NULL.";
-        internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupported(Algorithm: '{0}'), but Create.(algorithm) as '{1}' == NULL.";
+        internal const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}', Key: '{1}'), but Create.(algorithm, args) as '{2}' == NULL.";
+        internal const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}'), but Create.(algorithm, args) as '{1}' == NULL.";
         internal const string IDX10648 = "IDX10648: The SecurityKey provided for AuthenticatedEncryption must be a SymmetricSecurityKey. Type is: '{0}'.";
         internal const string IDX10649 = "IDX10649: Failed to create a SymmetricSignatureProvider for the algorithm '{0}'.";
-        internal const string IDX10650 = "IDX10650: Failed to verify ciphertext with aad: '{0}'; iv: '{1}'; and authenticationTag: '{2}'.";
+        internal const string IDX10650 = "IDX10650: Failed to verify ciphertext with aad '{0}'; iv '{1}'; and authenticationTag '{2}'.";
         internal const string IDX10651 = "IDX10651: The key length for the algorithm '{0]' cannot be less than '{1}'.";
         internal const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
         internal const string IDX10653 = "IDX10653: The encryption algorithm '{0}' requires a key size of at least '{1}' bits. Key '{2}', is of size: '{3}'.";
-        internal const string IDX10654 = "IDX10654: Decryption failed, exception from crypto operation: '{0}'.";
+        internal const string IDX10654 = "IDX10654: Decryption failed. Crypto operation exception: '{0}'.";
         internal const string IDX10655 = "IDX10655: 'length' must be greater than 1: '{0}'";
         internal const string IDX10656 = "IDX10656: 'length' cannot be greater than signature.Length. length: '{0}', signature.Length: '{1}'.";
-        internal const string IDX10657 = "IDX10657: Unable to create KeyedHashAlgorithm for Algorithm: '{0}'.";
-        internal const string IDX10658 = "IDX10658: Unable to obtain byte[] (needed for KeyHashAlgorithm) from SecurityKey: '{0}'.";
+        internal const string IDX10657 = "IDX10657: Unable to create KeyedHashAlgorithm for algorithm '{0}'.";
+        internal const string IDX10658 = "IDX10658: Unable to obtain required byte array for KeyHashAlgorithm from SecurityKey: '{0}'.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

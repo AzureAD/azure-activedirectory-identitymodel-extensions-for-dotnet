@@ -60,12 +60,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// JWE - Token format: 'protectedheader.encryptedkey.iv.cyphertext.authenticationtag'.
         /// </summary>
-        public const string JweCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$";
-
-        /// <summary>
-        /// JWE - Token format: 'protectedheader..iv.cyphertext.authenticationtag'. encryptedkey is empty, implying 'dir'.
-        /// </summary>
-        public const string JweCompactDirAlgSerializationRegex = @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        public const string JweCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$";
 
         /// <summary>
         /// The number of parts in a JWE token.
