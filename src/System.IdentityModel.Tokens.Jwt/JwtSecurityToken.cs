@@ -63,23 +63,23 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
                 if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 if (tokenParts[1] == string.Empty)
                 {
                     if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactDirAlgSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
                 }
                 else
                 {
                     if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
                 }
             }
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, nameof(jwtEncodedString), jwtEncodedString)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
 
             Decode(tokenParts, jwtEncodedString);
         }
