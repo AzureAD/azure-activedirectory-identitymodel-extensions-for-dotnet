@@ -151,7 +151,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static readonly JsonWebKey JsonWebKeyRsa256Public;
         public static readonly JsonWebKey JsonWebKeyEcdsa256;
         public static readonly JsonWebKey JsonWebKeyEcdsa256Public;
-        public static readonly JsonWebKey JsonWebKeySymmetric256;
         public static readonly JsonWebKey JsonWebKeySymmetric256_2;
 
         // SymmetricKeys
@@ -467,18 +466,48 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
             };
 
-            JsonWebKeySymmetric256 = new JsonWebKey
-            {
-                K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=",
-                Kty = JsonWebAlgorithmsKeyTypes.Octet
-            };
-
             JsonWebKeySymmetric256_2 = new JsonWebKey
             {
                 K = "vAhpeveLSFSsPs5rg+CPdLYor40ISGgdpen+FXzCSJg=",
                 Kty = JsonWebAlgorithmsKeyTypes.Octet
             };
+        }
 
+        public static string JsonWebKeySymmetricKid256
+        {
+            get
+            {
+                return "JsonWebKeySymmetricKid256";
+            }
+        }
+
+        public static string JsonWebKeySymmetricBytesEncoded256
+        {
+            get
+            {
+                return "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
+            }
+        }
+
+        public static byte[] JsonWebKeySymmetricBytes256
+        {
+            get
+            {
+                return Base64UrlEncoder.DecodeBytes("Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=");
+            }
+        }
+
+        public static JsonWebKey JsonWebKeySymmetric256
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    K = JsonWebKeySymmetricBytesEncoded256,
+                    KeyId = JsonWebKeySymmetricKid256,
+                    Kty = JsonWebAlgorithmsKeyTypes.Octet
+                };
+            }
         }
     }
 }
