@@ -1273,7 +1273,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private string DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SymmetricSecurityKey key)
+        private string DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
         {
             var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Header.Enc);
             if (decryptionProvider == null)
@@ -1353,24 +1353,17 @@ namespace System.IdentityModel.Tokens.Jwt
                     continue;
                 }
 
-                var cek = key as SymmetricSecurityKey;
-                if (cek == null)
-                {
-                    IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10608, key, typeof(SymmetricSecurityKey));
-                    continue;
-                }
-
                 try
                 {
-                    return DecryptToken(jwtToken, cryptoProviderFactory, cek);
+                    return DecryptToken(jwtToken, cryptoProviderFactory, key);
                 }
                 catch (Exception ex)
                 {
                     exceptionStrings.AppendLine(ex.ToString());
                 }
 
-                if (cek != null)
-                    keysAttempted.AppendLine(cek.ToString());
+                if (key != null)
+                    keysAttempted.AppendLine(key.ToString());
             }
 
             if (keysAttempted.Length > 0)
