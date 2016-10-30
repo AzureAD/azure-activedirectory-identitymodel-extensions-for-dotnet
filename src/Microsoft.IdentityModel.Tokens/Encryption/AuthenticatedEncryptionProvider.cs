@@ -57,13 +57,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'algorithm' is not supported.</exception>
         /// <exception cref="ArgumentException">a symmetricSignatureProvider is not created.</exception>
         /// </summary>
-        public AuthenticatedEncryptionProvider(SymmetricSecurityKey key, string algorithm)
+        public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (!IsSupportedAlgorithm(key, algorithm))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, GetType(), algorithm, key)));
 
             ValidateKeySize(key, algorithm);
             _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
@@ -90,9 +93,9 @@ namespace Microsoft.IdentityModel.Tokens
         public string Context { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SymmetricSecurityKey"/> that is being used.
+        /// Gets the <see cref="SecurityKey"/> that is being used.
         /// </summary>
-        public SymmetricSecurityKey Key { get; private set; }
+        public SecurityKey Key { get; private set; }
 
         /// <summary>
         /// Encrypts the 'plaintext'
@@ -209,30 +212,42 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private AuthenticatedKeys GetAlgorithmParameters(SymmetricSecurityKey key, string algorithm)
+        /// <summary>
+        /// Checks if an 'key, algorithm' pair is supported
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/></param>
+        /// <param name="algorithm">the algorithm to check.</param>
+        /// <returns>true if 'key, algorithm' pair is supported.</returns>
+        protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            int keyLength = 16;
-            if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal))
-            {
-                if (key.Key.Length < 32)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10651, algorithm, 256)));
-            }
-            else if (algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal))
-            {
-                if (key.Key.Length < 64)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10651, algorithm, 512)));
+            if (key == null)
+                return false;
 
-                keyLength = 32;
-            }
-            else
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
-            }
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
 
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512)))
+                return false;
+
+            if (key is SymmetricSecurityKey)
+                return true;
+
+            var jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+
+            return false;
+        }
+
+        private AuthenticatedKeys GetAlgorithmParameters(SecurityKey key, string algorithm)
+        {
+            int keyLength = algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal) ? 32 : 16;
+
+            var keyBytes = GetKeyBytes(key);
             byte[] aesKey = new byte[keyLength];
             byte[] hmacKey = new byte[keyLength];
-            Array.Copy(key.Key, keyLength, aesKey, 0, keyLength);
-            Array.Copy(key.Key, hmacKey, keyLength);
+            Array.Copy(keyBytes, keyLength, aesKey, 0, keyLength);
+            Array.Copy(keyBytes, hmacKey, keyLength);
             return new AuthenticatedKeys()
             {
                 AesKey = new SymmetricSecurityKey(aesKey),
@@ -251,25 +266,65 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
-        private void ValidateKeySize(SymmetricSecurityKey key, string algorithm)
+        /// <summary>
+        /// Called to obtain the byte[] needed to create a <see cref="KeyedHashAlgorithm"/>
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/>that will be used to obtain the byte[].</param>
+        /// <returns><see cref="byte"/>[] that is used to populated the KeyedHashAlgorithm.</returns>
+        /// <exception cref="ArgumentNullException">if key is null.</exception>
+        /// <exception cref="ArgumentException">if a byte[] can not be obtained from SecurityKey.</exception>
+        /// <remarks><see cref="SymmetricSecurityKey"/> and <see cref="JsonWebKey"/> are supported.
+        /// <para>For a <see cref="SymmetricSecurityKey"/> .Key is returned</para>
+        /// <para>For a <see cref="JsonWebKey"/>Base64UrlEncoder.DecodeBytes is called with <see cref="JsonWebKey.K"/> if <see cref="JsonWebKey.Kty"/> == JsonWebAlgorithmsKeyTypes.Octet</para>
+        /// </remarks>
+        protected virtual byte[] GetKeyBytes(SecurityKey key)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+            if (symmetricSecurityKey != null)
+                return symmetricSecurityKey.Key;
+
+            JsonWebKey jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, key)));
+        }
+
+        /// <summary>
+        /// Checks that the key has sufficient length
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/> that contains bytes.</param>
+        /// <param name="algorithm">the algorithm to apply.</param>
+        /// <exception cref="ArgumentNullException">if 'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'algorithm' is null or empty.</exception>
+        protected virtual void ValidateKeySize(SecurityKey key, string algorithm)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
             if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
             {
-                if (key.Key.Length < 32)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes128CbcHmacSha256, 256, key.KeyId, key.Key.Length << 3)));
+                if (key.KeySize < 256)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes128CbcHmacSha256, 256, key.KeyId, key.KeySize)));
 
                 return;
             }
 
             if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
             {
-                if (key.Key.Length < 64)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes256CbcHmacSha512, 512, key.KeyId, key.Key.Length << 3)));
+                if (key.KeySize < 512)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10653, SecurityAlgorithms.Aes256CbcHmacSha512, 512, key.KeyId, key.KeySize)));
 
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
     }
 }
