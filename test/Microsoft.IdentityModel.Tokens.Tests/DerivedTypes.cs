@@ -251,6 +251,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class DerivedAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider
     {
+        public DerivedAuthenticatedEncryptionProvider()
+            : base(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256)
+        {
+        }
         public DerivedAuthenticatedEncryptionProvider(SymmetricSecurityKey key, string algorithm)
             : base(key, algorithm)
         {
@@ -259,6 +263,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public bool DecryptCalled { get; set; } = false;
 
         public bool EncryptCalled { get; set; } = false;
+
+        public bool GetKeyBytesCalled { get; set; } = false;
+
+        public bool IsSupportedAlgorithmCalled { get; set; } = false;
+
+        public bool ValidateKeySizeCalled { get; set; } = false;
 
         public override byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
@@ -270,6 +280,43 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             EncryptCalled = true;
             return base.Encrypt(plaintext, authenticatedData);
+        }
+
+        protected override byte[] GetKeyBytes(SecurityKey key)
+        {
+            GetKeyBytesCalled = true;
+            return base.GetKeyBytes(key);
+        }
+
+        public byte[] GetKeyBytesPublic(SecurityKey key)
+        {
+            GetKeyBytesCalled = true;
+            return base.GetKeyBytes(key);
+        }
+
+        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            IsSupportedAlgorithmCalled = true;
+            return base.IsSupportedAlgorithm(key, algorithm);
+        }
+
+        public bool IsSupportedAlgorithmPublic(SecurityKey key, string algorithm)
+        {
+            IsSupportedAlgorithmCalled = true;
+            return base.IsSupportedAlgorithm(key, algorithm);
+        }
+
+        protected override void ValidateKeySize(SecurityKey key, string algorithm)
+        {
+            ValidateKeySizeCalled = true;
+            base.ValidateKeySize(key, algorithm);
+        }
+
+        public void ValidateKeySizePublic(SecurityKey key, string algorithm)
+        {
+            ValidateKeySizeCalled = true;
+
+            base.ValidateKeySize(key, algorithm);
         }
     }
 

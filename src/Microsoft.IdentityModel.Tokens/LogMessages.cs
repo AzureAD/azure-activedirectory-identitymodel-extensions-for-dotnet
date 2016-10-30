@@ -99,6 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10656 = "IDX10656: 'length' cannot be greater than signature.Length. length: '{0}', signature.Length: '{1}'.";
         internal const string IDX10657 = "IDX10657: Unable to create KeyedHashAlgorithm for algorithm '{0}'.";
         internal const string IDX10658 = "IDX10658: Unable to obtain required byte array for KeyHashAlgorithm from SecurityKey: '{0}'.";
+        internal const string IDX10659 = "IDX10659: Unable to create '{0}', algorithm '{1}'; key: '{2}' is not supported.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

@@ -102,12 +102,33 @@ namespace Microsoft.IdentityModel.Tokens
             return IsSupportedHashAlgorithm(algorithm);
         }
 
+        private bool IsSupportedAuthenticatedEncryptionAlgorithm(string algorithm, SecurityKey key)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512)))
+                return false;
+
+            if (key is SymmetricSecurityKey)
+                return true;
+
+            var jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+
+            return false;
+        }
+
         /// <summary>
-        /// Answers if an algorithm is supported
+        /// Checks if an 'algorithm, key' pair is supported.
         /// </summary>
-        /// <param name="algorithm">the algorithm to use</param>
-        /// <param name="key">the <see cref="SecurityKey"/></param>
-        /// <returns></returns>
+        /// <param name="algorithm">the algorithm to check.</param>
+        /// <param name="key">the <see cref="SecurityKey"/>.</param>
+        /// <returns>true if 'algorithm, key' pair is supported.</returns>
         public virtual bool IsSupportedAlgorithm(string algorithm, SecurityKey key)
         {
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
@@ -228,12 +249,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return cryptoProvider;
             }
 
-            var symmetricKey = key as SymmetricSecurityKey;
-            if (symmetricKey == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10648, key.GetType())));
-
-            if (IsSupportedAlgorithm(algorithm, key))
-                return new AuthenticatedEncryptionProvider(symmetricKey, algorithm);
+            if (IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
+                return new AuthenticatedEncryptionProvider(key, algorithm);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
