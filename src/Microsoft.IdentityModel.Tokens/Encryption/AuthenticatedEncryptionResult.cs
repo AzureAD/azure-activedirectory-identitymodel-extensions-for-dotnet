@@ -35,11 +35,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new <see cref="AuthenticatedEncryptionResult"/>
         /// </summary>
-        /// <param name="key">the <see cref="SymmetricSecurityKey"/> used during <see cref="AuthenticatedEncryptionProvider.Encrypt(byte[], byte[])"/></param>
+        /// <param name="key">the <see cref="SecurityKey"/> used during <see cref="AuthenticatedEncryptionProvider.Encrypt(byte[], byte[])"/></param>
         /// <param name="ciphertext">protected text.</param>
         /// <param name="iv">the initialization vector used.</param>
         /// <param name="authenticationTag">the bytes that need be passed to <see cref="AuthenticatedEncryptionProvider.Decrypt(byte[], byte[], byte[], byte[])"/>.</param>
-        public AuthenticatedEncryptionResult(SymmetricSecurityKey key, byte[] ciphertext, byte[] iv, byte[] authenticationTag)
+        public AuthenticatedEncryptionResult(SecurityKey key, byte[] ciphertext, byte[] iv, byte[] authenticationTag)
         {
             Key = key;
             Ciphertext = ciphertext;
@@ -48,9 +48,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the <see cref="SymmetricSecurityKey"/>.
+        /// Gets the <see cref="SecurityKey"/>.
         /// </summary>
-        public SymmetricSecurityKey Key { get; private set; }
+        public SecurityKey Key { get; private set; }
 
         /// <summary>
         /// Gets the Ciphertext.

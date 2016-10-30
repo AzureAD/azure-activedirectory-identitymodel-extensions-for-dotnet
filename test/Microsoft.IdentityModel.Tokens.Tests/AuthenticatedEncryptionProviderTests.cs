@@ -31,6 +31,29 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+    public class AuthenticatedEncryptionTestParams
+    {
+        public byte[] AuthenticatedData { get; set; }
+        public byte[] Bytes { get; set; }
+        public string DecryptAlgorithm { get; set; }
+        public SecurityKey DecryptKey { get; set; }
+        public ExpectedException EE { get; set; }
+        public string EncryptAlgorithm { get; set; }
+        public AuthenticatedEncryptionResult EncryptionResults { get; set; }
+        public SecurityKey EncryptKey { get; set; }
+        public bool IsSupportedAlgorithm { get; set; }
+        public byte[] KeyBytes { get; set; }
+        public int KeySize { get; set; }
+        public byte[] Plaintext { get; set; }
+        public AuthenticatedEncryptionProvider Provider { get; set; }
+        public string TestId { get; set; }
+
+        public override string ToString()
+        {
+            return $"{TestId}, {DecryptAlgorithm}, {EncryptAlgorithm}";
+        }
+    }
+
     /// <summary>
     /// Tests for AuthenticatedEncryptionProvider
     /// Constructors
@@ -84,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test3", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test4", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.NoExceptionExpected);
-            theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10652:"));
+            theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10659:"));
             theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
             theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
 
@@ -400,39 +423,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Provider = provider,
                 TestId = testId
             });
-        }
-
-        [Fact]
-        public void DecryptVirtual()
-        {
-            var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
-            var authenticatedData = Guid.NewGuid().ToByteArray();
-            var results = provider.Encrypt(Guid.NewGuid().ToByteArray(), authenticatedData);
-            var derivedProvider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
-            derivedProvider.Decrypt(results.Ciphertext, authenticatedData, results.IV, results.AuthenticationTag);
-            Assert.True(derivedProvider.DecryptCalled);
-        }
-
-        [Fact]
-        public void EncryptVirtual()
-        {
-            var provider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
-            provider.Encrypt(Guid.NewGuid().ToByteArray(), Guid.NewGuid().ToByteArray());
-            Assert.True(provider.EncryptCalled);
-        }
-
-        public class AuthenticatedEncryptionTestParams
-        {
-            public byte[] AuthenticatedData { get; set; }
-            public string DecryptAlgorithm { get; set; }
-            public SymmetricSecurityKey DecryptKey { get; set; }
-            public ExpectedException EE { get; set; }
-            public string EncryptAlgorithm { get; set; }
-            public AuthenticatedEncryptionResult EncryptionResults { get; set; }
-            public SymmetricSecurityKey EncryptKey { get; set; }
-            public byte[] Plaintext { get; set; }
-            public AuthenticatedEncryptionProvider Provider { get; set; }
-            public string TestId { get; set; }
         }
     }
 }
