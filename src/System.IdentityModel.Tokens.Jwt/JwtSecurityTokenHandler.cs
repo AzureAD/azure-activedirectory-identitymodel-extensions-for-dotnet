@@ -304,10 +304,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>see: http://tools.ietf.org/html/rfc7519 </para>
         /// </summary>
         /// <param name="tokenString">String that should represent a valid JWT.</param>
-        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of:
+        /// <remarks>A JWT can be validated via the following RegExes:
         /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
-        /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
-        /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
+        /// <para>JWE: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$"</para>
         /// </remarks>
         /// <returns>
         /// <para>'false' if the token is null or whitespace.</para>
