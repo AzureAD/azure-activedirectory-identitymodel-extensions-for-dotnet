@@ -396,7 +396,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(CreationJWEParams))]
+        [Theory, MemberData(nameof(RoundTripJWEParams))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, ExpectedException ee)
         {
@@ -408,14 +408,20 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 SecurityToken token = null;
                 var claimsPrincipal = handler.ValidateToken(jweCreatedInMemory.RawData, validationParameters, out token);
                 ee.ProcessNoException();
-                var jweValidated = token as JwtSecurityToken;
+                var outerToken = token as JwtSecurityToken;
+
+                Assert.True(outerToken != null, "ValidateToken should not return a null token for the JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken, testId);
+
+                Assert.True(outerToken.InnerToken != null, "ValidateToken should not return a null token for the inner JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, testId);
 
                 var context = new CompareContext();
-                if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, jweValidated.Payload, context))
+                if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, outerToken.Payload, context))
                     context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.Payload");
 
-                if (jweValidated.InnerToken == null)
-                    context.Diffs.Add("jweValidated.InnerToken == null");
+                if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, outerToken.InnerToken.Payload, context))
+                    context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.InnerToken.Payload");
 
                 TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWETokens: "), context.Diffs);
             }
@@ -425,7 +431,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        public static TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, ExpectedException> CreationJWEParams()
+        public static TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, ExpectedException> RoundTripJWEParams()
         {
             var theoryData = new TheoryData<string, SecurityTokenDescriptor, TokenValidationParameters, ExpectedException>();
 
@@ -464,6 +470,106 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = Default.SymmetricSigningKey256,
                     TokenDecryptionKey = NotDefault.SymmetricEncryptionKey,
                 },
+                ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:")
+            );
+
+            return theoryData;
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreationJWEParams))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void CreateJWETokens(string testId, string jweToken, TokenValidationParameters validationParameters, JwtPayload expectedPayload, ExpectedException ee)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimTypeMap.Clear();
+            try
+            {
+                SecurityToken token = null;
+                var claimsPrincipal = handler.ValidateToken(jweToken, validationParameters, out token);
+                ee.ProcessNoException();
+                var outerToken = token as JwtSecurityToken;
+
+                Assert.True(outerToken != null, "ValidateToken should not return a null token for the JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken, testId);
+
+                Assert.True(outerToken.InnerToken != null, "ValidateToken should not return a null token for the inner JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, testId);
+
+                var context = new CompareContext();
+                if (!IdentityComparer.AreEqual(outerToken.Payload, outerToken.InnerToken.Payload, context))
+                    context.Diffs.Add("outerToken.Payload != outerToken.InnerToken.Payload");
+
+                foreach(KeyValuePair<string, object> claim in expectedPayload)
+                {
+                    if (!outerToken.Payload.ContainsKey(claim.Key))
+                    {
+                        context.Diffs.Add(String.Format("expectedPayload claim {0} : {1} doesn't exist in outerToken.Payload", claim.Key, claim.Value));
+                    }
+                    else
+                    {
+                        if ((outerToken.Payload[claim.Key] != null && !outerToken.Payload[claim.Key].Equals(claim.Value)) || (outerToken.Payload[claim.Key] == null && claim.Value != null))
+                        {
+                            context.Diffs.Add(String.Format("expectedPayload claim {0} doesn't match in outerToken.Payload. Expected value: {1}. Outer token value: {2}", claim.Key, claim.Value, outerToken.Payload[claim.Key]));
+                        }
+                    }
+
+                }
+
+                TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "CreateJWETokens: "), context.Diffs);
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<string, string, TokenValidationParameters, JwtPayload, ExpectedException> CreationJWEParams()
+        {
+            var theoryData = new TheoryData<string, string, TokenValidationParameters, JwtPayload, ExpectedException>();
+            JwtPayload expectedPayload = new JwtPayload(ClaimSets.DefaultClaimsAsCreatedInPayload());
+
+            theoryData.Add(
+                "Test1",
+                EncodedJwts.JweTest1,
+                Default.SymmetricEncyptSignInfiniteLifetimeTokenValidationParameters,
+                expectedPayload,
+                ExpectedException.NoExceptionExpected
+            );
+
+            theoryData.Add(
+                "Test2",
+                EncodedJwts.JweTest2,
+                Default.SymmetricEncyptSignInfiniteLifetimeTokenValidationParameters,
+                expectedPayload,
+                ExpectedException.NoExceptionExpected
+            );
+
+            // signing key not found
+            theoryData.Add(
+                "Test3",
+                EncodedJwts.JweTest3,
+                new TokenValidationParameters
+                {
+                    IssuerSigningKey = NotDefault.SymmetricSigningKey256,
+                    TokenDecryptionKey = Default.SymmetricEncryptionKey256,
+                    ValidateLifetime = false
+                },
+                expectedPayload,
+                ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+            );
+
+            // encryption key not found
+            theoryData.Add(
+                "Test4",
+                EncodedJwts.JweTest4,
+                new TokenValidationParameters
+                {
+                    IssuerSigningKey = Default.SymmetricSigningKey256,
+                    TokenDecryptionKey = NotDefault.SymmetricEncryptionKey,
+                    ValidateLifetime = false
+                },
+                expectedPayload,
                 ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:")
             );
 
