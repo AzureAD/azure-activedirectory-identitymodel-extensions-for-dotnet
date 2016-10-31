@@ -325,6 +325,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
+        public static IEnumerable<Claim> DefaultClaimsAsCreatedInPayload()
+        {
+            return new List<Claim>()
+            {
+                new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/country", "USA"),
+                new Claim("email", "Bob@contoso.com"),
+                new Claim("given_name", "Bob"),
+                new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/homephone", "555.1212"),
+                new Claim("unique_name", "Jean-Sébastien"),
+                new Claim("iss", "http://Default.Issuer.com"),
+                new Claim("aud", "http://Default.Audience.com")
+            };
+        }
+
         public static IEnumerable<Claim> AllInboundShortClaimTypes(string issuer, string originalIssuer, IEnumerable<Claim> extraClaims = null)
         {
             foreach ( KeyValuePair<string, string> pair in JwtSecurityTokenHandler.DefaultInboundClaimTypeMap )

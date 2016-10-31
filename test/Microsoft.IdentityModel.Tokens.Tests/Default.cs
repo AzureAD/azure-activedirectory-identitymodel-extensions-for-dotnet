@@ -375,6 +375,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get { return TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey256); }
         }
 
+        public static TokenValidationParameters SymmetricEncyptSignInfiniteLifetimeTokenValidationParameters
+        {
+            get
+            {
+                TokenValidationParameters parameters = TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey256);
+                parameters.ValidateLifetime = false;
+                return parameters;
+            }
+        }
+
         public static TokenValidationParameters TokenValidationParameters(SecurityKey encryptionKey, SecurityKey signingKey)
         {
             return new TokenValidationParameters
