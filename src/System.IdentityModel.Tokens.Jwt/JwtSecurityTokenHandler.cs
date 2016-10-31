@@ -864,12 +864,12 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Validates that the signature, if found and / or required is valid.
+        /// Validates that the signature, if found or required, is valid.
         /// </summary>
         /// <param name="token">A JWS token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
-        /// <exception cref="ArgumentNullException">If 'jwt is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">If 'validationParameters is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'jwt' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
         /// This can indicate that a key refresh is required.</exception>
