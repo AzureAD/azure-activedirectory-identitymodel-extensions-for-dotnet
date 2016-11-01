@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 {
     public class LoggerTests
     {
-        [Fact(DisplayName = "LoggerTests : LogMessageAndThrowException")]
+        [Fact]
         public void LogMessageAndThrowException()
         {
             SampleListener listener = new SampleListener();
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             }
         }
 
-        [Fact(DisplayName = "LogHelper.LogException")]
+        [Fact]
         public void LogException()
         {
             var messageWithParams = Guid.NewGuid().ToString() + "{0}";
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             File.Delete(filename);
         }
 
-        [Fact(DisplayName = "LoggerTests: Test TextWriterEventListener with access denied to file.")]
+        [Fact]
         public void TextListenerCantAccessFileToWrite()
         {
             SampleListener listener = new SampleListener();
@@ -171,7 +171,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
             File.Delete(fileName);
 
         }
-        [Fact(DisplayName = "LoggerTests: Testing TextWriterEventListener Constructors ")]
+
+        [Fact]
         public void TextWriterEventListenerConstructors()
         {
             // using defaults
@@ -180,6 +181,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning!");
             }
+
             string logText = File.ReadAllText(TextWriterEventListener.DefaultLogFileName);
             Assert.Contains("This is a warning!", logText);
             File.Delete(TextWriterEventListener.DefaultLogFileName);
