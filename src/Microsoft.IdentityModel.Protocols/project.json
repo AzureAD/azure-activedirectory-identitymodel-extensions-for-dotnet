@@ -1,8 +1,8 @@
 {
-  "version": "2.1.0-*",
+  "version": "2.1.1",
   "description": "Provides types that are common across openidconnect and wsfed protocols.",
   "dependencies": {
-    "System.IdentityModel.Tokens.Jwt": "5.1.0-*"
+    "System.IdentityModel.Tokens.Jwt": "5.1.1"
   },
   "frameworks": {
     "netstandard1.4": {
