@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add(new AuthenticatedEncryptionTestParams
             {
                 DecryptKey = Default.AsymmetricSigningKey,
-                EE = ExpectedException.ArgumentException("IDX10658:"),
+                EE = ExpectedException.ArgumentException("IDX10667:"),
                 Provider = new DerivedAuthenticatedEncryptionProvider(),
                 TestId = "Test3"
             });
