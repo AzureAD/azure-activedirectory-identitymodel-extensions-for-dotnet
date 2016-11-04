@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols")]
 [assembly: AssemblyDescription("Contains classes for OpenId Connect protocol.")]
 [assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

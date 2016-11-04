@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens")]
 [assembly: AssemblyDescription("Support for SecurityTokens.")]
 [assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

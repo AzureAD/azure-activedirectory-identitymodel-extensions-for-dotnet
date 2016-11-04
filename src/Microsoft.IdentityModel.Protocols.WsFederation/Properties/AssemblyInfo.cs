@@ -36,6 +36,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols.WsFederation")]
 [assembly: AssemblyDescription("Support for WsFederation.")]
 [assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols.WsFederation")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("System.IdentityModel.Tokens.Jwt")]
 [assembly: AssemblyDescription("Contains classes for Json Web Tokens.")]
 [assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyProduct("System.IdentityModel.Tokens.Jwt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
