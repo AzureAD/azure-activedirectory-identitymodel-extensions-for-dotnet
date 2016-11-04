@@ -282,6 +282,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return new ExpectedException(typeExpected: typeof(SecurityTokenInvalidSigningKeyException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
+        public static ExpectedException KeyWrapUnwrapException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeExpected: typeof(KeyWrapUnwrapException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+        }
+
         public bool IgnoreInnerException { get; set; }
 
         public Type InnerTypeExpected { get; set; }
