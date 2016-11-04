@@ -1,5 +1,5 @@
 {
-  "version": "5.1.1",
+"version": "5.1.1-pre-311031854"
   "description": "Includes types that provide support for cryptographic operations.",
   "dependencies": {
     "Microsoft.IdentityModel.Logging": "1.1.1",
