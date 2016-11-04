@@ -367,4 +367,44 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
     }
+
+    // https://tools.ietf.org/html/rfc7516#appendix-A.3.3
+    // A.3.3 Key Encryption: Aes128 Key Wrap
+    public static class AES128_KeyWrap
+    {
+        public static string Algorithm
+        {
+            get { return SecurityAlgorithms.Aes128KW; }
+        }
+
+        public static string K
+        {
+            get { return "GawgguFyGrWKav7AX4VKUg"; }
+        }
+
+        public static byte[] CEK
+        {
+            get
+            {
+                return new byte[] { 4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
+                                    206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
+                                    44, 207 };
+            }
+        }
+
+        public static byte[] EncryptedKey
+        {
+            get
+            {
+                return new byte[] { 232, 160, 123, 211, 183, 76, 245, 132, 200, 128, 123, 75, 190, 216,
+                                    22, 67, 201, 138, 193, 186, 9, 91, 122, 31, 246, 90, 28, 139, 57, 3,
+                                    76, 124, 193, 11, 98, 37, 173, 61, 104, 57 };
+            }
+        }
+
+        public static string EncodedEncryptedKey
+        {
+            get { return "6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ"; }
+        }
+    }
 }

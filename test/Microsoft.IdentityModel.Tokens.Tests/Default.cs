@@ -223,6 +223,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        public static SymmetricSecurityKey SymmetricEncryptionKey128_2
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.SymmetricSecurityKey2_128.Key)
+                {
+                    KeyId = KeyingMaterial.SymmetricSecurityKey2_128.KeyId
+                };
+            }
+        }
+
         public static SymmetricSecurityKey SymmetricEncryptionKey256
         {
             get
@@ -230,6 +241,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_256.Key)
                 {
                     KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId
+                };
+            }
+        }
+
+        public static SymmetricSecurityKey SymmetricEncryptionKey256_2
+        {
+            get
+            {
+                return new SymmetricSecurityKey(KeyingMaterial.SymmetricSecurityKey2_256.Key)
+                {
+                    KeyId = KeyingMaterial.SymmetricSecurityKey2_256.KeyId
                 };
             }
         }
