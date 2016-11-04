@@ -6,6 +6,20 @@
   <coreFxOldVersion>4.3.0-\*</coreFxOldVersion>
   <coreFxNewVersion>4.3.0</coreFxNewVersion>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
+  <dependencies>
+    <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Logging": "1.1.0</nugetVersion>
+    </dependency>
+    <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Protocols": "2.1.0</nugetVersion>
+    </dependency>
+    <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Tokens": "5.1.0</nugetVersion>
+    </dependency>
+    <dependency>
+      <nugetVersion>"System.IdentityModel.Tokens.Jwt": "5.1.0</nugetVersion>
+    </dependency>
+  </dependencies>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Logging">
