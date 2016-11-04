@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Logging")]
 [assembly: AssemblyDescription("Contains classes for logger interfaces.")]
 [assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Logging")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
