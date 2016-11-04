@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens")]
 [assembly: AssemblyDescription("Support for SecurityTokens.")]
 [assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -39,4 +40,4 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(true)]
 [assembly: Guid("CC2DDB34-8FCE-4C93-9060-AF79263939B2")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyFileVersion("5.1.1")]
+[assembly: AssemblyVersion("5.1.1")]
