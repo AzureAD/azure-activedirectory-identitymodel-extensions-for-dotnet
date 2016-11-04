@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                 return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, key)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10667, key)));
         }
 
         /// <summary>
