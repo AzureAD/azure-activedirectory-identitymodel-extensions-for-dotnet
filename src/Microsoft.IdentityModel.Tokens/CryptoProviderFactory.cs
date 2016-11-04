@@ -123,6 +123,27 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+        private bool IsSupportedKeyWrapAlgorithm(string algorithm, SecurityKey key)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal)))
+                return false;
+
+            if (key is SymmetricSecurityKey)
+                return true;
+
+            var jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+
+            return false;
+        }
+
         /// <summary>
         /// Checks if an 'algorithm, key' pair is supported.
         /// </summary>
@@ -210,6 +231,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 case SecurityAlgorithms.Aes128CbcHmacSha256:
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
+                case SecurityAlgorithms.Aes128KW:
+                case SecurityAlgorithms.Aes256KW:
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha512Signature:
@@ -253,6 +276,37 @@ namespace Microsoft.IdentityModel.Tokens
                 return new AuthenticatedEncryptionProvider(key, algorithm);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="KeyWrapProvider"/> for a specific &lt;SecurityKey, Algorithm>.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to use.</param>
+        /// <returns>an instance of <see cref="KeyWrapProvider"/></returns>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="ArgumentException">'key' is not a <see cref="SymmetricSecurityKey"/>.</exception>
+        public virtual KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
+            {
+                var cryptoProvider = CustomCryptoProvider.Create(algorithm, key) as KeyWrapProvider;
+                if (cryptoProvider == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(KeyWrapProvider))));
+            }
+
+            if (IsSupportedKeyWrapAlgorithm(algorithm, key))
+                return new KeyWrapProvider(key, algorithm);
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, key, algorithm)));
         }
 
         /// <summary>
