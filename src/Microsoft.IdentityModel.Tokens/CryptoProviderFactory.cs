@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (IsSupportedKeyWrapAlgorithm(algorithm, key))
                 return new KeyWrapProvider(key, algorithm);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, key, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return new HMACSHA512(keyBytes);
 
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10657, algorithm)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10666, algorithm)));
             }
         }
 
