@@ -98,6 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string RsaPKCS1 = "RSA1_5";
         public const string RsaOAEP = "RSA-OAEP";
         public const string Aes128KW = "A128KW";
+        public const string Aes256KW = "A256KW";
 
         // see : https://tools.ietf.org/html/rfc7518#section-5.1
         public const string Aes128CbcHmacSha256 = "A128CBC-HS256";
