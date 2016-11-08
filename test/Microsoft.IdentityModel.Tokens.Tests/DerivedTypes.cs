@@ -331,10 +331,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public bool IsSupportedAlgorithmCalled { get; set; } = false;
         public bool UnwrapKeyCalled { get; set; } = false;
         public bool WrapKeyCalled { get; set; } = false;
-        protected override SymmetricAlgorithm GetSymmetricAlgorithm()
+        protected override SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
         {
             GetSymmetricAlgorithmCalled = true;
-            return base.GetSymmetricAlgorithm();
+            return base.GetSymmetricAlgorithm(key, algorithm);
         }
 
         protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)

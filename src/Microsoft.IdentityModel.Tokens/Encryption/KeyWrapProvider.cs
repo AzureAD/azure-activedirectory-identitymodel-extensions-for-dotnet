@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="InvalidCastException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
+        /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
         /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
         /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         /// </summary>
@@ -67,62 +67,14 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
 
             Algorithm = algorithm;
             Key = key;
 
-            _symmetricAlgorithm = GetSymmetricAlgorithm();
+            _symmetricAlgorithm = GetSymmetricAlgorithm(key, algorithm);
             if (_symmetricAlgorithm == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10669)));
-        }
-
-        /// <summary>
-        /// Returns the <see cref="SymmetricAlgorithm"/>.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="InvalidCastException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
-        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
-        /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
-        protected virtual SymmetricAlgorithm GetSymmetricAlgorithm()
-        {
-            byte[] keyBytes = null;
-
-            SymmetricSecurityKey symmetricSecurityKey = Key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
-                keyBytes = symmetricSecurityKey.Key;
-            else
-            {
-                JsonWebKey jsonWebKey = Key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
-            }
-
-            if (keyBytes == null)
-                throw LogHelper.LogExceptionMessage(new InvalidCastException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10657, Key.GetType())));
-
-            ValidateKeySize(keyBytes, Algorithm);
-
-            try
-            {
-                // Create the AES provider
-                SymmetricAlgorithm symmetricAlgorithm = Aes.Create();
-                symmetricAlgorithm.Mode = CipherMode.ECB;
-                symmetricAlgorithm.Padding = PaddingMode.None;
-                symmetricAlgorithm.KeySize = keyBytes.Length * 8;
-                symmetricAlgorithm.Key = keyBytes;
-
-                // Set the AES IV to Zeroes
-                var aesIv = new byte[symmetricAlgorithm.BlockSize >> 3];
-                Utility.Zero(aesIv);
-                symmetricAlgorithm.IV = aesIv;
-
-                return symmetricAlgorithm;
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10663, Key, Algorithm), ex));
-            }
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10669)));
         }
 
         /// <summary>
@@ -151,6 +103,54 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return temp;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="SymmetricAlgorithm"/>.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
+        /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
+        protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
+        {
+            byte[] keyBytes = null;
+
+            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+            if (symmetricSecurityKey != null)
+                keyBytes = symmetricSecurityKey.Key;
+            else
+            {
+                JsonWebKey jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+            }
+
+            if (keyBytes == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10657, key.GetType())));
+
+            ValidateKeySize(keyBytes, algorithm);
+
+            try
+            {
+                // Create the AES provider
+                SymmetricAlgorithm symmetricAlgorithm = Aes.Create();
+                symmetricAlgorithm.Mode = CipherMode.ECB;
+                symmetricAlgorithm.Padding = PaddingMode.None;
+                symmetricAlgorithm.KeySize = keyBytes.Length * 8;
+                symmetricAlgorithm.Key = keyBytes;
+
+                // Set the AES IV to Zeroes
+                var aesIv = new byte[symmetricAlgorithm.BlockSize >> 3];
+                Utility.Zero(aesIv);
+                symmetricAlgorithm.IV = aesIv;
+
+                return symmetricAlgorithm;
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10663, key, algorithm), ex));
+            }
         }
 
         /// <summary>
@@ -287,7 +287,6 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-           // if (ByteExtensions.SequenceEqualConstantTime(a, iv))
            if (Utility.AreEqual(a, iv))
             {
                 var c = new byte[n << 3];
@@ -323,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         /// <summary>
