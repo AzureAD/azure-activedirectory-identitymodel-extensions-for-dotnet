@@ -255,5 +255,37 @@ namespace Microsoft.IdentityModel.Tokens
 
             return temp;
         }
+
+        internal static byte[] Xor(byte[] a, byte[] b, int offset, bool inPlace)
+        {
+            if (inPlace)
+            {
+                for (var i = 0; i < a.Length; i++)
+                {
+                    a[i] = (byte)(a[i] ^ b[offset + i]);
+                }
+
+                return a;
+            }
+            else
+            {
+                var result = new byte[a.Length];
+
+                for (var i = 0; i < a.Length; i++)
+                {
+                    result[i] = (byte)(a[i] ^ b[offset + i]);
+                }
+
+                return result;
+            }
+        }
+
+        internal static void Zero(byte[] byteArray)
+        {
+            for (var i = 0; i < byteArray.Length; i++)
+            {
+                byteArray[i] = 0;
+            }
+        }
     }
 }
