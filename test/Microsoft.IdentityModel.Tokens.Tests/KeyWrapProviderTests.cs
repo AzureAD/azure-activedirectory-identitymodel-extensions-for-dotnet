@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 EncryptAlgorithm = algorithm,
                 EncryptKey = key,
-                EE = ExpectedException.KeyWrapUnwrapException("IDX10659:"),
+                EE = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
                 WrappedKey = wrappedKey
             });
@@ -240,9 +240,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<KeyWrapTestParams>();
 
-            AddUnwrapMismatchTheoryData("Test1", Default.SymmetricEncryptionKey128, Default.SymmetricEncryptionKey128_2, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128KW, ExpectedException.KeyWrapUnwrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test2", Default.SymmetricEncryptionKey256, Default.SymmetricEncryptionKey256_2, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256KW, ExpectedException.KeyWrapUnwrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test3", Default.SymmetricEncryptionKey128, Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes256KW, ExpectedException.KeyWrapUnwrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test1", Default.SymmetricEncryptionKey128, Default.SymmetricEncryptionKey128_2, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128KW, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test2", Default.SymmetricEncryptionKey256, Default.SymmetricEncryptionKey256_2, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256KW, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test3", Default.SymmetricEncryptionKey128, Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes256KW, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
 
             return theoryData;
         }

@@ -131,15 +131,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal)))
-                return false;
+            if (algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal))
+            {
+                if (key is SymmetricSecurityKey)
+                    return true;
 
-            if (key is SymmetricSecurityKey)
-                return true;
-
-            var jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
-                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+                var jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    return true;
+            }
 
             return false;
         }
@@ -301,6 +301,8 @@ namespace Microsoft.IdentityModel.Tokens
                 var cryptoProvider = CustomCryptoProvider.Create(algorithm, key) as KeyWrapProvider;
                 if (cryptoProvider == null)
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(KeyWrapProvider))));
+
+                return cryptoProvider;
             }
 
             if (IsSupportedKeyWrapAlgorithm(algorithm, key))
