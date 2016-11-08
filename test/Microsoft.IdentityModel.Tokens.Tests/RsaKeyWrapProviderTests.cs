@@ -141,10 +141,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<RsaKeyWrapTestParams>();
 
-            AddUnwrapMismatchTheoryData("Test1", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test2", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP256, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test3", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test4", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test1", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.SecurityTokenKeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test2", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP256, ExpectedException.SecurityTokenKeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test3", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP, ExpectedException.SecurityTokenKeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test4", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.SecurityTokenKeyWrapException("IDX10659:"), theoryData);
 
             return theoryData;
         }
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 DecryptAlgorithm = algorithm,
                 DecryptKey = decryptKey,
-                EE = ExpectedException.KeyWrapException("IDX10659:"),
+                EE = ExpectedException.SecurityTokenKeyWrapException("IDX10659:"),
                 Provider = provider,
                 WrappedKey = wrappedKey
             });
