@@ -38,10 +38,10 @@ namespace Microsoft.IdentityModel.Tokens
     public class KeyWrapProvider
     {
         private static readonly byte[] _defaultIv = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
-        private static readonly int BlockSizeInBits = 64;
-        private static readonly int BlockSizeInBytes = BlockSizeInBits >> 3;
-        private static object encryptorLock = new object();
-        private static object decryptorLock = new object();
+        private static readonly int _blockSizeInBits = 64;
+        private static readonly int _blockSizeInBytes = _blockSizeInBits >> 3;
+        private static object _encryptorLock = new object();
+        private static object _decryptorLock = new object();
 
         private SymmetricAlgorithm _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
@@ -54,7 +54,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="KeyWrapProvider.GetSymmetricAlgorithm"/> throws.</exception>
+        /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
+        /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         /// </summary>
         public KeyWrapProvider(SecurityKey key, string algorithm)
         {
@@ -65,61 +67,14 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
 
             Algorithm = algorithm;
             Key = key;
 
-            _symmetricAlgorithm = GetSymmetricAlgorithm();
-        }
-
-        /// <summary>
-        /// Returns the <see cref="SymmetricAlgorithm"/>.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
-        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">The algorithm doesn't support algorithm.</exception>
-        /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
-        protected virtual SymmetricAlgorithm GetSymmetricAlgorithm()
-        {
-            byte[] keyBytes = null;
-
-            SymmetricSecurityKey symmetricSecurityKey = Key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
-                keyBytes = symmetricSecurityKey.Key;
-            else
-            {
-                JsonWebKey jsonWebKey = Key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
-            }
-
-            if (keyBytes == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10657, Key.GetType())));
-
-            ValidateKeySize(keyBytes, Algorithm);
-
-            try
-            {
-                // Create the AES provider
-                _symmetricAlgorithm = Aes.Create();
-                _symmetricAlgorithm.Mode = CipherMode.ECB;
-                _symmetricAlgorithm.Padding = PaddingMode.None;
-                _symmetricAlgorithm.KeySize = keyBytes.Length * 8;
-                _symmetricAlgorithm.Key = keyBytes;
-
-                // Set the AES IV to Zeroes
-                var aesIv = new byte[_symmetricAlgorithm.BlockSize >> 3];
-                aesIv.Zero();
-                _symmetricAlgorithm.IV = aesIv;
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10663, Key, Algorithm), ex));
-            }
-
-            return _symmetricAlgorithm;
+            _symmetricAlgorithm = GetSymmetricAlgorithm(key, algorithm);
+            if (_symmetricAlgorithm == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10669)));
         }
 
         /// <summary>
@@ -151,6 +106,54 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Returns the <see cref="SymmetricAlgorithm"/>.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
+        /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
+        protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
+        {
+            byte[] keyBytes = null;
+
+            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
+            if (symmetricSecurityKey != null)
+                keyBytes = symmetricSecurityKey.Key;
+            else
+            {
+                JsonWebKey jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+            }
+
+            if (keyBytes == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10657, key.GetType())));
+
+            ValidateKeySize(keyBytes, algorithm);
+
+            try
+            {
+                // Create the AES provider
+                SymmetricAlgorithm symmetricAlgorithm = Aes.Create();
+                symmetricAlgorithm.Mode = CipherMode.ECB;
+                symmetricAlgorithm.Padding = PaddingMode.None;
+                symmetricAlgorithm.KeySize = keyBytes.Length * 8;
+                symmetricAlgorithm.Key = keyBytes;
+
+                // Set the AES IV to Zeroes
+                var aesIv = new byte[symmetricAlgorithm.BlockSize >> 3];
+                Utility.Zero(aesIv);
+                symmetricAlgorithm.IV = aesIv;
+
+                return symmetricAlgorithm;
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10663, key, algorithm), ex));
+            }
+        }
+
+        /// <summary>
         /// Answers if an algorithm is supported
         /// </summary>
         /// <param name="key">the <see cref="SecurityKey"/></param>
@@ -164,15 +167,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal)))
-                return false;
+            if (algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal))
+            {
+                if (key is SymmetricSecurityKey)
+                    return true;
 
-            if (key is SymmetricSecurityKey)
-                return true;
-
-            var jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
-                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+                var jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    return true;
+            }
 
             return false;
         }
@@ -184,7 +187,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Unwrap wrapped key</returns>
         /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
         /// <exception cref="ArgumentException">The lenth of wrappedKey must be a multiple of 64 bits.</exception>
-        /// <exception cref="KeyWrapUnwrapException">Failed to unwrap the wrappedKey.</exception>
+        /// <exception cref="KeyWrapException">Failed to unwrap the wrappedKey.</exception>
         public virtual byte[] UnwrapKey(byte[] wrappedKey)
         {
             if (wrappedKey == null || wrappedKey.Length == 0)
@@ -199,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new KeyWrapUnwrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
+                throw LogHelper.LogExceptionMessage(new KeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
             }
         }
 
@@ -233,21 +236,21 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] iv = _defaultIv.Clone() as byte[];
 
             // A = C[0]
-            byte[] a = new byte[BlockSizeInBytes];
+            byte[] a = new byte[_blockSizeInBytes];
 
-            Array.Copy(inputBuffer, inputOffset, a, 0, BlockSizeInBytes);
+            Array.Copy(inputBuffer, inputOffset, a, 0, _blockSizeInBytes);
 
             // The number of input blocks
-            var n = (inputCount - BlockSizeInBytes) >> 3;
+            var n = (inputCount - _blockSizeInBytes) >> 3;
 
             // The set of input blocks
             byte[] r = new byte[n << 3];
 
-            Array.Copy(inputBuffer, inputOffset + BlockSizeInBytes, r, 0, inputCount - BlockSizeInBytes);
+            Array.Copy(inputBuffer, inputOffset + _blockSizeInBytes, r, 0, inputCount - _blockSizeInBytes);
 
             if (_symmetricAlgorithmDecryptor == null)
             {
-                lock (decryptorLock)
+                lock (_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
                         _symmetricAlgorithmDecryptor = _symmetricAlgorithm.CreateDecryptor();
@@ -267,24 +270,24 @@ namespace Microsoft.IdentityModel.Tokens
                     // B = AES-1(K, (A ^ t) | R[i] )
 
                     // First, A = ( A ^ t )
-                    a.Xor(GetBytes(t), true);
+                    Utility.Xor(a, GetBytes(t), 0, true);
 
                     // Second, block = ( A | R[i] )
-                    Array.Copy(a, block, BlockSizeInBytes);
-                    Array.Copy(r, (i - 1) << 3, block, BlockSizeInBytes, BlockSizeInBytes);
+                    Array.Copy(a, block, _blockSizeInBytes);
+                    Array.Copy(r, (i - 1) << 3, block, _blockSizeInBytes, _blockSizeInBytes);
 
                     // Third, b = AES-1( block )
                     var b = _symmetricAlgorithmDecryptor.TransformFinalBlock(block, 0, 16);
 
                     // A = MSB(64, B)
-                    Array.Copy(b, a, BlockSizeInBytes);
+                    Array.Copy(b, a, _blockSizeInBytes);
 
                     // R[i] = LSB(64, B)
-                    Array.Copy(b, BlockSizeInBytes, r, (i - 1) << 3, BlockSizeInBytes);
+                    Array.Copy(b, _blockSizeInBytes, r, (i - 1) << 3, _blockSizeInBytes);
                 }
             }
 
-            if (a.SequenceEqualConstantTime(iv))
+           if (Utility.AreEqual(a, iv))
             {
                 var c = new byte[n << 3];
 
@@ -297,7 +300,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                throw LogHelper.LogException<InvalidOperationException>(LogMessages.IDX10665);
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10665));
             }
         }
 
@@ -319,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
         }
 
         /// <summary>
@@ -329,13 +332,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The wrapped key</returns>
         /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
         /// <exception cref="ArgumentException">The length of keyToWrap must be a multiple of 64 bits.</exception>
-        /// <exception cref="KeyWrapWrapException">Failed to wrap the keyToWrap.</exception>
+        /// <exception cref="KeyWrapException">Failed to wrap the keyToWrap.</exception>
         public virtual byte[] WrapKey(byte[] keyToWrap)
         {
             if (keyToWrap == null || keyToWrap.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(keyToWrap));
 
-            if (keyToWrap.Length %8 != 0)
+            if (keyToWrap.Length % 8 != 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyToWrap), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyToWrap.Length << 3)));
 
             try
@@ -344,7 +347,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new KeyWrapWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
+                throw LogHelper.LogExceptionMessage(new KeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
             }
         }
 
@@ -387,7 +390,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_symmetricAlgorithmEncryptor == null)
             {
-                lock (encryptorLock)
+                lock (_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
                         _symmetricAlgorithmEncryptor = _symmetricAlgorithm.CreateEncryptor();
@@ -417,7 +420,7 @@ namespace Microsoft.IdentityModel.Tokens
                     Array.Copy(b, a, 64 >> 3);
 
                     // A = A ^ t
-                    a.Xor(GetBytes(t), true);
+                    Utility.Xor(a, GetBytes(t), 0, true);
 
                     // R[i] = LSB( 64, B )
                     Array.Copy(b, 64 >> 3, r, i << 3, 64 >> 3);
