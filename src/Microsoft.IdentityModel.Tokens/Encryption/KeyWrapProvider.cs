@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
     public class KeyWrapProvider
     {
         private static readonly byte[] _defaultIv = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
-        private static readonly int _BlockSizeInBits = 64;
-        private static readonly int _BlockSizeInBytes = _BlockSizeInBits >> 3;
+        private static readonly int _blockSizeInBits = 64;
+        private static readonly int _blockSizeInBytes = _blockSizeInBits >> 3;
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
@@ -236,17 +236,17 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] iv = _defaultIv.Clone() as byte[];
 
             // A = C[0]
-            byte[] a = new byte[_BlockSizeInBytes];
+            byte[] a = new byte[_blockSizeInBytes];
 
-            Array.Copy(inputBuffer, inputOffset, a, 0, _BlockSizeInBytes);
+            Array.Copy(inputBuffer, inputOffset, a, 0, _blockSizeInBytes);
 
             // The number of input blocks
-            var n = (inputCount - _BlockSizeInBytes) >> 3;
+            var n = (inputCount - _blockSizeInBytes) >> 3;
 
             // The set of input blocks
             byte[] r = new byte[n << 3];
 
-            Array.Copy(inputBuffer, inputOffset + _BlockSizeInBytes, r, 0, inputCount - _BlockSizeInBytes);
+            Array.Copy(inputBuffer, inputOffset + _blockSizeInBytes, r, 0, inputCount - _blockSizeInBytes);
 
             if (_symmetricAlgorithmDecryptor == null)
             {
@@ -273,17 +273,17 @@ namespace Microsoft.IdentityModel.Tokens
                     Utility.Xor(a, GetBytes(t), 0, true);
 
                     // Second, block = ( A | R[i] )
-                    Array.Copy(a, block, _BlockSizeInBytes);
-                    Array.Copy(r, (i - 1) << 3, block, _BlockSizeInBytes, _BlockSizeInBytes);
+                    Array.Copy(a, block, _blockSizeInBytes);
+                    Array.Copy(r, (i - 1) << 3, block, _blockSizeInBytes, _blockSizeInBytes);
 
                     // Third, b = AES-1( block )
                     var b = _symmetricAlgorithmDecryptor.TransformFinalBlock(block, 0, 16);
 
                     // A = MSB(64, B)
-                    Array.Copy(b, a, _BlockSizeInBytes);
+                    Array.Copy(b, a, _blockSizeInBytes);
 
                     // R[i] = LSB(64, B)
-                    Array.Copy(b, _BlockSizeInBytes, r, (i - 1) << 3, _BlockSizeInBytes);
+                    Array.Copy(b, _blockSizeInBytes, r, (i - 1) << 3, _blockSizeInBytes);
                 }
             }
 
