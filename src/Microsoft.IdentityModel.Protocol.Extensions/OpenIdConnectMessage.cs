@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -28,16 +29,23 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
+        private const string _skuTelemetryValue = "ID_NET";
+        private static bool _enableTelemetryParametersByDefault = true;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
-        public OpenIdConnectMessage() : this(string.Empty) {}
+        public OpenIdConnectMessage() : this(string.Empty)
+        {
+            EnableTelemetryParameters = EnableTelemetryParametersByDefault;
+        }
 
         /// <summary>
         /// Initializes an instance of <see cref="OpenIdConnectMessage"/> class with a specific issuerAddress.
         /// </summary>
         public OpenIdConnectMessage(string issuerAddress) : base(issuerAddress) 
         {
+            EnableTelemetryParameters = EnableTelemetryParametersByDefault;
         }
 
         /// <summary>
@@ -61,6 +69,7 @@ namespace Microsoft.IdentityModel.Protocols
             IssuerAddress = other.IssuerAddress;
             RequestType = other.RequestType;
             TokenEndpoint = other.TokenEndpoint;
+            EnableTelemetryParameters = other.EnableTelemetryParameters;
         }
 
         /// <summary>
@@ -74,6 +83,7 @@ namespace Microsoft.IdentityModel.Protocols
                 return;
             }
 
+            EnableTelemetryParameters = EnableTelemetryParametersByDefault;
             foreach (var key in nameValueCollection.AllKeys)
             {
                 if (key != null)
@@ -94,6 +104,7 @@ namespace Microsoft.IdentityModel.Protocols
                 return;
             }
 
+            EnableTelemetryParameters = EnableTelemetryParametersByDefault;
             foreach (KeyValuePair<string, string[]> keyValue in parameters)
             {
                 if (keyValue.Value != null && !string.IsNullOrWhiteSpace(keyValue.Key))
@@ -128,6 +139,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.AuthenticationRequest;
+            EnsureTelemetryValues(openIdConnectMessage);
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -139,7 +151,20 @@ namespace Microsoft.IdentityModel.Protocols
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.LogoutRequest;
+            EnsureTelemetryValues(openIdConnectMessage);
             return openIdConnectMessage.BuildRedirectUrl();
+        }
+
+        /// <summary>
+        /// Adds telemetry values to the message parameters.
+        /// </summary>
+        private void EnsureTelemetryValues(OpenIdConnectMessage clonedMessage)
+        {
+            if (this.EnableTelemetryParameters)
+            {
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.SkuTelemetry, _skuTelemetryValue);
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString());
+            }
         }
 
         /// <summary>
@@ -236,6 +261,27 @@ namespace Microsoft.IdentityModel.Protocols
         {
             get { return GetParameter(OpenIdConnectParameterNames.DomainHint); }
             set { SetParameter(OpenIdConnectParameterNames.DomainHint, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets whether parameters for the library and version are sent on the query string for this <see cref="OpenIdConnectMessage"/> instance. 
+        /// This value is set to the value of EnableTelemetryParametersByDefault at message creation time.
+        /// </summary>
+        public bool EnableTelemetryParameters { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether parameters for the library and version are sent on the query string for all instances of <see cref="OpenIdConnectMessage"/>. 
+        /// </summary>
+        public static bool EnableTelemetryParametersByDefault
+        {
+            get
+            {
+                return _enableTelemetryParametersByDefault;
+            }
+            set
+            {
+                _enableTelemetryParametersByDefault = value;
+            }
         }
 
         /// <summary>

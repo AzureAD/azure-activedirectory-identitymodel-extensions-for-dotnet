@@ -147,15 +147,14 @@ namespace Microsoft.IdentityModel.Test
             OpenIdConnectMessage message = new OpenIdConnectMessage();
             Type type = typeof(OpenIdConnectMessage);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 48)
-                Assert.Fail("Number of public fields has changed from 48 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 50)
+                Assert.Fail("Number of public fields has changed from 50 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                     {
-                        new KeyValuePair<string, List<object>>("IssuerAddress", new List<object>{string.Empty, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("AccessToken", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("AcrValues", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -167,6 +166,8 @@ namespace Microsoft.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("Code", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Display", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("DomainHint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("EnableTelemetryParameters", new List<object>{true, false, false}),
+                        new KeyValuePair<string, List<object>>("EnableTelemetryParametersByDefault", new List<object>{true, false, false}),
                         new KeyValuePair<string, List<object>>("Error",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("ErrorDescription",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("ErrorUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -175,6 +176,7 @@ namespace Microsoft.IdentityModel.Test
                         new KeyValuePair<string, List<object>>("IdToken", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("IdTokenHint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("IdentityProvider", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("IssuerAddress", new List<object>{string.Empty, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("MaxAge", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("Password", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         new KeyValuePair<string, List<object>>("PostLogoutRedirectUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -295,6 +297,42 @@ namespace Microsoft.IdentityModel.Test
             url = message.BuildRedirectUrl();
             expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code+id_token&scope=openid+profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", issuerAddress, message.Nonce, HttpUtility.UrlEncode(customParameterName), HttpUtility.UrlEncode(customParameterValue), HttpUtility.UrlEncode(redirectUri), HttpUtility.UrlEncode(resource));
             Report("7", errors, url, expected);
+
+            // Telemetry added
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            message = new OpenIdConnectMessage();
+            url = message.CreateAuthenticationRequestUrl();
+            string assemblyVersion = message.GetType().Assembly.GetName().Version.ToString();
+            expected = string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", assemblyVersion);
+            Report("8", errors, url, expected);
+
+            // Telemetry added on logout request URL
+            url = message.CreateLogoutRequestUrl();
+            expected = string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", assemblyVersion);
+            Report("9", errors, url, expected);
+
+            // Telemetry turned off
+            message = new OpenIdConnectMessage();
+            message.EnableTelemetryParameters = false;
+            url = message.CreateAuthenticationRequestUrl();
+            expected = string.Format(CultureInfo.InvariantCulture, @"");
+            Report("10", errors, url, expected);
+
+            // Telemetry turned off using static switch
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
+            message = new OpenIdConnectMessage();
+            url = message.CreateAuthenticationRequestUrl();
+            expected = string.Format(CultureInfo.InvariantCulture, @"");
+            Report("11", errors, url, expected);
+
+            // Telemetry turned off using static switch, but turned on on the instance
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
+            message = new OpenIdConnectMessage();
+            message.EnableTelemetryParameters = true;
+            url = message.CreateAuthenticationRequestUrl();
+            expected = string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", assemblyVersion);
+            Report("12", errors, url, expected);
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
 
             if (errors.Count != 0)
             {
