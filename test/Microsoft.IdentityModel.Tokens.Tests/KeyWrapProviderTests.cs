@@ -73,6 +73,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        [Fact]
+        public void KeyWrapProviderDispose_Test()
+        {
+            SecurityKey key = Default.SymmetricEncryptionKey128;
+            var provider = new KeyWrapProvider(key, SecurityAlgorithms.Aes128KW);
+            key.CryptoProviderFactory.ReleaseKeyWrapProvider(provider);
+        }
+
         public static TheoryData<string, SecurityKey, string, ExpectedException> KeyWrapConstructorTheoryData()
         {
             var theoryData = new TheoryData<string, SecurityKey, string, ExpectedException>();
