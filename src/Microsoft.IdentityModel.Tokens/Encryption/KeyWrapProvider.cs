@@ -218,7 +218,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Unwrap wrapped key</returns>
         /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
         /// <exception cref="ArgumentException">The lenth of wrappedKey must be a multiple of 64 bits.</exception>
-        /// <exception cref="KeyWrapException">Failed to unwrap the wrappedKey.</exception>
+        /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
         public virtual byte[] UnwrapKey(byte[] wrappedKey)
         {
             if (wrappedKey == null || wrappedKey.Length == 0)
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new KeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
             }
         }
 
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The wrapped key</returns>
         /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
         /// <exception cref="ArgumentException">The length of keyToWrap must be a multiple of 64 bits.</exception>
-        /// <exception cref="KeyWrapException">Failed to wrap the keyToWrap.</exception>
+        /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
         public virtual byte[] WrapKey(byte[] keyToWrap)
         {
             if (keyToWrap == null || keyToWrap.Length == 0)
@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new KeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
             }
         }
 
