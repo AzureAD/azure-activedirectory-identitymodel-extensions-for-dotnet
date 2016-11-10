@@ -32,10 +32,10 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    public class RsaKeyWrapProvider
+    public class RsaKeyWrapProvider : IDisposable
     {
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private bool _disposeRsa;
+        private bool _dispose;
 
         public RsaKeyWrapProvider(SecurityKey key, string algorithm, bool isDecrypt)
         {
@@ -109,6 +109,36 @@ namespace Microsoft.IdentityModel.Tokens
             return parameters;
         }
 
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes of internal components.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_dispose)
+            {
+                if (disposing)
+                {
+                    if (_rsaCryptoServiceProvider != null)
+                    {
+                        _rsaCryptoServiceProvider.Dispose();
+                        _rsaCryptoServiceProvider = null;
+                    }
+
+                    _dispose = true;
+                }
+            }
+        }
+
         protected virtual void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool isDecrypt)
         {
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
@@ -121,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                     (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
-                    _disposeRsa = true;
+                    _dispose = true;
                 }
                 return;
             }
@@ -163,6 +193,38 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Wrap the 'keyToWrap'
+        /// </summary>
+        /// <param name="keyToWrap">the key to be wrapped</param>
+        /// <returns>The wrapped key</returns>
+        public virtual byte[] WrapKey(byte[] keyToWrap)
+        {
+            bool fOAEP = false;
+            if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
+            {
+                fOAEP = true;
+            }
+
+            return _rsaCryptoServiceProvider.Encrypt(keyToWrap, fOAEP);
+        }
+
+        /// <summary>
+        /// Unwrap the wrappedKey
+        /// </summary>
+        /// <param name="wrappedKey">the wrapped key to unwrap</param>
+        /// <returns>Unwrap wrapped key</returns>
+        public virtual byte[] UnwrapKey(byte[] wrappedKey)
+        {
+            bool fOAEP = false;
+            if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
+            {
+                fOAEP = true;
+            }
+
+            return _rsaCryptoServiceProvider.Decrypt(wrappedKey, fOAEP);
         }
     }
 }
