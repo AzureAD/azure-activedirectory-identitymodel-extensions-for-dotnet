@@ -288,6 +288,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
         /// <exception cref="ArgumentException">'key' is not a <see cref="SymmetricSecurityKey"/>.</exception>
+        /// <remarks>
+        /// <para>When finished with the <see cref="KeyWrapProvider"/> call <see cref="ReleaseKeyWrapProvider(KeyWrapProvider)"/>.</para>
+        /// </remarks>
         public virtual KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -364,6 +367,16 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (hashAlgorithm != null)
                 hashAlgorithm.Dispose();
+        }
+
+        /// <summary>
+        /// When finished with a <see cref="KeyWrapProvider"/> call this method for cleanup."/>
+        /// </summary>
+        /// <param name="provider"><see cref="KeyWrapProvider"/> to be released.</param>
+        public virtual void ReleaseKeyWrapProvider(KeyWrapProvider provider)
+        {
+            if (provider != null)
+                provider.Dispose();
         }
 
         /// <summary>
