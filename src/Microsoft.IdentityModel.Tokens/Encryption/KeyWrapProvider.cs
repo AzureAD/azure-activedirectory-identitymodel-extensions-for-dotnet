@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Provides Wrap key and Unwrap key services.
     /// </summary>
-    public class KeyWrapProvider
+    public class KeyWrapProvider : IDisposable
     {
         private static readonly byte[] _defaultIv = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
         private static readonly int _blockSizeInBits = 64;
@@ -46,6 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SymmetricAlgorithm _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
+        private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyWrapProvider"/> class used for wrap key and unwrap key.
@@ -92,6 +93,36 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the <see cref="SecurityKey"/> that is being used.
         /// </summary>
         public SecurityKey Key { get; private set; }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes of internal components.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (_symmetricAlgorithm != null)
+                    {
+                        _symmetricAlgorithm.Dispose();
+                        _symmetricAlgorithm = null;
+                    }
+
+                    _disposed = true;
+                }
+            }
+        }
 
         private static byte[] GetBytes(ulong i)
         {
@@ -195,6 +226,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (wrappedKey.Length % 8 != 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(wrappedKey), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, wrappedKey.Length << 3)));
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             try
             {
@@ -340,6 +374,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (keyToWrap.Length % 8 != 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyToWrap), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyToWrap.Length << 3)));
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             try
             {
