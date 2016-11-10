@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static ExpectedException KeyWrapException(string substringExpected = null, Type innerTypeExpected = null)
         {
-            return new ExpectedException(typeExpected: typeof(KeyWrapException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
+            return new ExpectedException(typeExpected: typeof(SecurityTokenKeyWrapException), substringExpected: substringExpected, innerTypeExpected: innerTypeExpected);
         }
 
         public bool IgnoreInnerException { get; set; }
