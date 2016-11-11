@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SymmetricAlgorithm _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
-        private bool _disposed;
+        private bool _disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyWrapProvider"/> class used for wrap key and unwrap key.
