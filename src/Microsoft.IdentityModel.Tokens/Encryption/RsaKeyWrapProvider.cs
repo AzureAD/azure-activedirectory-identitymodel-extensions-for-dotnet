@@ -32,12 +32,21 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Provides RSA Wrap key and Unwrap key services.
+    /// </summary>
     public class RsaKeyWrapProvider : IDisposable
     {
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private bool _dispose;
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+        private bool _disposed;
 
-        public RsaKeyWrapProvider(SecurityKey key, string algorithm, bool isDecrypt)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RsaKeyWrapProvider"/> class used for wrap key and unwrap key.
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name="willDecrypt">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
+        public RsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -45,14 +54,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
+            if (!IsSupportedAlgorithm(key, algorithm, willDecrypt))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
 
             Algorithm = algorithm;
             Key = key;
 
-            ResolveRsaAlgorithm(key, algorithm, isDecrypt);
-            if (_rsaCryptoServiceProvider == null)
+            ResolveRsaAlgorithm(key, algorithm, willDecrypt);
+            if (_rsaCryptoServiceProvider == null && _rsaCryptoServiceProviderProxy == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10672)));
         }
 
@@ -124,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_dispose)
+            if (!_disposed)
             {
                 if (disposing)
                 {
@@ -134,12 +143,21 @@ namespace Microsoft.IdentityModel.Tokens
                         _rsaCryptoServiceProvider = null;
                     }
 
-                    _dispose = true;
+                    if (_rsaCryptoServiceProviderProxy != null)
+                        _rsaCryptoServiceProviderProxy.Dispose();
+
+                    _disposed = true;
                 }
             }
         }
 
-        protected virtual void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool isDecrypt)
+        /// <summary>
+        /// Resolve rsa algorithm.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name="willDecrypt">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
+        protected virtual void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
         {
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
             if (rsaKey != null)
@@ -151,15 +169,25 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                     (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
-                    _dispose = true;
+                    _disposed = true;
                 }
+                return;
+            }
+
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                if (willDecrypt)
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
+                else
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey as RSACryptoServiceProvider);
                 return;
             }
 
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
-                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, isDecrypt);
+                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willDecrypt);
                 _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                 (_rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
                 return;
@@ -173,8 +201,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">the <see cref="SecurityKey"/></param>
         /// <param name="algorithm">the algorithm to use</param>
+        /// <param name = "willDecrypt" > Whether this <see cref = "RsaKeyWrapProvider" /> is required to create decrypts then set this to true.</param> 
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
-        protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
         {
             if (key == null)
                 return false;
@@ -182,10 +211,29 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
+            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
             {
-                if (key is SymmetricSecurityKey)
+                if (key as RsaSecurityKey != null)
                     return true;
+
+                X509SecurityKey x509Key = key as X509SecurityKey;
+                if (x509Key != null)
+                {
+                    if (willDecrypt)
+                    {
+                        if (x509Key.PrivateKey as RSACryptoServiceProvider != null)
+                            return true;
+                    }
+                    else
+                    {
+                        if (x509Key.PublicKey as RSACryptoServiceProvider != null)
+                            return true;
+                    }
+
+                    return false;
+                }
 
                 var jsonWebKey = key as JsonWebKey;
                 if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
@@ -202,13 +250,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The wrapped key</returns>
         public virtual byte[] WrapKey(byte[] keyToWrap)
         {
+            if (keyToWrap == null || keyToWrap.Length == 0)
+                throw LogHelper.LogArgumentNullException("keyToWrap");
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+
             bool fOAEP = false;
             if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
             {
                 fOAEP = true;
             }
 
-            return _rsaCryptoServiceProvider.Encrypt(keyToWrap, fOAEP);
+            if (_rsaCryptoServiceProvider != null)
+                return _rsaCryptoServiceProvider.Encrypt(keyToWrap, fOAEP);
+            else if (_rsaCryptoServiceProviderProxy != null)
+                return _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP);
+
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
         /// <summary>
@@ -218,13 +277,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Unwrap wrapped key</returns>
         public virtual byte[] UnwrapKey(byte[] wrappedKey)
         {
+            if (wrappedKey == null || wrappedKey.Length == 0)
+                throw LogHelper.LogArgumentNullException("wrappedKey");
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+
             bool fOAEP = false;
             if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
             {
                 fOAEP = true;
             }
 
-            return _rsaCryptoServiceProvider.Decrypt(wrappedKey, fOAEP);
+            if (_rsaCryptoServiceProvider != null)
+                return _rsaCryptoServiceProvider.Decrypt(wrappedKey, fOAEP);
+            else if (_rsaCryptoServiceProviderProxy != null)
+                return _rsaCryptoServiceProviderProxy.Decrypt(wrappedKey, fOAEP);
+
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
     }
 }

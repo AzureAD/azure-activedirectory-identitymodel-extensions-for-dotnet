@@ -144,6 +144,46 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+        private bool IsSupportedRsaKeyWrapAlgorithm(string algorithm, SecurityKey key, bool willDecrypt)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
+            {
+                if (key as RsaSecurityKey != null)
+                    return true;
+
+                X509SecurityKey x509Key = key as X509SecurityKey;
+                if (x509Key != null)
+                {
+                    if (willDecrypt)
+                    {
+                        if (x509Key.PrivateKey as RSACryptoServiceProvider != null)
+                            return true;
+                    }
+                    else
+                    {
+                        if (x509Key.PublicKey as RSACryptoServiceProvider != null)
+                            return true;
+                    }
+
+                    return false;
+                }
+
+                var jsonWebKey = key as JsonWebKey;
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Checks if an 'algorithm, key' pair is supported.
         /// </summary>
@@ -379,6 +419,12 @@ namespace Microsoft.IdentityModel.Tokens
                 provider.Dispose();
         }
 
+        public virtual void ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider provider)
+        {
+            if (provider != null)
+                provider.Dispose();
+        }
+
         /// <summary>
         /// Returns a <see cref="HashAlgorithm"/> for a specific algorithm.
         /// </summary>
@@ -463,6 +509,51 @@ namespace Microsoft.IdentityModel.Tokens
                 default:
                     throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10666, algorithm)));
             }
+        }
+
+        private RsaKeyWrapProvider CreateRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willDecrypt))
+            {
+                RsaKeyWrapProvider rsaKeyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willDecrypt) as RsaKeyWrapProvider;
+                if (rsaKeyWrapProvider == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
+
+                return rsaKeyWrapProvider;
+            }
+
+            if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key, willDecrypt))
+                return new RsaKeyWrapProvider(key, algorithm, willDecrypt);
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
+        }
+
+        /// <summary>
+        /// Returns a <see cref="RsaKeyWrapProvider"/> instance supports the <see cref="SecurityKey"/> and algorithm.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> to use for decrypting.</param>
+        /// <param name="algorithm">The algorithm to use for decrypting.</param>
+        /// <remarks>When finished with the <see cref="RsaKeyWrapProvider"/> call <see cref="ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider)"/>.</remarks>
+        public virtual RsaKeyWrapProvider CreateRsaKeyWrapProviderForDecrypting(SecurityKey key, string algorithm)
+        {
+            return CreateRsaKeyWrapProvider(key, algorithm, true);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="RsaKeyWrapProvider"/> instance supports the <see cref="SecurityKey"/> and algorithm.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> to use for encrypting.</param>
+        /// <param name="algorithm">The algorithm to use for encrypting.</param>
+        /// <remarks>When finished with the <see cref="RsaKeyWrapProvider"/> call <see cref="ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider)"/>.</remarks>
+        public virtual RsaKeyWrapProvider CreateRsaKeyWrapProviderForEncrypting(SecurityKey key, string algorithm)
+        {
+            return CreateRsaKeyWrapProvider(key, algorithm, false);
         }
 
         private SignatureProvider CreateSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)

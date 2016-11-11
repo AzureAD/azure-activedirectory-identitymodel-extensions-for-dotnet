@@ -106,6 +106,30 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Decrypts data with the System.Security.Cryptography.RSA algorithm.
+        /// </summary>
+        /// <param name="input">The data to be decrypted.</param>
+        /// <param name="fOAEP">true to perform direct System.Security.Cryptography.RSA decryption using OAEP padding (only available on a computer running Microsoft Windows XP or later);o
+        /// therwise, false to use PKCS#1 v1.5 padding.</param>
+        /// <returns></returns>
+        public byte[] Decrypt(byte[] input, bool fOAEP)
+        {
+            return _rsa.Decrypt(input, fOAEP);
+        }
+
+        /// <summary>
+        ///  Encrypts data with the System.Security.Cryptography.RSA algorithm.
+        /// </summary>
+        /// <param name="input">The data to be encrypted.</param>
+        /// <param name="fOAEP">true to perform direct System.Security.Cryptography.RSA encryption using OAEP padding (only available on a computer running Microsoft Windows XP or later); 
+        /// otherwise, false to use PKCS#1 v1.5 padding.</param>
+        /// <returns></returns>
+        public byte[] Encrypt(byte[] input, bool fOAEP)
+        {
+            return _rsa.Encrypt(input, fOAEP);
+        }
+
+        /// <summary>
         /// Computes the hash value of the specified byte array using the specified hash algorithm, and signs the resulting hash value.
         /// </summary>
         /// <param name="signingInput">The input byte array for which to compute the hash.</param>

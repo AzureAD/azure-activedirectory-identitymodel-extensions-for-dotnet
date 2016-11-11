@@ -139,6 +139,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the <see cref="SymmetricAlgorithm"/>.
         /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
         /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
