@@ -73,14 +73,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact]
-        public void KeyWrapProviderDispose_Test()
-        {
-            SecurityKey key = Default.SymmetricEncryptionKey128;
-            var provider = new KeyWrapProvider(key, SecurityAlgorithms.Aes128KW);
-            key.CryptoProviderFactory.ReleaseKeyWrapProvider(provider);
-        }
-
         public static TheoryData<string, SecurityKey, string, ExpectedException> KeyWrapConstructorTheoryData()
         {
             var theoryData = new TheoryData<string, SecurityKey, string, ExpectedException>();
@@ -91,14 +83,27 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test4", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
 
-            JsonWebKey key = new JsonWebKey();
-            key.Kty = JsonWebAlgorithmsKeyTypes.Octet;
-            theoryData.Add("Test6", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
-            theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-            theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-            theoryData.Add("Test9", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test6", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
+            theoryData.Add("Test7", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
+
+            JsonWebKey key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.Octet };
+            theoryData.Add("Test8", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+
+            key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.RSA, K = KeyingMaterial.JsonWebKeySymmetric128.K };
+            theoryData.Add("Test9", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test10", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test11", KeyingMaterial.JsonWebKeySymmetric128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
+            theoryData.Add("Test12", KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
 
             return theoryData;
+        }
+
+        [Fact]
+        public void KeyWrapProviderDispose_Test()
+        {
+            SecurityKey key = Default.SymmetricEncryptionKey128;
+            var provider = new KeyWrapProvider(key, SecurityAlgorithms.Aes128KW);
+            key.CryptoProviderFactory.ReleaseKeyWrapProvider(provider);
         }
 
         [Fact]
@@ -108,6 +113,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             byte[] wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
             provider.UnwrapKey(wrappedKey);
             Assert.True(provider.UnwrapKeyCalled);
+            Assert.True(provider.IsSupportedAlgorithmCalled);
+            Assert.True(provider.GetSymmetricAlgorithmCalled);
         }
 
         [Fact]
@@ -116,6 +123,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var provider = new DerivedKeyWrapProvider(Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW);
             byte[] wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
             Assert.True(provider.WrapKeyCalled);
+            Assert.True(provider.IsSupportedAlgorithmCalled);
+            Assert.True(provider.GetSymmetricAlgorithmCalled);
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
