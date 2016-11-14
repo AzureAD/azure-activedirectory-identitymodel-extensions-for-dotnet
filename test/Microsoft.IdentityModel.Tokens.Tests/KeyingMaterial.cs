@@ -473,6 +473,43 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
+        public static string JsonWebKeySymmetricKid128
+        {
+            get
+            {
+                return "JsonWebKeySymmetricKid128";
+            }
+        }
+
+        public static string JsonWebKeySymmetricBytesEncoded128
+        {
+            get
+            {
+                return "mSSKo6XfloeNAGLhqTQwvQ==";
+            }
+        }
+
+        public static byte[] JsonWebKeySymmetricBytes128
+        {
+            get
+            {
+                return Base64UrlEncoder.DecodeBytes(JsonWebKeySymmetricBytesEncoded128);
+            }
+        }
+
+        public static JsonWebKey JsonWebKeySymmetric128
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    K = JsonWebKeySymmetricBytesEncoded128,
+                    KeyId = JsonWebKeySymmetricKid128,
+                    Kty = JsonWebAlgorithmsKeyTypes.Octet
+                };
+            }
+        }
+
         public static string JsonWebKeySymmetricKid256
         {
             get
@@ -493,7 +530,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                return Base64UrlEncoder.DecodeBytes("Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=");
+                return Base64UrlEncoder.DecodeBytes(JsonWebKeySymmetricBytesEncoded256);
             }
         }
 

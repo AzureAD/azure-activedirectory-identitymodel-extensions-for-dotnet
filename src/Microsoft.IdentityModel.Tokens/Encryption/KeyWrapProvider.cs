@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class KeyWrapProvider : IDisposable
     {
-        private static readonly byte[] _defaultIv = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
+        private static readonly byte[] _defaultIV = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
         private static readonly int _blockSizeInBits = 64;
         private static readonly int _blockSizeInBytes = _blockSizeInBits >> 3;
         private static object _encryptorLock = new object();
@@ -270,8 +270,6 @@ namespace Microsoft.IdentityModel.Tokens
                     Return an error
             */
 
-            byte[] iv = _defaultIv.Clone() as byte[];
-
             // A = C[0]
             byte[] a = new byte[_blockSizeInBytes];
 
@@ -324,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-           if (Utility.AreEqual(a, iv))
+           if (Utility.AreEqual(a, _defaultIV))
             {
                 var c = new byte[n << 3];
 
@@ -416,10 +414,8 @@ namespace Microsoft.IdentityModel.Tokens
                        C[i] = R[i]
             */
 
-            byte[] iv = _defaultIv.Clone() as byte[];
-
             // The default initialization vector from RFC3394
-            byte[] a = iv;
+            byte[] a = _defaultIV.Clone() as byte[];
 
             // The number of input blocks
             var n = inputCount >> 3;
