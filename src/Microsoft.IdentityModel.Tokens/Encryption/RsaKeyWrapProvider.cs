@@ -55,7 +55,10 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (key.KeySize < 2048)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, algorithm, 2048, Key.KeyId, key.KeySize)));
+            {
+                string keyId = key.KeyId ?? string.Empty;
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, algorithm, 2048, keyId, key.KeySize)));
+            }
 
             if (!IsSupportedAlgorithm(key, algorithm, willDecrypt))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
