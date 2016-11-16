@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test3", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaOAEP, false, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
             theoryData.Add("Test4", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes128KW, false, ExpectedException.ArgumentException("IDX10671:"));
             theoryData.Add("Test5", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, false, ExpectedException.NoExceptionExpected);
-         //   theoryData.Add("Test6", KeyingMaterial.X509SecurityKey2, SecurityAlgorithms.RsaPKCS1, false, ExpectedException.NoExceptionExpected);
+            theoryData.Add("Test6", KeyingMaterial.X509SecurityKey2, SecurityAlgorithms.RsaPKCS1, false, ExpectedException.NoExceptionExpected);
 
             JsonWebKey webKey = KeyingMaterial.JsonWebKeyRsa256;
             theoryData.Add("Test7", webKey, SecurityAlgorithms.RsaPKCS1, true, ExpectedException.NoExceptionExpected);
@@ -142,8 +142,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var theoryData = new TheoryData<RsaKeyWrapTestParams>();
 
             AddUnwrapMismatchTheoryData("Test1", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test2", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
-            AddUnwrapMismatchTheoryData("Test3", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test2", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP256, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test3", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test4", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
 
             return theoryData;
         }
@@ -184,6 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // tampering: wrapped key
             AddUnwrapTamperedTheoryData("Test1", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, theoryData);
             AddUnwrapTamperedTheoryData("Test2", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, theoryData);
+            AddUnwrapTamperedTheoryData("Test3", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaOAEP256, theoryData);
 
             return theoryData;
         }
