@@ -118,6 +118,137 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("RsaUnwrapMismatchTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void RsaUnwrapMismatch(RsaKeyWrapTestParams theoryParams)
+        {
+            try
+            {
+                var encryptProvider = new RsaKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm, false);
+                byte[] keyToWrap = Guid.NewGuid().ToByteArray();
+                byte[] wrappedKey = encryptProvider.WrapKey(keyToWrap);
+                var decryptProvider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
+                byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
+                theoryParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryParams.EE.ProcessException(ex);
+            }
+        }
+
+        private static TheoryData<RsaKeyWrapTestParams> RsaUnwrapMismatchTheoryData()
+        {
+            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
+
+            AddUnwrapMismatchTheoryData("Test1", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test2", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+            AddUnwrapMismatchTheoryData("Test3", KeyingMaterial.RsaSecurityKey_4096_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.RsaOAEP, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
+
+            return theoryData;
+        }
+
+        private static void AddUnwrapMismatchTheoryData(string testId, SecurityKey encryptKey, SecurityKey decryptKey, string encryptAlg, string decryptAlg, ExpectedException ee, TheoryData<RsaKeyWrapTestParams> theoryData)
+        {
+            theoryData.Add(new RsaKeyWrapTestParams
+            {
+                EncryptAlgorithm = encryptAlg,
+                EncryptKey = encryptKey,
+                DecryptAlgorithm = decryptAlg,
+                DecryptKey = decryptKey,
+                EE = ee,
+                TestId = testId
+            });
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("RsaUnwrapTamperedTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void RsaUnwrapTamperedData(RsaKeyWrapTestParams theoryParams)
+        {
+            try
+            {
+                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
+                theoryParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryParams.EE.ProcessException(ex);
+            }
+        }
+
+        private static TheoryData<RsaKeyWrapTestParams> RsaUnwrapTamperedTheoryData()
+        {
+            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
+
+            // tampering: wrapped key
+            AddUnwrapTamperedTheoryData("Test1", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, theoryData);
+            AddUnwrapTamperedTheoryData("Test2", KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, theoryData);
+
+            return theoryData;
+        }
+
+        private static void AddUnwrapTamperedTheoryData(string testId, SecurityKey encrtyptKey, SecurityKey decryptKey, string algorithm, TheoryData<RsaKeyWrapTestParams> theoryData)
+        {
+            var keyToWrap = Guid.NewGuid().ToByteArray();
+            var provider = new RsaKeyWrapProvider(encrtyptKey, algorithm, false);
+            var wrappedKey = provider.WrapKey(keyToWrap);
+
+            TestUtilities.XORBytes(wrappedKey);
+            theoryData.Add(new RsaKeyWrapTestParams
+            {
+                DecryptAlgorithm = algorithm,
+                DecryptKey = decryptKey,
+                EE = ExpectedException.KeyWrapException("IDX10659:"),
+                Provider = provider,
+                WrappedKey = wrappedKey
+            });
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("RsaUnwrapTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void RsaUnwrapParameterCheck(RsaKeyWrapTestParams theoryParams)
+        {
+            try
+            {
+                var provider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
+                byte[] unwrappedKey = provider.UnwrapKey(theoryParams.WrappedKey);
+
+                theoryParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryParams.EE.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<RsaKeyWrapTestParams> RsaUnwrapTheoryData()
+        {
+            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
+
+            // Unwrap parameter checking
+            AddUnwrapParameterCheckTheoryData("Test1", SecurityAlgorithms.RsaPKCS1, KeyingMaterial.RsaSecurityKey_2048, null, ExpectedException.ArgumentNullException(), theoryData);
+
+            byte[] wrappedKey = new byte[0];
+            AddUnwrapParameterCheckTheoryData("Test2", SecurityAlgorithms.RsaPKCS1, KeyingMaterial.RsaSecurityKey_2048, wrappedKey, ExpectedException.ArgumentNullException(), theoryData);
+
+            return theoryData;
+        }
+
+        private static void AddUnwrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey key, byte[] wrappedKey, ExpectedException ee, TheoryData<RsaKeyWrapTestParams> theoryData)
+        {
+            theoryData.Add(new RsaKeyWrapTestParams
+            {
+                DecryptAlgorithm = algorithm,
+                DecryptKey = key,
+                WrappedKey = wrappedKey,
+                EE = ee,
+                TestId = testId
+            });
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("RsaWrapUnwrapTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void RsaWrapUnwrapKey(RsaKeyWrapTestParams theoryParams)
@@ -144,37 +275,38 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var theoryData = new TheoryData<RsaKeyWrapTestParams>();
 
             // round trip positive tests
-            AddWrapUnwrapTheoryData("Test1", SecurityAlgorithms.RsaPKCS1, KeyingMaterial.RsaSecurityKey1, theoryData);
-            AddWrapUnwrapTheoryData("Test2", SecurityAlgorithms.RsaOAEP, KeyingMaterial.RsaSecurityKey1, theoryData);
-            AddWrapUnwrapTheoryData("Test3", SecurityAlgorithms.RsaOAEP256, KeyingMaterial.RsaSecurityKey1, theoryData);
+            AddWrapUnwrapTheoryData("Test1", SecurityAlgorithms.RsaPKCS1, KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, theoryData);
+            AddWrapUnwrapTheoryData("Test2", SecurityAlgorithms.RsaOAEP, KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, theoryData);
+            AddWrapUnwrapTheoryData("Test3", SecurityAlgorithms.RsaOAEP256, KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, theoryData);
 
             // Wrap parameter checking
-            AddWrapParameterCheckTheoryData("Test4", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, null, ExpectedException.ArgumentNullException(), theoryData);
-            byte[] keyToWrap = new byte[9];
-            Array.Copy(Guid.NewGuid().ToByteArray(), keyToWrap, keyToWrap.Length);
-            AddWrapParameterCheckTheoryData("Test4", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, keyToWrap, ExpectedException.ArgumentException("IDX10664:"), theoryData);
+            AddWrapParameterCheckTheoryData("Test4", SecurityAlgorithms.RsaPKCS1, KeyingMaterial.RsaSecurityKey_2048_Public, KeyingMaterial.RsaSecurityKey_2048, null, ExpectedException.ArgumentNullException(), theoryData);
 
             return theoryData;
         }
 
-        private static void AddWrapUnwrapTheoryData(string testId, string algorithm, SecurityKey key, TheoryData<RsaKeyWrapTestParams> theoryData)
+        private static void AddWrapUnwrapTheoryData(string testId, string algorithm, SecurityKey encryptKey, SecurityKey decryptKey, TheoryData<RsaKeyWrapTestParams> theoryData)
         {
             theoryData.Add(new RsaKeyWrapTestParams
             {
                 EncryptAlgorithm = algorithm,
+                DecryptAlgorithm = algorithm,
                 KeyToWrap = Guid.NewGuid().ToByteArray(),
                 EE = ExpectedException.NoExceptionExpected,
-                EncryptKey = key,
+                EncryptKey = encryptKey,
+                DecryptKey = decryptKey,
                 TestId = "AddWrapUnwrapTheoryData_" + testId
             });
         }
 
-        private static void AddWrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey key, byte[] keyToWrap, ExpectedException ee, TheoryData<RsaKeyWrapTestParams> theoryData)
+        private static void AddWrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey encryptKey, SecurityKey decryptKey, byte[] keyToWrap, ExpectedException ee, TheoryData<RsaKeyWrapTestParams> theoryData)
         {
             theoryData.Add(new RsaKeyWrapTestParams
             {
                 EncryptAlgorithm = algorithm,
-                EncryptKey = key,
+                DecryptAlgorithm = algorithm,
+                EncryptKey = encryptKey,
+                DecryptKey = decryptKey,
                 KeyToWrap = keyToWrap,
                 EE = ee,
                 TestId = testId
@@ -190,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             public SecurityKey EncryptKey { get; set; }
             public byte[] KeyToWrap { get; set; }
             public byte[] WrappedKey { get; set; }
-            public KeyWrapProvider Provider { get; set; }
+            public RsaKeyWrapProvider Provider { get; set; }
             public string TestId { get; set; }
         }
     }
