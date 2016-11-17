@@ -50,6 +50,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
         /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
         /// <param name="willDecrypt">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The <see cref="SecurityKey"/>  is not supported.</exception>
+        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="InvalidOperationException">Failed to create RSA algorithm with provided key and algorithm.</exception>
         public RsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
         {
             if (key == null)
@@ -175,11 +181,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Answers if an algorithm is supported
+        /// Checks if an algorithm is supported.
         /// </summary>
-        /// <param name="key">the <see cref="SecurityKey"/></param>
-        /// <param name="algorithm">the algorithm to use</param>
-        /// <param name = "willDecrypt" > Whether this <see cref = "RsaKeyWrapProvider" /> is required to create decrypts then set this to true.</param> 
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name = "willDecrypt"> Whether this <see cref = "RsaKeyWrapProvider" /> is required to create decrypts then set this to true.</param>
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
         {
@@ -235,6 +241,13 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #if NETSTANDARD1_4
+        /// <summary>
+        /// Initialize RSA algorithm.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// <param name="algorithm">The RSA KeyWrap algorithm to apply.</param>
+        /// <param name="willDecrypt">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
+        /// <exception cref="ArgumentOutOfRangeException">The <see cref="SecurityKey"/> is not supported.</exception>
         protected virtual void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
         {
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
@@ -288,11 +301,12 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #else
         /// <summary>
-        /// Resolve rsa algorithm.
+        /// Initialize RSA algorithm.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
-        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name="algorithm">The RSA KeyWrap algorithm to apply.</param>
         /// <param name="willDecrypt">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
+        /// <exception cref="ArgumentOutOfRangeException">The <see cref="SecurityKey"/> is not supported.</exception>
         protected virtual void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
         {
             RsaSecurityKey rsaKey = key as RsaSecurityKey;
@@ -334,11 +348,16 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
         }
 #endif
+
         /// <summary>
         /// Unwrap the wrappedKey
         /// </summary>
         /// <param name="wrappedKey">the wrapped key to unwrap</param>
         /// <returns>Unwrap wrapped key</returns>
+        /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
+        /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
+        /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
         public virtual byte[] UnwrapKey(byte[] wrappedKey)
         {
             if (wrappedKey == null || wrappedKey.Length == 0)
@@ -398,6 +417,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="keyToWrap">the key to be wrapped</param>
         /// <returns>The wrapped key</returns>
+        /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
+        /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
+        /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
         public virtual byte[] WrapKey(byte[] keyToWrap)
         {
             if (keyToWrap == null || keyToWrap.Length == 0)
