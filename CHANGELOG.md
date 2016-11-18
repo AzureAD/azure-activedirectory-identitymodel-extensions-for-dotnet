@@ -1,4 +1,9 @@
 <a name="5.0.0"></a>
+# 5.1.0
+
+## Features
+* **JWE Support:** Direct encryption supported on tokens
+
 # 5.0.0
 
 ## Features
