@@ -83,6 +83,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static readonly TimeSpan DefaultNonceLifetime = TimeSpan.FromMinutes(60);
 
         /// <summary>
+        /// Default for the RequreSub value.
+        /// </summary>
+        /// <remarks>default: true.</remarks>
+        public static bool RequireSubByDefault = true;
+
+        /// <summary>
         /// Creates a new instance of <see cref="OpenIdConnectProtocolValidator"/>,
         /// </summary>
         public OpenIdConnectProtocolValidator()
@@ -93,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             RequireAzp = false;
             RequireNonce = true;
             RequireState = true;
-            RequireSub = false;
+            RequireSub = RequireSubByDefault;
             RequireTimeStampInNonce = true;
             RequireStateValidation = true;
 
@@ -198,8 +204,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or sets a value indicating if a 'sub' claim is required.
         /// </summary>
-        [DefaultValue(false)]
-        public bool RequireSub { get; set; }
+        [DefaultValue(true)]
+        public bool RequireSub { get; set; } = RequireSubByDefault;
 
         /// <summary>
         /// Gets or set logic to control if a nonce is prefixed with a timestamp.
@@ -387,7 +393,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 if (idToken.Payload.Iss == null)
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
 
-                // sub is optional by default
+                // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some of Microsoft organizations which don't have this...
                 if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Payload.Sub)))
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
 

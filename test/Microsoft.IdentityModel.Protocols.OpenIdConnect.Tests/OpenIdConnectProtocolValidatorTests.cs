@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new KeyValuePair<string, List<object>>("RequireAuthTime", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireAzp", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("RequireNonce", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("RequireSub", new List<object>{false, true, false}),
+                        new KeyValuePair<string, List<object>>("RequireSub", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("RequireTimeStampInNonce", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("RequireState", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("RequireStateValidation", new List<object>{true, false, true}),
@@ -172,8 +172,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             };
             var validator = new PublicOpenIdConnectProtocolValidator { RequireState = false };
             var jwtWithNoSub = CreateValidatedIdToken();
+            jwtWithNoSub.Payload.Remove(JwtRegisteredClaimNames.Sub);
             var jwtWithSub = CreateValidatedIdToken();
-            jwtWithSub.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
             var stringJwt = new JwtSecurityTokenHandler().WriteToken(jwtWithSub);
 
             var userInfoResponseJson = @"{ ""sub"": ""sub""}";
@@ -520,6 +520,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
+            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
             return jwt;
         }
 
@@ -627,8 +628,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10314:")
                 );
 
-            // add iss, nonce is not required, state not required
+            // add iss, nonce is not required, state not required, sub not required
             validator.RequireNonce = false;
+            validator.RequireSub = false;
             validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
             ValidateIdToken(validatedIdToken, protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
 
