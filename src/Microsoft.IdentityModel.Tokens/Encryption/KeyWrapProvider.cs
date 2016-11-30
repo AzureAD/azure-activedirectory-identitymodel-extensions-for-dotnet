@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SymmetricAlgorithm _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
-        private bool _disposed;
+        private bool _disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyWrapProvider"/> class used for wrap key and unwrap key.
@@ -139,6 +139,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the <see cref="SymmetricAlgorithm"/>.
         /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">The <see cref="SecurityKey"/> cannot be converted to byte array</exception>
         /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
@@ -218,6 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Unwrap wrapped key</returns>
         /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
         /// <exception cref="ArgumentException">The lenth of wrappedKey must be a multiple of 64 bits.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="KeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
         public virtual byte[] UnwrapKey(byte[] wrappedKey)
         {
@@ -364,6 +367,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The wrapped key</returns>
         /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
         /// <exception cref="ArgumentException">The length of keyToWrap must be a multiple of 64 bits.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="KeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
         public virtual byte[] WrapKey(byte[] keyToWrap)
         {

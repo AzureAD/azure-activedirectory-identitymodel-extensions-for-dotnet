@@ -178,6 +178,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             // using defaults
             using (TextWriterEventListener listener = new TextWriterEventListener())
             {
+                IdentityModelEventSource.Logger.LogLevel = EventLevel.Informational;
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning!");
             }
