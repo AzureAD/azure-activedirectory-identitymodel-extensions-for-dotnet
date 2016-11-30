@@ -420,6 +420,10 @@ namespace Microsoft.IdentityModel.Tokens
                 provider.Dispose();
         }
 
+        /// <summary>
+        /// When finished with a <see cref="RsaKeyWrapProvider"/> call this method for cleanup."/>
+        /// </summary>
+        /// <param name="provider"><see cref="RsaKeyWrapProvider"/> to be released.</param>
         public virtual void ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider provider)
         {
             if (provider != null)

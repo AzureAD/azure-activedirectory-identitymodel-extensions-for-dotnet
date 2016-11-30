@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
-        public void RsaKeyWrapProviderDispose_Test()
+        public void RsaKeyWrapProviderDispose()
         {
             SecurityKey key = KeyingMaterial.RsaSecurityKey_2048;
             var provider = new RsaKeyWrapProvider(key, SecurityAlgorithms.RsaPKCS1, false);
