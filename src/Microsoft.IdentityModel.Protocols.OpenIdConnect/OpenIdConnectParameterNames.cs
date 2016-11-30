@@ -65,6 +65,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string ResponseMode = "response_mode";
         public const string ResponseType = "response_type";
         public const string Scope = "scope";
+        public const string SkuTelemetry = "x-client-SKU";
         public const string SessionState = "session_state";
         public const string Sid = "sid";
         public const string State = "state";
@@ -73,6 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string UiLocales = "ui_locales";
         public const string UserId = "user_id";
         public const string Username = "username";
+        public const string VersionTelemetry = "x-client-ver";
 #pragma warning restore 1591
     }
 }
