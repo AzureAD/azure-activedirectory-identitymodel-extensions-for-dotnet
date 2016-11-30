@@ -356,6 +356,43 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
+    public class DerivedRsaKeyWrapProvider : RsaKeyWrapProvider
+    {
+        public DerivedRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
+            : base(key, algorithm, willDecrypt)
+        {
+        }
+
+        public bool IsSupportedAlgorithmCalled { get; set; } = false;
+        public bool ResolveRsaAlgorithmCalled { get; set; } = false;
+        public bool UnwrapKeyCalled { get; set; } = false;
+        public bool WrapKeyCalled { get; set; } = false;
+
+        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
+        {
+            IsSupportedAlgorithmCalled = true;
+            return base.IsSupportedAlgorithm(key, algorithm, willDecrypt);
+        }
+
+        protected override void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
+        {
+            ResolveRsaAlgorithmCalled = true;
+            base.ResolveRsaAlgorithm(key, algorithm, willDecrypt);
+        }
+
+        public override byte[] UnwrapKey(byte[] wrappedKey)
+        {
+            UnwrapKeyCalled = true;
+            return base.UnwrapKey(wrappedKey);
+        }
+
+        public override byte[] WrapKey(byte[] keyToWrap)
+        {
+            WrapKeyCalled = true;
+            return base.WrapKey(keyToWrap);
+        }
+    }
+
     /// <summary>
     /// Useful for trigging an exception.
     /// </summary>
