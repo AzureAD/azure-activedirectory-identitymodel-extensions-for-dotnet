@@ -83,12 +83,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static readonly TimeSpan DefaultNonceLifetime = TimeSpan.FromMinutes(60);
 
         /// <summary>
-        /// Default for the RequreSub value.
-        /// </summary>
-        /// <remarks>default: true.</remarks>
-        public static bool RequireSubByDefault = true;
-
-        /// <summary>
         /// Creates a new instance of <see cref="OpenIdConnectProtocolValidator"/>,
         /// </summary>
         public OpenIdConnectProtocolValidator()
@@ -99,7 +93,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             RequireAzp = false;
             RequireNonce = true;
             RequireState = true;
-            RequireSub = RequireSubByDefault;
             RequireTimeStampInNonce = true;
             RequireStateValidation = true;
 
@@ -206,6 +199,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [DefaultValue(true)]
         public bool RequireSub { get; set; } = RequireSubByDefault;
+
+
+        /// <summary>
+        /// Gets or sets a value for default RequreSub.
+        /// </summary>
+        /// <remarks>default: true.</remarks>
+        public static bool RequireSubByDefault { get; set; } = true;
 
         /// <summary>
         /// Gets or set logic to control if a nonce is prefixed with a timestamp.
