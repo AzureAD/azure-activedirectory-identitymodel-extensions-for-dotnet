@@ -56,6 +56,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">The <see cref="SecurityKey"/>  is not supported.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
         /// <exception cref="InvalidOperationException">Failed to create RSA algorithm with provided key and algorithm.</exception>
+        /// </summary>
         public RsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
         {
             if (key == null)
