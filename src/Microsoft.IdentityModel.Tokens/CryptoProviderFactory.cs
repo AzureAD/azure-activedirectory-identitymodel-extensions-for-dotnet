@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Tokens
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
             {
-                if (key as RsaSecurityKey != null)
+                if (key is RsaSecurityKey)
                     return true;
 
                 X509SecurityKey x509Key = key as X509SecurityKey;
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 
                 var jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                if (jsonWebKey != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
                     return true;
             }
 
