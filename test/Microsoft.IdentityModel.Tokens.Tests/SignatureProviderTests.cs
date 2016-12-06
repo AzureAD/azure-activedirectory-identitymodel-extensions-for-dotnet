@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Security.Cryptography;
 using Xunit;
 
@@ -82,16 +83,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             FactoryCreateFor("Signing ECDsa256Key_Public: SecurityKey without private key", KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.EcdsaSha256, factory, ExpectedException.InvalidOperationException(substringExpected: "IDX10638:"));
 
             // Key size checks
-            FactoryCreateFor("Signing: AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
-            FactoryCreateFor("Signing: SymmetricKeySize Key to small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10603:"));
+            FactoryCreateFor("Signing: AsymmetricKeySize Key too small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10630:"));
+            FactoryCreateFor("Signing: SymmetricKeySize Key too small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.ArgumentOutOfRangeException("IDX10603:"));
 
             FactoryCreateFor("Signing: SymmetricKeySize Key", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.NoExceptionExpected);
             FactoryCreateFor("Verifying: SymmetricKeySize Key", KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, factory, ExpectedException.NoExceptionExpected);
 
             // extensibility tests
             // smaller key sizes but no exceptions using custom crypto factory
-            FactoryCreateFor("Signing: AsymmetricKeySize Key to small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature }), ExpectedException.NoExceptionExpected);
-            FactoryCreateFor("Signing: SymmetricKeySize Key to small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.HmacSha256Signature }), ExpectedException.NoExceptionExpected);
+            FactoryCreateFor("Signing: AsymmetricKeySize Key too small", KeyingMaterial.X509SecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature }), ExpectedException.NoExceptionExpected);
+            FactoryCreateFor("Signing: SymmetricKeySize Key too small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.HmacSha256Signature }), ExpectedException.NoExceptionExpected);
         }
 
         private void FactoryCreateFor(string testcase, SecurityKey key, string algorithm, CryptoProviderFactory factory, ExpectedException expectedException)
@@ -326,6 +327,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
 
         }
+        private static bool IsRunningOn462OrGreaterOrCore()
+        {
+#if NETCOREAPP1_0
+            // test for Core
+            return true;
+#else
+            // test for >=4.6.2
+            // AesCng was added to System.Core in 4.6.2. It doesn't exist in .NET Core.
+            Module systemCoreModule = typeof(System.Security.Cryptography.AesCryptoServiceProvider).GetTypeInfo().Assembly.GetModules()[0];
+            if (systemCoreModule != null && systemCoreModule.GetType("System.Security.Cryptography.AesCng") != null)
+                return true;
+            return false;
+#endif
+        }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyTheoryData))]
@@ -387,16 +402,32 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test3"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            if (IsRunningOn462OrGreaterOrCore())
             {
-                Algorithm = SecurityAlgorithms.EcdsaSha384,
-                EE = ExpectedException.NoExceptionExpected,
-                RawBytes = rawBytes,
-                Key = KeyingMaterial.ECDsa384Key,
-                ShouldVerify = false,
-                Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
-                TestId = "Test4"
-            });
+                theoryData.Add(new SignatureProviderTestParams
+                {
+                    Algorithm = SecurityAlgorithms.EcdsaSha384,
+                    EE = ExpectedException.NoExceptionExpected,
+                    RawBytes = rawBytes,
+                    Key = KeyingMaterial.ECDsa384Key,
+                    ShouldVerify = false,
+                    Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                    TestId = "Test4 (for >= 4.6.2 and Core)"
+                });
+            }
+            else //running on 461 or below
+            {
+                theoryData.Add(new SignatureProviderTestParams
+                {
+                    Algorithm = SecurityAlgorithms.EcdsaSha384,
+                    EE = new ExpectedException(typeof(System.Security.Cryptography.CryptographicException), "The parameter is incorrect."),
+                    RawBytes = rawBytes,
+                    Key = KeyingMaterial.ECDsa384Key,
+                    ShouldVerify = false,
+                    Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                    TestId = "Test4 (for < 4.6.2)"
+                });
+            }
 
             theoryData.Add(new SignatureProviderTestParams
             {
