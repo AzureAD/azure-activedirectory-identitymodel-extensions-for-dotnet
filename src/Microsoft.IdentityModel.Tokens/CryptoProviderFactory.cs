@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        private bool IsSupportedRsaKeyWrapAlgorithm(string algorithm, SecurityKey key, bool willDecrypt)
+        private bool IsSupportedRsaKeyWrapAlgorithm(string algorithm, SecurityKey key)
         {
             if (key == null)
                 return false;
@@ -162,23 +162,20 @@ namespace Microsoft.IdentityModel.Tokens
                 X509SecurityKey x509Key = key as X509SecurityKey;
                 if (x509Key != null)
                 {
-                    if (willDecrypt)
-                    {
-                        if (x509Key.PrivateKey as RSACryptoServiceProvider != null)
-                            return true;
-                    }
-                    else
-                    {
-                        if (x509Key.PublicKey as RSACryptoServiceProvider != null)
-                            return true;
-                    }
-
+#if NETSTANDARD1_4
+                    if (x509Key.PublicKey as RSA == null)
+                        return false;
+#else
+                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
                     return false;
+#endif
                 }
 
                 var jsonWebKey = key as JsonWebKey;
                 if (jsonWebKey != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
                     return true;
+
+                return false;
             }
 
             return false;
@@ -532,7 +529,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return rsaKeyWrapProvider;
             }
 
-            if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key, willDecrypt))
+            if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key))
                 return new RsaKeyWrapProvider(key, algorithm, willDecrypt);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));

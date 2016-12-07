@@ -42,6 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
 #else
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
 #endif
+        private bool _disposeRsa;
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
         private bool _disposed = false;
 
@@ -160,17 +161,11 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
 #if NETSTANDARD1_4
-                    if (_rsa != null)
-                    {
+                    if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();
-                        _rsa = null;
-                    }
 #else
-                    if (_rsaCryptoServiceProvider != null)
-                    {
+                    if (_rsaCryptoServiceProvider != null && _disposeRsa)
                         _rsaCryptoServiceProvider.Dispose();
-                        _rsaCryptoServiceProvider = null;
-                    }
 #endif
 
                     if (_rsaCryptoServiceProviderProxy != null)
@@ -264,6 +259,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_rsa != null)
                 {
                     _rsa.ImportParameters(rsaKey.Parameters);
+                    _disposeRsa = true;
                     return;
                 }
             }
@@ -294,6 +290,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_rsa != null)
                 {
                     _rsa.ImportParameters(parameters);
+                    _disposed = true;
                     return;
                 }
             }
@@ -320,6 +317,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                     (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                    _disposeRsa = true;
                 }
 
                 return;
@@ -342,7 +340,7 @@ namespace Microsoft.IdentityModel.Tokens
                 RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willDecrypt);
                 _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                 (_rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
-
+                _disposeRsa = true;
                 return;
             }
 
