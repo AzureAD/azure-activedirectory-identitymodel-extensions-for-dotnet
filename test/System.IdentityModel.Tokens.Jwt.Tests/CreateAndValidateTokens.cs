@@ -235,9 +235,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 createParams.SecurityTokenDescriptor.IssuedAt,
                 createParams.SecurityTokenDescriptor.SigningCredentials);
             var jwtToken5 = handler.CreateToken(createParams.SecurityTokenDescriptor) as JwtSecurityToken;
+            var jwtToken6 = handler.CreateJwtSecurityToken(
+                createParams.SecurityTokenDescriptor.Issuer,
+                createParams.SecurityTokenDescriptor.Audience,
+                createParams.SecurityTokenDescriptor.Subject,
+                createParams.SecurityTokenDescriptor.NotBefore,
+                createParams.SecurityTokenDescriptor.Expires,
+                createParams.SecurityTokenDescriptor.IssuedAt,
+                createParams.SecurityTokenDescriptor.SigningCredentials,
+                createParams.SecurityTokenDescriptor.EncryptingCredentials);
             var encodedJwt3 = handler.WriteToken(jwtToken3);
             var encodedJwt4 = handler.WriteToken(jwtToken4);
             var encodedJwt5 = handler.WriteToken(jwtToken5);
+            var encodedJwt6 = handler.WriteToken(jwtToken6);
 
             SecurityToken validatedJwtToken1 = null;
             var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, createParams.TokenValidationParameters, out validatedJwtToken1);
@@ -253,6 +263,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             SecurityToken validatedJwtToken5 = null;
             var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, createParams.TokenValidationParameters, out validatedJwtToken5);
+
+            SecurityToken validatedJwtToken6 = null;
+            var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, createParams.TokenValidationParameters, out validatedJwtToken6);
 
             var context = new CompareContext();
             var localContext = new CompareContext();
@@ -305,6 +318,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
 
             localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken6, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken6");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
             if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal2, localContext))
             {
                 context.Diffs.Add("claimsPrincipal1 != claimsPrincipal2");
@@ -329,6 +349,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal5, localContext))
             {
                 context.Diffs.Add("claimsPrincipal1 != claimsPrincipal5");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal6, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal6");
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
@@ -403,6 +430,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
             var jweCreatedInMemory = handler.CreateJwtSecurityToken(tokenDescriptor);
+            var jweCreatedInMemory2 = handler.CreateJwtSecurityToken
+                (
+                tokenDescriptor.Issuer,
+                tokenDescriptor.Audience,
+                tokenDescriptor.Subject,
+                tokenDescriptor.NotBefore,
+                tokenDescriptor.Expires,
+                tokenDescriptor.IssuedAt,
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials
+                );
             try
             {
                 SecurityToken token = null;
@@ -419,6 +457,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var context = new CompareContext();
                 if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, outerToken.Payload, context))
                     context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.Payload");
+
+                if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, jweCreatedInMemory2.Payload, context))
+                    context.Diffs.Add("jweCreatedInMemory.Payload != jweCreatedInMemory2.Payload");
 
                 if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, outerToken.InnerToken.Payload, context))
                     context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.InnerToken.Payload");

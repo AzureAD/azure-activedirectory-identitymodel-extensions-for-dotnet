@@ -327,75 +327,333 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         }
 
-        [Fact]
-        public void AsymmetricSignatureProviders_Verify()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void
+        AsymmetricSignatureProvidersVerify(SignatureProviderTestParams testParams)
         {
-            List<string> errors = new List<string>();
+            try
+            {
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(testParams.Key, testParams.Algorithm);
+                if (provider.Verify(testParams.RawBytes, testParams.Signature) != testParams.ShouldVerify)
+                    Assert.True(false, testParams.TestId + " - SignatureProvider.Verify did not return expected: " + testParams.ShouldVerify + " , algorithm: " + testParams.Algorithm);
+
+                testParams.EE.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                testParams.EE.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<SignatureProviderTestParams> AsymmetricSignatureProviderVerifyTheoryData()
+        {
+            var theoryData = new TheoryData<SignatureProviderTestParams>();
+
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, null, null, ExpectedException.ArgumentNullException(), errors, false);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[1], null, ExpectedException.ArgumentNullException(), errors, false);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[0], new byte[1], ExpectedException.ArgumentNullException(), errors, false);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[1], new byte[0], ExpectedException.ArgumentNullException(), errors, false);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.ECDsa256Key,
+                ShouldVerify = true,
+                Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                TestId = "Test1"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.ECDsa256Key_Public,
+                ShouldVerify = true,
+                Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                TestId = "Test2"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.ECDsa256Key,
+                ShouldVerify = false,
+                Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                TestId = "Test3"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.ECDsa384Key,
+                ShouldVerify = false,
+                Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                TestId = "Test4"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha384,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.ECDsa384Key,
+                ShouldVerify = true,
+                Signature = GetSignature(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes),
+                TestId = "Test5"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.JsonWebKeyEcdsa256,
+                ShouldVerify = true,
+                Signature = GetSignature(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                TestId = "Test6"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                RawBytes = rawBytes,
+                Key = KeyingMaterial.JsonWebKeyEcdsa256Public,
+                ShouldVerify = true,
+                Signature = GetSignature(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes),
+                TestId = "Test7"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = KeyingMaterial.RsaSecurityKey_2048,
+                RawBytes = null,
+                Signature = null,
+                ShouldVerify = false,
+                TestId = "Test8"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = KeyingMaterial.RsaSecurityKey_2048,
+                RawBytes = new byte[1],
+                Signature = null,
+                ShouldVerify = false,
+                TestId = "Test9"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = KeyingMaterial.RsaSecurityKey_2048,
+                RawBytes = new byte[0],
+                Signature = new byte[1],
+                ShouldVerify = false,
+                TestId = "Test10"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = KeyingMaterial.RsaSecurityKey_2048,
+                RawBytes = new byte[1],
+                Signature = new byte[0],
+                ShouldVerify = false,
+                TestId = "Test11"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.ArgumentNullException(),
+                Key = KeyingMaterial.RsaSecurityKey_2048,
+                RawBytes = new byte[0],
+                Signature = new byte[1],
+                ShouldVerify = false,
+                TestId = "Test12"
+            });
 
             var signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-#if NETCOREAPP1_0
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-#endif
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_2048,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test13"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test14"
+            });
+
             // wrong hash
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha384Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_2048_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = false,
+                TestId = "Test15"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha512Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_2048_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = false,
+                TestId = "Test16"
+            });
+
             // wrong key
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_4096_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = false,
+                TestId = "Test17"
+            });
 
             signature = GetSignature(KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaSha256Signature, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_4096,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test18"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_4096_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test19"
+            });
+
             // wrong hash
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_4096_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha384Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_4096_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = false,
+                TestId = "Test20"
+            });
+
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha512Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_4096_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = false,
+                TestId = "Test21"
+            });
+
             // wrong key
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_2048_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = false,
+                TestId = "Test22"
+            });
 
             // sha384, 512
             signature = GetSignature(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha384Signature, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha384Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha384Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_2048_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test23"
+            });
 
             signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha512Signature, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-
-            //ecdsa
-            signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.EcdsaSha256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-
-            // wrong key
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-#if NETCOREAPP1_0
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-#else
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, false);
-#endif
-
-            signature = GetSignature(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-
-            signature = GetSignature(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha512Signature,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.RsaSecurityKey_2048_Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test24"
+            });
 
             signature = GetSignature(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, rawBytes);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
-            AsymmetricSignatureProviders_Verify_Variation(KeyingMaterial.JsonWebKeyRsa256Public, SecurityAlgorithms.RsaSha256, rawBytes, signature, ExpectedException.NoExceptionExpected, errors, true);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.JsonWebKeyRsa256,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test25"
+            });
 
-            TestUtilities.AssertFailIfErrors("AsymmetricSignatureProviders_Verify", errors);
+            theoryData.Add(new SignatureProviderTestParams
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256,
+                EE = ExpectedException.NoExceptionExpected,
+                Key = KeyingMaterial.JsonWebKeyRsa256Public,
+                RawBytes = rawBytes,
+                Signature = signature,
+                ShouldVerify = true,
+                TestId = "Test26"
+            });
+
+            return theoryData;
         }
 
-        private byte[] GetSignature(SecurityKey key, string algorithm, byte[] rawBytes)
+        private static byte[] GetSignature(SecurityKey key, string algorithm, byte[] rawBytes)
         {
             var provider = new AsymmetricSignatureProvider(key, algorithm, true);
             var bytes = provider.Sign(rawBytes);
@@ -404,21 +662,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return bytes;
         }
 
-        private void AsymmetricSignatureProviders_Verify_Variation(SecurityKey key, string algorithm, byte[] rawBytes, byte[] signature, ExpectedException ee, List<string> errors, bool shouldSignatureSucceed)
-        {
-            try
-            {
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(key, algorithm);
-                if (provider.Verify(rawBytes, signature) != shouldSignatureSucceed)
-                    errors.Add("SignatureProvider.Verify did not return expected: " + shouldSignatureSucceed + " , algorithm: " + algorithm);
-
-                ee.ProcessNoException(errors);
-            }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex, errors);
-            }
-        }
 #endregion
 
 #region Symmetric Signature Provider Tests

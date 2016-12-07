@@ -31,6 +31,7 @@ using System.Collections.Specialized;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
+using System.Reflection;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -39,6 +40,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
+        private const string _skuTelemetryValue = "ID_NET";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
@@ -82,6 +85,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IssuerAddress = other.IssuerAddress;
             RequestType = other.RequestType;
             TokenEndpoint = other.TokenEndpoint;
+            EnableTelemetryParameters = other.EnableTelemetryParameters;
         }
 
         /// <summary>
@@ -169,6 +173,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.Authentication;
+            EnsureTelemetryValues(openIdConnectMessage);
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
@@ -180,7 +185,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             OpenIdConnectMessage openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.Logout;
+            EnsureTelemetryValues(openIdConnectMessage);
             return openIdConnectMessage.BuildRedirectUrl();
+        }
+
+        /// <summary>
+        /// Adds telemetry values to the message parameters.
+        /// </summary>
+        private void EnsureTelemetryValues(OpenIdConnectMessage clonedMessage)
+        {
+            if (this.EnableTelemetryParameters)
+            {
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.SkuTelemetry, _skuTelemetryValue);
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString());
+            }
         }
 
         /// <summary>
@@ -278,6 +296,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             get { return GetParameter(OpenIdConnectParameterNames.DomainHint); }
             set { SetParameter(OpenIdConnectParameterNames.DomainHint, value); }
         }
+
+        /// <summary>
+        /// Gets or sets whether parameters for the library and version are sent on the query string for this <see cref="OpenIdConnectMessage"/> instance. 
+        /// This value is set to the value of EnableTelemetryParametersByDefault at message creation time.
+        /// </summary>
+        public bool EnableTelemetryParameters { get; set; } = EnableTelemetryParametersByDefault;
+
+
+        /// <summary>
+        /// Gets or sets whether parameters for the library and version are sent on the query string for all instances of <see cref="OpenIdConnectMessage"/>. 
+        /// </summary>
+        public static bool EnableTelemetryParametersByDefault { get; set; } = true;
 
         /// <summary>
         /// Gets or sets 'error'.
