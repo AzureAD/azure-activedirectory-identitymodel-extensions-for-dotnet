@@ -6,7 +6,8 @@ param(
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
-    [string]$updateCoreFxVersion="NO")
+    [string]$updateCoreFxVersion="NO",
+    [string]$failBuildOnTestFailure="YES")
 
 Write-Host ""
 Write-Host "============================"
@@ -20,6 +21,7 @@ Write-Host "root: " $root;
 Write-Host "runTests: " $runTests;
 Write-Host "PSScriptRoot: " $PSScriptRoot;
 Write-Host "updateCoreFxVersion: " $updateCoreFxVersion;
+Write-Host "failBuildOnTestFailure: " $failBuildOnTestFailure;
 
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $artifactsRoot = "$root\artifacts";
@@ -225,12 +227,35 @@ if ($runTests -eq "YES")
         $name = $testProject.name;
         Write-Host "";
         Write-Host ">>> Set-Location $root\test\$name"
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe test -c $buildType"
+        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe test -c $buildType"
         Write-Host ""
         pushd
         Set-Location $root\test\$name
-        Start-Process -wait -NoNewWindow $dotnetexe "test -c $buildType"
+        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test -c $buildType"
+        if($p.ExitCode -ne 0)
+        {
+            if (!$testExitCode)
+            {
+                $failedTestProjects = "$name"
+            }
+            else
+            {
+                $failedTestProjects = "$failedTestProjects, $name"
+            }
+        }
+        $testExitCode = $p.ExitCode + $testExitCode
         popd
+    }
+    if($testExitCode -ne 0)
+    {
+        Write-Host ""
+        Write-Host "==== Test Failures" -foregroundcolor "DarkRed"
+        Write-Host "Failed test projects: $failedTestProjects" -foregroundcolor "DarkRed"
+        Write-Host ""
+        if($failBuildOnTestFailure -ne "NO")
+        {
+            throw "Exiting test run."
+        }
     }
 }
 
