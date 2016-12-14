@@ -74,6 +74,7 @@ namespace Microsoft.IdentityModel
         public const string IDX10229 = "IDX10229: TokenValidationParameters.TokenReplayCache was unable to add the securityToken: '{0}'.";
         public const string IDX10230 = "IDX10230: Lifetime validation failed. Delegate returned false, securitytoken: '{0}'.";
         public const string IDX10231 = "IDX10231: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
+        public const string IDX10232 = "IDX10232: validationParameters.CertificateValidator is null; User need to set CertificateValidator";
 
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
@@ -169,6 +170,7 @@ namespace Microsoft.IdentityModel
         public const string IDX11006 = "IDX11006: This method is not supported to read a 'saml2token' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
         public const string IDX11007 = "IDX11007: This method is not supported to read a 'samltoken' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
         public const string IDX11008 = "IDX11008: This method is not supported to validate a 'jwt' use the method: ValidateToken(String, TokenValidationParameters, out SecurityToken).";
+        public const string IDX11009 = "IDX11009: This method only support X509SecurityKey";
 
         // Loading from web.config
         public const string IDX13000 = "IDX13000: A NamedKey must specify the 'symmetricKey' attribute. XML received: '{0}'.";
