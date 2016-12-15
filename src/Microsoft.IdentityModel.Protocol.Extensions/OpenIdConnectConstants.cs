@@ -185,6 +185,8 @@ namespace Microsoft.IdentityModel.Protocols
         public const string CheckSessionIframe = "check_session_iframe";
         public const string Discovery = ".well-known/openid-configuration";
         public const string EndSessionEndpoint = "end_session_endpoint";
+        public const string FrontchannelLogoutSessionSupported = "frontchannel_logout_session_supported";
+        public const string FrontchannelLogoutSupported = "frontchannel_logout_supported";
         public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
         public const string JwksUri = "jwks_uri";
         public const string Issuer = "issuer";
