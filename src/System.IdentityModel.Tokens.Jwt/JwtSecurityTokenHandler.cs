@@ -693,7 +693,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="jwt">The token to validate.</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
-        private ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        protected ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             DateTime? expires = (jwt.Payload.Exp == null) ? null : new DateTime?(jwt.ValidTo);
             DateTime? notBefore = (jwt.Payload.Nbf == null) ? null : new DateTime?(jwt.ValidFrom);
