@@ -19,7 +19,9 @@
 using Microsoft.IdentityModel.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
+using System.Security.Cryptography.X509Certificates;
 
 namespace System.IdentityModel.Test
 {
@@ -29,7 +31,19 @@ namespace System.IdentityModel.Test
     [TestClass]
     public class ValidatorsTests
     {
+        internal class MyX509CertificateValidator : X509CertificateValidator
+        {
+            public override void Validate(X509Certificate2 certificate)
+            {
+                if (!certificate.Equals(KeyingMaterial.DefaultCert_2048))
+                {
+                    throw new ArgumentException();
+                }
+            }
+        }
+
         public TestContext TestContext { get; set; }
+        private static bool issuerSigningKeyValidatorCalled = false;
 
         [ClassInitialize]
         public static void ClassSetup(TestContext testContext)
@@ -140,6 +154,67 @@ namespace System.IdentityModel.Test
         [Description("Tests: SecurityKeyValidator")]
         public void Validators_SecurityKey()
         {
+            SecurityKey x509SecurityKey = new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
+            TokenValidationParameters validationParameters = new TokenValidationParameters();
+
+            // Test validationParameters == null
+            RunSecurityKeyTest(x509SecurityKey, null, null, ExpectedException.ArgumentNullException());
+            // Test validationParameters.ValidateIssuerSigningKey == false
+            RunSecurityKeyTest(x509SecurityKey, null, validationParameters, ExpectedException.NoExceptionExpected);
+
+            // Test ValidateIssuerSigningKey = true in following cases:
+            validationParameters.ValidateIssuerSigningKey = true;
+
+            // securityKey == x509SecurityKey, validationParameters.CertificateValidator == null, validationParameters.IssuerSigningKeyValidator == null
+            validationParameters.CertificateValidator = null;
+            validationParameters.IssuerSigningKeyValidator = null;
+            RunSecurityKeyTest(x509SecurityKey, null, validationParameters, ExpectedException.SecurityTokenValidationException("IDX10232:"));
+
+            // securityKey == x509SecurityKey with validate certificate, validationParameters.CertificateValidator != null, validationParameters.IssuerSigningKeyValidator == null
+            validationParameters.CertificateValidator = new MyX509CertificateValidator();
+            validationParameters.IssuerSigningKeyValidator = null;
+            RunSecurityKeyTest(x509SecurityKey, null, validationParameters, ExpectedException.NoExceptionExpected);
+
+            // securityKey == x509SecurityKey with invalidate certificate, validationParameters.CertificateValidator != null, validationParameters.IssuerSigningKeyValidator == null
+            validationParameters.CertificateValidator = new MyX509CertificateValidator();
+            validationParameters.IssuerSigningKeyValidator = null;
+            X509SecurityKey x509NegCert = new X509SecurityKey(KeyingMaterial.Cert_1024);
+            RunSecurityKeyTest(x509NegCert, null, validationParameters, ExpectedException.ArgumentException());
+
+            // securityKey == x509SecurityKey, validationParameters.CertificateValidator == null, validationParameters.IssuerSigningKeyValidator != null
+            validationParameters.CertificateValidator = null;
+            validationParameters.IssuerSigningKeyValidator = IssuerSigningKeyValidator;
+            RunSecurityKeyTest(x509SecurityKey, null, validationParameters, ExpectedException.NoExceptionExpected);
+            Assert.AreEqual(issuerSigningKeyValidatorCalled, true);
+            issuerSigningKeyValidatorCalled = false;
+
+            // securityKey != x509SecurityKey, validationParameters.IssuerSigningKeyValidator == null
+            validationParameters.IssuerSigningKeyValidator = null;
+            RunSecurityKeyTest(KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2.SigningKey, null, validationParameters, ExpectedException.SecurityTokenValidationException("IDX10233:"));
+
+            // securityKey != x509SecurityKey, validationParameters.IssuerSigningKeyValidator != null
+            validationParameters.IssuerSigningKeyValidator = IssuerSigningKeyValidator;
+            RunSecurityKeyTest(KeyingMaterial.DefaultAsymmetricSigningCreds_2048_RsaSha2_Sha2.SigningKey, null, validationParameters, ExpectedException.NoExceptionExpected);
+            Assert.AreEqual(issuerSigningKeyValidatorCalled, true);
+            issuerSigningKeyValidatorCalled = false;
+        }
+
+        private void RunSecurityKeyTest(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
+        {
+            try
+            {
+                Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+                ee.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                ee.ProcessException(ex);
+            }
+        }
+
+        private static void IssuerSigningKeyValidator(SecurityKey key)
+        {
+            issuerSigningKeyValidatorCalled = true;
         }
     }
 }

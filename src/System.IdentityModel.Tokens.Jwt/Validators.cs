@@ -169,14 +169,30 @@ namespace System.IdentityModel.Tokens
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey != null)
             {
-                if (validationParameters.CertificateValidator == null)
-                    throw new NullReferenceException(ErrorMessages.IDX10232);
-
-                validationParameters.CertificateValidator.Validate(x509SecurityKey.Certificate);
-                return;
+                if (validationParameters.CertificateValidator != null)
+                {
+                    validationParameters.CertificateValidator.Validate(x509SecurityKey.Certificate);
+                }
+                else if (validationParameters.IssuerSigningKeyValidator != null)
+                {
+                    validationParameters.IssuerSigningKeyValidator(securityKey);
+                }
+                else
+                {
+                    throw new SecurityTokenValidationException(ErrorMessages.IDX10232);
+                }
             }
-
-            throw new ArgumentOutOfRangeException("securityKey", ErrorMessages.IDX11009);
+            else
+            {
+                if (validationParameters.IssuerSigningKeyValidator != null)
+                {
+                    validationParameters.IssuerSigningKeyValidator(securityKey);
+                }
+                else
+                {
+                    throw new SecurityTokenValidationException(ErrorMessages.IDX10233);
+                }
+            }
         }
 
         /// <summary>
