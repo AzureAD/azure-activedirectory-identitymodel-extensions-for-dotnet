@@ -187,8 +187,14 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public string CheckSessionIframe { get; set; }
 
+        /// <summary>
+        /// Gets or sets the frontchannel_logout_session_supported.
+        /// </summary>
         public bool FrontchannelLogoutSessionSupported { get; set; }
 
+        /// <summary>
+        /// Gets or sets the frontchannel_logout_supported.
+        /// </summary>
         public bool FrontchannelLogoutSupported { get; set; }
 
         /// <summary>
