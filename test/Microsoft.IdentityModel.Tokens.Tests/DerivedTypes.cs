@@ -368,10 +368,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public bool UnwrapKeyCalled { get; set; } = false;
         public bool WrapKeyCalled { get; set; } = false;
 
-        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
+        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
             IsSupportedAlgorithmCalled = true;
-            return base.IsSupportedAlgorithm(key, algorithm, willDecrypt);
+            return base.IsSupportedAlgorithm(key, algorithm);
         }
 
         protected override void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)

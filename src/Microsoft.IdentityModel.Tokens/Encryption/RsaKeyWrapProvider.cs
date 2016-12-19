@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, algorithm, 2048, keyId, key.KeySize)));
             }
 
-            if (!IsSupportedAlgorithm(key, algorithm, willDecrypt))
+            if (!IsSupportedAlgorithm(key, algorithm))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
 
             Algorithm = algorithm;
@@ -181,9 +181,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
         /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
-        /// <param name = "willDecrypt"> Whether this <see cref = "RsaKeyWrapProvider" /> is required to create decrypts then set this to true.</param>
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
-        protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
+        protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
             if (key == null)
                 return false;
@@ -202,27 +201,11 @@ namespace Microsoft.IdentityModel.Tokens
                 if (x509Key != null)
                 {
 #if NETSTANDARD1_4
-                    if (willDecrypt)
-                    {
-                        if (x509Key.PrivateKey as RSACryptoServiceProvider != null || x509Key.PrivateKey as RSA != null)
-                            return true;
-                    }
-                    else
-                    {
-                        if (x509Key.PublicKey as RSA != null)
-                            return true;
-                    }
+                    if (x509Key.PublicKey as RSA != null)
+                        return true;
 #else
-                    if (willDecrypt)
-                    {
-                        if (x509Key.PrivateKey as RSACryptoServiceProvider != null)
-                            return true;
-                    }
-                    else
-                    {
-                        if (x509Key.PublicKey as RSACryptoServiceProvider != null)
-                            return true;
-                    }
+                    if (x509Key.PublicKey as RSACryptoServiceProvider != null)
+                        return true;
 #endif
 
                     return false;
