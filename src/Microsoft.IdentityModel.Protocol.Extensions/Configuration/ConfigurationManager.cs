@@ -89,15 +89,26 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="metadataAddress">the address to obtain configuration.</param>
         /// <param name="docRetriever">the <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
         public ConfigurationManager(string metadataAddress, IDocumentRetriever docRetriever)
+            : this(metadataAddress, GetConfigurationRetriever(), docRetriever)
         {
-            if (!typeof(T).Equals(typeof(WsFederationConfiguration)) && (!typeof(T).Equals(typeof(OpenIdConnectConfiguration))))
-            {
-                throw new NotImplementedException(typeof(T).FullName);
-            }
+        }
 
+        /// <summary>
+        /// Instantiaties a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">the address to obtain configuration.</param>
+        /// <param name="configRetriever">the <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">the <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever)
+        {
             if (string.IsNullOrWhiteSpace(metadataAddress))
             {
                 throw new ArgumentNullException("metadataAddress");
+            }
+
+            if (configRetriever == null)
+            {
+                throw new ArgumentNullException("configRetriever");
             }
 
             if (docRetriever == null)
@@ -106,8 +117,9 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             _metadataAddress = metadataAddress;
+            _configRetriever = configRetriever;
             _docRetriever = docRetriever;
-            _configRetriever = GetConfigurationRetriever();
+
             _refreshLock = new SemaphoreSlim(1);
         }
 

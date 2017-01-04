@@ -106,6 +106,7 @@
     <Compile Include="CrossTokenTests.cs" />
     <Compile Include="DerivedTypes.cs" />
     <Compile Include="End2EndTests.cs" />
+    <Compile Include="FileDocumentRetriever.cs" />
     <Compile Include="GenericDocumentRetrieverTests.cs" />
     <Compile Include="HttpDocumentRetrieverTests.cs" />
     <Compile Include="JsonWebKeySetTests.cs" />
@@ -121,6 +122,8 @@
     <Compile Include="SamlSecurityTokenHandlerTests.cs" />
     <Compile Include="SecurityTokenHandlerCollectionExtensionsTests.cs" />
     <Compile Include="StaticConfigurationManagerTests.cs" />
+    <Compile Include="FakeConfiguration.cs" />
+    <Compile Include="FakeConfigurationRetriever.cs" />
     <Compile Include="WsFederationConfigurationRetrieverTests.cs" />
     <Compile Include="WsFederationConfigurationTests.cs" />
     <Compile Include="WsFederationConstantsTests.cs" />
@@ -161,6 +164,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="PingLabsJWKS.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ConfigurationDocument.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
