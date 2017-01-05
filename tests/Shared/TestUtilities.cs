@@ -317,7 +317,14 @@ namespace Microsoft.IdentityModel.Test
             object retval = propertyInfo.GetValue(obj);
             if (propertyInfo.CanWrite)
             {
-                propertyInfo.SetValue(obj, propertyValue);
+                if (!propertyInfo.PropertyType.Equals(propertyValue.GetType()))
+                {
+                    propertyInfo.SetValue(obj, Convert.ChangeType(propertyValue, propertyInfo.PropertyType));
+                }
+                else
+                {
+                    propertyInfo.SetValue(obj, propertyValue);
+                }
             }
             else
             {
