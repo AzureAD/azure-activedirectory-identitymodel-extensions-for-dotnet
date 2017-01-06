@@ -109,6 +109,8 @@ namespace Microsoft.IdentityModel.Test
             // ensure that each property can be set independently
             GetAndCheckConfiguration("authorization_endpoint", "AuthorizationEndpoint");
             GetAndCheckConfiguration("check_session_iframe", "CheckSessionIframe");
+            GetAndCheckConfiguration("frontchannel_logout_session_supported", "FrontchannelLogoutSessionSupported", "true");
+            GetAndCheckConfiguration("frontchannel_logout_supported", "FrontchannelLogoutSupported", "true");
             GetAndCheckConfiguration("end_session_endpoint", "EndSessionEndpoint");
             GetAndCheckConfiguration("jwks_uri", "JwksUri", OpenIdConfigData.AADCommonUrl);
             GetAndCheckConfiguration("token_endpoint", "TokenEndpoint");
@@ -215,6 +217,7 @@ namespace Microsoft.IdentityModel.Test
                 OpenIdConnectConfiguration openIdConnectConfiguration = new OpenIdConnectConfiguration(jsonString);
                 OpenIdConnectConfiguration expectedConfiguration = new OpenIdConnectConfiguration();
                 TestUtilities.SetProperty(expectedConfiguration, propertyName, jsonValue);
+
                 Assert.IsTrue(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
             }
             catch (Exception exception)
