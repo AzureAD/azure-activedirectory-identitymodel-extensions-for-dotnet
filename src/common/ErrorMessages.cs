@@ -74,6 +74,8 @@ namespace Microsoft.IdentityModel
         public const string IDX10229 = "IDX10229: TokenValidationParameters.TokenReplayCache was unable to add the securityToken: '{0}'.";
         public const string IDX10230 = "IDX10230: Lifetime validation failed. Delegate returned false, securitytoken: '{0}'.";
         public const string IDX10231 = "IDX10231: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
+        public const string IDX10232 = "IDX10232: validationParameters.CertificateValidator and validationParameters.IssuerSigningKeyValidator are null. Validation of a X509SecurityKey requires that you set the CertificateValidator or IssuerSigningKeyValidator.";
+        public const string IDX10233 = "IDX10233: validationParameters.IssuerSigningKeyValidator is null. Validation requires that you set the IssuerSigningKeyValidator.";
 
         // protocol validation
         public const string IDX10300 = "IDX10300: A claim of type: '{0}', was not found in the jwt: '{1}'.";
