@@ -1,9 +1,9 @@
 {
-  "version": "5.1.0",
+  "version": "5.1.1",
   "dependencies": {
     "Newtonsoft.Json": "9.0.1",
-    "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.1.0-*",
-    "System.IdentityModel.Tokens.Saml": "5.1.0-*",
+    "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.1.1-*",
+    "System.IdentityModel.Tokens.Saml": "5.1.1-*",
     "dotnet-test-xunit": "2.2.0-*",
     "xunit": "2.2.0-*"
   },

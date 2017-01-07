@@ -184,7 +184,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
-            return Verify(input, signature, signature.Length);
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
+
+            if (_keyedHash == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
+
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
+
+            return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
         }
 
         /// <summary>

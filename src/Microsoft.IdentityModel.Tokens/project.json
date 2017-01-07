@@ -1,8 +1,8 @@
 {
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Includes types that provide support for cryptographic operations.",
   "dependencies": {
-    "Microsoft.IdentityModel.Logging": "1.1.0",
+    "Microsoft.IdentityModel.Logging": "1.1.1",
     "Newtonsoft.Json": "9.0.1"
   },
   "frameworks": {

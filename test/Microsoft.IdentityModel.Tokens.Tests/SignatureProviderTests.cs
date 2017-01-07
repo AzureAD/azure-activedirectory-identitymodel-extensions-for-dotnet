@@ -37,6 +37,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string Algorithm { get; set; }
         public ExpectedException EE { get; set; }
         public SecurityKey Key { get; set; }
+        public SignatureProvider ProviderForSigning { get; set; }
+        public SignatureProvider ProviderForVerifying { get; set; }
         public byte[] RawBytes { get; set; }
         public bool ShouldVerify { get; set; }
         public byte[] Signature { get; set; }
@@ -220,6 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ee.ProcessException(ex, errors);
             }
         }
+
 #endregion
 
 #region Asymmetric Signature Provider Tests
@@ -395,7 +398,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("AsymmetricSignatureProviders_Verify", errors);
         }
 
-        private byte[] GetSignature(SecurityKey key, string algorithm, byte[] rawBytes)
+        private static byte[] GetSignature(SecurityKey key, string algorithm, byte[] rawBytes)
         {
             var provider = new AsymmetricSignatureProvider(key, algorithm, true);
             var bytes = provider.Sign(rawBytes);
@@ -938,6 +941,111 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             );
 
             return dataSet;
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(SignatureTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignatureTampering(SignatureProviderTestParams testParams)
+        {
+            Console.WriteLine($"SignatureTampering : {testParams} : {testParams.Signature.Length}");
+
+            var copiedSignature = testParams.Signature.CloneByteArray();
+            for (int i = 0; i < testParams.Signature.Length; i++)
+            {
+                var originalB = testParams.Signature[i];
+                for (byte b = 0; b < byte.MaxValue; b++)
+                {
+                    // skip here as this will succeed
+                    if (b == testParams.Signature[i])
+                        continue;
+
+                    copiedSignature[i] = b;
+                    Assert.False(testParams.ProviderForVerifying.Verify(testParams.RawBytes, copiedSignature), $"signature should not have verified: {testParams.TestId} : {i} : {b} : {copiedSignature[i]}");
+
+                    // reset so we move to next byte
+                    copiedSignature[i] = originalB;
+                }
+            }
+
+            Assert.True(testParams.ProviderForVerifying.Verify(testParams.RawBytes, copiedSignature), "Final check should have verified");
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(SignatureTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignatureTruncation(SignatureProviderTestParams testParams)
+        {
+            Console.WriteLine($"SignatureTruncation : {testParams} : {testParams.Signature.Length}");
+
+            for (int i = 0; i < testParams.Signature.Length-1; i++)
+            {
+                var truncatedSignature = new byte[i+1];
+                Array.Copy(testParams.Signature, truncatedSignature, i+1);
+                Assert.False(testParams.ProviderForVerifying.Verify(testParams.RawBytes, truncatedSignature), $"signature should not have verified: {testParams.TestId} : {i}");
+            }
+
+            Assert.True(testParams.ProviderForVerifying.Verify(testParams.RawBytes, testParams.Signature), "Final check should have verified");
+        }
+
+        public static TheoryData<SignatureProviderTestParams> SignatureTheoryData()
+        {
+            var theoryData = new TheoryData<SignatureProviderTestParams>();
+
+            var rawBytes = Guid.NewGuid().ToByteArray();
+            var asymmetricProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256, true);
+            theoryData.Add(
+                new SignatureProviderTestParams
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    Key = KeyingMaterial.DefaultX509Key_2048,
+                    ProviderForVerifying = asymmetricProvider,
+                    RawBytes = rawBytes,
+                    Signature = asymmetricProvider.Sign(rawBytes),
+                    TestId = "Test1"
+                }
+            );
+
+            var asymmetricProvider2 = new AsymmetricSignatureProvider(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true);
+            theoryData.Add(
+                new SignatureProviderTestParams
+                {
+                    Algorithm = SecurityAlgorithms.EcdsaSha256,
+                    Key = KeyingMaterial.ECDsa256Key,
+                    ProviderForVerifying = asymmetricProvider,
+                    RawBytes = rawBytes,
+                    Signature = asymmetricProvider.Sign(rawBytes),
+                    TestId = "Test2"
+                }
+            );
+
+            var symmetricProvider = new SymmetricSignatureProvider(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256);
+            theoryData.Add(
+                new SignatureProviderTestParams
+                {
+                    Algorithm = SecurityAlgorithms.HmacSha256,
+                    Key = KeyingMaterial.SymmetricSecurityKey2_256,
+                    ProviderForVerifying = symmetricProvider,
+                    RawBytes = rawBytes,
+                    Signature = symmetricProvider.Sign(rawBytes),
+                    TestId = "Test3"
+                }
+            );
+
+            var symmetricProvider2 = new SymmetricSignatureProvider(KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512);
+            theoryData.Add(
+                new SignatureProviderTestParams
+                {
+                    Algorithm = SecurityAlgorithms.HmacSha512,
+                    Key = KeyingMaterial.SymmetricSecurityKey2_512,
+                    ProviderForVerifying = symmetricProvider2,
+                    RawBytes = rawBytes,
+                    Signature = symmetricProvider2.Sign(rawBytes),
+                    TestId = "Test4"
+                }
+            );
+
+            return theoryData;
         }
     }
 }
