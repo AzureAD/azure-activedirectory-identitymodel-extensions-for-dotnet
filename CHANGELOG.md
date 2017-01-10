@@ -1,4 +1,9 @@
 <a name="5.0.0"></a>
+# 5.1.2
+
+## Features
+* **Rebuild:** Fix strong name signing issue
+
 # 5.1.1
 
 ## Features
