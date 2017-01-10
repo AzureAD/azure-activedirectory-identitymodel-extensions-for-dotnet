@@ -40,4 +40,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-[assembly: AssemblyVersion("5.1.0")]
+[assembly: AssemblyVersion("5.1.2")]
