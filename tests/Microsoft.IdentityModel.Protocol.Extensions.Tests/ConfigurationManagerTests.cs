@@ -52,8 +52,19 @@ namespace Microsoft.IdentityModel.Test
         [TestMethod]
         [TestProperty("TestCaseID", "39792f21-e6cd-4b6a-bebd-fee9b86304d8")]
         [Description("Tests: Constructors")]
+        [DeploymentItem("ConfigurationDocument.xml")]
         public void ConfigurationManager_Constructors()
         {
+            FileDocumentRetriever docRetriever = new FileDocumentRetriever();
+            ConfigurationManager<OpenIdConnectConfiguration> openIdConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", docRetriever);
+            var openIdConfiguration = openIdConfigurationManager.GetConfigurationAsync().Result;
+            Assert.IsTrue(openIdConfiguration is OpenIdConnectConfiguration);
+            Assert.IsFalse(String.IsNullOrWhiteSpace(openIdConfiguration.Issuer));
+
+            ConfigurationManager<FakeConfiguration> genericDocumentConfigurationManager = new ConfigurationManager<FakeConfiguration>("ConfigurationDocument.xml", new FakeConfigurationRetriever(), docRetriever);
+            var fakeConfiguration = genericDocumentConfigurationManager.GetConfigurationAsync().Result;
+            Assert.IsTrue(fakeConfiguration is FakeConfiguration);
+            Assert.IsFalse(String.IsNullOrWhiteSpace(fakeConfiguration.Title));
         }
 
         [TestMethod]
