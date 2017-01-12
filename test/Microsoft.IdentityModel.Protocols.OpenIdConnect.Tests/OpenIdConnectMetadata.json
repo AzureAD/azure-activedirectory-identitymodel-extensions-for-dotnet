@@ -1,6 +1,8 @@
 {
     "acr_values_supported" : ["acr_value1", "acr_value2", "acr_value3"],
     "authorization_endpoint": "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize",
+	"frontchannel_logout_session_supported": "true",
+	"frontchannel_logout_supported": "true",
     "check_session_iframe": "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession",
     "claims_locales_supported": [ "claim_local1", "claim_local2", "claim_local3" ],
     "claims_parameter_supported": true,

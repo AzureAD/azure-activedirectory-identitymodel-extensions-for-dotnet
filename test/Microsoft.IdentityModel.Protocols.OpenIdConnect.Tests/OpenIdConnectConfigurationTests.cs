@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 42)
+            if (properties.Length != 44)
                 Assert.True(false, "Number of properties has changed from 42 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
@@ -150,6 +150,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             string authorization_Endpoint = Guid.NewGuid().ToString();
             string end_Session_Endpoint = Guid.NewGuid().ToString();
+            string frontchannelLogoutSessionSupported = "true";
+            string frontchannelLogoutSupported = "true";
             string issuer = Guid.NewGuid().ToString();
             string jwks_Uri = Guid.NewGuid().ToString();
             string token_Endpoint = Guid.NewGuid().ToString();
@@ -158,6 +160,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 AuthorizationEndpoint = authorization_Endpoint,
                 EndSessionEndpoint = end_Session_Endpoint,
+                FrontchannelLogoutSessionSupported = frontchannelLogoutSessionSupported,
+                FrontchannelLogoutSupported = frontchannelLogoutSupported,
                 Issuer = issuer,
                 JwksUri = jwks_Uri,
                 TokenEndpoint = token_Endpoint,
@@ -174,6 +178,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (!string.Equals(configuration.EndSessionEndpoint, end_Session_Endpoint))
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.EndSessionEndpoint != end_Session_Endpoint. '{0}', '{1}'.", configuration.EndSessionEndpoint, end_Session_Endpoint));
+
+            if (!string.Equals(configuration.FrontchannelLogoutSessionSupported, frontchannelLogoutSessionSupported))
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.FrontchannelLogoutSessionSupported != frontchannelLogoutSessionSupported. '{0}', '{1}'.", configuration.FrontchannelLogoutSessionSupported, frontchannelLogoutSessionSupported));
+
+            if (!string.Equals(configuration.FrontchannelLogoutSupported, frontchannelLogoutSupported))
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.FrontchannelLogoutSupported != efrontchannelLogoutSessionSupported. '{0}', '{1}'.", configuration.FrontchannelLogoutSupported, frontchannelLogoutSupported));
 
             if (!string.Equals(configuration.Issuer, issuer))
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.Issuer != issuer. '{0}', '{1}'.", configuration.Issuer, issuer));

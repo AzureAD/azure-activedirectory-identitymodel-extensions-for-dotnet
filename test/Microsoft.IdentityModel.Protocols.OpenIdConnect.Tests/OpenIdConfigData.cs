@@ -69,6 +69,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"" : [""acr_value1"", ""acr_value2"", ""acr_value3""],
                                                 ""authorization_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""frontchannel_logout_session_supported"": ""true"",
+                                                ""frontchannel_logout_supported"": ""true"",
                                                 ""check_session_iframe"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
                                                 ""claims_locales_supported"" : [ ""claim_local1"", ""claim_local2"", ""claim_local3"" ],
                                                 ""claims_parameter_supported"" : true,
@@ -190,6 +192,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.ClaimTypesSupported, "Normal Claims", "Aggregated Claims", "Distributed Claims");
             AddToCollection(config.DisplayValuesSupported, "displayValue1", "displayValue2", "displayValue3");
             config.EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout";
+            config.FrontchannelLogoutSessionSupported = "true";
+            config.FrontchannelLogoutSupported = "true";
             AddToCollection(config.GrantTypesSupported, "authorization_code", "implicit");
             config.HttpLogoutSupported = true;
             AddToCollection(config.IdTokenEncryptionAlgValuesSupported, "RSA1_5", "A256KW");
