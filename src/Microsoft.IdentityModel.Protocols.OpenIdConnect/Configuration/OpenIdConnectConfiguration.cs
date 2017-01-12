@@ -161,6 +161,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string EndSessionEndpoint { get; set; }
 
         /// <summary>
+        /// Gets or sets the frontchannel_logout_session_supported.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.FrontchannelLogoutSessionSupported, Required = Required.Default)]
+        public string FrontchannelLogoutSessionSupported { get; set; }
+
+        /// <summary>
+        /// Gets or sets the frontchannel_logout_supported.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.FrontchannelLogoutSupported, Required = Required.Default)]
+        public string FrontchannelLogoutSupported { get; set; }
+
+        /// <summary>
         /// Gets the collection of 'grant_types_supported'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.GrantTypesSupported, Required = Required.Default)]
