@@ -44,6 +44,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string Discovery = ".well-known/openid-configuration";
         public const string DisplayValuesSupported = "display_values_supported";
         public const string EndSessionEndpoint = "end_session_endpoint";
+        public const string FrontchannelLogoutSessionSupported = "frontchannel_logout_session_supported";
+        public const string FrontchannelLogoutSupported = "frontchannel_logout_supported";
         public const string HttpLogoutSupported = "http_logout_supported";
         public const string GrantTypesSupported = "grant_types_supported";
         public const string IdTokenEncryptionAlgValuesSupported = "id_token_encryption_alg_values_supported";
