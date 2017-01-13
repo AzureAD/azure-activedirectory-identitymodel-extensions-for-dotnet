@@ -88,6 +88,19 @@ namespace Microsoft.IdentityModel.Tokens
         };
 
         /// <summary>
+        /// Mapping from algorithm to <see cref="ECDsa"/>.KeySize.
+        /// </summary>
+        private static readonly Dictionary<string, int> DefaultECDsaKeySizeInBitsMap = new Dictionary<string, int>()
+        {
+            { SecurityAlgorithms.EcdsaSha256, 256 },
+            { SecurityAlgorithms.EcdsaSha384, 384 },
+            { SecurityAlgorithms.EcdsaSha512, 521 },
+            { SecurityAlgorithms.EcdsaSha256Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha384Signature, 384 },
+            { SecurityAlgorithms.EcdsaSha512Signature, 521 }
+        };
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.<see cref="SecurityKey"/></param>
@@ -254,7 +267,14 @@ namespace Microsoft.IdentityModel.Tokens
                 if (ecdsaKey.ECDsa != null)
                 {
                     _ecdsa = ecdsaKey.ECDsa;
-                    return;
+                    if (_ecdsa != null && ValidateECDSAKeySize(_ecdsa.KeySize, algorithm))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, key, DefaultECDsaKeySizeInBitsMap[algorithm], key.KeySize)));
+                    }
                 }
             }
 
@@ -276,8 +296,16 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw new PlatformNotSupportedException();
 
-                CreateECDsaFromJsonWebKey(webKey, willCreateSignatures);
-                return;
+                _ecdsa = CreateECDsaFromJsonWebKey(webKey, algorithm, willCreateSignatures);
+                _disposeEcdsa = true;
+                if (_ecdsa != null)
+                {
+                    return;
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10672, key)));
+                }
             }
 
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
@@ -357,8 +385,15 @@ namespace Microsoft.IdentityModel.Tokens
                 if (ecdsaKey.ECDsa != null)
                 {
                     _ecdsa = ecdsaKey.ECDsa as ECDsaCng;
-                    _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
-                    return;
+                    if (_ecdsa != null && ValidateECDSAKeySize(_ecdsa.KeySize, algorithm))
+                    {
+                        _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                        return;
+                    }
+                    else
+                    {
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, key, DefaultECDsaKeySizeInBitsMap[algorithm], key.KeySize)));
+                    }
                 }
             }
 
@@ -372,8 +407,16 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
-                CreateECDsaFromJsonWebKey(webKey, willCreateSignatures);
-                return;
+                _ecdsa = CreateECDsaFromJsonWebKey(webKey, algorithm, willCreateSignatures);
+                _disposeEcdsa = true;
+                if (_ecdsa != null)
+                {
+                    return;
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10672, key)));
+                }
             }
 
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
@@ -417,7 +460,7 @@ namespace Microsoft.IdentityModel.Tokens
             return parameters;
         }
 
-        private void CreateECDsaFromJsonWebKey(JsonWebKey webKey, bool willCreateSignatures)
+        private ECDsaCng CreateECDsaFromJsonWebKey(JsonWebKey webKey, string algorithm, bool willCreateSignatures)
         {
             if (webKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(webKey));
@@ -469,8 +512,14 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
                     {
-                        _ecdsa = new ECDsaCng(cngKey);
-                        _disposeEcdsa = true;
+                        if (ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                        {
+                            return new ECDsaCng(cngKey);
+                        }
+                        else
+                        {
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                        }
                     }
                 }
                 else
@@ -478,8 +527,14 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
                     {
-                        _ecdsa = new ECDsaCng(cngKey);
-                        _disposeEcdsa = true;
+                        if (ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                        {
+                            return new ECDsaCng(cngKey);
+                        }
+                        else
+                        {
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                        }
                     }
                 }
             }
@@ -605,6 +660,14 @@ namespace Microsoft.IdentityModel.Tokens
                 return _ecdsa.SignData(input);
 #endif
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
+        }
+
+        private bool ValidateECDSAKeySize(int keySize, string algorithm)
+        {
+            if (DefaultECDsaKeySizeInBitsMap.ContainsKey(algorithm) && keySize == DefaultECDsaKeySizeInBitsMap[algorithm])
+                return true;
+
+            return false;
         }
 
         /// <summary>

@@ -95,6 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             FactoryCreateFor("Signing: SymmetricKeySize Key too small", KeyingMaterial.DefaultSymmetricSecurityKey_56, SecurityAlgorithms.HmacSha256Signature, new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.HmacSha256Signature }), ExpectedException.NoExceptionExpected);
         }
 
+
         private void FactoryCreateFor(string testcase, SecurityKey key, string algorithm, CryptoProviderFactory factory, ExpectedException expectedException)
         {
             Console.WriteLine(testcase);
@@ -259,6 +260,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricConstructorVariation("Verifying:  - Creates with no errors", KeyingMaterial.JsonWebKeyRsa256Public, SecurityAlgorithms.RsaSha256, ExpectedException.NoExceptionExpected);
             AsymmetricConstructorVariation("Signing:  - Creates with no errors", KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, ExpectedException.NoExceptionExpected);
             AsymmetricConstructorVariation("Verifying:  - Creates with no errors", KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256, ExpectedException.NoExceptionExpected);
+
+            // constructing using a key with wrong key size:
+            AsymmetricConstructorVariation("Verifying:    - ECDSA with unmatched keysize", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
+            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with unmatched keysize", KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
         }
 
         private void AsymmetricConstructorVariation(string testcase, SecurityKey key, string algorithm, ExpectedException expectedException)
@@ -316,7 +321,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 try
                 {
-                    var provider = new AsymmetricSignatureProvider(KeyingMaterial.ECDsa256Key, algorithm);
+                    SecurityKey key = null;
+                    if (algorithm.Equals(SecurityAlgorithms.EcdsaSha256, StringComparison.Ordinal))
+                    {
+                        key = KeyingMaterial.ECDsa256Key;
+                    }
+                    else if (algorithm.Equals(SecurityAlgorithms.EcdsaSha384, StringComparison.Ordinal))
+                    {
+                        key = KeyingMaterial.ECDsa384Key;
+                    }
+                    else
+                    {
+                        key = KeyingMaterial.ECDsa521Key;
+                    }
+
+                    var provider = new AsymmetricSignatureProvider(key, algorithm);
                 }
                 catch (Exception ex)
                 {
@@ -327,6 +346,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
 
         }
+
         private static bool IsRunningOn462OrGreaterOrCore()
         {
 #if NETCOREAPP1_0
@@ -394,7 +414,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add(new SignatureProviderTestParams
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha384,
-                EE = ExpectedException.NoExceptionExpected,
+                EE = ExpectedException.ArgumentOutOfRangeException("IDX10671:"),
                 RawBytes = rawBytes,
                 Key = KeyingMaterial.ECDsa256Key,
                 ShouldVerify = false,
@@ -416,7 +436,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 });
             }
             else //running on 461 or below
-            {
+             {
                 theoryData.Add(new SignatureProviderTestParams
                 {
                     Algorithm = SecurityAlgorithms.EcdsaSha384,
@@ -428,6 +448,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "Test4 (for < 4.6.2)"
                 });
             }
+
+        //theoryData.Add(new SignatureProviderTestParams
+        //    {
+        //        Algorithm = SecurityAlgorithms.EcdsaSha384,
+        //        EE = ExpectedException.NoExceptionExpected,
+        //        RawBytes = rawBytes,
+        //        Key = KeyingMaterial.ECDsa384Key,
+        //        ShouldVerify = false,
+        //        Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
+        //        TestId = "Test4"
+        //    });
 
             theoryData.Add(new SignatureProviderTestParams
             {
