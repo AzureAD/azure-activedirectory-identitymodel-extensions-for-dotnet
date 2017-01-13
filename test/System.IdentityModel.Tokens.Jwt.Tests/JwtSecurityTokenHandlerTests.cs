@@ -115,9 +115,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             switch (outboundAlgorithm)
             {
                 case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.EcdsaSha512Signature:
                     jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa256Key, outboundAlgorithm) });
+                    break;
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa384Key, outboundAlgorithm) });
+                    break;
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa521Key, outboundAlgorithm) });
                     break;
 
                 case SecurityAlgorithms.RsaSha256Signature:
