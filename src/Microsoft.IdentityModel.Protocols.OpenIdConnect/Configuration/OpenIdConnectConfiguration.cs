@@ -113,13 +113,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public ICollection<string> AcrValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
-        /// Gets or sets the authorization endpoint.
+        /// Gets or sets the 'authorization_endpoint'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.AuthorizationEndpoint, Required = Required.Default)]
         public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the check_session_iframe.
+        /// Gets or sets the 'check_session_iframe'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.CheckSessionIframe, Required = Required.Default)]
         public string CheckSessionIframe { get; set; }
@@ -155,19 +155,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public ICollection<string> DisplayValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
-        /// Gets or sets the end session endpoint.
+        /// Gets or sets the 'end_session_endpoint'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.EndSessionEndpoint, Required = Required.Default)]
         public string EndSessionEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the frontchannel_logout_session_supported.
+        /// Gets or sets the 'frontchannel_logout_session_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.FrontchannelLogoutSessionSupported, Required = Required.Default)]
         public string FrontchannelLogoutSessionSupported { get; set; }
 
         /// <summary>
-        /// Gets or sets the frontchannel_logout_supported.
+        /// Gets or sets the 'frontchannel_logout_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.FrontchannelLogoutSupported, Required = Required.Default)]
         public string FrontchannelLogoutSupported { get; set; }
