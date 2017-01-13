@@ -184,7 +184,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
             }
 
-            if (key as ECDsaSecurityKey != null)
+            ECDsaSecurityKey ecdsaSecurityKey = key as ECDsaSecurityKey;
+            if (ecdsaSecurityKey != null)
                 return IsEcdsaAlgorithmSupported(algorithm);
 
             if (key as SymmetricSecurityKey != null)
@@ -198,10 +199,10 @@ namespace Microsoft.IdentityModel.Tokens
             switch (algorithm)
             {
                 case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha512:
                 case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.EcdsaSha384:
                 case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.EcdsaSha512:
                 case SecurityAlgorithms.EcdsaSha512Signature:
                     return true;
             }
