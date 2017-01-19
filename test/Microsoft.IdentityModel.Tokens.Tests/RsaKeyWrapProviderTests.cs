@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             theoryData.Add("Test1", null, null, false, ExpectedException.ArgumentNullException());
             theoryData.Add("Test2", KeyingMaterial.RsaSecurityKey_2048, null, false, ExpectedException.ArgumentNullException());
-            theoryData.Add("Test3", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaOAEP, false, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
+            theoryData.Add("Test3", KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaOAEP, false, ExpectedException.ArgumentException("IDX10671:"));
             theoryData.Add("Test4", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes128KW, false, ExpectedException.ArgumentException("IDX10671:"));
             theoryData.Add("Test5", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, false, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test6", KeyingMaterial.X509SecurityKey2, SecurityAlgorithms.RsaPKCS1, false, ExpectedException.NoExceptionExpected);

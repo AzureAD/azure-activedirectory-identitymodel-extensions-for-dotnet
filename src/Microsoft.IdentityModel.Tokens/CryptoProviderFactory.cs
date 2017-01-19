@@ -512,7 +512,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private RsaKeyWrapProvider CreateRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
+        private RsaKeyWrapProvider CreateRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -520,9 +520,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willDecrypt))
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willUnwrap))
             {
-                RsaKeyWrapProvider rsaKeyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willDecrypt) as RsaKeyWrapProvider;
+                RsaKeyWrapProvider rsaKeyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willUnwrap) as RsaKeyWrapProvider;
                 if (rsaKeyWrapProvider == null)
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
@@ -530,7 +530,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key))
-                return new RsaKeyWrapProvider(key, algorithm, willDecrypt);
+                return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
         }
