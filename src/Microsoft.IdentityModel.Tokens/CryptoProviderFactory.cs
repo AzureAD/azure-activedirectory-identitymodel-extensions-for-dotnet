@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        private bool IsSupportedRsaKeyWrapAlgorithm(string algorithm, SecurityKey key, bool willDecrypt)
+        private bool IsSupportedRsaKeyWrapAlgorithm(string algorithm, SecurityKey key)
         {
             if (key == null)
                 return false;
@@ -156,29 +156,26 @@ namespace Microsoft.IdentityModel.Tokens
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
             {
-                if (key as RsaSecurityKey != null)
+                if (key is RsaSecurityKey)
                     return true;
 
                 X509SecurityKey x509Key = key as X509SecurityKey;
                 if (x509Key != null)
                 {
-                    if (willDecrypt)
-                    {
-                        if (x509Key.PrivateKey as RSACryptoServiceProvider != null)
-                            return true;
-                    }
-                    else
-                    {
-                        if (x509Key.PublicKey as RSACryptoServiceProvider != null)
-                            return true;
-                    }
-
+#if NETSTANDARD1_4
+                    if (x509Key.PublicKey as RSA == null)
+                        return false;
+#else
+                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
                     return false;
+#endif
                 }
 
                 var jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                if (jsonWebKey != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
                     return true;
+
+                return false;
             }
 
             return false;
@@ -515,7 +512,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private RsaKeyWrapProvider CreateRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
+        private RsaKeyWrapProvider CreateRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -523,17 +520,17 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willDecrypt))
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willUnwrap))
             {
-                RsaKeyWrapProvider rsaKeyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willDecrypt) as RsaKeyWrapProvider;
+                RsaKeyWrapProvider rsaKeyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willUnwrap) as RsaKeyWrapProvider;
                 if (rsaKeyWrapProvider == null)
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
                 return rsaKeyWrapProvider;
             }
 
-            if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key, willDecrypt))
-                return new RsaKeyWrapProvider(key, algorithm, willDecrypt);
+            if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key))
+                return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
         }
