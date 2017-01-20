@@ -1,4 +1,10 @@
 <a name="5.0.0"></a>
+# 5.1.3
+
+## Features
+* **JWE Support:** AES and RSA key wrap support
+* Fix for breaking change introduced in 5.1.0
+
 # 5.1.2
 
 ## Features
