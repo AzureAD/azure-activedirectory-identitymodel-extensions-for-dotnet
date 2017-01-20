@@ -43,4 +43,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("2.1.1")]
+[assembly: AssemblyVersion("2.1.3")]
