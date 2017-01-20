@@ -333,17 +333,17 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (samlToken == null)
                 {
-                    throw new NullReferenceException(ErrorMessages.IDX10201);
-                }
-
-                if (samlToken.IssuerToken == null && validationParameters.RequireSignedTokens)
-                {
-                    throw new SecurityTokenValidationException(ErrorMessages.IDX10213);
+                    throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10201, securityToken));
                 }
 
                 if (samlToken.Assertion == null)
                 {
-                    throw new ArgumentException(ErrorMessages.IDX10202);
+                    throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10202, securityToken));
+                }
+
+                if (samlToken.IssuerToken == null && validationParameters.RequireSignedTokens)
+                {
+                    throw new SecurityTokenValidationException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10213, securityToken));
                 }
 
                 DateTime? notBefore = null;
