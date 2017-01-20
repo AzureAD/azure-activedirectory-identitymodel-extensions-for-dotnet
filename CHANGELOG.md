@@ -1,4 +1,20 @@
 <a name="5.0.0"></a>
+# 5.1.3
+
+## Features
+* **JWE Support:** AES and RSA key wrap support
+* Fix for breaking change introduced in 5.1.0
+
+# 5.1.2
+
+## Features
+* **Rebuild:** Fix strong name signing issue
+
+# 5.1.1
+
+## Features
+* **Security Fix:** IdentityModel Extensions library Microsoft.IdentityModel.Tokens has a known security vulnerability affecting version 5.1.0. Please update to >= 5.1.1 immediately. An updated package is available on NuGet. For more details, see the [security notice](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/SECURITY_NOTICE.md).
+
 # 5.1.0
 
 ## Features
