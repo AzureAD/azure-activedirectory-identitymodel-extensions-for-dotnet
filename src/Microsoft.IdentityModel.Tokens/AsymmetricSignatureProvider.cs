@@ -225,87 +225,31 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             _hashAlgorithm = GetHashAlgorithmName(algorithm);
-            RsaSecurityKey rsaKey = key as RsaSecurityKey;
-
-            if (rsaKey != null)
+            RsaAlgorithm rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
+            if (rsaAlgorithm != null)
             {
-                if (rsaKey.Rsa != null)
+                if (rsaAlgorithm.rsa != null)
                 {
-                    _rsa = rsaKey.Rsa;
+                    _rsa = rsaAlgorithm.rsa;
+                    _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
-
-                _rsa = RSA.Create();
-                if (_rsa != null)
+                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
                 {
-                    _rsa.ImportParameters(rsaKey.Parameters);
-                    _disposeRsa = true;
+                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
+                    _disposeRsa = rsaAlgorithm.dispose;
                     return;
-                }
-            }
-
-            X509SecurityKey x509Key = key as X509SecurityKey;
-            if (x509Key != null)
-            {
-                if (willCreateSignatures)
-                {
-                    RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
-                    if (rsaCsp != null)
-                        _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
-                    else
-                        _rsa = x509Key.PrivateKey as RSA;
                 }
                 else
-                    _rsa = x509Key.PublicKey as RSA;
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
+            }
 
+            ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
+            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
+            {
+                _ecdsa = ecdsaAlgorithm.ecdsa;
+                _disposeEcdsa = ecdsaAlgorithm.dispose;
                 return;
-            }
-
-            ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
-            if (ecdsaKey != null)
-            {
-                if (ecdsaKey.ECDsa != null)
-                {
-                    _ecdsa = ecdsaKey.ECDsa;
-                    if (_ecdsa != null && ValidateECDSAKeySize(_ecdsa.KeySize, algorithm))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, key, DefaultECDsaKeySizeInBitsMap[algorithm], key.KeySize)));
-                    }
-                }
-            }
-
-            JsonWebKey webKey = key as JsonWebKey;
-            if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-            {
-                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willCreateSignatures);
-
-                _rsa = RSA.Create();
-                if (_rsa != null)
-                {
-                    _rsa.ImportParameters(parameters);
-                    _disposeRsa = true;
-                    return;
-                }
-            }
-            else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-            {
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    throw new PlatformNotSupportedException();
-
-                _ecdsa = CreateECDsaFromJsonWebKey(webKey, algorithm, willCreateSignatures);
-                _disposeEcdsa = true;
-                if (_ecdsa != null)
-                {
-                    return;
-                }
-                else
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10672, key)));
-                }
             }
 
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
@@ -353,278 +297,37 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             _hashAlgorithm = GetHashAlgorithmString(algorithm);
-            RsaSecurityKey rsaKey = key as RsaSecurityKey;
-
-            if (rsaKey != null)
+            RsaAlgorithm rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
+            if (rsaAlgorithm != null)
             {
-                if (rsaKey.Rsa != null)
-                    _rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
-
-                if (_rsaCryptoServiceProvider == null)
+                if (rsaAlgorithm.rsaCryptoServiceProvider != null)
                 {
-                    _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                    (_rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
-                    _disposeRsa = true;
+                    _rsaCryptoServiceProvider = rsaAlgorithm.rsaCryptoServiceProvider;
+                    _disposeRsa = rsaAlgorithm.dispose;
+                    return;
                 }
-                return;
-            }
-
-            X509SecurityKey x509Key = key as X509SecurityKey;
-            if (x509Key != null)
-            {
-                if (willCreateSignatures)
-                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
-                else
-                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey as RSACryptoServiceProvider);
-                return;
-            }
-
-            ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
-            if (ecdsaKey != null)
-            {
-                if (ecdsaKey.ECDsa != null)
+                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
                 {
-                    _ecdsa = ecdsaKey.ECDsa as ECDsaCng;
-                    if (_ecdsa != null && ValidateECDSAKeySize(_ecdsa.KeySize, algorithm))
-                    {
-                        _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
-                        return;
-                    }
-                    else
-                    {
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, key, DefaultECDsaKeySizeInBitsMap[algorithm], key.KeySize)));
-                    }
-                }
-            }
-
-            JsonWebKey webKey = key as JsonWebKey;
-            if (webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-            {
-                RSAParameters parameters = CreateRsaParametersFromJsonWebKey(webKey, willCreateSignatures);
-                _rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                (_rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
-                return;
-            }
-            else if (webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-            {
-                _ecdsa = CreateECDsaFromJsonWebKey(webKey, algorithm, willCreateSignatures);
-                _disposeEcdsa = true;
-                if (_ecdsa != null)
-                {
+                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
+                    _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
                 else
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10672, key)));
-                }
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
+            }
+
+            ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
+            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsaCng != null)
+            {
+                _ecdsa = ecdsaAlgorithm.ecdsaCng;
+                _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                _disposeEcdsa = ecdsaAlgorithm.dispose;
+                return;
             }
 
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
         }
 #endif
-
-        private RSAParameters CreateRsaParametersFromJsonWebKey(JsonWebKey webKey, bool willCreateSignatures)
-        {
-            if (webKey == null)
-                throw LogHelper.LogArgumentNullException(nameof(webKey));
-
-            if (webKey.N == null || webKey.E == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, webKey)));
-
-            RSAParameters parameters;
-            if (willCreateSignatures)
-            {
-                if (webKey.D == null || webKey.DP == null || webKey.DQ == null || webKey.QI == null || webKey.P == null || webKey.Q == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(webKey), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10702, webKey)));
-
-                parameters = new RSAParameters()
-                {
-                    D = Base64UrlEncoder.DecodeBytes(webKey.D),
-                    DP = Base64UrlEncoder.DecodeBytes(webKey.DP),
-                    DQ = Base64UrlEncoder.DecodeBytes(webKey.DQ),
-                    Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                    InverseQ = Base64UrlEncoder.DecodeBytes(webKey.QI),
-                    P = Base64UrlEncoder.DecodeBytes(webKey.P),
-                    Q = Base64UrlEncoder.DecodeBytes(webKey.Q)
-                };
-            }
-            else
-            {
-                parameters = new RSAParameters()
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                };
-            }
-            return parameters;
-        }
-
-        private ECDsaCng CreateECDsaFromJsonWebKey(JsonWebKey webKey, string algorithm, bool willCreateSignatures)
-        {
-            if (webKey == null)
-                throw LogHelper.LogArgumentNullException(nameof(webKey));
-
-            if (webKey.Crv == null)
-                throw LogHelper.LogArgumentNullException(nameof(webKey.Crv));
-
-            if (webKey.X == null)
-                throw LogHelper.LogArgumentNullException(nameof(webKey.X));
-
-            if (webKey.Y == null)
-                throw LogHelper.LogArgumentNullException(nameof(webKey.Y));
-
-            GCHandle keyBlobHandle = new GCHandle();
-            try
-            {
-                uint dwMagic = GetMagicValue(webKey.Crv, willCreateSignatures);
-                uint cbKey = GetKeyByteCount(webKey.Crv);
-                byte[] keyBlob;
-                if (willCreateSignatures)
-                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
-                else
-                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
-
-                keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
-                IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
-                byte[] x = Base64UrlEncoder.DecodeBytes(webKey.X);
-                byte[] y = Base64UrlEncoder.DecodeBytes(webKey.Y);
-
-                Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
-                Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
-
-                int index = 8;
-                foreach (byte b in x)
-                    Marshal.WriteByte(keyBlobPtr, index++, b);
-
-                foreach (byte b in y)
-                    Marshal.WriteByte(keyBlobPtr, index++, b);
-
-                if (willCreateSignatures)
-                {
-                    if (webKey.D == null)
-                        throw LogHelper.LogArgumentNullException(nameof(webKey.D));
-
-                    byte[] d = Base64UrlEncoder.DecodeBytes(webKey.D);
-                    foreach (byte b in d)
-                        Marshal.WriteByte(keyBlobPtr, index++, b);
-
-                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
-                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
-                    {
-                        if (ValidateECDSAKeySize(cngKey.KeySize, algorithm))
-                        {
-                            return new ECDsaCng(cngKey);
-                        }
-                        else
-                        {
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
-                        }
-                    }
-                }
-                else
-                {
-                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
-                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
-                    {
-                        if (ValidateECDSAKeySize(cngKey.KeySize, algorithm))
-                        {
-                            return new ECDsaCng(cngKey);
-                        }
-                        else
-                        {
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                if (keyBlobHandle != null)
-                    keyBlobHandle.Free();
-            }
-        }
-
-        /// <summary>
-        /// Returns the size of key in bytes
-        /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P521</param>
-        /// <returns>Size of the key in bytes</returns>
-        private uint GetKeyByteCount(string curveId)
-        {
-            if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogArgumentNullException(nameof(curveId));
-
-            uint keyByteCount;
-            switch (curveId)
-            {
-                case JsonWebKeyECTypes.P256:
-                    keyByteCount = 32;
-                    break;
-                case JsonWebKeyECTypes.P384:
-                    keyByteCount = 48;
-                    break;
-                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
-                case JsonWebKeyECTypes.P521:
-                    keyByteCount = 64;
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
-            }
-            return keyByteCount;
-        }
-
-        /// <summary>
-        /// Returns the magic value representing the curve corresponding to the curve id.
-        /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
-        /// <param name="willCreateSignatures">Whether the provider will create signatures or not</param>
-        /// <returns>Uint representing the magic number</returns>
-        private uint GetMagicValue(string curveId, bool willCreateSignatures)
-        {
-            if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogArgumentNullException(nameof(curveId));
-
-            KeyBlobMagicNumber magicNumber;
-            switch (curveId)
-            {
-                case JsonWebKeyECTypes.P256:
-                    if (willCreateSignatures)
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P256_MAGIC;
-                    else
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P256_MAGIC;
-                    break;
-                case JsonWebKeyECTypes.P384:
-                    if (willCreateSignatures)
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P384_MAGIC;
-                    else
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
-                    break;
-                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
-                case JsonWebKeyECTypes.P521:
-                    if (willCreateSignatures)
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC;
-                    else
-                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
-            }
-            return (uint)magicNumber;
-        }
-
-        /// <summary>
-        /// Magic numbers identifying ECDSA blob types
-        /// </summary>
-        internal enum KeyBlobMagicNumber : uint
-        {
-            BCRYPT_ECDSA_PUBLIC_P256_MAGIC = 0x31534345,
-            BCRYPT_ECDSA_PUBLIC_P384_MAGIC = 0x33534345,
-            BCRYPT_ECDSA_PUBLIC_P521_MAGIC = 0x35534345,
-            BCRYPT_ECDSA_PRIVATE_P256_MAGIC = 0x32534345,
-            BCRYPT_ECDSA_PRIVATE_P384_MAGIC = 0x34534345,
-            BCRYPT_ECDSA_PRIVATE_P521_MAGIC = 0x36534345,
-        }
 
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( SecurityKey, string, bool )"/>.

@@ -358,8 +358,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class DerivedRsaKeyWrapProvider : RsaKeyWrapProvider
     {
-        public DerivedRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willDecrypt)
-            : base(key, algorithm, willDecrypt)
+        public DerivedRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
+            : base(key, algorithm, willUnwrap)
         {
         }
 
@@ -368,16 +368,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public bool UnwrapKeyCalled { get; set; } = false;
         public bool WrapKeyCalled { get; set; } = false;
 
-        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
+        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
             IsSupportedAlgorithmCalled = true;
-            return base.IsSupportedAlgorithm(key, algorithm, willDecrypt);
-        }
-
-        protected override void ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool willDecrypt)
-        {
-            ResolveRsaAlgorithmCalled = true;
-            base.ResolveRsaAlgorithm(key, algorithm, willDecrypt);
+            return base.IsSupportedAlgorithm(key, algorithm);
         }
 
         public override byte[] UnwrapKey(byte[] wrappedKey)
