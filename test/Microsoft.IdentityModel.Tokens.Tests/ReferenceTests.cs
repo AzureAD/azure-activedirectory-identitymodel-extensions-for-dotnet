@@ -112,13 +112,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void KeyWrapReferenceTest(KeyWrapTestParams testParams)
         {
-            var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-            byte[] wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
-            Assert.True(Utility.AreEqual(wrappedKey, testParams.EncryptedKey), "Utility.AreEqual(wrappedKey, testParams.EncryptedKey)");
-            Assert.Equal(Base64UrlEncoder.Encode(wrappedKey), testParams.EncodedEncryptedKey);
+            if (testParams.Algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.OrdinalIgnoreCase)
+                || testParams.Algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.OrdinalIgnoreCase))
+            {
+                var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
+                byte[] wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
+                Assert.True(Utility.AreEqual(wrappedKey, testParams.EncryptedKey), "Utility.AreEqual(wrappedKey, testParams.EncryptedKey)");
+                Assert.Equal(Base64UrlEncoder.Encode(wrappedKey), testParams.EncodedEncryptedKey);
 
-            byte[] unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
-            Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+                byte[] unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
+                Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+            }
+            else if (testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.OrdinalIgnoreCase)
+                    || testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.OrdinalIgnoreCase)
+                    || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
+            {
+                var rsaKeyWrapProvider = CryptoProviderFactory.Default.CreateRsaKeyWrapProviderForDecrypting(testParams.Key, testParams.Algorithm);
+                byte[] unwrappedKey = rsaKeyWrapProvider.UnwrapKey(testParams.EncryptedKey);
+                Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+            }
         }
 
         public static TheoryData<KeyWrapTestParams> KeyWrapTheoryData
@@ -135,6 +147,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     EncryptedKey = AES128_KeyWrap.EncryptedKey,
                     EncodedEncryptedKey = AES128_KeyWrap.EncodedEncryptedKey,
                     TestId = "AES128_KeyWrap"
+                });
+
+                theoryData.Add(new KeyWrapTestParams
+                {
+                    Algorithm = RSAES_OAEP_KeyWrap.Algorithm,
+                    Key = RSAES_OAEP_KeyWrap.Key,
+                    KeyToWrap = RSAES_OAEP_KeyWrap.CEK,
+                    EncryptedKey = RSAES_OAEP_KeyWrap.EncryptedKey,
+                    EncodedEncryptedKey = RSAES_OAEP_KeyWrap.EncodedEncryptedKey,
+                    TestId = "RSA_OAEP_KeyWrap"
+                });
+
+                theoryData.Add(new KeyWrapTestParams
+                {
+                    Algorithm = RSAES_PKCS1_KeyWrap.Algorithm,
+                    Key = RSAES_PKCS1_KeyWrap.Key,
+                    KeyToWrap = RSAES_PKCS1_KeyWrap.CEK,
+                    EncryptedKey = RSAES_PKCS1_KeyWrap.EncryptedKey,
+                    EncodedEncryptedKey = RSAES_PKCS1_KeyWrap.EncodedEncryptedKey,
+                    TestId = "RSAES-PKCS1-v1_5"
                 });
 
                 return theoryData;
