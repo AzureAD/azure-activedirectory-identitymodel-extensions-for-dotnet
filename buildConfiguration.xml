@@ -9,16 +9,16 @@
 
   <dependencies>
     <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Logging": "1.1.1</nugetVersion>
+      <nugetVersion>"Microsoft.IdentityModel.Logging": "1.1.3</nugetVersion>
     </dependency>
     <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Protocols": "2.1.1</nugetVersion>
+      <nugetVersion>"Microsoft.IdentityModel.Protocols": "2.1.3</nugetVersion>
     </dependency>
     <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Tokens": "5.1.1</nugetVersion>
+      <nugetVersion>"Microsoft.IdentityModel.Tokens": "5.1.3</nugetVersion>
     </dependency>
     <dependency>
-      <nugetVersion>"System.IdentityModel.Tokens.Jwt": "5.1.1</nugetVersion>
+      <nugetVersion>"System.IdentityModel.Tokens.Jwt": "5.1.3</nugetVersion>
     </dependency>
   </dependencies>
 
