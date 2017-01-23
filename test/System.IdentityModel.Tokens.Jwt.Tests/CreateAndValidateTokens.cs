@@ -490,9 +490,34 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
+            // TODO: enable the following test data once key wrap in JwtSecurityTokenHandler complete.
+            //EncryptingCredentials encryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes128CbcHmacSha256);
+            //theoryData.Add(
+            //    "Test3",
+            //    Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+            //    Default.TokenValidationParameters(Default.SymmetricEncryptionKey256, Default.SymmetricSigningKey256),
+            //    ExpectedException.NoExceptionExpected
+            //);
+
+            //encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
+            //theoryData.Add(
+            //    "Test4",
+            //    Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+            //    Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+            //    ExpectedException.NoExceptionExpected
+            //);
+
+            //encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256);
+            //theoryData.Add(
+            //    "Test5",
+            //    Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+            //    Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+            //    ExpectedException.NoExceptionExpected
+            //);
+
             // signing key not found
             theoryData.Add(
-                "Test3",
+                "Test6",
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 new TokenValidationParameters
                 {
@@ -504,7 +529,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // encryption key not found
             theoryData.Add(
-                "Test4",
+                "Test7",
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 new TokenValidationParameters
                 {
