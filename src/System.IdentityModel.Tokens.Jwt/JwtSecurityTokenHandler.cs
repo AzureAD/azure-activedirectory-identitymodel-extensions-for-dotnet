@@ -545,32 +545,39 @@ namespace System.IdentityModel.Tokens.Jwt
             if (cryptoProviderFactory == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10733));
 
-            if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Enc, encryptingCredentials.Key))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10615, innerJwt.Header.Enc, encryptingCredentials.Key)));
-
-            var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
-            if (!JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10734));
-
-            var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Enc);
-            if (encryptionProvider == null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
-
-            try
+            // if direct algorithm, look for support
+            if (JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal))
             {
-                var encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
-                return new JwtSecurityToken(
-                                header,
-                                innerJwt,
-                                header.Base64UrlEncode(),
-                                string.Empty,
-                                Base64UrlEncoder.Encode(encryptionResult.IV),
-                                Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
-                                Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
+                if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Enc, encryptingCredentials.Key))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10615, encryptingCredentials.Enc, encryptingCredentials.Key)));
+
+                var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
+                var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Enc);
+                if (encryptionProvider == null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
+
+                try
+                {
+                    var encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
+                    return new JwtSecurityToken(
+                                    header,
+                                    innerJwt,
+                                    header.Base64UrlEncode(),
+                                    string.Empty,
+                                    Base64UrlEncoder.Encode(encryptionResult.IV),
+                                    Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
+                                    Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
+                }
             }
-            catch (Exception ex)
+            // TODO: check that KW is supported, generate key, wrap key
+            else
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
+                //if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Alg, encryptingCredentials.Key))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10615, innerJwt.Header.Enc, encryptingCredentials.Key)));
             }
         }
 
