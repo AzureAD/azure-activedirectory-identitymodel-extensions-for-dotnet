@@ -43,6 +43,16 @@ namespace Microsoft.IdentityModel.Tokens
         public ECDsaCng ecdsaCng;
 #endif
         public bool dispose;
+
+        public static readonly Dictionary<string, int> DefaultECDsaKeySizeInBitsMap = new Dictionary<string, int>()
+        {
+            { SecurityAlgorithms.EcdsaSha256, 256 },
+            { SecurityAlgorithms.EcdsaSha384, 384 },
+            { SecurityAlgorithms.EcdsaSha512, 521 },
+            { SecurityAlgorithms.EcdsaSha256Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha384Signature, 384 },
+            { SecurityAlgorithms.EcdsaSha512Signature, 521 }
+        };
     }
 
     internal class RsaAlgorithm
@@ -313,7 +323,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
             if (ecdsaKey != null)
             {
-                if (ecdsaKey.ECDsa != null)
+                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
                 {
                     ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa;
                     return ecdsaAlgorithm;
@@ -327,14 +337,14 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw new PlatformNotSupportedException();
 
-                ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(usePrivateKey);
+                ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
                 ecdsaAlgorithm.dispose = true;
                 return ecdsaAlgorithm;
             }
 #else
             if (ecdsaKey != null)
             {
-                if (ecdsaKey.ECDsa != null)
+                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
                 {
                     ecdsaAlgorithm.ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
                     return ecdsaAlgorithm;
@@ -344,7 +354,7 @@ namespace Microsoft.IdentityModel.Tokens
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
-                ecdsaAlgorithm.ecdsaCng = webKey.CreateECDsa(usePrivateKey);
+                ecdsaAlgorithm.ecdsaCng = webKey.CreateECDsa(algorithm, usePrivateKey);
                 ecdsaAlgorithm.dispose = true;
                 return ecdsaAlgorithm;
             }
@@ -458,6 +468,14 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 #endif
+
+        internal static bool ValidateECDSAKeySize(int keySize, string algorithm)
+        {
+            if (ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap.ContainsKey(algorithm) && keySize == ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm])
+                return true;
+
+            return false;
+        }
 
         internal static void Zero(byte[] byteArray)
         {

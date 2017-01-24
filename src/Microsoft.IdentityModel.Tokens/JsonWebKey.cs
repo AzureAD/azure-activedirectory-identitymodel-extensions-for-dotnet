@@ -281,7 +281,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        internal ECDsaCng CreateECDsa(bool usePrivateKey)
+        internal ECDsaCng CreateECDsa(string algorithm, bool usePrivateKey)
         {
             if (Crv == null)
                 throw LogHelper.LogArgumentNullException(nameof(Crv));
@@ -330,7 +330,10 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
                     {
-                        return new ECDsaCng(cngKey);
+                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                            return new ECDsaCng(cngKey);
+                        else
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
                     }
                 }
                 else
@@ -338,7 +341,10 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
                     {
-                        return new ECDsaCng(cngKey);
+                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                            return new ECDsaCng(cngKey);
+                        else
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
                     }
                 }
             }

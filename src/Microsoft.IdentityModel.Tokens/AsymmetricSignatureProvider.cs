@@ -88,19 +88,6 @@ namespace Microsoft.IdentityModel.Tokens
         };
 
         /// <summary>
-        /// Mapping from algorithm to <see cref="ECDsa"/>.KeySize.
-        /// </summary>
-        private static readonly Dictionary<string, int> DefaultECDsaKeySizeInBitsMap = new Dictionary<string, int>()
-        {
-            { SecurityAlgorithms.EcdsaSha256, 256 },
-            { SecurityAlgorithms.EcdsaSha384, 384 },
-            { SecurityAlgorithms.EcdsaSha512, 521 },
-            { SecurityAlgorithms.EcdsaSha256Signature, 256 },
-            { SecurityAlgorithms.EcdsaSha384Signature, 384 },
-            { SecurityAlgorithms.EcdsaSha512Signature, 521 }
-        };
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.<see cref="SecurityKey"/></param>
@@ -363,14 +350,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return _ecdsa.SignData(input);
 #endif
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
-        }
-
-        private bool ValidateECDSAKeySize(int keySize, string algorithm)
-        {
-            if (DefaultECDsaKeySizeInBitsMap.ContainsKey(algorithm) && keySize == DefaultECDsaKeySizeInBitsMap[algorithm])
-                return true;
-
-            return false;
         }
 
         /// <summary>
