@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class DerivedKeyWrapProvider : KeyWrapProvider
+    public class DerivedKeyWrapProvider : SymmetricKeyWrapProvider
     {
         public DerivedKeyWrapProvider(SecurityKey key, string algorithm)
             : base(key, algorithm)
@@ -336,6 +336,37 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             GetSymmetricAlgorithmCalled = true;
             return base.GetSymmetricAlgorithm(key, algorithm);
         }
+
+        protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
+        {
+            IsSupportedAlgorithmCalled = true;
+            return base.IsSupportedAlgorithm(key, algorithm);
+        }
+
+        public override byte[] UnwrapKey(byte[] wrappedKey)
+        {
+            UnwrapKeyCalled = true;
+            return base.UnwrapKey(wrappedKey);
+        }
+
+        public override byte[] WrapKey(byte[] keyToWrap)
+        {
+            WrapKeyCalled = true;
+            return base.WrapKey(keyToWrap);
+        }
+    }
+
+    public class DerivedRsaKeyWrapProvider : RsaKeyWrapProvider
+    {
+        public DerivedRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
+            : base(key, algorithm, willUnwrap)
+        {
+        }
+
+        public bool IsSupportedAlgorithmCalled { get; set; } = false;
+        public bool ResolveRsaAlgorithmCalled { get; set; } = false;
+        public bool UnwrapKeyCalled { get; set; } = false;
+        public bool WrapKeyCalled { get; set; } = false;
 
         protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {

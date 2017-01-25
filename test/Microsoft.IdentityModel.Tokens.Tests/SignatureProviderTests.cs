@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricConstructorVariation("Verifying:  - Creates with no errors", KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256, ExpectedException.NoExceptionExpected);
 
             // constructing using a key with wrong key size:
-            AsymmetricConstructorVariation("Verifying:    - ECDSA with unmatched keysize", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
+            AsymmetricConstructorVariation("Verifying:    - ECDSA with unmatched keysize", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10641:"));
             AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with unmatched keysize", KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
         }
 
@@ -416,7 +416,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add(new SignatureProviderTestParams
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha384,
-                EE = ExpectedException.ArgumentOutOfRangeException("IDX10671:"),
+                EE = ExpectedException.ArgumentOutOfRangeException("IDX10641:"),
                 RawBytes = rawBytes,
                 Key = KeyingMaterial.ECDsa256Key,
                 ShouldVerify = false,

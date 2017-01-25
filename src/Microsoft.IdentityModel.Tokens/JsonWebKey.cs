@@ -27,9 +27,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -39,6 +41,19 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKey : SecurityKey
     {
+        /// <summary>
+        /// Magic numbers identifying ECDSA blob types
+        /// </summary>
+        internal enum KeyBlobMagicNumber : uint
+        {
+            BCRYPT_ECDSA_PUBLIC_P256_MAGIC = 0x31534345,
+            BCRYPT_ECDSA_PUBLIC_P384_MAGIC = 0x33534345,
+            BCRYPT_ECDSA_PUBLIC_P521_MAGIC = 0x35534345,
+            BCRYPT_ECDSA_PRIVATE_P256_MAGIC = 0x32534345,
+            BCRYPT_ECDSA_PRIVATE_P384_MAGIC = 0x34534345,
+            BCRYPT_ECDSA_PRIVATE_P521_MAGIC = 0x36534345,
+        }
+
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKey"/>.
         /// </summary>
@@ -264,6 +279,179 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                     return false;
             }
+        }
+
+        internal ECDsaCng CreateECDsa(string algorithm, bool usePrivateKey)
+        {
+            if (Crv == null)
+                throw LogHelper.LogArgumentNullException(nameof(Crv));
+
+            if (X == null)
+                throw LogHelper.LogArgumentNullException(nameof(X));
+
+            if (Y == null)
+                throw LogHelper.LogArgumentNullException(nameof(Y));
+
+            GCHandle keyBlobHandle = new GCHandle();
+            try
+            {
+                uint dwMagic = GetMagicValue(Crv, usePrivateKey);
+                uint cbKey = GetKeyByteCount(Crv);
+                byte[] keyBlob;
+                if (usePrivateKey)
+                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                else
+                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+
+                keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
+                IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
+                byte[] x = Base64UrlEncoder.DecodeBytes(X);
+                byte[] y = Base64UrlEncoder.DecodeBytes(Y);
+
+                Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
+                Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
+
+                int index = 8;
+                foreach (byte b in x)
+                    Marshal.WriteByte(keyBlobPtr, index++, b);
+
+                foreach (byte b in y)
+                    Marshal.WriteByte(keyBlobPtr, index++, b);
+
+                if (usePrivateKey)
+                {
+                    if (D == null)
+                        throw LogHelper.LogArgumentNullException(nameof(D));
+
+                    byte[] d = Base64UrlEncoder.DecodeBytes(D);
+                    foreach (byte b in d)
+                        Marshal.WriteByte(keyBlobPtr, index++, b);
+
+                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
+                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
+                    {
+                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                            return new ECDsaCng(cngKey);
+                        else
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                    }
+                }
+                else
+                {
+                    Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
+                    using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
+                    {
+                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                            return new ECDsaCng(cngKey);
+                        else
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                    }
+                }
+            }
+            finally
+            {
+                if (keyBlobHandle != null)
+                    keyBlobHandle.Free();
+            }
+        }
+
+        internal RSAParameters CreateRsaParameters()
+        {
+            if (N == null || E == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, this)));
+
+            RSAParameters parameters = new RSAParameters();
+
+            if (D != null)
+                parameters.D = Base64UrlEncoder.DecodeBytes(D);
+
+            if (DP != null)
+                parameters.DP = Base64UrlEncoder.DecodeBytes(DP);
+
+            if (DQ != null)
+                parameters.DQ = Base64UrlEncoder.DecodeBytes(DQ);
+
+            if (QI != null)
+                parameters.InverseQ = Base64UrlEncoder.DecodeBytes(QI);
+
+            if (P != null)
+                parameters.P = Base64UrlEncoder.DecodeBytes(P);
+
+            if (Q != null)
+                parameters.Q = Base64UrlEncoder.DecodeBytes(Q);
+
+            parameters.Exponent = Base64UrlEncoder.DecodeBytes(E);
+            parameters.Modulus = Base64UrlEncoder.DecodeBytes(N);
+
+            return parameters;
+        }
+
+        /// <summary>
+        /// Returns the size of key in bytes
+        /// </summary>
+        /// <param name="curveId">Represents ecdsa curve -P256, P384, P521</param>
+        /// <returns>Size of the key in bytes</returns>
+        private uint GetKeyByteCount(string curveId)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
+
+            uint keyByteCount;
+            switch (curveId)
+            {
+                case JsonWebKeyECTypes.P256:
+                    keyByteCount = 32;
+                    break;
+                case JsonWebKeyECTypes.P384:
+                    keyByteCount = 48;
+                    break;
+                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
+                case JsonWebKeyECTypes.P521:
+                    keyByteCount = 64;
+                    break;
+                default:
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
+            }
+            return keyByteCount;
+        }
+
+        /// <summary>
+        /// Returns the magic value representing the curve corresponding to the curve id.
+        /// </summary>
+        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
+        /// <param name="willCreateSignatures">Whether the provider will create signatures or not</param>
+        /// <returns>Uint representing the magic number</returns>
+        private uint GetMagicValue(string curveId, bool willCreateSignatures)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
+
+            KeyBlobMagicNumber magicNumber;
+            switch (curveId)
+            {
+                case JsonWebKeyECTypes.P256:
+                    if (willCreateSignatures)
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P256_MAGIC;
+                    else
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P256_MAGIC;
+                    break;
+                case JsonWebKeyECTypes.P384:
+                    if (willCreateSignatures)
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P384_MAGIC;
+                    else
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
+                    break;
+                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
+                case JsonWebKeyECTypes.P521:
+                    if (willCreateSignatures)
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC;
+                    else
+                        magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
+                    break;
+                default:
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
+            }
+            return (uint)magicNumber;
         }
     }
 }
