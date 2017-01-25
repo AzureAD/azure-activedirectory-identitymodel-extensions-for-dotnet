@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10658 = "IDX10658: WrapKey failed, exception from crypto operation: '{0}'";
         internal const string IDX10659 = "IDX10659: UnwrapKey failed, exception from crypto operation: '{0}'";
         internal const string IDX10660 = "IDX10660: The Key: '{0}' and algorithm: '{1}' pair are not supported.";
-        internal const string IDX10661 = "IDX10661: Unable to create the KeyWrapProvider.\n\nKeyWrapAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
+        internal const string IDX10661 = "IDX10661: Unable to create the KeyWrapProvider.\nKeyWrapAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
         internal const string IDX10662 = "IDX10662: The KeyWrap algorithm '{0}' requires a key size of '{1}' bits. Key '{2}', is of size:'{3}'.";
         internal const string IDX10663 = "IDX10663: Failed to create symmetric algorithm with SecurityKey: '{0}', KeyWrapAlgorithm: '{1}'.";
         internal const string IDX10664 = "IDX10664: The length of input must be a multiple of 64 bits. The input size is: '{0}' bits.";
@@ -112,7 +112,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10669 = "IDX10669: Failed to create symmetric algorithm.";
         internal const string IDX10670 = "IDX10670: The lengths of the two byte arrays do not match. The first one has: '{0}' bytes, the second one has: '{1}' bytes.";
         internal const string IDX10671 = "IDX10671: The ECDsa Key: '{0}' must be '{1}' bits. KeySize: '{2}'.";
-        internal const string IDX10672 = "IDX10672: Cannot create ECDSA from JsonWebKey: '{0}'.";
 
         // security keys
         internal const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

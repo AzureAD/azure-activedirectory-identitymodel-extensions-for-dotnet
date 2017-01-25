@@ -224,7 +224,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ee.ProcessException(ex, errors);
             }
         }
-
 #endregion
 
 #region Asymmetric Signature Provider Tests
@@ -265,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricConstructorVariation("Verifying:  - Creates with no errors", KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256, ExpectedException.NoExceptionExpected);
 
             // constructing using a key with wrong key size:
-            AsymmetricConstructorVariation("Verifying:    - ECDSA with unmatched keysize", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
+            AsymmetricConstructorVariation("Verifying:    - ECDSA with unmatched keysize", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10641:"));
             AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with unmatched keysize", KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
         }
 
@@ -417,7 +416,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add(new SignatureProviderTestParams
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha384,
-                EE = ExpectedException.ArgumentOutOfRangeException("IDX10671:"),
+                EE = ExpectedException.ArgumentOutOfRangeException("IDX10641:"),
                 RawBytes = rawBytes,
                 Key = KeyingMaterial.ECDsa256Key,
                 ShouldVerify = false,
@@ -1256,10 +1255,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Console.WriteLine($"SignatureTampering : {testParams} : {testParams.Signature.Length}");
 
             var copiedSignature = testParams.Signature.CloneByteArray();
-            for (int i = 0; i < testParams.Signature.Length; i++)
+            for (int i = 0; i<testParams.Signature.Length; i++)
             {
                 var originalB = testParams.Signature[i];
-                for (byte b = 0; b < byte.MaxValue; b++)
+                for (byte b = 0; b<byte.MaxValue; b++)
                 {
                     // skip here as this will succeed
                     if (b == testParams.Signature[i])
@@ -1283,9 +1282,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             Console.WriteLine($"SignatureTruncation : {testParams} : {testParams.Signature.Length}");
 
-            for (int i = 0; i < testParams.Signature.Length-1; i++)
+            for (int i = 0; i<testParams.Signature.Length-1; i++)
             {
-                var truncatedSignature = new byte[i+1];
+                var truncatedSignature = new byte[i + 1];
                 Array.Copy(testParams.Signature, truncatedSignature, i+1);
                 Assert.False(testParams.ProviderForVerifying.Verify(testParams.RawBytes, truncatedSignature), $"signature should not have verified: {testParams.TestId} : {i}");
             }

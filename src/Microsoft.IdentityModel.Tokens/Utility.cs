@@ -29,11 +29,43 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    internal class ECDsaAlgorithm
+    {
+#if NETSTANDARD1_4
+        public ECDsa ecdsa;
+#else
+        public ECDsaCng ecdsaCng;
+#endif
+        public bool dispose;
+
+        public static readonly Dictionary<string, int> DefaultECDsaKeySizeInBitsMap = new Dictionary<string, int>()
+        {
+            { SecurityAlgorithms.EcdsaSha256, 256 },
+            { SecurityAlgorithms.EcdsaSha384, 384 },
+            { SecurityAlgorithms.EcdsaSha512, 521 },
+            { SecurityAlgorithms.EcdsaSha256Signature, 256 },
+            { SecurityAlgorithms.EcdsaSha384Signature, 384 },
+            { SecurityAlgorithms.EcdsaSha512Signature, 521 }
+        };
+    }
+
+    internal class RsaAlgorithm
+    {
+#if NETSTANDARD1_4
+        public RSA rsa;
+#else
+        public RSACryptoServiceProvider rsaCryptoServiceProvider;
+#endif
+        public RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
+        public bool dispose;
+    }
+
     /// <summary>
     /// Contains some utility methods.
     /// </summary>
@@ -278,6 +310,170 @@ namespace Microsoft.IdentityModel.Tokens
 
                 return result;
             }
+        }
+
+        internal static ECDsaAlgorithm ResolveECDsaAlgorithm(SecurityKey key, string algorithm, bool usePrivateKey)
+        {
+            if (key == null)
+                return null;
+
+            ECDsaAlgorithm ecdsaAlgorithm = new ECDsaAlgorithm();
+            ECDsaSecurityKey ecdsaKey = key as ECDsaSecurityKey;
+
+#if NETSTANDARD1_4
+            if (ecdsaKey != null)
+            {
+                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
+                {
+                    ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa;
+                    return ecdsaAlgorithm;
+                }
+            }
+
+            JsonWebKey webKey = key as JsonWebKey;
+            if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+            {
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    throw new PlatformNotSupportedException();
+
+                ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
+                ecdsaAlgorithm.dispose = true;
+                return ecdsaAlgorithm;
+            }
+#else
+            if (ecdsaKey != null)
+            {
+                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
+                {
+                    ecdsaAlgorithm.ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
+                    return ecdsaAlgorithm;
+                }
+            }
+
+            JsonWebKey webKey = key as JsonWebKey;
+            if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+            {
+                ecdsaAlgorithm.ecdsaCng = webKey.CreateECDsa(algorithm, usePrivateKey);
+                ecdsaAlgorithm.dispose = true;
+                return ecdsaAlgorithm;
+            }
+#endif
+
+            return null;
+        }
+
+#if NETSTANDARD1_4
+        internal static RsaAlgorithm ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool usePrivateKey)
+        {
+            if (key == null)
+                return null;
+
+            RsaAlgorithm rsaAlgorithm = new RsaAlgorithm();
+            RsaSecurityKey rsaKey = key as RsaSecurityKey;
+            if (rsaKey != null)
+            {
+                if (rsaKey.Rsa != null)
+                {
+                    rsaAlgorithm.rsa = rsaKey.Rsa;
+                    return rsaAlgorithm;
+                }
+
+                rsaAlgorithm.rsa = RSA.Create();
+                if (rsaAlgorithm.rsa != null)
+                {
+                    rsaAlgorithm.rsa.ImportParameters(rsaKey.Parameters);
+                    rsaAlgorithm.dispose = true;
+                    return rsaAlgorithm;
+                }
+            }
+
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                if (usePrivateKey)
+                {
+                    RSACryptoServiceProvider rsaCsp = x509Key.PrivateKey as RSACryptoServiceProvider;
+                    if (rsaCsp != null)
+                        rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCsp);
+                    else
+                        rsaAlgorithm.rsa = x509Key.PrivateKey as RSA;
+                }
+                else
+                    rsaAlgorithm.rsa = x509Key.PublicKey as RSA;
+
+                return rsaAlgorithm;
+            }
+
+            JsonWebKey webKey = key as JsonWebKey;
+            if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+            {
+                RSAParameters parameters = webKey.CreateRsaParameters();
+                rsaAlgorithm.rsa = RSA.Create();
+                if (rsaAlgorithm.rsa != null)
+                {
+                    rsaAlgorithm.rsa.ImportParameters(parameters);
+                    rsaAlgorithm.dispose = true;
+                    return rsaAlgorithm;
+                }
+            }
+
+            return null;
+        }
+#else
+        internal static RsaAlgorithm ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool usePrivateKey)
+        {
+            if (key == null)
+                return null;
+
+            RsaAlgorithm rsaAlgorithm = new RsaAlgorithm();
+            RsaSecurityKey rsaKey = key as RsaSecurityKey;
+            if (rsaKey != null)
+            {
+                if (rsaKey.Rsa != null)
+                    rsaAlgorithm.rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
+
+                if (rsaAlgorithm.rsaCryptoServiceProvider == null)
+                {
+                    rsaAlgorithm.rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                    (rsaAlgorithm.rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                    rsaAlgorithm.dispose = true;
+                }
+
+                return rsaAlgorithm;
+            }
+
+            X509SecurityKey x509Key = key as X509SecurityKey;
+            if (x509Key != null)
+            {
+                if (usePrivateKey)
+                    rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
+                else
+                    rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey as RSACryptoServiceProvider);
+
+                return rsaAlgorithm;
+            }
+
+            JsonWebKey webKey = key as JsonWebKey;
+            if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+            {
+                RSAParameters parameters = webKey.CreateRsaParameters();
+                rsaAlgorithm.rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                (rsaAlgorithm.rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
+                rsaAlgorithm.dispose = true;
+                return rsaAlgorithm;
+            }
+
+            return null;
+        }
+#endif
+
+        internal static bool ValidateECDSAKeySize(int keySize, string algorithm)
+        {
+            if (ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap.ContainsKey(algorithm) && keySize == ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm])
+                return true;
+
+            return false;
         }
 
         internal static void Zero(byte[] byteArray)
