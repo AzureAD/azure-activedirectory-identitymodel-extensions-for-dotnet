@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.OrdinalIgnoreCase)
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
             {
-                var rsaKeyWrapProvider = CryptoProviderFactory.Default.CreateRsaKeyWrapProviderForDecrypting(testParams.Key, testParams.Algorithm);
+                var rsaKeyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
                 byte[] unwrappedKey = rsaKeyWrapProvider.UnwrapKey(testParams.EncryptedKey);
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }

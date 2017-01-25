@@ -408,8 +408,7 @@ namespace Microsoft.IdentityModel.Tokens
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
-                RSAParameters parameters = webKey.CreateRsaParameters(usePrivateKey);
-
+                RSAParameters parameters = webKey.CreateRsaParameters();
                 rsaAlgorithm.rsa = RSA.Create();
                 if (rsaAlgorithm.rsa != null)
                 {
@@ -458,7 +457,7 @@ namespace Microsoft.IdentityModel.Tokens
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
-                RSAParameters parameters = webKey.CreateRsaParameters(usePrivateKey);
+                RSAParameters parameters = webKey.CreateRsaParameters();
                 rsaAlgorithm.rsaCryptoServiceProvider = new RSACryptoServiceProvider();
                 (rsaAlgorithm.rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
                 rsaAlgorithm.dispose = true;

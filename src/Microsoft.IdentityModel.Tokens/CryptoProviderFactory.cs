@@ -131,27 +131,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal))
-            {
-                if (key is SymmetricSecurityKey)
-                    return true;
-
-                var jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsSupportedRsaKeyWrapAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
             if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
@@ -257,6 +236,10 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSha384Signature:
                 case SecurityAlgorithms.RsaSha512Signature:
+                case SecurityAlgorithms.RsaOAEP:
+                case SecurityAlgorithms.RsaOAEP256:
+                case SecurityAlgorithms.RsaPKCS1:
+                case SecurityAlgorithms.RsaOaepKeyWrap:
                     return true;
             }
 
@@ -331,26 +314,54 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public virtual KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm)
         {
+            return CreateKeyWrapProvider(key, algorithm, false);
+        }
+
+        private KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
+        {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willUnwrap))
             {
-                var cryptoProvider = CustomCryptoProvider.Create(algorithm, key) as KeyWrapProvider;
-                if (cryptoProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(KeyWrapProvider))));
+                KeyWrapProvider keyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willUnwrap) as KeyWrapProvider;
+                if (keyWrapProvider == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
-                return cryptoProvider;
+                return keyWrapProvider;
             }
 
-            if (IsSupportedKeyWrapAlgorithm(algorithm, key))
-                return new KeyWrapProvider(key, algorithm);
+            var rsaKey = key as RsaSecurityKey;
+            if (rsaKey != null && IsRsaAlgorithmSupported(algorithm))
+                return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10652, algorithm)));
+            var x509Key = key as X509SecurityKey;
+            if (x509Key != null && IsRsaAlgorithmSupported(algorithm))
+                return new RsaKeyWrapProvider(x509Key, algorithm, willUnwrap);
+
+            var jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+            {
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA &&  IsRsaAlgorithmSupported(algorithm))
+                {
+                    return new RsaKeyWrapProvider(jsonWebKey, algorithm, willUnwrap);
+                }
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet &&  IsSymmetricAlgorithmSupported(algorithm))
+                {
+                    return new SymmetricKeyWrapProvider(jsonWebKey, algorithm);
+                }
+            }
+
+            var symmetricKey = key as SymmetricSecurityKey;
+            if ( symmetricKey != null && IsSymmetricAlgorithmSupported(algorithm))
+                return new SymmetricKeyWrapProvider(symmetricKey, algorithm);
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
         }
+
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
@@ -511,51 +522,6 @@ namespace Microsoft.IdentityModel.Tokens
                 default:
                     throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10666, algorithm)));
             }
-        }
-
-        private RsaKeyWrapProvider CreateRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
-        {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
-
-            if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
-
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willUnwrap))
-            {
-                RsaKeyWrapProvider rsaKeyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willUnwrap) as RsaKeyWrapProvider;
-                if (rsaKeyWrapProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
-
-                return rsaKeyWrapProvider;
-            }
-
-            if (IsSupportedRsaKeyWrapAlgorithm(algorithm, key))
-                return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
-
-            throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, algorithm, key)));
-        }
-
-        /// <summary>
-        /// Returns a <see cref="RsaKeyWrapProvider"/> instance supports the <see cref="SecurityKey"/> and algorithm.
-        /// </summary>
-        /// <param name="key">The <see cref="SecurityKey"/> to use for decrypting.</param>
-        /// <param name="algorithm">The algorithm to use for decrypting.</param>
-        /// <remarks>When finished with the <see cref="RsaKeyWrapProvider"/> call <see cref="ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider)"/>.</remarks>
-        public virtual RsaKeyWrapProvider CreateRsaKeyWrapProviderForDecrypting(SecurityKey key, string algorithm)
-        {
-            return CreateRsaKeyWrapProvider(key, algorithm, true);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="RsaKeyWrapProvider"/> instance supports the <see cref="SecurityKey"/> and algorithm.
-        /// </summary>
-        /// <param name="key">The <see cref="SecurityKey"/> to use for encrypting.</param>
-        /// <param name="algorithm">The algorithm to use for encrypting.</param>
-        /// <remarks>When finished with the <see cref="RsaKeyWrapProvider"/> call <see cref="ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider)"/>.</remarks>
-        public virtual RsaKeyWrapProvider CreateRsaKeyWrapProviderForEncrypting(SecurityKey key, string algorithm)
-        {
-            return CreateRsaKeyWrapProvider(key, algorithm, false);
         }
 
         private SignatureProvider CreateSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)

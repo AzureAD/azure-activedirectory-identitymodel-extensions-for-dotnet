@@ -355,37 +355,34 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        internal RSAParameters CreateRsaParameters(bool usePrivateKey)
+        internal RSAParameters CreateRsaParameters()
         {
             if (N == null || E == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, this)));
 
-            RSAParameters parameters;
-            if (usePrivateKey)
-            {
-                if (D == null || DP == null || DQ == null || QI == null || P == null || Q == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(JsonWebKey), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10702, this)));
+            RSAParameters parameters = new RSAParameters();
 
-                parameters = new RSAParameters()
-                {
-                    D = Base64UrlEncoder.DecodeBytes(D),
-                    DP = Base64UrlEncoder.DecodeBytes(DP),
-                    DQ = Base64UrlEncoder.DecodeBytes(DQ),
-                    Exponent = Base64UrlEncoder.DecodeBytes(E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(N),
-                    InverseQ = Base64UrlEncoder.DecodeBytes(QI),
-                    P = Base64UrlEncoder.DecodeBytes(P),
-                    Q = Base64UrlEncoder.DecodeBytes(Q)
-                };
-            }
-            else
-            {
-                parameters = new RSAParameters()
-                {
-                    Exponent = Base64UrlEncoder.DecodeBytes(E),
-                    Modulus = Base64UrlEncoder.DecodeBytes(N),
-                };
-            }
+            if (D != null)
+                parameters.D = Base64UrlEncoder.DecodeBytes(D);
+
+            if (DP != null)
+                parameters.DP = Base64UrlEncoder.DecodeBytes(DP);
+
+            if (DQ != null)
+                parameters.DQ = Base64UrlEncoder.DecodeBytes(DQ);
+
+            if (QI != null)
+                parameters.InverseQ = Base64UrlEncoder.DecodeBytes(QI);
+
+            if (P != null)
+                parameters.P = Base64UrlEncoder.DecodeBytes(P);
+
+            if (Q != null)
+                parameters.Q = Base64UrlEncoder.DecodeBytes(Q);
+
+            parameters.Exponent = Base64UrlEncoder.DecodeBytes(E);
+            parameters.Modulus = Base64UrlEncoder.DecodeBytes(N);
+
             return parameters;
         }
 

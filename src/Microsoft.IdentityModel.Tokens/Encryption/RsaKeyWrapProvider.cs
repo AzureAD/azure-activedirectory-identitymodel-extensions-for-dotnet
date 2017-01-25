@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Provides RSA Wrap key and Unwrap key services.
     /// </summary>
-    public class RsaKeyWrapProvider : IDisposable
+    public class RsaKeyWrapProvider : KeyWrapProvider
     {
 #if NETSTANDARD1_4
         private RSA _rsa;
@@ -115,33 +115,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the KeyWrap algorithm that is being used.
         /// </summary>
-        public string Algorithm { get; private set; }
+        public override string Algorithm { get; }
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="KeyWrapProvider"/>.
         /// </summary>
         /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
-        public string Context { get; set; }
+        public override string Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.
         /// </summary>
-        public SecurityKey Key { get; private set; }
-
-        /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
-        /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        public override SecurityKey Key { get; }
 
         /// <summary>
         /// Disposes of internal components.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
@@ -220,7 +211,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
         /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
-        public virtual byte[] UnwrapKey(byte[] wrappedKey)
+        public override byte[] UnwrapKey(byte[] wrappedKey)
         {
             if (wrappedKey == null || wrappedKey.Length == 0)
                 throw LogHelper.LogArgumentNullException("wrappedKey");
@@ -283,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
         /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
-        public virtual byte[] WrapKey(byte[] keyToWrap)
+        public override byte[] WrapKey(byte[] keyToWrap)
         {
             if (keyToWrap == null || keyToWrap.Length == 0)
                 throw LogHelper.LogArgumentNullException("keyToWrap");

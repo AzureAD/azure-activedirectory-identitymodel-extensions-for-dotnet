@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class DerivedKeyWrapProvider : KeyWrapProvider
+    public class DerivedKeyWrapProvider : SymmetricKeyWrapProvider
     {
         public DerivedKeyWrapProvider(SecurityKey key, string algorithm)
             : base(key, algorithm)
