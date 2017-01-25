@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void KeyWrapReferenceTest(KeyWrapTestParams testParams)
         {
             if (testParams.Algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.OrdinalIgnoreCase)
-                || testParams.Algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.OrdinalIgnoreCase))
+                || testParams.Algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.OrdinalIgnoreCase))
             {
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
                 byte[] wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
