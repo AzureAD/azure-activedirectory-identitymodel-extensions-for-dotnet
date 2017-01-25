@@ -203,11 +203,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return new TheoryData<SecurityKey, string, bool, bool, ExpectedException>
                 {
                     {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10671:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10671:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
                     {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384Signature, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10671:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512Signature, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10671:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384Signature, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512Signature, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
                     {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption, false, false, ExpectedException.NoExceptionExpected},
 
                     {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, true, true, ExpectedException.NoExceptionExpected},
