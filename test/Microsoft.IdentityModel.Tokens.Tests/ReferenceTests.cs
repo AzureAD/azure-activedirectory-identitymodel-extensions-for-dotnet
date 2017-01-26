@@ -116,11 +116,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 || testParams.Algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.OrdinalIgnoreCase))
             {
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-                byte[] wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
-                Assert.True(Utility.AreEqual(wrappedKey, testParams.EncryptedKey), "Utility.AreEqual(wrappedKey, testParams.EncryptedKey)");
-                Assert.Equal(Base64UrlEncoder.Encode(wrappedKey), testParams.EncodedEncryptedKey);
+                KeyWrapContext keyWrapContext = keyWrapProvider.WrapKey(testParams.KeyToWrap);
+                Assert.True(Utility.AreEqual(keyWrapContext.WrappedKey, testParams.EncryptedKey), "Utility.AreEqual(wrappedKey, testParams.EncryptedKey)");
+                Assert.Equal(Base64UrlEncoder.Encode(keyWrapContext.WrappedKey), testParams.EncodedEncryptedKey);
 
-                byte[] unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
+                byte[] unwrappedKey = keyWrapProvider.UnwrapKey(keyWrapContext);
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }
             else if (testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.OrdinalIgnoreCase)
@@ -128,7 +128,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
             {
                 var rsaKeyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-                byte[] unwrappedKey = rsaKeyWrapProvider.UnwrapKey(testParams.EncryptedKey);
+                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = testParams.EncryptedKey };
+                byte[] unwrappedKey = rsaKeyWrapProvider.UnwrapKey(keyWrapContext);
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }
         }

@@ -597,7 +597,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 aes.GenerateKey();
                 var symmetricKey = new SymmetricSecurityKey(aes.Key);
                 var kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                var wrappedKey = kwProvider.WrapKey(aes.Key);                
+                var keyWrapContext = kwProvider.WrapKey(aes.Key);                
                 var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(symmetricKey, encryptingCredentials.Enc);
                 if (encryptionProvider == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
@@ -610,7 +610,7 @@ namespace System.IdentityModel.Tokens.Jwt
                                     header,
                                     innerJwt,
                                     header.Base64UrlEncode(),
-                                    Base64UrlEncoder.Encode(wrappedKey),
+                                    Base64UrlEncoder.Encode(keyWrapContext.WrappedKey),
                                     Base64UrlEncoder.Encode(encryptionResult.IV),
                                     Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
                                     Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
@@ -1454,7 +1454,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     var kwp = key.CryptoProviderFactory.CreateKeyWrapProvider(key, jwtToken.Header.Alg);
                     var encodedKey = Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey);
-                    var unwrappedKey = kwp.UnwrapKey(encodedKey);
+                    KeyWrapContext keyWrapContext = new KeyWrapContext
+                    { WrappedKey = encodedKey };
+                    var unwrappedKey = kwp.UnwrapKey(keyWrapContext);
                     unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                 }
             }
