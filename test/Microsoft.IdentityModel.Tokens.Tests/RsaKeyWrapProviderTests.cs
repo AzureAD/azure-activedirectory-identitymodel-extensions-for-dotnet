@@ -106,8 +106,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void UnwrapKey()
         {
             var provider = new DerivedRsaKeyWrapProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, true);
-            byte[] wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
-            provider.UnwrapKey(wrappedKey);
+            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
+            provider.UnwrapKey(keyWrapContext);
             Assert.True(provider.UnwrapKeyCalled);
         }
 
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void WrapKey()
         {
             var provider = new DerivedRsaKeyWrapProvider(KeyingMaterial.RsaSecurityKey1, SecurityAlgorithms.RsaPKCS1, false);
-            byte[] wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
+            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
             Assert.True(provider.WrapKeyCalled);
         }
 
@@ -128,9 +128,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var encryptProvider = new RsaKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm, false);
                 byte[] keyToWrap = Guid.NewGuid().ToByteArray();
-                byte[] wrappedKey = encryptProvider.WrapKey(keyToWrap);
+                KeyWrapContext keyWrapContext = encryptProvider.WrapKey(keyToWrap);
                 var decryptProvider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
-                byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
+                byte[] unwrappedKey = decryptProvider.UnwrapKey(keyWrapContext);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -171,7 +171,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
+                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
+                theoryParams.Provider.UnwrapKey(keyWrapContext);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -196,16 +197,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var keyToWrap = Guid.NewGuid().ToByteArray();
             var provider = new RsaKeyWrapProvider(encrtyptKey, algorithm, false);
-            var wrappedKey = provider.WrapKey(keyToWrap);
+            KeyWrapContext keyWrapContext = provider.WrapKey(keyToWrap);
 
-            TestUtilities.XORBytes(wrappedKey);
+            TestUtilities.XORBytes(keyWrapContext.WrappedKey);
             theoryData.Add(new RsaKeyWrapTestParams
             {
                 DecryptAlgorithm = algorithm,
                 DecryptKey = decryptKey,
                 EE = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
-                WrappedKey = wrappedKey
+                WrappedKey = keyWrapContext.WrappedKey
             });
         }
 
@@ -217,7 +218,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var provider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
-                byte[] unwrappedKey = provider.UnwrapKey(theoryParams.WrappedKey);
+                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
+                byte[] unwrappedKey = provider.UnwrapKey(keyWrapContext);
 
                 theoryParams.EE.ProcessNoException();
             }

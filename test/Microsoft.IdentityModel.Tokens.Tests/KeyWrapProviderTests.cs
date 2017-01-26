@@ -136,8 +136,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
-                byte[] wrappedKey = provider.WrapKey(theoryParams.KeyToWrap);
-                byte[] unwrappedKey = provider.UnwrapKey(wrappedKey);
+                KeyWrapContext keyWrapContext = provider.WrapKey(theoryParams.KeyToWrap);
+                byte[] unwrappedKey = provider.UnwrapKey(keyWrapContext);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, theoryParams.KeyToWrap), "theoryParams.KeyToWrap != unwrappedKey");
 
@@ -197,7 +197,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
+                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
+                theoryParams.Provider.UnwrapKey(keyWrapContext);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -221,16 +222,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var keyToWrap = Guid.NewGuid().ToByteArray();
             var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(key, algorithm);
-            var wrappedKey = provider.WrapKey(keyToWrap);
+            KeyWrapContext keyWrapContext = provider.WrapKey(keyToWrap);
 
-            TestUtilities.XORBytes(wrappedKey);
+            TestUtilities.XORBytes(keyWrapContext.WrappedKey);
             theoryData.Add(new KeyWrapTestParams
             {
                 EncryptAlgorithm = algorithm,
                 EncryptKey = key,
                 EE = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
-                WrappedKey = wrappedKey
+                WrappedKey = keyWrapContext.WrappedKey
             });
         }
 
@@ -243,9 +244,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var encryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
                 byte[] keyToWrap = Guid.NewGuid().ToByteArray();
-                byte[] wrappedKey = encryptProvider.WrapKey(keyToWrap);
+                KeyWrapContext keyWrapContext = encryptProvider.WrapKey(keyToWrap);
                 var decryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm);
-                byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
+                byte[] unwrappedKey = decryptProvider.UnwrapKey(keyWrapContext);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -287,7 +288,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
-                byte[] unwrappedKey = provider.UnwrapKey(theoryParams.WrappedKey);
+                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
+                byte[] unwrappedKey = provider.UnwrapKey(keyWrapContext);
 
                 theoryParams.EE.ProcessNoException();
             }

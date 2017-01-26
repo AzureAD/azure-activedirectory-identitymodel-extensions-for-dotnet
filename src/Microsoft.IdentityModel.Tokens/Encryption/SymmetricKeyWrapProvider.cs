@@ -211,20 +211,20 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentException">The lenth of wrappedKey must be a multiple of 64 bits.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="KeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
-        public override byte[] UnwrapKey(byte[] wrappedKey)
+        public override byte[] UnwrapKey(KeyWrapContext keyWrapContext)
         {
-            if (wrappedKey == null || wrappedKey.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(wrappedKey));
+            if (keyWrapContext.WrappedKey == null || keyWrapContext.WrappedKey.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(keyWrapContext.WrappedKey));
 
-            if (wrappedKey.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(wrappedKey), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, wrappedKey.Length << 3)));
+            if (keyWrapContext.WrappedKey.Length % 8 != 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyWrapContext.WrappedKey), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyWrapContext.WrappedKey.Length << 3)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             try
             {
-                return UnwrapKeyPrivate(wrappedKey, 0, wrappedKey.Length);
+                return UnwrapKeyPrivate(keyWrapContext.WrappedKey, 0, keyWrapContext.WrappedKey.Length);
             }
             catch (Exception ex)
             {
@@ -353,12 +353,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Wrap the 'keyToWrap'
         /// </summary>
         /// <param name="keyToWrap">the key to be wrapped</param>
-        /// <returns>The wrapped key</returns>
+        /// <returns>The wrapped key result</returns>
         /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
         /// <exception cref="ArgumentException">The length of keyToWrap must be a multiple of 64 bits.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="KeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
-        public override byte[] WrapKey(byte[] keyToWrap)
+        public override KeyWrapContext WrapKey(byte[] keyToWrap)
         {
             if (keyToWrap == null || keyToWrap.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(keyToWrap));
@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private byte[] WrapKeyPrivate(byte[] inputBuffer, int inputOffset, int inputCount)
+        private KeyWrapContext WrapKeyPrivate(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             /*
                1) Initialize variables.
@@ -462,7 +462,8 @@ namespace Microsoft.IdentityModel.Tokens
                 Array.Copy(r, i << 3, c, (i + 1) << 3, 8);
             }
 
-            return c;
+            KeyWrapContext result = new KeyWrapContext { WrappedKey = c };
+            return result;
         }
     }
 }

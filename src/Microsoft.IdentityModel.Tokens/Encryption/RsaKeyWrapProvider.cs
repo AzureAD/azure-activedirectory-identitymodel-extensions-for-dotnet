@@ -211,9 +211,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
         /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
-        public override byte[] UnwrapKey(byte[] wrappedKey)
+        public override byte[] UnwrapKey(KeyWrapContext keyWrapContext)
         {
-            if (wrappedKey == null || wrappedKey.Length == 0)
+            if (keyWrapContext.WrappedKey == null || keyWrapContext.WrappedKey.Length == 0)
                 throw LogHelper.LogArgumentNullException("wrappedKey");
 
             if (_disposed)
@@ -235,9 +235,9 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 if (_rsa != null)
-                    return _rsa.Decrypt(wrappedKey, padding);
+                    return _rsa.Decrypt(keyWrapContext.WrappedKey, padding);
                 else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Decrypt(wrappedKey, fOAEP);
+                    return _rsaCryptoServiceProviderProxy.Decrypt(keyWrapContext.WrappedKey, fOAEP);
             }
             catch (Exception ex)
             {
@@ -269,12 +269,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Wrap the 'keyToWrap'
         /// </summary>
         /// <param name="keyToWrap">the key to be wrapped</param>
-        /// <returns>The wrapped key</returns>
+        /// <returns>The wrapped key result</returns>
         /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
         /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
-        public override byte[] WrapKey(byte[] keyToWrap)
+        public override KeyWrapContext WrapKey(byte[] keyToWrap)
         {
             if (keyToWrap == null || keyToWrap.Length == 0)
                 throw LogHelper.LogArgumentNullException("keyToWrap");
@@ -302,9 +302,15 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 if (_rsa != null)
-                    return _rsa.Encrypt(keyToWrap, padding);
+                {
+                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsa.Encrypt(keyToWrap, padding) };
+                    return result;
+                }
                 else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP);
+                {
+                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP) };
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -314,9 +320,15 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Encrypt(keyToWrap, fOAEP);
+                {
+                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsaCryptoServiceProvider.Encrypt(keyToWrap, fOAEP) };
+                    return result;
+                }
                 else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP);
+                {
+                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP) };
+                    return result;
+                }
             }
             catch (Exception ex)
             {

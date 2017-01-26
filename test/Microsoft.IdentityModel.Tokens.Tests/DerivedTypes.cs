@@ -343,13 +343,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return base.IsSupportedAlgorithm(key, algorithm);
         }
 
-        public override byte[] UnwrapKey(byte[] wrappedKey)
+        public override byte[] UnwrapKey(KeyWrapContext keyWrapContext)
         {
             UnwrapKeyCalled = true;
-            return base.UnwrapKey(wrappedKey);
+            return base.UnwrapKey(keyWrapContext);
         }
 
-        public override byte[] WrapKey(byte[] keyToWrap)
+        public override KeyWrapContext WrapKey(byte[] keyToWrap)
         {
             WrapKeyCalled = true;
             return base.WrapKey(keyToWrap);
@@ -374,13 +374,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return base.IsSupportedAlgorithm(key, algorithm);
         }
 
-        public override byte[] UnwrapKey(byte[] wrappedKey)
+        public override byte[] UnwrapKey(KeyWrapContext keyWrapContext)
         {
             UnwrapKeyCalled = true;
-            return base.UnwrapKey(wrappedKey);
+            return base.UnwrapKey(keyWrapContext);
         }
 
-        public override byte[] WrapKey(byte[] keyToWrap)
+        public override KeyWrapContext WrapKey(byte[] keyToWrap)
         {
             WrapKeyCalled = true;
             return base.WrapKey(keyToWrap);
