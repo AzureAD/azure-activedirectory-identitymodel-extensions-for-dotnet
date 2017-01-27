@@ -27,8 +27,14 @@
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Contains the context of <see cref="KeyWrapProvider.WrapKey(byte[])"/> and <see cref="KeyWrapProvider.UnwrapKey(KeyWrapContext)"/>  operation.
+    /// </summary>
     public class KeyWrapContext
     {
+        /// <summary>
+        /// Gets and sets the wrapped key.
+        /// </summary>
         public byte[] WrappedKey { get; set; }
 
         internal JsonWebKey Epk { get; set; }

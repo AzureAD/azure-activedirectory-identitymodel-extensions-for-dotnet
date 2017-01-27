@@ -111,8 +111,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void UnwrapKey()
         {
             var provider = new DerivedKeyWrapProvider(Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW);
-            byte[] wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
-            provider.UnwrapKey(wrappedKey);
+            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
+            provider.UnwrapKey(keyWrapContext);
             Assert.True(provider.UnwrapKeyCalled);
             Assert.True(provider.IsSupportedAlgorithmCalled);
             Assert.True(provider.GetSymmetricAlgorithmCalled);
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void WrapKey()
         {
             var provider = new DerivedKeyWrapProvider(Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW);
-            byte[] wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
+            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
             Assert.True(provider.WrapKeyCalled);
             Assert.True(provider.IsSupportedAlgorithmCalled);
             Assert.True(provider.GetSymmetricAlgorithmCalled);
