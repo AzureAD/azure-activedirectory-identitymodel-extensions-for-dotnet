@@ -132,8 +132,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
             {
                 if (key is RsaSecurityKey)
                     return true;
@@ -237,7 +236,6 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaSha384Signature:
                 case SecurityAlgorithms.RsaSha512Signature:
                 case SecurityAlgorithms.RsaOAEP:
-                case SecurityAlgorithms.RsaOAEP256:
                 case SecurityAlgorithms.RsaPKCS1:
                 case SecurityAlgorithms.RsaOaepKeyWrap:
                     return true;

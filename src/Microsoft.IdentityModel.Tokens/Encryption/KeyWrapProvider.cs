@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Unwrap the wrappedKey
         /// </summary>
-        /// <param name="wrappedKey">the wrapped key to unwrap</param>
+        /// <param name="keyWrapContext"><see cref="KeyWrapContext"/> </param>
         /// <returns>Unwrap wrapped key</returns>
         public abstract byte[] UnwrapKey(KeyWrapContext keyWrapContext);
 
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Wrap the 'keyToWrap'
         /// </summary>
         /// <param name="keyToWrap">the key to be wrapped</param>
-        /// <returns>The wrapped key</returns>
+        /// <returns><see cref="KeyWrapContext"/></returns>
         public abstract KeyWrapContext WrapKey(byte[] keyToWrap);
     }
 }

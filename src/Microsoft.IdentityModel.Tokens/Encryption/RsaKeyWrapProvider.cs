@@ -174,8 +174,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
             {
                 if (key as RsaSecurityKey != null)
                     return true;
@@ -205,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Unwrap the wrappedKey
         /// </summary>
-        /// <param name="wrappedKey">the wrapped key to unwrap</param>
+        /// <param name="keyWrapContext"><see cref="KeyWrapContext"/></param>
         /// <returns>Unwrap wrapped key</returns>
         /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
@@ -226,10 +225,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
             {
                 padding = RSAEncryptionPadding.OaepSHA1;
-            }
-            else if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
-            {
-                padding = RSAEncryptionPadding.OaepSHA256;
             }
 
             try
@@ -252,9 +247,9 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Decrypt(wrappedKey, fOAEP);
+                    return _rsaCryptoServiceProvider.Decrypt(keyWrapContext.WrappedKey, fOAEP);
                 else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Decrypt(wrappedKey, fOAEP);
+                    return _rsaCryptoServiceProviderProxy.Decrypt(keyWrapContext.WrappedKey, fOAEP);
             }
             catch (Exception ex)
             {
@@ -293,10 +288,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
             {
                 padding = RSAEncryptionPadding.OaepSHA1;
-            }
-            else if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.Ordinal))
-            {
-                padding = RSAEncryptionPadding.OaepSHA256;
             }
 
             try

@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Unwrap the wrappedKey
         /// </summary>
-        /// <param name="wrappedKey">the wrapped key to unwrap</param>
+        /// <param name="keyWrapContext"><see cref="KeyWrapContext"/></param>
         /// <returns>Unwrap wrapped key</returns>
         /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
         /// <exception cref="ArgumentException">The lenth of wrappedKey must be a multiple of 64 bits.</exception>
