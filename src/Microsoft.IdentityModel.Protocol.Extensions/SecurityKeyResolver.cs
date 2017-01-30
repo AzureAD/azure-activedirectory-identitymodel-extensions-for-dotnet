@@ -202,6 +202,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     key = securityKey;
                     this.IsKeyMatched = true;
+                    break;
                 }
             }
 
