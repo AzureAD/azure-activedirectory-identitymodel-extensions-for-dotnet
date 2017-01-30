@@ -146,6 +146,17 @@ namespace Microsoft.IdentityModel.Test
             securityTokenValidators.Add(new System.IdentityModel.Tokens.JwtSecurityTokenHandler());
             ValidateToken(defaultSaml2Token, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);
             ValidateToken(defaultJwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);
+            
+            //Multiple SigningKeys
+            tokenValidationParameters = new TokenValidationParameters();
+            tokenValidationParameters.IssuerSigningKeys = new[] { KeyingMaterial.AsymmetricKey_1024, KeyingMaterial.DefaultAsymmetricKey_2048 };
+            tokenValidationParameters.AudienceValidator = (audiences, token, parameters) => true;
+            tokenValidationParameters.ValidIssuer = IdentityUtilities.DefaultIssuer;
+            securityTokenValidators = SecurityTokenHandlerCollectionExtensions.GetDefaultHandlers();
+            ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);
+            //support multiple keys in any order
+            tokenValidationParameters.IssuerSigningKeys = new[] { KeyingMaterial.DefaultAsymmetricKey_2048, KeyingMaterial.AsymmetricKey_1024 };
+            ValidateToken(defaultSamlToken, tokenValidationParameters, securityTokenValidators, ExpectedException.NoExceptionExpected);
         }
 
         private void ValidateToken(string securityToken, TokenValidationParameters validationParameters, SecurityTokenHandlerCollection tokenHandlers, ExpectedException expectedException)
