@@ -106,16 +106,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void UnwrapKey()
         {
             var provider = new DerivedRsaKeyWrapProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, true);
-            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
-            provider.UnwrapKey(keyWrapContext);
+            var keyBytes = provider.WrapKey(Guid.NewGuid().ToByteArray());
+            provider.UnwrapKey(keyBytes);
             Assert.True(provider.UnwrapKeyCalled);
-        }
-
-        [Fact]
-        public void WrapKey()
-        {
-            var provider = new DerivedRsaKeyWrapProvider(KeyingMaterial.RsaSecurityKey1, SecurityAlgorithms.RsaPKCS1, false);
-            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
             Assert.True(provider.WrapKeyCalled);
         }
 
@@ -128,9 +121,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var encryptProvider = new RsaKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm, false);
                 byte[] keyToWrap = Guid.NewGuid().ToByteArray();
-                KeyWrapContext keyWrapContext = encryptProvider.WrapKey(keyToWrap);
+                var wrappedKey = encryptProvider.WrapKey(keyToWrap);
                 var decryptProvider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
-                byte[] unwrappedKey = decryptProvider.UnwrapKey(keyWrapContext);
+                byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -170,8 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
-                theoryParams.Provider.UnwrapKey(keyWrapContext);
+                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -195,16 +187,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var keyToWrap = Guid.NewGuid().ToByteArray();
             var provider = new RsaKeyWrapProvider(encrtyptKey, algorithm, false);
-            KeyWrapContext keyWrapContext = provider.WrapKey(keyToWrap);
+            var wrappedKey = provider.WrapKey(keyToWrap);
 
-            TestUtilities.XORBytes(keyWrapContext.WrappedKey);
+            TestUtilities.XORBytes(wrappedKey);
             theoryData.Add(new RsaKeyWrapTestParams
             {
                 DecryptAlgorithm = algorithm,
                 DecryptKey = decryptKey,
                 EE = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
-                WrappedKey = keyWrapContext.WrappedKey
+                WrappedKey = wrappedKey
             });
         }
 
@@ -216,8 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var provider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
-                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
-                byte[] unwrappedKey = provider.UnwrapKey(keyWrapContext);
+                provider.UnwrapKey(theoryParams.WrappedKey);
 
                 theoryParams.EE.ProcessNoException();
             }
@@ -260,9 +251,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var encryptProvider = new RsaKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm, false);
-                KeyWrapContext keyWrapContext = encryptProvider.WrapKey(theoryParams.KeyToWrap);
+                var wrappedKey = encryptProvider.WrapKey(theoryParams.KeyToWrap);
                 var decryptProvider = new DerivedRsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
-                byte[] unwrappedKey = decryptProvider.UnwrapKey(keyWrapContext);
+                byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, theoryParams.KeyToWrap), "theoryParams.KeyToWrap != unwrappedKey");
 

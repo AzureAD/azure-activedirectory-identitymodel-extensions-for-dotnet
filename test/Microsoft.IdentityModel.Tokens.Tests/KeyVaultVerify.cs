@@ -42,10 +42,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             if (testParams.Algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.OrdinalIgnoreCase)
                 || testParams.Algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.OrdinalIgnoreCase))
             {
-                byte[] wrappedKey = testParams.KeyVaultEncryptor.TransformFinalBlock(testParams.KeyToWrap, 0, testParams.KeyToWrap.Length);
+                var wrappedKey = testParams.KeyVaultEncryptor.TransformFinalBlock(testParams.KeyToWrap, 0, testParams.KeyToWrap.Length);
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = wrappedKey };
-                byte[] unwrappedKey = keyWrapProvider.UnwrapKey(keyWrapContext);
+                var unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }
@@ -53,9 +52,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
             {
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-                byte[] wrappedKey = testParams.KeyVaultEncryptor.TransformFinalBlock(testParams.KeyToWrap, 0, testParams.KeyToWrap.Length);
-                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = wrappedKey };
-                byte[] unwrappedKey = keyWrapProvider.UnwrapKey(keyWrapContext);
+                var wrappedKey = testParams.KeyVaultEncryptor.TransformFinalBlock(testParams.KeyToWrap, 0, testParams.KeyToWrap.Length);
+                var unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }
@@ -70,8 +68,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 || testParams.Algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.OrdinalIgnoreCase))
             {
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-                KeyWrapContext KeyWrapContext = keyWrapProvider.WrapKey(testParams.KeyToWrap);
-                byte[] unwrappedKey = testParams.KeyVaultDecryptor.TransformFinalBlock(KeyWrapContext.WrappedKey, 0, KeyWrapContext.WrappedKey.Length);
+                var wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
+                byte[] unwrappedKey = testParams.KeyVaultDecryptor.TransformFinalBlock(wrappedKey, 0, wrappedKey.Length);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }
@@ -79,8 +77,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
             {
                 var keyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);
-                KeyWrapContext KeyWrapContext = keyWrapProvider.WrapKey(testParams.KeyToWrap);
-                byte[] unwrappedKey = testParams.KeyVaultDecryptor.TransformFinalBlock(KeyWrapContext.WrappedKey, 0, KeyWrapContext.WrappedKey.Length);
+                var wrappedKey = keyWrapProvider.WrapKey(testParams.KeyToWrap);
+                byte[] unwrappedKey = testParams.KeyVaultDecryptor.TransformFinalBlock(wrappedKey, 0, wrappedKey.Length);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
             }
