@@ -66,17 +66,17 @@ namespace Microsoft.IdentityModel.Tokens
         protected abstract void Dispose(bool disposing);
 
         /// <summary>
-        /// Unwrap the wrappedKey
+        /// Unwrap a key.
         /// </summary>
-        /// <param name="keyWrapContext"><see cref="KeyWrapContext"/> </param>
-        /// <returns>Unwrap wrapped key</returns>
-        public abstract byte[] UnwrapKey(KeyWrapContext keyWrapContext);
+        /// <param name="keyBytes">key to unwrap.</param>
+        /// <returns>Unwrapped key.</returns>
+        public abstract byte[] UnwrapKey(byte[] keyBytes);
 
         /// <summary>
-        /// Wrap the 'keyToWrap'
+        /// Wrap a key.
         /// </summary>
-        /// <param name="keyToWrap">the key to be wrapped</param>
-        /// <returns><see cref="KeyWrapContext"/></returns>
-        public abstract KeyWrapContext WrapKey(byte[] keyToWrap);
+        /// <param name="keyBytes">the key to be wrapped</param>
+        /// <returns>wrapped key.</returns>
+        public abstract byte[] WrapKey(byte[] keyBytes);
     }
 }

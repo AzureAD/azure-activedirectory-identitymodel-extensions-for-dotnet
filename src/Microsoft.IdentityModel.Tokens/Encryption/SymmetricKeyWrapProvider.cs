@@ -203,28 +203,28 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Unwrap the wrappedKey
+        /// Unwrap a key using Symmmetric decryption.
         /// </summary>
-        /// <param name="keyWrapContext"><see cref="KeyWrapContext"/></param>
-        /// <returns>Unwrap wrapped key</returns>
-        /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
-        /// <exception cref="ArgumentException">The lenth of wrappedKey must be a multiple of 64 bits.</exception>
+        /// <param name="keyBytes">bytes to unwrap</param>
+        /// <returns>Unwraped key</returns>
+        /// <exception cref="ArgumentNullException">'keyBytes' is null or length == 0.</exception>
+        /// <exception cref="ArgumentException">'keyBytes' is not a multiple of 8.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="KeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
-        public override byte[] UnwrapKey(KeyWrapContext keyWrapContext)
+        public override byte[] UnwrapKey(byte[] keyBytes)
         {
-            if (keyWrapContext.WrappedKey == null || keyWrapContext.WrappedKey.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(keyWrapContext.WrappedKey));
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
-            if (keyWrapContext.WrappedKey.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyWrapContext.WrappedKey), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyWrapContext.WrappedKey.Length << 3)));
+            if (keyBytes.Length % 8 != 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyBytes), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyBytes.Length << 3)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             try
             {
-                return UnwrapKeyPrivate(keyWrapContext.WrappedKey, 0, keyWrapContext.WrappedKey.Length);
+                return UnwrapKeyPrivate(keyBytes, 0, keyBytes.Length);
             }
             catch (Exception ex)
             {
@@ -313,14 +313,14 @@ namespace Microsoft.IdentityModel.Tokens
 
            if (Utility.AreEqual(a, _defaultIV))
             {
-                var c = new byte[n << 3];
+                var keyBytes = new byte[n << 3];
 
                 for (var i = 0; i < n; i++)
                 {
-                    Array.Copy(r, i << 3, c, i << 3, 8);
+                    Array.Copy(r, i << 3, keyBytes, i << 3, 8);
                 }
 
-                return c;
+                return keyBytes;
             }
             else
             {
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes128KW.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.Length != 16)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, SecurityAlgorithms.Aes128KW, 128, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.Length), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, SecurityAlgorithms.Aes128KW, 128, Key.KeyId, key.Length << 3)));
 
                 return;
             }
@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes256KW.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.Length != 32)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, SecurityAlgorithms.Aes256KW, 256, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.Length), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10662, SecurityAlgorithms.Aes256KW, 256, Key.KeyId, key.Length << 3)));
 
                 return;
             }
@@ -350,28 +350,28 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Wrap the 'keyToWrap'
+        /// Wrap a key using Symmetric encryption.
         /// </summary>
-        /// <param name="keyToWrap">the key to be wrapped</param>
+        /// <param name="keyBytes">the key to be wrapped</param>
         /// <returns>The wrapped key result</returns>
-        /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
-        /// <exception cref="ArgumentException">The length of keyToWrap must be a multiple of 64 bits.</exception>
+        /// <exception cref="ArgumentNullException">'keyBytes' is null or has length 0.</exception>
+        /// <exception cref="ArgumentException">'keyBytes' is not a multiple of 8.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="KeyWrapProvider.Dispose(bool)"/> has been called.</exception>
-        /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
-        public override KeyWrapContext WrapKey(byte[] keyToWrap)
+        /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap 'keyBytes'.</exception>
+        public override byte[] WrapKey(byte[] keyBytes)
         {
-            if (keyToWrap == null || keyToWrap.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(keyToWrap));
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
-            if (keyToWrap.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyToWrap), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyToWrap.Length << 3)));
+            if (keyBytes.Length % 8 != 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyBytes), string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10664, keyBytes.Length << 3)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             try
             {
-                return WrapKeyPrivate(keyToWrap, 0, keyToWrap.Length);
+                return WrapKeyPrivate(keyBytes, 0, keyBytes.Length);
             }
             catch (Exception ex)
             {
@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private KeyWrapContext WrapKeyPrivate(byte[] inputBuffer, int inputOffset, int inputCount)
+        private byte[] WrapKeyPrivate(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             /*
                1) Initialize variables.
@@ -453,17 +453,16 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            var c = new byte[(n + 1) << 3];
+            var keyBytes = new byte[(n + 1) << 3];
 
-            Array.Copy(a, c, a.Length);
+            Array.Copy(a, keyBytes, a.Length);
 
             for (var i = 0; i < n; i++)
             {
-                Array.Copy(r, i << 3, c, (i + 1) << 3, 8);
+                Array.Copy(r, i << 3, keyBytes, (i + 1) << 3, 8);
             }
 
-            KeyWrapContext result = new KeyWrapContext { WrappedKey = c };
-            return result;
+            return keyBytes;
         }
     }
 }

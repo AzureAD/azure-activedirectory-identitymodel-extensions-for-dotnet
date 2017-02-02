@@ -534,12 +534,12 @@ namespace System.IdentityModel.Tokens.Jwt
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
 
             if (encryptingCredentials != null)
-                return EncryptedToken(new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature), encryptingCredentials);
+                return EncryptToken(new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature), encryptingCredentials);
             else
                 return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
         }
 
-        private JwtSecurityToken EncryptedToken(JwtSecurityToken innerJwt, EncryptingCredentials encryptingCredentials)
+        private JwtSecurityToken EncryptToken(JwtSecurityToken innerJwt, EncryptingCredentials encryptingCredentials)
         {
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
@@ -597,7 +597,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 aes.GenerateKey();
                 var symmetricKey = new SymmetricSecurityKey(aes.Key);
                 var kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                var keyWrapContext = kwProvider.WrapKey(aes.Key);                
+                var wrappedKey = kwProvider.WrapKey(aes.Key);
                 var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(symmetricKey, encryptingCredentials.Enc);
                 if (encryptionProvider == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
@@ -610,7 +610,7 @@ namespace System.IdentityModel.Tokens.Jwt
                                     header,
                                     innerJwt,
                                     header.Base64UrlEncode(),
-                                    Base64UrlEncoder.Encode(keyWrapContext.WrappedKey),
+                                    Base64UrlEncoder.Encode(wrappedKey),
                                     Base64UrlEncoder.Encode(encryptionResult.IV),
                                     Base64UrlEncoder.Encode(encryptionResult.Ciphertext),
                                     Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
@@ -856,7 +856,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (jwtToken.InnerToken.SigningCredentials != null)
                     encodedSignature = CreateEncodedSignature(string.Concat(jwtToken.InnerToken.EncodedHeader, ".", jwtToken.EncodedPayload), jwtToken.InnerToken.SigningCredentials);
 
-                return EncryptedToken(new JwtSecurityToken(jwtToken.InnerToken.Header, jwtToken.InnerToken.Payload, jwtToken.InnerToken.EncodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
+                return EncryptToken(new JwtSecurityToken(jwtToken.InnerToken.Header, jwtToken.InnerToken.Payload, jwtToken.InnerToken.EncodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
             }
 
             // if EncryptingCredentials isn't set, then we need to create JWE
@@ -867,7 +867,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 encodedSignature =  CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
 
             if (jwtToken.EncryptingCredentials != null)
-                return EncryptedToken(new JwtSecurityToken(header, jwtToken.Payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
+                return EncryptToken(new JwtSecurityToken(header, jwtToken.Payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
             else
                 return string.Concat(encodedHeader, ".", encodedPayload, ".", encodedSignature);
         }
@@ -1453,10 +1453,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
                 {
                     var kwp = key.CryptoProviderFactory.CreateKeyWrapProvider(key, jwtToken.Header.Alg);
-                    var encodedKey = Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey);
-                    KeyWrapContext keyWrapContext = new KeyWrapContext
-                    { WrappedKey = encodedKey };
-                    var unwrappedKey = kwp.UnwrapKey(keyWrapContext);
+                    var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                     unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                 }
             }

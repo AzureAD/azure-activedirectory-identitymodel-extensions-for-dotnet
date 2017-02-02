@@ -111,18 +111,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void UnwrapKey()
         {
             var provider = new DerivedKeyWrapProvider(Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW);
-            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
-            provider.UnwrapKey(keyWrapContext);
+            var wrappedKey = provider.WrapKey(Guid.NewGuid().ToByteArray());
+            provider.UnwrapKey(wrappedKey);
             Assert.True(provider.UnwrapKeyCalled);
-            Assert.True(provider.IsSupportedAlgorithmCalled);
-            Assert.True(provider.GetSymmetricAlgorithmCalled);
-        }
-
-        [Fact]
-        public void WrapKey()
-        {
-            var provider = new DerivedKeyWrapProvider(Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW);
-            KeyWrapContext keyWrapContext = provider.WrapKey(Guid.NewGuid().ToByteArray());
             Assert.True(provider.WrapKeyCalled);
             Assert.True(provider.IsSupportedAlgorithmCalled);
             Assert.True(provider.GetSymmetricAlgorithmCalled);
@@ -136,8 +127,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
-                KeyWrapContext keyWrapContext = provider.WrapKey(theoryParams.KeyToWrap);
-                byte[] unwrappedKey = provider.UnwrapKey(keyWrapContext);
+                var wrappedKey = provider.WrapKey(theoryParams.KeyToWrap);
+                byte[] unwrappedKey = provider.UnwrapKey(wrappedKey);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, theoryParams.KeyToWrap), "theoryParams.KeyToWrap != unwrappedKey");
 
@@ -197,8 +188,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
-                theoryParams.Provider.UnwrapKey(keyWrapContext);
+                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -222,16 +212,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var keyToWrap = Guid.NewGuid().ToByteArray();
             var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(key, algorithm);
-            KeyWrapContext keyWrapContext = provider.WrapKey(keyToWrap);
+            var wrappedKey = provider.WrapKey(keyToWrap);
 
-            TestUtilities.XORBytes(keyWrapContext.WrappedKey);
+            TestUtilities.XORBytes(wrappedKey);
             theoryData.Add(new KeyWrapTestParams
             {
                 EncryptAlgorithm = algorithm,
                 EncryptKey = key,
                 EE = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
-                WrappedKey = keyWrapContext.WrappedKey
+                WrappedKey = wrappedKey
             });
         }
 
@@ -244,9 +234,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var encryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
                 byte[] keyToWrap = Guid.NewGuid().ToByteArray();
-                KeyWrapContext keyWrapContext = encryptProvider.WrapKey(keyToWrap);
+                var wrappedKey = encryptProvider.WrapKey(keyToWrap);
                 var decryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm);
-                byte[] unwrappedKey = decryptProvider.UnwrapKey(keyWrapContext);
+                byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)
@@ -288,9 +278,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
-                KeyWrapContext keyWrapContext = new KeyWrapContext { WrappedKey = theoryParams.WrappedKey };
-                byte[] unwrappedKey = provider.UnwrapKey(keyWrapContext);
-
+                byte[] unwrappedKey = provider.UnwrapKey(theoryParams.WrappedKey);
                 theoryParams.EE.ProcessNoException();
             }
             catch (Exception ex)

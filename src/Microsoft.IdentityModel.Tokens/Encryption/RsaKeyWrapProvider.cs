@@ -202,54 +202,45 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Unwrap the wrappedKey
+        /// Unwrap a key using RSA decryption.
         /// </summary>
-        /// <param name="keyWrapContext"><see cref="KeyWrapContext"/></param>
-        /// <returns>Unwrap wrapped key</returns>
-        /// <exception cref="ArgumentNullException">'wrappedKey' is null or empty.</exception>
+        /// <param name="keyBytes">the bytes to unwrap.</param>
+        /// <returns>Unwrapped key</returns>
+        /// <exception cref="ArgumentNullException">'keyBytes' is null or length == 0.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
         /// <exception cref="SecurityTokenKeyWrapException">Failed to unwrap the wrappedKey.</exception>
         /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
-        public override byte[] UnwrapKey(KeyWrapContext keyWrapContext)
+        public override byte[] UnwrapKey(byte[] keyBytes)
         {
-            if (keyWrapContext.WrappedKey == null || keyWrapContext.WrappedKey.Length == 0)
+            if (keyBytes == null || keyBytes.Length == 0)
                 throw LogHelper.LogArgumentNullException("wrappedKey");
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            bool fOAEP = false;
+            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
 
 #if NETSTANDARD1_4
-            RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
-            if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
-            {
-                padding = RSAEncryptionPadding.OaepSHA1;
-            }
+            var padding = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) ? RSAEncryptionPadding.OaepSHA1 : RSAEncryptionPadding.Pkcs1;
 
             try
             {
                 if (_rsa != null)
-                    return _rsa.Decrypt(keyWrapContext.WrappedKey, padding);
+                    return _rsa.Decrypt(keyBytes, padding);
                 else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Decrypt(keyWrapContext.WrappedKey, fOAEP);
+                    return _rsaCryptoServiceProviderProxy.Decrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
             }
 #else
-            if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
-            {
-                fOAEP = true;
-            }
-
             try
             {
                 if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Decrypt(keyWrapContext.WrappedKey, fOAEP);
+                    return _rsaCryptoServiceProvider.Decrypt(keyBytes, fOAEP);
                 else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Decrypt(keyWrapContext.WrappedKey, fOAEP);
+                    return _rsaCryptoServiceProviderProxy.Decrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
             {
@@ -261,47 +252,35 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Wrap the 'keyToWrap'
+        /// Wrap a key using RSA encryption.
         /// </summary>
-        /// <param name="keyToWrap">the key to be wrapped</param>
-        /// <returns>The wrapped key result</returns>
-        /// <exception cref="ArgumentNullException">'keyToWrap' is null or empty.</exception>
+        /// <param name="keyBytes">the key to be wrapped</param>
+        /// <returns>A wrapped key</returns>
+        /// <exception cref="ArgumentNullException">'keyBytes' is null or has length == 0.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="RsaKeyWrapProvider.Dispose(bool)"/> has been called.</exception>
-        /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the keyToWrap.</exception>
+        /// <exception cref="SecurityTokenKeyWrapException">Failed to wrap the 'keyBytes'.</exception>
         /// <exception cref="InvalidOperationException">If the internal RSA algorithm is null.</exception>
-        public override KeyWrapContext WrapKey(byte[] keyToWrap)
+        public override byte[] WrapKey(byte[] keyBytes)
         {
-            if (keyToWrap == null || keyToWrap.Length == 0)
-                throw LogHelper.LogArgumentNullException("keyToWrap");
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            bool fOAEP = false;
-            if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
-            {
-                fOAEP = true;
-            }
+            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
 
 #if NETSTANDARD1_4
             RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
             if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
-            {
                 padding = RSAEncryptionPadding.OaepSHA1;
-            }
 
             try
             {
                 if (_rsa != null)
-                {
-                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsa.Encrypt(keyToWrap, padding) };
-                    return result;
-                }
+                    return _rsa.Encrypt(keyBytes, padding);
                 else if (_rsaCryptoServiceProviderProxy != null)
-                {
-                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP) };
-                    return result;
-                }
+                    return _rsaCryptoServiceProviderProxy.Encrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
             {
@@ -311,15 +290,9 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 if (_rsaCryptoServiceProvider != null)
-                {
-                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsaCryptoServiceProvider.Encrypt(keyToWrap, fOAEP) };
-                    return result;
-                }
+                    return _rsaCryptoServiceProvider.Encrypt(keyBytes, fOAEP);
                 else if (_rsaCryptoServiceProviderProxy != null)
-                {
-                    KeyWrapContext result = new KeyWrapContext { WrappedKey = _rsaCryptoServiceProviderProxy.Encrypt(keyToWrap, fOAEP) };
-                    return result;
-                }
+                    return _rsaCryptoServiceProviderProxy.Encrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
             {
