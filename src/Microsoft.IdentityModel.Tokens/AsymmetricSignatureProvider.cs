@@ -27,10 +27,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -47,13 +46,13 @@ namespace Microsoft.IdentityModel.Tokens
         private ECDsaCng _ecdsa;
         private string _hashAlgorithm;
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 #endif
         private bool _disposeRsa;
         private bool _disposeEcdsa;
         private bool _disposed;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
-        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 
         /// <summary>
         /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
@@ -212,7 +211,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             _hashAlgorithm = GetHashAlgorithmName(algorithm);
-            RsaAlgorithm rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
+            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
             if (rsaAlgorithm != null)
             {
                 if (rsaAlgorithm.rsa != null)
@@ -221,17 +220,11 @@ namespace Microsoft.IdentityModel.Tokens
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
-                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
-                {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
-                    _disposeRsa = rsaAlgorithm.dispose;
-                    return;
-                }
-                else
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
+
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10641, key)));
             }
 
-            ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
+            var ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
             if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
             {
                 _ecdsa = ecdsaAlgorithm.ecdsa;
@@ -337,8 +330,6 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
             if (_rsa != null)
                 return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-            else if (_rsaCryptoServiceProviderProxy != null)
-                return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm.Name);
             else if (_ecdsa != null)
                 return _ecdsa.SignData(input, _hashAlgorithm);
 #else
@@ -379,8 +370,6 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
             if (_rsa != null)
                 return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-            else if (_rsaCryptoServiceProviderProxy != null)
-                return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm.Name, signature);
             else if (_ecdsa != null)
                 return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
 #else
@@ -430,12 +419,12 @@ namespace Microsoft.IdentityModel.Tokens
 #else
                     if (_rsaCryptoServiceProvider != null && _disposeRsa)
                         _rsaCryptoServiceProvider.Dispose();
-#endif
-                    if (_ecdsa != null && _disposeEcdsa)
-                        _ecdsa.Dispose();
 
                     if (_rsaCryptoServiceProviderProxy != null)
                         _rsaCryptoServiceProviderProxy.Dispose();
+#endif
+                    if (_ecdsa != null && _disposeEcdsa)
+                        _ecdsa.Dispose();
                 }
             }
         }

@@ -168,7 +168,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[0], ExpectedException.ArgumentNullException(), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.ArgumentOutOfRangeException("IDX10630:"), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
+#if NET451
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
+#endif
+
 #if NETCOREAPP1_0
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
             Assert.ThrowsAny<CryptographicException>(() =>
@@ -177,13 +180,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 provider.Sign(rawBytes);
             });
 #endif
+
+#if NET451
             // since the actual exception thrown is private - WindowsCryptographicException, using this pattern to match the derived exception
             Assert.ThrowsAny<CryptographicException>(() =>
             {
                 AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature);
                 provider.Sign(rawBytes);
             });
-
+#endif
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.InvalidOperationException("IDX10638:"), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", rawBytes, ExpectedException.ArgumentException("IDX10634:"), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes, ExpectedException.NoExceptionExpected, errors);
@@ -367,8 +372,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void
-        AsymmetricSignatureProvidersVerify(SignatureProviderTestParams testParams)
+        public void AsymmetricSignatureProvidersVerify(SignatureProviderTestParams testParams)
         {
             try
             {
@@ -562,6 +566,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test13"
             });
 
+#if NET451
             theoryData.Add(new SignatureProviderTestParams
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
@@ -572,7 +577,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ShouldVerify = true,
                 TestId = "Test14"
             });
-
+#endif
             // wrong hash
             theoryData.Add(new SignatureProviderTestParams
             {
@@ -666,6 +671,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test22"
             });
 
+#if NET451
             // sha384, 512
             signature = GetSignature(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha384Signature, rawBytes);
             theoryData.Add(new SignatureProviderTestParams
@@ -679,6 +685,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test23"
             });
 
+#endif
             signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, rawBytes);
             theoryData.Add(new SignatureProviderTestParams
             {
@@ -829,7 +836,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 testParams.EE.ProcessException(ex);
             }
         }
-        #endregion
+#endregion
 
         public static TheoryData <SignatureProviderTestParams> SymmetricSignatureProviderVerifyTheoryData()
         {
@@ -838,7 +845,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
-            #region Parameter Validation
+#region Parameter Validation
 
             theoryData.Add(new SignatureProviderTestParams
             {
@@ -895,9 +902,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test5"
             });
 
-            #endregion Parameter Validation
+#endregion Parameter Validation
 
-            #region positive tests
+#region positive tests
 
             // HmacSha256 <-> HmacSha256Signature
             theoryData.Add(new SignatureProviderTestParams
@@ -980,9 +987,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test11",
             });
 
-            #endregion positive tests
+#endregion positive tests
 
-            #region negative tests
+#region negative tests
 
             // different algorithm
             // HmacSha256 -> HmacSha384
@@ -1104,7 +1111,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test21",
             });
 
-            #endregion  negative tests
+#endregion  negative tests
 
             return theoryData;
         }
@@ -1202,13 +1209,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var dataSet = new TheoryData<string, SecurityKey, string, ExpectedException>();
 
+#if NET451
             dataSet.Add(
                 "Test1",
                 new RsaSecurityKey(new RSACryptoServiceProvider(2048)),
                 SecurityAlgorithms.RsaSha256,
                 ExpectedException.NoExceptionExpected
             );
-
+#endif
             dataSet.Add(
                 "Test2",
                 new RsaSecurityKey(KeyingMaterial.RsaParameters_2048),

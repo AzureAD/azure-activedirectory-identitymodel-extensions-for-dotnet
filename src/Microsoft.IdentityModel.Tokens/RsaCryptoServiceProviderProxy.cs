@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#if NET451
+
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -170,3 +172,4 @@ namespace Microsoft.IdentityModel.Tokens
         }
     }
 }
+#endif

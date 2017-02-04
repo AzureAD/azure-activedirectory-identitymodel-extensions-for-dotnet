@@ -126,8 +126,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static RsaSecurityKey RsaSecurityKey_2048_Public;
         public static RsaSecurityKey RsaSecurityKey_4096;
         public static RsaSecurityKey RsaSecurityKey_4096_Public;
+#if NET451
         public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048;
         public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048_Public;
+#endif
         public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048;
         public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048_Public;
 
@@ -394,12 +396,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+#if NET451
             var rsaCsp = new RSACryptoServiceProvider();
             rsaCsp.ImportParameters(RsaParameters_2048);
             RsaSecurityKeyWithCspProvider_2048 = new RsaSecurityKey(rsaCsp);
             var rsaCspPublic = new RSACryptoServiceProvider();
             rsaCspPublic.ImportParameters(RsaParameters_2048_Public);
             RsaSecurityKeyWithCspProvider_2048_Public = new RsaSecurityKey(rsaCspPublic);
+#endif
+
 #if NETCOREAPP1_0
             var rsaCng = new RSACng();
             rsaCng.ImportParameters(RsaParameters_2048);

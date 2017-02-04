@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#if NET451
+
 using System;
 using System.Security.Cryptography;
 using Xunit;
@@ -34,13 +36,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class RsaCryptoServiceProviderProxyTests
     {
 
+
         byte[] input = new byte[10];
 
-#if NETCOREAPP1_0
-        HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA256;
-#else
         string _hashAlgorithm = SecurityAlgorithms.Sha256;
-#endif
 
         [Fact]
         public void TestCustomRsaCsp()
@@ -83,11 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-#if NETCOREAPP1_0
-                rsaCsp.SignData(input, _hashAlgorithm.Name);
-#else
                 rsaCsp.SignData(input, _hashAlgorithm);
-#endif
                 ee.ProcessNoException();
             }
             catch (Exception ex)
@@ -100,11 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-#if NETCOREAPP1_0
-                rsaCspProxy.SignData(input, _hashAlgorithm.Name);
-#else
                 rsaCspProxy.SignData(input, _hashAlgorithm);
-#endif
                 ee.ProcessNoException();
             }
             catch (Exception ex)
@@ -112,6 +103,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ee.ProcessException(ex);
             }
         }
-
     }
 }
+#endif

@@ -20,7 +20,6 @@
           "type" : "build",
           "version" : "4.3.0-*"
         },
-        "System.Security.Cryptography.Csp": "4.3.0-*",
         "System.Security.Cryptography.X509Certificates": "4.3.0-*",
         "System.Text.RegularExpressions": "4.3.0-*",
         "System.Threading": "4.3.0-*",
