@@ -41,9 +41,9 @@ namespace Microsoft.IdentityModel.Tokens
         private RSA _rsa;
 #else
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 #endif
         private bool _disposeRsa;
-        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
         private bool _disposed = false;
 
         /// <summary>
@@ -72,25 +72,15 @@ namespace Microsoft.IdentityModel.Tokens
             Algorithm = algorithm;
             Key = key;
 
-            RsaAlgorithm rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willUnwrap);
+            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willUnwrap);
+
 #if NETSTANDARD1_4
-            if (rsaAlgorithm != null)
+            if (rsaAlgorithm != null && rsaAlgorithm.rsa != null)
             {
-                if (rsaAlgorithm.rsa != null)
-                {
-                    _rsa = rsaAlgorithm.rsa;
-                    _disposeRsa = rsaAlgorithm.dispose;
-                }
-                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
-                {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
-                    _disposeRsa = rsaAlgorithm.dispose;
-                }
-                else
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
+                _rsa = rsaAlgorithm.rsa;
+                _disposeRsa = rsaAlgorithm.dispose;
+                return;
             }
-            else
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
 #else
             if (rsaAlgorithm != null)
             {
@@ -98,18 +88,18 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     _rsaCryptoServiceProvider = rsaAlgorithm.rsaCryptoServiceProvider;
                     _disposeRsa = rsaAlgorithm.dispose;
+                    return;
                 }
-                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
+
+                if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
                 {
                     _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
                     _disposeRsa = rsaAlgorithm.dispose;
+                    return;
                 }
-                else
-                      throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
             }
-            else
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
 #endif
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10661, algorithm, key)));
         }
 
         /// <summary>
@@ -144,11 +134,10 @@ namespace Microsoft.IdentityModel.Tokens
 #else
                     if (_rsaCryptoServiceProvider != null && _disposeRsa)
                         _rsaCryptoServiceProvider.Dispose();
-#endif
 
                     if (_rsaCryptoServiceProviderProxy != null)
                         _rsaCryptoServiceProviderProxy.Dispose();
-
+#endif
                     _disposed = true;
                 }
             }
@@ -179,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (key as RsaSecurityKey != null)
                     return true;
 
-                X509SecurityKey x509Key = key as X509SecurityKey;
+                var x509Key = key as X509SecurityKey;
                 if (x509Key != null)
                 {
 #if NETSTANDARD1_4
@@ -189,7 +178,6 @@ namespace Microsoft.IdentityModel.Tokens
                     if (x509Key.PublicKey as RSACryptoServiceProvider != null)
                         return true;
 #endif
-
                     return false;
                 }
 
@@ -218,23 +206,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
-
 #if NETSTANDARD1_4
             var padding = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) ? RSAEncryptionPadding.OaepSHA1 : RSAEncryptionPadding.Pkcs1;
-
             try
             {
                 if (_rsa != null)
                     return _rsa.Decrypt(keyBytes, padding);
-                else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Decrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
             }
 #else
+            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
             try
             {
                 if (_rsaCryptoServiceProvider != null)
@@ -247,7 +231,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
             }
 #endif
-
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
@@ -268,25 +251,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
-
 #if NETSTANDARD1_4
-            RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
-            if (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
-                padding = RSAEncryptionPadding.OaepSHA1;
-
+            var padding = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) ? RSAEncryptionPadding.OaepSHA1 : RSAEncryptionPadding.Pkcs1;
             try
             {
                 if (_rsa != null)
                     return _rsa.Encrypt(keyBytes, padding);
-                else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Encrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
             }
 #else
+            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
             try
             {
                 if (_rsaCryptoServiceProvider != null)
@@ -299,7 +276,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
             }
 #endif
-
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
     }

@@ -113,6 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "AES256_KeyWrap"
                 });
 
+#if NET451
                 Rsa15 rsa15 = new Rsa15();
                 theoryData.Add(new KeyWrapTestParams
                 {
@@ -134,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     KeyToWrap = RSAES_OAEP_KeyWrap.CEK,
                     TestId = "RSA_OAEP_KeyWrap"
                 });
-
+#endif
                 return theoryData;
             }
         }

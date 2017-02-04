@@ -200,7 +200,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [DefaultValue(true)]
         public bool RequireSub { get; set; } = RequireSubByDefault;
 
-
         /// <summary>
         /// Gets or sets a value for default RequreSub.
         /// </summary>
@@ -393,7 +392,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 if (idToken.Payload.Iss == null)
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
 
-                // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some of Microsoft organizations which don't have this...
+                // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
                 if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Payload.Sub)))
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
 
