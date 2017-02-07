@@ -587,7 +587,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     keySize = 256;
                 else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
                     keySize = 384;
-                else if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
                     keySize = 512;
                 else
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10617, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Aes192CbcHmacSha384, SecurityAlgorithms.Aes256CbcHmacSha512, encryptingCredentials.Enc)));
