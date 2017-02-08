@@ -110,7 +110,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512)))
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
                 return false;
 
             if (key is SymmetricSecurityKey)
@@ -249,6 +251,7 @@ namespace Microsoft.IdentityModel.Tokens
             switch (algorithm)
             {
                 case SecurityAlgorithms.Aes128CbcHmacSha256:
+                case SecurityAlgorithms.Aes192CbcHmacSha384:
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
                 case SecurityAlgorithms.Aes128KW:
                 case SecurityAlgorithms.Aes256KW:

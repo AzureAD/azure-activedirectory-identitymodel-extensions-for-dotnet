@@ -72,7 +72,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10606 = "IDX10606: Decryption failed. To decrypt a JWE there must be 5 parts. 'tokenParts' is of length: '{0}'.";
         internal const string IDX10607 = "IDX10607: Decryption skipping key: '{0}', both validationParameters.CryptoProviderFactory and key.CryptoProviderFactory are null.";
         internal const string IDX10608 = "IDX10608: Decryption skipping key: '{0}', it is not a '{1}'.";
-        internal const string IDX10609 = "IDX10609: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
+        internal const string IDX10609 = "IDX10609: Decryption failed. No Keys tried: token: '{0}'.";
         internal const string IDX10610 = "IDX10610: Decryption failed. Could not create decryption provider. Key: '{0}', Algorithm: '{1}'.";
         internal const string IDX10611 = "IDX10611: Decryption failed. Encryption is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
         internal const string IDX10612 = "IDX10612: Decryption failed. Header.Enc is null or empty, it must be specified.";
