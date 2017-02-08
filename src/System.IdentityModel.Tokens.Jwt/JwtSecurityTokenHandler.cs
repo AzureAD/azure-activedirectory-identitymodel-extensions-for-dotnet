@@ -580,24 +580,20 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Alg, encryptingCredentials.Key))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10615, encryptingCredentials.Alg, encryptingCredentials.Key)));
 
-                int keySize = 0;
+                SymmetricSecurityKey symmetricKey = null;
 
-                // only certain CEK algorithm
+                // only 128, 384 and 512 AesCbcHmac for CEK algorithm
                 if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
-                    keySize = 256;
+                    symmetricKey = new SymmetricSecurityKey(GenerateKeyBytes(256));
                 else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
-                    keySize = 384;
+                    symmetricKey = new SymmetricSecurityKey(GenerateKeyBytes(384));
                 else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
-                    keySize = 512;
+                    symmetricKey = new SymmetricSecurityKey(GenerateKeyBytes(512));
                 else
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10617, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Aes192CbcHmacSha384, SecurityAlgorithms.Aes256CbcHmacSha512, encryptingCredentials.Enc)));
 
-                var aes = Aes.Create();
-                aes.KeySize = keySize;
-                aes.GenerateKey();
-                var symmetricKey = new SymmetricSecurityKey(aes.Key);
                 var kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                var wrappedKey = kwProvider.WrapKey(aes.Key);
+                var wrappedKey = kwProvider.WrapKey(symmetricKey.Key);
                 var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(symmetricKey, encryptingCredentials.Enc);
                 if (encryptionProvider == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
@@ -620,6 +616,39 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                 }
             }
+        }
+
+        private static byte[] GenerateKeyBytes(int size)
+        {
+            var aes = Aes.Create();
+            byte[] key = null;
+            if (size == 256)
+            {
+                key = new byte[32];
+                aes.KeySize = size;
+                aes.GenerateKey();
+                Array.Copy(aes.Key, key, 32);
+            }
+            else if (size == 384)
+            {
+                key = new byte[48];
+                aes.KeySize = 192;
+                aes.GenerateKey();
+                Array.Copy(aes.Key, key, 24);
+                aes.GenerateKey();
+                Array.Copy(aes.Key, 0, key, 24, 24);
+            }
+            else if (size == 512)
+            {
+                key = new byte[64];
+                aes.KeySize = 256;
+                aes.GenerateKey();
+                Array.Copy(aes.Key, key, 32);
+                aes.GenerateKey();
+                Array.Copy(aes.Key, 0, key, 32, 32);
+            }
+
+            return key;
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
@@ -1417,9 +1446,9 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10609, keysAttempted, exceptionStrings, jwtToken.RawData)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10603, keysAttempted, exceptionStrings, jwtToken.RawData)));
 
-            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10609, keysAttempted, exceptionStrings, jwtToken.RawData)));
+            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10609, jwtToken.RawData)));
         }
 
         private IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
