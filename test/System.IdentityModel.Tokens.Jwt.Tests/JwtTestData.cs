@@ -58,6 +58,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
+            dataSet.Add(
+                "Test4",
+                EncodedJwts.ValidJwt,
+                ExpectedException.NoExceptionExpected
+            );
+
             return dataSet;
         }
 
