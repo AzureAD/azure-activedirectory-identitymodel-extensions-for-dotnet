@@ -74,6 +74,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 theoryData.Add(new AuthenticationEncryptionTestParams
                 {
+                    Algorithm = AES_192_CBC_HMAC_SHA_384.Algorithm,
+                    AuthenticationData = AES_192_CBC_HMAC_SHA_384.A,
+                    AuthenticationTag = AES_192_CBC_HMAC_SHA_384.T,
+                    Ciphertext = AES_192_CBC_HMAC_SHA_384.E,
+                    DecryptionKey = new SymmetricSecurityKey(AES_192_CBC_HMAC_SHA_384.K) { KeyId = "DecryptionKey.AES_192_CBC_HMAC_SHA_384.K" },
+                    EncryptionKey = new SymmetricSecurityKey(AES_192_CBC_HMAC_SHA_384.K) { KeyId = "EncryptionKey.AES_192_CBC_HMAC_SHA_384.K" },
+                    IV = AES_192_CBC_HMAC_SHA_384.IV,
+                    Plaintext = AES_192_CBC_HMAC_SHA_384.P,
+                    TestId = "AES_192_CBC_HMAC_SHA_384"
+                });
+
+                theoryData.Add(new AuthenticationEncryptionTestParams
+                {
                     Algorithm = AES_256_CBC_HMAC_SHA_512.Algorithm,
                     AuthenticationData = AES_256_CBC_HMAC_SHA_512.A,
                     AuthenticationTag = AES_256_CBC_HMAC_SHA_512.T,

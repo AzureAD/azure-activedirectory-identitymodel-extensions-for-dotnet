@@ -408,7 +408,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Case = "Test5",
                 ExceptionType = null,
                 SecurityTokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims),
-                TokenValidationParameters = Default.SymmetricEncyptSignTokenValidationParameters
+                TokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
             theoryData.Add(new CreateAndValidateParams
@@ -416,7 +416,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Case = "Test6",
                 ExceptionType = null,
                 SecurityTokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.GetDefaultRoleClaims(handler)),
-                TokenValidationParameters = Default.SymmetricEncyptSignTokenValidationParameters
+                TokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
             return theoryData;
@@ -479,7 +479,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(
                 "Test1",
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
-                Default.SymmetricEncyptSignTokenValidationParameters,
+                Default.SymmetricEncryptSignTokenValidationParameters,
                 ExpectedException.NoExceptionExpected
             );
 
@@ -500,7 +500,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384);
             theoryData.Add(
-                "Test4",
+                "RsaPKCS1-Aes192CbcHmacSha384",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -508,7 +508,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512);
             theoryData.Add(
-                "Test5",
+                "RsaPKCS1-Aes256CbcHmacSha512",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -516,7 +516,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
-                "Test6",
+                "RsaOAEP-Aes128CbcHmacSha256",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -524,7 +524,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes192CbcHmacSha384);
             theoryData.Add(
-                "Test7",
+                "RsaOAEP-Aes192CbcHmacSha384",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -532,7 +532,31 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512);
             theoryData.Add(
-                "Test8",
+                "RsaOAEP-Aes256CbcHmacSha512",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
+            theoryData.Add(
+                "RsaOaepKeyWrap-Aes128CbcHmacSha256",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
+            theoryData.Add(
+                "RsaOaepKeyWrap-Aes192CbcHmacSha384",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512);
+            theoryData.Add(
+                "RsaOaepKeyWrap-Aes256CbcHmacSha512",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -540,7 +564,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // signing key not found
             theoryData.Add(
-                "Test9",
+                "SigningKey-Not-Found",
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 new TokenValidationParameters
                 {
@@ -552,7 +576,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // encryption key not found
             theoryData.Add(
-                "Test10",
+                "EncryptionKey-Not-Found",
                 Default.SymmetricEncryptSignSecurityTokenDescriptor(),
                 new TokenValidationParameters
                 {
@@ -565,7 +589,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // symmetric key wrap
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
-                "Test11",
+                "SymmetricSecurityKey2_128-Aes128KW-Aes128CbcHmacSha256",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.SymmetricSecurityKey2_128, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -573,9 +597,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             encryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
-                "Test12",
+                "SymmetricEncryptionKey256-Aes256KW-Aes128CbcHmacSha256",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(Default.SymmetricEncryptionKey256, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
+            theoryData.Add(
+                "RsaOaepKeyWrap-Aes192CbcHmacSha384",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
             );
 
@@ -638,7 +670,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(
                 "Test1",
                 EncodedJwts.JweTest1,
-                Default.SymmetricEncyptSignInfiniteLifetimeTokenValidationParameters,
+                Default.SymmetricEncryptSignInfiniteLifetimeTokenValidationParameters,
                 expectedPayload,
                 ExpectedException.NoExceptionExpected
             );
@@ -646,7 +678,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(
                 "Test2",
                 EncodedJwts.JweTest2,
-                Default.SymmetricEncyptSignInfiniteLifetimeTokenValidationParameters,
+                Default.SymmetricEncryptSignInfiniteLifetimeTokenValidationParameters,
                 expectedPayload,
                 ExpectedException.NoExceptionExpected
             );

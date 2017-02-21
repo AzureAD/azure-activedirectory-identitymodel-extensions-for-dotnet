@@ -134,7 +134,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
             {
                 if (key is RsaSecurityKey)
                     return true;

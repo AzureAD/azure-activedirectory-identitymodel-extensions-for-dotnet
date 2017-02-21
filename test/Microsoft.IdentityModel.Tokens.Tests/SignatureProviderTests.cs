@@ -1314,7 +1314,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ProviderForVerifying = asymmetricProvider,
                     RawBytes = rawBytes,
                     Signature = asymmetricProvider.Sign(rawBytes),
-                    TestId = "Test1"
+                    TestId = "RS256"
                 }
             );
 
@@ -1327,7 +1327,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ProviderForVerifying = asymmetricProvider,
                     RawBytes = rawBytes,
                     Signature = asymmetricProvider.Sign(rawBytes),
-                    TestId = "Test2"
+                    TestId = "ES256"
                 }
             );
 
@@ -1340,7 +1340,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ProviderForVerifying = symmetricProvider,
                     RawBytes = rawBytes,
                     Signature = symmetricProvider.Sign(rawBytes),
-                    TestId = "Test3"
+                    TestId = "HS256"
                 }
             );
 
@@ -1353,7 +1353,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ProviderForVerifying = symmetricProvider2,
                     RawBytes = rawBytes,
                     Signature = symmetricProvider2.Sign(rawBytes),
-                    TestId = "Test4"
+                    TestId = "HS512"
                 }
             );
 

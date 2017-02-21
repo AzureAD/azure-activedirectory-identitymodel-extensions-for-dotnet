@@ -243,7 +243,15 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AuthenticatedKeys GetAlgorithmParameters(SecurityKey key, string algorithm)
         {
-            int keyLength = algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal) ? 32 : 16;
+            int keyLength = -1;
+            if (algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal))
+                keyLength = 32;
+            else if (algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal))
+                keyLength = 24;
+            else if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal))
+                keyLength = 16;
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10668, GetType(), algorithm, key)));
 
             var keyBytes = GetKeyBytes(key);
             byte[] aesKey = new byte[keyLength];

@@ -200,7 +200,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new CreateAndValidateParams
                     {
                         Actor = Default.SymmetricJws,
-                        ActorTokenValidationParameters = Default.SymmetricEncyptSignTokenValidationParameters,
+                        ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
                         Case = "Test2",
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
                         Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
@@ -221,7 +221,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new CreateAndValidateParams
                     {
                         Actor = Default.SymmetricJws,
-                        ActorTokenValidationParameters = Default.SymmetricEncyptSignTokenValidationParameters,
+                        ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
                         Case = "Test3",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),

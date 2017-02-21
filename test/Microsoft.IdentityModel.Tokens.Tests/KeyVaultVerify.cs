@@ -135,6 +135,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     KeyToWrap = RSAES_OAEP_KeyWrap.CEK,
                     TestId = "RSA_OAEP_KeyWrap"
                 });
+
+                rsaOaep = new RsaOaep();
+                theoryData.Add(new KeyWrapTestParams
+                {
+                    Algorithm = SecurityAlgorithms.RsaOaepKeyWrap,
+                    KeyVaultEncryptor = rsaOaep.CreateEncryptor(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.Rsa),
+                    KeyVaultDecryptor = rsaOaep.CreateDecryptor(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.Rsa),
+                    Key = KeyingMaterial.RsaSecurityKeyWithCspProvider_2048,
+                    KeyToWrap = RSAES_OAEP_KeyWrap.CEK,
+                    TestId = "RsaOaepKeyWrap"
+                });
+
 #endif
                 return theoryData;
             }
