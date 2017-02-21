@@ -163,7 +163,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal))
+             || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+             || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
             {
                 if (key as RsaSecurityKey != null)
                     return true;
@@ -207,7 +208,10 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
 #if NETSTANDARD1_4
-            var padding = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) ? RSAEncryptionPadding.OaepSHA1 : RSAEncryptionPadding.Pkcs1;
+            var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                        || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
+                        ? RSAEncryptionPadding.OaepSHA1
+                        : RSAEncryptionPadding.Pkcs1;
             try
             {
                 if (_rsa != null)
@@ -218,7 +222,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10659, ex)));
             }
 #else
-            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
+            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                      || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
             try
             {
                 if (_rsaCryptoServiceProvider != null)
@@ -252,7 +257,10 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
 #if NETSTANDARD1_4
-            var padding = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) ? RSAEncryptionPadding.OaepSHA1 : RSAEncryptionPadding.Pkcs1;
+            var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                        || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
+                        ? RSAEncryptionPadding.OaepSHA1
+                        : RSAEncryptionPadding.Pkcs1;
             try
             {
                 if (_rsa != null)
@@ -263,7 +271,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10658, ex)));
             }
 #else
-            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal);
+            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                      || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
             try
             {
                 if (_rsaCryptoServiceProvider != null)
