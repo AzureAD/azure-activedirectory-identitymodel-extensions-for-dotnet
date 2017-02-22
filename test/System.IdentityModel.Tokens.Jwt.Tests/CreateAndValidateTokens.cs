@@ -683,9 +683,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
-            // signing key not found
             theoryData.Add(
-                "Test3",
+                "SigningKeyNotFound",
                 EncodedJwts.JweTest3,
                 new TokenValidationParameters
                 {
@@ -697,9 +696,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
             );
 
-            // encryption key not found
             theoryData.Add(
-                "Test4",
+                "EncryptionKeyNotFound",
                 EncodedJwts.JweTest4,
                 new TokenValidationParameters
                 {
@@ -853,6 +851,39 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             CompareContext context = new CompareContext();
             IdentityComparer.AreEqual(principal.Claims, expectedIdentity.Claims, context);
             TestUtilities.AssertFailIfErrors(GetType().ToString()+".RoleClaims", context.Diffs);
+        }
+
+        [Fact]
+        public void ContentType()
+        {
+            // tests that CTY is ignored
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256),
+                SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256),
+                Subject = ClaimSets.DefaultClaimsIdentity
+            };
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.CreateJwtSecurityToken(tokenDescriptor);
+            var validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = KeyingMaterial.RsaSecurityKey_2048,
+                TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false
+            };
+
+            SecurityToken validatedToken = null;
+
+            jwtToken.InnerToken.Header[JwtHeaderParameterNames.Cty] = "JWS";
+            var jwt = handler.WriteToken(jwtToken);
+
+            var principal = handler.ValidateToken(jwt, validationParameters, out validatedToken);
+
+            jwtToken.InnerToken.Header[JwtHeaderParameterNames.Cty] = "ABC";
+            jwt = handler.WriteToken(jwtToken);
+            principal = handler.ValidateToken(jwt, validationParameters, out validatedToken);
         }
 
         private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)

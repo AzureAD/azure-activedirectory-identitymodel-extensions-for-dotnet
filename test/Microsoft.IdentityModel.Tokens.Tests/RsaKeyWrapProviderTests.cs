@@ -292,43 +292,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<RsaKeyWrapTestParams>();
 
-            // Unwrap parameter checking
-            AddUnwrapParameterCheckTheoryData(
-                "Test1",
-                SecurityAlgorithms.RsaPKCS1,
-                KeyingMaterial.RsaSecurityKey_2048,
-                null,
-                ExpectedException.ArgumentNullException(),
-                theoryData);
-
-            byte[] wrappedKey = new byte[0];
-            AddUnwrapParameterCheckTheoryData(
-                "Test2",
-                SecurityAlgorithms.RsaPKCS1,
-                KeyingMaterial.RsaSecurityKey_2048,
-                wrappedKey,
-                ExpectedException.ArgumentNullException(),
-                theoryData);
-
-            return theoryData;
-        }
-
-        private static void AddUnwrapParameterCheckTheoryData(
-            string testId,
-            string algorithm,
-            SecurityKey key,
-            byte[] wrappedKey,
-            ExpectedException ee,
-            TheoryData<RsaKeyWrapTestParams> theoryData)
-        {
             theoryData.Add(new RsaKeyWrapTestParams
             {
-                DecryptAlgorithm = algorithm,
-                DecryptKey = key,
-                WrappedKey = wrappedKey,
-                EE = ee,
-                TestId = testId
+                DecryptAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
+                WrappedKey = null,
+                EE = ExpectedException.ArgumentNullException(),
+                TestId = "NullKey"
             });
+
+            theoryData.Add(new RsaKeyWrapTestParams
+            {
+                DecryptAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
+                WrappedKey = new byte[0],
+                EE = ExpectedException.ArgumentNullException(),
+                TestId = "ZeroByteLength"
+            });
+
+            return theoryData;
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant

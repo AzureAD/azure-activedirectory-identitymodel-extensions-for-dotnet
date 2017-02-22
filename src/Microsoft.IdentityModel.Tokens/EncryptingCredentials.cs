@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
     public class EncryptingCredentials
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
+        /// Initializes a new instance of the <see cref="EncryptingCredentials"/> class.
         /// </summary>
         /// <param name="key"><see cref="SecurityKey"/></param>
         /// <param name="alg">The key encryption algorithm to apply.</param>

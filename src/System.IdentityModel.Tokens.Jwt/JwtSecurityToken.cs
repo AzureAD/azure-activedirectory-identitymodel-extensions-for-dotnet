@@ -512,9 +512,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>Assumes Header has already been set.</remarks>
         private void DecodeJws(string[] tokenParts)
         {
-            // We do not support other content types for JWS.
+            // Log if CTY is set, assume compact JWS
             if (Header.Cty != null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10723, tokenParts[1], RawData)));
+                IdentityModelEventSource.Logger.WriteVerbose(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10738, Header.Cty));
 
             try
             {
