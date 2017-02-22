@@ -222,126 +222,303 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_GetSets*** Test Failures:\n", context.Errors);
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Publics")]
-        public void Publics()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("CreateAuthenticationRequestUrlTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void OidcCreateAuthenticationRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
-            string issuerAddress = "http://gotJwt.onmicrosoft.com";
+            Assert.Equal(message.CreateAuthenticationRequestUrl(), expectedMessage);
+        }
+
+        public static TheoryData<string, OpenIdConnectMessage, string> CreateAuthenticationRequestUrlTheoryData()
+        {
             string customParameterName = "Custom Parameter Name";
             string customParameterValue = "Custom Parameter Value";
             string nonce = Guid.NewGuid().ToString();
             string redirectUri = "http://gotJwt.onmicrosoft.com/signedIn";
             string resource = "location data";
 
-            List<string> errors = new List<string>();
+            var theoryData = new TheoryData<string, OpenIdConnectMessage, string>();
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
+            var message = new OpenIdConnectMessage();
 
-            // Empty string
-            OpenIdConnectMessage message = new OpenIdConnectMessage();
+            theoryData.Add("EmptyMessage", message, "");
 
-            string url = message.BuildRedirectUrl();
-            string expected = string.Format(CultureInfo.InvariantCulture, @"");
-            Report("1", errors, url, expected);
+            theoryData.Add(
+                "Code",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.Code,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.Code))
+            );
 
-            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
-            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-            message.Scope = OpenIdConnectScope.OpenIdProfile;
+            theoryData.Add(
+                "CodeIdToken",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.CodeIdToken))
+            );
 
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile");
-            Report("1a", errors, url, expected);
+            theoryData.Add(
+                "CodeIdTokenToken",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdTokenToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.CodeIdTokenToken))
+            );
 
-            // Nonce added
-            message.Nonce = nonce;
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={0}", nonce);
-            Report("2", errors, url, expected);
+            theoryData.Add(
+                "CodeToken",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.CodeToken))
+            );
 
-            // IssuerAddress only
-            message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
-            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
-            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-            message.Scope = OpenIdConnectScope.OpenIdProfile;
-            message.Nonce = nonce;
+            theoryData.Add(
+                "IdToken",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.IdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.IdToken))
+            );
 
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}", Uri.EscapeUriString(issuerAddress), nonce);
-            Report("3", errors, url, expected);
+            theoryData.Add(
+                "IdTokenToken",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.IdTokenToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.IdTokenToken))
+            );
 
-            // IssuerAdderss and Redirect_uri
-            message.RedirectUri = redirectUri;
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}", Uri.EscapeUriString(issuerAddress), message.Nonce, Uri.EscapeDataString(redirectUri));
-            Report("4", errors, url, expected);
+            theoryData.Add(
+                "None",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.None,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.None))
+            );
 
-            // IssuerAdderss empty and Redirect_uri
-            message.IssuerAddress = string.Empty;
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={0}&redirect_uri={1}", message.Nonce, Uri.EscapeDataString(redirectUri));
-            Report("5", errors, url, expected);
+            theoryData.Add(
+                "Token",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.Token,
+                    Scope = OpenIdConnectScope.OpenIdProfile
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type={0}&scope=openid%20profile", Uri.EscapeUriString(OpenIdConnectResponseType.Token))
+            );
 
-            // IssuerAdderss, Redirect_uri, Response
-            message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
-            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
-            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-            message.Scope = OpenIdConnectScope.OpenIdProfile;
-            message.Nonce = nonce;
-            message.RedirectUri = redirectUri;
-            message.Resource = resource;
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}&resource={3}", issuerAddress, message.Nonce, Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
-            Report("6", errors, url, expected);
+            theoryData.Add(
+                "Nonce",
+                message = new OpenIdConnectMessage()
+                {
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile,
+                    Nonce = nonce
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={0}", nonce)
+            );
 
-            // IssuerAdderss, Redirect_uri, Response, customParam
-            message = new OpenIdConnectMessage() { IssuerAddress = issuerAddress };
-            message.ResponseMode = OpenIdConnectResponseMode.FormPost;
-            message.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-            message.Scope = OpenIdConnectScope.OpenIdProfile;
-            message.Nonce = nonce;
+            theoryData.Add(
+                "IssuerAddress",
+                message = new OpenIdConnectMessage()
+                {
+                    IssuerAddress = Default.Issuer,
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile,
+                    Nonce = nonce
+                },
+                string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}", Uri.EscapeUriString(Default.Issuer), nonce)
+            );
+
+            theoryData.Add(
+                "IssuerAddress",
+                message = new OpenIdConnectMessage()
+                {
+                    IssuerAddress = Default.Issuer,
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile,
+                    Nonce = nonce,
+                    RedirectUri = redirectUri
+                },
+                string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}", Uri.EscapeUriString(Default.Issuer), nonce, Uri.EscapeDataString(redirectUri))
+            );
+
+            theoryData.Add(
+                "IssuerAddressEmpty",
+                message = new OpenIdConnectMessage()
+                {
+                    IssuerAddress = string.Empty,
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile,
+                    Nonce = nonce,
+                    RedirectUri = redirectUri
+                },
+                string.Format(CultureInfo.InvariantCulture, @"?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={0}&redirect_uri={1}", nonce, Uri.EscapeDataString(redirectUri))
+            );
+
+            theoryData.Add(
+                "Resource",
+                message = new OpenIdConnectMessage()
+                {
+                    IssuerAddress = Default.Issuer,
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile,
+                    Nonce = nonce,
+                    RedirectUri = redirectUri,
+                    Resource = resource
+                },
+                string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}&resource={3}", Default.Issuer, nonce, Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource))
+            );
+
+            message = new OpenIdConnectMessage()
+            {
+                IssuerAddress = Default.Issuer,
+                ResponseMode = OpenIdConnectResponseMode.FormPost,
+                ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                Scope = OpenIdConnectScope.OpenIdProfile,
+                Nonce = nonce,
+            };
             message.Parameters.Add(customParameterName, customParameterValue);
             message.RedirectUri = redirectUri;
             message.Resource = resource;
-            url = message.BuildRedirectUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", issuerAddress, message.Nonce, Uri.EscapeDataString(customParameterName), Uri.EscapeDataString(customParameterValue), Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource));
-            Report("7", errors, url, expected);
 
-            // Telemetry added
+            theoryData.Add(
+                "CustomParam",
+                message,
+                string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&{2}={3}&redirect_uri={4}&resource={5}", Default.Issuer, nonce, Uri.EscapeDataString(customParameterName), Uri.EscapeDataString(customParameterValue), Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource))
+            );
+
             message = new OpenIdConnectMessage();
-            url = message.CreateAuthenticationRequestUrl();
-            string assemblyVersion = typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", assemblyVersion);
-            Report("8", errors, url, expected);
+            theoryData.Add(
+                "Resource",
+                message = new OpenIdConnectMessage()
+                {
+                    IssuerAddress = Default.Issuer,
+                    ResponseMode = OpenIdConnectResponseMode.FormPost,
+                    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+                    Scope = OpenIdConnectScope.OpenIdProfile,
+                    Nonce = nonce,
+                    RedirectUri = redirectUri,
+                    Resource = resource
+                },
+                string.Format(CultureInfo.InvariantCulture, @"{0}?response_mode=form_post&response_type=code%20id_token&scope=openid%20profile&nonce={1}&redirect_uri={2}&resource={3}", Default.Issuer, nonce, Uri.EscapeDataString(redirectUri), Uri.EscapeDataString(resource))
+            );
 
-            // Telemetry added on logout request URL
-            url = message.CreateLogoutRequestUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", assemblyVersion);
-            Report("9", errors, url, expected);
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            theoryData.Add(
+                "Telemetry",
+                new OpenIdConnectMessage(),
+                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+            );
 
             // Telemetry turned off
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
             message = new OpenIdConnectMessage();
-            message.EnableTelemetryParameters = false;
-            url = message.CreateAuthenticationRequestUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"");
-            Report("10", errors, url, expected);
+            message.EnableTelemetryParameters = true;
+            theoryData.Add(
+                "TelemetryStaticFalseInstanceTrue",
+                message,
+                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+            );
 
             // Telemetry turned off using static switch
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
             message = new OpenIdConnectMessage();
-            url = message.CreateAuthenticationRequestUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"");
-            Report("11", errors, url, expected);
+            theoryData.Add(
+                "TelemetryStaticFalse",
+                message,
+                ""
+            );
 
             // Telemetry turned off using static switch, but turned on on the instance
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            message = new OpenIdConnectMessage();
+            message.EnableTelemetryParameters = false;
+            theoryData.Add(
+                "TelemetryStaticTrueInstanceFalse",
+                message,
+                ""
+            );
+
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+
+            return theoryData;
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("CreateLogoutRequestUrlTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void OidcCreateLogoutRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
+        {
+            Assert.Equal(message.CreateLogoutRequestUrl(), expectedMessage);
+        }
+
+        public static TheoryData<string, OpenIdConnectMessage, string> CreateLogoutRequestUrlTheoryData()
+        {
+            var theoryData = new TheoryData<string, OpenIdConnectMessage, string>();
+
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            var message = new OpenIdConnectMessage();
+            theoryData.Add(
+                "Telemetry",
+                message,
+                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+            );
+
+            // Telemetry turned off using static switch
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
+            message = new OpenIdConnectMessage();
+            theoryData.Add(
+                "TelemetryStaticFalse",
+                message,
+                ""
+            );
+
+            // Telemetry turned off using static switch
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = false;
             message = new OpenIdConnectMessage();
             message.EnableTelemetryParameters = true;
-            url = message.CreateAuthenticationRequestUrl();
-            expected = string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", assemblyVersion);
-            Report("12", errors, url, expected);
-            OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            theoryData.Add(
+                "TelemetryStaticFalseInstanceTrue",
+                message,
+                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+            );
 
-            TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Publics*** Test Failures:\n", errors);
+            return theoryData;
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: NULL form parameters")]
+
+        [Fact]
         public void NullFormParameters()
         {
             List<KeyValuePair<string, string[]>> formData = new List<KeyValuePair<string, string[]>>();
