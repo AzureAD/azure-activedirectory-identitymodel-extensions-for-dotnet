@@ -29,10 +29,14 @@ using System;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
+
+    #if DESKTOPNET45
+        [Serializable]
+    #endif
+
     /// <summary>
     /// This exception is thrown when an OpenIdConnect protocol handler encounters a protocol error.
     /// </summary>
-    // [Serializable]
     public class OpenIdConnectProtocolException : Exception
     {
         /// <summary>
@@ -61,14 +65,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
         }
 
-    //    /// <summary>
-    //    /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
-    //    /// </summary>
-    //    /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
-    //    /// <param name="context">The contextual information about the source or destination.</param>
-    //    protected OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)
-    //        : base(info, context)
-    //    {
-    //    }
+#if DESKTOPNET45
+       /// <summary>
+       /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
+       /// </summary>
+       /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+       /// <param name="context">The contextual information about the source or destination.</param>
+       protected OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)
+           : base(info, context)
+       {
+       }
+#endif
     }
 }
