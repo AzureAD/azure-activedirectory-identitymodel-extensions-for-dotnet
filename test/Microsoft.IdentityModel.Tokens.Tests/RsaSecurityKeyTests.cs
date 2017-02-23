@@ -84,20 +84,60 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Fact]
-        public void HasPrivateKey()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("HasPrivateKeyTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void HasPrivateKey(string testId, AsymmetricSecurityKey key, bool expected)
         {
+            if (expected)
+                Assert.True(key.HasPrivateKey, testId);
+            else
+                Assert.False(key.HasPrivateKey, testId);
+        }
+
+        public static TheoryData<string, SecurityKey, bool> HasPrivateKeyTheoryData()
+        {
+            var theoryData = new TheoryData<string, SecurityKey, bool>();
 #if NET451
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048 does not have the private key.");
-            Assert.False(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public has the private key.");
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048",
+                KeyingMaterial.RsaSecurityKeyWithCspProvider_2048,
+                true
+            );
+
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public",
+                KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public,
+                false
+            );
 #endif
 
 #if NETCOREAPP1_0
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048 does not have the private key.");
-            Assert.False(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public has the private key.");
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048",
+                KeyingMaterial.RsaSecurityKeyWithCngProvider_2048,
+                true
+            );
+
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public",
+                KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public,
+                false
+            );
 #endif
-            Assert.True(KeyingMaterial.RsaSecurityKey_2048.HasPrivateKey, "KeyingMaterial.RsaSecurityKey_2048 does not have the private key.");
-            Assert.False(KeyingMaterial.RsaSecurityKey_2048_Public.HasPrivateKey, "KeyingMaterial.RsaSecurityKey_2048_Public has the private key.");
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKey_2048",
+                KeyingMaterial.RsaSecurityKey_2048,
+                true
+            );
+
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKey_2048_Public",
+                KeyingMaterial.RsaSecurityKey_2048_Public,
+                false
+            );
+
+            return theoryData;
         }
 
         [Fact]
