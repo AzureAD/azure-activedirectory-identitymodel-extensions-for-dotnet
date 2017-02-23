@@ -122,16 +122,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static RsaSecurityKey RsaSecurityKeyFromPing3;
         public static RsaSecurityKey RsaSecurityKey_1024;
         public static RsaSecurityKey RsaSecurityKey_1024_Public;
-        public static RsaSecurityKey RsaSecurityKey_2048;
-        public static RsaSecurityKey RsaSecurityKey_2048_Public;
         public static RsaSecurityKey RsaSecurityKey_4096;
         public static RsaSecurityKey RsaSecurityKey_4096_Public;
-#if NET451
-        public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048;
-        public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048_Public;
-#endif
-        public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048;
-        public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048_Public;
 
         public static SigningCredentials RSASigningCreds_1024;
         public static SigningCredentials RSASigningCreds_1024_Public;
@@ -386,8 +378,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             RsaSecurityKey_1024 = new RsaSecurityKey(RsaParameters_1024);
             RsaSecurityKey_1024_Public = new RsaSecurityKey(RsaParameters_1024_Public);
-            RsaSecurityKey_2048 = new RsaSecurityKey(RsaParameters_2048) { KeyId = "999b2be9-6213-436b-b12b-637b0176be41" };
-            RsaSecurityKey_2048_Public = new RsaSecurityKey(RsaParameters_2048_Public);
             RsaSecurityKey_4096 = new RsaSecurityKey(RsaParameters_4096);
             RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
             RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
@@ -396,23 +386,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
             RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
-#if NET451
-            var rsaCsp = new RSACryptoServiceProvider();
-            rsaCsp.ImportParameters(RsaParameters_2048);
-            RsaSecurityKeyWithCspProvider_2048 = new RsaSecurityKey(rsaCsp);
-            var rsaCspPublic = new RSACryptoServiceProvider();
-            rsaCspPublic.ImportParameters(RsaParameters_2048_Public);
-            RsaSecurityKeyWithCspProvider_2048_Public = new RsaSecurityKey(rsaCspPublic);
-#endif
-
-#if NETCOREAPP1_0
-            var rsaCng = new RSACng();
-            rsaCng.ImportParameters(RsaParameters_2048);
-            RsaSecurityKeyWithCngProvider_2048 = new RsaSecurityKey(rsaCng);
-            var rsaCngPublic = new RSACng();
-            rsaCngPublic.ImportParameters(RsaParameters_2048_Public);
-            RsaSecurityKeyWithCngProvider_2048_Public = new RsaSecurityKey(rsaCngPublic);
-#endif
 
             //ecdsa
             byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
@@ -476,6 +449,66 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 K = "vAhpeveLSFSsPs5rg+CPdLYor40ISGgdpen+FXzCSJg=",
                 Kty = JsonWebAlgorithmsKeyTypes.Octet
             };
+        }
+
+#if NET451
+        public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048
+        {
+            get
+            {
+                var rsaCsp = new RSACryptoServiceProvider();
+                rsaCsp.ImportParameters(RsaParameters_2048);
+                return new RsaSecurityKey(rsaCsp){ KeyId = "RsaSecurityKeyWithCspProvider_2048" };
+            }
+        }
+
+        public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048_Public
+        {
+            get
+            {
+                var rsaCsp = new RSACryptoServiceProvider();
+                rsaCsp.ImportParameters(RsaParameters_2048_Public);
+                return new RsaSecurityKey(rsaCsp){ KeyId = "RsaSecurityKeyWithCspProvider_2048" };
+            }
+        }
+#endif
+
+#if NETCOREAPP1_0
+        public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048
+        {
+            get
+            {
+                var rsaCng = new RSACng();
+                rsaCng.ImportParameters(RsaParameters_2048);
+                return new RsaSecurityKey(rsaCng){ KeyId = "RsaSecurityKeyWithCngProvider_2048" };
+            }
+        }
+
+        public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048_Public
+        {
+            get
+            {
+                var rsaCng = new RSACng();
+                rsaCng.ImportParameters(RsaParameters_2048_Public);
+                return new RsaSecurityKey(rsaCng){ KeyId = "RsaSecurityKeyWithCngProvider_2048" };
+            }
+        }
+#endif
+
+        public static RsaSecurityKey RsaSecurityKey_2048_Public
+        {
+            get
+            {
+                return new RsaSecurityKey(RsaParameters_2048_Public) { KeyId = "RsaSecurityKey_FromRsaParameters_2048" };
+            }
+        }
+
+        public static RsaSecurityKey RsaSecurityKey_2048
+        {
+            get
+            {
+                return new RsaSecurityKey(RsaParameters_2048) { KeyId = "RsaSecurityKey_FromRsaParameters_2048" };
+            }
         }
 
         public static string JsonWebKeySymmetricKid128

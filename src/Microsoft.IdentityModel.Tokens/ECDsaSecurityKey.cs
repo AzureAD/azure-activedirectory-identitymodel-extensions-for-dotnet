@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
                         ECDsa.SignData(hash, HashAlgorithmName.SHA256);
 #else
-                    ECDsa.SignHash(hash);
+                        ECDsa.SignHash(hash);
 #endif
                         _hasPrivateKey = true;
                     }

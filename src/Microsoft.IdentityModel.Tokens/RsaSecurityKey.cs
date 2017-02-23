@@ -83,11 +83,11 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
                         Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #else
-                    RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;
-                    if (rsaCryptoServiceProvider != null)
-                        rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.Sha256);
-                    else
-                        Rsa.DecryptValue(hash);
+                        RSACryptoServiceProvider rsaCryptoServiceProvider = Rsa as RSACryptoServiceProvider;
+                        if (rsaCryptoServiceProvider != null)
+                            rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.Sha256);
+                        else
+                            Rsa.DecryptValue(hash);
 #endif
                         _hasPrivateKey = true;
                     }
