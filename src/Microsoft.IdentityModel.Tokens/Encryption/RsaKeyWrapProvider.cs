@@ -53,8 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="willUnwrap">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">The <see cref="SecurityKey"/>  is not supported.</exception>
+        /// <exception cref="ArgumentException">The keysize doesn't match the algorithm.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
         /// <exception cref="InvalidOperationException">Failed to create RSA algorithm with provided key and algorithm.</exception>
         /// </summary>
@@ -258,7 +257,7 @@ namespace Microsoft.IdentityModel.Tokens
 
 #if NETSTANDARD1_4
             var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                        || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
+                        || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
                         ? RSAEncryptionPadding.OaepSHA1
                         : RSAEncryptionPadding.Pkcs1;
             try

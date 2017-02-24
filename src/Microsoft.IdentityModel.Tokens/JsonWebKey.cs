@@ -27,11 +27,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
-using System.Globalization;
-using System.Security.Cryptography;
 
 namespace Microsoft.IdentityModel.Tokens
 {
