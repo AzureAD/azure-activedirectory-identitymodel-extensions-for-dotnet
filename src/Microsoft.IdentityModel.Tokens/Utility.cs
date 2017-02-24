@@ -352,7 +352,7 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 
-        internal static RsaAlgorithm ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool usePrivateKey)
+        internal static RsaAlgorithm ResolveRsaAlgorithm(SecurityKey key, string algorithm, bool requirePrivateKey)
         {
             if (key == null)
                 return null;
@@ -390,12 +390,12 @@ namespace Microsoft.IdentityModel.Tokens
             if (x509Key != null)
             {
 #if NETSTANDARD1_4
-                if (usePrivateKey)
+                if (requirePrivateKey)
                     rsaAlgorithm.rsa = x509Key.PrivateKey as RSA;
                 else
                     rsaAlgorithm.rsa = x509Key.PublicKey as RSA;
 #else
-                if (usePrivateKey)
+                if (requirePrivateKey)
                     rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PrivateKey as RSACryptoServiceProvider);
                 else
                     rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(x509Key.PublicKey as RSACryptoServiceProvider);
