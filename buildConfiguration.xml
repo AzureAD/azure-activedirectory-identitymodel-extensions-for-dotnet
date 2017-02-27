@@ -8,7 +8,7 @@
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
   <dependencies>
     <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Logging": "1.1.4"</nugetVersion>
+      <nugetVersion>"Microsoft.IdentityModel.Logging": "1.1.4</nugetVersion>
     </dependency>
     <dependency>
       <nugetVersion>"Microsoft.IdentityModel.Protocols": "2.1.4</nugetVersion>
