@@ -5,7 +5,7 @@
     "Microsoft.IdentityModel.Protocols": "2.1.4"
   },
   "frameworks": {
-    "netstandard1.4": {
+    "netstandard1.6": {
       "dependencies": {
         "System.Dynamic.Runtime": "4.3.0-*"
       }

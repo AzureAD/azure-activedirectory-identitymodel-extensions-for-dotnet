@@ -3,7 +3,7 @@
   "description": "Includes Event Source based logging support.",
   "dependencies": { },
   "frameworks": {
-    "netstandard1.4": {
+    "netstandard1.6": {
       "dependencies": {
         "System.Diagnostics.Tracing": "4.3.0-*",
         "System.Globalization": "4.3.0-*",

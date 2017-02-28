@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class ECDsaAlgorithm
     {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
         public ECDsa ecdsa;
 #else
         public ECDsaCng ecdsaCng;
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
 
     internal class RsaAlgorithm
     {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
         public RSA rsa;
 #else
         public RSACryptoServiceProvider rsaCryptoServiceProvider;
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return false;
             }
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
             return uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase); //Uri.UriSchemeHttps is internal in dnxcore
 #else
             return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (ecdsaKey != null)
             {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                 if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
                 {
                     ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa;
@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
                 ecdsaAlgorithm.dispose = true;
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                 ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
 #else // net451 windows
                 ecdsaAlgorithm.ecdsaCng = webKey.CreateECDsa(algorithm, usePrivateKey);
@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (rsaKey.Rsa != null)
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                     rsaAlgorithm.rsa = rsaKey.Rsa;
 #else
                     rsaAlgorithm.rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
@@ -372,7 +372,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                     rsaAlgorithm.rsa = RSA.Create();
                     rsaAlgorithm.rsa.ImportParameters(rsaKey.Parameters);
                     rsaAlgorithm.dispose = true;
@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Tokens
             X509SecurityKey x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                 if (requirePrivateKey)
                     rsaAlgorithm.rsa = x509Key.PrivateKey as RSA;
                 else
@@ -406,7 +406,7 @@ namespace Microsoft.IdentityModel.Tokens
             JsonWebKey webKey = key as JsonWebKey;
             if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
             {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                 RSAParameters parameters = webKey.CreateRsaParameters();
                 rsaAlgorithm.rsa = RSA.Create();
                 rsaAlgorithm.dispose = true;
