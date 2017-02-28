@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class AsymmetricSignatureProvider : SignatureProvider
     {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
         private ECDsa _ecdsa;
         private HashAlgorithmName _hashAlgorithm;
         private RSA _rsa;
@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
         /// <summary>
         /// Returns the <see cref="HashAlgorithmName"/> instance.
         /// </summary>
@@ -327,7 +327,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
             if (_rsa != null)
                 return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
             else if (_ecdsa != null)
@@ -367,7 +367,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
             if (_rsa != null)
                 return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
             else if (_ecdsa != null)
@@ -413,7 +413,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (disposing)
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();
 #else

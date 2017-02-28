@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class RsaKeyWrapProvider : KeyWrapProvider
     {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
         private RSA _rsa;
 #else
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willUnwrap);
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
             if (rsaAlgorithm != null && rsaAlgorithm.rsa != null)
             {
                 _rsa = rsaAlgorithm.rsa;
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (disposing)
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();
 #else
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens
                 var x509Key = key as X509SecurityKey;
                 if (x509Key != null)
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
                     if (x509Key.PublicKey as RSA != null)
                         return true;
 #else
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
             var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                         || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
                         ? RSAEncryptionPadding.OaepSHA1
@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_6
             var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                         || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
                         ? RSAEncryptionPadding.OaepSHA1
