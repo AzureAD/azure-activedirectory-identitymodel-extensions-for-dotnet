@@ -414,5 +414,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 bytes[i] = (byte)(bytes[i] ^ bytes[i + 1]);
             }
         }
+
+        public static void TestHeader(string testcase, ref bool first)
+        {
+            if (first)
+            {
+                Console.WriteLine("====================================");
+                first = false;
+            }
+
+            Console.WriteLine(">>>> " + testcase);
+
+            //S2SLogger.LogAlways("");
+            //S2SLogger.LogAlways("====================================");
+            //S2SLogger.LogAlways(">>>> " + testcase);
+            //S2SLogger.LogAlways("");
+        }
+
     }
 }

@@ -5,11 +5,13 @@
     "Microsoft.IdentityModel.Protocols": "2.1.4"
   },
   "frameworks": {
-    "netstandard1.4": {},
-    "net451": { }
+    "net451": {
+        "frameworkAssemblies": {
+            "System.IdentityModel": ""
+        }
+    }
   },
   "buildOptions": {
-    "compile": { "exclude": [ "WsFederationMessage.cs", "Configuration\\WsFederationConfiguration.cs", "Configuration\\WsFederationConfigurationRetriever.cs"] },
     "delaySign": true,
     "keyFile": "../../build/35MSSharedLib1024.snk",
     "warningsAsErrors": true,

@@ -39,17 +39,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class ConfigurationManagerTests
     {
-        [Fact(DisplayName = "ConfigurationManagerTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
         }
 
-        [Fact(DisplayName = "ConfigurationManagerTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
         }
 
-        [Fact(DisplayName = "ConfigurationManagerTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             FileDocumentRetriever docRetriever = new FileDocumentRetriever();
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
         }
 
-        [Fact(DisplayName = "ConfigurationManagerTests: Publics")]
+        [Fact]
         public void Publics()
         {
             ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());

@@ -285,5 +285,16 @@ namespace Microsoft.IdentityModel.Logging
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message);
         }
 
+        /// <summary>
+        /// Formats the string using InvariantCulture
+        /// </summary>
+        /// <param name="format">Format string.</param>
+        /// <param name="args">Format arguments.</param>
+        /// <returns>Formatted string.</returns>
+        public static string FormatInvariant(string format, params object[] args)
+        {
+            return string.Format(CultureInfo.InvariantCulture, format, args);
+        }
+
     }
 }

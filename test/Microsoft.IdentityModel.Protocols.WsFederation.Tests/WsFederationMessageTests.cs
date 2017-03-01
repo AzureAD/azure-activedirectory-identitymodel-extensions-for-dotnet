@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     /// </summary>
     public class WsFederationMessageTests
     {
-        [Fact(DisplayName = "WsFederationMessageTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Fact(DisplayName = "WsFederationMessageTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             Assert.IsNull(wsFederationMessage.Wtrealm);
         }
 
-        [Fact(DisplayName = "WsFederationMessageTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Fact(DisplayName = "WsFederationMessageTests: Publics")]
+        [Fact]
         public void Publics()
         {
             string issuerAdderss = @"http://www.gotjwt.com";

@@ -36,20 +36,20 @@ namespace System.IdentityModel.Tokens.Saml.Tests
     /// </summary>
     public class SamlSecurityTokenHandlerTests
     {
-        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
         }
 
-        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             Assert.True(samlSecurityTokenHandler.MaximumTokenSizeInBytes == TokenValidationParameters.DefaultMaximumTokenSizeInBytes, "MaximumTokenSizeInBytes");
         }
 
-        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
@@ -58,7 +58,7 @@ namespace System.IdentityModel.Tokens.Saml.Tests
         }
 
         /*
-        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Protected")]
+        [Fact]
         public void Protected()
         {
             CreateClaims();
@@ -84,7 +84,7 @@ namespace System.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Fact(DisplayName = "SamlSecurityTokenHandlerTests: Publics")]
+        [Fact]
         public void Publics()
         {
             CanReadToken();

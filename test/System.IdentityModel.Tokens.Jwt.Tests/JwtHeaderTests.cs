@@ -36,7 +36,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public class JwtHeaderTests
     {
-        [Fact(DisplayName = "JwtHeaderTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             var header1 = new JwtHeader();
@@ -48,7 +48,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors("JwtHeaderTests.Constructors", context.Diffs);
         }
 
-        [Fact(DisplayName = "JwtHeaderTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             JwtHeader jwtHeader = new JwtHeader();
@@ -59,12 +59,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
-        [Fact(DisplayName = "JwtHeaderTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
         }
 
-        [Fact(DisplayName = "JwtHeaderTests: Publics")]
+        [Fact]
         public void Publics()
         {
         }

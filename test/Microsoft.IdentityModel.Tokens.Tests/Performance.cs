@@ -27,8 +27,11 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.IdentityModel.Tokens.Saml;
-using System.IdentityModel.Tokens.Saml2;
+
+#if NNET451
+using Microsoft.IdentityModel.Tokens.Saml;
+using System.IdentityModel.Tokens;
+#endif
 using System.IO;
 using System.Xml;
 using Xunit;
@@ -40,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class PerformanceTests
     {
-        [Fact(DisplayName = "Performance tests for creating Jwts" , Skip = "Beta6")]
+        [Fact(Skip = "till 5.2.0")]
         public void Jwt_Performance()
         {
             throw new NotImplementedException();
@@ -218,11 +221,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Console.WriteLine( string.Format( created, "JwtHandler - signatureProvider == null", iterations, DateTime.UtcNow - started ) );
             }
-
+#if NNET451
             started = DateTime.UtcNow;
             for ( int i = 0; i < iterations; i++ )
             {
-                CreateSaml2Tokens( tokenDescriptor );
+                // TODO - populate descriptor
+                var descriptor2 = new System.IdentityModel.Tokens.SecurityTokenDescriptor();
+                CreateSaml2Tokens( descriptor2 );
             }
 
             if ( display )
@@ -233,14 +238,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             started = DateTime.UtcNow;
             for ( int i = 0; i < iterations; i++ )
             {
-                CreateSamlTokens( tokenDescriptor );
+                // TODO - populate descriptor
+                var descriptor = new System.IdentityModel.Tokens.SecurityTokenDescriptor();
+                CreateSamlTokens( descriptor );
             }
 
             if ( display )
             {
                 Console.WriteLine( string.Format( written, "Saml1", iterations, DateTime.UtcNow - started ) );
             }
-
+#endif
             started = DateTime.UtcNow;
             for ( int i = 0; i < iterations; i++ )
             {
@@ -254,22 +261,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         }
 
-        private void CreateSaml2Tokens( SecurityTokenDescriptor tokenDescriptor )
+#if NNET451
+        private void CreateSaml2Tokens( System.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor )
         {
-            Saml2SecurityTokenHandler samlTokenHandler = new Saml2SecurityTokenHandler();
-            Saml2SecurityToken  token = samlTokenHandler.CreateToken( tokenDescriptor ) as Saml2SecurityToken;
+            var samlTokenHandler = new System.IdentityModel.Tokens.Saml2SecurityTokenHandler();
+            var  token = samlTokenHandler.CreateToken( tokenDescriptor ) as Saml2SecurityToken;
             MemoryStream ms = new MemoryStream();
             XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter( ms );
             samlTokenHandler.WriteToken( writer, token );
         }
 
-        private void CreateSamlTokens( SecurityTokenDescriptor tokenDescriptor )
+        private void CreateSamlTokens( System.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor )
         {
-            SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
-            SamlSecurityToken token = samlTokenHandler.CreateToken( tokenDescriptor ) as SamlSecurityToken;
+            var samlTokenHandler = new System.IdentityModel.Tokens.SamlSecurityTokenHandler();
+            var token = samlTokenHandler.CreateToken( tokenDescriptor ) as SamlSecurityToken;
             MemoryStream ms = new MemoryStream();
             XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter( ms );
             samlTokenHandler.WriteToken( writer, token );
         }
+#endif
     }
 }

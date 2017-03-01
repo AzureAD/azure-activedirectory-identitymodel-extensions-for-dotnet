@@ -14,11 +14,24 @@
       <nugetVersion>"Microsoft.IdentityModel.Protocols": "2.1.4</nugetVersion>
     </dependency>
     <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.1.4</nugetVersion>
+    </dependency>
+    <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Protocols.WsFederation": "2.1.4</nugetVersion>
+    </dependency>
+    <dependency>
       <nugetVersion>"Microsoft.IdentityModel.Tokens": "5.1.4</nugetVersion>
+    </dependency>
+    <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Xml": "5.1.4</nugetVersion>
+    </dependency>
+    <dependency>
+      <nugetVersion>"Microsoft.IdentityModel.Tokens.Saml": "5.1.4</nugetVersion>
     </dependency>
     <dependency>
       <nugetVersion>"System.IdentityModel.Tokens.Jwt": "5.1.4</nugetVersion>
     </dependency>
+
   </dependencies>
   <projects>
     <src>
@@ -31,7 +44,7 @@
       <project name="System.IdentityModel.Tokens.Jwt">
         <build>yes</build>
       </project>
-      <project name="System.IdentityModel.Tokens.Saml">
+      <project name="Microsoft.IdentityModel.Tokens.Saml">
         <build>yes</build>
       </project>
       <project name="Microsoft.IdentityModel.Protocols">
@@ -54,7 +67,7 @@
       <project name="System.IdentityModel.Tokens.Jwt.Tests">
         <build>yes</build>
       </project>
-      <project name="System.IdentityModel.Tokens.Saml.Tests">
+      <project name="Microsoft.IdentityModel.Tokens.Saml.Tests">
         <build>yes</build>
       </project>
       <project name="Microsoft.IdentityModel.Protocols.Tests">

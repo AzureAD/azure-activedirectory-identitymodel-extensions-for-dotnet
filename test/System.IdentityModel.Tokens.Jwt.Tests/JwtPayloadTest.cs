@@ -43,7 +43,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
         /// </summary>
-        [Fact(DisplayName = "JwtPayloadTests: Ensures that JwtPayload defaults are as expected")]
+        [Fact]
         public void Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -71,7 +71,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
-        [Fact(DisplayName = "JwtPayloadTests: GetSets, covers defaults")]
+        [Fact]
         public void GetSets()
         {
             // Aud, Claims, ValidFrom, ValidTo handled in Defaults.

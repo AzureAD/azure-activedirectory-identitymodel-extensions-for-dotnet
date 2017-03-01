@@ -31,8 +31,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JsonExtensionsTests
     {
-        [Fact(DisplayName = "JsonExtensionsTests: Test json with duplicate names")]
-        public void TestJsonWithDuplicateNames()
+        [Fact]
+        public void JsonWithDuplicateNames()
         {
             try
             {
@@ -47,8 +47,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Fact(DisplayName = "JsonExtensionsTests: Test malformed json")]
-        public void TestMalformedJson()
+        [Fact]
+        public void MalformedJson()
         {
             Assert.Throws<Newtonsoft.Json.JsonReaderException>(() => JsonExtensions.DeserializeFromJson<object>(@"{""tag"":""value""}ABCD"));
         }

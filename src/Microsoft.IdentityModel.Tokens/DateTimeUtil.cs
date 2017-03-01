@@ -87,5 +87,22 @@ namespace Microsoft.IdentityModel.Tokens
 
             return new DateTime(DateTime.MinValue.Ticks, kind);
         }
+
+        public static DateTime? ToUniversalTime(DateTime? value)
+        {
+            if (null == value || value.Value.Kind == DateTimeKind.Utc)
+                return value;
+
+            return ToUniversalTime(value.Value);
+        }
+
+        public static DateTime ToUniversalTime(DateTime value)
+        {
+
+            if (value.Kind == DateTimeKind.Utc)
+                return value;
+
+            return value.ToUniversalTime();
+        }
     }
 }

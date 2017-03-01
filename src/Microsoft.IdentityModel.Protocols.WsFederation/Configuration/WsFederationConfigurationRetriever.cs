@@ -25,15 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
+using System.IdentityModel.Metadata;
 using System.IdentityModel.Tokens;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+using WsFedMetadataSerializer = System.IdentityModel.Metadata.MetadataSerializer;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -83,12 +86,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.LogArgumentNullException(nameof(address));
             }
 
             if (retriever == null)
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
+                LogHelper.LogArgumentNullException(nameof(retriever));
             }
 
             WsFederationConfiguration configuration = new WsFederationConfiguration();
@@ -97,9 +100,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             using (XmlReader metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {
-                var serializer = new MetadataSerializer { CertificateValidationMode = X509CertificateValidationMode.None };
+                var serializer = new WsFedMetadataSerializer { CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None };
 
-                MetadataBase metadataBase = serializer.ReadMetadata(metaDataReader);
+                var metadataBase = serializer.ReadMetadata(metaDataReader);
                 var entityDescriptor = (EntityDescriptor)metadataBase;
 
                 if (!string.IsNullOrWhiteSpace(entityDescriptor.EntityId.Id))
@@ -115,8 +118,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     {
                         if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
                         {
-                            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10807);
-                            foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
+                            //IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10807);
+                            foreach (System.IdentityModel.Tokens.SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
                             {
                                 X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
                                 if (x509Clause != null)

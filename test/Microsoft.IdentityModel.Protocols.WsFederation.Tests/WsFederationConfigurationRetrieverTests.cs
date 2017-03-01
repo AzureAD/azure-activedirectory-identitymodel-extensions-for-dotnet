@@ -34,22 +34,22 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
-        [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
         }
 
-        [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
         }
 
-        [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
         }
 
-        [Fact(DisplayName = "WsFederationConfigurationRetrieverTests: Publics")]
+        [Fact]
         public void Publics()
         {
         }

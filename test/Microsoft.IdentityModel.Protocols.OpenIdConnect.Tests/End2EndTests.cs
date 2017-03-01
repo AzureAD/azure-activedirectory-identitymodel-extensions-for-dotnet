@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class End2EndTests
     {
-        [Fact(DisplayName = "End2EndTests: OpenIdConnect")]
+        [Fact]
         public void OpenIdConnect()
         {
             SigningCredentials rsaSigningCredentials =
@@ -73,11 +73,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             SecurityToken securityToken = null;
             tokenHandler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
-        }
-
-        [Fact(DisplayName = "End2EndTests: WsFederation")]
-        public void WsFederation()
-        {
         }
     }
 }

@@ -1,0 +1,359 @@
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Xml;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Microsoft.IdentityModel.Xml
+{
+    public class SignedInfo : ISecurityElement
+    {
+        readonly ExclusiveCanonicalizationTransform canonicalizationMethodElement = new ExclusiveCanonicalizationTransform(true);
+        ElementWithAlgorithmAttribute signatureMethodElement;
+        SignatureResourcePool resourcePool;
+        List<Reference> references;
+
+        public SignedInfo()
+        {
+            signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.SignatureMethod);
+            this.references = new List<Reference>();
+            Prefix = SignedXml.DefaultPrefix;
+        }
+
+        protected MemoryStream CanonicalStream { get; set; }
+
+        public bool SendSide { get; set; }
+
+        public void AddReference(Reference reference)
+        {
+            reference.ResourcePool = this.ResourcePool;
+            this.references.Add(reference);
+        }
+
+        public ISignatureReaderProvider ReaderProvider { get; set; }
+
+        public object SignatureReaderProviderCallbackContext { get; set; }
+
+        public string CanonicalizationMethod
+        {
+            get { return this.canonicalizationMethodElement.Algorithm; }
+            set
+            {
+                if (value != this.canonicalizationMethodElement.Algorithm)
+                {
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
+                }
+            }
+        }
+
+        public XmlDictionaryString CanonicalizationMethodDictionaryString
+        {
+            set
+            {
+                if (value != null && value.Value != this.canonicalizationMethodElement.Algorithm)
+                {
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
+                }
+            }
+        }
+
+        public bool HasId
+        {
+            get { return true; }
+        }
+
+        public string Id { get; set; }
+
+        public virtual int ReferenceCount
+        {
+            get { return this.references.Count; }
+        }
+
+        public Reference this[int index]
+        {
+            get { return this.references[index]; }
+        }
+
+        public string SignatureMethod { get; set; }
+
+        public string SignatureMethodDictionaryString { get; set; }
+
+        public SignatureResourcePool ResourcePool
+        {
+            get
+            {
+                if (this.resourcePool == null)
+                {
+                    this.resourcePool = new SignatureResourcePool();
+                }
+                return this.resourcePool;
+            }
+            set
+            {
+                this.resourcePool = value;
+            }
+        }
+
+        public void ComputeHash(HashAlgorithm algorithm)
+        {
+            if ((this.CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (this.CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
+            {
+                throw LogHelper.LogExceptionMessage(new CryptographicException("UnsupportedTransformAlgorithm"));
+            }
+            HashStream hashStream = this.ResourcePool.TakeHashStream(algorithm);
+            ComputeHash(hashStream);
+            hashStream.FlushHash();
+        }
+
+        protected virtual void ComputeHash(HashStream hashStream)
+        {
+            if (SendSide)
+            {
+                XmlDictionaryWriter utf8Writer = this.ResourcePool.TakeUtf8Writer();
+                utf8Writer.StartCanonicalization(hashStream, false, null);
+                WriteTo(utf8Writer);
+                utf8Writer.EndCanonicalization();
+            }
+            else if (CanonicalStream != null)
+            {
+                CanonicalStream.WriteTo(hashStream);
+            }
+            else
+            {
+                if (ReaderProvider == null)
+                    throw LogHelper.LogExceptionMessage(new XmlSignedInfoException("ReaderProvider == null"));
+
+                XmlDictionaryReader signatureReader = ReaderProvider.GetReader(SignatureReaderProviderCallbackContext);
+
+                if (!signatureReader.CanCanonicalize)
+                {
+                    MemoryStream stream = new MemoryStream();
+                    XmlDictionaryWriter bufferingWriter = XmlDictionaryWriter.CreateBinaryWriter(stream);
+                    string[] inclusivePrefix = GetInclusivePrefixes();
+                    if (inclusivePrefix != null)
+                    {
+                        bufferingWriter.WriteStartElement("a");
+                        for (int i = 0; i < inclusivePrefix.Length; ++i)
+                        {
+                            string ns = GetNamespaceForInclusivePrefix(inclusivePrefix[i]);
+                            if (ns != null)
+                            {
+                                bufferingWriter.WriteXmlnsAttribute(inclusivePrefix[i], ns);
+                            }
+                        }
+                    }
+                    signatureReader.MoveToContent();
+                    bufferingWriter.WriteNode(signatureReader, false);
+                    if (inclusivePrefix != null)
+                        bufferingWriter.WriteEndElement();
+                    bufferingWriter.Flush();
+                    byte[] buffer = stream.ToArray();
+                    int bufferLength = (int)stream.Length;
+                    bufferingWriter.Close();
+
+                    signatureReader.Close();
+
+                    // Create a reader around the buffering Stream.
+                    signatureReader = XmlDictionaryReader.CreateBinaryReader(buffer, 0, bufferLength, XmlDictionaryReaderQuotas.Max);
+                    if (inclusivePrefix != null)
+                        signatureReader.ReadStartElement("a");
+                }
+                signatureReader.ReadStartElement(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
+                signatureReader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+                signatureReader.StartCanonicalization(hashStream, false, GetInclusivePrefixes());
+                signatureReader.Skip();
+                signatureReader.EndCanonicalization();
+                signatureReader.Close();
+            }
+        }
+
+        public virtual void ComputeReferenceDigests()
+        {
+            if (this.references.Count == 0)
+            {
+                throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneReferenceRequired"));
+            }
+
+            for (int i = 0; i < this.references.Count; i++)
+            {
+                this.references[i].ComputeAndSetDigest();
+            }
+        }
+
+
+        public virtual void EnsureAllReferencesVerified()
+        {
+            for (int i = 0; i < this.references.Count; i++)
+            {
+                if (!this.references[i].Verified)
+                {
+                    throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.references[i].Uri"));
+                }
+            }
+        }
+
+        protected string[] GetInclusivePrefixes()
+        {
+            return this.canonicalizationMethodElement.GetInclusivePrefixes();
+        }
+
+        protected virtual string GetNamespaceForInclusivePrefix(string prefix)
+        {
+            if (Context == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException());
+
+            if (prefix == null)
+                throw LogHelper.LogArgumentNullException(nameof(prefix));
+
+            return Context[prefix];
+        }
+
+        public void EnsureDigestValidity(string id, object resolvedXmlSource)
+        {
+            if (!EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
+            {
+                throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredTargetNotSigned, id"));
+            }
+        }
+
+        public virtual bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
+        {
+            for (int i = 0; i < this.references.Count; i++)
+            {
+                if (this.references[i].EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        public virtual bool HasUnverifiedReference(string id)
+        {
+            for (int i = 0; i < this.references.Count; i++)
+            {
+                if (!this.references[i].Verified && this.references[i].ExtractReferredId() == id)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected void ReadCanonicalizationMethod(XmlDictionaryReader reader)
+        {
+            // we will ignore any comments in the SignedInfo elemnt when verifying signature
+            this.canonicalizationMethodElement.ReadFrom(reader, false);
+        }
+
+        public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
+        {
+            SendSide = false;
+            if (reader.CanCanonicalize)
+            {
+                this.CanonicalStream = new MemoryStream();
+                reader.StartCanonicalization(this.CanonicalStream, false, null);
+            }
+
+            reader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+            Prefix = reader.Prefix;
+            Id = reader.GetAttribute(UtilityStrings.Id, null);
+            reader.Read();
+
+            ReadCanonicalizationMethod(reader);
+            ReadSignatureMethod(reader);
+            while (reader.IsStartElement(XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace))
+            {
+                Reference reference = new Reference();
+                reference.ReadFrom(reader, transformFactory);
+                AddReference(reference);
+            }
+            reader.ReadEndElement(); // SignedInfo
+
+            if (reader.CanCanonicalize)
+                reader.EndCanonicalization();
+
+            string[] inclusivePrefixes = GetInclusivePrefixes();
+            if (inclusivePrefixes != null)
+            {
+                // Clear the canonicalized stream. We cannot use this while inclusive prefixes are
+                // specified.
+                this.CanonicalStream = null;
+                Context = new Dictionary<string, string>(inclusivePrefixes.Length);
+                for (int i = 0; i < inclusivePrefixes.Length; i++)
+                {
+                    Context.Add(inclusivePrefixes[i], reader.LookupNamespace(inclusivePrefixes[i]));
+                }
+            }
+        }
+
+        public virtual void WriteTo(XmlDictionaryWriter writer)
+        {
+            writer.WriteStartElement(Prefix, XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+            if (Id != null)
+                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+
+            WriteCanonicalizationMethod(writer);
+            WriteSignatureMethod(writer);
+            foreach (var reference in references)
+                reference.WriteTo(writer);
+
+            writer.WriteEndElement(); // SignedInfo
+        }
+
+        protected void ReadSignatureMethod(XmlDictionaryReader reader)
+        {
+            this.signatureMethodElement.ReadFrom(reader);
+        }
+
+        protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)
+        {
+            this.canonicalizationMethodElement.WriteTo(writer);
+        }
+
+        protected void WriteSignatureMethod(XmlDictionaryWriter writer)
+        {
+            this.signatureMethodElement.WriteTo(writer);
+        }
+
+        protected string Prefix
+        {
+            get; set;
+        }
+
+        protected Dictionary<string, string> Context
+        {
+            get; set;
+        }
+    }
+}

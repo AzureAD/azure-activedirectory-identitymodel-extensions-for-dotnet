@@ -43,6 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";
         public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
+        public const string EnvelopedSignature = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
 
         // See https://tools.ietf.org/html/rfc6931#section-2.2.2
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
@@ -104,6 +105,10 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes128CbcHmacSha256 = "A128CBC-HS256";
         public const string Aes192CbcHmacSha384 = "A192CBC-HS384";
         public const string Aes256CbcHmacSha512 = "A256CBC-HS512";
+
+
+        public const string StrTransform = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#STR-Transform";
+
 #pragma warning restore 1591
     }
 }
