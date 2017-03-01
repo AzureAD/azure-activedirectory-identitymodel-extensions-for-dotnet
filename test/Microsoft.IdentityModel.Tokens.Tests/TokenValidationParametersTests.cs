@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("TokenValidationParameters", compareContext.Diffs);
         }
 
-        [Fact( DisplayName = "TokenValidationParametersTests: GetSets, covers defaults")]
+        [Fact]
         public void GetSets()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();

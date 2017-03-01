@@ -68,6 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             DefaultClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
+                new Claim(ClaimTypes.NameIdentifier, "Bob", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
                 new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
                 new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),
                 new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer),

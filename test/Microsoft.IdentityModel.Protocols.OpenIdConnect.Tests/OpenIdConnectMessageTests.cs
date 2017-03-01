@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectMessageTests
     {
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return openIdConnectMessage;
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             List<string> errors = new List<string>();
@@ -159,7 +159,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectMessage message = new OpenIdConnectMessage();
@@ -551,7 +551,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(customOpenIdConnectMessage.LogoutRequestUrl == customOpenIdConnectMessage.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + customOpenIdConnectMessage.LogoutRequestUrl + ", " + customOpenIdConnectMessage.CreateLogoutRequestUrl());
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Tests if _issuerAddress has '?'")]
+        [Fact]
         public void OpenIdConnectMessage_IssuerAddressHasQuery()
         {
             List<string> errors = new List<string>();

@@ -502,7 +502,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(identity.HasClaim("internalClaim", "claimValue"));
         }
 
-        [Fact(DisplayName = "JwtSecurityTokenHandlerTests: Ensures that JwtSecurityTokenHandler defaults are as expected")]
+        [Fact]
         public void Defaults()
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();

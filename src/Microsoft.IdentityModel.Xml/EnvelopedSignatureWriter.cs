@@ -1,0 +1,285 @@
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
+
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Xml;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Microsoft.IdentityModel.Xml
+{
+    /// <summary>
+    /// Wraps a writer and generates a signature automatically when the envelope
+    /// is written completely. By default the generated signature is inserted as
+    /// the last element in the envelope. This can be modified by explicitily 
+    /// calling WriteSignature to indicate the location inside the envelope where
+    /// the signature should be inserted.
+    /// </summary>
+    public sealed class EnvelopedSignatureWriter : DelegatingXmlDictionaryWriter
+    {
+        XmlWriter _innerWriter;
+        SigningCredentials _signingCredentials;
+        string _referenceId;
+        //SecurityTokenSerializer _tokenSerializer;
+        HashStream _hashStream;
+        HashAlgorithm _hashAlgorithm;
+        int _elementCount;
+        MemoryStream _signatureFragment;
+        MemoryStream _endFragment;
+        bool _hasSignatureBeenMarkedForInsert;
+        MemoryStream _writerStream;
+        MemoryStream _preCanonicalTracingStream;
+        bool _disposed;
+
+        /// <summary>
+        /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
+        /// to write the envelope. The signature will be automatically generated when 
+        /// the envelope is completed.
+        /// </summary>
+        /// <param name="innerWriter">Writer to wrap/</param>
+        /// <param name="signingCredentials">SigningCredentials to be used to generate the signature.</param>
+        /// <param name="referenceId">The reference Id of the envelope.</param>
+        /// <param name="securityTokenSerializer">SecurityTokenSerializer to serialize the signature KeyInfo.</param>
+        /// <exception cref="ArgumentNullException">One of he input parameter is null.</exception>
+        /// <exception cref="ArgumentException">The string 'referenceId' is either null or empty.</exception>
+        public EnvelopedSignatureWriter(XmlWriter innerWriter, SigningCredentials signingCredentials, string referenceId)
+        {
+            if (innerWriter == null)
+                LogHelper.LogArgumentNullException(nameof(innerWriter));
+
+            if (signingCredentials == null)
+                LogHelper.LogArgumentNullException(nameof(signingCredentials));
+
+            if (string.IsNullOrEmpty(referenceId))
+                LogHelper.LogArgumentNullException(nameof(referenceId));
+
+            // the Signature will be written into the innerWriter.
+            _innerWriter = innerWriter;
+            _signingCredentials = signingCredentials;
+            _referenceId = referenceId;
+            _signatureFragment = new MemoryStream();
+            _endFragment = new MemoryStream();
+            _writerStream = new MemoryStream();
+
+            var effectiveWriter = XmlDictionaryWriter.CreateTextWriter(_writerStream, Encoding.UTF8, false);
+            SetCanonicalizingWriter(effectiveWriter);
+            // TODO - need alg for digest
+            //_hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Algorithm);
+            _hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(SecurityAlgorithms.Sha256);
+            _hashStream = new HashStream(_hashAlgorithm);
+            InnerWriter.StartCanonicalization(_hashStream, false, null);
+        }
+
+        private void ComputeSignature()
+        {
+            var signedInfo = new PreDigestedSignedInfo() { SendSide = true };
+            signedInfo.AddEnvelopedSignatureTransform = true;
+            signedInfo.CanonicalizationMethod = ExclusiveC14NStrings.Namespace;
+            //signedInfo.SignatureMethod = _signingCreds.SignatureAlgorithm;
+            //signedInfo.DigestMethod = _signingCreds.DigestAlgorithm;
+            signedInfo.AddReference(_referenceId, _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream));
+
+            SignedXml signedXml = new SignedXml(signedInfo);
+            signedXml.ComputeSignature(_signingCredentials);
+            //signedXml.Signature.KeyIdentifier = _signingCreds.SigningKeyIdentifier;
+            signedXml.WriteTo(base.InnerWriter);
+            ((IDisposable)_hashStream).Dispose();
+            _hashStream = null;
+        }
+
+        private void OnEndRootElement()
+        {
+            if (!_hasSignatureBeenMarkedForInsert)
+            {
+                // Default case. Signature is added as the last child element.
+                // We still have to compute the signature. Write end element as a different fragment.
+
+                ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).StartFragment(_endFragment, false);
+                base.WriteEndElement();
+                ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).EndFragment();
+            }
+            else if (_hasSignatureBeenMarkedForInsert)
+            {
+                // Signature should be added to the middle between the start and element 
+                // elements. Finish the end fragment and compute the signature and 
+                // write the signature as a seperate fragment.
+                base.WriteEndElement();
+                ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).EndFragment();
+            }
+
+            // Stop Canonicalization.
+            base.EndCanonicalization();
+
+            // Compute signature and write it into a seperate fragment.
+            ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).StartFragment(_signatureFragment, false);
+            ComputeSignature();
+            ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).EndFragment();
+
+            // Put all fragments together. The fragment before the signature is already written into the writer.
+            ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).WriteFragment(_signatureFragment.GetBuffer(), 0, (int)_signatureFragment.Length);
+            ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).WriteFragment(_endFragment.GetBuffer(), 0, (int)_endFragment.Length);
+
+            // _startFragment.Close();
+            _signatureFragment.Close();
+            _endFragment.Close();
+
+            _writerStream.Position = 0;
+            _hasSignatureBeenMarkedForInsert = false;
+
+            // Write the signed stream to the writer provided by the user.
+            // We are creating a Text Reader over a stream that we just wrote out. Hence, it is safe to 
+            // create a XmlTextReader and not a XmlDictionaryReader.
+            // Note: reader will close _writerStream on Dispose.
+            XmlReader reader = XmlDictionaryReader.CreateTextReader(_writerStream, XmlDictionaryReaderQuotas.Max);
+            reader.MoveToContent();
+            _innerWriter.WriteNode(reader, false);
+            _innerWriter.Flush();
+            reader.Close();
+            base.Close();
+        }
+
+        /// <summary>
+        /// Sets the position of the signature within the envelope. Call this
+        /// method while writing the envelope to indicate at which point the 
+        /// signature should be inserted.
+        /// </summary>
+        public void WriteSignature()
+        {
+            base.Flush();
+            if (_writerStream == null || _writerStream.Length == 0)
+                LogHelper.LogExceptionMessage(new InvalidOperationException("ID6029"));
+
+            if (_signatureFragment.Length != 0)
+                LogHelper.LogExceptionMessage(new InvalidOperationException("ID6030"));
+
+            // Capture the remaing as a seperate fragment.
+            ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).StartFragment(_endFragment, false);
+
+            _hasSignatureBeenMarkedForInsert = true;
+        }
+
+        /// <summary>
+        /// Overrides the base class implementation. When the last element of the envelope is written
+        /// the signature is automatically computed over the envelope and the signature is inserted at
+        /// the appropriate position, if WriteSignature was explicitly called or is inserted at the
+        /// end of the envelope.
+        /// </summary>
+        public override void WriteEndElement()
+        {
+            _elementCount--;
+            if (_elementCount == 0)
+            {
+                base.Flush();
+                OnEndRootElement();
+            }
+            else
+            {
+                base.WriteEndElement();
+            }
+        }
+
+        /// <summary>
+        /// Overrides the base class implementation. When the last element of the envelope is written
+        /// the signature is automatically computed over the envelope and the signature is inserted at
+        /// the appropriate position, if WriteSignature was explicitly called or is inserted at the
+        /// end of the envelope.
+        /// </summary>
+        public override void WriteFullEndElement()
+        {
+            _elementCount--;
+            if (_elementCount == 0)
+            {
+                base.Flush();
+                OnEndRootElement();
+            }
+            else
+            {
+                base.WriteFullEndElement();
+            }
+        }
+
+        /// <summary>
+        /// Overrides the base class. Writes the specified start tag and associates
+        /// it with the given namespace.
+        /// </summary>
+        /// <param name="prefix">The namespace prefix of the element.</param>
+        /// <param name="localName">The local name of the element.</param>
+        /// <param name="ns">The namespace URI to associate with the element.</param>
+        public override void WriteStartElement(string prefix, string localName, string ns)
+        {
+            _elementCount++;
+            base.WriteStartElement(prefix, localName, ns);
+        }
+
+        #region IDisposable Members
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the System.IdentityModel.Protocols.XmlSignature.EnvelopedSignatureWriter and optionally
+        /// releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// True to release both managed and unmanaged resources; false to release only unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                //
+                // Free all of our managed resources
+                //
+                if (_hashStream != null)
+                {
+                    _hashStream.Dispose();
+                    _hashStream = null;
+                }
+
+                if (_hashAlgorithm != null)
+                {
+                    ((IDisposable)_hashAlgorithm).Dispose();
+                    _hashAlgorithm = null;
+                }
+
+                if (_signatureFragment != null)
+                {
+                    _signatureFragment.Dispose();
+                    _signatureFragment = null;
+                }
+
+                if (_endFragment != null)
+                {
+                    _endFragment.Dispose();
+                    _endFragment = null;
+                }
+
+                if (_writerStream != null)
+                {
+                    _writerStream.Dispose();
+                    _writerStream = null;
+                }
+
+                if (_preCanonicalTracingStream != null)
+                {
+                    _preCanonicalTracingStream.Dispose();
+                    _preCanonicalTracingStream = null;
+                }
+            }
+
+            // Free native resources, if any.
+
+            _disposed = true;
+        }
+
+        #endregion
+    }
+}

@@ -40,19 +40,19 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class HttpDocumentRetrieverTests
     {
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();
             Assert.Throws<ArgumentNullException>(() => new HttpDocumentRetriever(null));
         }
 
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
         }
 
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             }
         }
 
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: Publics")]
+        [Fact]
         public void Publics()
         {
             HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();

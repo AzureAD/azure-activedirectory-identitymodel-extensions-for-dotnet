@@ -1,0 +1,23 @@
+{
+  "version": "5.1.4",
+  "description": "Includes types that provide support for SamlTokens.",
+    "dependencies": {
+        "Microsoft.IdentityModel.Tokens": "5.1.4",
+        "Microsoft.IdentityModel.Xml": "5.1.4",
+        "Microsoft.IdentityModel.Logging": "1.1.4"
+    },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime.Serialization": "",
+        "System.Net.Http": ""
+      }
+    }
+  },
+    "buildOptions": {
+        "warningsAsErrors": true,
+        "delaySign": true,
+        "keyFile": "../../build/35MSSharedLib1024.snk",
+        "xmlDoc": false
+    }
+}

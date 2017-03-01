@@ -1,13 +1,15 @@
 {
   "version": "5.1.4",
-  "dependencies": {
-    "Newtonsoft.Json": "9.0.1",
-    "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.1.4-*",
-    "System.IdentityModel.Tokens.Saml": "5.1.4-*",
-    "Microsoft.Azure.KeyVault.Cryptography": "2.0.5-*",
-    "dotnet-test-xunit": "2.2.0-*",
-    "xunit": "2.2.0-*"
-  },
+    "dependencies": {
+        "Newtonsoft.Json": "9.0.1",
+        "Microsoft.IdentityModel.Tokens": "5.1.4-*",
+        "System.IdentityModel.Tokens.Jwt": "5.1.4-*",
+        "Microsoft.IdentityModel.Protocols": "2.1.4-*",
+        "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.1.4-*",
+        "Microsoft.Azure.KeyVault.Cryptography": "2.0.5-*",
+        "dotnet-test-xunit": "2.2.0-*",
+        "xunit": "2.2.0-*"
+    },
   "description": "Microsoft.IdentityModel.Tokens.Tests",
   "testRunner": "xunit",
   "frameworks": {
@@ -17,17 +19,18 @@
           "version": "1.0.0-*",
           "type": "platform"
         },
-        "System.Security.Cryptography.Cng": "4.3.0-*"
+        "System.Security.Cryptography.Cng": "4.3.0-*",
+        "System.Security.Claims": "4.3.0-*"
       }
     },
     "net451": {
-      "frameworkAssemblies": {
-        "System.Runtime": "",
-        "System.Threading.Tasks": ""
-      },
-      "dependencies": {
-        "xunit.runner.console": "2.1.0"
-      }
+        "frameworkAssemblies": {
+            "System.Runtime": "",
+            "System.Threading.Tasks": ""
+        },
+        "dependencies": {
+            "xunit.runner.console": "2.1.0"
+        }
     }
   },
   "buildOptions": {

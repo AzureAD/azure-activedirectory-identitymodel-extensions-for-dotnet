@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             ValidateTokenResponse(protocolValidationContext, protocolValidator, ExpectedException.NoExceptionExpected);
         }
 
-        [Fact(DisplayName = "OpenIdConnectProtocolValidator: ValidateMessageWithCode")]
+        [Fact]
         public void ValidateMessageWithCode()
         {
             var protocolValidator = new OpenIdConnectProtocolValidator { RequireNonce = false };

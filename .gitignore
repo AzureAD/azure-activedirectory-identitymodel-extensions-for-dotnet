@@ -199,7 +199,6 @@ node_modules
 
 # Wilson project folder
 .nuget/*
-*.xml
 Artifacts/*
 build/*
 lib/*

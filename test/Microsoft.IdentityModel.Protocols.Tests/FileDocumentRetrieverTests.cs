@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             }
         }
 
-        [Fact(DisplayName = "FileDocumentRetrieverTests: GetDocuments")]
+        [Fact]
         public void GetDocuments()
         {
             FileDocumentRetriever docRetriever = new FileDocumentRetriever();

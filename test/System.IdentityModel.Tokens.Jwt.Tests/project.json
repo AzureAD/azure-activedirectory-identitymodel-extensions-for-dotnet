@@ -10,20 +10,20 @@
   "testRunner": "xunit",
   "frameworks": {
     "netcoreapp1.0": {
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
-          "type": "platform"
-        },
-        "System.Diagnostics.Process": "4.3.0-*"
-      }
+        "dependencies": {
+            "Microsoft.NETCore.App": {
+                "version": "1.0.0-*",
+                "type": "platform"
+            },
+            "System.Diagnostics.Process": "4.3.0-*",
+            "Microsoft.IdentityModel.Tokens": "5.1.4"
+        }
     },
     "net451": {
-      "frameworkAssemblies": {
-      },
-      "dependencies": {
-        "xunit.runner.console": "2.1.0"
-      }
+        "dependencies": {
+            "xunit.runner.console": "2.1.0",
+            "Microsoft.IdentityModel.Tokens": "5.1.4"
+        }
     }
   },
   "buildOptions": {

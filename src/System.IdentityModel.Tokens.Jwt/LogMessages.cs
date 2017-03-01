@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10646 = "IDX10646: CryptoProviderFactory.CreateForSigning returned null for key: '{0}', signatureAlgorithm: '{1}'.";
 
 
-        // JWT specific errors
+        // JWT messages
         internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
         internal const string IDX10701 = "IDX10701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range.";
         internal const string IDX10706 = "IDX10706: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";

@@ -40,7 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public class ExtensibilityTests
     {
-        [Fact(DisplayName = "ExtensibilityTests: JwtSecurityTokenHandler")]
+        [Fact]
         public void JwtSecurityTokenHandler_Extensibility()
         {
             DerivedJwtSecurityTokenHandler handler = new DerivedJwtSecurityTokenHandler()

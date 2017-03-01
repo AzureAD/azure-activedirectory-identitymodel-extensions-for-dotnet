@@ -27,6 +27,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Protocols.WSTrust;
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -78,14 +80,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
-        public WsFederationMessage() : this(string.Empty) {}
+        public WsFederationMessage(){}
         
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
-        /// </summary>
-        /// <param name="issuerAddress">The endpoint of the token issuer.</param>
-        public WsFederationMessage(string issuerAddress) : base(issuerAddress) {}
-
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>

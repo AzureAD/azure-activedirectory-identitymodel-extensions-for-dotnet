@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protcols.Test
     /// </summary>
     public class CrossTokenTests
     {
-        [Fact(DisplayName = "CrossTokenTests: Validates tokens")]
+        [Fact]
         public void CrossToken_ValidateToken()
         {
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
@@ -98,25 +98,25 @@ namespace Microsoft.IdentityModel.Protcols.Test
         }
 
 
-        [Fact(DisplayName = "CrossTokenTests: Validates Signatures")]
+        [Fact]
         public void CrossToken_ValidateSignature()
         {
             // ensure jwt, saml1 and saml2 work the same
         }
 
-        [Fact(DisplayName = "CrossTokenTests: Validate Audience")]
+        [Fact]
         public void CrossToken_ValidateAudience()
         {
             // ensure jwt, saml1 and saml2 work the same
         }
 
-        [Fact(DisplayName = "CrossTokenTests: Validate Issuer")]
+        [Fact]
         public void CrossToken_ValidateIssuer()
         {
             // ensure jwt, saml1 and saml2 work the same
         }
 
-        [Fact(DisplayName = "CrossTokenTests: ValidateLifetime")]
+        [Fact]
         public void CrossToken_ValidateLifetime()
         {
             // ensure jwt, saml1 and saml2 work the same
