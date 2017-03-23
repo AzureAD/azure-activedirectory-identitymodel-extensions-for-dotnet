@@ -26,10 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
@@ -64,6 +62,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Fact]
         public void CreateToken()
         {
+            bool first = true;
+            TestUtilities.TestHeader("SamlSecurityTokenHandlerTests.CreateToken", "Saml1Token", ref first);
             var tokenHandler = new SamlSecurityTokenHandler();
             var descriptor = Default.SecurityTokenDescriptor();
             var token = tokenHandler.CreateToken(descriptor);
@@ -72,7 +72,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             tokenHandler.WriteToken(writer, token);
             writer.Flush();
             var saml = ms.ToString();
-            Console.WriteLine($"samltoken: {saml}");
             var samlToken = tokenHandler.ReadToken(saml);
         }
 

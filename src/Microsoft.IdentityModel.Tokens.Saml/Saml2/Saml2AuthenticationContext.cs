@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
@@ -45,9 +46,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </remarks>
     public class Saml2AuthenticationContext
     {
-        private Collection<string> _authenticatingAuthorities = new Collection<string>();
-        private string _classReference;
-        private string _declarationReference;
+        private Collection<Uri> _authenticatingAuthorities = new Collection<Uri>();
+        private Uri _classReference;
+        private Uri _declarationReference;
 
         /// <summary>
         /// Creates an instance of Saml2AuthenticationContext.
@@ -61,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates an instance of Saml2AuthenticationContext.
         /// </summary>
         /// <param name="classReference">The class reference of the authentication context.</param>
-        public Saml2AuthenticationContext(string classReference)
+        public Saml2AuthenticationContext(Uri classReference)
             : this(classReference, null)
         {
         }
@@ -71,13 +72,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="classReference">The class reference of the authentication context.</param>
         /// <param name="declarationReference">The declaration reference of the authentication context.</param>
-        public Saml2AuthenticationContext(string classReference, string declarationReference)
+        public Saml2AuthenticationContext(Uri classReference, Uri declarationReference)
         {
-            if (string.IsNullOrEmpty(classReference))
-                throw LogHelper.LogArgumentNullException(nameof(classReference));
+            if (null != classReference && !classReference.IsAbsoluteUri)
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(classReference), classReference)));
 
-            if (string.IsNullOrEmpty(declarationReference))
-                throw LogHelper.LogArgumentNullException(nameof(declarationReference));
+            if (null != declarationReference && !declarationReference.IsAbsoluteUri)
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(declarationReference), declarationReference)));
 
             _classReference = classReference;
             _declarationReference = declarationReference;
@@ -89,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// the assertion issuer, who is presumed to have been involved without
         /// being explicitly named here). [Saml2Core, 2.7.2.2]
         /// </summary>
-        public ICollection<string> AuthenticatingAuthorities
+        public ICollection<Uri> AuthenticatingAuthorities
         {
             get { return _authenticatingAuthorities; }
         }
@@ -99,13 +102,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// describes the authentication context declaration that follows.
         /// [Saml2Core, 2.7.2.2]
         /// </summary>
-        public string ClassReference
+        public Uri ClassReference
         {
             get { return _classReference; }
             set
             {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                if (null != value && !value.IsAbsoluteUri)
+                    throw LogHelper.LogExceptionMessage(
+                        new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(value), value)));
 
                 _classReference = value;
             }
@@ -115,13 +119,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets a URI reference that identifies an authentication context 
         /// declaration. [Saml2Core, 2.7.2.2]
         /// </summary>
-        public string DeclarationReference
+        public Uri DeclarationReference
         {
             get { return _declarationReference; }
             set
             {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                if (null != value && !value.IsAbsoluteUri)
+                    throw LogHelper.LogExceptionMessage(
+                        new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(value), value)));
 
                 _declarationReference = value;
             }

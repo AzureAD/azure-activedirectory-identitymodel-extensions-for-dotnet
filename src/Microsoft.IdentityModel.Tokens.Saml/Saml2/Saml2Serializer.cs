@@ -505,7 +505,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 reader.Read();
             }
 
-            reader.MoveToContent();
+            reader.ReadStartElement(Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
             if (reader.NodeType == XmlNodeType.Element)
             {
                 while (reader.NodeType == XmlNodeType.Element)
@@ -630,11 +630,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // Now we have enough data to create the object
                 // TODO - relax URI - string?
-                var authnContext = new Saml2AuthenticationContext(classRef.OriginalString, declRef.OriginalString);
+                var authnContext = new Saml2AuthenticationContext(classRef, declRef);
 
                 // <AuthenticatingAuthority> - 0-OO
                 while (reader.IsStartElement(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace))
-                    authnContext.AuthenticatingAuthorities.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthenticatingAuthority, UriKind.RelativeOrAbsolute, false).OriginalString);
+                    authnContext.AuthenticatingAuthorities.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthenticatingAuthority, UriKind.RelativeOrAbsolute, false));
 
                 reader.ReadEndElement();
                 return authnContext;
@@ -1944,25 +1944,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
 
             // One of ClassRef and DeclRef must be present.
-            if (string.IsNullOrEmpty(authenticationContext.ClassReference) && string.IsNullOrEmpty(authenticationContext.DeclarationReference))
-                throw LogWriteException(LogMessages.IDX11132);
+            if (authenticationContext.ClassReference == null && authenticationContext.DeclarationReference == null)
+                throw LogWriteException(LogMessages.IDX11149);
 
             // <AuthnContext>
             writer.WriteStartElement(Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
 
             // <AuthnContextClassReference> 0-1
-            if (!string.IsNullOrEmpty(authenticationContext.ClassReference))
-                writer.WriteElementString(Saml2Constants.Elements.AuthnContextClassRef, Saml2Constants.Namespace, authenticationContext.ClassReference);
+            if (authenticationContext.ClassReference != null)
+                writer.WriteElementString(Saml2Constants.Elements.AuthnContextClassRef, Saml2Constants.Namespace, authenticationContext.ClassReference.AbsoluteUri);
 
             // <AuthnContextDeclRef> 0-1
-            if (!string.IsNullOrEmpty(authenticationContext.DeclarationReference))
-                writer.WriteElementString(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace, authenticationContext.DeclarationReference);
+            if (authenticationContext.DeclarationReference != null)
+                writer.WriteElementString(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace, authenticationContext.DeclarationReference.AbsoluteUri);
 
             // <AuthenticatingAuthority> 0-OO
             foreach (var authority in authenticationContext.AuthenticatingAuthorities)
-            {
-                writer.WriteElementString(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace, authority);
-            }
+                writer.WriteElementString(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace, authority.AbsoluteUri);
 
             // </AuthnContext>
             writer.WriteEndElement();
