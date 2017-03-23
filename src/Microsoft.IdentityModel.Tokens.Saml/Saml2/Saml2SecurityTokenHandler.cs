@@ -223,6 +223,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                || reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace);
         }
 
+        public override SecurityToken ReadToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (token.Length* 2 > MaximumTokenSizeInBytes)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX11013, token.Length, MaximumTokenSizeInBytes)));
+
+            return null;
+        }
 
         /// <summary>
         /// Reads a SAML 2.0 token from the XmlReader.
@@ -235,6 +245,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             Saml2Assertion assertion = Serializer.ReadAssertion(reader, validationParameters);
             return new Saml2SecurityToken(assertion);
         }
+
 
 
         internal static XmlDictionaryReader CreatePlaintextReaderFromEncryptedData(
