@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="name">Name string to initialize with.</param>
         public Saml2NameIdentifier(string name)
             : this(name, null)
-        {}
+        { }
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2NameIdentifier"/> from a name and format.
@@ -65,9 +65,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null != format && !format.IsAbsoluteUri)
                 throw LogHelper.LogArgumentNullException("nameof(format), ID0013");
 
-            this._format = format;
-            this._value = name;
-            this._externalEncryptedKeys = new Collection<SecurityKeyIdentifierClause>();
+            _format = format;
+            _value = name;
+            _externalEncryptedKeys = new Collection<SecurityKeyIdentifierClause>();
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
         {
-            get { return this._externalEncryptedKeys; }
+            get { return _externalEncryptedKeys; }
         }
 
         /// <summary>
@@ -93,13 +93,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Uri Format
         {
-            get { return this._format; }           
+            get { return _format; }
             set
             {
                 if (null != value && !value.IsAbsoluteUri)
                     throw LogHelper.LogArgumentNullException("nameof(value), ID0013");
 
-                this._format = value;
+                _format = value;
             }
         }
 
@@ -108,8 +108,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string NameQualifier
         {
-            get { return this._nameQualifier; }
-            set { this._nameQualifier = XmlUtil.NormalizeEmptyString(value); }
+            get { return _nameQualifier; }
+            set { _nameQualifier = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -118,8 +118,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string SPNameQualifier
         {
-            get { return this._serviceProviderPointNameQualifier; }
-            set { this._serviceProviderPointNameQualifier = XmlUtil.NormalizeEmptyString(value); }
+            get { return _serviceProviderPointNameQualifier; }
+            set { _serviceProviderPointNameQualifier = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -128,8 +128,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string SPProvidedId
         {
-            get { return this._serviceProviderdId; }
-            set { this._serviceProviderdId = XmlUtil.NormalizeEmptyString(value); }
+            get { return _serviceProviderdId; }
+            set { _serviceProviderdId = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -137,13 +137,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Value
         {
-            get { return this._value; }
+            get { return _value; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._value = value;
+                _value = value;
             }
         }
     }

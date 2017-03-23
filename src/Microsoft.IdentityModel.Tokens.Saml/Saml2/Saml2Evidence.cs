@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of <see cref="Saml2Evidence"/> class.
         /// </summary>
         public Saml2Evidence()
-        {}
+        { }
 
         /// <summary>
         /// Initializes a new instance of <see cref="Saml2Evidence"/> class from a <see cref="Saml2Assertion"/>.
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == assertion)
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
 
-            this._assertions.Add(assertion);
+            _assertions.Add(assertion);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == idReference)
                 throw LogHelper.LogArgumentNullException(nameof(idReference));
 
-            this._assertionIdReferences.Add(idReference);
+            _assertionIdReferences.Add(idReference);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == uriReference)
                 throw LogHelper.LogArgumentNullException(nameof(uriReference));
 
-            this._assertionUriReferences.Add(uriReference);
+            _assertionUriReferences.Add(uriReference);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Id> AssertionIdReferences
         {
-            get { return this._assertionIdReferences; }
+            get { return _assertionIdReferences; }
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Assertion> Assertions
         {
-            get { return this._assertions; }
+            get { return _assertions; }
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Uri> AssertionUriReferences
         {
-            get { return this._assertionUriReferences; }
+            get { return _assertionUriReferences; }
         }
     }
 }

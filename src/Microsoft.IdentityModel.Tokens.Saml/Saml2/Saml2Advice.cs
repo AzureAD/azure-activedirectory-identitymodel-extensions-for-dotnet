@@ -30,7 +30,6 @@ using System.Collections.ObjectModel;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-
     /// <summary>
     /// Represents the Advice element specified in [Saml2Core, 2.6.1].
     /// </summary>
@@ -56,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Id> AssertionIdReferences
         {
-            get { return this._assertionIdReferences; }
+            get { return _assertionIdReferences; }
         }
 
         /// <summary>
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Assertion> Assertions
         {
-            get { return this._assertions; }
+            get { return _assertions; }
         }
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Uri> AssertionUriReferences
         {
-            get { return this._assertionUriReferences; }
+            get { return _assertionUriReferences; }
         }
     }
 }

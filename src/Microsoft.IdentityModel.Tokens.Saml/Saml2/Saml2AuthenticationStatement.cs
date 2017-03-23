@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="authenticationContext">The authentication context of this statement.</param>
         public Saml2AuthenticationStatement(Saml2AuthenticationContext authenticationContext)
             : this(authenticationContext, DateTime.UtcNow)
-        {}
+        { }
 
         /// <summary>
         /// Creates an instance of Saml2AuthenticationContext.
@@ -59,8 +59,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == authenticationContext)
                 throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
 
-            this._authnContext = authenticationContext;
-            this._authnInstant = DateTimeUtil.ToUniversalTime(authenticationInstant);
+            _authnContext = authenticationContext;
+            _authnInstant = DateTimeUtil.ToUniversalTime(authenticationInstant);
         }
 
         /// <summary>
@@ -69,13 +69,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2AuthenticationContext AuthenticationContext
         {
-            get { return this._authnContext; }
+            get { return _authnContext; }
             set
             {
                 if (null == value)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._authnContext = value;
+                _authnContext = value;
             }
         }
 
@@ -84,8 +84,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime AuthenticationInstant
         {
-            get { return this._authnInstant; }
-            set { this._authnInstant = DateTimeUtil.ToUniversalTime(value); }
+            get { return _authnInstant; }
+            set { _authnInstant = DateTimeUtil.ToUniversalTime(value); }
         }
 
         /// <summary>
@@ -94,8 +94,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string SessionIndex
         {
-            get { return this._sessionIndex; }
-            set { this._sessionIndex = XmlUtil.NormalizeEmptyString(value); }
+            get { return _sessionIndex; }
+            set { _sessionIndex = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -105,8 +105,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime? SessionNotOnOrAfter
         {
-            get { return this._sessionNotOnOrAfter; }
-            set { this._sessionNotOnOrAfter = DateTimeUtil.ToUniversalTime(value); }
+            get { return _sessionNotOnOrAfter; }
+            set { _sessionNotOnOrAfter = DateTimeUtil.ToUniversalTime(value); }
         }
 
         /// <summary>

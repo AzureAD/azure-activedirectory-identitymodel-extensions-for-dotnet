@@ -37,21 +37,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 {
     public class SamlAssertion //: ICanonicalWriterEndRootElementCallback
     {
-        string assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
-        string issuer;
-        DateTime issueInstant = DateTime.UtcNow.ToUniversalTime();
-        SamlConditions conditions;
-        SamlAdvice advice;
-        private Collection<SamlStatement> statements = new Collection<SamlStatement>();
-        SigningCredentials signingCredentials;
-        SecurityToken signingToken;
-        //HashStream hashStream;
-        XmlTokenStream tokenStream;
-        XmlTokenStream sourceData;
+        private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
+        private string _issuer;
+        private Collection<SamlStatement> _statements = new Collection<SamlStatement>();
+        private XmlTokenStream _tokenStream;
+        private XmlTokenStream _sourceData;
 
-        public SamlAssertion()
-        {
-        }
+        public SamlAssertion() { }
 
         public SamlAssertion(
             string assertionId,
@@ -65,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (string.IsNullOrEmpty(assertionId))
                 throw LogHelper.LogArgumentNullException(nameof(assertionId));
 
-            tokenStream = new XmlTokenStream(32);
+            _tokenStream = new XmlTokenStream(32);
 
             // TODO warning
             //if (!IsAssertionIdValid(assertionId))
@@ -77,21 +69,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (samlStatements == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlStatements));
 
-            this.assertionId = assertionId;
-            this.issuer = issuer;
-            this.issueInstant = issueInstant.ToUniversalTime();
-            this.conditions = samlConditions;
-            this.advice = samlAdvice;
+            AssertionId = assertionId;
+            Issuer = issuer;
+            IssueInstant = issueInstant.ToUniversalTime();
+            Conditions = samlConditions;
+            Advice = samlAdvice;
 
             foreach (SamlStatement samlStatement in samlStatements)
             {
                 if (samlStatement == null)
                     throw LogHelper.LogArgumentNullException("SAMLEntityCannotBeNullOrEmpty");
 
-                this.statements.Add(samlStatement);
+                _statements.Add(samlStatement);
             }
 
-            if (this.statements.Count == 0)
+            if (_statements.Count == 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentException("SAMLAssertionRequireOneStatement"));
         }
 
@@ -109,13 +101,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         public string AssertionId
         {
-            get { return this.assertionId; }
+            get { return _assertionId; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this.assertionId = value;
+                _assertionId = value;
             }
         }
 
@@ -140,83 +132,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns></returns>
         public virtual bool CanWriteSourceData
         {
-            get { return null != this.sourceData; }
+            get { return null != _sourceData; }
         }
 
         public string Issuer
         {
-            get { return this.issuer; }
+            get { return _issuer; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this.issuer = value;
+                _issuer = value;
             }
         }
 
-        public DateTime IssueInstant
-        {
-            get { return this.issueInstant; }
-            set
-            {
-                this.issueInstant = value;
-            }
-        }
+        public DateTime IssueInstant { get; set; } = DateTime.UtcNow;
 
-        public SamlConditions Conditions
-        {
-            get { return this.conditions; }
-            set
-            {
-                this.conditions = value;
-            }
-        }
+        public SamlConditions Conditions { get; set; }
 
-        public SamlAdvice Advice
-        {
-            get { return this.advice; }
-            set
-            {
-                this.advice = value;
-            }
-        }
+        public SamlAdvice Advice { get; set; }
 
         public IList<SamlStatement> Statements
         {
             get
             {
-                return this.statements;
+                return _statements;
             }
         }
 
-        public SigningCredentials SigningCredentials
-        {
-            get { return this.signingCredentials; }
-            set
-            {
-                this.signingCredentials = value;
-            }
-        }
+        public SigningCredentials SigningCredentials { get; set; }
 
-        public SignedXml Signature
-        {
-            get; set;
-        }
+        public SignedXml Signature { get; set; }
 
-        public SecurityKey SignatureVerificationKey
-        {
-            get; set;
-        }
-
-        public SecurityToken SigningToken
-        {
-            get { return this.signingToken; }
-            set
-            {
-                this.signingToken = value;
-            }
-        }
+        public SecurityKey SignatureVerificationKey { get; set; }
 
         /// <summary>
         /// Captures the XML source data from an EnvelopedSignatureReader. 
@@ -236,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             // TODO capturing of tokens, where to do this
-            this.sourceData = reader.XmlTokens;
+            _sourceData = reader.XmlTokens;
         }
 
         protected void ReadSignature(XmlDictionaryReader reader, SamlSerializer samlSerializer)
@@ -273,8 +222,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             //this.signature = signedXml;
             //this.signingToken = SamlSerializer.ResolveSecurityToken(securityKeyIdentifier, outOfBandTokenResolver);
-            if (this.signingToken == null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SamlSigningTokenNotFound"));
+            if (SecurityKey == null)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SecurityKey not found"));
 
             if (!ReferenceEquals(reader, effectiveReader))
                 effectiveReader.Close();

@@ -31,10 +31,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 {
     public abstract class SamlSubjectStatement : SamlStatement
     {
-        public virtual SamlSubject Subject { get; set; }
-
-        protected SamlSubjectStatement()
-        { }
+        protected SamlSubjectStatement() { }
 
         protected SamlSubjectStatement(SamlSubject subject)
         {
@@ -43,5 +40,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             Subject = subject;
         }
+
+        public virtual SamlSubject Subject { get; set; }
     }
 }

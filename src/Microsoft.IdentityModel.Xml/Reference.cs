@@ -1,6 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Security.Cryptography;
@@ -12,83 +35,61 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class Reference
     {
-        ElementWithAlgorithmAttribute digestMethodElement;
-        DigestValueElement digestValueElement = new DigestValueElement();
-        string id;
-        string prefix = SignedXml.DefaultPrefix;
-        object resolvedXmlSource;
-        readonly TransformChain transformChain = new TransformChain();
-        string type;
-        string uri;
-        SignatureResourcePool resourcePool;
-        bool verified;
-        string referredId;
+        ElementWithAlgorithmAttribute _digestMethodElement;
+        DigestValueElement _digestValueElement = new DigestValueElement();
+        string _prefix = SignedXml.DefaultPrefix;
+        object _resolvedXmlSource;
+        readonly TransformChain _transformChain = new TransformChain();
+        bool _verified;
+        string _referredId;
 
         public Reference()
             : this(null)
-        {
-        }
+        { }
 
         public Reference(string uri)
             : this(uri, null)
-        {
-        }
+        { }
 
         public Reference(string uri, object resolvedXmlSource)
         {
-            this.digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.DigestMethod);
-            this.uri = uri;
-            this.resolvedXmlSource = resolvedXmlSource;
+            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.DigestMethod);
+            Uri = uri;
+            _resolvedXmlSource = resolvedXmlSource;
         }
 
         public string DigestMethod
         {
-            get { return this.digestMethodElement.Algorithm; }
-            set { this.digestMethodElement.Algorithm = value; }
+            get { return _digestMethodElement.Algorithm; }
+            set { _digestMethodElement.Algorithm = value; }
         }
 
-        public string Id
-        {
-            get { return this.id; }
-            set { this.id = value; }
-        }
+        public string Id { get; set; }
 
-        public SignatureResourcePool ResourcePool
-        {
-            get { return this.resourcePool; }
-            set { this.resourcePool = value; }
-        }
+        public SignatureResourcePool ResourcePool { get; set; }
 
         public TransformChain TransformChain
         {
-            get { return this.transformChain; }
+            get { return _transformChain; }
         }
 
         public int TransformCount
         {
-            get { return this.transformChain.TransformCount; }
+            get { return _transformChain.TransformCount; }
         }
 
-        public string Type
-        {
-            get { return this.type; }
-            set { this.type = value; }
-        }
+        public string Type { get; set; }
 
-        public string Uri
-        {
-            get { return this.uri; }
-            set { this.uri = value; }
-        }
+        public string Uri { get; set; }
 
         public bool Verified
         {
-            get { return this.verified; }
+            get { return _verified; }
         }
 
         public void AddTransform(Transform transform)
         {
-            this.transformChain.Add(transform);
+            _transformChain.Add(transform);
         }
 
         public void EnsureDigestValidity(string id, byte[] computedDigest)
@@ -109,65 +110,57 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool EnsureDigestValidityIfIdMatches(string id, byte[] computedDigest)
         {
-            if (this.verified || id != ExtractReferredId())
-            {
+            if (_verified || id != ExtractReferredId())
                 return false;
-            }
+
             if (!Utility.AreEqual(computedDigest, GetDigestValue()))
-            {
                 throw LogHelper.LogExceptionMessage(new CryptographicException("DigestVerificationFailedForReference, this.uri"));
-            }
-            this.verified = true;
+
+            _verified = true;
             return true;
         }
 
         public bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
         {
-            if (this.verified)
-            {
+            if (_verified)
                 return false;
-            }
 
             // During StrTransform the extractedReferredId on the reference will point to STR and hence will not be 
             // equal to the referred element ie security token Id.
-            if (id != ExtractReferredId() && !this.IsStrTranform())
-            {
+            if (id != ExtractReferredId() && !IsStrTranform())
                 return false;
-            }
 
-            this.resolvedXmlSource = resolvedXmlSource;
+            _resolvedXmlSource = resolvedXmlSource;
             if (!CheckDigest())
-            {
                 throw LogHelper.LogExceptionMessage(new CryptographicException("DigestVerificationFailedForReference, this.uri"));
-            }
-            this.verified = true;
+
+            _verified = true;
             return true;
         }
 
         public bool IsStrTranform()
         {
-            return this.TransformChain.TransformCount == 1 && this.TransformChain[0].Algorithm == SecurityAlgorithms.StrTransform;
+            return TransformChain.TransformCount == 1 && TransformChain[0].Algorithm == SecurityAlgorithms.StrTransform;
         }
 
 
         public string ExtractReferredId()
         {
-            if (this.referredId == null)
+            if (_referredId == null)
             {
-                if (StringComparer.OrdinalIgnoreCase.Equals(uri, String.Empty))
+                if (StringComparer.OrdinalIgnoreCase.Equals(Uri, String.Empty))
                 {
                     return String.Empty;
                 }
 
-                if (this.uri == null || this.uri.Length < 2 || this.uri[0] != '#')
-                {
-                    throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
-                }
-                this.referredId = this.uri.Substring(1);
-            }
-            return this.referredId;
-        }
+                if (Uri == null || Uri.Length < 2 || Uri[0] != '#')
+                    throw LogHelper.LogExceptionMessage(new XmlSignedInfoException("UnableToResolveReferenceUriForSignature, this.uri"));
 
+                _referredId = Uri.Substring(1);
+            }
+
+            return _referredId;
+        }
 
         /// <summary>
         /// We look at the URI reference to decide if we should preserve comments while canonicalization.
@@ -180,7 +173,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             bool preserveComments = false;
 
-            if (!String.IsNullOrEmpty(uri))
+            if (!string.IsNullOrEmpty(uri))
             {
                 //removes the hash
                 string idref = uri.Substring(1);
@@ -213,44 +206,39 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ComputeAndSetDigest()
         {
-            this.digestValueElement.Value = ComputeDigest();
+            _digestValueElement.Value = ComputeDigest();
         }
 
         public byte[] ComputeDigest()
         {
-            if (this.transformChain.TransformCount == 0)
-            {
+            if (_transformChain.TransformCount == 0)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
-            }
 
-            if (this.resolvedXmlSource == null)
-            {
+            if (_resolvedXmlSource == null)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
-            }
-            return this.transformChain.TransformToDigest(this.resolvedXmlSource, this.ResourcePool, this.DigestMethod);
+
+            return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestMethod);
         }
 
         public byte[] GetDigestValue()
         {
-            return this.digestValueElement.Value;
+            return _digestValueElement.Value;
         }
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
             reader.MoveToStartElement(XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
-            this.prefix = reader.Prefix;
-            this.Id = reader.GetAttribute(UtilityStrings.Id, null);
-            this.Uri = reader.GetAttribute(XmlSignatureStrings.URI, null);
-            this.Type = reader.GetAttribute(XmlSignatureStrings.Type, null);
+            _prefix = reader.Prefix;
+            Id = reader.GetAttribute(UtilityStrings.Id, null);
+            Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
+            Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
             reader.Read();
 
             if (reader.IsStartElement(XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace))
-            {
-                this.transformChain.ReadFrom(reader, transformFactory, ShouldPreserveComments(this.Uri));
-            }
+                _transformChain.ReadFrom(reader, transformFactory, ShouldPreserveComments(Uri));
 
-            this.digestMethodElement.ReadFrom(reader);
-            this.digestValueElement.ReadFrom(reader);
+            _digestMethodElement.ReadFrom(reader);
+            _digestValueElement.ReadFrom(reader);
 
             reader.MoveToContent();
             reader.ReadEndElement(); // Reference
@@ -258,61 +246,55 @@ namespace Microsoft.IdentityModel.Xml
 
         public void SetResolvedXmlSource(object resolvedXmlSource)
         {
-            this.resolvedXmlSource = resolvedXmlSource;
+            _resolvedXmlSource = resolvedXmlSource;
         }
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(this.prefix, XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
-            if (this.id != null)
-            {
-                writer.WriteAttributeString(UtilityStrings.Id, null, this.id);
-            }
-            if (this.uri != null)
-            {
-                writer.WriteAttributeString(XmlSignatureStrings.URI, null, this.uri);
-            }
-            if (this.type != null)
-            {
-                writer.WriteAttributeString(XmlSignatureStrings.Type, null, this.type);
-            }
+            writer.WriteStartElement(_prefix, XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
+            if (Id != null)
+                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 
-            if (this.transformChain.TransformCount > 0)
-            {
-                this.transformChain.WriteTo(writer);
-            }
+            if (Uri != null)
+                writer.WriteAttributeString(XmlSignatureStrings.URI, null, Uri);
 
-            this.digestMethodElement.WriteTo(writer);
-            this.digestValueElement.WriteTo(writer);
+            if (Type != null)
+                writer.WriteAttributeString(XmlSignatureStrings.Type, null, Type);
+
+            if (_transformChain.TransformCount > 0)
+                _transformChain.WriteTo(writer);
+
+            _digestMethodElement.WriteTo(writer);
+            _digestValueElement.WriteTo(writer);
 
             writer.WriteEndElement(); // Reference
         }
 
         struct DigestValueElement
         {
-            byte[] digestValue;
-            string digestText;
-            string prefix;
+            byte[] _digestValue;
+            string _digestText;
+            string _prefix;
 
             internal byte[] Value
             {
-                get { return this.digestValue; }
+                get { return _digestValue; }
                 set
                 {
-                    this.digestValue = value;
-                    this.digestText = null;
+                    _digestValue = value;
+                    _digestText = null;
                 }
             }
 
             public void ReadFrom(XmlDictionaryReader reader)
             {
                 reader.MoveToStartElement(XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
-                this.prefix = reader.Prefix;
+                _prefix = reader.Prefix;
                 reader.Read();
                 reader.MoveToContent();
 
-                this.digestText = reader.ReadString();
-                this.digestValue = System.Convert.FromBase64String(digestText.Trim());
+                _digestText = reader.ReadString();
+                _digestValue = System.Convert.FromBase64String(_digestText.Trim());
 
                 reader.MoveToContent();
                 reader.ReadEndElement(); // DigestValue
@@ -320,15 +302,12 @@ namespace Microsoft.IdentityModel.Xml
 
             public void WriteTo(XmlDictionaryWriter writer)
             {
-                writer.WriteStartElement(this.prefix ?? XmlSignatureStrings.Prefix, XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
-                if (this.digestText != null)
-                {
-                    writer.WriteString(this.digestText);
-                }
+                writer.WriteStartElement(_prefix ?? XmlSignatureStrings.Prefix, XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
+                if (_digestText != null)
+                    writer.WriteString(_digestText);
                 else
-                {
-                    writer.WriteBase64(this.digestValue, 0, this.digestValue.Length);
-                }
+                    writer.WriteBase64(_digestValue, 0, _digestValue.Length);
+
                 writer.WriteEndElement(); // DigestValue
             }
         }

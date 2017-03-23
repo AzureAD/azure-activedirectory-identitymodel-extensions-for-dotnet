@@ -29,7 +29,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
@@ -103,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // TODO - can this be null
         public string NameFormat
         {
-            get;set;
+            get; set;
         }
 
         // TODO - can this be null

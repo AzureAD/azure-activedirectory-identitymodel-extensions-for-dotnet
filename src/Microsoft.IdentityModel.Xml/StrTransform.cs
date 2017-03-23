@@ -1,6 +1,29 @@
-﻿//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -13,44 +36,35 @@ namespace Microsoft.IdentityModel.Xml
 {
     class StrTransform : Transform
     {
-        readonly bool includeComments;
-        string inclusiveNamespacesPrefixList;
-        string[] inclusivePrefixes;
-        string prefix = XmlSignatureStrings.Prefix;
-        TranformationParameters transformationParameters;
+        readonly bool _includeComments;
+        string _inclusiveNamespacesPrefixList;
+        string[] _inclusivePrefixes;
+        string _prefix = XmlSignatureStrings.Prefix;
+        TranformationParameters _transformationParameters;
 
         public StrTransform()
         {
-            this.transformationParameters = new TranformationParameters();
-            this.includeComments = false;
+            _transformationParameters = new TranformationParameters();
+            _includeComments = false;
         }
 
         public override string Algorithm
         {
-            get
-            {
-                return SecurityAlgorithms.StrTransform;
-            }
+            get { return SecurityAlgorithms.StrTransform; }
         }
 
         public bool IncludeComments
         {
-            get
-            {
-                return this.includeComments;
-            }
+            get { return _includeComments; }
         }
 
         public string InclusiveNamespacesPrefixList
         {
-            get
-            {
-                return this.inclusiveNamespacesPrefixList;
-            }
+            get { return _inclusiveNamespacesPrefixList; }
             set
             {
-                this.inclusiveNamespacesPrefixList = value;
-                this.inclusivePrefixes = TokenizeInclusivePrefixList(value);
+                _inclusiveNamespacesPrefixList = value;
+                _inclusivePrefixes = TokenizeInclusivePrefixList(value);
             }
         }
 
@@ -61,14 +75,14 @@ namespace Microsoft.IdentityModel.Xml
 
         public string[] GetInclusivePrefixes()
         {
-            return this.inclusivePrefixes;
+            return _inclusivePrefixes;
         }
 
         CanonicalizationDriver GetConfiguredDriver(SignatureResourcePool resourcePool)
         {
             CanonicalizationDriver driver = resourcePool.TakeCanonicalizationDriver();
-            driver.IncludeComments = this.IncludeComments;
-            driver.SetInclusivePrefixes(this.inclusivePrefixes);
+            driver.IncludeComments = IncludeComments;
+            driver.SetInclusivePrefixes(_inclusivePrefixes);
             return driver;
         }
 
@@ -93,7 +107,6 @@ namespace Microsoft.IdentityModel.Xml
             else
             {
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedInputTypeForTransform"));
-                //throw LogHelper.LogExceptionMessage(new NotSupportedException(SR.GetString(SR.UnsupportedInputTypeForTransform, input.GetType())));
             }
         }
 
@@ -116,14 +129,13 @@ namespace Microsoft.IdentityModel.Xml
             else if (input is ISecurityElement)
             {
                 XmlDictionaryWriter utf8Writer = resourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(hashStream, this.IncludeComments, GetInclusivePrefixes());
+                utf8Writer.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
                 (input as ISecurityElement).WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
             }
             else
             {
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedInputTypeForTransform"));
-                //throw LogHelper.LogExceptionMessage(new NotSupportedException(SR.GetString(SR.UnsupportedInputTypeForTransform, input.GetType())));
             }
 
             hashStream.FlushHash();
@@ -135,7 +147,7 @@ namespace Microsoft.IdentityModel.Xml
             XmlDictionaryReader dictionaryReader = reader as XmlDictionaryReader;
             if (dictionaryReader != null && dictionaryReader.CanCanonicalize)
             {
-                dictionaryReader.StartCanonicalization(hashStream, this.IncludeComments, GetInclusivePrefixes());
+                dictionaryReader.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
                 dictionaryReader.Skip();
                 dictionaryReader.EndCanonicalization();
             }
@@ -150,14 +162,11 @@ namespace Microsoft.IdentityModel.Xml
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
             reader.MoveToStartElement(XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
-            this.prefix = reader.Prefix;
+            _prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
             string algorithm = reader.GetAttribute(XmlSignatureStrings.Algorithm, null);
-            if (algorithm != this.Algorithm)
-            {
+            if (algorithm != Algorithm)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("AlgorithmMismatchForTransform"));
-                //throw LogHelper.LogExceptionMessage(new CryptographicException(SR.GetString(SR.AlgorithmMismatchForTransform)));
-            }
 
             reader.MoveToContent();
             reader.Read();
@@ -165,7 +174,7 @@ namespace Microsoft.IdentityModel.Xml
             if (!isEmptyElement)
             {
                 if (reader.IsStartElement(XmlSignatureStrings.TransformationParameters, XmlSignatureStrings.SecurityJan2004Namespace))
-                    this.transformationParameters.ReadFrom(reader);
+                    _transformationParameters.ReadFrom(reader);
 
                 reader.MoveToContent();
                 reader.ReadEndElement();
@@ -174,20 +183,19 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
+            writer.WriteStartElement(_prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
             writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
-            writer.WriteString(this.Algorithm);
+            writer.WriteString(Algorithm);
             writer.WriteEndAttribute();
-            this.transformationParameters.WriteTo(writer);
+            _transformationParameters.WriteTo(writer);
             writer.WriteEndElement(); // Transform
         }
 
         static string[] TokenizeInclusivePrefixList(string prefixList)
         {
             if (prefixList == null)
-            {
                 return null;
-            }
+
             string[] prefixes = prefixList.Split(null);
             int count = 0;
             for (int i = 0; i < prefixes.Length; i++)
@@ -221,9 +229,7 @@ namespace Microsoft.IdentityModel.Xml
 
     class TranformationParameters
     {
-        public TranformationParameters()
-        {
-        }
+        public TranformationParameters() { }
 
         public string CanonicalizationAlgorithm
         {
@@ -251,17 +257,10 @@ namespace Microsoft.IdentityModel.Xml
                 reader.ReadStartElement();
 
                 if (algorithm == null)
-                {
                     throw LogHelper.LogExceptionMessage(new CryptographicException("dictionaryManager.XmlSignatureDictionary.CanonicalizationMethod"));
-                    //throw LogHelper.LogExceptionMessage(new CryptographicException(
-                    //    SR.GetString(SR.RequiredAttributeMissing, dictionaryManager.XmlSignatureDictionary.Algorithm, dictionaryManager.XmlSignatureDictionary.CanonicalizationMethod)));
-                }
 
-                if (algorithm != this.CanonicalizationAlgorithm)
-                {
+                if (algorithm != CanonicalizationAlgorithm)
                     throw LogHelper.LogExceptionMessage(new CryptographicException("AlgorithmMismatchForTransform"));
-                    //throw LogHelper.LogExceptionMessage(new CryptographicException(SR.GetString(SR.AlgorithmMismatchForTransform)));
-                }
 
 
                 // ReadEndElement() called only if element was not empty

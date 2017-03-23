@@ -34,9 +34,9 @@ namespace Microsoft.IdentityModel.Xml
 {
     sealed class EnvelopedSignatureTransform : Transform
     {
-        string prefix = XmlSignatureStrings.Prefix;
+        string _prefix = XmlSignatureStrings.Prefix;
 
-        public EnvelopedSignatureTransform() {}
+        public EnvelopedSignatureTransform() { }
 
         public override string Algorithm
         {
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Xml
             }
 
             WrappedReader reader = input as WrappedReader;
-            if ( reader != null )
+            if (reader != null)
             {
                 // The Enveloped Signature Transform is supposed to remove the
                 // Signature which encloses the transform element. Previous versions
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Xml
                 // as the depth, we narrow our range of support so that we require
                 // that the enveloped signature be a direct child of the element
                 // being signed.
-                reader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace, 1 );
+                reader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace, 1);
                 return reader;
             }
 
@@ -79,16 +79,14 @@ namespace Microsoft.IdentityModel.Xml
         {
             reader.MoveToContent();
             string algorithm = XmlUtil.ReadEmptyElementAndRequiredAttribute(reader,
-                XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace, XmlSignatureStrings.Algorithm, out this.prefix);
-            if (algorithm != this.Algorithm)
-            {
+                XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace, XmlSignatureStrings.Algorithm, out _prefix);
+            if (algorithm != Algorithm)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("AlgorithmMismatchForTransform"));
-            }
         }
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(this.prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
+            writer.WriteStartElement(_prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
             writer.WriteAttributeString(XmlSignatureStrings.Algorithm, null, Algorithm);
             writer.WriteEndElement();
         }

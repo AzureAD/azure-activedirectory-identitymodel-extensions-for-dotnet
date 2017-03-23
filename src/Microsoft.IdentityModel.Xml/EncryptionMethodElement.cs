@@ -1,30 +1,53 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
-{   
+{
     public class EncryptionMethodElement
     {
         public string Algorithm { get; set; }
 
         public string Parameters { get; set; }
 
-        public void ReadXml( XmlDictionaryReader reader )
+        public void ReadXml(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             reader.MoveToContent();
-            if ( !reader.IsStartElement(XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace ) )
+            if (!reader.IsStartElement(XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace))
                 return;
 
-            Algorithm = reader.GetAttribute(XmlEncryptionStrings.Algorithm, null );
+            Algorithm = reader.GetAttribute(XmlEncryptionStrings.Algorithm, null);
 
-            if ( !reader.IsEmptyElement )
+            if (!reader.IsEmptyElement)
             {
                 //
                 // Trace unread missing element
@@ -41,15 +64,15 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        public void WriteXml( XmlWriter writer )
+        public void WriteXml(XmlWriter writer)
         {
-            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace );
+            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace);
 
-            writer.WriteAttributeString(XmlEncryptionStrings.Algorithm, null, Algorithm );
+            writer.WriteAttributeString(XmlEncryptionStrings.Algorithm, null, Algorithm);
 
             // <EncryptionMethod>
 
-            writer.WriteEndElement(); 
+            writer.WriteEndElement();
         }
 
     }

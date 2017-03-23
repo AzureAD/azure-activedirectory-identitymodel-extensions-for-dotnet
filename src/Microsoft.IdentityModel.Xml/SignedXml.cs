@@ -1,6 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Security.Cryptography;
 using System.Xml;
@@ -12,16 +35,14 @@ namespace Microsoft.IdentityModel.Xml
     public class SignedXml : ISignatureValueSecurityElement
     {
         internal const string DefaultPrefix = XmlSignatureStrings.Prefix;
-        Signature _signature;
-        TransformFactory _transformFactory;
 
         public SignedXml(SignedInfo signedInfo)
         {
             if (signedInfo == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedInfo));
 
-            _transformFactory = TransformFactory.Instance;
-            _signature = new Signature(this, signedInfo);
+            TransformFactory = TransformFactory.Instance;
+            Signature = new Signature(this, signedInfo);
         }
 
         public bool HasId
@@ -31,50 +52,43 @@ namespace Microsoft.IdentityModel.Xml
 
         public string Id
         {
-            get { return _signature.Id; }
-            set { _signature.Id = value; }
+            get { return Signature.Id; }
+            set { Signature.Id = value; }
         }
 
-        public Signature Signature
-        {
-            get { return _signature; }
-        }
+        public Signature Signature { get; private set; }
 
-        public TransformFactory TransformFactory
-        {
-            get { return _transformFactory; }
-            set { _transformFactory = value; }
-        }
+        public TransformFactory TransformFactory { get; set; }
 
         public void ComputeSignature(SigningCredentials credentials)
         {
             // TODO - shouldn't need to create the hash algorithm.
             //var hash = credentials.CryptoProviderFactory.CreateHashAlgorithm(credentials.Algorithm);
             var hash = credentials.Key.CryptoProviderFactory.CreateHashAlgorithm(SecurityAlgorithms.Sha256);
-            this.Signature.SignedInfo.ComputeReferenceDigests();
-            this.Signature.SignedInfo.ComputeHash(hash);
+            Signature.SignedInfo.ComputeReferenceDigests();
+            Signature.SignedInfo.ComputeHash(hash);
             byte[] signature = hash.Hash;
-            this.Signature.SetSignatureValue(signature);
+            Signature.SetSignatureValue(signature);
         }
 
         public void CompleteSignatureVerification()
         {
-            this.Signature.SignedInfo.EnsureAllReferencesVerified();
+            Signature.SignedInfo.EnsureAllReferencesVerified();
         }
 
         public void EnsureDigestValidity(string id, object resolvedXmlSource)
         {
-            this.Signature.SignedInfo.EnsureDigestValidity(id, resolvedXmlSource);
+            Signature.SignedInfo.EnsureDigestValidity(id, resolvedXmlSource);
         }
 
         public bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
         {
-            return this.Signature.SignedInfo.EnsureDigestValidityIfIdMatches(id, resolvedXmlSource);
+            return Signature.SignedInfo.EnsureDigestValidityIfIdMatches(id, resolvedXmlSource);
         }
 
         public byte[] GetSignatureValue()
         {
-            return this.Signature.GetSignatureBytes();
+            return Signature.GetSignatureBytes();
         }
 
         public void ReadFrom(XmlReader reader)
@@ -84,16 +98,14 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
-            _signature.ReadFrom(reader);
+            Signature.ReadFrom(reader);
         }
 
         void VerifySignature(KeyedHashAlgorithm hash)
         {
-            this.Signature.SignedInfo.ComputeHash(hash);
+            Signature.SignedInfo.ComputeHash(hash);
             if (!Utility.AreEqual(hash.Hash, GetSignatureValue()))
-            {
                 throw LogHelper.LogExceptionMessage(new CryptographicException("SignatureVerificationFailed"));
-            }
         }
 
         public void StartSignatureVerification(SecurityKey verificationKey)
@@ -141,7 +153,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            _signature.WriteTo(writer);
+            Signature.WriteTo(writer);
         }
-    }    
+    }
 }

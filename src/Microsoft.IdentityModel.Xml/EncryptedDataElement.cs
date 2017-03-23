@@ -1,6 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.Security.Cryptography;
@@ -10,20 +33,20 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    
+
     /// <summary>
     /// This class implements a deserialization for: EncryptedData as defined in section 3.4 of http://www.w3.org/TR/2002/REC-xmlenc-core-2002120
     /// </summary>
     public class EncryptedDataElement : EncryptedTypeElement
     {
-        public static bool CanReadFrom( XmlReader reader )
+        public static bool CanReadFrom(XmlReader reader)
         {
             return reader != null && reader.IsStartElement(
                 XmlEncryptionStrings.EncryptedData,
-                XmlEncryptionStrings.Namespace );
+                XmlEncryptionStrings.Namespace);
         }
 
-        public EncryptedDataElement() {}
+        public EncryptedDataElement() { }
 
         /// <summary>
         /// Decrypts the data
@@ -32,7 +55,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">When algorithm is null</exception>
         /// <exception cref="InvalidOperationException">When no cipher data has been read</exception>
-        public byte[] Decrypt( SymmetricAlgorithm algorithm )
+        public byte[] Decrypt(SymmetricAlgorithm algorithm)
         {
             if (algorithm == null)
                 LogHelper.LogArgumentNullException(nameof(algorithm));
@@ -42,18 +65,18 @@ namespace Microsoft.IdentityModel.Xml
 
             byte[] cipherText = CipherData.CipherValue;
 
-            return ExtractIVAndDecrypt( algorithm, cipherText, 0, cipherText.Length );
+            return ExtractIVAndDecrypt(algorithm, cipherText, 0, cipherText.Length);
         }
 
-        public void Encrypt( SymmetricAlgorithm algorithm, byte[] buffer, int offset, int length )
+        public void Encrypt(SymmetricAlgorithm algorithm, byte[] buffer, int offset, int length)
         {
             byte[] iv;
             byte[] cipherText;
-            GenerateIVAndEncrypt( algorithm, buffer, offset, length, out iv, out cipherText );
-            CipherData.SetCipherValueFragments( iv, cipherText );
+            GenerateIVAndEncrypt(algorithm, buffer, offset, length, out iv, out cipherText);
+            CipherData.SetCipherValueFragments(iv, cipherText);
         }
 
-        static byte[] ExtractIVAndDecrypt( SymmetricAlgorithm algorithm, byte[] cipherText, int offset, int count )
+        static byte[] ExtractIVAndDecrypt(SymmetricAlgorithm algorithm, byte[] cipherText, int offset, int count)
         {
             byte[] iv = new byte[algorithm.BlockSize / 8];
 
@@ -63,7 +86,7 @@ namespace Microsoft.IdentityModel.Xml
             if (cipherText.Length - offset < iv.Length)
                 LogHelper.LogExceptionMessage(new XmlSignedInfoException("cipherText.Length"));
 
-            Buffer.BlockCopy( cipherText, offset, iv, 0, iv.Length );
+            Buffer.BlockCopy(cipherText, offset, iv, 0, iv.Length);
             algorithm.Padding = PaddingMode.ISO10126;
             algorithm.Mode = CipherMode.CBC;
 
@@ -72,34 +95,34 @@ namespace Microsoft.IdentityModel.Xml
 
             try
             {
-                decrTransform = algorithm.CreateDecryptor( algorithm.Key, iv );
-                plainText = decrTransform.TransformFinalBlock( cipherText, offset + iv.Length, count - iv.Length );
+                decrTransform = algorithm.CreateDecryptor(algorithm.Key, iv);
+                plainText = decrTransform.TransformFinalBlock(cipherText, offset + iv.Length, count - iv.Length);
             }
             finally
             {
-                if ( decrTransform != null )
+                if (decrTransform != null)
                     decrTransform.Dispose();
             }
 
             return plainText;
         }
 
-        static void GenerateIVAndEncrypt( SymmetricAlgorithm algorithm, byte[] plainText, int offset, int length, out byte[] iv, out byte[] cipherText )
+        static void GenerateIVAndEncrypt(SymmetricAlgorithm algorithm, byte[] plainText, int offset, int length, out byte[] iv, out byte[] cipherText)
         {
             RandomNumberGenerator random = CryptoHelper.RandomNumberGenerator;
             int ivSize = algorithm.BlockSize / 8;
             iv = new byte[ivSize];
-            random.GetBytes( iv );
+            random.GetBytes(iv);
             algorithm.Padding = PaddingMode.PKCS7;
             algorithm.Mode = CipherMode.CBC;
-            ICryptoTransform encrTransform = algorithm.CreateEncryptor( algorithm.Key, iv );
-            cipherText = encrTransform.TransformFinalBlock( plainText, offset, length );
+            ICryptoTransform encrTransform = algorithm.CreateEncryptor(algorithm.Key, iv);
+            cipherText = encrTransform.TransformFinalBlock(plainText, offset, length);
             encrTransform.Dispose();
         }
 
         public SecurityKey Key { get; set; }
 
-        public override void ReadExtensions( XmlDictionaryReader reader )
+        public override void ReadExtensions(XmlDictionaryReader reader)
         {
             // nothing to do here
         }
@@ -110,7 +133,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="reader"></param>
         /// <exception cref="ArgumentNullException">When reader is null</exception>
         /// <exception cref="ArgumentNullException">When securityTokenSerializer is null</exception>
-        public override void ReadXml( XmlDictionaryReader reader )
+        public override void ReadXml(XmlDictionaryReader reader)
         {
             if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
@@ -121,7 +144,7 @@ namespace Microsoft.IdentityModel.Xml
 
             // <EncryptedData> extends <EncryptedType>
             // base will read the start element and the end element.
-            base.ReadXml( reader );
+            base.ReadXml(reader);
         }
 
         /// <summary>
@@ -143,13 +166,13 @@ namespace Microsoft.IdentityModel.Xml
             //}
 
             // <EncryptedData>
-            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptedData, XmlEncryptionStrings.Namespace );
+            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptedData, XmlEncryptionStrings.Namespace);
 
             if (!string.IsNullOrEmpty(Id))
-                writer.WriteAttributeString(XmlEncryptionStrings.Id, null, Id );
+                writer.WriteAttributeString(XmlEncryptionStrings.Id, null, Id);
 
             if (!string.IsNullOrEmpty(Type))
-                writer.WriteAttributeString(XmlEncryptionStrings.Type, null, Type );
+                writer.WriteAttributeString(XmlEncryptionStrings.Type, null, Type);
 
             if (EncryptionMethod != null)
                 EncryptionMethod.WriteXml(writer);
@@ -160,7 +183,7 @@ namespace Microsoft.IdentityModel.Xml
             //    securityTokenSerializer.WriteKeyIdentifier( XmlDictionaryWriter.CreateDictionaryWriter( writer ), KeyIdentifier );
             //}
 
-            CipherData.WriteXml( writer );
+            CipherData.WriteXml(writer);
 
             // <EncryptedData> 
             writer.WriteEndElement();

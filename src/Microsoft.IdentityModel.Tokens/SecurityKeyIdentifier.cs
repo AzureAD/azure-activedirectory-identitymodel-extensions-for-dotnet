@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens
         //        throw LogHelper.LogArgumentNullException(nameof(clauses));
         //    }
 
-        //    this.clauses = new List<SecurityKeyIdentifierClause>(clauses.Length);
+        //    clauses = new List<SecurityKeyIdentifierClause>(clauses.Length);
         //    for (int i = 0; i < clauses.Length; i++)
         //    {
         //        Add(clauses[i]);

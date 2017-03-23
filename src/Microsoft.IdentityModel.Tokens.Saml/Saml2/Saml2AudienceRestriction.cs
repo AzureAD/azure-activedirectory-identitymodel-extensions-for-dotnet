@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
@@ -47,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates an instance of Saml2AudienceRestriction.
         /// </summary>
         public Saml2AudienceRestriction()
-        {}
+        { }
 
         /// <summary>
         /// Creates an instance of Saml2AudienceRestriction.
@@ -55,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="audience">The audience element contained in this restriction.</param>
         public Saml2AudienceRestriction(string audience)
             : this(new string[] { audience })
-        {}
+        { }
 
         /// <summary>
         /// Creates an instance of Saml2AudienceRestriction.
@@ -71,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null == audience)
                     throw LogHelper.LogArgumentNullException(nameof(audiences));
 
-                this._audiences.Add(audience);
+                _audiences.Add(audience);
             }
         }
 
@@ -80,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public ICollection<string> Audiences
         {
-            get { return this._audiences; }
+            get { return _audiences; }
         }
     }
 }

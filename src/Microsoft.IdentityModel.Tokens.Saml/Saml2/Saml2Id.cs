@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             try
             {
-                this._value = XmlConvert.VerifyNCName(value);
+                _value = XmlConvert.VerifyNCName(value);
             }
             catch (XmlException e)
             {
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Value
         {
-            get { return this._value; }
+            get { return _value; }
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             Saml2Id other = obj as Saml2Id;
-            return (null != other) && StringComparer.Ordinal.Equals(this._value, other.Value);
+            return (null != other) && StringComparer.Ordinal.Equals(_value, other.Value);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>The hash code for this object.</returns>
         public override int GetHashCode()
         {
-            return this._value.GetHashCode();
+            return _value.GetHashCode();
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>The string representation of this object.</returns>
         public override string ToString()
         {
-            return this._value;
+            return _value;
         }
     }
 }

@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
@@ -80,8 +79,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (string.IsNullOrEmpty(declarationReference))
                 throw LogHelper.LogArgumentNullException(nameof(declarationReference));
 
-            this._classReference = classReference;
-            this._declarationReference = declarationReference;
+            _classReference = classReference;
+            _declarationReference = declarationReference;
         }
 
         /// <summary>
@@ -92,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public ICollection<string> AuthenticatingAuthorities
         {
-            get { return this._authenticatingAuthorities; }
+            get { return _authenticatingAuthorities; }
         }
 
         /// <summary>
@@ -102,13 +101,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string ClassReference
         {
-            get { return this._classReference; }
+            get { return _classReference; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._classReference = value;
+                _classReference = value;
             }
         }
 
@@ -118,13 +117,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string DeclarationReference
         {
-            get { return this._declarationReference; }
+            get { return _declarationReference; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._declarationReference = value;
+                _declarationReference = value;
             }
         }
     }

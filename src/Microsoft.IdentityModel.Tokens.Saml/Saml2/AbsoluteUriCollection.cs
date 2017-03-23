@@ -43,9 +43,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (item == null)
                 throw LogHelper.LogArgumentNullException(nameof(item));
 
-            if( !item.IsAbsoluteUri)
+            if (!item.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11012, item)));
-            
+
             base.InsertItem(index, item);
         }
 

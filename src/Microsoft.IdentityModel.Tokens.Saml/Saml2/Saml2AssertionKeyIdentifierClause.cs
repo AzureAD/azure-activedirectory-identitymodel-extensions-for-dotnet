@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             : base(null, derivationNonce, derivationLength)
         {
             if (string.IsNullOrEmpty(id))
-                 throw LogHelper.LogArgumentNullException(nameof(id));
+                throw LogHelper.LogArgumentNullException(nameof(id));
 
             Id = id;
         }

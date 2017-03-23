@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+// TODO - shouldn't need this type
+
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
@@ -45,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2SecurityKeyIdentifierClause(Saml2Assertion assertion)
             : base(typeof(Saml2SecurityKeyIdentifierClause).ToString())
         {
-            this._assertion = assertion;
+            _assertion = assertion;
         }
 
         /// <summary>
@@ -54,7 +56,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <remarks>The assertion returned may be null.</remarks>
         public Saml2Assertion Assertion
         {
-            get { return this._assertion; }
+            get { return _assertion; }
         }
     }
 }

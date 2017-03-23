@@ -65,8 +65,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (!actionNamespace.IsAbsoluteUri)
                 throw LogHelper.LogArgumentNullException("nameof(actionNamespace), ID0013");
 
-            this._namespace = actionNamespace;
-            this._value = value;
+            _namespace = actionNamespace;
+            _value = value;
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Uri Namespace
         {
             get
-            { 
-                return this._namespace; 
+            {
+                return _namespace;
             }
 
             set
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!value.IsAbsoluteUri)
                     throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("value is not an AbsoluteUri"));
 
-                this._namespace = value;
+                _namespace = value;
             }
         }
 
@@ -100,8 +100,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public string Value
         {
             get
-            { 
-                return this._value; 
+            {
+                return _value;
             }
 
             set
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._value = value;
+                _value = value;
             }
         }
     }
