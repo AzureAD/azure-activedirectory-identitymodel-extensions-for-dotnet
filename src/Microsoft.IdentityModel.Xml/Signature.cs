@@ -36,6 +36,7 @@ namespace Microsoft.IdentityModel.Xml
         string _prefix = SignedXml.DefaultPrefix;
         readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
         readonly SignedInfo _signedInfo;
+        private KeyInfo _keyInfo;
 
         public Signature(SignedXml signedXml, SignedInfo signedInfo)
         {
@@ -71,6 +72,8 @@ namespace Microsoft.IdentityModel.Xml
 
             _signedInfo.ReadFrom(reader, _signedXml.TransformFactory);
             _signatureValueElement.ReadFrom(reader);
+            _keyInfo = new KeyInfo();
+            _keyInfo.ReadFrom(reader);
 
             reader.ReadEndElement(); // Signature
         }

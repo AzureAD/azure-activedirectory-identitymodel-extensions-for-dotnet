@@ -50,16 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Action"/> instance.</returns>
         public virtual Saml2Action ReadAction(XmlReader reader)
         {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (reader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.Action);
-
-            if (!reader.IsStartElement(Saml2Constants.Elements.Action, Saml2Constants.Namespace))
-                throw LogReadException(LogMessages.IDX11105, Saml2Constants.Elements.Action, reader.LocalName);
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Action, Saml2Constants.Namespace);
             try
             {
                 // @xsi:type
@@ -79,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, typeof(Saml2Action), ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Action);
             }
         }
 
@@ -97,18 +88,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Advice"/> element.</param>
         /// <returns>A <see cref="Saml2Advice"/> instance.</returns>
-        public virtual Saml2Advice ReadAdvice(XmlReader reader, TokenValidationParameters validationParameters)
+        public virtual Saml2Advice ReadAdvice(XmlReader reader)
         {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (reader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX11104, Saml2Strings.Advice);
-
-            if (!reader.IsStartElement(Saml2Strings.Advice, Saml2Strings.Namespace))
-                throw LogReadException(LogMessages.IDX11105, Saml2Strings.Advice, reader.LocalName);
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Advice, Saml2Constants.Namespace);
             try
             {
                 Saml2Advice advice = new Saml2Advice();
@@ -129,11 +111,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         if (reader.IsStartElement(Saml2Constants.Elements.AssertionIDRef, Saml2Constants.Namespace))
                             advice.AssertionIdReferences.Add(ReadSimpleNCNameElement(reader, Saml2Constants.Elements.AssertionIDRef));
                         else if (reader.IsStartElement(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace))
-                            advice.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Strings.Advice));
+                            advice.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Strings.Advice, UriKind.RelativeOrAbsolute, false));
                         else if (reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
-                            advice.Assertions.Add(ReadAssertion(reader, validationParameters));
+                            advice.Assertions.Add(ReadAssertion(reader));
                         else if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-                            advice.Assertions.Add(ReadAssertion(reader, validationParameters));
+                            advice.Assertions.Add(ReadAssertion(reader));
                         else
                             reader.Skip();
                     }
@@ -145,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, Saml2Strings.Advice, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Strings.Advice);
             }
         }
 
@@ -154,13 +136,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
-        public virtual Saml2Assertion ReadAssertion(XmlReader reader, TokenValidationParameters validationParameters)
+        public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
             if (null == reader)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            if (null == validationParameters)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             XmlDictionaryReader plaintextReader = XmlDictionaryReader.CreateDictionaryReader(reader);
 
@@ -253,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // <Advice> 0-1
                 if (realReader.IsStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace))
-                    assertion.Advice = ReadAdvice(realReader, validationParameters);
+                    assertion.Advice = ReadAdvice(realReader);
 
                 // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
                 while (realReader.IsStartElement())
@@ -307,7 +286,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, Saml2Strings.Assertion, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Strings.Assertion);
             }
         }
 
@@ -324,14 +303,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Attribute"/> instance.</returns>
         public virtual Saml2Attribute ReadAttribute(XmlReader reader)
         {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.Attribute, Saml2Constants.Namespace))
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenException($"Reader is not on element 'ns:name' {Saml2Constants.Namespace} : {Saml2Constants.Elements.Attribute}."));
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
             try
             {
                 Saml2Attribute attribute;
@@ -434,9 +406,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, Saml2Constants.Elements.Attribute, ex);
             }
         }
 
@@ -449,35 +419,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2AttributeStatement"/> instance.</returns>
         public virtual Saml2AttributeStatement ReadAttributeStatement(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            bool isStatementElement = false;
-            if (reader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-            {
-                isStatementElement = true;
-            }
-            else if (!reader.IsStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
             try
             {
-                // defer disallowing empty element until checking xsi:type
-                bool isEmpty = reader.IsEmptyElement;
-
-                // @attributes
-
                 // @xsi:type
-                XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AttributeStatementType, Saml2Constants.Namespace, isStatementElement);
-
-                // disallow empty element, since xsi:type is ok
-                if (isEmpty)
-                    throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.AttributeStatement);
+                XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AttributeStatementType, Saml2Constants.Namespace, false);
 
                 // Content
                 Saml2AttributeStatement statement = new Saml2AttributeStatement();
@@ -511,7 +457,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, Saml2Constants.Elements.AttributeStatement, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeStatement);
             }
         }
 
@@ -549,16 +495,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // would be missing that part.
             //
 
-            if (reader == null)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
 
-            string result = String.Empty;
-            string whiteSpace = String.Empty;
-
-            reader.ReadStartElement(Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
-
+            string result = string.Empty;
+            string whiteSpace = string.Empty;
             while (reader.NodeType == XmlNodeType.Whitespace)
             {
                 whiteSpace += reader.Value;
@@ -631,10 +571,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // We are now laxing the uri check for audience restriction to support interop partners 
                 // This is a specific request from server : Bug 11850
                 // ReadSimpleUriElement now has a flag that turns lax reading ON/OFF.
-                audienceRestriction = new Saml2AudienceRestriction(ReadSimpleUriElement(reader, Saml2Constants.Elements.Audience, UriKind.RelativeOrAbsolute, true).OriginalString);
+                audienceRestriction = new Saml2AudienceRestriction(ReadSimpleUriElement(reader, Saml2Constants.Elements.Audience, UriKind.RelativeOrAbsolute, false).OriginalString);
                 while (reader.IsStartElement(Saml2Constants.Elements.Audience, Saml2Constants.Namespace))
                 {
-                    audienceRestriction.Audiences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.Audience, UriKind.RelativeOrAbsolute, true).OriginalString);
+                    audienceRestriction.Audiences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.Audience, UriKind.RelativeOrAbsolute, false).OriginalString);
                 }
 
                 reader.ReadEndElement();
@@ -642,7 +582,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, Saml2Constants.Elements.Audience, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Audience);
             }
         }
 
@@ -658,25 +598,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2AuthenticationContext"/> instance.</returns>
         public virtual Saml2AuthenticationContext ReadAuthenticationContext(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
             try
             {
-                // Disallow empty
-                if (reader.IsEmptyElement)
-                    throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.AuthnContext);
-
-                // @attributes
-
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthnContextType, Saml2Constants.Namespace);
 
@@ -691,9 +615,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // <AuthnContextClassRef> - see comment above
                 if (reader.IsStartElement(Saml2Constants.Elements.AuthnContextClassRef, Saml2Constants.Namespace))
-                {
-                    classRef = ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthnContextClassRef);
-                }
+                    classRef = ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthnContextClassRef, UriKind.RelativeOrAbsolute, false);
 
                 // <AuthnContextDecl> - see comment above
                 if (reader.IsStartElement(Saml2Constants.Elements.AuthnContextDecl, Saml2Constants.Namespace))
@@ -702,31 +624,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // <AuthnContextDeclRef> - see comment above
                 // If there was no ClassRef, there must be a DeclRef
                 if (reader.IsStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace))
-                {
-                    declRef = ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthnContextDeclRef);
-                }
+                    declRef = ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthnContextDeclRef, UriKind.RelativeOrAbsolute, false);
                 else if (null == classRef)
-                {
                     reader.ReadStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace);
-                }
 
                 // Now we have enough data to create the object
                 // TODO - relax URI - string?
-                Saml2AuthenticationContext authnContext = new Saml2AuthenticationContext(classRef.OriginalString, declRef.OriginalString);
+                var authnContext = new Saml2AuthenticationContext(classRef.OriginalString, declRef.OriginalString);
 
                 // <AuthenticatingAuthority> - 0-OO
                 while (reader.IsStartElement(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace))
-                {
-                    authnContext.AuthenticatingAuthorities.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthenticatingAuthority).OriginalString);
-                }
+                    authnContext.AuthenticatingAuthorities.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthenticatingAuthority, UriKind.RelativeOrAbsolute, false).OriginalString);
 
                 reader.ReadEndElement();
-
                 return authnContext;
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, Saml2Constants.Elements.AuthnContext, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnContext);
             }
         }
 
@@ -738,22 +653,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2AuthenticationStatement"/> instance.</returns>
         public virtual Saml2AuthenticationStatement ReadAuthenticationStatement(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            bool isStatementElement = false;
-            if (reader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-            {
-                isStatementElement = true;
-            }
-            else if (!reader.IsStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
             try
             {
                 // Must cache the individual data since the required
@@ -771,11 +671,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 string value;
 
                 // @xsi:type -- if we're a <Statement> element, this declaration must be present
-                XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthnStatementType, Saml2Constants.Namespace, isStatementElement);
-
-                // disallow empty, since xsi:type is ok
-                if (isEmpty)
-                    throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.AuthnStatement);
+                XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthnStatementType, Saml2Constants.Namespace, false);
 
                 // @AuthnInstant - required
                 value = reader.GetAttribute(Saml2Constants.Attributes.AuthnInstant);
@@ -790,18 +686,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @SessionNotOnOrAfter - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.SessionNotOnOrAfter);
                 if (!string.IsNullOrEmpty(value))
-                {
                     sessionNotOnOrAfter = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
-                }
 
                 // Content
                 reader.Read();
 
                 // <SubjectLocality> 0-1
                 if (reader.IsStartElement(Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace))
-                {
                     subjectLocality = ReadSubjectLocality(reader);
-                }
 
                 // <AuthnContext> 1
                 authnContext = ReadAuthenticationContext(reader);
@@ -809,18 +701,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 reader.ReadEndElement();
 
                 // Construct the actual object
-                Saml2AuthenticationStatement authnStatement = new Saml2AuthenticationStatement(authnContext, authnInstant);
+                var authnStatement = new Saml2AuthenticationStatement(authnContext, authnInstant);
                 authnStatement.SessionIndex = sessionIndex;
                 authnStatement.SessionNotOnOrAfter = sessionNotOnOrAfter;
                 authnStatement.SubjectLocality = subjectLocality;
-
                 return authnStatement;
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement);
             }
         }
 
@@ -833,22 +722,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2AuthorizationDecisionStatement"/> instance.</returns>
         public virtual Saml2AuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            bool isStatementElement = false;
-            if (reader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-            {
-                isStatementElement = true;
-            }
-            else if (!reader.IsStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
             try
             {
                 // Need the attributes before we can instantiate
@@ -856,41 +730,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 Saml2AccessDecision decision;
                 Uri resource;
 
-                // defer rejecting empty until processing xsi:type
-                bool isEmpty = reader.IsEmptyElement;
-
                 // @attributes
                 string value;
 
                 // @xsi:type
-                XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthzDecisionStatementType, Saml2Constants.Namespace, isStatementElement);
-
-                // disallow empty, since xsi:type is ok
-                if (isEmpty)
-                    throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.AuthzDecisionStatement);
+                XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthzDecisionStatementType, Saml2Constants.Namespace, false);
 
                 // @Decision - required
                 value = reader.GetAttribute(Saml2Constants.Attributes.Decision);
                 if (string.IsNullOrEmpty(value))
-                {
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Decision);
-                }
                 else if (StringComparer.Ordinal.Equals(Saml2AccessDecision.Permit.ToString(), value))
-                {
                     decision = Saml2AccessDecision.Permit;
-                }
                 else if (StringComparer.Ordinal.Equals(Saml2AccessDecision.Deny.ToString(), value))
-                {
                     decision = Saml2AccessDecision.Deny;
-                }
                 else if (StringComparer.Ordinal.Equals(Saml2AccessDecision.Indeterminate.ToString(), value))
-                {
                     decision = Saml2AccessDecision.Indeterminate;
-                }
                 else
-                {
                     throw LogReadException(LogMessages.IDX11135, value);
-                }
 
                 // @Resource - required
                 value = reader.GetAttribute(Saml2Constants.Attributes.Resource);
@@ -923,19 +780,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // <Evidence> 0-1
                 if (reader.IsStartElement(Saml2Constants.Elements.Evidence, Saml2Constants.Namespace))
-                {
                     statement.Evidence = ReadEvidence(reader);
-                }
 
                 reader.ReadEndElement();
-
                 return statement;
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement);
             }
         }
 
@@ -950,42 +802,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Conditions"/> instance.</returns>
         public virtual Saml2Conditions ReadConditions(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
             try
             {
                 Saml2Conditions conditions = new Saml2Conditions();
-
                 bool isEmpty = reader.IsEmptyElement;
-
-                // @attributes
-                string value;
 
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.ConditionsType, Saml2Constants.Namespace);
 
                 // @NotBefore - optional
-                value = reader.GetAttribute(Saml2Constants.Attributes.NotBefore);
+                var value = reader.GetAttribute(Saml2Constants.Attributes.NotBefore);
                 if (!string.IsNullOrEmpty(value))
-                {
                     conditions.NotBefore = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
-                }
 
                 // @NotOnOrAfter - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.NotOnOrAfter);
                 if (!string.IsNullOrEmpty(value))
-                {
                     conditions.NotOnOrAfter = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
-                }
 
                 // Content
                 reader.ReadStartElement();
@@ -1065,9 +899,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Conditions);
             }
         }
 
@@ -1128,21 +960,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Evidence"/> instance.</returns>
         public virtual Saml2Evidence ReadEvidence(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.Evidence, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
-            }
-
-            // disallow empty
-            if (reader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.Evidence);
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
             try
             {
                 Saml2Evidence evidence = new Saml2Evidence();
@@ -1163,15 +981,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                     else if (reader.IsStartElement(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace))
                     {
-                        evidence.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AssertionURIRef));
+                        evidence.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AssertionURIRef, UriKind.RelativeOrAbsolute, false));
                     }
                     else if (reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
                     {
-                        evidence.Assertions.Add(ReadAssertion(reader, null));
+                        evidence.Assertions.Add(ReadAssertion(reader));
                     }
                     else if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
                     {
-                        evidence.Assertions.Add(ReadAssertion(reader, null));
+                        evidence.Assertions.Add(ReadAssertion(reader));
                     }
                 }
 
@@ -1186,9 +1004,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Evidence);
             }
         }
 
@@ -1199,17 +1015,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2NameIdentifier"/> instance.</returns>
         public virtual Saml2NameIdentifier ReadIssuer(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.Issuer, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
             return ReadNameIdType(reader);
         }
 
@@ -1221,16 +1027,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
         public virtual Saml2NameIdentifier ReadNameId(XmlReader reader)
         {
-            if (null == reader)
-            {
+            if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
 
             // throw if wrong element
             if (!reader.IsStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
-            }
+                LogReadException(LogMessages.IDX11105, Saml2Constants.Elements.NameID, reader.LocalName);
 
             return ReadNameIdType(reader);
         }
@@ -1287,7 +1089,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 // Content is string
-                nameIdentifier.Value = reader.ReadElementString();
+                nameIdentifier.Value = reader.ReadElementContentAsString();
 
                 // According to section 8.3.6, if the name identifier format is of type 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity'
                 // the name identifier value must be a uri and name qualifier, spname qualifier, and spproded id must be omitted.
@@ -1302,14 +1104,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         || !string.IsNullOrEmpty(nameIdentifier.SPProvidedId))
                         throw LogReadException(LogMessages.IDX11124, nameIdentifier.Value, Saml2Constants.NameIdentifierFormats.Entity.AbsoluteUri);
                 }
-
                 return nameIdentifier;
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Types.NameIDType);
             }
         }
 
@@ -1325,26 +1124,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>An instance of <see cref="Saml2ProxyRestriction"/></returns>
         public virtual Saml2ProxyRestriction ReadProxyRestriction(XmlReader reader)
         {
-            if (null == reader)
-            {
+            if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
 
             // throw if wrong element
             bool isConditionElement = false;
             if (reader.IsStartElement(Saml2Constants.Elements.Condition, Saml2Constants.Namespace))
-            {
                 isConditionElement = true;
-            }
             else if (!reader.IsStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace))
-            {
+
                 reader.ReadStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace);
-            }
 
             try
             {
                 Saml2ProxyRestriction proxyRestriction = new Saml2ProxyRestriction();
-
                 bool isEmpty = reader.IsEmptyElement;
 
                 // @attributes
@@ -1367,7 +1160,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     // <Audience> - 0-OO
                     while (reader.IsStartElement(Saml2Constants.Elements.Audience, Saml2Constants.Namespace))
                     {
-                        proxyRestriction.Audiences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.Audience));
+                        proxyRestriction.Audiences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.Audience, UriKind.RelativeOrAbsolute, false));
                     }
 
                     reader.ReadEndElement();
@@ -1377,9 +1170,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.ProxyRestricton);
             }
         }
 
@@ -1479,25 +1270,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public virtual Saml2Subject ReadSubject(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
             try
             {
-                // disallow empty
-                if (reader.IsEmptyElement)
-                {
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("reader is empty"));
-                }
-
                 // @attributes
 
                 // @xsi:type
@@ -1526,9 +1301,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Subject);
             }
         }
 
@@ -1539,17 +1312,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>An instance of <see cref="Saml2SubjectConfirmation"/> .</returns>
         public virtual Saml2SubjectConfirmation ReadSubjectConfirmation(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace, true);
             try
             {
                 bool isEmpty = reader.IsEmptyElement;
@@ -1588,9 +1351,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmation);
             }
         }
 
@@ -1605,16 +1366,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public virtual Saml2SubjectConfirmationData ReadSubjectConfirmationData(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            if (!reader.IsStartElement(Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
-            }
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
             try
             {
                 Saml2SubjectConfirmationData confirmationData = new Saml2SubjectConfirmationData();
@@ -1707,9 +1459,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmationData);
             }
         }
 
@@ -1790,14 +1540,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>An instance of <see cref="Saml2SubjectLocality"/> .</returns>
         public virtual Saml2SubjectLocality ReadSubjectLocality(XmlReader reader)
         {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-
-            if (!reader.IsStartElement(Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace))
-                LogReadException(LogMessages.IDX11105, Saml2Constants.Elements.SubjectLocality, reader.LocalName);
-
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace);
             try
             {
                 Saml2SubjectLocality subjectLocality = new Saml2SubjectLocality();
@@ -1825,7 +1568,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, Saml2Constants.Elements.SubjectLocality, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectLocality);
             }
         }
 
@@ -2868,21 +2611,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
         }
 
-        // Reads an element with simple content anyURI. Since this is SAML, 
-        // restricts the URI to absolute.
-        internal static Uri ReadSimpleUriElement(XmlReader reader, string element)
-        {
-            return ReadSimpleUriElement(reader, element, UriKind.Absolute);
-        }
-
-        // Reads an element with simple content anyURI where a UriKind can be specified
-        internal static Uri ReadSimpleUriElement(XmlReader reader, string element, UriKind kind)
-        {
-            return ReadSimpleUriElement(reader, element, kind, false);
-        }
-
         // allow lax reading of relative URIs in some instances for interop
-        internal static Uri ReadSimpleUriElement(XmlReader reader, string element, UriKind kind, bool allowLaxReading)
+        internal static Uri ReadSimpleUriElement(XmlReader reader, string element, UriKind kind, bool requireUri)
         {
             try
             {
@@ -2890,24 +2620,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11104, "Uri");
 
                 XmlUtil.ValidateXsiType(reader, "anyURI", XmlSchema.Namespace);
-
                 reader.MoveToElement();
                 string value = reader.ReadElementContentAsString();
 
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106);
+                    throw LogReadException(LogMessages.IDX11136, element);
 
                 // TODO - kind can change.
-                if (UriUtil.CanCreateValidUri(value, kind))
+                if (requireUri && !UriUtil.CanCreateValidUri(value, kind))
                     throw LogReadException(LogMessages.IDX11107, element, value);
 
                 return new Uri(value, kind);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(
-                    new Saml2SecurityTokenReadException(
-                        LogHelper.FormatInvariant(LogMessages.IDX11102, typeof(Saml2Id)), ex));
+                throw LogReadException(LogMessages.IDX11102, element, ex);
             }
         }
 
@@ -2951,5 +2678,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             return LogHelper.LogExceptionMessage(new Saml2SecurityTokenWriteException(LogHelper.FormatInvariant(format, args), inner));
         }
 
+        internal static void CheckReaderOnEntry(XmlReader reader, string element, string ns, bool allowEmptyElement = false )
+        {
+            if (null == reader)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            reader.MoveToContent();
+            if (!allowEmptyElement && reader.IsEmptyElement)
+                throw LogReadException(LogMessages.IDX11104, element);
+
+            if (!reader.IsStartElement(element, ns))
+                throw LogReadException(LogMessages.IDX11105, element, reader.LocalName);
+        }
     }
 }
