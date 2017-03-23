@@ -103,11 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
         public int MaximumTokenSizeInBytes
         {
-            get
-            {
-                return _maximumTokenSizeInBytes;
-            }
-
+            get { return _maximumTokenSizeInBytes; }
             set
             {
                 if (value < 1)
@@ -231,7 +227,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (token.Length* 2 > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX11013, token.Length, MaximumTokenSizeInBytes)));
 
-            return null;
+            using (StringReader sr = new StringReader(token))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    var assertion = Serializer.ReadAssertion(reader);
+                    return new Saml2SecurityToken(assertion);
+                }
+            }
         }
 
         /// <summary>
@@ -242,11 +245,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="InvalidOperationException">Is thrown if 'Configuration', 'Configruation.IssuerTokenResolver' or 'Configuration.ServiceTokenResolver is null.</exception>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            Saml2Assertion assertion = Serializer.ReadAssertion(reader, validationParameters);
-            return new Saml2SecurityToken(assertion);
+            return new Saml2SecurityToken(Serializer.ReadAssertion(reader));
         }
-
-
 
         internal static XmlDictionaryReader CreatePlaintextReaderFromEncryptedData(
                         XmlDictionaryReader reader,
@@ -1487,6 +1487,52 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             key = null;
             return false;
+        }
+
+        /// <summary>
+        /// Determines if an issuer found in a <see cref="Saml2SecurityToken"/> is valid.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate</param>
+        /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>The issuer to use when creating the <see cref="Claim"/>(s) in the <see cref="ClaimsIdentity"/>.</returns>
+        /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
+        protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (validationParameters.ValidateAudience)
+            {
+                if (validationParameters.AudienceValidator != null)
+                    validationParameters.AudienceValidator(audiences, securityToken, validationParameters);
+                else
+                    Validators.ValidateAudience(audiences, securityToken, validationParameters);
+            }
+        }
+
+        /// <summary>
+        /// Determines if an issuer found in a <see cref="Saml2SecurityToken"/> is valid.
+        /// </summary>
+        /// <param name="issuer">The issuer to validate</param>
+        /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>The issuer to use when creating the <see cref="Claim"/>(s) in the <see cref="ClaimsIdentity"/>.</returns>
+        /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
+        protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (validationParameters.ValidateIssuer)
+            {
+                if (validationParameters.IssuerValidator != null)
+                    return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
+                else
+                    return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
+            }
+
+            return issuer;
         }
 
         /// <summary>

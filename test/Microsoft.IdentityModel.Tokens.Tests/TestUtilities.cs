@@ -414,6 +414,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 bytes[i] = (byte)(bytes[i] ^ bytes[i + 1]);
             }
         }
+        public static void TestHeader(string testcase, string variation, ref bool first)
+        {
+            TestHeader($"{testcase} : {variation}", ref first);
+        }
 
         public static void TestHeader(string testcase, ref bool first)
         {

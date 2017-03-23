@@ -32,6 +32,7 @@
   <AttributeStatement>
     <Attribute Name="http://schemas.microsoft.com/identity/claims/tenantid">
       <AttributeValue>add29489-7269-41f4-8841-b63c95564420</AttributeValue>
+      <AttributeValue>add29489-7269-41f4-8841-b63c95564421</AttributeValue>
     </Attribute>
     <Attribute Name="http://schemas.microsoft.com/identity/claims/objectidentifier">
       <AttributeValue>d1ad9ce7-b322-4221-ab74-1e1011e1bbcb</AttributeValue>

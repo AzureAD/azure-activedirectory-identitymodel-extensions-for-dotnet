@@ -93,6 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11133 = "IDX11133: The Saml2Assertion Statements collection contains an unrecognized Saml2Statement.To handle custom Saml2Statement objects, extend Saml2SecurityTokenHandler and override WriteStatement. Type: '{0}'";
         internal const string IDX11134 = "IDX11134: '{1}' was not a Absolute Uri, was: '{2}'.";
         internal const string IDX11135 = "IDX11135: An unrecognized value was encountered for the SAML2:AuthorizationDecisionStatement element's Decision attribute: '{0}'";
+        internal const string IDX11136 = "IDX11136: Unable to read for Saml2SecurityToken. Required Element: '{0}' is missing or empty.";
 
         // Saml2SecurityTokenHandler writing
         internal const string IDX11140 = "IDX11140: The Saml2SecurityTokenHandler can only write SecurityToken objects of type Saml2SecurityToken.";
