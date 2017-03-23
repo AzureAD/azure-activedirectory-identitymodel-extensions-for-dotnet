@@ -105,6 +105,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11146 = "IDX11146: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies the Bearer confirmation method but identifies keys in the SubjectConfirmationData.";
         internal const string IDX11147 = "IDX11147: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies the Holder-of-key confirmation method but identifies no keys in the SubjectConfirmationData.";
         internal const string IDX11148 = "IDX11148: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies an unsupported confirmation method: '{0}'";
+        internal const string IDX11149 = "IDX11149: Both AuthenticationContext ClassReference DeclarationReference can not be null.";
 
         // NotSupported Exceptions
 #pragma warning restore 1591

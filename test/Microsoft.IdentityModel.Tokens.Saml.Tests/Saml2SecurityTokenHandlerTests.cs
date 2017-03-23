@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public SecurityToken CompareTo { get; set; }
 
-        public ExpectedException ExpectedException { get; set; }
+        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
 
         public Type ExceptionType { get; set; }
 
@@ -70,9 +70,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
     public class Saml2SecurityTokenHandlerTests
     {
-        private static bool _firstValidateToken = true;
-        private static bool _firstValidateIssuer = true;
+        private static bool _firstCanReadToken = true;
+        private static bool _firstReadToken = true;
         private static bool _firstValidateAudience = true;
+        private static bool _firstValidateIssuer = true;
+        private static bool _firstValidateToken = true;
 
         [Fact]
         public void Constructors()
@@ -100,9 +102,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CanReadToken(CreateAndValidateParams theoryData)
         {
-            if (theoryData.CanRead != theoryData.Handler.CanReadToken(theoryData.Token))
+            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.CanReadToken", theoryData.TestId, ref _firstCanReadToken);
+            try
             {
-                Assert.False(false, $"Expected CanRead != CanRead, token: {theoryData.Token}");
+                // TODO - need to pass actual Saml2Token
+
+                if (theoryData.CanRead != theoryData.Handler.CanReadToken(theoryData.Token))
+                    Assert.False(true, $"Expected CanRead != CanRead, token: {theoryData.Token}");
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 
@@ -118,6 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateParams
                     {
                         CanRead = false,
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Handler = handler,
                         TestId = "Null Token",
                         Token = null
@@ -146,6 +159,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
                 //samlString = IdentityUtilities.CreateSaml2Token();
                 //Assert.True(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+
+                return theoryData;
+            }
+        }
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadTokenTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadToken(CreateAndValidateParams theoryData)
+        {
+            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.ReadToken", theoryData.TestId, ref _firstReadToken);
+            try
+            {
+                theoryData.Handler.ReadToken(theoryData.Token);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<CreateAndValidateParams> ReadTokenTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<CreateAndValidateParams>();
+
+                theoryData.Add(
+                    new CreateAndValidateParams
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = "AADSaml2Token",
+                        Token = RefrenceSaml2Token.SamlToken
+                    });
 
                 return theoryData;
             }
@@ -182,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string>(),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Handler = handler,
-                        TestId = "'TokenValidationParameters null'",
+                        TestId = "TokenValidationParameters null",
                         ValidationParameters = null,
                     });
 
@@ -192,7 +239,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string>(),
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = handler,
-                        TestId = "'ValidateAudience = false'",
+                        TestId = "ValidateAudience = false",
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateAudience = false,
@@ -205,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string>(),
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                         Handler = handler,
-                        TestId = "'no audiences in validationParameters",
+                        TestId = "no audiences in validationParameters",
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateAudience = true,
@@ -218,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string> { "John" },
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                         Handler = handler,
-                        TestId = "'audience has value, tvp has no values'",
+                        TestId = "audience has value, tvp has no values",
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateAudience = true,
@@ -231,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string> { "John" },
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         Handler = handler,
-                        TestId = "'audience not matched'",
+                        TestId = "audience not matched",
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateAudience = true,
@@ -245,7 +292,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string> { "John" },
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = handler,
-                        TestId = "'AudienceValidator returns true'",
+                        TestId = "AudienceValidator returns true",
                         ValidationParameters = new TokenValidationParameters
                         {
                             AudienceValidator = (aud, token, type) =>
@@ -263,7 +310,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Audiences = new List<string> { "John" },
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = handler,
-                        TestId = "'AudienceValidator throws, validateAudience false'",
+                        TestId = "AudienceValidator throws, validateAudience false",
                         ValidationParameters = new TokenValidationParameters
                         {
                             AudienceValidator = IdentityUtilities.AudienceValidatorThrows,
@@ -307,7 +354,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Handler = handler,
                         Issuer = "bob",
-                        TestId = "'ValidationParameters null'",
+                        TestId = "ValidationParameters null",
                         ValidationParameters = null,
                     });
 
@@ -316,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = handler,
-                        TestId = "'ValidateIssuer == false'",
+                        TestId = "ValidateIssuer == false",
                         ValidationParameters = new TokenValidationParameters { ValidateIssuer = false },
                     });
 
@@ -326,7 +373,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
                         Handler = handler,
                         Issuer = "bob",
-                        TestId = "'Issuer not matched'",
+                        TestId = "Issuer not matched",
                         ValidationParameters = new TokenValidationParameters { ValidIssuer = "frank" }
                     });
 
@@ -336,7 +383,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = handler,
                         Issuer = "bob",
-                        TestId = "'Issuer matched'",
+                        TestId = "Issuer matched",
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateAudience = false,
@@ -350,7 +397,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"),
                         Handler = handler,
                         Issuer = "bob",
-                        TestId = "'ValidIssuers set but not matched'",
+                        TestId = "ValidIssuers set but not matched",
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateAudience = false,
@@ -364,7 +411,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = handler,
                         Issuer = "bob",
-                        TestId = "'IssuerValidator - echo'",
+                        TestId = "IssuerValidator - echo",
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerValidator = IdentityUtilities.IssuerValidatorEcho,

@@ -205,6 +205,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             Serializer.WriteAssertion(writer, samlToken.Assertion);
         }
 
+        public override bool CanReadToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (token.Length* 2 > MaximumTokenSizeInBytes)
+                return false;
+
+            using (StringReader sr = new StringReader(token))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    return CanReadToken(reader);
+                }
+            }
+        }
+
         /// <summary>
         /// Indicates whether the current XML element can be read as a token of the type handled by this instance.
         /// </summary>
@@ -689,7 +706,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (tokenDescriptor.Subject == null)
                 return null;
 
-            string authenticationMethod = null;
+            Uri authenticationMethod = null;
             string authenticationInstant = null;
 
             // Search for an Authentication Claim.
@@ -699,7 +716,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // We support only one authentication statement and hence we just pick the first authentication type
                 // claim found in the claim collection. Since the spec allows multiple Auth Statements, 
                 // we do not throw an error.
-                authenticationMethod = claimCollection.First<Claim>().Value;
+                authenticationMethod = new Uri(claimCollection.First<Claim>().Value);
             }
 
             claimCollection = from c in tokenDescriptor.Subject.Claims where c.Type == ClaimTypes.AuthenticationInstant select c;
@@ -1220,7 +1237,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 subject.AddClaim(
                         new Claim(
                             ClaimTypes.AuthenticationMethod,
-                            statement.AuthenticationContext.ClassReference,
+                            statement.AuthenticationContext.ClassReference.AbsoluteUri,
                             ClaimValueTypes.String,
                             issuer));
             }
