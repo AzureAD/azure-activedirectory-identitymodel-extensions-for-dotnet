@@ -41,6 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11010 = "IDX11010: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
         internal const string IDX11011 = "IDX11011: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
         internal const string IDX11012 = "IDX11012: Uri must be an AbsoluteUri is: '{0}'";
+        internal const string IDX11013 = "IDX11013: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
 
         // token validation
         internal const string IDX11040 = "IDX11040: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";

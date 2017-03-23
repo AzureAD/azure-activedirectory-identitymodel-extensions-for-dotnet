@@ -15,12 +15,7 @@
         }
     }
   },
-    "buildOptions": {
-        "warningsAsErrors": true,
-        "compile": {
-            "exclude": [
-                "Saml2SecurityTokenHandlerTests.cs"
-            ]
-        }
+  "buildOptions": {
+    "warningsAsErrors": true
     }
 }
