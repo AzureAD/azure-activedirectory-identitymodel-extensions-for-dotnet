@@ -28,7 +28,7 @@
 using System;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
-{   
+{
     /// <summary>
     /// Contains constants related to SAML2.
     /// </summary>
@@ -374,20 +374,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             public const string ActionType = "ActionType";
             public const string AdviceType = "AdviceType";
-            public const string AssertionType = "AssertionType";           
-            public const string AttributeStatementType = "AttributeStatementType";            
-            public const string AttributeType = "AttributeType";            
-            public const string AudienceRestrictionType = "AudienceRestrictionType";            
-            public const string AuthnContextType = "AuthnContextType";            
-            public const string AuthnStatementType = "AuthnStatementType";            
-            public const string AuthzDecisionStatementType = "AuthzDecisionStatementType";            
-            public const string BaseIDAbstractType = "BaseIDAbstractType";            
-            public const string ConditionAbstractType = "ConditionAbstractType";            
-            public const string ConditionsType = "ConditionsType";            
-            public const string EncryptedElementType = "EncryptedElementType";            
-            public const string EvidenceType = "EvidenceType";            
-            public const string KeyInfoConfirmationDataType = "KeyInfoConfirmationDataType";            
-            public const string NameIDType = "NameIDType";            
+            public const string AssertionType = "AssertionType";
+            public const string AttributeStatementType = "AttributeStatementType";
+            public const string AttributeType = "AttributeType";
+            public const string AudienceRestrictionType = "AudienceRestrictionType";
+            public const string AuthnContextType = "AuthnContextType";
+            public const string AuthnStatementType = "AuthnStatementType";
+            public const string AuthzDecisionStatementType = "AuthzDecisionStatementType";
+            public const string BaseIDAbstractType = "BaseIDAbstractType";
+            public const string ConditionAbstractType = "ConditionAbstractType";
+            public const string ConditionsType = "ConditionsType";
+            public const string EncryptedElementType = "EncryptedElementType";
+            public const string EvidenceType = "EvidenceType";
+            public const string KeyInfoConfirmationDataType = "KeyInfoConfirmationDataType";
+            public const string NameIDType = "NameIDType";
             public const string OneTimeUseType = "OneTimeUseType";
             public const string ProxyRestrictionType = "ProxyRestrictionType";
             public const string SubjectType = "SubjectType";

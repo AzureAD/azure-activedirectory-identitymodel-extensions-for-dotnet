@@ -35,13 +35,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public class SamlConditions
     {
         Collection<SamlCondition> _conditions = new Collection<SamlCondition>();
-        DateTime _notBefore = SecurityUtils.MinUtcDateTime;
-        DateTime _notOnOrAfter = SecurityUtils.MaxUtcDateTime;
 
-        internal SamlConditions()
-        {
-
-        }
+        internal SamlConditions() { }
 
         public SamlConditions(DateTime notBefore, DateTime notOnOrAfter)
             : this(notBefore, notOnOrAfter, null)
@@ -52,8 +47,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             IEnumerable<SamlCondition> conditions
             )
         {
-            _notBefore = notBefore.ToUniversalTime();
-            _notOnOrAfter = notOnOrAfter.ToUniversalTime();
+            NotBefore = notBefore.ToUniversalTime();
+            NotOnOrAfter = notOnOrAfter.ToUniversalTime();
 
             if (conditions != null)
             {

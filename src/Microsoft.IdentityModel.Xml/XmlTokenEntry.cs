@@ -25,12 +25,51 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens.Saml
+using System.Xml;
+
+namespace Microsoft.IdentityModel.Xml
 {
-    public class SamlDoNotCacheCondition : SamlCondition
+    public struct XmlTokenEntry
     {
-        public SamlDoNotCacheCondition()
+        internal XmlNodeType _nodeType;
+        internal string _prefix;
+        internal string _localName;
+        internal string _namespaceUri;
+        private string _value;
+
+        public bool IsEmptyElement
         {
+            get { return _value == null; }
+            set { _value = value ? null : ""; }
+        }
+
+        public string Value
+        {
+            get { return _value; }
+        }
+
+        public void Set(XmlNodeType nodeType, string value)
+        {
+            _nodeType = nodeType;
+            _value = value;
+        }
+
+        public void SetAttribute(string prefix, string localName, string namespaceUri, string value)
+        {
+            _nodeType = XmlNodeType.Attribute;
+            _prefix = prefix;
+            _localName = localName;
+            _namespaceUri = namespaceUri;
+            _value = value;
+        }
+
+        public void SetElement(string prefix, string localName, string namespaceUri, bool isEmptyElement)
+        {
+            _nodeType = XmlNodeType.Element;
+            _prefix = prefix;
+            _localName = localName;
+            _namespaceUri = namespaceUri;
+            IsEmptyElement = isEmptyElement;
         }
     }
 }

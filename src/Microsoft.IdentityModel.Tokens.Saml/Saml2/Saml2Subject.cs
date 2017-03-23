@@ -25,12 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.ObjectModel;
+using Microsoft.IdentityModel.Logging;
+
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    using System;
-    using System.Collections.ObjectModel;
-    using Logging;
-
     /// <summary>
     /// Represents the Subject element specified in [Saml2Core, 2.4.1].
     /// </summary>
@@ -40,15 +39,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </remarks>
     public class Saml2Subject
     {
-        private Saml2NameIdentifier nameId;
-        private Collection<Saml2SubjectConfirmation> subjectConfirmations = new Collection<Saml2SubjectConfirmation>();
+        private Collection<Saml2SubjectConfirmation> _subjectConfirmations = new Collection<Saml2SubjectConfirmation>();
 
         /// <summary>
         /// Initialize an instance of <see cref="Saml2Subject"/>.
         /// </summary>
-        public Saml2Subject()
-        {
-        }
+        public Saml2Subject() { }
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2Subject"/> from a <see cref="Saml2NameIdentifier"/>.
@@ -56,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="nameId">The <see cref="Saml2NameIdentifier"/> to use for initialization.</param>
         public Saml2Subject(Saml2NameIdentifier nameId)
         {
-            this.nameId = nameId;
+            NameId = nameId;
         }
 
         /// <summary>
@@ -68,17 +64,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == subjectConfirmation)
                 throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation));
 
-            this.subjectConfirmations.Add(subjectConfirmation);
+            _subjectConfirmations.Add(subjectConfirmation);
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Saml2NameIdentifier"/>. [Saml2Core, 2.4.1]
         /// </summary>
-        public Saml2NameIdentifier NameId
-        {
-            get { return this.nameId; }
-            set { this.nameId = value; }
-        }
+        public Saml2NameIdentifier NameId { get; set; }
 
         /// <summary>
         /// Gets a collection of <see cref="Saml2SubjectConfirmation"/> which can be used to validate and confirm the <see cref="Saml2Subject"/>. [Saml2Core, 2.4.1]
@@ -90,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public Collection<Saml2SubjectConfirmation> SubjectConfirmations
         {
-            get { return this.subjectConfirmations; }
+            get { return _subjectConfirmations; }
         }
     }
 }

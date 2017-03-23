@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (string.IsNullOrEmpty(name))
                 throw LogHelper.LogArgumentNullException(nameof(name));
 
-            this._name = name;
+            _name = name;
         }
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(values));
 
             foreach (string value in values)
-                this._values.Add(value);
+                _values.Add(value);
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the Saml2Attribute class.
         /// </summary>
@@ -78,8 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="value">The value of the attribute.</param>
         public Saml2Attribute(string name, string value)
             : this(name, new string[] { value })
-        {
-        }
+        { }
 
         /// <summary>
         /// Gets or sets a string that provides a more human-readable form of the attribute's 
@@ -87,8 +86,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string FriendlyName
         {
-            get { return this._friendlyName; }
-            set { this._friendlyName = XmlUtil.NormalizeEmptyString(value); }
+            get { return _friendlyName; }
+            set { _friendlyName = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -96,17 +95,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Name
         {
-            get 
-            { 
-                return this._name; 
-            }
-
+            get { return _name; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
 
-                this._name = value;
+                _name = value;
             }
         }
 
@@ -116,17 +111,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Uri NameFormat
         {
-            get 
-            { 
-                return this._nameFormat; 
-            }
-
+            get { return _nameFormat; }
             set
             {
                 if (null != value && !value.IsAbsoluteUri)
                     throw LogHelper.LogArgumentNullException("nameof(value), ID0013");
 
-                this._nameFormat = value;
+                _nameFormat = value;
             }
         }
 
@@ -140,11 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string AttributeValueXsiType
         {
-            get 
-            {
-                return this._attributeValueXsiType;
-            }
-
+            get { return _attributeValueXsiType; }
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -162,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (suffix.Length == 0)
                     throw LogHelper.LogArgumentNullException("nameof(value), ID4254");
 
-                this._attributeValueXsiType = value;
+                _attributeValueXsiType = value;
             }
         }
 
@@ -171,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<string> Values
         {
-            get { return this._values; }
+            get { return _values; }
         }
     }
 }

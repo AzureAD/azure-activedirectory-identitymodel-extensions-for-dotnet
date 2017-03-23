@@ -1,6 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -13,24 +36,23 @@ namespace Microsoft.IdentityModel.Xml
     sealed class PreDigestedSignedInfo : SignedInfo
     {
         const int InitialReferenceArraySize = 8;
-        int count;
-        ReferenceEntry[] references;
+        int _count;
+        ReferenceEntry[] _references;
 
         public PreDigestedSignedInfo()
         {
-            this.references = new ReferenceEntry[InitialReferenceArraySize];
+            _references = new ReferenceEntry[InitialReferenceArraySize];
         }
 
         public PreDigestedSignedInfo(
             string canonicalizationMethod,
             string digestMethod,
             string signatureMethod)
-            : base()
         {
-            this.references = new ReferenceEntry[InitialReferenceArraySize];
-            this.CanonicalizationMethod = canonicalizationMethod;
-            this.DigestMethod = digestMethod;
-            this.SignatureMethod = signatureMethod;
+            _references = new ReferenceEntry[InitialReferenceArraySize];
+            CanonicalizationMethod = canonicalizationMethod;
+            DigestMethod = digestMethod;
+            SignatureMethod = signatureMethod;
         }
 
         public bool AddEnvelopedSignatureTransform { get; set; }
@@ -39,7 +61,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public override int ReferenceCount
         {
-            get { return this.count; }
+            get { return _count; }
         }
 
         public void AddReference(string id, byte[] digest)
@@ -49,27 +71,27 @@ namespace Microsoft.IdentityModel.Xml
 
         public void AddReference(string id, byte[] digest, bool useStrTransform)
         {
-            if (this.count == this.references.Length)
+            if (_count == _references.Length)
             {
-                ReferenceEntry[] newReferences = new ReferenceEntry[this.references.Length * 2];
-                Array.Copy(this.references, 0, newReferences, 0, this.count);
-                this.references = newReferences;
+                ReferenceEntry[] newReferences = new ReferenceEntry[_references.Length * 2];
+                Array.Copy(_references, 0, newReferences, 0, _count);
+                _references = newReferences;
             }
-            this.references[this.count++].Set(id, digest, useStrTransform);
+            _references[_count++].Set(id, digest, useStrTransform);
         }
 
         protected override void ComputeHash(HashStream hashStream)
         {
-            if (this.AddEnvelopedSignatureTransform)
+            if (AddEnvelopedSignatureTransform)
             {
                 base.ComputeHash(hashStream);
             }
             else
             {
                 SignedInfoCanonicalFormWriter.Instance.WriteSignedInfoCanonicalForm(
-                    hashStream, this.SignatureMethod, this.DigestMethod,
-                    this.references, this.count,
-                    this.ResourcePool.TakeEncodingBuffer(), this.ResourcePool.TakeBase64Buffer());
+                    hashStream, SignatureMethod, DigestMethod,
+                    _references, _count,
+                    ResourcePool.TakeEncodingBuffer(), ResourcePool.TakeBase64Buffer());
             }
         }
 
@@ -81,7 +103,7 @@ namespace Microsoft.IdentityModel.Xml
         public override void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
             // WriteOnly
-            throw LogHelper.LogExceptionMessage(new NotSupportedException()); 
+            throw LogHelper.LogExceptionMessage(new NotSupportedException());
         }
 
         public override void EnsureAllReferencesVerified()
@@ -104,12 +126,12 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
-            for (int i = 0; i < this.count; i++)
+            for (int i = 0; i < _count; i++)
             {
                 writer.WriteStartElement(prefix, XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
                 writer.WriteStartAttribute(XmlSignatureStrings.URI, null);
                 writer.WriteString("#");
-                writer.WriteString(this.references[i].id);
+                writer.WriteString(_references[i]._id);
                 writer.WriteEndAttribute();
 
                 writer.WriteStartElement(prefix, XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
@@ -122,7 +144,7 @@ namespace Microsoft.IdentityModel.Xml
                     writer.WriteEndElement(); // Transform
                 }
 
-                if (this.references[i].useStrTransform)
+                if (_references[i]._useStrTransform)
                 {
                     writer.WriteStartElement(prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
                     writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
@@ -154,7 +176,7 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteEndAttribute();
                 writer.WriteEndElement(); // DigestMethod
 
-                byte[] digest = this.references[i].digest;
+                byte[] digest = _references[i]._digest;
                 writer.WriteStartElement(prefix, XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
                 writer.WriteBase64(digest, 0, digest.Length);
                 writer.WriteEndElement(); // DigestValue
@@ -166,96 +188,84 @@ namespace Microsoft.IdentityModel.Xml
 
         struct ReferenceEntry
         {
-            internal string id;
-            internal byte[] digest;
-            internal bool useStrTransform;
+            internal string _id;
+            internal byte[] _digest;
+            internal bool _useStrTransform;
 
             public void Set(string id, byte[] digest, bool useStrTransform)
             {
                 if (useStrTransform && string.IsNullOrEmpty(id))
-                {
                     throw LogHelper.LogExceptionMessage(new XmlSignedInfoException(id));
-                }
 
-                this.id = id;
-                this.digest = digest;
-                this.useStrTransform = useStrTransform;
+                _id = id;
+                _digest = digest;
+                _useStrTransform = useStrTransform;
             }
         }
 
         sealed class SignedInfoCanonicalFormWriter : CanonicalFormWriter
         {
-            const string xml1 = "<SignedInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></CanonicalizationMethod><SignatureMethod Algorithm=\"";
-            const string xml2 = "\"></SignatureMethod>";
-            const string xml3 = "<Reference URI=\"#";
-            const string xml4 = "\"><Transforms><Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></Transform></Transforms><DigestMethod Algorithm=\"";
-            const string xml4WithStrTransform = "\"><Transforms><Transform Algorithm=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#STR-Transform\"><o:TransformationParameters xmlns:o=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></CanonicalizationMethod></o:TransformationParameters></Transform></Transforms><DigestMethod Algorithm=\"";
-            const string xml5 = "\"></DigestMethod><DigestValue>";
-            const string xml6 = "</DigestValue></Reference>";
-            const string xml7 = "</SignedInfo>";
+            const string _xml1 = "<SignedInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></CanonicalizationMethod><SignatureMethod Algorithm=\"";
+            const string _xml2 = "\"></SignatureMethod>";
+            const string _xml3 = "<Reference URI=\"#";
+            const string _xml4 = "\"><Transforms><Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></Transform></Transforms><DigestMethod Algorithm=\"";
+            const string _xml4WithStrTransform = "\"><Transforms><Transform Algorithm=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#STR-Transform\"><o:TransformationParameters xmlns:o=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></CanonicalizationMethod></o:TransformationParameters></Transform></Transforms><DigestMethod Algorithm=\"";
+            const string _xml5 = "\"></DigestMethod><DigestValue>";
+            const string _xml6 = "</DigestValue></Reference>";
+            const string _xml7 = "</SignedInfo>";
 
-            readonly byte[] fragment1;
-            readonly byte[] fragment2;
-            readonly byte[] fragment3;
-            readonly byte[] fragment4;
-            readonly byte[] fragment4StrTransform;
-            readonly byte[] fragment5;
-            readonly byte[] fragment6;
-            readonly byte[] fragment7;
-            readonly byte[] sha256Digest;
-            readonly byte[] hmacSha2Signature;
-            readonly byte[] rsaSha2Signature;
+            readonly byte[] _fragment1;
+            readonly byte[] _fragment2;
+            readonly byte[] _fragment3;
+            readonly byte[] _fragment4;
+            readonly byte[] _fragment4StrTransform;
+            readonly byte[] _fragment5;
+            readonly byte[] _fragment6;
+            readonly byte[] _fragment7;
+            readonly byte[] _sha256Digest;
+            readonly byte[] _hmacSha2Signature;
+            readonly byte[] _rsaSha2Signature;
 
-            static readonly SignedInfoCanonicalFormWriter instance = new SignedInfoCanonicalFormWriter();
+            static readonly SignedInfoCanonicalFormWriter _instance = new SignedInfoCanonicalFormWriter();
 
             SignedInfoCanonicalFormWriter()
             {
                 var encoding = Utf8WithoutPreamble;
-                this.fragment1 = encoding.GetBytes(xml1);
-                this.fragment2 = encoding.GetBytes(xml2);
-                this.fragment3 = encoding.GetBytes(xml3);
-                this.fragment4 = encoding.GetBytes(xml4);
-                this.fragment4StrTransform = encoding.GetBytes(xml4WithStrTransform);
-                this.fragment5 = encoding.GetBytes(xml5);
-                this.fragment6 = encoding.GetBytes(xml6);
-                this.fragment7 = encoding.GetBytes(xml7);
-                this.sha256Digest = encoding.GetBytes(SecurityAlgorithms.Sha256Digest);
-                this.hmacSha2Signature = encoding.GetBytes(SecurityAlgorithms.HmacSha256Signature);
-                this.rsaSha2Signature = encoding.GetBytes(SecurityAlgorithms.RsaSha256Signature);
+                _fragment1 = encoding.GetBytes(_xml1);
+                _fragment2 = encoding.GetBytes(_xml2);
+                _fragment3 = encoding.GetBytes(_xml3);
+                _fragment4 = encoding.GetBytes(_xml4);
+                _fragment4StrTransform = encoding.GetBytes(_xml4WithStrTransform);
+                _fragment5 = encoding.GetBytes(_xml5);
+                _fragment6 = encoding.GetBytes(_xml6);
+                _fragment7 = encoding.GetBytes(_xml7);
+                _sha256Digest = encoding.GetBytes(SecurityAlgorithms.Sha256Digest);
+                _hmacSha2Signature = encoding.GetBytes(SecurityAlgorithms.HmacSha256Signature);
+                _rsaSha2Signature = encoding.GetBytes(SecurityAlgorithms.RsaSha256Signature);
             }
 
             public static SignedInfoCanonicalFormWriter Instance
             {
-                get { return instance; }
+                get { return _instance; }
             }
 
             // optimization 
             byte[] EncodeDigestAlgorithm(string algorithm)
             {
                 if (algorithm == SecurityAlgorithms.Sha256Digest)
-                {
-                    return this.sha256Digest;
-                }
+                    return _sha256Digest;
                 else
-                {
                     return Utf8WithoutPreamble.GetBytes(algorithm);
-                }
             }
 
             byte[] EncodeSignatureAlgorithm(string algorithm)
             {
                 if (algorithm == SecurityAlgorithms.HmacSha256Signature)
-                {
-                    return this.hmacSha2Signature;
-                }
+                    return _hmacSha2Signature;
                 else if (algorithm == SecurityAlgorithms.RsaSha256Signature)
-                {
-                    return this.rsaSha2Signature;
-                }
+                    return _rsaSha2Signature;
                 else
-                {
                     return Utf8WithoutPreamble.GetBytes(algorithm);
-                }
             }
 
             public void WriteSignedInfoCanonicalForm(
@@ -263,32 +273,28 @@ namespace Microsoft.IdentityModel.Xml
                 ReferenceEntry[] references, int referenceCount,
                 byte[] workBuffer, char[] base64WorkBuffer)
             {
-                stream.Write(this.fragment1, 0, this.fragment1.Length);
+                stream.Write(_fragment1, 0, _fragment1.Length);
                 byte[] signatureMethodBytes = EncodeSignatureAlgorithm(signatureMethod);
                 stream.Write(signatureMethodBytes, 0, signatureMethodBytes.Length);
-                stream.Write(this.fragment2, 0, this.fragment2.Length);
+                stream.Write(_fragment2, 0, _fragment2.Length);
 
                 byte[] digestMethodBytes = EncodeDigestAlgorithm(digestMethod);
                 for (int i = 0; i < referenceCount; i++)
                 {
-                    stream.Write(this.fragment3, 0, this.fragment3.Length);
-                    EncodeAndWrite(stream, workBuffer, references[i].id);
-                    if (references[i].useStrTransform)
-                    {
-                        stream.Write(this.fragment4StrTransform, 0, this.fragment4StrTransform.Length);
-                    }
+                    stream.Write(_fragment3, 0, _fragment3.Length);
+                    EncodeAndWrite(stream, workBuffer, references[i]._id);
+                    if (references[i]._useStrTransform)
+                        stream.Write(_fragment4StrTransform, 0, _fragment4StrTransform.Length);
                     else
-                    {
-                        stream.Write(this.fragment4, 0, this.fragment4.Length);
-                    }
+                        stream.Write(_fragment4, 0, _fragment4.Length);
 
                     stream.Write(digestMethodBytes, 0, digestMethodBytes.Length);
-                    stream.Write(this.fragment5, 0, this.fragment5.Length);
-                    Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, references[i].digest);
-                    stream.Write(this.fragment6, 0, this.fragment6.Length);
+                    stream.Write(_fragment5, 0, _fragment5.Length);
+                    Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, references[i]._digest);
+                    stream.Write(_fragment6, 0, _fragment6.Length);
                 }
 
-                stream.Write(this.fragment7, 0, this.fragment7.Length);
+                stream.Write(_fragment7, 0, _fragment7.Length);
             }
         }
     }

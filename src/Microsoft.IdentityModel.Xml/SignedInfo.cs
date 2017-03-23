@@ -37,15 +37,15 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class SignedInfo : ISecurityElement
     {
-        readonly ExclusiveCanonicalizationTransform canonicalizationMethodElement = new ExclusiveCanonicalizationTransform(true);
-        ElementWithAlgorithmAttribute signatureMethodElement;
-        SignatureResourcePool resourcePool;
-        List<Reference> references;
+        readonly ExclusiveCanonicalizationTransform _canonicalizationMethodElement = new ExclusiveCanonicalizationTransform(true);
+        ElementWithAlgorithmAttribute _signatureMethodElement;
+        SignatureResourcePool _resourcePool;
+        List<Reference> _references;
 
         public SignedInfo()
         {
-            signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.SignatureMethod);
-            this.references = new List<Reference>();
+            _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.SignatureMethod);
+            _references = new List<Reference>();
             Prefix = SignedXml.DefaultPrefix;
         }
 
@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public void AddReference(Reference reference)
         {
-            reference.ResourcePool = this.ResourcePool;
-            this.references.Add(reference);
+            reference.ResourcePool = ResourcePool;
+            _references.Add(reference);
         }
 
         public ISignatureReaderProvider ReaderProvider { get; set; }
@@ -65,10 +65,10 @@ namespace Microsoft.IdentityModel.Xml
 
         public string CanonicalizationMethod
         {
-            get { return this.canonicalizationMethodElement.Algorithm; }
+            get { return _canonicalizationMethodElement.Algorithm; }
             set
             {
-                if (value != this.canonicalizationMethodElement.Algorithm)
+                if (value != _canonicalizationMethodElement.Algorithm)
                 {
                     throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
                 }
@@ -79,10 +79,8 @@ namespace Microsoft.IdentityModel.Xml
         {
             set
             {
-                if (value != null && value.Value != this.canonicalizationMethodElement.Algorithm)
-                {
+                if (value != null && value.Value != _canonicalizationMethodElement.Algorithm)
                     throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
-                }
             }
         }
 
@@ -95,12 +93,12 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual int ReferenceCount
         {
-            get { return this.references.Count; }
+            get { return _references.Count; }
         }
 
         public Reference this[int index]
         {
-            get { return this.references[index]; }
+            get { return _references[index]; }
         }
 
         public string SignatureMethod { get; set; }
@@ -111,25 +109,23 @@ namespace Microsoft.IdentityModel.Xml
         {
             get
             {
-                if (this.resourcePool == null)
-                {
-                    this.resourcePool = new SignatureResourcePool();
-                }
-                return this.resourcePool;
+                if (_resourcePool == null)
+                    _resourcePool = new SignatureResourcePool();
+
+                return _resourcePool;
             }
             set
             {
-                this.resourcePool = value;
+                _resourcePool = value;
             }
         }
 
         public void ComputeHash(HashAlgorithm algorithm)
         {
-            if ((this.CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (this.CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
-            {
+            if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
                 throw LogHelper.LogExceptionMessage(new CryptographicException("UnsupportedTransformAlgorithm"));
-            }
-            HashStream hashStream = this.ResourcePool.TakeHashStream(algorithm);
+
+            var hashStream = ResourcePool.TakeHashStream(algorithm);
             ComputeHash(hashStream);
             hashStream.FlushHash();
         }
@@ -138,7 +134,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (SendSide)
             {
-                XmlDictionaryWriter utf8Writer = this.ResourcePool.TakeUtf8Writer();
+                var utf8Writer = ResourcePool.TakeUtf8Writer();
                 utf8Writer.StartCanonicalization(hashStream, false, null);
                 WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
@@ -152,12 +148,11 @@ namespace Microsoft.IdentityModel.Xml
                 if (ReaderProvider == null)
                     throw LogHelper.LogExceptionMessage(new XmlSignedInfoException("ReaderProvider == null"));
 
-                XmlDictionaryReader signatureReader = ReaderProvider.GetReader(SignatureReaderProviderCallbackContext);
-
+                var signatureReader = ReaderProvider.GetReader(SignatureReaderProviderCallbackContext);
                 if (!signatureReader.CanCanonicalize)
                 {
-                    MemoryStream stream = new MemoryStream();
-                    XmlDictionaryWriter bufferingWriter = XmlDictionaryWriter.CreateBinaryWriter(stream);
+                    var stream = new MemoryStream();
+                    var bufferingWriter = XmlDictionaryWriter.CreateBinaryWriter(stream);
                     string[] inclusivePrefix = GetInclusivePrefixes();
                     if (inclusivePrefix != null)
                     {
@@ -198,32 +193,25 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual void ComputeReferenceDigests()
         {
-            if (this.references.Count == 0)
-            {
+            if (_references.Count == 0)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneReferenceRequired"));
-            }
 
-            for (int i = 0; i < this.references.Count; i++)
-            {
-                this.references[i].ComputeAndSetDigest();
-            }
+            for (int i = 0; i < _references.Count; i++)
+                _references[i].ComputeAndSetDigest();
         }
-
 
         public virtual void EnsureAllReferencesVerified()
         {
-            for (int i = 0; i < this.references.Count; i++)
+            for (int i = 0; i < _references.Count; i++)
             {
-                if (!this.references[i].Verified)
-                {
+                if (!_references[i].Verified)
                     throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.references[i].Uri"));
-                }
             }
         }
 
         protected string[] GetInclusivePrefixes()
         {
-            return this.canonicalizationMethodElement.GetInclusivePrefixes();
+            return _canonicalizationMethodElement.GetInclusivePrefixes();
         }
 
         protected virtual string GetNamespaceForInclusivePrefix(string prefix)
@@ -240,40 +228,35 @@ namespace Microsoft.IdentityModel.Xml
         public void EnsureDigestValidity(string id, object resolvedXmlSource)
         {
             if (!EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
-            {
                 throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredTargetNotSigned, id"));
-            }
         }
 
         public virtual bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
         {
-            for (int i = 0; i < this.references.Count; i++)
+            for (int i = 0; i < _references.Count; i++)
             {
-                if (this.references[i].EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
-                {
+                if (_references[i].EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
                     return true;
-                }
             }
+
             return false;
         }
 
 
         public virtual bool HasUnverifiedReference(string id)
         {
-            for (int i = 0; i < this.references.Count; i++)
+            for (int i = 0; i < _references.Count; i++)
             {
-                if (!this.references[i].Verified && this.references[i].ExtractReferredId() == id)
-                {
+                if (!_references[i].Verified && _references[i].ExtractReferredId() == id)
                     return true;
-                }
             }
+
             return false;
         }
 
         protected void ReadCanonicalizationMethod(XmlDictionaryReader reader)
         {
-            // we will ignore any comments in the SignedInfo elemnt when verifying signature
-            this.canonicalizationMethodElement.ReadFrom(reader, false);
+            _canonicalizationMethodElement.ReadFrom(reader, false);
         }
 
         public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
@@ -281,8 +264,8 @@ namespace Microsoft.IdentityModel.Xml
             SendSide = false;
             if (reader.CanCanonicalize)
             {
-                this.CanonicalStream = new MemoryStream();
-                reader.StartCanonicalization(this.CanonicalStream, false, null);
+                CanonicalStream = new MemoryStream();
+                reader.StartCanonicalization(CanonicalStream, false, null);
             }
 
             reader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
@@ -298,8 +281,8 @@ namespace Microsoft.IdentityModel.Xml
                 reference.ReadFrom(reader, transformFactory);
                 AddReference(reference);
             }
-            reader.ReadEndElement(); // SignedInfo
 
+            reader.ReadEndElement(); // SignedInfo
             if (reader.CanCanonicalize)
                 reader.EndCanonicalization();
 
@@ -308,12 +291,10 @@ namespace Microsoft.IdentityModel.Xml
             {
                 // Clear the canonicalized stream. We cannot use this while inclusive prefixes are
                 // specified.
-                this.CanonicalStream = null;
+                CanonicalStream = null;
                 Context = new Dictionary<string, string>(inclusivePrefixes.Length);
                 for (int i = 0; i < inclusivePrefixes.Length; i++)
-                {
                     Context.Add(inclusivePrefixes[i], reader.LookupNamespace(inclusivePrefixes[i]));
-                }
             }
         }
 
@@ -325,7 +306,7 @@ namespace Microsoft.IdentityModel.Xml
 
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
-            foreach (var reference in references)
+            foreach (var reference in _references)
                 reference.WriteTo(writer);
 
             writer.WriteEndElement(); // SignedInfo
@@ -333,27 +314,21 @@ namespace Microsoft.IdentityModel.Xml
 
         protected void ReadSignatureMethod(XmlDictionaryReader reader)
         {
-            this.signatureMethodElement.ReadFrom(reader);
+            _signatureMethodElement.ReadFrom(reader);
         }
 
         protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)
         {
-            this.canonicalizationMethodElement.WriteTo(writer);
+            _canonicalizationMethodElement.WriteTo(writer);
         }
 
         protected void WriteSignatureMethod(XmlDictionaryWriter writer)
         {
-            this.signatureMethodElement.WriteTo(writer);
+            _signatureMethodElement.WriteTo(writer);
         }
 
-        protected string Prefix
-        {
-            get; set;
-        }
+        protected string Prefix { get; set; }
 
-        protected Dictionary<string, string> Context
-        {
-            get; set;
-        }
+        protected Dictionary<string, string> Context { get; set; }
     }
 }

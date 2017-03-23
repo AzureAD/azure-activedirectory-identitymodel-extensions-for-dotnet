@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         ~RSACryptoServiceProviderProxy()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 

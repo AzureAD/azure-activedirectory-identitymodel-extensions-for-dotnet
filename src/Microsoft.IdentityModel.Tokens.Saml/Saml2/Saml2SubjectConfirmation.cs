@@ -25,19 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using Microsoft.IdentityModel.Logging;
+
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    using System;
-    using Logging;
-
     /// <summary>
     /// Represents the SubjectConfirmation element specified in [Saml2Core, 2.4.1.1]. 
     /// </summary>
     public class Saml2SubjectConfirmation
     {
-        private Saml2SubjectConfirmationData data;
-        private Uri method;
-        private Saml2NameIdentifier nameId;
+        private Saml2SubjectConfirmationData _data;
+        private Uri _method;
+        private Saml2NameIdentifier _nameId;
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2SubjectConfirmation"/> from a <see cref="Uri"/> indicating the
@@ -63,8 +63,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (!method.IsAbsoluteUri)
                 throw LogHelper.LogArgumentNullException("nameof(method), ID0013");
 
-            this.method = method;
-            this.data = data;
+            _method = method;
+            _data = data;
         }
 
         /// <summary>
@@ -73,9 +73,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Uri Method
         {
-            get 
-            { 
-                return this.method; 
+            get
+            {
+                return _method;
             }
             set
             {
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!value.IsAbsoluteUri)
                     throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID0013"));
 
-                this.method = value;
+                _method = value;
             }
         }
 
@@ -95,8 +95,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2NameIdentifier NameIdentifier
         {
-            get { return this.nameId; }
-            set { this.nameId = value; }
+            get { return _nameId; }
+            set { _nameId = value; }
         }
 
         /// <summary>
@@ -105,8 +105,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2SubjectConfirmationData SubjectConfirmationData
         {
-            get { return this.data; }
-            set { this.data = value; }
+            get { return _data; }
+            set { _data = value; }
         }
     }
 }

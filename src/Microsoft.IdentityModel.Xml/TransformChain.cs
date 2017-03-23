@@ -1,6 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -11,38 +34,29 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class TransformChain
     {
-        string prefix = SignedXml.DefaultPrefix;
-        
-        //MostlySingletonList<Transform> transforms;
-        List<Transform> transforms = new List<Transform>();
+        string _prefix = SignedXml.DefaultPrefix;
+        List<Transform> _transforms = new List<Transform>();
 
-        public TransformChain()
-        {
-        }
+        public TransformChain() { }
 
         public int TransformCount
         {
-            get { return this.transforms.Count; }
+            get { return _transforms.Count; }
         }
 
         public Transform this[int index]
         {
-            get
-            {
-                return this.transforms[index];
-            }
+            get { return _transforms[index]; }
         }
 
         public bool NeedsInclusiveContext
         {
             get
             {
-                for (int i = 0; i < this.TransformCount; i++)
+                for (int i = 0; i < TransformCount; i++)
                 {
                     if (this[i].NeedsInclusiveContext)
-                    {
                         return true;
-                    }
                 }
                 return false;
             }
@@ -50,13 +64,13 @@ namespace Microsoft.IdentityModel.Xml
 
         public void Add(Transform transform)
         {
-            this.transforms.Add(transform);
+            _transforms.Add(transform);
         }
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory, bool preserveComments)
         {
             reader.MoveToStartElement(XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
-            this.prefix = reader.Prefix;
+            _prefix = reader.Prefix;
             reader.Read();
 
             while (reader.IsStartElement(XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace))
@@ -68,25 +82,23 @@ namespace Microsoft.IdentityModel.Xml
             }
             reader.MoveToContent();
             reader.ReadEndElement(); // Transforms
-            if (this.TransformCount == 0)
-            {
+            if (TransformCount == 0)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneTransformRequired"));
-            }
         }
 
         public byte[] TransformToDigest(object data, SignatureResourcePool resourcePool, string digestMethod)
         {
-            for (int i = 0; i < this.TransformCount - 1; i++)
+            for (int i = 0; i < TransformCount - 1; i++)
             {
                 data = this[i].Process(data, resourcePool);
             }
-            return this[this.TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
+            return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
         }
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(this.prefix, XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
-            for (int i = 0; i < this.TransformCount; i++)
+            writer.WriteStartElement(_prefix, XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
+            for (int i = 0; i < TransformCount; i++)
             {
                 this[i].WriteTo(writer);
             }

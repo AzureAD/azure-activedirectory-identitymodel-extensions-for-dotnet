@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string attributeValue = reader.GetAttribute(SamlStrings.MajorVersion, null);
             if (string.IsNullOrEmpty(attributeValue))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAssertionMissingMajorVersionAttributeOnRead"));
-            
+
             // TODO - use convert?
             int majorVersion = Int32.Parse(attributeValue, CultureInfo.InvariantCulture);
             attributeValue = reader.GetAttribute(SamlStrings.MinorVersion, null);

@@ -1,6 +1,29 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -13,11 +36,6 @@ namespace Microsoft.IdentityModel.Xml
 {
     class ExclusiveCanonicalizationTransform : Transform
     {
-        // "http://www.w3.org/2001/10/xml-exc-c14n#";
-        // ExclusiveC14n
-        // "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
-        // ExclusiveC14nWithComments
-
         string _inclusiveNamespacesPrefixList;
         string[] _inclusivePrefixes;
         string _inclusiveListElementPrefix = ExclusiveC14NStrings.Prefix;
@@ -31,7 +49,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public ExclusiveCanonicalizationTransform(bool isCanonicalizationMethod)
             : this(isCanonicalizationMethod, false)
-        {            
+        {
         }
 
         public ExclusiveCanonicalizationTransform(bool isCanonicalizationMethod, bool includeComments)
@@ -40,7 +58,7 @@ namespace Microsoft.IdentityModel.Xml
             IncludeComments = includeComments;
             Algorithm = includeComments ? SecurityAlgorithmStrings.ExclusiveC14nWithComments : SecurityAlgorithmStrings.ExclusiveC14n;
         }
-        
+
         public bool IncludeComments
         {
             get;
@@ -142,7 +160,7 @@ namespace Microsoft.IdentityModel.Xml
             XmlDictionaryReader dictionaryReader = reader as XmlDictionaryReader;
             if (dictionaryReader != null && dictionaryReader.CanCanonicalize)
             {
-                dictionaryReader.StartCanonicalization(hashStream, this.IncludeComments, GetInclusivePrefixes());
+                dictionaryReader.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
                 dictionaryReader.Skip();
                 dictionaryReader.EndCanonicalization();
             }
@@ -165,7 +183,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("dictionaryManager.XmlSignatureDictionary.Algorithm"));
             }
-            
+
             if (Algorithm == SecurityAlgorithmStrings.ExclusiveC14nWithComments)
             {
                 // to include comments in canonicalization, two conditions need to be met
@@ -194,7 +212,7 @@ namespace Microsoft.IdentityModel.Xml
                     _inclusiveListElementPrefix = reader.Prefix;
                     bool emptyElement = reader.IsEmptyElement;
                     // We treat PrefixList as optional Attribute.
-                    this.InclusiveNamespacesPrefixList = reader.GetAttribute(ExclusiveC14NStrings.PrefixList, null);
+                    InclusiveNamespacesPrefixList = reader.GetAttribute(ExclusiveC14NStrings.PrefixList, null);
                     reader.Read();
                     if (!emptyElement)
                         reader.ReadEndElement();
@@ -210,11 +228,11 @@ namespace Microsoft.IdentityModel.Xml
                 XmlSignatureStrings.CanonicalizationMethod : XmlSignatureStrings.Transform;
             writer.WriteStartElement(_prefix, elementName, XmlSignatureStrings.Namespace);
             writer.WriteAttributeString(XmlSignatureStrings.Algorithm, null, Algorithm);
-            
-            if (this.InclusiveNamespacesPrefixList != null)
+
+            if (InclusiveNamespacesPrefixList != null)
             {
                 writer.WriteStartElement(_inclusiveListElementPrefix, ExclusiveC14NStrings.InclusiveNamespaces, ExclusiveC14NStrings.Namespace);
-                writer.WriteAttributeString(ExclusiveC14NStrings.PrefixList, null, this.InclusiveNamespacesPrefixList);
+                writer.WriteAttributeString(ExclusiveC14NStrings.PrefixList, null, InclusiveNamespacesPrefixList);
                 writer.WriteEndElement(); // InclusiveNamespaces
             }
 

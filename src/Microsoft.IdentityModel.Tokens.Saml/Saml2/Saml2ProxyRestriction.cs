@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes an instance of <see cref="Saml2ProxyRestriction"/>.
         /// </summary>
         public Saml2ProxyRestriction()
-        {}
+        { }
 
         /// <summary>
         /// Gets the set of audiences to whom the asserting party permits
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Uri> Audiences
         {
-            get { return this._audiences; }
+            get { return _audiences; }
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public int? Count
         {
-            get { return this._count; }
+            get { return _count; }
             set
             {
                 if (null != value)
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), "ID0002"));
                 }
 
-                this._count = value;
+                _count = value;
             }
         }
     }

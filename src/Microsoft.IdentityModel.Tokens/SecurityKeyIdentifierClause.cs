@@ -35,10 +35,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SecurityKeyIdentifierClause
     {
-        readonly string clauseType;
-        byte[] derivationNonce;
-        int derivationLength;
-        string id = null;
+        readonly string _clauseType;
+        byte[] _derivationNonce;
+        int _derivationLength;
 
         protected SecurityKeyIdentifierClause(string clauseType)
             : this(clauseType, null, 0)
@@ -47,9 +46,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         protected SecurityKeyIdentifierClause(string clauseType, byte[] nonce, int length)
         {
-            this.clauseType = clauseType;
-            this.derivationNonce = nonce;
-            this.derivationLength = length;
+            _clauseType = clauseType;
+            _derivationNonce = nonce;
+            _derivationLength = length;
         }
 
         public virtual bool CanCreateKey
@@ -59,14 +58,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         public string ClauseType
         {
-            get { return this.clauseType; }
+            get { return _clauseType; }
         }
 
-        public string Id
-        {
-            get { return this.id; }
-            set { this.id = value; }
-        }
+        public string Id { get; set; }
 
         public virtual SecurityKey CreateKey()
         {
@@ -80,12 +75,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         public byte[] GetDerivationNonce()
         {
-            return (this.derivationNonce != null) ? (byte[])this.derivationNonce.Clone() : null;
+            return (_derivationNonce != null) ? (byte[])_derivationNonce.Clone() : null;
         }
 
         public int DerivationLength
         {
-            get { return this.derivationLength; }
+            get { return _derivationLength; }
         }
     }
 }

@@ -29,9 +29,9 @@ using System;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    #if DESKTOPNET45
+#if DESKTOPNET45
         [Serializable]
-    #endif
+#endif
 
     /// <summary>
     /// Represents a security token exception.

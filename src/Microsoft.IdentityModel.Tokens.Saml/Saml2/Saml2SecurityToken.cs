@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2SecurityToken : SecurityToken
     {
-        private Saml2Assertion assertion;
+        private Saml2Assertion _assertion;
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2SecurityToken"/> from a <see cref="Saml2Assertion"/>.
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == assertion)
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
 
-            this.assertion = assertion;
+            _assertion = assertion;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2Assertion Assertion
         {
-            get { return this.assertion; }
+            get { return _assertion; }
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public override string Id
         {
-            get { return this.assertion.Id.Value; }
+            get { return _assertion.Id.Value; }
         }
 
         /// <summary>
@@ -88,8 +88,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get
             {
-                if (null != this.assertion.Conditions && null != this.assertion.Conditions.NotBefore)
-                    return this.assertion.Conditions.NotBefore.Value;
+                if (null != _assertion.Conditions && null != _assertion.Conditions.NotBefore)
+                    return _assertion.Conditions.NotBefore.Value;
                 else
                     return DateTime.MinValue;
             }
@@ -102,8 +102,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get
             {
-                if (null != this.assertion.Conditions && null != this.assertion.Conditions.NotOnOrAfter)
-                    return this.assertion.Conditions.NotOnOrAfter.Value;
+                if (null != _assertion.Conditions && null != _assertion.Conditions.NotOnOrAfter)
+                    return _assertion.Conditions.NotOnOrAfter.Value;
                 else
                     return DateTime.MaxValue;
             }
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public override string Issuer
         {
             // TODO - is this right, Saml2NameIdentifier is a complex type
-            get { return assertion.Issuer.Value; }
+            get { return _assertion.Issuer.Value; }
         }
 
         public override SecurityKey SigningKey

@@ -57,12 +57,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public const string TokenProfile11ValueType = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLID";
         private const string Actor = "Actor";
         private const string Attribute = "Attribute";
-        private static string[] tokenTypeIdentifiers = new string[] { Saml2Constants.Saml2TokenProfile11, Saml2Constants.OasisWssSaml2TokenProfile11 };
+        private static string[] _tokenTypeIdentifiers = new string[] { Saml2Constants.Saml2TokenProfile11, Saml2Constants.OasisWssSaml2TokenProfile11 };
         private static TimeSpan TokenReplayCacheExpirationPeriod = TimeSpan.FromDays(10);
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         const string ClaimType2009Namespace = "http://schemas.xmlsoap.org/ws/2009/09/identity/claims";
-        object syncObject = new object();
+        object _syncObject = new object();
 
         /// <summary>
         /// Creates an instance of <see cref="Saml2SecurityTokenHandler"/>
@@ -133,19 +133,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             Saml2Assertion assertion = new Saml2Assertion(CreateIssuerNameIdentifier(tokenDescriptor));
 
             // Subject
-            assertion.Subject = this.CreateSamlSubject(tokenDescriptor);
+            assertion.Subject = CreateSamlSubject(tokenDescriptor);
 
             // Signature
-            assertion.SigningCredentials = this.GetSigningCredentials(tokenDescriptor);
+            assertion.SigningCredentials = GetSigningCredentials(tokenDescriptor);
 
             // Conditions
-            assertion.Conditions = this.CreateConditions(tokenDescriptor);
+            assertion.Conditions = CreateConditions(tokenDescriptor);
 
             // Advice
-            assertion.Advice = this.CreateAdvice(tokenDescriptor);
+            assertion.Advice = CreateAdvice(tokenDescriptor);
 
             // Statements
-            IEnumerable<Saml2Statement> statements = this.CreateStatements(tokenDescriptor);
+            IEnumerable<Saml2Statement> statements = CreateStatements(tokenDescriptor);
             if (null != statements)
             {
                 foreach (Saml2Statement statement in statements)
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             // encrypting credentials
-            assertion.EncryptingCredentials = this.GetEncryptingCredentials(tokenDescriptor);
+            assertion.EncryptingCredentials = GetEncryptingCredentials(tokenDescriptor);
 
             SecurityToken token = new Saml2SecurityToken(assertion);
 
@@ -348,7 +348,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return false;
 
             string tokenType = reader.GetAttribute(WSWSSecurity11Strings.TokenType, WSWSSecurity11Strings.Namespace);
-            return tokenTypeIdentifiers.Contains(tokenType);
+            return _tokenTypeIdentifiers.Contains(tokenType);
         }
 
         /// <summary>
@@ -513,19 +513,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             case ClaimTypes.AuthenticationMethod:
                                 break;
                             default:
-                                attributes.Add(this.CreateAttribute(claim, tokenDescriptor));
+                                attributes.Add(CreateAttribute(claim, tokenDescriptor));
                                 break;
                         }
                     }
                 }
 
-                this.AddDelegateToAttributes(subject, attributes, tokenDescriptor);
-
-                ICollection<Saml2Attribute> collectedAttributes = this.CollectAttributeValues(attributes);
-                if (collectedAttributes.Count > 0)
-                {
-                    return new Saml2AttributeStatement(collectedAttributes);
-                }
+                AddDelegateToAttributes(subject, attributes, tokenDescriptor);
+                return new Saml2AttributeStatement(CollectAttributeValues(attributes));
             }
 
             return null;
@@ -584,13 +579,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             foreach (Claim claim in subject.Actor.Claims)
             {
                 if (claim != null)
-                    actingAsAttributes.Add(this.CreateAttribute(claim, tokenDescriptor));
+                    actingAsAttributes.Add(CreateAttribute(claim, tokenDescriptor));
             }
 
-            this.AddDelegateToAttributes(subject.Actor, actingAsAttributes, tokenDescriptor);
+            AddDelegateToAttributes(subject.Actor, actingAsAttributes, tokenDescriptor);
 
-            ICollection<Saml2Attribute> collectedAttributes = this.CollectAttributeValues(actingAsAttributes);
-            attributes.Add(this.CreateAttribute(new Claim(ClaimTypes.Actor, this.CreateXmlStringFromAttributes(collectedAttributes), ClaimValueTypes.String), tokenDescriptor));
+            ICollection<Saml2Attribute> collectedAttributes = CollectAttributeValues(actingAsAttributes);
+            attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateXmlStringFromAttributes(collectedAttributes), ClaimValueTypes.String), tokenDescriptor));
         }
 
         /// <summary>
@@ -650,10 +645,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             var statements = new Collection<Saml2Statement>();
-            var attributeStatement = this.CreateAttributeStatement(tokenDescriptor.Subject, tokenDescriptor);
+            var attributeStatement = CreateAttributeStatement(tokenDescriptor.Subject, tokenDescriptor);
             if (attributeStatement != null)
                 statements.Add(attributeStatement);
-            
+
             // TODO - figure out how to set the AuthenticationInfo
             //var authenticationStatement = this.CreateAuthenticationStatement(tokenDescriptor.AuthenticationInfo, tokenDescriptor);
             //if (authenticationStatement != null)
@@ -757,7 +752,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         // Do not allow multiple name identifier claim.
                         if (null != nameIdentifierClaim)
                             throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4139"));
-            
+
                         nameIdentifierClaim = claim.Value;
                         if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
                             nameIdentifierFormat = claim.Properties[ClaimProperties.SamlNameIdentifierFormat];
@@ -929,11 +924,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 if (string.IsNullOrEmpty(samlToken.Assertion.Issuer.Value))
                 {
-                    stringBuilder.AppendFormat("{0}{1}", samlToken.Assertion.Id.Value, tokenTypeIdentifiers[0]);
+                    stringBuilder.AppendFormat("{0}{1}", samlToken.Assertion.Id.Value, _tokenTypeIdentifiers[0]);
                 }
                 else
                 {
-                    stringBuilder.AppendFormat("{0}{1}{2}", samlToken.Assertion.Id.Value, samlToken.Assertion.Issuer.Value, tokenTypeIdentifiers[0]);
+                    stringBuilder.AppendFormat("{0}{1}{2}", samlToken.Assertion.Id.Value, samlToken.Assertion.Issuer.Value, _tokenTypeIdentifiers[0]);
                 }
 
                 key = Convert.ToBase64String(hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(stringBuilder.ToString())));
@@ -1077,7 +1072,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     if (subject.Actor != null)
                         throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11141));
 
-                    this.SetDelegateFromAttribute(attribute, subject, issuer);
+                    SetDelegateFromAttribute(attribute, subject, issuer);
                 }
                 else
                 {
@@ -1192,7 +1187,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // TODO - what should the authenticationType be, call tokenvalidationParameters.CreateClaimsIdentity
             subject.Actor = new ClaimsIdentity(claims);
-            this.SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
+            SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
         }
 
         /// <summary>
@@ -1394,7 +1389,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 securityKeys = new Collection<SecurityKey>();
                 //List<SecurityKey> holderKeys = new List<SecurityKey>();
                 //SecurityKey key;
-                
+
                 // TODO - SecurityKey serialization / deserialization
                 //foreach (SecurityKeyIdentifier keyIdentifier in subjectConfirmation.SubjectConfirmationData.KeyIdentifiers)
                 //{
@@ -1453,7 +1448,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             SecurityKey key;
-            if (this.TryResolveIssuerToken(assertion, validationParameters, out key))
+            if (TryResolveIssuerToken(assertion, validationParameters, out key))
             {
                 return key;
             }

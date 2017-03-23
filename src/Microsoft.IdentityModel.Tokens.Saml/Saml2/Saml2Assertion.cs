@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (issuer == null)
                 throw LogHelper.LogArgumentNullException(nameof(issuer));
 
-            this._issuer = issuer;
+            _issuer = issuer;
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>'True' if this instance can write the source data.</returns>
         public virtual bool CanWriteSourceData
         {
-            get { return null != this._sourceData; }
+            get { return null != _sourceData; }
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
         {
-            get { return this._externalEncryptedKeys; }
+            get { return _externalEncryptedKeys; }
         }
 
         /// <summary>
@@ -125,14 +125,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2Id Id
         {
-            get { return this._id; }
+            get { return _id; }
             set
             {
                 if (null == value)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._id = value;
-                this._sourceData = null;
+                _id = value;
+                _sourceData = null;
             }
         }
 
@@ -141,8 +141,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime IssueInstant
         {
-            get { return this._issueInstant; }
-            set { this._issueInstant = DateTimeUtil.ToUniversalTime(value); }
+            get { return _issueInstant; }
+            set { _issueInstant = DateTimeUtil.ToUniversalTime(value); }
         }
 
         /// <summary>
@@ -150,13 +150,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2NameIdentifier Issuer
         {
-            get { return this._issuer; }
+            get { return _issuer; }
             set
             {
                 if (value == null)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
-                this._issuer = value;
+                _issuer = value;
             }
         }
 
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Statement> Statements
         {
-            get { return this._statements; }
+            get { return _statements; }
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public string Version
         {
-            get { return this._version; }
+            get { return _version; }
         }
 
         /// <summary>
@@ -202,12 +202,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="writer">A <see cref="XmlWriter"/> for writting the data.</param>
         public virtual void WriteSourceData(XmlWriter writer)
         {
-            if (!this.CanWriteSourceData)
-                throw LogHelper.LogExceptionMessage( new Saml2SecurityTokenException("SR.ID4140"));
+            if (!CanWriteSourceData)
+                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("SR.ID4140"));
 
             // This call will properly just reuse the existing writer if it already qualifies
-            this._sourceData.SetElementExclusion(null, null);
-            this._sourceData.GetWriter().WriteTo(XmlDictionaryWriter.CreateDictionaryWriter(writer));
+            _sourceData.SetElementExclusion(null, null);
+            _sourceData.GetWriter().WriteTo(XmlDictionaryWriter.CreateDictionaryWriter(writer));
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == reader)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            this._sourceData = reader.XmlTokens;
+            _sourceData = reader.XmlTokens;
         }
     }
 }

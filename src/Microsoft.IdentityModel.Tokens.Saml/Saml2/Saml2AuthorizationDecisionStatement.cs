@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="decision">The <see cref="SamlAccessDecision"/> in use.</param>
         public Saml2AuthorizationDecisionStatement(Uri resource, Saml2AccessDecision decision)
             : this(resource, decision, null)
-        {}
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Saml2AuthorizationDecisionStatement"/> class from
@@ -77,14 +77,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (decision < Saml2AccessDecision.Permit || decision > Saml2AccessDecision.Indeterminate)
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(decision)));
 
-            this._resource = resource;
-            this._decision = decision;
+            _resource = resource;
+            _decision = decision;
 
             if (null != actions)
             {
                 foreach (Saml2Action action in actions)
                 {
-                    this._actions.Add(action);
+                    _actions.Add(action);
                 }
             }
         }
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Action> Actions
         {
-            get { return this._actions; }
+            get { return _actions; }
         }
 
         /// <summary>
@@ -104,13 +104,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2AccessDecision Decision
         {
-            get { return this._decision; }
+            get { return _decision; }
             set
             {
                 if (value < Saml2AccessDecision.Permit || value > Saml2AccessDecision.Indeterminate)
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
 
-                this._decision = value;
+                _decision = value;
             }
         }
 
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public Uri Resource
         {
-            get { return this._resource; }
+            get { return _resource; }
             set
             {
                 if (null == value)
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!(value.IsAbsoluteUri || value.Equals(EmptyResource)))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(value), value.OriginalString)));
 
-                this._resource = value;
+                _resource = value;
             }
         }
     }

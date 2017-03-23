@@ -67,8 +67,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Address
         {
-            get { return this._address; }
-            set { this._address = XmlUtil.NormalizeEmptyString(value); }
+            get { return _address; }
+            set { _address = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -77,8 +77,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string DnsName
         {
-            get { return this._dnsName; }
-            set { this._dnsName = XmlUtil.NormalizeEmptyString(value); }
+            get { return _dnsName; }
+            set { _dnsName = XmlUtil.NormalizeEmptyString(value); }
         }
     }
 }

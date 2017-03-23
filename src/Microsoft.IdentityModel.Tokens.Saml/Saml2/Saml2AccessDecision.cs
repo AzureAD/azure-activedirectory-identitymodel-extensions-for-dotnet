@@ -29,7 +29,7 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    // TODO can be get rid of this enum
+    // TODO get rid of this enum and just use strings
     public enum Saml2AccessDecision
     {
         [EnumMember]

@@ -34,9 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     {
         SamlAssertion _assertion;
 
-        protected SamlSecurityToken()
-        {
-        }
+        protected SamlSecurityToken() { }
 
         public SamlSecurityToken(SamlAssertion assertion)
         {

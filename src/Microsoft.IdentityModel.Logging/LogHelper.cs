@@ -274,12 +274,12 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
 
             if (innerException != null) 
-                if (String.IsNullOrEmpty(argumentName))
+                if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message, innerException);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException);
             else
-                if (String.IsNullOrEmpty(argumentName))
+                if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message);

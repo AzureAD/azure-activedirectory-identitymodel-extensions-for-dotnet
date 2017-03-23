@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of <see cref="Saml2Conditions"/>. class.
         /// </summary>
         public Saml2Conditions()
-        {}
+        { }
 
         /// <summary>
         /// Gets a collection of <see cref="Saml2AudienceRestriction"/> that the assertion is addressed to.
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2AudienceRestriction> AudienceRestrictions
         {
-            get { return this._audienceRestrictions; }
+            get { return _audienceRestrictions; }
         }
 
         /// <summary>
@@ -61,19 +61,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime? NotBefore
         {
-            get { return this._notBefore; }
+            get { return _notBefore; }
             set
             {
                 value = DateTimeUtil.ToUniversalTime(value);
 
                 // NotBefore must be earlier than NotOnOrAfter
-                if (null != value && null != this._notOnOrAfter)
+                if (null != value && null != _notOnOrAfter)
                 {
-                    if (value.Value >= this._notOnOrAfter.Value)
+                    if (value.Value >= _notOnOrAfter.Value)
                         throw LogHelper.LogArgumentNullException("nameof(value), ID4116");
                 }
-             
-                this._notBefore = value;
+
+                _notBefore = value;
             }
         }
 
@@ -83,19 +83,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime? NotOnOrAfter
         {
-            get { return this._notOnOrAfter; }
+            get { return _notOnOrAfter; }
             set
             {
                 value = DateTimeUtil.ToUniversalTime(value);
 
                 // NotBefore must be earlier than NotOnOrAfter
-                if (null != value && null != this._notBefore)
+                if (null != value && null != _notBefore)
                 {
-                    if (value.Value <= this._notBefore.Value)
+                    if (value.Value <= _notBefore.Value)
                         throw LogHelper.LogArgumentNullException("nameof(value), ID4116");
                 }
 
-                this._notOnOrAfter = value;
+                _notOnOrAfter = value;
             }
         }
 

@@ -38,12 +38,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2SubjectConfirmationData
     {
-        private string address;
-        private Saml2Id inResponseTo;
-        private Collection<SecurityKeyIdentifier> keyIdentifiers = new Collection<SecurityKeyIdentifier>();
-        private DateTime? notBefore;
-        private DateTime? notOnOrAfter;
-        private Uri recipient;
+        private string _address;
+        private Collection<SecurityKeyIdentifier> _keyIdentifiers = new Collection<SecurityKeyIdentifier>();
+        private DateTime? _notBefore;
+        private DateTime? _notOnOrAfter;
+        private Uri _recipient;
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2SubjectConfirmationData"/>.
@@ -58,14 +57,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Address
         {
-            get 
-            { 
-                return this.address; 
+            get
+            {
+                return _address;
             }
 
             set
             {
-                this.address = XmlUtil.NormalizeEmptyString(value);
+                _address = XmlUtil.NormalizeEmptyString(value);
             }
         }
 
@@ -73,18 +72,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets the <see cref="Saml2Id"/> of a SAML protocol message in response to which an attesting entity can 
         /// present the assertion. [Saml2Core, 2.4.1.2]
         /// </summary>
-        public Saml2Id InResponseTo
-        {
-            get { return this.inResponseTo; }
-            set { this.inResponseTo = value; }
-        }
+        public Saml2Id InResponseTo { get; set; }
 
         /// <summary>
         /// Gets a collection of <see cref="SecurityKeyIdentifier"/> which can be used to authenticate an attesting entity. [Saml2Core, 2.4.1.3]
         /// </summary>
         public Collection<SecurityKeyIdentifier> KeyIdentifiers
         {
-            get { return this.keyIdentifiers; }
+            get { return _keyIdentifiers; }
         }
 
         /// <summary>
@@ -92,8 +87,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime? NotBefore
         {
-            get { return this.notBefore; }
-            set { this.notBefore = DateTimeUtil.ToUniversalTime(value); }
+            get { return _notBefore; }
+            set { _notBefore = DateTimeUtil.ToUniversalTime(value); }
         }
 
         /// <summary>
@@ -101,8 +96,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime? NotOnOrAfter
         {
-            get { return this.notOnOrAfter; }
-            set { this.notOnOrAfter = DateTimeUtil.ToUniversalTime(value); }
+            get { return _notOnOrAfter; }
+            set { _notOnOrAfter = DateTimeUtil.ToUniversalTime(value); }
         }
 
         /// <summary>
@@ -111,9 +106,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Uri Recipient
         {
-            get 
-            { 
-                return this.recipient; 
+            get
+            {
+                return _recipient;
             }
 
             set
@@ -121,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null != value && !value.IsAbsoluteUri)
                     throw LogHelper.LogArgumentNullException("nameof(value), ID0013");
 
-                this.recipient = value;
+                _recipient = value;
             }
         }
     }

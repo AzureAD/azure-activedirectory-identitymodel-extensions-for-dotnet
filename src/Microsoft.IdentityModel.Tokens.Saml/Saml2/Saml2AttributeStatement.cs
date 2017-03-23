@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
@@ -43,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates an instance of Saml2AttributeStatement.
         /// </summary>
         public Saml2AttributeStatement()
-        {}
+        { }
 
         /// <summary>
         /// Creates an instance of Saml2AttributeStatement.
@@ -51,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="attribute">The <see cref="Saml2Attribute"/> contained in this statement.</param>
         public Saml2AttributeStatement(Saml2Attribute attribute)
             : this(new Saml2Attribute[] { attribute })
-        {}
+        { }
 
         /// <summary>
         /// Creates an instance of Saml2AttributeStatement.
@@ -67,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (attribute == null)
                     throw LogHelper.LogArgumentNullException(nameof(attributes));
 
-                this._attributes.Add(attribute);
+                _attributes.Add(attribute);
             }
         }
 
@@ -76,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Collection<Saml2Attribute> Attributes
         {
-            get { return this._attributes; }
+            get { return _attributes; }
         }
     }
 }

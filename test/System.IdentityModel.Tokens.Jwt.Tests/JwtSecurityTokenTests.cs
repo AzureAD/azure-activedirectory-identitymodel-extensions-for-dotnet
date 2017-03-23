@@ -158,7 +158,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // create outer token
             try
             {
-                if (String.IsNullOrEmpty(jwt))
+                if (string.IsNullOrEmpty(jwt))
                     outerJwt = new JwtSecurityToken(
                         header: outerTokenVariation.Header,
                         innerToken: innerJwt,
@@ -335,12 +335,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         private static void ParseJweParts(string jwe, out string headerPart, out string encryptedKeyPart, out string initializationVectorPart, out string ciphertextPart, out string authenticationTagPart)
         {
-            if (String.IsNullOrEmpty(jwe))
+            if (string.IsNullOrEmpty(jwe))
                 throw new ArgumentNullException(nameof(jwe));
 
             string[] parts = jwe.Split(new char[] {'.'}, 6);
             if (parts.Length != 5)
-                throw new ArgumentException(String.Format("The JWE token must have 5 parts. The JWE {0} has {1} parts.", jwe, parts.Length));
+                throw new ArgumentException(string.Format("The JWE token must have 5 parts. The JWE {0} has {1} parts.", jwe, parts.Length));
 
             headerPart = parts[0];
             encryptedKeyPart = parts[1];

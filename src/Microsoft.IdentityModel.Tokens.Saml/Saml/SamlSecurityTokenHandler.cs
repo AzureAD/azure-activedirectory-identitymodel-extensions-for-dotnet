@@ -550,11 +550,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string claimType;
             if (!ShortToLongClaimTypeMap.TryGetValue(claim.Type, out claimType))
                 claimType = claim.Type;
-            
+
             int lastSlashIndex = claimType.LastIndexOf('/');
             if ((lastSlashIndex == 0) || (lastSlashIndex == -1))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4215, claim.Type: {claimType}"));
-            
+
             // TODO - see if there is another slash before this one.
             if (lastSlashIndex == claim.Type.Length - 1)
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4216, claim.Type: {claimType}"));
@@ -595,8 +595,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             // Search for an Authentication Claim.
             var claimCollection = (from c in tokenDescriptor.Subject.Claims
-                                                  where c.Type == ClaimTypes.AuthenticationMethod
-                                                  select c);
+                                   where c.Type == ClaimTypes.AuthenticationMethod
+                                   select c);
             if (claimCollection.Count<Claim>() > 0)
             {
                 // We support only one authentication statement and hence we just pick the first authentication type
@@ -625,7 +625,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             // we need to add authInfo
             //if (authInfo == null)
             //{
-                  return new SamlAuthenticationStatement(subject, authenticationMethod, authInstantTime, null, null, null);
+            return new SamlAuthenticationStatement(subject, authenticationMethod, authInstantTime, null, null, null);
             //}
             //else
             //{
@@ -676,15 +676,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (identityClaim != null)
             {
                 samlSubject.Name = identityClaim.Value;
-            //    if (identityClaim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
-            //    {
-            //        samlSubject.NameFormat = identityClaim.Properties[ClaimProperties.SamlNameIdentifierFormat];
-            //    }
+                //    if (identityClaim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
+                //    {
+                //        samlSubject.NameFormat = identityClaim.Properties[ClaimProperties.SamlNameIdentifierFormat];
+                //    }
 
-            //    if (identityClaim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierNameQualifier))
-            //    {
-            //        samlSubject.NameQualifier = identityClaim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier];
-            //    }
+                //    if (identityClaim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierNameQualifier))
+                //    {
+                //        samlSubject.NameQualifier = identityClaim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier];
+                //    }
             }
 
             //if (tokenDescriptor.Proof != null)
@@ -796,7 +796,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             // TODO - who sets reader to XmlDictionaryReader?
             return serializer.ReadToken(reader as XmlDictionaryReader);
         }
- 
+
         /// <summary>
         /// Resolves the SecurityKeyIdentifier specified in a saml:Subject element. 
         /// </summary>
@@ -851,7 +851,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             DateTime? notBefore = null;
             DateTime? expires = null;
-            
+
             // TODO - make the same a JWT
             //if (samlToken.Conditions != null)
             //{
@@ -868,7 +868,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
                     {
                         throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken))
-                            { NotBefore = notBefore, Expires = expires });
+                        { NotBefore = notBefore, Expires = expires });
                     }
                 }
                 else
@@ -902,7 +902,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
                     {
                         throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken))
-                            { InvalidAudience = String.Join(", ", audiences) });
+                        { InvalidAudience = String.Join(", ", audiences) });
                     }
                 }
                 else
