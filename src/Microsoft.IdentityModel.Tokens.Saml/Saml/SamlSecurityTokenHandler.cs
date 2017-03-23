@@ -950,7 +950,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateAudience(audiences, securityToken, validationParameters);
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (validationParameters.ValidateAudience)
+            {
+                if (validationParameters.AudienceValidator != null)
+                    validationParameters.AudienceValidator(audiences, securityToken, validationParameters);
+                else
+                    Validators.ValidateAudience(audiences, securityToken, validationParameters);
+            }
         }
 
         /// <summary>
@@ -963,7 +972,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
         protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (validationParameters.ValidateIssuer)
+            {
+                if (validationParameters.IssuerValidator != null)
+                    return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
+                else
+                    return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
+            }
+
+            return issuer;
         }
 
         /// <summary>

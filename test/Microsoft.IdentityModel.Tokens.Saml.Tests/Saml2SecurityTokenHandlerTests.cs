@@ -34,40 +34,6 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
-    public class CreateAndValidateParams
-    {
-        public string Actor { get; set; }
-
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
-
-        public bool CanRead { get; set; }
-
-        public SecurityToken CompareTo { get; set; }
-
-        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
-
-        public Type ExceptionType { get; set; }
-
-        public Saml2SecurityTokenHandler Handler { get; set; }
-
-        public string Issuer { get; set; }
-
-        public IEnumerable<string> Audiences { get; set; }
-
-        public SecurityTokenDescriptor TokenDescriptor { get; set; }
-
-        public string TestId { get; set; }
-
-        public string Token { get; set; }
-
-        public TokenValidationParameters ValidationParameters { get; set; }
-
-        public override string ToString()
-        {
-            return $"{TestId}, {Token}, {ExpectedException}";
-        }
-    }
-
     public class Saml2SecurityTokenHandlerTests
     {
         private static bool _firstCanReadToken = true;
@@ -151,14 +117,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         CanRead = true,
                         Handler = handler,
                         TestId = "AADSaml2Token",
-                        Token = RefrenceSaml2Token.SamlToken
+                        Token = RefrenceTokens.Saml2Token_1
                     });
 
-                //samlString = IdentityUtilities.CreateSamlToken();
-                //Assert.False(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
-
-                //samlString = IdentityUtilities.CreateSaml2Token();
-                //Assert.True(CanReadToken(securityToken: samlString, samlSecurityTokenHandler: samlSecurityTokenHandler, expectedException: ExpectedException.NoExceptionExpected));
+                theoryData.Add(
+                    new CreateAndValidateParams
+                    {
+                        CanRead = false,
+                        Handler = handler,
+                        TestId = "Saml1Token_1",
+                        Token = RefrenceTokens.Saml1Token_1
+                    });
 
                 return theoryData;
             }
@@ -191,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = "AADSaml2Token",
-                        Token = RefrenceSaml2Token.SamlToken
+                        Token = RefrenceTokens.Saml2Token_1
                     });
 
                 return theoryData;
@@ -207,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 // TODO - need to pass actual Saml2Token
-                ((theoryData.Handler)as DerivedSamlSecurityTokenHandler).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
+                ((theoryData.Handler)as DerivedSaml2SecurityTokenHandler).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -221,103 +190,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             get
             {
                 var theoryData = new TheoryData<CreateAndValidateParams>();
-                var handler = new DerivedSamlSecurityTokenHandler();
+                var handler = new DerivedSaml2SecurityTokenHandler();
 
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string>(),
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        Handler = handler,
-                        TestId = "TokenValidationParameters null",
-                        ValidationParameters = null,
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string>(),
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        Handler = handler,
-                        TestId = "ValidateAudience = false",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = false,
-                        },
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string>(),
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
-                        Handler = handler,
-                        TestId = "no audiences in validationParameters",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = true,
-                        },
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string> { "John" },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
-                        Handler = handler,
-                        TestId = "audience has value, tvp has no values",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = true,
-                        },
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string> { "John" },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        Handler = handler,
-                        TestId = "audience not matched",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = true,
-                            ValidAudience = "frank"
-                        },
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string> { "John" },
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        Handler = handler,
-                        TestId = "AudienceValidator returns true",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            AudienceValidator = (aud, token, type) =>
-                            {
-                                return true;
-                            },
-                            ValidateAudience = true,
-                            ValidAudience = "frank"
-                        },
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        Audiences = new List<string> { "John" },
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        Handler = handler,
-                        TestId = "AudienceValidator throws, validateAudience false",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            AudienceValidator = IdentityUtilities.AudienceValidatorThrows,
-                            ValidateAudience = false,
-                            ValidAudience = "frank"
-                        },
-                    });
+                ValidateTheoryData.AddValidateAudienceTheoryData(theoryData, handler);
 
                 return theoryData;
             }
@@ -332,7 +207,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 // TODO - need to pass actual Saml2Token
-                ((theoryData.Handler)as DerivedSamlSecurityTokenHandler).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
+                ((theoryData.Handler)as DerivedSaml2SecurityTokenHandler).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -346,78 +221,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             get
             {
                 var theoryData = new TheoryData<CreateAndValidateParams>();
-                var handler = new DerivedSamlSecurityTokenHandler();
+                var handler = new DerivedSaml2SecurityTokenHandler();
 
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        Handler = handler,
-                        Issuer = "bob",
-                        TestId = "ValidationParameters null",
-                        ValidationParameters = null,
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        Handler = handler,
-                        TestId = "ValidateIssuer == false",
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuer = false },
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
-                        Handler = handler,
-                        Issuer = "bob",
-                        TestId = "Issuer not matched",
-                        ValidationParameters = new TokenValidationParameters { ValidIssuer = "frank" }
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        Handler = handler,
-                        Issuer = "bob",
-                        TestId = "Issuer matched",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = false,
-                            ValidIssuer = "bob"
-                        }
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"),
-                        Handler = handler,
-                        Issuer = "bob",
-                        TestId = "ValidIssuers set but not matched",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = false,
-                            ValidIssuers = new List<string> { "john", "paul", "george", "ringo" }
-                        }
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateParams
-                    {
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        Handler = handler,
-                        Issuer = "bob",
-                        TestId = "IssuerValidator - echo",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
-                            ValidateAudience = false
-                        }
-                    });
+                ValidateTheoryData.AddValidateIssuerTheoryData(theoryData, handler);
 
                 return theoryData;
             }
@@ -434,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 SecurityToken validatedToken;
-                retVal = theoryData.Handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out validatedToken);
+                retVal = (theoryData.Handler as Saml2SecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out validatedToken);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -498,7 +304,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        private class DerivedSamlSecurityTokenHandler : Saml2SecurityTokenHandler
+        private class DerivedSaml2SecurityTokenHandler : Saml2SecurityTokenHandler
         {
             public string ValidateIssuerPublic(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
             {
