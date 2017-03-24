@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -55,6 +56,8 @@ namespace Microsoft.IdentityModel.Xml
             get { return Signature.Id; }
             set { Signature.Id = value; }
         }
+
+        public object TokenSource { get; set; }
 
         public Signature Signature { get; private set; }
 
@@ -108,47 +111,13 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogExceptionMessage(new CryptographicException("SignatureVerificationFailed"));
         }
 
-        public void StartSignatureVerification(SecurityKey verificationKey)
+        public void VerifySignature(SecurityKey key)
         {
-            // TODO - use Signature
-            //string signatureMethod = this.Signature.SignedInfo.SignatureMethod;
-            //SymmetricSecurityKey symmetricKey = verificationKey as SymmetricSecurityKey;
-            //if (symmetricKey != null)
-            //{
-            //    using (KeyedHashAlgorithm hash = symmetricKey.GetKeyedHashAlgorithm(signatureMethod))
-            //    {
-            //        if (hash == null)
-            //        {
-            //            throw LogHelper.LogExceptionMessage(new CryptographicException(
-            //                SR.GetString(SR.UnableToCreateKeyedHashAlgorithmFromSymmetricCrypto, signatureMethod, symmetricKey)));
-            //        }
-            //        VerifySignature(hash);
-            //    }
-            //}
-            //else
-            //{
-            //    AsymmetricSecurityKey asymmetricKey = verificationKey as AsymmetricSecurityKey;
-            //    if (asymmetricKey == null)
-            //    {
-            //        throw LogHelper.LogExceptionMessage(new InvalidOperationException(SR.GetString(SR.UnknownICryptoType, verificationKey)));
-            //    }
-            //    using (HashAlgorithm hash = asymmetricKey.GetHashAlgorithmForSignature(signatureMethod))
-            //    {
-            //        if (hash == null)
-            //        {
-            //            throw LogHelper.LogExceptionMessage(new CryptographicException(
-            //                SR.GetString(SR.UnableToCreateHashAlgorithmFromAsymmetricCrypto, signatureMethod, asymmetricKey)));
-            //        }
-            //        AsymmetricSignatureDeformatter deformatter = asymmetricKey.GetSignatureDeformatter(signatureMethod);
-            //        if (deformatter == null)
-            //        {
-            //            throw LogHelper.LogExceptionMessage(new CryptographicException(
-            //                SR.GetString(SR.UnableToCreateSignatureDeformatterFromAsymmetricCrypto, signatureMethod, asymmetricKey)));
-            //        }
-
-            //        VerifySignature(hash, deformatter, signatureMethod);
-            //    }
-            //}
+            var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, Signature.SignedInfo.SignatureMethod);
+            var memoryStream = new MemoryStream();
+            Signature.SignedInfo.GetCanonicalBytes(memoryStream);
+            if (!signatureProvider.Verify(memoryStream.ToArray(), Signature.GetSignatureBytes()))
+                throw LogHelper.LogExceptionMessage(new CryptographicException("Signature Failure"));
         }
 
         public void WriteTo(XmlDictionaryWriter writer)

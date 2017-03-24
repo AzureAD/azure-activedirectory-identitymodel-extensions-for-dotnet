@@ -177,10 +177,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            validatedToken = ReadToken(securityToken);
+            if (securityToken.Length* 2 > MaximumTokenSizeInBytes)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX11013, securityToken.Length, MaximumTokenSizeInBytes)));
 
-            var claimsIdentity = validationParameters.CreateClaimsIdentity(validatedToken, string.Empty);
-            return new ClaimsPrincipal(claimsIdentity);
+
+            using (StringReader sr = new StringReader(securityToken))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    var assertion = Serializer.ReadAssertion(reader);
+                    ValidateAssertion(assertion, validationParameters);
+                    validatedToken =  new Saml2SecurityToken(assertion);
+                    return null;
+                }
+            }
+        }
+
+        protected virtual void ValidateAssertion(Saml2Assertion assertion, TokenValidationParameters validationParameters)
+        {
+            if (assertion.SignedXml == null && validationParameters.RequireSignedTokens)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException("token not signed"));
+
+            assertion.SignedXml.VerifySignature(validationParameters.IssuerSigningKey);
+            assertion.SignedXml.EnsureDigestValidity(assertion.SignedXml.Signature.SignedInfo[0].ExtractReferredId(), assertion.SignedXml.TokenSource);
+            assertion.SignedXml.CompleteSignatureVerification();
+        }
+
+        protected virtual Saml2SecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
+        {
+            throw new NotImplementedException("not yet");
         }
 
         /// <summary>

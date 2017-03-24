@@ -59,6 +59,7 @@ namespace Microsoft.IdentityModel.Xml
 
             _requireSignature = true;
             _wrappedReader = new WrappedReader(CreateDictionaryReader(reader));
+            _wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
             SetCanonicalizingReader(_wrappedReader);
         }
 
@@ -69,14 +70,17 @@ namespace Microsoft.IdentityModel.Xml
 
             if (_signedXml != null)
             {
-                ResolveSigningCredentials();
-                _signedXml.StartSignatureVerification(_signingCredentials.Key);
-                _wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
-                WifSignedInfo signedInfo = _signedXml.Signature.SignedInfo as WifSignedInfo;
-                _signedXml.EnsureDigestValidity(signedInfo[0].ExtractReferredId(), _wrappedReader);
-                _signedXml.CompleteSignatureVerification();
+                _signedXml.TokenSource = _wrappedReader;
+                //ResolveSigningCredentials();
+                //_signedXml.StartSignatureVerification(_signingCredentials.Key);
+                //_wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
+                //WifSignedInfo signedInfo = _signedXml.Signature.SignedInfo as WifSignedInfo;
+                //_signedXml.EnsureDigestValidity(signedInfo[0].ExtractReferredId(), _wrappedReader);
+                //_signedXml.CompleteSignatureVerification();
             }
         }
+
+        public SignedXml SignedXml { get { return _signedXml; } }
 
         /// <summary>
         /// Returns the SigningCredentials used in the signature after the 
@@ -116,8 +120,8 @@ namespace Microsoft.IdentityModel.Xml
             {
                 _elementCount--;
                 // TODO - read signature to be processed later
-                //if (_elementCount == 0)
-                //    OnEndOfRootElement();
+                if (_elementCount == 0)
+                    OnEndOfRootElement();
             }
 
             bool result = base.Read();

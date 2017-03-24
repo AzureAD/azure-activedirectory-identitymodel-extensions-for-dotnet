@@ -58,6 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             _issuer = issuer;
         }
 
+        public SignedXml SignedXml { get; set; }
+
         /// <summary>
         /// Gets or sets additional information related to the assertion that assists processing in certain
         /// situations but which may be ignored by applications that do not understand the 

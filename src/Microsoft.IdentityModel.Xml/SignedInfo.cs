@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Xml
             Prefix = SignedXml.DefaultPrefix;
         }
 
-        protected MemoryStream CanonicalStream { get; set; }
+        public MemoryStream CanonicalStream { get; set; }
 
         public bool SendSide { get; set; }
 
@@ -130,18 +130,23 @@ namespace Microsoft.IdentityModel.Xml
             hashStream.FlushHash();
         }
 
-        protected virtual void ComputeHash(HashStream hashStream)
+        public virtual void ComputeHash(HashStream hashStream)
+        {
+            GetCanonicalBytes(hashStream);
+        }
+
+        public virtual void GetCanonicalBytes(Stream stream)
         {
             if (SendSide)
             {
                 var utf8Writer = ResourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(hashStream, false, null);
+                utf8Writer.StartCanonicalization(stream, false, null);
                 WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
             }
             else if (CanonicalStream != null)
             {
-                CanonicalStream.WriteTo(hashStream);
+                CanonicalStream.WriteTo(stream);
             }
             else
             {
@@ -151,8 +156,8 @@ namespace Microsoft.IdentityModel.Xml
                 var signatureReader = ReaderProvider.GetReader(SignatureReaderProviderCallbackContext);
                 if (!signatureReader.CanCanonicalize)
                 {
-                    var stream = new MemoryStream();
-                    var bufferingWriter = XmlDictionaryWriter.CreateBinaryWriter(stream);
+                    var ms = new MemoryStream();
+                    var bufferingWriter = XmlDictionaryWriter.CreateBinaryWriter(ms);
                     string[] inclusivePrefix = GetInclusivePrefixes();
                     if (inclusivePrefix != null)
                     {
@@ -171,8 +176,8 @@ namespace Microsoft.IdentityModel.Xml
                     if (inclusivePrefix != null)
                         bufferingWriter.WriteEndElement();
                     bufferingWriter.Flush();
-                    byte[] buffer = stream.ToArray();
-                    int bufferLength = (int)stream.Length;
+                    byte[] buffer = ms.ToArray();
+                    int bufferLength = (int)ms.Length;
                     bufferingWriter.Close();
 
                     signatureReader.Close();
@@ -184,7 +189,7 @@ namespace Microsoft.IdentityModel.Xml
                 }
                 signatureReader.ReadStartElement(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
                 signatureReader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
-                signatureReader.StartCanonicalization(hashStream, false, GetInclusivePrefixes());
+                signatureReader.StartCanonicalization(stream, false, GetInclusivePrefixes());
                 signatureReader.Skip();
                 signatureReader.EndCanonicalization();
                 signatureReader.Close();
@@ -315,6 +320,7 @@ namespace Microsoft.IdentityModel.Xml
         protected void ReadSignatureMethod(XmlDictionaryReader reader)
         {
             _signatureMethodElement.ReadFrom(reader);
+            SignatureMethod = _signatureMethodElement.Algorithm;
         }
 
         protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)

@@ -142,35 +142,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             XmlDictionaryReader plaintextReader = XmlDictionaryReader.CreateDictionaryReader(reader);
-
+            EnvelopedSignatureReader realReader = new EnvelopedSignatureReader(plaintextReader);
             Saml2Assertion assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
 
-            // If it's an EncryptedAssertion, we need to retrieve the plaintext
-            // and repoint our reader
-            if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-            {
-                EncryptingCredentials encryptingCredentials = null;
-                //plaintextReader = CreatePlaintextReaderFromEncryptedData(
-                //                    plaintextReader,
-                //                    out encryptingCredentials);
+            //// If it's an EncryptedAssertion, we need to retrieve the plaintext
+            //// and repoint our reader
+            //if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
+            //{
+            //    EncryptingCredentials encryptingCredentials = null;
+            //    //plaintextReader = CreatePlaintextReaderFromEncryptedData(
+            //    //                    plaintextReader,
+            //    //                    out encryptingCredentials);
 
-                assertion.EncryptingCredentials = encryptingCredentials;
-            }
+            //    assertion.EncryptingCredentials = encryptingCredentials;
+            //}
 
             // Throw if wrong element
-            if (!plaintextReader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
+            if (!realReader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
             {
-                plaintextReader.ReadStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+                realReader.ReadStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
             }
 
             // disallow empty
-            if (plaintextReader.IsEmptyElement)
+            if (realReader.IsEmptyElement)
                 throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.Assertion);
 
-            // SAML supports enveloped signature, so we need to wrap our reader.
-            // We do not dispose this reader, since as a delegating reader it would
-            // dispose the inner reader, which we don't properly own.
-            EnvelopedSignatureReader realReader = new EnvelopedSignatureReader(plaintextReader);
             try
             {
                 // Process @attributes
@@ -216,7 +212,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 assertion.Issuer = ReadIssuer(realReader);
 
                 // <ds:Signature> 0-1
-                realReader.TryReadSignature();
+                //realReader.TryReadSignature();
 
                 // <Subject> 0-1
                 if (realReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
@@ -276,12 +272,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // Reading the end element will complete the signature;
                 // capture the signing creds
-                assertion.SigningCredentials = realReader.SigningCredentials;
+                //assertion.SigningCredentials = realReader.SigningCredentials;
 
                 // Save the captured on-the-wire data, which can then be used
                 // to re-emit this assertion, preserving the same signature.
-                assertion.CaptureSourceData(realReader);
+                //assertion.CaptureSourceData(realReader);
 
+                assertion.SignedXml = realReader.SignedXml;
                 return assertion;
             }
             catch (Exception ex)

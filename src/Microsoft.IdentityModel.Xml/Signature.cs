@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public byte[] GetSignatureBytes()
         {
-            return _signatureValueElement.Value;
+            return _signatureValueElement.Signature;
         }
 
         public void ReadFrom(XmlDictionaryReader reader)
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void SetSignatureValue(byte[] signatureValue)
         {
-            _signatureValueElement.Value = signatureValue;
+            _signatureValueElement.Signature = signatureValue;
         }
 
         public void WriteTo(XmlDictionaryWriter writer)
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public string Id { get; set; }
 
-            internal byte[] Value
+            public byte[] Signature
             {
                 get { return _signatureValue; }
                 set
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Xml
 
             byte[] ISignatureValueSecurityElement.GetSignatureValue()
             {
-                return Value;
+                return Signature;
             }
         }
     }
