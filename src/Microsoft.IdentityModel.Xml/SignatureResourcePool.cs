@@ -78,8 +78,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (string.IsNullOrEmpty(algorithm))
                     throw LogHelper.LogExceptionMessage(new ArgumentException("algorithm, EmptyOrNullArgumentString"));
 
-                // TODO - hash algorithms are serverd up by keys and factories
-                _hashAlgorithm = null;// CryptoHelper.CreateHashAlgorithm( algorithm );
+                _hashAlgorithm = SHA256.Create();
             }
             else
             {

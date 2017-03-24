@@ -80,16 +80,21 @@ namespace Microsoft.IdentityModel.Xml
             _references[_count++].Set(id, digest, useStrTransform);
         }
 
-        protected override void ComputeHash(HashStream hashStream)
+        public override void ComputeHash(HashStream hashStream)
+        {
+            GetCanonicalBytes(hashStream);
+        }
+
+        public override void GetCanonicalBytes(Stream stream)
         {
             if (AddEnvelopedSignatureTransform)
             {
-                base.ComputeHash(hashStream);
+                base.GetCanonicalBytes(stream);
             }
             else
             {
                 SignedInfoCanonicalFormWriter.Instance.WriteSignedInfoCanonicalForm(
-                    hashStream, SignatureMethod, DigestMethod,
+                    stream, SignatureMethod, DigestMethod,
                     _references, _count,
                     ResourcePool.TakeEncodingBuffer(), ResourcePool.TakeBase64Buffer());
             }

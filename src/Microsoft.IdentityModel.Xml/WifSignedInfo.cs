@@ -79,20 +79,25 @@ namespace Microsoft.IdentityModel.Xml
 
         }
 
-        protected override void ComputeHash(HashStream hashStream)
+        public override void ComputeHash(HashStream hashStream)
+        {
+            GetCanonicalBytes(hashStream);
+        }
+
+        public override void GetCanonicalBytes(Stream stream)
         {
             if (SendSide)
             {
                 using (XmlDictionaryWriter utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
                 {
-                    utf8Writer.StartCanonicalization(hashStream, false, null);
+                    utf8Writer.StartCanonicalization(stream, false, null);
                     WriteTo(utf8Writer);
                     utf8Writer.EndCanonicalization();
                 }
             }
             else if (CanonicalStream != null)
             {
-                CanonicalStream.WriteTo(hashStream);
+                CanonicalStream.WriteTo(stream);
             }
             else
             {
@@ -116,7 +121,7 @@ namespace Microsoft.IdentityModel.Xml
                                 bufferingWriter.WriteXmlnsAttribute(inclusivePrefix[i], ns);
                             }
                         }
-                        bufferingWriter.StartCanonicalization(hashStream, false, inclusivePrefix);
+                        bufferingWriter.StartCanonicalization(stream, false, inclusivePrefix);
                         bufferingWriter.WriteNode(signedinfoReader, false);
                         bufferingWriter.EndCanonicalization();
                         bufferingWriter.WriteEndElement();
