@@ -16,6 +16,7 @@ IdentityModel Extensions library Microsoft.IdentityModel.Tokens has a known secu
 IdentityModel Extensions for .NET 5 has now been released. If you are using IdentityModel Extensions with ASP.NET, the following combinations are supported:
 * **IdentityModel Extensions for .NET 4.x** and **ASP.NET 4**
 * **IdentityModel Extensions for .NET 5.x** and **ASP.NET Core 1.x**
+
 All other combinations aren't supported.
 
 ## Samples and Documentation
