@@ -119,6 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public const string SessionNotOnOrAfter = "SessionNotOnOrAfter";
             public const string SPNameQualifier = "SPNameQualifier";
             public const string SPProvidedID = "SPProvidedID";
+            public const string Type = "type";
             public const string Version = "Version";
         }
 

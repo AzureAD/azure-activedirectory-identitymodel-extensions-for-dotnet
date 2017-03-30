@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.ObjectModel;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Xml;
+
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    using System;
-    using System.Collections.ObjectModel;
-    using Logging;
-    using Xml;
-
     /// <summary>
     /// Represents the SubjectConfirmationData element and the associated 
     /// KeyInfoConfirmationDataType defined in [Saml2Core, 2.4.1.2-2.4.1.3].
@@ -57,15 +57,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Address
         {
-            get
-            {
-                return _address;
-            }
-
-            set
-            {
-                _address = XmlUtil.NormalizeEmptyString(value);
-            }
+            get { return _address; }
+            set { _address = XmlUtil.NormalizeEmptyString(value); }
         }
 
         /// <summary>
@@ -106,15 +99,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Uri Recipient
         {
-            get
-            {
-                return _recipient;
-            }
-
+            get { return _recipient;  }
             set
             {
-                if (null != value && !value.IsAbsoluteUri)
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID0013");
+                if (value == null)
+                    throw LogHelper.LogArgumentNullException(nameof(value));
+
+                if (!value.IsAbsoluteUri)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11300, nameof(value), value));
 
                 _recipient = value;
             }
