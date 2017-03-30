@@ -132,23 +132,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Reads the &lt;saml:Assertion> element.
+        /// Reads a &lt;saml:Assertion> element.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
         public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
-            XmlDictionaryReader plaintextReader = XmlDictionaryReader.CreateDictionaryReader(reader);
-            EnvelopedSignatureReader realReader = new EnvelopedSignatureReader(plaintextReader);
-            Saml2Assertion assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
+            var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
+            var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
 
-            //// If it's an EncryptedAssertion, we need to retrieve the plaintext
-            //// and repoint our reader
+            // TODO - handle EncryptedAssertions
+            // If it's an EncryptedAssertion, we need to retrieve the plaintext
+            // and repoint our reader
             //if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
             //{
             //    EncryptingCredentials encryptingCredentials = null;
@@ -165,10 +162,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 string value;
 
                 // @xsi:type
-                XmlUtil.ValidateXsiType(realReader, Saml2Constants.Types.AssertionType, Saml2Constants.Namespace);
+                XmlUtil.ValidateXsiType(envelopeReader, Saml2Constants.Types.AssertionType, Saml2Constants.Namespace);
 
                 // @Version - required - must be "2.0"
-                string version = realReader.GetAttribute(Saml2Constants.Attributes.Version);
+                string version = envelopeReader.GetAttribute(Saml2Constants.Attributes.Version);
                 if (string.IsNullOrEmpty(version))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.Version);
 
@@ -176,60 +173,60 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11137, version);
 
                 // @ID - required
-                value = realReader.GetAttribute(Saml2Constants.Attributes.ID);
+                value = envelopeReader.GetAttribute(Saml2Constants.Attributes.ID);
                 if (string.IsNullOrEmpty(value))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.ID);
 
                 assertion.Id = new Saml2Id(value);
 
                 // @IssueInstant - required
-                value = realReader.GetAttribute(Saml2Constants.Attributes.IssueInstant);
+                value = envelopeReader.GetAttribute(Saml2Constants.Attributes.IssueInstant);
                 if (string.IsNullOrEmpty(value))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
 
                 assertion.IssueInstant = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
 
                 // Process <elements>
-                realReader.Read();
+                envelopeReader.Read();
 
                 // <Issuer> 1
-                assertion.Issuer = ReadIssuer(realReader);
+                assertion.Issuer = ReadIssuer(envelopeReader);
 
                 // <ds:Signature> 0-1
                 //realReader.TryReadSignature();
 
                 // <Subject> 0-1
-                if (realReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
-                    assertion.Subject = ReadSubject(realReader);
+                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
+                    assertion.Subject = ReadSubject(envelopeReader);
 
                 // <Conditions> 0-1
-                if (realReader.IsStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace))
-                    assertion.Conditions = ReadConditions(realReader);
+                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace))
+                    assertion.Conditions = ReadConditions(envelopeReader);
 
                 // <Advice> 0-1
-                if (realReader.IsStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace))
-                    assertion.Advice = ReadAdvice(realReader);
+                if (envelopeReader.IsStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace))
+                    assertion.Advice = ReadAdvice(envelopeReader);
 
                 // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
-                while (realReader.IsStartElement())
+                while (envelopeReader.IsStartElement())
                 {
                     Saml2Statement statement;
 
-                    if (realReader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-                        statement = ReadStatement(realReader);
-                    else if (realReader.IsStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace))
-                        statement = ReadAttributeStatement(realReader);
-                    else if (realReader.IsStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace))
-                        statement = ReadAuthenticationStatement(realReader);
-                    else if (realReader.IsStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace))
-                        statement = ReadAuthorizationDecisionStatement(realReader);
+                    if (envelopeReader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
+                        statement = ReadStatement(envelopeReader);
+                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace))
+                        statement = ReadAttributeStatement(envelopeReader);
+                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace))
+                        statement = ReadAuthenticationStatement(envelopeReader);
+                    else if (envelopeReader.IsStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace))
+                        statement = ReadAuthorizationDecisionStatement(envelopeReader);
                     else
                         break;
 
                     assertion.Statements.Add(statement);
                 }
 
-                realReader.ReadEndElement();
+                envelopeReader.ReadEndElement();
 
                 if (null == assertion.Subject)
                 {
@@ -250,15 +247,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                 }
 
-                // Reading the end element will complete the signature;
-                // capture the signing creds
-                //assertion.SigningCredentials = realReader.SigningCredentials;
-
-                // Save the captured on-the-wire data, which can then be used
-                // to re-emit this assertion, preserving the same signature.
-                //assertion.CaptureSourceData(realReader);
-
-                assertion.SignedXml = realReader.SignedXml;
+                assertion.SignedXml = envelopeReader.SignedXml;
                 return assertion;
             }
             catch (Exception ex)
