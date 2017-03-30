@@ -141,6 +141,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (null == reader)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+
             XmlDictionaryReader plaintextReader = XmlDictionaryReader.CreateDictionaryReader(reader);
             EnvelopedSignatureReader realReader = new EnvelopedSignatureReader(plaintextReader);
             Saml2Assertion assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
@@ -157,16 +159,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             //    assertion.EncryptingCredentials = encryptingCredentials;
             //}
 
-            // Throw if wrong element
-            if (!realReader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
-            {
-                realReader.ReadStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
-            }
-
-            // disallow empty
-            if (realReader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.Assertion);
-
             try
             {
                 // Process @attributes
@@ -178,30 +170,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @Version - required - must be "2.0"
                 string version = realReader.GetAttribute(Saml2Constants.Attributes.Version);
                 if (string.IsNullOrEmpty(version))
-                {
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("version empty"));
-                }
+                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.Version);
 
-                if (!StringComparer.Ordinal.Equals(assertion.Version, version))
-                {
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("version is not right"));
-                }
+                if (!StringComparer.Ordinal.Equals(Saml2Constants.Version, version))
+                    throw LogReadException(LogMessages.IDX11137, version);
 
                 // @ID - required
                 value = realReader.GetAttribute(Saml2Constants.Attributes.ID);
                 if (string.IsNullOrEmpty(value))
-                {
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("id missing"));
-                }
+                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.ID);
 
                 assertion.Id = new Saml2Id(value);
 
                 // @IssueInstant - required
                 value = realReader.GetAttribute(Saml2Constants.Attributes.IssueInstant);
                 if (string.IsNullOrEmpty(value))
-                {
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("IssueInstant missing"));
-                }
+                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
 
                 assertion.IssueInstant = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
 
@@ -216,15 +200,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // <Subject> 0-1
                 if (realReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
-                {
                     assertion.Subject = ReadSubject(realReader);
-                }
 
                 // <Conditions> 0-1
                 if (realReader.IsStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace))
-                {
                     assertion.Conditions = ReadConditions(realReader);
-                }
 
                 // <Advice> 0-1
                 if (realReader.IsStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace))
@@ -261,7 +241,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     // [Saml2Core, lines 1050, 1168, 1280]
                     foreach (Saml2Statement statement in assertion.Statements)
                     {
-                        if (statement is Saml2AuthenticationStatement
+                        if  (  statement is Saml2AuthenticationStatement
                             || statement is Saml2AttributeStatement
                             || statement is Saml2AuthorizationDecisionStatement)
                         {
@@ -283,6 +263,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
+                if (ex is Saml2SecurityTokenReadException)
+                    throw;
+
                 throw LogReadException(LogMessages.IDX11102, ex, Saml2Strings.Assertion);
             }
         }
@@ -1222,16 +1205,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public virtual Saml2Statement ReadStatement(XmlReader reader)
         {
-            if (null == reader)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-            }
-
-            // throw if wrong element
-            if (!reader.IsStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace))
-            {
-                reader.ReadStartElement(Saml2Constants.Elements.Statement, Saml2Constants.Namespace);
-            }
+            CheckReaderOnEntry(reader, Saml2Constants.Elements.Statement, Saml2Constants.Namespace);
 
             // Since Statement is an abstract type, we have to switch off the xsi:type declaration
             XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
@@ -1240,9 +1214,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // statement is abstract
             if (null == declaredType
                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.StatementAbstractType, Saml2Constants.Namespace))
-            {
                 throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
-            }
 
             // Reroute to the known statement types if applicable
             if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.AttributeStatementType, Saml2Constants.Namespace))

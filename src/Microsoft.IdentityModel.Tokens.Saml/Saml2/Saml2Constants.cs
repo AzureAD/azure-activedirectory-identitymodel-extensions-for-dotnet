@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public const string Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string Saml2TokenProfile11 = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string OasisWssSaml2TokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0";
+        public const string Version = "2.0";
 
         // TODO - is this the right place ?
         public const string ClaimValueTypeSerializationPrefix = "tn"; // for target namespace
