@@ -25,33 +25,95 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Xml;
+using System;
+using System.IO;
+using System.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
     /// <summary>
-    /// 
+    /// Ws-Fed metadata reading tests.
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
-        [Fact]
-        public void Constructors()
+        private static bool _firstTest = true;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("MetadataTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadMetadataTest(WsFederationMetadataTestParams theoryData)
         {
+            TestUtilities.TestHeader($"{this}.ReadMetadataTest", theoryData.TestId, ref _firstTest);
+            try
+            {
+                XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                WsFederationMetadataSerializer serializer = new WsFederationMetadataSerializer();
+                WsFederationConfiguration configuration = serializer.ReadMetadata(reader);
+
+                Assert.Equal(theoryData.Issuer, configuration.Issuer);
+                Assert.Equal(theoryData.TokenEndpoint, configuration.TokenEndpoint);
+                Assert.Equal(theoryData.KeyInfoCount, configuration.KeyInfos.Count);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
         }
 
-        [Fact]
-        public void Defaults()
+        public static TheoryData<WsFederationMetadataTestParams> MetadataTheoryData
         {
+            get
+            {
+                var theoryData = new TheoryData<WsFederationMetadataTestParams>();
+
+                theoryData.Add(
+                    new WsFederationMetadataTestParams
+                    {
+                        Metadata = ReferenceMetadata.Metadata,
+                        Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
+                        TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                        KeyInfoCount = 3,
+                        TestId = nameof(ReferenceMetadata.Metadata)
+                    });
+
+                theoryData.Add(
+                    new WsFederationMetadataTestParams
+                    {
+                        Metadata = ReferenceMetadata.MetadataNoIssuer,
+                        TestId = nameof(ReferenceMetadata.MetadataNoIssuer),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13001")
+                    });
+
+                theoryData.Add(
+                    new WsFederationMetadataTestParams
+                    {
+                        Metadata = ReferenceMetadata.MetadataNoTokenUri,
+                        TestId = nameof(ReferenceMetadata.MetadataNoTokenUri),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003")
+                    });
+
+                return theoryData;
+            }
         }
 
-        [Fact]
-        public void GetSets()
+        public class WsFederationMetadataTestParams
         {
-        }
+            public string Metadata { get; set; }
 
-        [Fact]
-        public void Publics()
-        {
+            public string Issuer { get; set; }
+
+            public string TokenEndpoint { get; set; }
+
+            public int KeyInfoCount { get; set; }
+
+            public string TestId { get; set; }
+
+            public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
         }
     }
 }

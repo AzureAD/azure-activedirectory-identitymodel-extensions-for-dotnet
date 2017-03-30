@@ -25,18 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using System.IdentityModel.Metadata;
-using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Logging;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
-using WsFedMetadataSerializer = System.IdentityModel.Metadata.MetadataSerializer;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -94,46 +88,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 LogHelper.LogArgumentNullException(nameof(retriever));
             }
 
-            WsFederationConfiguration configuration = new WsFederationConfiguration();
-
             string document = await retriever.GetDocumentAsync(address, cancel);
 
             using (XmlReader metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {
-                var serializer = new WsFedMetadataSerializer { CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None };
+                var serializer = new WsFederationMetadataSerializer();
 
-                var metadataBase = serializer.ReadMetadata(metaDataReader);
-                var entityDescriptor = (EntityDescriptor)metadataBase;
+                WsFederationConfiguration configuration = serializer.ReadMetadata(metaDataReader);
 
-                if (!string.IsNullOrWhiteSpace(entityDescriptor.EntityId.Id))
-                {
-                    configuration.Issuer = entityDescriptor.EntityId.Id;
-                }
+                return configuration;
 
-                SecurityTokenServiceDescriptor stsd = entityDescriptor.RoleDescriptors.OfType<SecurityTokenServiceDescriptor>().First();
-                if (stsd != null)
-                {
-                    configuration.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
-                    foreach (KeyDescriptor keyDescriptor in stsd.Keys)
-                    {
-                        if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
-                        {
-                            //IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10807);
-                            foreach (System.IdentityModel.Tokens.SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
-                            {
-                                X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
-                                if (x509Clause != null)
-                                {
-                                    var key = new X509SecurityKey(new X509Certificate2(x509Clause.GetX509RawData()));
-                                    configuration.SigningKeys.Add(key);
-                                }
-                            }
-                        }
-                    }
-                }
             }
-
-            return configuration;
+            
         }
     }
 }

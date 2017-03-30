@@ -383,5 +383,9 @@ namespace Microsoft.IdentityModel.Xml
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args)));
         }
 
+        public static Exception LogReadException(string format, Exception inner, params object[] args)
+        {
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args), inner));
+        }
     }
 }
