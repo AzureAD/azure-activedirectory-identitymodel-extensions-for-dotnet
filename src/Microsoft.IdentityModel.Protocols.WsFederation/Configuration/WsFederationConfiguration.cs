@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -37,6 +38,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     public class WsFederationConfiguration
     {
         private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
+        private Collection<KeyInfo> _keyInfos = new Collection<KeyInfo>();
 
         /// <summary>
         /// Initializes an new instance of <see cref="WsFederationConfiguration"/>.
@@ -58,6 +60,22 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             get
             {
                 return _signingKeys;
+            }
+        }
+
+        /// <summary>
+        /// Signed xml.
+        /// </summary>
+        public SignedXml SignedXml { get; set; }
+
+        /// <summary>
+        /// Get the <see cref="ICollection{KeyInfo}"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// </summary>
+        public ICollection<KeyInfo> KeyInfos
+        {
+            get
+            {
+                return _keyInfos;
             }
         }
 

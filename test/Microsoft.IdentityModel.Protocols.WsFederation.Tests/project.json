@@ -3,20 +3,12 @@
   "dependencies": {
     "Microsoft.IdentityModel.Tokens.Tests": "5.1.4",
     "xunit": "2.2.0-*",
-    "dotnet-test-xunit": "2.2.0-*"
+    "dotnet-test-xunit": "2.2.0-*",
+    "Microsoft.IdentityModel.Protocols.WsFederation": "2.1.4"
   },
   "description": "Microsoft.IdentityModel.Protocols.WsFederation.Tests",
   "testRunner": "xunit",
   "frameworks": {
-    "netcoreapp1.0": {
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
-          "type": "platform"
-        },
-        "System.Diagnostics.Process": "4.3.0-*"
-      }
-    },
     "net451": {
       "frameworkAssemblies": {
         "System.Runtime": "",

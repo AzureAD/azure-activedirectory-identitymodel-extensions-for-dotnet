@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public string CreateSignInUrl()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
-            wsFederationMessage.Wa = WsFederationActions.SignIn;
+            wsFederationMessage.Wa = WsFederationConstants.WsFederationActions.SignIn;
             return wsFederationMessage.BuildRedirectUrl();
         }
 
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public string CreateSignOutUrl()
         {
             WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
-            wsFederationMessage.Wa = WsFederationActions.SignOut;
+            wsFederationMessage.Wa = WsFederationConstants.WsFederationActions.SignOut;
             return wsFederationMessage.BuildRedirectUrl();
         }
         
@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             get
             {
-                return Wa == WsFederationActions.SignIn;
+                return Wa == WsFederationConstants.WsFederationActions.SignIn;
             }
         }
         
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             get
             {
-                return Wa == WsFederationActions.SignOut;
+                return Wa == WsFederationConstants.WsFederationActions.SignOut;
             }
         }
 
@@ -210,8 +210,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wa 
         { 
-            get { return GetParameter(WsFederationParameterNames.Wa); }
-            set { SetParameter(WsFederationParameterNames.Wa, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wa); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wa, value); }
         }
 
         /// <summary>
@@ -220,8 +220,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wattr
         {
-            get { return GetParameter(WsFederationParameterNames.Wattr); }
-            set { SetParameter(WsFederationParameterNames.Wattr, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wattr); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wattr, value); }
         }
 
         /// <summary>
@@ -230,8 +230,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wattrptr
         {
-            get { return GetParameter(WsFederationParameterNames.Wattrptr); }
-            set { SetParameter(WsFederationParameterNames.Wattrptr, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wattrptr); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wattrptr, value); }
         }
 
         /// <summary>
@@ -240,8 +240,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wauth
         {
-            get { return GetParameter(WsFederationParameterNames.Wauth); }
-            set { SetParameter(WsFederationParameterNames.Wauth, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wauth); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wauth, value); }
         }
 
         /// <summary>
@@ -250,8 +250,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wct
         {
-            get { return GetParameter(WsFederationParameterNames.Wct); }
-            set { SetParameter(WsFederationParameterNames.Wct, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wct); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wct, value); }
         }
 
         /// <summary>
@@ -260,8 +260,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]        
         public string Wctx
         {
-            get { return GetParameter(WsFederationParameterNames.Wctx); }
-            set { SetParameter(WsFederationParameterNames.Wctx, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wctx); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wctx, value); }
         }
 
         /// <summary>
@@ -270,8 +270,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wencoding
         {
-            get { return GetParameter(WsFederationParameterNames.Wencoding); }
-            set { SetParameter(WsFederationParameterNames.Wencoding, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wencoding); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wencoding, value); }
         }
 
         /// <summary>
@@ -280,8 +280,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wfed
         {
-            get { return GetParameter(WsFederationParameterNames.Wfed); }
-            set { SetParameter(WsFederationParameterNames.Wfed, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wfed); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wfed, value); }
         }
 
         /// <summary>
@@ -290,8 +290,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wfresh
         {
-            get { return GetParameter(WsFederationParameterNames.Wfresh); }
-            set { SetParameter(WsFederationParameterNames.Wfresh, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wfresh); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wfresh, value); }
         }
 
         /// <summary>
@@ -300,8 +300,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Whr
         {
-            get { return GetParameter(WsFederationParameterNames.Whr); }
-            set { SetParameter(WsFederationParameterNames.Whr, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Whr); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Whr, value); }
         }
 
         /// <summary>
@@ -311,8 +311,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709")]
         public string Wp
         {
-            get { return GetParameter(WsFederationParameterNames.Wp); }
-            set { SetParameter(WsFederationParameterNames.Wp, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wp); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wp, value); }
         }
 
         /// <summary>
@@ -321,8 +321,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wpseudo
         {
-            get { return GetParameter(WsFederationParameterNames.Wpseudo); }
-            set { SetParameter(WsFederationParameterNames.Wpseudo, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wpseudo); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wpseudo, value); }
         }
 
         /// <summary>
@@ -331,8 +331,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wpseudoptr
         {
-            get { return GetParameter(WsFederationParameterNames.Wpseudoptr); }
-            set { SetParameter(WsFederationParameterNames.Wpseudoptr, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wpseudoptr); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wpseudoptr, value); }
         }
 
         /// <summary>
@@ -341,8 +341,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wreply
         {
-            get { return GetParameter(WsFederationParameterNames.Wreply); }
-            set { SetParameter(WsFederationParameterNames.Wreply, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wreply); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wreply, value); }
         }
 
         /// <summary>
@@ -351,8 +351,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]        
         public string Wreq
         {
-            get { return GetParameter(WsFederationParameterNames.Wreq); }
-            set { SetParameter(WsFederationParameterNames.Wreq, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wreq); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wreq, value); }
         }
 
         /// <summary>
@@ -361,8 +361,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]        
         public string Wreqptr
         {
-            get { return GetParameter(WsFederationParameterNames.Wreqptr); }
-            set { SetParameter(WsFederationParameterNames.Wreqptr, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wreqptr); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wreqptr, value); }
         }
 
         /// <summary>
@@ -371,8 +371,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]        
         public string Wres
         {
-            get { return GetParameter(WsFederationParameterNames.Wres); }
-            set { SetParameter(WsFederationParameterNames.Wres, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wres); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wres, value); }
         }
 
         /// <summary>
@@ -380,8 +380,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         public string Wresult
         {
-            get { return GetParameter(WsFederationParameterNames.Wresult); }
-            set { SetParameter(WsFederationParameterNames.Wresult, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wresult); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wresult, value); }
         }
 
         /// <summary>
@@ -390,8 +390,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]        
         public string Wresultptr
         {
-            get { return GetParameter(WsFederationParameterNames.Wresultptr); }
-            set { SetParameter(WsFederationParameterNames.Wresultptr, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wresultptr); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wresultptr, value); }
         }
 
         /// <summary>
@@ -400,8 +400,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704")]        
         public string Wtrealm
         {
-            get { return GetParameter(WsFederationParameterNames.Wtrealm); }
-            set { SetParameter(WsFederationParameterNames.Wtrealm, value); }
+            get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm); }
+            set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm, value); }
         }
     }
 }

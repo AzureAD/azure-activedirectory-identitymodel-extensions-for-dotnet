@@ -40,7 +40,15 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX10900 = "IDX10900: Building wsfederation message from query string: '{0}'.";
         internal const string IDX10901 = "IDX10901: Building wsfederation message from uri: '{0}'.";
 
-        #pragma warning restore 1591
+        // xml metadata messages
+        internal const string IDX13000 = "IDX13000: Exception thrown while reading WsFederation metadata.";
+        internal const string IDX13001 = "IDX13001: entityID attribute is not found in EntityDescriptor element in metadata file.";
+        internal const string IDX13002 = "IDX13002: Current name '{0} and namespace '{1}' do not match the expected name '{2}' and namespace '{3}'.";
+        internal const string IDX13003 = "IDX13003: Token reference address is missing metadata file.";
+        internal const string IDX13004 = "IDX13004: Security token type role descriptor is expected.";
+        internal const string IDX13005 = "IDX13005: Key descriptor for signing is expected.";
+
+#pragma warning restore 1591
 
 
     }
