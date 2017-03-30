@@ -95,10 +95,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11135 = "IDX11135: An unrecognized value was encountered for the SAML2:AuthorizationDecisionStatement element's Decision attribute: '{0}'";
         internal const string IDX11136 = "IDX11136: Unable to read for Saml2SecurityToken. Required Element: '{0}' is missing or empty.";
         internal const string IDX11137 = "IDX11137: Unable to read for Saml2SecurityToken. Version must be '2.0' was: '{0}'.";
+        internal const string IDX11138 = "IDX11138: Unable to read for Saml2SecurityToken. the AttributeStatement does not contain any Attributes.";
 
         // Saml2SecurityTokenHandler writing
-        internal const string IDX11140 = "IDX11140: The Saml2SecurityTokenHandler can only write SecurityToken objects of type Saml2SecurityToken.";
-        internal const string IDX11141 = "IDX11141: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
+        internal const string IDX11200 = "IDX11200: The Saml2SecurityTokenHandler can only write SecurityToken objects of type Saml2SecurityToken.";
+        internal const string IDX11201 = "IDX11201: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
         internal const string IDX11142 = "IDX11142: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
         internal const string IDX11143 = "IDX11143: A Saml2SecurityToken cannot be created from the Saml2Assertion because it has no Subject.";
         internal const string IDX11144 = "IDX11144: A Saml2SecurityToken cannot be created from the Saml2Assertion because it has no SubjectConfirmation.";
@@ -107,6 +108,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11147 = "IDX11147: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies the Holder-of-key confirmation method but identifies no keys in the SubjectConfirmationData.";
         internal const string IDX11148 = "IDX11148: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies an unsupported confirmation method: '{0}'";
         internal const string IDX11149 = "IDX11149: Both AuthenticationContext ClassReference DeclarationReference can not be null.";
+
+        internal const string IDX11300 = "IDX11300: '{0}' must be an absolute Uri, was: '{1}'";
 
         // NotSupported Exceptions
 #pragma warning restore 1591

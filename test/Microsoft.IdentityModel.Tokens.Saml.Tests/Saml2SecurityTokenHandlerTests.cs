@@ -117,8 +117,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         CanRead = true,
                         Handler = handler,
-                        TestId = "AADSaml2Token",
-                        Token = RefrenceTokens.Saml2Token_1
+                        TestId = nameof(RefrenceTokens.Saml2Token_Valid),
+                        Token = RefrenceTokens.Saml2Token_Valid
                     });
 
                 theoryData.Add(
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         CanRead = false,
                         Handler = handler,
-                        TestId = "Saml1Token_1",
+                        TestId = nameof(RefrenceTokens.Saml1Token_1),
                         Token = RefrenceTokens.Saml1Token_1
                     });
 
@@ -160,8 +160,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateParams
                     {
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = "AADSaml2Token",
-                        Token = RefrenceTokens.Saml2Token_1
+                        TestId = nameof(RefrenceTokens.Saml2Token_Valid),
+                        Token = RefrenceTokens.Saml2Token_Valid
                     });
 
                 return theoryData;
@@ -256,12 +256,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 var theoryData = new TheoryData<CreateAndValidateParams>();
 
-                var tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = "Null-SecurityToken",
                         Token = null,
                         ValidationParameters = new TokenValidationParameters()
@@ -271,13 +270,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateParams
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = "NULL-TokenValidationParameters",
                         Token = "s",
                         ValidationParameters = null,
                     });
 
-                tokenHandler = new Saml2SecurityTokenHandler();
+                var tokenHandler = new Saml2SecurityTokenHandler();
                 tokenHandler.MaximumTokenSizeInBytes = 1;
                 theoryData.Add(
                     new CreateAndValidateParams
@@ -289,82 +288,83 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
-                        Handler = tokenHandler,
-                        TestId = "Saml2Token_MissingVersion",
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(RefrenceTokens.Saml2Token_MissingVersion),
                         Token = RefrenceTokens.Saml2Token_MissingVersion,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11137:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_VersionNotV20),
                         Token = RefrenceTokens.Saml2Token_VersionNotV20,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_IdMissing),
                         Token = RefrenceTokens.Saml2Token_IdMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerInstantMissing),
                         Token = RefrenceTokens.Saml2Token_IssuerInstantMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(FormatException)),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerInstantFormatError),
                         Token = RefrenceTokens.Saml2Token_IssuerInstantFormatError,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11105:"),
-                        Handler = tokenHandler,
+                        Handler = tokenHandler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerMissing),
                         Token = RefrenceTokens.Saml2Token_IssuerMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
-                tokenHandler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11108:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_NoSubjectNoStatements),
                         Token = RefrenceTokens.Saml2Token_NoSubjectNoStatements,
+                        ValidationParameters = new TokenValidationParameters(),
+                    });
+
+                theoryData.Add(
+                    new CreateAndValidateParams
+                    {
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11138:"),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(RefrenceTokens.Saml2Token_NoAttributes),
+                        Token = RefrenceTokens.Saml2Token_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
                     });
 
@@ -375,8 +375,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateParams
                     {
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.Saml2Token_1),
-                        Token = RefrenceTokens.Saml2Token_1,
+                        TestId = nameof(RefrenceTokens.Saml2Token_Valid),
+                        Token = RefrenceTokens.Saml2Token_Valid,
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = new X509SecurityKey(aadCert),
@@ -392,7 +392,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = ExpectedException.CryptographicException(),
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = "Saml2Token_AttributeTampered",
+                        TestId = nameof(RefrenceTokens.Saml2Token_AttributeTampered),
                         Token = RefrenceTokens.Saml2Token_AttributeTampered,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -409,7 +409,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = ExpectedException.CryptographicException(),
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = "Saml2Token_DigestTampered",
+                        TestId = nameof(RefrenceTokens.Saml2Token_DigestTampered),
                         Token = RefrenceTokens.Saml2Token_DigestTampered,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = ExpectedException.CryptographicException(),
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = "Saml2Token_SignatureTampered",
+                        TestId = nameof(RefrenceTokens.Saml2Token_SignatureTampered),
                         Token = RefrenceTokens.Saml2Token_SignatureTampered,
                         ValidationParameters = new TokenValidationParameters
                         {

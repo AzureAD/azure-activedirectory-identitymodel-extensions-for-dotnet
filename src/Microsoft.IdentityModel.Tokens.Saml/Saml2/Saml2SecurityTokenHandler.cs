@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var samlToken = token as Saml2SecurityToken;
             if (null == samlToken)
-                throw Saml2Serializer.LogWriteException(LogMessages.IDX11140);
+                throw Saml2Serializer.LogWriteException(LogMessages.IDX11200);
 
             Serializer.WriteAssertion(writer, samlToken.Assertion);
         }
@@ -1123,7 +1123,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     // TODO - how do we want to handle actor?
                     if (subject.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11141));
+                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11201));
 
                     SetDelegateFromAttribute(attribute, subject, issuer);
                 }
