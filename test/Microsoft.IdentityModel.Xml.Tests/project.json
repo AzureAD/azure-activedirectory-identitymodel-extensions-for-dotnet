@@ -1,0 +1,21 @@
+{
+  "version": "5.1.4",
+    "dependencies": {
+        "Microsoft.IdentityModel.Tokens.Tests": "5.1.4",
+        "Microsoft.IdentityModel.Tokens.Xml": "5.1.4-*",
+        "dotnet-test-xunit": "2.2.0-*",
+        "xunit": "2.2.0-*"
+    },
+  "description": "Microsoft.IdentityModel.Xml.Tests",
+  "testRunner": "xunit",
+  "frameworks": {
+    "net451": {
+        "dependencies": {
+            "xunit.runner.console": "2.1.0"
+        }
+    }
+  },
+  "buildOptions": {
+    "warningsAsErrors": true
+    }
+}

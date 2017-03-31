@@ -41,6 +41,9 @@
       <project name="Microsoft.IdentityModel.Tokens">
         <build>yes</build>
       </project>
+      <project name="Microsoft.IdentityModel.Xml">
+        <build>yes</build>
+      </project>
       <project name="System.IdentityModel.Tokens.Jwt">
         <build>yes</build>
       </project>
@@ -62,6 +65,9 @@
         <build>yes</build>
       </project>
       <project name="Microsoft.IdentityModel.Tokens.Tests">
+        <build>yes</build>
+      </project>
+      <project name="Microsoft.IdentityModel.Xml.Tests">
         <build>yes</build>
       </project>
       <project name="System.IdentityModel.Tokens.Jwt.Tests">
