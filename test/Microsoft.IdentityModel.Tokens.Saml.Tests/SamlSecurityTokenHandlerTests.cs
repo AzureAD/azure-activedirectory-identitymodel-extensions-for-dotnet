@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void CreateToken()
         {
             bool first = true;
-            TestUtilities.TestHeader("SamlSecurityTokenHandlerTests.CreateToken", "Saml1Token", ref first);
+            TestUtilities.TestHeader($"{this}.CreateToken", "Saml1Token", ref first);
             var tokenHandler = new SamlSecurityTokenHandler();
             var descriptor = Default.SecurityTokenDescriptor();
             var token = tokenHandler.CreateToken(descriptor);
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateAudience(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("SamlSecurityTokenHandlerTests.ValidateAudience", theoryData.TestId, ref _firstValidateAudience);
+            TestUtilities.TestHeader($"{this}.ValidateAudience", theoryData.TestId, ref _firstValidateAudience);
             try
             {
                 ((theoryData.Handler)as DerivedSamlSecurityTokenHandler).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateIssuer(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("SamlSecurityTokenHandlerTests.ValidateIssuer", theoryData.TestId, ref _firstValidateIssuer);
+            TestUtilities.TestHeader($"{this}.ValidateIssuer", theoryData.TestId, ref _firstValidateIssuer);
             try
             {
                 ((theoryData.Handler)as DerivedSamlSecurityTokenHandler).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);

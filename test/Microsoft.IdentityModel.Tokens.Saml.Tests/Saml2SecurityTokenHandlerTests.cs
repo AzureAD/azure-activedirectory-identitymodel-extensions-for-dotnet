@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CanReadToken(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.CanReadToken", theoryData.TestId, ref _firstCanReadToken);
+            TestUtilities.TestHeader($"{this}.CanReadToken", theoryData.TestId, ref _firstCanReadToken);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadToken(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.ReadToken", theoryData.TestId, ref _firstReadToken);
+            TestUtilities.TestHeader($"{this}.ReadToken", theoryData.TestId, ref _firstReadToken);
             try
             {
                 theoryData.Handler.ReadToken(theoryData.Token);
@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateAudience(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.ValidateAudience", theoryData.TestId, ref _firstValidateAudience);
+            TestUtilities.TestHeader($"{this}.ValidateAudience", theoryData.TestId, ref _firstValidateAudience);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -204,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateIssuer(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.ValidateIssuer", theoryData.TestId, ref _firstValidateIssuer);
+            TestUtilities.TestHeader($"{this}.ValidateIssuer", theoryData.TestId, ref _firstValidateIssuer);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -235,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateToken(CreateAndValidateParams theoryData)
         {
-            TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.ValidateToken", theoryData.TestId, ref _firstValidateToken);
+            TestUtilities.TestHeader($"{this}.ValidateToken", theoryData.TestId, ref _firstValidateToken);
 
             ClaimsPrincipal retVal = null;
             try
