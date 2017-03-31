@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
@@ -42,6 +43,8 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         public SignedXml SignedXml { get; set; }
 
         public string TestId { get; set; }
+
+        public XmlReader XmlReader { get; set; }
     }
 
     public class EnvelopedSignatureReaderTests
@@ -57,6 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.TestHeader("Saml2SecurityTokenHandlerTests.CanReadToken", ref _firstReadSignedXml);
             try
             {
+                var envelopedReader = new EnvelopedSignatureReader(theoryData.XmlReader);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -70,7 +74,13 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             get
             {
                 var theoryData = new TheoryData<EnvelopedSignatureTheoryData>();
-                
+
+                theoryData.Add(new EnvelopedSignatureTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    XmlReader = null
+                });
+
                 return theoryData;
             }
         }
