@@ -5,14 +5,14 @@
         "Microsoft.IdentityModel.Tokens": "5.1.4",
         "Microsoft.IdentityModel.Logging": "1.1.4"
     },
-  "frameworks": {
-    "net451": {
-      "frameworkAssemblies": {
-        "System.Runtime.Serialization": "",
-        "System.Net.Http": ""
-      }
-    }
-  },
+    "frameworks": {
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Runtime.Serialization": "",
+                "System.Net.Http": ""
+            }
+        }
+    },
     "buildOptions": {
         "warningsAsErrors": true,
         "delaySign": true,
