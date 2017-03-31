@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Xml.Tests
@@ -37,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
     public class EnvelopedSignatureTheoryData
     {
         public ExpectedException ExpectedException { get; set; }
+
+        public SignedXml SignedXml { get; set; }
 
         public string TestId { get; set; }
     }
