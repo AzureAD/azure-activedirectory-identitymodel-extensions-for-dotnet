@@ -147,23 +147,23 @@ namespace Microsoft.IdentityModel.Xml
 
             reader.MoveToContent();
 
-            _id = reader.GetAttribute(XmlEncryptionStrings.Id, null);
-            _type = reader.GetAttribute(XmlEncryptionStrings.Type, null);
-            _mimeType = reader.GetAttribute(XmlEncryptionStrings.MimeType, null);
-            _encoding = reader.GetAttribute(XmlEncryptionStrings.Encoding, null);
+            _id = reader.GetAttribute(XmlEncryptionConstants.Attributes.Id, null);
+            _type = reader.GetAttribute(XmlEncryptionConstants.Attributes.Type, null);
+            _mimeType = reader.GetAttribute(XmlEncryptionConstants.Attributes.MimeType, null);
+            _encoding = reader.GetAttribute(XmlEncryptionConstants.Attributes.Encoding, null);
 
             reader.ReadStartElement();
             reader.MoveToContent();
 
             // <EncryptedMethod>? 0 - 1
-            if (reader.IsStartElement(XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace))
+            if (reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace))
             {
                 _encryptionMethod.ReadXml(reader);
             }
 
             // <KeyInfo>? 0 - 1
             reader.MoveToContent();
-            if (reader.IsStartElement(XmlSignatureStrings.KeyInfo, XmlSignatureStrings.Namespace))
+            if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
             {
                 // TODO - key reader?
                 //_keyInfo = new KeyInfo(_keyInfoSerializer);

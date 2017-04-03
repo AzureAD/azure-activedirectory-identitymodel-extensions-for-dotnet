@@ -314,7 +314,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // <xenc:EncryptedKey> 0-oo
             reader.MoveToContent();
-            while (reader.IsStartElement(XmlEncryptionStrings.EncryptedKey, XmlEncryptionStrings.Namespace))
+            while (reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptedKey, XmlEncryptionConstants.Namespace))
             {
                 reader.Skip();
                 // TODO - securityKey reader / writer

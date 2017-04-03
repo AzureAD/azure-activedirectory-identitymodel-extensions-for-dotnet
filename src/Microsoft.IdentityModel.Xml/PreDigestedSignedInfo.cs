@@ -125,40 +125,40 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            string prefix = XmlSignatureStrings.Prefix;
-            writer.WriteStartElement(prefix, XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+            string prefix = XmlSignatureConstants.Prefix;
+            writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
             if (!string.IsNullOrEmpty(Id))
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
             for (int i = 0; i < _count; i++)
             {
-                writer.WriteStartElement(prefix, XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
-                writer.WriteStartAttribute(XmlSignatureStrings.URI, null);
+                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
+                writer.WriteStartAttribute(XmlSignatureConstants.Attributes.URI, null);
                 writer.WriteString("#");
                 writer.WriteString(_references[i]._id);
                 writer.WriteEndAttribute();
 
-                writer.WriteStartElement(prefix, XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
+                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
                 if (AddEnvelopedSignatureTransform)
                 {
-                    writer.WriteStartElement(prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
-                    writer.WriteString(XmlSignatureStrings.EnvelopedSignature);
+                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                    writer.WriteString(XmlSignatureConstants.Algorithms.EnvelopedSignature);
                     writer.WriteEndAttribute();
                     writer.WriteEndElement(); // Transform
                 }
 
                 if (_references[i]._useStrTransform)
                 {
-                    writer.WriteStartElement(prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
+                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                     writer.WriteString(SecurityAlgorithms.StrTransform);
                     writer.WriteEndAttribute();
-                    writer.WriteStartElement(XmlSignatureStrings.SecurityJan2004Prefix, XmlSignatureStrings.TransformationParameters, XmlSignatureStrings.SecurityJan2004Namespace);  //<wsse:TransformationParameters>
-                    writer.WriteStartElement(prefix, XmlSignatureStrings.CanonicalizationMethod, XmlSignatureStrings.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
-                    writer.WriteString(SecurityAlgorithmStrings.ExclusiveC14n);
+                    writer.WriteStartElement(XmlSignatureConstants.SecurityJan2004Prefix, XmlSignatureConstants.TransformationParameters, XmlSignatureConstants.SecurityJan2004Namespace);  //<wsse:TransformationParameters>
+                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
+                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                    writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
                     writer.WriteEndAttribute();
                     writer.WriteEndElement(); //CanonicalizationMethod 
                     writer.WriteEndElement(); // TransformationParameters
@@ -166,23 +166,23 @@ namespace Microsoft.IdentityModel.Xml
                 }
                 else
                 {
-                    writer.WriteStartElement(prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
-                    writer.WriteString(SecurityAlgorithmStrings.ExclusiveC14n);
+                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                    writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
                     writer.WriteEndAttribute();
                     writer.WriteEndElement(); // Transform
                 }
 
                 writer.WriteEndElement(); // Transforms
 
-                writer.WriteStartElement(prefix, XmlSignatureStrings.DigestMethod, XmlSignatureStrings.Namespace);
-                writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
+                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+                writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 writer.WriteString(DigestMethod);
                 writer.WriteEndAttribute();
                 writer.WriteEndElement(); // DigestMethod
 
                 byte[] digest = _references[i]._digest;
-                writer.WriteStartElement(prefix, XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
+                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 writer.WriteBase64(digest, 0, digest.Length);
                 writer.WriteEndElement(); // DigestValue
 

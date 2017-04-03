@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public SignedInfo()
         {
-            _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.SignatureMethod);
+            _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
             _references = new List<Reference>();
             Prefix = SignedXml.DefaultPrefix;
         }
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
-            reader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
 
             SendSide = false;
             _defaultNamespace = reader.LookupNamespace(String.Empty);
@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.Xml
                 CanonicalStream = new MemoryStream();
                 effectiveReader.StartCanonicalization(CanonicalStream, false, null);
 
-                effectiveReader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+                effectiveReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
                 Prefix = effectiveReader.Prefix;
                 // TODO - need to use dictionary
                 Id = effectiveReader.GetAttribute(UtilityStrings.Id, null);
@@ -292,7 +292,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 ReadCanonicalizationMethod(effectiveReader);
                 ReadSignatureMethod(effectiveReader);
-                while (effectiveReader.IsStartElement(XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace))
+                while (effectiveReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                 {
                     Reference reference = new Reference();
                     reference.ReadFrom(effectiveReader, transformFactory);
@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(Prefix, XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
             if (Id != null)
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 

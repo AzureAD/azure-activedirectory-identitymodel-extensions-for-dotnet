@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             var signedInfo = new PreDigestedSignedInfo() { SendSide = true };
             signedInfo.AddEnvelopedSignatureTransform = true;
-            signedInfo.CanonicalizationMethod = ExclusiveC14NStrings.Namespace;
+            signedInfo.CanonicalizationMethod = XmlSignatureConstants.Algorithms.ExcC14N;
             //signedInfo.SignatureMethod = _signingCreds.SignatureAlgorithm;
             //signedInfo.DigestMethod = _signingCreds.DigestAlgorithm;
             signedInfo.AddReference(_referenceId, _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream));

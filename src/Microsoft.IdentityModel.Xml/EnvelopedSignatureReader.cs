@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             _wrappedReader = new WrappedReader(CreateDictionaryReader(reader));
-            _wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
+            _wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             SetCanonicalizingReader(_wrappedReader);
         }
 
@@ -96,8 +96,8 @@ namespace Microsoft.IdentityModel.Xml
             bool result = base.Read();
             if (result
                 && _signedXml == null
-                && InnerReader.IsLocalName(XmlSignatureStrings.Signature)
-                && InnerReader.IsNamespaceUri(XmlSignatureStrings.Namespace))
+                && InnerReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
+                && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
                 ReadSignature();
             }
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <remarks>Does not move the reader when returning false.</remarks>
         public bool TryReadSignature()
         {
-            if (IsStartElement(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace))
+            if (IsStartElement(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace))
             {
                 ReadSignature();
                 return true;

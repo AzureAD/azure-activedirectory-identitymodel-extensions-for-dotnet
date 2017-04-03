@@ -42,8 +42,8 @@ namespace Microsoft.IdentityModel.Xml
         public static bool CanReadFrom(XmlReader reader)
         {
             return reader != null && reader.IsStartElement(
-                XmlEncryptionStrings.EncryptedData,
-                XmlEncryptionStrings.Namespace);
+                XmlEncryptionConstants.Elements.EncryptedData,
+                XmlEncryptionConstants.Namespace);
         }
 
         public EncryptedDataElement() { }
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Xml
                 LogHelper.LogArgumentNullException(nameof(reader));
 
             reader.MoveToContent();
-            if (!reader.IsStartElement(XmlEncryptionStrings.EncryptedData, XmlEncryptionStrings.Namespace))
+            if (!reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptedData, XmlEncryptionConstants.Namespace))
                 LogHelper.LogExceptionMessage(new XmlEncryptionException("xmlreader not on encryptdata element"));
 
             // <EncryptedData> extends <EncryptedType>
@@ -166,13 +166,13 @@ namespace Microsoft.IdentityModel.Xml
             //}
 
             // <EncryptedData>
-            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptedData, XmlEncryptionStrings.Namespace);
+            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.EncryptedData, XmlEncryptionConstants.Namespace);
 
             if (!string.IsNullOrEmpty(Id))
-                writer.WriteAttributeString(XmlEncryptionStrings.Id, null, Id);
+                writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Id, null, Id);
 
             if (!string.IsNullOrEmpty(Type))
-                writer.WriteAttributeString(XmlEncryptionStrings.Type, null, Type);
+                writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Type, null, Type);
 
             if (EncryptionMethod != null)
                 EncryptionMethod.WriteXml(writer);

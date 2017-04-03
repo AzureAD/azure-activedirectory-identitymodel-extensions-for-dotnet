@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public const int MinorVersionValue = 1;
         public const string Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
         public const string NamespaceAttributePrefix = "NamespaceAttributePrefix";
+        public const string PreferredPrefix = "saml";
         public const string Saml11Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
         public const string Saml2Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string SenderVouches = "urn:oasis:names:tc:SAML:1.0:cm:sender-vouches";
@@ -63,52 +64,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public const string AssertionIdPrefix = "SamlSecurityToken-";
         public const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
-        /// <summary>
-        /// Known values for <see cref="Microsoft.IdentityModel.Tokens.SamlAuthenticationStatement"/>
-        /// </summary>
-        public static class AuthenticationMethods
+        internal static class Attributes
         {
-            public const string HardwareTokenString = "URI:urn:oasis:names:tc:SAML:1.0:am:HardwareToken";
-            public const string KerberosString = "urn:ietf:rfc:1510";
-            public const string PasswordString = "urn:oasis:names:tc:SAML:1.0:am:password";
-            public const string PgpString = "urn:oasis:names:tc:SAML:1.0:am:PGP";
-            public const string SecureRemotePasswordString = "urn:ietf:rfc:2945";
-            public const string SignatureString = "urn:ietf:rfc:3075";
-            public const string SpkiString = "urn:oasis:names:tc:SAML:1.0:am:SPKI";
-            public const string TlsClientString = "urn:ietf:rfc:2246";
-            public const string UnspecifiedString = "urn:oasis:names:tc:SAML:1.0:am:unspecified";
-            public const string WindowsString = "urn:federation:authentication:windows";
-            public const string X509String = "urn:oasis:names:tc:SAML:1.0:am:X509-PKI";
-            public const string XkmsString = "urn:oasis:names:tc:SAML:1.0:am:XKMS";
-        }
-
-        internal static class ElementNames
-        {
-            public const string Action = "Action";
-            public const string Advice = "Advice";
-            public const string Assertion = "Assertion";
-            public const string AssertionIdReference = "AssertionIDReference";
-            public const string Attribute = "Attribute";
-            public const string AttributeStatement = "AttributeStatement";
-            public const string AttributeValue = "AttributeValue";
-            public const string Audience = "Audience";
-            public const string AudienceRestrictionCondition = "AudienceRestrictionCondition";
-            public const string AuthenticationStatement = "AuthenticationStatement";
-            public const string AuthorityBinding = "AuthorityBinding";
-            public const string AuthorizationDecisionStatement = "AuthorizationDecisionStatement";
-            public const string Conditions = "Conditions";
-            public const string DoNotCacheCondition = "DoNotCacheCondition";
-            public const string Evidence = "Evidence";
-            public const string NameIdentifier = "NameIdentifier";
-            public const string SubjectConfirmation = "SubjectConfirmation";
-            public const string Subject = "Subject";
-            public const string SubjectConfirmationData = "SubjectConfirmationData";
-            public const string SubjectConfirmationMethod = "ConfirmationMethod";
-            public const string SubjectLocality = "SubjectLocality";
-        }
-
-        internal static class AttributeNames
-        {
+            public const string ActionNamespaceAttribute = "Namespace";
             public const string AssertionId = "AssertionID";
             public const string AttributeName = "AttributeName";
             public const string AttributeNamespace = "AttributeNamespace";
@@ -134,5 +92,54 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             public const string SubjectLocalityDNSAddress = "DNSAddress";
             public const string SubjectLocalityIPAddress = "IPAddress";
         }
+
+        /// <summary>
+        /// Known values for <see cref="Microsoft.IdentityModel.Tokens.SamlAuthenticationStatement"/>
+        /// </summary>
+        public static class AuthenticationMethods
+        {
+            public const string HardwareTokenString = "URI:urn:oasis:names:tc:SAML:1.0:am:HardwareToken";
+            public const string KerberosString = "urn:ietf:rfc:1510";
+            public const string PasswordString = "urn:oasis:names:tc:SAML:1.0:am:password";
+            public const string PgpString = "urn:oasis:names:tc:SAML:1.0:am:PGP";
+            public const string SecureRemotePasswordString = "urn:ietf:rfc:2945";
+            public const string SignatureString = "urn:ietf:rfc:3075";
+            public const string SpkiString = "urn:oasis:names:tc:SAML:1.0:am:SPKI";
+            public const string TlsClientString = "urn:ietf:rfc:2246";
+            public const string UnspecifiedString = "urn:oasis:names:tc:SAML:1.0:am:unspecified";
+            public const string WindowsString = "urn:federation:authentication:windows";
+            public const string X509String = "urn:oasis:names:tc:SAML:1.0:am:X509-PKI";
+            public const string XkmsString = "urn:oasis:names:tc:SAML:1.0:am:XKMS";
+        }
+
+        internal static class Elements
+        {
+            public const string Action = "Action";
+            public const string Advice = "Advice";
+            public const string Assertion = "Assertion";
+            public const string AssertionIdReference = "AssertionIDReference";
+            public const string Attribute = "Attribute";
+            public const string AttributeStatement = "AttributeStatement";
+            public const string AttributeValue = "AttributeValue";
+            public const string Audience = "Audience";
+            public const string AudienceRestrictionCondition = "AudienceRestrictionCondition";
+            public const string AuthenticationStatement = "AuthenticationStatement";
+            public const string AuthorityBinding = "AuthorityBinding";
+            public const string AuthorizationDecisionStatement = "AuthorizationDecisionStatement";
+            public const string Conditions = "Conditions";
+            public const string DoNotCacheCondition = "DoNotCacheCondition";
+            public const string Evidence = "Evidence";
+            public const string NameIdentifier = "NameIdentifier";
+            public const string SubjectConfirmation = "SubjectConfirmation";
+            public const string Subject = "Subject";
+            public const string SubjectConfirmationData = "SubjectConfirmationData";
+            public const string SubjectConfirmationMethod = "ConfirmationMethod";
+            public const string SubjectLocality = "SubjectLocality";
+            public const string SubjectLocalityDNSAddress = "DNSAddress";
+            public const string SubjectLocalityIPAddress = "IPAddress";
+
+        }
+
+
     }
 }

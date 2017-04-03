@@ -69,13 +69,13 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory, bool preserveComments)
         {
-            reader.MoveToStartElement(XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             reader.Read();
 
-            while (reader.IsStartElement(XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace))
+            while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
             {
-                string transformAlgorithmUri = reader.GetAttribute(XmlSignatureStrings.Algorithm, null);
+                string transformAlgorithmUri = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 Transform transform = transformFactory.CreateTransform(transformAlgorithmUri);
                 transform.ReadFrom(reader, preserveComments);
                 Add(transform);
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(_prefix, XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
+            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
             for (int i = 0; i < TransformCount; i++)
                 this[i].WriteTo(writer);
 
