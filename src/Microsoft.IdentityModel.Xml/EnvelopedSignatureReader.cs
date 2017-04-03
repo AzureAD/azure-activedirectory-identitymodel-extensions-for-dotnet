@@ -34,16 +34,12 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Wraps a reader pointing to a enveloped signed XML and provides
-    /// a reader that can be used to read the content without having to
-    /// process the signature. The Signature is automatically validated
-    /// when the last element of the envelope is read.
+    /// Wraps a reader pointing to a root element of enveloped signed XML.
+    /// The signature and keyinfo will be read for signature validation.
     /// </summary>
-    public sealed class EnvelopedSignatureReader : DelegatingXmlDictionaryReader
+    public class EnvelopedSignatureReader : DelegatingXmlDictionaryReader
     {
         int _elementCount;
-        bool _requireSignature;
-        SigningCredentials _signingCredentials;
         SignedXml _signedXml;
         WrappedReader _wrappedReader;
         bool _disposed;
@@ -57,42 +53,18 @@ namespace Microsoft.IdentityModel.Xml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            _requireSignature = true;
             _wrappedReader = new WrappedReader(CreateDictionaryReader(reader));
             _wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
             SetCanonicalizingReader(_wrappedReader);
         }
 
-        void OnEndOfRootElement()
+        protected virtual void OnEndOfRootElement()
         {
-            if (_signedXml == null && _requireSignature)
-                throw LogHelper.LogExceptionMessage(new CryptographicException("SR.ID3089"));
-
             if (_signedXml != null)
-            {
                 _signedXml.TokenSource = _wrappedReader;
-                //ResolveSigningCredentials();
-                //_signedXml.StartSignatureVerification(_signingCredentials.Key);
-                //_wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
-                //WifSignedInfo signedInfo = _signedXml.Signature.SignedInfo as WifSignedInfo;
-                //_signedXml.EnsureDigestValidity(signedInfo[0].ExtractReferredId(), _wrappedReader);
-                //_signedXml.CompleteSignatureVerification();
-            }
         }
 
         public SignedXml SignedXml { get { return _signedXml; } }
-
-        /// <summary>
-        /// Returns the SigningCredentials used in the signature after the 
-        /// envelope is consumed and when the signature is validated.
-        /// </summary>
-        public SigningCredentials SigningCredentials
-        {
-            get
-            {
-                return _signingCredentials;
-            }
-        }
 
         /// <summary>
         /// Gets a XmlBuffer of the envelope that was enveloped signed.
@@ -138,21 +110,13 @@ namespace Microsoft.IdentityModel.Xml
 
         void ReadSignature()
         {
-            _signedXml = new SignedXml(new WifSignedInfo());
+            _signedXml = new SignedXml(new SignedInfo());
             _signedXml.TransformFactory = TransformFactory.Instance;
             _signedXml.ReadFrom(_wrappedReader);
             if (_signedXml.Signature.SignedInfo.ReferenceCount != 1)
             {
                 throw LogHelper.LogExceptionMessage(new CryptographicException("SR.ID3057"));
             }
-        }
-
-        void ResolveSigningCredentials()
-        {
-            if (_signedXml.Signature == null || _signedXml.Signature.Key == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException("ID3276"));
-
-            _signingCredentials = new SigningCredentials(_signedXml.Signature.Key, _signedXml.Signature.SignedInfo.SignatureMethod);
         }
 
         /// <summary>

@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ComputeSignature(SigningCredentials credentials)
         {
-            // TODO - shouldn't need to create the hash algorithm.
+            // TODO - do not create hash algorithm here OR assume SHA256
             //var hash = credentials.CryptoProviderFactory.CreateHashAlgorithm(credentials.Algorithm);
             var hash = credentials.Key.CryptoProviderFactory.CreateHashAlgorithm(SecurityAlgorithms.Sha256);
             Signature.SignedInfo.ComputeReferenceDigests();
@@ -113,6 +113,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public void VerifySignature(SecurityKey key)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, Signature.SignedInfo.SignatureMethod);
             var memoryStream = new MemoryStream();
             Signature.SignedInfo.GetCanonicalBytes(memoryStream);

@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Xml
                 return false;
 
             if (!Utility.AreEqual(computedDigest, GetDigestValue()))
-                throw LogHelper.LogExceptionMessage(new CryptographicException("DigestVerificationFailedForReference, this.uri"));
+                throw LogHelper.LogExceptionMessage(new CryptographicException($"DigestVerificationFailedForReference: id: {id}"));
 
             _verified = true;
             return true;
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Xml
 
             _resolvedXmlSource = resolvedXmlSource;
             if (!CheckDigest())
-                throw LogHelper.LogExceptionMessage(new CryptographicException("DigestVerificationFailedForReference, this.uri"));
+                throw LogHelper.LogExceptionMessage(new CryptographicException($"DigestVerificationFailedForReference: id: {id}"));
 
             _verified = true;
             return true;
