@@ -104,13 +104,6 @@ namespace Microsoft.IdentityModel.Xml
             Signature.ReadFrom(reader);
         }
 
-        void VerifySignature(KeyedHashAlgorithm hash)
-        {
-            Signature.SignedInfo.ComputeHash(hash);
-            if (!Utility.AreEqual(hash.Hash, GetSignatureValue()))
-                throw LogHelper.LogExceptionMessage(new CryptographicException("SignatureVerificationFailed"));
-        }
-
         public void VerifySignature(SecurityKey key)
         {
             if (key == null)

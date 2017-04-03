@@ -27,7 +27,6 @@
 
 using System;
 using System.IO;
-using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
@@ -35,8 +34,8 @@ namespace Microsoft.IdentityModel.Xml
 {
     public sealed class CanonicalizationDriver
     {
-        XmlReader _reader;
-        string[] _inclusivePrefixes;
+        private string[] _inclusivePrefixes;
+        private XmlReader _reader;
 
         public bool CloseReadersAfterProcessing { get; set; }
 

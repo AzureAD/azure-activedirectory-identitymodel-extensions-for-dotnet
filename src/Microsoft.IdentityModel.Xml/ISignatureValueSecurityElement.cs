@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+// TODO - remove this interface
 namespace Microsoft.IdentityModel.Xml
 {
     public interface ISignatureValueSecurityElement : ISecurityElement

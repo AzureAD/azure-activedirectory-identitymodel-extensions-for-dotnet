@@ -27,6 +27,7 @@
 
 using System.Xml;
 
+// TODO - remove this interface
 namespace Microsoft.IdentityModel.Xml
 {
     public interface ISecurityElement

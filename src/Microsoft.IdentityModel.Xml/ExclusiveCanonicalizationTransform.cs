@@ -34,13 +34,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    class ExclusiveCanonicalizationTransform : Transform
+    internal class ExclusiveCanonicalizationTransform : Transform
     {
-        string _inclusiveNamespacesPrefixList;
-        string[] _inclusivePrefixes;
-        string _inclusiveListElementPrefix = ExclusiveC14NStrings.Prefix;
-        string _prefix = XmlSignatureStrings.Prefix;
-        readonly bool _isCanonicalizationMethod;
+        private string _inclusiveListElementPrefix = ExclusiveC14NStrings.Prefix;
+        private string _inclusiveNamespacesPrefixList;
+        private string[] _inclusivePrefixes;
+        private readonly bool _isCanonicalizationMethod;
+        private string _prefix = XmlSignatureStrings.Prefix;
 
         public ExclusiveCanonicalizationTransform()
             : this(false)
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Xml
 
         private CanonicalizationDriver GetConfiguredDriver(SignatureResourcePool resourcePool)
         {
-            CanonicalizationDriver driver = resourcePool.TakeCanonicalizationDriver();
+            var driver = resourcePool.TakeCanonicalizationDriver();
             driver.IncludeComments = IncludeComments;
             driver.SetInclusivePrefixes(_inclusivePrefixes);
             return driver;
@@ -110,8 +110,8 @@ namespace Microsoft.IdentityModel.Xml
             var securityElement = input as ISecurityElement;
             if (securityElement != null)
             {
-                MemoryStream stream = new MemoryStream();
-                XmlDictionaryWriter utf8Writer = resourcePool.TakeUtf8Writer();
+                var stream = new MemoryStream();
+                var utf8Writer = resourcePool.TakeUtf8Writer();
                 utf8Writer.StartCanonicalization(stream, false, null);
                 securityElement.WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
@@ -125,23 +125,22 @@ namespace Microsoft.IdentityModel.Xml
         // common single-transform case; fold directly into a digest
         public override byte[] ProcessAndDigest(object input, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
-            HashAlgorithm hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
+            var hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
             ProcessAndDigest(input, resourcePool, hash);
             return hash.Hash;
         }
 
         public void ProcessAndDigest(object input, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
-            HashStream hashStream = resourcePool.TakeHashStream(hash);
-
-            XmlReader reader = input as XmlReader;
+            var hashStream = resourcePool.TakeHashStream(hash);
+            var reader = input as XmlReader;
             if (reader != null)
             {
                 ProcessReaderInput(reader, resourcePool, hashStream);
             }
             else if (input is ISecurityElement)
             {
-                XmlDictionaryWriter utf8Writer = resourcePool.TakeUtf8Writer();
+                var utf8Writer = resourcePool.TakeUtf8Writer();
                 utf8Writer.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
                 (input as ISecurityElement).WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
@@ -157,7 +156,7 @@ namespace Microsoft.IdentityModel.Xml
         void ProcessReaderInput(XmlReader reader, SignatureResourcePool resourcePool, HashStream hashStream)
         {
             reader.MoveToContent();
-            XmlDictionaryReader dictionaryReader = reader as XmlDictionaryReader;
+            var dictionaryReader = reader as XmlDictionaryReader;
             if (dictionaryReader != null && dictionaryReader.CanCanonicalize)
             {
                 dictionaryReader.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
@@ -166,7 +165,7 @@ namespace Microsoft.IdentityModel.Xml
             }
             else
             {
-                CanonicalizationDriver driver = GetConfiguredDriver(resourcePool);
+                var driver = GetConfiguredDriver(resourcePool);
                 driver.SetInput(reader);
                 driver.WriteTo(hashStream);
             }

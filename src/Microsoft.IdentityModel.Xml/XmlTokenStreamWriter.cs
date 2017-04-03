@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public XmlNodeType NodeType
         {
-            get { return _entries[_position]._nodeType; }
+            get { return _entries[_position].NodeType; }
         }
 
         public bool IsEmptyElement
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool MoveToFirstAttribute()
         {
-            if (_position < Count - 1 && _entries[_position + 1]._nodeType == XmlNodeType.Attribute)
+            if (_position < Count - 1 && _entries[_position + 1].NodeType == XmlNodeType.Attribute)
             {
                 _position++;
                 return true;
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool MoveToNextAttribute()
         {
-            if (_position < _count - 1 && _entries[_position + 1]._nodeType == XmlNodeType.Attribute)
+            if (_position < _count - 1 && _entries[_position + 1].NodeType == XmlNodeType.Attribute)
             {
                 _position++;
                 return true;

@@ -66,12 +66,12 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteXml(XmlWriter writer)
         {
+            // <EncryptionMethod>
             writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace);
 
             writer.WriteAttributeString(XmlEncryptionStrings.Algorithm, null, Algorithm);
 
-            // <EncryptionMethod>
-
+            // </EncryptionMethod>
             writer.WriteEndElement();
         }
 

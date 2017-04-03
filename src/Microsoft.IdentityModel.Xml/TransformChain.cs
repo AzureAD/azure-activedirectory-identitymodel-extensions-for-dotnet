@@ -34,8 +34,8 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class TransformChain
     {
-        string _prefix = SignedXml.DefaultPrefix;
-        List<Transform> _transforms = new List<Transform>();
+        private string _prefix = SignedXml.DefaultPrefix;
+        private List<Transform> _transforms = new List<Transform>();
 
         public TransformChain() { }
 
@@ -89,9 +89,8 @@ namespace Microsoft.IdentityModel.Xml
         public byte[] TransformToDigest(object data, SignatureResourcePool resourcePool, string digestMethod)
         {
             for (int i = 0; i < TransformCount - 1; i++)
-            {
                 data = this[i].Process(data, resourcePool);
-            }
+
             return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
         }
 
@@ -99,9 +98,8 @@ namespace Microsoft.IdentityModel.Xml
         {
             writer.WriteStartElement(_prefix, XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace);
             for (int i = 0; i < TransformCount; i++)
-            {
                 this[i].WriteTo(writer);
-            }
+
             writer.WriteEndElement(); // Transforms
         }
     }

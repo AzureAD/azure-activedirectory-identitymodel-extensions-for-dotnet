@@ -34,11 +34,11 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class HashStream : Stream
     {
-        HashAlgorithm _hash;
-        long _length;
-        bool _disposed;
-        bool _hashNeedsReset;
-        MemoryStream _logStream;
+        private bool _disposed;
+        private HashAlgorithm _hash;
+        private bool _hashNeedsReset;
+        private long _length;
+        private MemoryStream _logStream;
 
         /// <summary>
         /// Constructor for HashStream. The HashAlgorithm instance is owned by the caller.

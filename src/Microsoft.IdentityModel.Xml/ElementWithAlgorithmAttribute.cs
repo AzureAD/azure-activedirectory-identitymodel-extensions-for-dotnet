@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     struct ElementWithAlgorithmAttribute
     {
-        readonly string _elementName;
+        private readonly string _elementName;
 
         public ElementWithAlgorithmAttribute(string elementName)
         {

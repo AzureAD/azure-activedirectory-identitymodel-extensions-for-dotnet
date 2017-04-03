@@ -37,18 +37,19 @@ namespace Microsoft.IdentityModel.Xml
     // for sequential use by one thread
     public class SignatureResourcePool
     {
-        const int BufferSize = 64;
-        CanonicalizationDriver _canonicalizationDriver;
-        HashStream _hashStream;
-        HashAlgorithm _hashAlgorithm;
-        XmlDictionaryWriter _utf8Writer;
-        byte[] _encodingBuffer;
-        char[] _base64Buffer;
+        private char[] _base64Buffer;
+        private const int _bufferSize = 64;
+        private CanonicalizationDriver _canonicalizationDriver;
+        private byte[] _encodingBuffer;
+        private HashStream _hashStream;
+        private HashAlgorithm _hashAlgorithm;
+        private XmlDictionaryWriter _utf8Writer;
+
 
         public char[] TakeBase64Buffer()
         {
             if (_base64Buffer == null)
-                _base64Buffer = new char[BufferSize];
+                _base64Buffer = new char[_bufferSize];
 
             return _base64Buffer;
         }
@@ -66,11 +67,12 @@ namespace Microsoft.IdentityModel.Xml
         public byte[] TakeEncodingBuffer()
         {
             if (_encodingBuffer == null)
-                _encodingBuffer = new byte[BufferSize];
+                _encodingBuffer = new byte[_bufferSize];
 
             return _encodingBuffer;
         }
 
+        // TODO - do not lock on SHA256
         public HashAlgorithm TakeHashAlgorithm(string algorithm)
         {
             if (_hashAlgorithm == null)

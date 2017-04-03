@@ -31,9 +31,9 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public static class CryptoHelper
+    internal static class CryptoHelper
     {
-        static RandomNumberGenerator _random;
+        private static RandomNumberGenerator _random;
 
         /// <summary>
         /// Provides an integer-domain mathematical operation for 
@@ -69,16 +69,6 @@ namespace Microsoft.IdentityModel.Xml
                 return _random;
             }
         }
-
-        // TODO - this may be handy
-        //public static byte[] GenerateDerivedKey(byte[] key, string algorithm, byte[] label, byte[] nonce, int derivedKeySize, int position)
-        //{
-        //    if ((algorithm != SecurityAlgorithms.Psha1KeyDerivation) && (algorithm != SecurityAlgorithms.Psha1KeyDerivationDec2005))
-        //    {
-        //        throw LogHelper.ExceptionUtility.ThrowHelperWarning(new InvalidOperationException(SR.GetString(SR.UnsupportedKeyDerivationAlgorithm, algorithm)));
-        //    }
-        //    return new Psha1DerivedKeyGenerator(key).GenerateDerivedKey(label, nonce, derivedKeySize, position);
-        //}
 
         /// <summary>
         /// This generates the entropy using random number. This is usually used on the sending 

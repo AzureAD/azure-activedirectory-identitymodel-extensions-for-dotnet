@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class DelegatingXmlDictionaryReader : XmlDictionaryReader
     {
-        XmlDictionaryReader _innerReader;
+        private XmlDictionaryReader _innerReader;
 
         /// <summary>
         /// Initializes the Inner reader that this instance wraps.
