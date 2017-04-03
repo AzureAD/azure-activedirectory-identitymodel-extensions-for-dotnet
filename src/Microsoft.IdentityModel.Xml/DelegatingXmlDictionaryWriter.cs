@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class DelegatingXmlDictionaryWriter : XmlDictionaryWriter
     {
-        XmlDictionaryWriter _innerWriter;
-        XmlWriter _tracingWriter;
+        private XmlDictionaryWriter _innerWriter;
+        private XmlWriter _tracingWriter;
 
         /// <summary>
         /// Initializes a new instance of <see cref="DelegatingXmlDictionaryWriter"/>

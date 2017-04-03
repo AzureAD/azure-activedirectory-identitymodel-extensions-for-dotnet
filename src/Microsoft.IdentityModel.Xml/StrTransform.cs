@@ -34,17 +34,16 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    class StrTransform : Transform
+    internal class StrTransform : Transform
     {
-        readonly bool _includeComments;
-        string _inclusiveNamespacesPrefixList;
-        string[] _inclusivePrefixes;
-        string _prefix = XmlSignatureStrings.Prefix;
-        TranformationParameters _transformationParameters;
+        private readonly bool _includeComments;
+        private string _inclusiveNamespacesPrefixList;
+        private string[] _inclusivePrefixes;
+        private string _prefix = XmlSignatureStrings.Prefix;
+        private TranformationParameters _transformationParameters = new TranformationParameters();
 
         public StrTransform()
         {
-            _transformationParameters = new TranformationParameters();
             _includeComments = false;
         }
 
@@ -80,7 +79,7 @@ namespace Microsoft.IdentityModel.Xml
 
         CanonicalizationDriver GetConfiguredDriver(SignatureResourcePool resourcePool)
         {
-            CanonicalizationDriver driver = resourcePool.TakeCanonicalizationDriver();
+            var driver = resourcePool.TakeCanonicalizationDriver();
             driver.IncludeComments = IncludeComments;
             driver.SetInclusivePrefixes(_inclusivePrefixes);
             return driver;
@@ -90,14 +89,14 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (input is XmlReader)
             {
-                CanonicalizationDriver driver = GetConfiguredDriver(resourcePool);
+                var driver = GetConfiguredDriver(resourcePool);
                 driver.SetInput(input as XmlReader);
                 return driver.GetMemoryStream();
             }
             else if (input is ISecurityElement)
             {
-                MemoryStream stream = new MemoryStream();
-                XmlDictionaryWriter utf8Writer = resourcePool.TakeUtf8Writer();
+                var stream = new MemoryStream();
+                var utf8Writer = resourcePool.TakeUtf8Writer();
                 utf8Writer.StartCanonicalization(stream, false, null);
                 (input as ISecurityElement).WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
@@ -119,16 +118,15 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ProcessAndDigest(object input, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
-            HashStream hashStream = resourcePool.TakeHashStream(hash);
-
-            XmlReader reader = input as XmlReader;
+            var hashStream = resourcePool.TakeHashStream(hash);
+            var reader = input as XmlReader;
             if (reader != null)
             {
                 ProcessReaderInput(reader, resourcePool, hashStream);
             }
             else if (input is ISecurityElement)
             {
-                XmlDictionaryWriter utf8Writer = resourcePool.TakeUtf8Writer();
+                var utf8Writer = resourcePool.TakeUtf8Writer();
                 utf8Writer.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
                 (input as ISecurityElement).WriteTo(utf8Writer);
                 utf8Writer.EndCanonicalization();
@@ -144,7 +142,7 @@ namespace Microsoft.IdentityModel.Xml
         void ProcessReaderInput(XmlReader reader, SignatureResourcePool resourcePool, HashStream hashStream)
         {
             reader.MoveToContent();
-            XmlDictionaryReader dictionaryReader = reader as XmlDictionaryReader;
+            var dictionaryReader = reader as XmlDictionaryReader;
             if (dictionaryReader != null && dictionaryReader.CanCanonicalize)
             {
                 dictionaryReader.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
@@ -153,7 +151,7 @@ namespace Microsoft.IdentityModel.Xml
             }
             else
             {
-                CanonicalizationDriver driver = GetConfiguredDriver(resourcePool);
+                var driver = GetConfiguredDriver(resourcePool);
                 driver.SetInput(reader);
                 driver.WriteTo(hashStream);
             }

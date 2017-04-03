@@ -39,10 +39,10 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class EnvelopedSignatureReader : DelegatingXmlDictionaryReader
     {
-        int _elementCount;
-        SignedXml _signedXml;
-        WrappedReader _wrappedReader;
-        bool _disposed;
+        private bool _disposed;
+        private int _elementCount;
+        private SignedXml _signedXml;
+        private WrappedReader _wrappedReader;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
@@ -73,10 +73,7 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public XmlTokenStream XmlTokens
         {
-            get
-            {
-                return _wrappedReader.XmlTokens.Trim();
-            }
+            get { return _wrappedReader.XmlTokens.Trim(); }
         }
 
         /// <summary>

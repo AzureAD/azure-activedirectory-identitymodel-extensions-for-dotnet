@@ -36,12 +36,12 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class WrappedReader : DelegatingXmlDictionaryReader, IXmlLineInfo
     {
-        XmlTokenStream _xmlTokens;
-        MemoryStream _contentStream;
-        TextReader _contentReader;
-        bool _recordDone;
-        int _depth;
-        bool _disposed;
+        private MemoryStream _contentStream;
+        private TextReader _contentReader;
+        private int _depth;
+        private bool _disposed;
+        private bool _recordDone;
+        private XmlTokenStream _xmlTokens;
 
         public WrappedReader(XmlDictionaryReader reader)
         {

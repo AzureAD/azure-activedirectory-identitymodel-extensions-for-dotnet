@@ -33,15 +33,15 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    sealed class PreDigestedSignedInfo : SignedInfo
+    internal class PreDigestedSignedInfo : SignedInfo
     {
-        const int InitialReferenceArraySize = 8;
-        int _count;
-        ReferenceEntry[] _references;
+        private const int _initialReferenceArraySize = 8;
+        private int _count;
+        private ReferenceEntry[] _references;
 
         public PreDigestedSignedInfo()
         {
-            _references = new ReferenceEntry[InitialReferenceArraySize];
+            _references = new ReferenceEntry[_initialReferenceArraySize];
         }
 
         public PreDigestedSignedInfo(
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Xml
             string digestMethod,
             string signatureMethod)
         {
-            _references = new ReferenceEntry[InitialReferenceArraySize];
+            _references = new ReferenceEntry[_initialReferenceArraySize];
             CanonicalizationMethod = canonicalizationMethod;
             DigestMethod = digestMethod;
             SignatureMethod = signatureMethod;
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool AddEnvelopedSignatureTransform { get; set; }
 
-        public string DigestMethod { get; set; }
+        public string DigestMethod { get; private set; }
 
         public override int ReferenceCount
         {

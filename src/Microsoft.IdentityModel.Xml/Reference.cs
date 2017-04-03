@@ -35,13 +35,13 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class Reference
     {
-        ElementWithAlgorithmAttribute _digestMethodElement;
-        DigestValueElement _digestValueElement = new DigestValueElement();
-        string _prefix = SignedXml.DefaultPrefix;
-        object _resolvedXmlSource;
-        readonly TransformChain _transformChain = new TransformChain();
-        bool _verified;
-        string _referredId;
+        private ElementWithAlgorithmAttribute _digestMethodElement;
+        private DigestValueElement _digestValueElement = new DigestValueElement();
+        private string _prefix = SignedXml.DefaultPrefix;
+        private string _referredId;
+        private object _resolvedXmlSource;
+        private readonly TransformChain _transformChain = new TransformChain();
+        private bool _verified;
 
         public Reference()
             : this(null)

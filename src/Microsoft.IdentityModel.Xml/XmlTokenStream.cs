@@ -27,21 +27,20 @@
 
 
 using System;
-using System.IO;
-using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using HexBinary = System.Runtime.Remoting.Metadata.W3cXsd2001.SoapHexBinary;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class XmlTokenStream : ISecurityElement
+    public class XmlTokenStream
     {
-        int _count;
-        XmlTokenEntry[] _entries;
-        string _excludedElement;
-        int? _excludedElementDepth;
-        string _excludedElementNamespace;
+        // TODO - remove dynamic adding.
+        // Add constructor to TokenEntry that takes type / value
+        private int _count;
+        private XmlTokenEntry[] _entries;
+        private string _excludedElement;
+        private int? _excludedElementDepth;
+        private string _excludedElementNamespace;
 
         public XmlTokenStream(int initialSize)
         {
@@ -119,16 +118,6 @@ namespace Microsoft.IdentityModel.Xml
         public void WriteTo(XmlDictionaryWriter writer)
         {
             GetWriter().WriteTo(writer);
-        }
-
-        bool ISecurityElement.HasId
-        {
-            get { return false; }
-        }
-
-        string ISecurityElement.Id
-        {
-            get { return null; }
         }
     }
 }

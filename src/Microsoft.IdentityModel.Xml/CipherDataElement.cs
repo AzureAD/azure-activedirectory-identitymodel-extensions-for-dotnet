@@ -33,8 +33,8 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class CipherDataElement
     {
-        byte[] _iv;
-        byte[] _cipherText;
+        private byte[] _cipherText;
+        private byte[] _iv;
 
         public byte[] CipherValue
         {
@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void SetCipherValueFragments(byte[] iv, byte[] cipherText)
         {
+            // TODO - allow null?
             _iv         = iv;
             _cipherText = cipherText;
         }
@@ -97,8 +98,11 @@ namespace Microsoft.IdentityModel.Xml
 
             writer.WriteBase64(_cipherText, 0, _cipherText.Length);
 
-            writer.WriteEndElement(); // CipherValue
-            writer.WriteEndElement(); // CipherData
+            // </CipherValue>
+            writer.WriteEndElement();
+
+            // </CipherData>
+            writer.WriteEndElement();
         }
     }
 }

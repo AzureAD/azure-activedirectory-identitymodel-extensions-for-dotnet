@@ -38,21 +38,19 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public abstract class EncryptedTypeElement
     {
-        EncryptionMethodElement _encryptionMethod;
-        CipherDataElement _cipherData;
-        List<string> _properties;
-        string _id;
-        string _type;
-        string _mimeType;
-        string _encoding;
+        private CipherDataElement _cipherData;
+        private EncryptionMethodElement _encryptionMethod;
+        private string _encoding;
+        private string _id;
+        private string _mimeType;
+        private List<string> _properties;
+        private string _type;
 
         public EncryptedTypeElement()
         {
             _cipherData = new CipherDataElement();
             _encryptionMethod = new EncryptionMethodElement();
-            //_keyInfo = new KeyInfo(keyInfoSerializer);
             _properties = new List<string>();
-            //_keyInfoSerializer = keyInfoSerializer;
             Algorithm = EncryptionMethod.Algorithm;
         }
 
@@ -104,7 +102,7 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        // TODO - securityKey reader / writer
+        // TODO - use KeyInfo class
         public SecurityKey SecurityKey { get; set; }
         //public SecurityKeyIdentifier KeyIdentifier
         //{

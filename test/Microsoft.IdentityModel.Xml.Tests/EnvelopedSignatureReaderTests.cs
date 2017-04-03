@@ -38,33 +38,60 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
-    public class EnvelopedSignatureTheoryData
-    {
-        public ExpectedException ExpectedException { get; set; }
-
-        public bool ExpectSignedXml { get; set; }
-
-        public SecurityKey SecurityKey { get; set; }
-
-        public SignedXml SignedXml { get; set; }
-
-        public string TestId { get; set; }
-
-        public XmlReader XmlReader { get; set; }
-
-        public override string ToString()
-        {
-            return TestId + ", ExpectSignedXml: " + ExpectSignedXml;
-        }
-    }
-
     public class EnvelopedSignatureReaderTests
     {
 
+        static bool _firstConstructor = true;
         static bool _firstReadSignedXml = true;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("EnvelopedSignatureReaderTheoryData")]
+        [Theory, MemberData("ConstructorTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Constructor(EnvelopedSignatureTheoryData theoryData)
+        {
+            TestUtilities.TestHeader($"{this}.Constructor", theoryData.TestId, ref _firstConstructor);
+            try
+            {
+                var envelopedReader = new EnvelopedSignatureReader(theoryData.XmlReader);
+                while (envelopedReader.Read()) ;
+
+                if (theoryData.ExpectSignedXml)
+                {
+                    if (envelopedReader.SignedXml == null)
+                        Assert.False(true, "theoryData.ExpectSignedXml == true && envelopedReader.SignedXml == null");
+
+                    envelopedReader.SignedXml.VerifySignature(theoryData.SecurityKey);
+                    envelopedReader.SignedXml.EnsureDigestValidity(envelopedReader.SignedXml.Signature.SignedInfo[0].ExtractReferredId(), envelopedReader.SignedXml.TokenSource);
+                    envelopedReader.SignedXml.CompleteSignatureVerification();
+                }
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<EnvelopedSignatureTheoryData> ConstructorTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<EnvelopedSignatureTheoryData>();
+
+                theoryData.Add(new EnvelopedSignatureTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    TestId = "Null XmlReader",
+                    XmlReader = null
+                });
+
+                return theoryData;
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadSignedXmlTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadSignedXml(EnvelopedSignatureTheoryData theoryData)
         {
@@ -92,18 +119,11 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        public static TheoryData<EnvelopedSignatureTheoryData> EnvelopedSignatureReaderTheoryData
+        public static TheoryData<EnvelopedSignatureTheoryData> ReadSignedXmlTheoryData
         {
             get
             {
                 var theoryData = new TheoryData<EnvelopedSignatureTheoryData>();
-
-                theoryData.Add(new EnvelopedSignatureTheoryData
-                {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    TestId = "Null XmlReader in Constructor",
-                    XmlReader = null
-                });
 
                 var sr = new StringReader(RefrenceXml.Saml2Token_Valid);
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));

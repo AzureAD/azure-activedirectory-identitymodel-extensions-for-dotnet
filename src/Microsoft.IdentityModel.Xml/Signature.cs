@@ -26,22 +26,27 @@
 //------------------------------------------------------------------------------
 
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
     public class Signature
     {
-        SignedXml _signedXml;
-        string _prefix = SignedXml.DefaultPrefix;
-        readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
-        readonly SignedInfo _signedInfo;
         private KeyInfo _keyInfo;
+        private string _prefix = SignedXml.DefaultPrefix;
+        readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
 
         public Signature(SignedXml signedXml, SignedInfo signedInfo)
         {
-            _signedXml = signedXml;
-            _signedInfo = signedInfo;
+            if (signedXml == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedXml));
+
+            if (signedInfo == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedInfo));
+
+            SignedXml = signedXml;
+            SignedInfo = signedInfo;
         }
 
         public SecurityKey Key { get; set; }
@@ -50,7 +55,12 @@ namespace Microsoft.IdentityModel.Xml
 
         public SignedInfo SignedInfo
         {
-            get { return _signedInfo; }
+            get; private set;
+        }
+
+        public SignedXml SignedXml
+        {
+            get; private set;
         }
 
         public ISignatureValueSecurityElement SignatureValue
@@ -70,7 +80,7 @@ namespace Microsoft.IdentityModel.Xml
             Id = reader.GetAttribute(UtilityStrings.Id, null);
             reader.Read();
 
-            _signedInfo.ReadFrom(reader, _signedXml.TransformFactory);
+            SignedInfo.ReadFrom(reader, SignedXml.TransformFactory);
             _signatureValueElement.ReadFrom(reader);
             _keyInfo = new KeyInfo();
             _keyInfo.ReadFrom(reader);
@@ -89,7 +99,7 @@ namespace Microsoft.IdentityModel.Xml
             if (Id != null)
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 
-            _signedInfo.WriteTo(writer);
+            SignedInfo.WriteTo(writer);
             _signatureValueElement.WriteTo(writer);
 
             writer.WriteEndElement(); // Signature

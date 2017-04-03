@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     sealed class EnvelopedSignatureTransform : Transform
     {
-        string _prefix = XmlSignatureStrings.Prefix;
+        private string _prefix = XmlSignatureStrings.Prefix;
 
         public EnvelopedSignatureTransform() { }
 

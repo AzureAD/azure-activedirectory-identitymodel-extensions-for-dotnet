@@ -44,18 +44,18 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public sealed class EnvelopedSignatureWriter : DelegatingXmlDictionaryWriter
     {
-        XmlWriter _innerWriter;
-        SigningCredentials _signingCredentials;
-        string _referenceId;
-        HashStream _hashStream;
-        HashAlgorithm _hashAlgorithm;
-        int _elementCount;
-        MemoryStream _signatureFragment;
-        MemoryStream _endFragment;
-        bool _hasSignatureBeenMarkedForInsert;
-        MemoryStream _writerStream;
-        MemoryStream _preCanonicalTracingStream;
-        bool _disposed;
+        private bool _disposed;
+        private int _elementCount;
+        private MemoryStream _endFragment;
+        private HashAlgorithm _hashAlgorithm;
+        private HashStream _hashStream;
+        private bool _hasSignatureBeenMarkedForInsert;
+        private XmlWriter _innerWriter;
+        private MemoryStream _preCanonicalTracingStream;
+        private string _referenceId;
+        private MemoryStream _signatureFragment;
+        private SigningCredentials _signingCredentials;
+        private MemoryStream _writerStream;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
@@ -71,28 +71,28 @@ namespace Microsoft.IdentityModel.Xml
         public EnvelopedSignatureWriter(XmlWriter innerWriter, SigningCredentials signingCredentials, string referenceId)
         {
             if (innerWriter == null)
-                LogHelper.LogArgumentNullException(nameof(innerWriter));
+                throw LogHelper.LogArgumentNullException(nameof(innerWriter));
 
             if (signingCredentials == null)
-                LogHelper.LogArgumentNullException(nameof(signingCredentials));
+                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
 
             if (string.IsNullOrEmpty(referenceId))
-                LogHelper.LogArgumentNullException(nameof(referenceId));
+                throw LogHelper.LogArgumentNullException(nameof(referenceId));
 
             // the Signature will be written into the innerWriter.
             _innerWriter = innerWriter;
             _signingCredentials = signingCredentials;
             _referenceId = referenceId;
-            _signatureFragment = new MemoryStream();
             _endFragment = new MemoryStream();
+            _signatureFragment = new MemoryStream();
             _writerStream = new MemoryStream();
 
             var effectiveWriter = XmlDictionaryWriter.CreateTextWriter(_writerStream, Encoding.UTF8, false);
             SetCanonicalizingWriter(effectiveWriter);
-            // TODO - need alg for digest
-            //_hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Algorithm);
+            // TODO - do not hard code hash algorithm
             _hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(SecurityAlgorithms.Sha256);
             _hashStream = new HashStream(_hashAlgorithm);
+            // TODO - why exclude comments?
             InnerWriter.StartCanonicalization(_hashStream, false, null);
         }
 

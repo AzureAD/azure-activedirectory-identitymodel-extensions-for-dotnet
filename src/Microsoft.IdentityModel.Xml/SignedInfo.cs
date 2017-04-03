@@ -63,8 +63,6 @@ namespace Microsoft.IdentityModel.Xml
             _references.Add(reference);
         }
 
-//        public ISignatureReaderProvider ReaderProvider { get; set; }
-
         public object SignatureReaderProviderCallbackContext { get; set; }
 
         public string CanonicalizationMethod
@@ -105,7 +103,7 @@ namespace Microsoft.IdentityModel.Xml
             get { return _references[index]; }
         }
 
-        public string SignatureMethod { get; set; }
+        public string SignatureMethod { get; protected set; }
 
         public string SignatureMethodDictionaryString { get; set; }
 

@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     public struct XmlTokenEntry
     {
-        internal XmlNodeType _nodeType;
+        internal XmlNodeType NodeType;
         internal string _prefix;
         internal string _localName;
         internal string _namespaceUri;
@@ -50,13 +50,13 @@ namespace Microsoft.IdentityModel.Xml
 
         public void Set(XmlNodeType nodeType, string value)
         {
-            _nodeType = nodeType;
+            NodeType = nodeType;
             _value = value;
         }
 
         public void SetAttribute(string prefix, string localName, string namespaceUri, string value)
         {
-            _nodeType = XmlNodeType.Attribute;
+            NodeType = XmlNodeType.Attribute;
             _prefix = prefix;
             _localName = localName;
             _namespaceUri = namespaceUri;
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void SetElement(string prefix, string localName, string namespaceUri, bool isEmptyElement)
         {
-            _nodeType = XmlNodeType.Element;
+            NodeType = XmlNodeType.Element;
             _prefix = prefix;
             _localName = localName;
             _namespaceUri = namespaceUri;

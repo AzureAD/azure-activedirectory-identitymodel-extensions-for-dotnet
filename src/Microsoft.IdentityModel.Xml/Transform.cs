@@ -25,14 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Xml;
+
 namespace Microsoft.IdentityModel.Xml
 {
-    using System.Xml;
-
     public abstract class Transform
     {
-        protected Transform()
-        { }
+        protected Transform() { }
 
         public virtual string Algorithm { get; set; }
 

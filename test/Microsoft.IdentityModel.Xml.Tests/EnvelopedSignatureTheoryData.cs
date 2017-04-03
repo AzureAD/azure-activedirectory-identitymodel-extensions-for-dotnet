@@ -25,45 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Cryptography;
-using Microsoft.IdentityModel.Logging;
+using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Tests;
 
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Xml.Tests
 {
-    public class TransformFactory
+    public class EnvelopedSignatureTheoryData
     {
-        private static TransformFactory _instance = new TransformFactory();
+        public ExpectedException ExpectedException { get; set; }
 
-        protected TransformFactory() { }
+        public bool ExpectSignedXml { get; set; }
 
-        public static TransformFactory Instance
+        public string ReferenceId { get; set; }
+
+        public SecurityKey SecurityKey { get; set; }
+
+        public SigningCredentials SigningCredentials { get; set; }
+
+        public SignedXml SignedXml { get; set; }
+
+        public string TestId { get; set; }
+
+        public XmlReader XmlReader { get; set; }
+
+        public XmlWriter XmlWriter { get; set; }
+
+        public override string ToString()
         {
-            get { return _instance; }
-        }
-
-        public virtual Transform CreateTransform(string transform)
-        {
-            if (transform == SecurityAlgorithms.ExclusiveC14n)
-            {
-                return new ExclusiveCanonicalizationTransform();
-            }
-            else if (transform == SecurityAlgorithms.ExclusiveC14nWithComments)
-            {
-                return new ExclusiveCanonicalizationTransform(false, true);
-            }
-            else if (transform == SecurityAlgorithms.StrTransform)
-            {
-                return new StrTransform();
-            }
-            else if (transform == SecurityAlgorithms.EnvelopedSignature)
-            {
-                return new EnvelopedSignatureTransform();
-            }
-            else
-            {
-                throw LogHelper.LogExceptionMessage(new CryptographicException("UnsupportedTransformAlgorithm"));
-            }
+            return TestId + ", ExpectSignedXml: " + ExpectSignedXml;
         }
     }
 }
