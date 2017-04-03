@@ -390,6 +390,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(RefrenceTokens.Saml2Token_Valid_Spaces_Added),
+                        Token = RefrenceTokens.Saml2Token_Valid_Spaces_Added,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = new X509SecurityKey(aadCert),
+                            IssuerSigningKeys = keySet.GetSigningKeys(),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    });
+
+
+                theoryData.Add(
+                    new CreateAndValidateParams
+                    {
+                        ExpectedException = ExpectedException.CryptographicException(),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(RefrenceTokens.Saml2Token_Formated),
+                        Token = RefrenceTokens.Saml2Token_Formated,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = new X509SecurityKey(aadCert),
+                            IssuerSigningKeys = keySet.GetSigningKeys(),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    });
+
+                theoryData.Add(
+                    new CreateAndValidateParams
+                    {
                         ExpectedException = ExpectedException.CryptographicException(),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_AttributeTampered),

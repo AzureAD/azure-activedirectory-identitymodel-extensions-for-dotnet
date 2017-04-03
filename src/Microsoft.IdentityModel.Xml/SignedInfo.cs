@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -41,6 +42,9 @@ namespace Microsoft.IdentityModel.Xml
         ElementWithAlgorithmAttribute _signatureMethodElement;
         SignatureResourcePool _resourcePool;
         List<Reference> _references;
+        MemoryStream _bufferedStream;
+        string _defaultNamespace = string.Empty;
+//        bool _disposed;
 
         public SignedInfo()
         {
@@ -59,7 +63,7 @@ namespace Microsoft.IdentityModel.Xml
             _references.Add(reference);
         }
 
-        public ISignatureReaderProvider ReaderProvider { get; set; }
+//        public ISignatureReaderProvider ReaderProvider { get; set; }
 
         public object SignatureReaderProviderCallbackContext { get; set; }
 
@@ -139,10 +143,12 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (SendSide)
             {
-                var utf8Writer = ResourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(stream, false, null);
-                WriteTo(utf8Writer);
-                utf8Writer.EndCanonicalization();
+                using (XmlDictionaryWriter utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
+                {
+                    utf8Writer.StartCanonicalization(stream, false, null);
+                    WriteTo(utf8Writer);
+                    utf8Writer.EndCanonicalization();
+                }
             }
             else if (CanonicalStream != null)
             {
@@ -150,18 +156,18 @@ namespace Microsoft.IdentityModel.Xml
             }
             else
             {
-                if (ReaderProvider == null)
-                    throw LogHelper.LogExceptionMessage(new XmlSignedInfoException("ReaderProvider == null"));
-
-                var signatureReader = ReaderProvider.GetReader(SignatureReaderProviderCallbackContext);
-                if (!signatureReader.CanCanonicalize)
+                _bufferedStream.Position = 0;
+                // We are creating a XmlDictionaryReader with a hard-coded Max XmlDictionaryReaderQuotas. This is a reader that we
+                // are creating over an already buffered content. The content was initially read off user provided XmlDictionaryReader
+                // with the correct quotas and hence we know the data is valid.
+                // Note: signedinfoReader will close _bufferedStream on Dispose.
+                using (XmlDictionaryReader signedinfoReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
                 {
-                    var ms = new MemoryStream();
-                    var bufferingWriter = XmlDictionaryWriter.CreateBinaryWriter(ms);
-                    string[] inclusivePrefix = GetInclusivePrefixes();
-                    if (inclusivePrefix != null)
+                    signedinfoReader.MoveToContent();
+                    using (XmlDictionaryWriter bufferingWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
                     {
-                        bufferingWriter.WriteStartElement("a");
+                        bufferingWriter.WriteStartElement("a", _defaultNamespace);
+                        string[] inclusivePrefix = GetInclusivePrefixes();
                         for (int i = 0; i < inclusivePrefix.Length; ++i)
                         {
                             string ns = GetNamespaceForInclusivePrefix(inclusivePrefix[i]);
@@ -170,31 +176,15 @@ namespace Microsoft.IdentityModel.Xml
                                 bufferingWriter.WriteXmlnsAttribute(inclusivePrefix[i], ns);
                             }
                         }
-                    }
-                    signatureReader.MoveToContent();
-                    bufferingWriter.WriteNode(signatureReader, false);
-                    if (inclusivePrefix != null)
+                        bufferingWriter.StartCanonicalization(stream, false, inclusivePrefix);
+                        bufferingWriter.WriteNode(signedinfoReader, false);
+                        bufferingWriter.EndCanonicalization();
                         bufferingWriter.WriteEndElement();
-                    bufferingWriter.Flush();
-                    byte[] buffer = ms.ToArray();
-                    int bufferLength = (int)ms.Length;
-                    bufferingWriter.Close();
-
-                    signatureReader.Close();
-
-                    // Create a reader around the buffering Stream.
-                    signatureReader = XmlDictionaryReader.CreateBinaryReader(buffer, 0, bufferLength, XmlDictionaryReaderQuotas.Max);
-                    if (inclusivePrefix != null)
-                        signatureReader.ReadStartElement("a");
+                    }
                 }
-                signatureReader.ReadStartElement(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
-                signatureReader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
-                signatureReader.StartCanonicalization(stream, false, GetInclusivePrefixes());
-                signatureReader.Skip();
-                signatureReader.EndCanonicalization();
-                signatureReader.Close();
             }
         }
+
 
         public virtual void ComputeReferenceDigests()
         {
@@ -266,30 +256,54 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
+            reader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+
             SendSide = false;
-            if (reader.CanCanonicalize)
+            _defaultNamespace = reader.LookupNamespace(String.Empty);
+            _bufferedStream = new MemoryStream();
+
+
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Encoding = Encoding.UTF8;
+            settings.NewLineHandling = NewLineHandling.None;
+
+            using (XmlWriter bufferWriter = XmlTextWriter.Create(_bufferedStream, settings))
+            {
+                bufferWriter.WriteNode(reader, true);
+                bufferWriter.Flush();
+            }
+
+            _bufferedStream.Position = 0;
+
+            //
+            // We are creating a XmlDictionaryReader with a hard-coded Max XmlDictionaryReaderQuotas. This is a reader that we
+            // are creating over an already buffered content. The content was initially read off user provided XmlDictionaryReader
+            // with the correct quotas and hence we know the data is valid.
+            // Note: effectiveReader will close _bufferedStream on Dispose.
+            //
+            using (XmlDictionaryReader effectiveReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
             {
                 CanonicalStream = new MemoryStream();
-                reader.StartCanonicalization(CanonicalStream, false, null);
+                effectiveReader.StartCanonicalization(CanonicalStream, false, null);
+
+                effectiveReader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
+                Prefix = effectiveReader.Prefix;
+                // TODO - need to use dictionary
+                Id = effectiveReader.GetAttribute(UtilityStrings.Id, null);
+                effectiveReader.Read();
+
+                ReadCanonicalizationMethod(effectiveReader);
+                ReadSignatureMethod(effectiveReader);
+                while (effectiveReader.IsStartElement(XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace))
+                {
+                    Reference reference = new Reference();
+                    reference.ReadFrom(effectiveReader, transformFactory);
+                    AddReference(reference);
+                }
+                effectiveReader.ReadEndElement();
+
+                effectiveReader.EndCanonicalization();
             }
-
-            reader.MoveToStartElement(XmlSignatureStrings.SignedInfo, XmlSignatureStrings.Namespace);
-            Prefix = reader.Prefix;
-            Id = reader.GetAttribute(UtilityStrings.Id, null);
-            reader.Read();
-
-            ReadCanonicalizationMethod(reader);
-            ReadSignatureMethod(reader);
-            while (reader.IsStartElement(XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace))
-            {
-                Reference reference = new Reference();
-                reference.ReadFrom(reader, transformFactory);
-                AddReference(reference);
-            }
-
-            reader.ReadEndElement(); // SignedInfo
-            if (reader.CanCanonicalize)
-                reader.EndCanonicalization();
 
             string[] inclusivePrefixes = GetInclusivePrefixes();
             if (inclusivePrefixes != null)
@@ -299,7 +313,9 @@ namespace Microsoft.IdentityModel.Xml
                 CanonicalStream = null;
                 Context = new Dictionary<string, string>(inclusivePrefixes.Length);
                 for (int i = 0; i < inclusivePrefixes.Length; i++)
+                {
                     Context.Add(inclusivePrefixes[i], reader.LookupNamespace(inclusivePrefixes[i]));
+                }
             }
         }
 
