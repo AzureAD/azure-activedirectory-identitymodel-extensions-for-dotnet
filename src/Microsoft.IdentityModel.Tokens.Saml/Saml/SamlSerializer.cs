@@ -51,11 +51,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            if (!reader.IsStartElement(SamlStrings.Action, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.Action, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SamlConstants.ElementNames.Action, SamlConstants.Namespace, reader.LocalName, reader.NamespaceURI"));
 
             // The Namespace attribute is optional.
-            string ns = reader.GetAttribute(SamlStrings.Namespace, null);
+            string ns = reader.GetAttribute(SamlConstants.Namespace, null);
 
             reader.MoveToContent();
             string action = reader.ReadString();
@@ -90,14 +90,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(SamlStrings.AssertionIdReference, SamlStrings.Namespace))
+                if (reader.IsStartElement(SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace))
                 {
                     reader.MoveToContent();
                     advice.AssertionIdReferences.Add(reader.ReadString());
                     reader.MoveToContent();
                     reader.ReadEndElement();
                 }
-                else if (reader.IsStartElement(SamlStrings.Assertion, SamlStrings.Namespace))
+                else if (reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
                 {
                     advice.Assertions.Add(ReadAssertion(reader));
                 }
@@ -119,25 +119,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             SamlAssertion assertion = new SamlAssertion();
-            if (!reader.IsStartElement(SamlStrings.Assertion, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLElementNotRecognized"));
 
-            string attributeValue = reader.GetAttribute(SamlStrings.MajorVersion, null);
+            string attributeValue = reader.GetAttribute(SamlConstants.Attributes.MajorVersion, null);
             if (string.IsNullOrEmpty(attributeValue))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAssertionMissingMajorVersionAttributeOnRead"));
 
             // TODO - use convert?
             int majorVersion = Int32.Parse(attributeValue, CultureInfo.InvariantCulture);
-            attributeValue = reader.GetAttribute(SamlStrings.MinorVersion, null);
+            attributeValue = reader.GetAttribute(SamlConstants.Attributes.MinorVersion, null);
             if (string.IsNullOrEmpty(attributeValue))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAssertionMissingMinorVersionAttributeOnRead"));
 
             // TODO - use convert?
             int minorVersion = Int32.Parse(attributeValue, CultureInfo.InvariantCulture);
             if ((majorVersion != SamlConstants.MajorVersionValue) || (minorVersion != SamlConstants.MinorVersionValue))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLTokenVersionNotSupported, majorVersion, minorVersion, SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue"));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLTokenVersionNotSupported, majorVersion, minorVersion, SamlConstants.MajorVersion, SamlConstants.MinorVersionValue"));
 
-            attributeValue = reader.GetAttribute(SamlStrings.AssertionId, null);
+            attributeValue = reader.GetAttribute(SamlConstants.Attributes.AssertionId, null);
             if (string.IsNullOrEmpty(attributeValue))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAssertionIdRequired"));
 
@@ -146,13 +146,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             assertion.AssertionId = attributeValue;
 
-            attributeValue = reader.GetAttribute(SamlStrings.Issuer, null);
+            attributeValue = reader.GetAttribute(SamlConstants.Attributes.Issuer, null);
             if (string.IsNullOrEmpty(attributeValue))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLAssertionMissingIssuerAttributeOnRead"));
 
             assertion.Issuer = attributeValue;
 
-            attributeValue = reader.GetAttribute(SamlStrings.IssueInstant, null);
+            attributeValue = reader.GetAttribute(SamlConstants.Attributes.IssueInstant, null);
             // TODO - try/catch throw SamlReadException
             if (!string.IsNullOrEmpty(attributeValue))
                 assertion.IssueInstant = DateTime.ParseExact(
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             reader.MoveToContent();
             reader.Read();
 
-            if (reader.IsStartElement(SamlStrings.Conditions, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.Conditions, SamlConstants.Namespace))
             {
 
                 var conditions = ReadConditions(reader);
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 assertion.Conditions = conditions;
             }
 
-            if (reader.IsStartElement(SamlStrings.Advice, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.Advice, SamlConstants.Namespace))
             {
                 var advice = ReadAdvice(reader);
                 if (advice == null)
@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace))
+                if (reader.IsStartElement(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace))
                 {
                     reader.Skip();
                 }
@@ -218,11 +218,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             SamlAttribute attribute = new SamlAttribute();
 
-            var name = reader.GetAttribute(SamlStrings.AttributeName, null);
+            var name = reader.GetAttribute(SamlConstants.Attributes.AttributeName, null);
             if (string.IsNullOrEmpty(name))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeMissingNameAttributeOnRead"));
 
-            var nameSpace = reader.GetAttribute(SamlStrings.AttributeNamespace, null);
+            var nameSpace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace, null);
             if (string.IsNullOrEmpty(nameSpace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeMissingNamespaceAttributeOnRead"));
 
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             reader.MoveToContent();
             reader.Read();
-            while (reader.IsStartElement(SamlStrings.AttributeValue, SamlStrings.Namespace))
+            while (reader.IsStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace))
             {
                 // We will load all Attributes as a string value by default.
                 string attrValue = reader.ReadString();
@@ -258,14 +258,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             reader.MoveToContent();
             reader.Read();
 
-            if (!reader.IsStartElement(SamlStrings.Subject, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeStatementMissingSubjectOnRead"));
 
             var statement = new SamlAttributeStatement();
             statement.Subject = ReadSubject(reader);
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(SamlStrings.Attribute, SamlStrings.Namespace))
+                if (reader.IsStartElement(SamlConstants.Elements.Attribute, SamlConstants.Namespace))
                 {
                     SamlAttribute attribute = ReadAttribute(reader);
                     if (attribute == null)
@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string result = string.Empty;
             string whiteSpace = string.Empty;
 
-            reader.ReadStartElement(SamlStrings.AttributeValue, SamlStrings.Namespace);
+            reader.ReadStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace);
 
             while (reader.NodeType == XmlNodeType.Whitespace)
             {
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            if (!reader.IsStartElement(SamlStrings.AudienceRestrictionCondition, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SamlConstants.ElementNames.AudienceRestrictionCondition, SamlConstants.Namespace, reader.LocalName, reader.NamespaceURI"));
 
             reader.ReadStartElement();
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var audienceRestrictionCondition = new SamlAudienceRestrictionCondition();
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(SamlStrings.Audience, SamlStrings.Namespace))
+                if (reader.IsStartElement(SamlConstants.Elements.Audience, SamlConstants.Namespace))
                 {
                     string audience = reader.ReadString();
                     if (string.IsNullOrEmpty(audience))
@@ -418,28 +418,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var authenticationStatement = new SamlAuthenticationStatement();
 
-            string authInstance = reader.GetAttribute(SamlStrings.AuthenticationInstant, null);
+            string authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
             if (string.IsNullOrEmpty(authInstance))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthenticationStatementMissingAuthenticationInstanceOnRead"));
 
             var authenticationInstant = DateTime.ParseExact(
                 authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
-            var authenticationMethod = reader.GetAttribute(SamlStrings.AuthenticationMethod, null);
+            var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
             if (string.IsNullOrEmpty(authenticationMethod))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthenticationStatementMissingAuthenticationMethodOnRead"));
 
             reader.MoveToContent();
             reader.Read();
 
-            if (!reader.IsStartElement(SamlStrings.Subject, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthenticationStatementMissingSubject"));
 
             authenticationStatement.Subject = ReadSubject(reader);
-            if (reader.IsStartElement(SamlStrings.SubjectLocality, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
             {
-                var dnsAddress = reader.GetAttribute(SamlStrings.SubjectLocalityDNSAddress, null);
-                var ipAddress = reader.GetAttribute(SamlStrings.SubjectLocalityIPAddress, null);
+                var dnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
+                var ipAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
 
                 if (reader.IsEmptyElement)
                 {
@@ -456,7 +456,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             while (reader.IsStartElement())
             {
-                if (!reader.IsStartElement(SamlStrings.AuthorityBinding, SamlStrings.Namespace))
+                if (!reader.IsStartElement(SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace))
                     throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLBadSchema, dictionary.AuthenticationStatement"));
 
                 authenticationStatement.AuthorityBindings.Add(ReadAuthorityBinding(reader));
@@ -473,7 +473,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            string authKind = reader.GetAttribute(SamlStrings.AuthorityKind, null);
+            string authKind = reader.GetAttribute(SamlConstants.Attributes.AuthorityKind, null);
             if (string.IsNullOrEmpty(authKind))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingAuthorityKindOnRead"));
 
@@ -498,11 +498,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             nameSpace = reader.LookupNamespace(prefix);
             var authorityKind = new XmlQualifiedName(localName, nameSpace);
 
-            var binding = reader.GetAttribute(SamlStrings.Binding, null);
+            var binding = reader.GetAttribute(SamlConstants.Attributes.Binding, null);
             if (string.IsNullOrEmpty(binding))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingBindingOnRead"));
 
-            var location = reader.GetAttribute(SamlStrings.Location, null);
+            var location = reader.GetAttribute(SamlConstants.Attributes.Location, null);
             if (string.IsNullOrEmpty(location))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorityBindingMissingLocationOnRead"));
 
@@ -528,11 +528,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var statement = new SamlAuthorizationDecisionStatement();
 
-            var resource = reader.GetAttribute(SamlStrings.Resource, null);
+            var resource = reader.GetAttribute(SamlConstants.Attributes.Resource, null);
             if (string.IsNullOrEmpty(resource))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorizationDecisionStatementMissingResourceAttributeOnRead"));
 
-            string decisionString = reader.GetAttribute(SamlStrings.Decision, null);
+            string decisionString = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
             if (string.IsNullOrEmpty(decisionString))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorizationDecisionStatementMissingDecisionAttributeOnRead"));
 
@@ -546,17 +546,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             reader.MoveToContent();
             reader.Read();
 
-            if (!reader.IsStartElement(SamlStrings.Subject, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorizationDecisionStatementMissingSubjectOnRead"));
 
             statement.Subject = ReadSubject(reader);
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(SamlStrings.Action, SamlStrings.Namespace))
+                if (reader.IsStartElement(SamlConstants.Elements.Action, SamlConstants.Namespace))
                 {
                     statement.Actions.Add(ReadAction(reader));
                 }
-                else if (reader.IsStartElement(SamlStrings.Evidence, SamlStrings.Namespace))
+                else if (reader.IsStartElement(SamlConstants.Elements.Evidence, SamlConstants.Namespace))
                 {
                     if (statement.Evidence != null)
                         throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorizationDecisionHasMoreThanOneEvidence"));
@@ -581,11 +581,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            if (reader.IsStartElement(SamlStrings.AudienceRestrictionCondition, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace))
             {
                 return ReadAudienceRestrictionCondition(reader);
             }
-            else if (reader.IsStartElement(SamlStrings.DoNotCacheCondition, SamlStrings.Namespace))
+            else if (reader.IsStartElement(SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace))
             {
                 return ReadDoNotCacheCondition(reader);
             }
@@ -600,12 +600,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             //var conditions = new SamlConditions();
             var nbf = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
-            string time = reader.GetAttribute(SamlStrings.NotBefore, null);
+            string time = reader.GetAttribute(SamlConstants.Attributes.NotBefore, null);
             if (!string.IsNullOrEmpty(time))
                 nbf = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
             var notOnOrAfter = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
-            time = reader.GetAttribute(SamlStrings.NotOnOrAfter, null);
+            time = reader.GetAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
             if (!string.IsNullOrEmpty(time))
                 notOnOrAfter = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
@@ -637,7 +637,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            if (!reader.IsStartElement(SamlStrings.DoNotCacheCondition, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLBadSchema, dictionary.DoNotCacheCondition.Value"));
 
             // TODO what is this about
@@ -668,13 +668,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             reader.Read();
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(SamlStrings.AssertionIdReference, SamlStrings.Namespace))
+                if (reader.IsStartElement(SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace))
                 {
                     reader.MoveToContent();
                     evidence.AssertionIdReferences.Add(reader.ReadString());
                     reader.ReadEndElement();
                 }
-                else if (reader.IsStartElement(SamlStrings.Assertion, SamlStrings.Namespace))
+                else if (reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
                 {
                     evidence.Assertions.Add(ReadAssertion(reader));
                 }
@@ -696,11 +696,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            if (reader.IsStartElement(SamlStrings.AuthenticationStatement, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace))
                 return ReadAuthenticationStatement(reader);
-            else if (reader.IsStartElement(SamlStrings.AttributeStatement, SamlStrings.Namespace))
+            else if (reader.IsStartElement(SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace))
                 return ReadAttributeStatement(reader);
-            else if (reader.IsStartElement(SamlStrings.AuthorizationDecisionStatement, SamlStrings.Namespace))
+            else if (reader.IsStartElement(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace))
                 return ReadAuthorizationDecisionStatement(reader);
             else
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLUnableToLoadUnknownElement, reader.LocalName"));
@@ -718,7 +718,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            if (!reader.IsStartElement(SamlStrings.Subject, SamlStrings.Namespace))
+            if (!reader.IsStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLBadSchema, not on subject node"));
 
             var subject = new SamlSubject();
@@ -729,10 +729,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             reader.Read();
 
-            if (reader.IsStartElement(SamlStrings.NameIdentifier, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.NameIdentifier, SamlConstants.Namespace))
             {
-                subject.NameFormat = reader.GetAttribute(SamlStrings.NameIdentifierFormat, null);
-                subject.NameQualifier = reader.GetAttribute(SamlStrings.NameIdentifierNameQualifier, null);
+                subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
+                subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
 
                 // TODO - check for string ??
                 reader.MoveToContent();
@@ -745,12 +745,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 reader.ReadEndElement();
             }
 
-            if (reader.IsStartElement(SamlStrings.SubjectConfirmation, SamlStrings.Namespace))
+            if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace))
             {
                 reader.MoveToContent();
                 reader.Read();
 
-                while (reader.IsStartElement(SamlStrings.SubjectConfirmationMethod, SamlStrings.Namespace))
+                while (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace))
                 {
                     string method = reader.ReadString();
                     if (string.IsNullOrEmpty(method))
@@ -768,7 +768,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLSubjectConfirmationClauseMissingConfirmationMethodOnRead"));
                 }
 
-                if (reader.IsStartElement(SamlStrings.SubjectConfirmationData, SamlStrings.Namespace))
+                if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
                 {
                     reader.MoveToContent();
                     // An Authentication protocol specified in the confirmation method might need this
@@ -778,7 +778,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     reader.ReadEndElement();
                 }
 
-                if (reader.IsStartElement(XmlSignatureStrings.KeyInfo, XmlSignatureStrings.Namespace))
+                if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                 {
                     XmlDictionaryReader dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader);
                     // TODO - we need to get the key
@@ -849,10 +849,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (action == null)
                 throw LogHelper.LogArgumentNullException(nameof(action));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Action, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Action, SamlConstants.Namespace);
             if (!string.IsNullOrEmpty(action.Namespace))
             {
-                writer.WriteStartAttribute(SamlStrings.ActionNamespaceAttribute, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.ActionNamespaceAttribute, null);
                 writer.WriteString(action.Namespace);
                 writer.WriteEndAttribute();
             }
@@ -869,11 +869,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (advice == null)
                 throw LogHelper.LogArgumentNullException(nameof(advice));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Advice, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Advice, SamlConstants.Namespace);
 
             foreach (var reference in advice.AssertionIdReferences)
             {
-                writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AssertionIdReference, SamlStrings.Namespace);
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace);
                 writer.WriteString(reference);
                 writer.WriteEndElement();
             }
@@ -906,20 +906,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             try
             {
-                writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Assertion, SamlStrings.Namespace);
-                writer.WriteStartAttribute(SamlStrings.MajorVersion, null);
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
+                writer.WriteStartAttribute(SamlConstants.Attributes.MajorVersion, null);
                 writer.WriteValue(SamlConstants.MajorVersionValue);
                 writer.WriteEndAttribute();
-                writer.WriteStartAttribute(SamlStrings.MinorVersion, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.MinorVersion, null);
                 writer.WriteValue(SamlConstants.MinorVersionValue);
                 writer.WriteEndAttribute();
-                writer.WriteStartAttribute(SamlStrings.AssertionId, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.AssertionId, null);
                 writer.WriteString(assertion.AssertionId);
                 writer.WriteEndAttribute();
-                writer.WriteStartAttribute(SamlStrings.Issuer, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.Issuer, null);
                 writer.WriteString(assertion.Issuer);
                 writer.WriteEndAttribute();
-                writer.WriteStartAttribute(SamlStrings.IssueInstant, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.IssueInstant, null);
                 writer.WriteString(assertion.IssueInstant.ToString(SamlConstants.GeneratedDateTimeFormat, CultureInfo.InvariantCulture));
                 writer.WriteEndAttribute();
 
@@ -951,11 +951,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (attribute == null)
                 throw LogHelper.LogArgumentNullException(nameof(attribute));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Attribute, SamlStrings.Namespace);
-            writer.WriteStartAttribute(SamlStrings.AttributeName, null);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Attribute, SamlConstants.Namespace);
+            writer.WriteStartAttribute(SamlConstants.Attributes.AttributeName, null);
             writer.WriteString(attribute.Name);
             writer.WriteEndAttribute();
-            writer.WriteStartAttribute(SamlStrings.AttributeNamespace, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.AttributeNamespace, null);
             writer.WriteString(attribute.Namespace);
             writer.WriteEndAttribute();
 
@@ -964,7 +964,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(attributeValue))
                     throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SamlAttributeValueCannotBeNull"));
 
-                writer.WriteElementString(SamlStrings.PreferredPrefix, SamlStrings.AttributeValue, SamlStrings.Namespace, attributeValue);
+                writer.WriteElementString(SamlConstants.PreferredPrefix, SamlConstants.Elements.AttributeValue, SamlConstants.Namespace, attributeValue);
             }
 
             writer.WriteEndElement();
@@ -978,7 +978,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (statement == null)
                 throw LogHelper.LogArgumentNullException(nameof(statement));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AttributeStatement, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace);
 
             WriteSubject(writer, statement.Subject);
             foreach (var attribute in statement.Attributes)
@@ -995,13 +995,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AudienceRestrictionCondition, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
 
             foreach (var audience in condition.Audiences)
             {
                 // TODO - should we throw ?
                 if (audience != null)
-                    writer.WriteElementString(SamlStrings.Audience, SamlStrings.Namespace, audience.AbsoluteUri);
+                    writer.WriteElementString(SamlConstants.Elements.Audience, SamlConstants.Namespace, audience.AbsoluteUri);
             }
 
             writer.WriteEndElement();
@@ -1015,11 +1015,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (statement == null)
                 throw LogHelper.LogArgumentNullException(nameof(statement));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AuthenticationStatement, SamlStrings.Namespace);
-            writer.WriteStartAttribute(SamlStrings.AuthenticationMethod, null);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace);
+            writer.WriteStartAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
             writer.WriteString(statement.AuthenticationMethod);
             writer.WriteEndAttribute();
-            writer.WriteStartAttribute(SamlStrings.AuthenticationInstant, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
             writer.WriteString(statement.AuthenticationInstant.ToString(SamlConstants.GeneratedDateTimeFormat, CultureInfo.InvariantCulture));
             writer.WriteEndAttribute();
 
@@ -1027,18 +1027,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if ((!string.IsNullOrEmpty(statement.IPAddress)) || (!string.IsNullOrEmpty(statement.DnsAddress)))
             {
-                writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.SubjectLocality, SamlStrings.Namespace);
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace);
 
                 if (!string.IsNullOrEmpty(statement.IPAddress))
                 {
-                    writer.WriteStartAttribute(SamlStrings.SubjectLocalityIPAddress, null);
+                    writer.WriteStartAttribute(SamlConstants.Attributes.SubjectLocalityIPAddress, null);
                     writer.WriteString(statement.IPAddress);
                     writer.WriteEndAttribute();
                 }
 
                 if (!string.IsNullOrEmpty(statement.DnsAddress))
                 {
-                    writer.WriteStartAttribute(SamlStrings.SubjectLocalityDNSAddress, null);
+                    writer.WriteStartAttribute(SamlConstants.Attributes.SubjectLocalityDNSAddress, null);
                     writer.WriteString(statement.DnsAddress);
                     writer.WriteEndAttribute();
                 }
@@ -1062,27 +1062,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (authorityBinding == null)
                 throw LogHelper.LogArgumentNullException(nameof(authorityBinding));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AuthorityBinding, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace);
 
             string prefix = null;
             if (!string.IsNullOrEmpty(authorityBinding.AuthorityKind.Namespace))
             {
-                writer.WriteAttributeString(string.Empty, SamlStrings.NamespaceAttributePrefix, null, authorityBinding.AuthorityKind.Namespace);
+                writer.WriteAttributeString(string.Empty, SamlConstants.NamespaceAttributePrefix, null, authorityBinding.AuthorityKind.Namespace);
                 prefix = writer.LookupPrefix(authorityBinding.AuthorityKind.Namespace);
             }
 
-            writer.WriteStartAttribute(SamlStrings.AuthorityKind, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.AuthorityKind, null);
             if (string.IsNullOrEmpty(prefix))
                 writer.WriteString(authorityBinding.AuthorityKind.Name);
             else
                 writer.WriteString(prefix + ":" + authorityBinding.AuthorityKind.Name);
             writer.WriteEndAttribute();
 
-            writer.WriteStartAttribute(SamlStrings.Location, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.Location, null);
             writer.WriteString(authorityBinding.Location);
             writer.WriteEndAttribute();
 
-            writer.WriteStartAttribute(SamlStrings.Binding, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.Binding, null);
             writer.WriteString(authorityBinding.Binding);
             writer.WriteEndAttribute();
 
@@ -1097,13 +1097,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (statement == null)
                 throw LogHelper.LogArgumentNullException(nameof(statement));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AuthorizationDecisionStatement, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace);
 
-            writer.WriteStartAttribute(SamlStrings.Decision, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.Decision, null);
             writer.WriteString(statement.AccessDecision.ToString());
             writer.WriteEndAttribute();
 
-            writer.WriteStartAttribute(SamlStrings.Resource, null);
+            writer.WriteStartAttribute(SamlConstants.Attributes.Resource, null);
             writer.WriteString(statement.Resource);
             writer.WriteEndAttribute();
 
@@ -1137,17 +1137,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (conditions == null)
                 throw LogHelper.LogArgumentNullException(nameof(conditions));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Conditions, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Conditions, SamlConstants.Namespace);
             if (conditions.NotBefore != SecurityUtils.MinUtcDateTime)
             {
-                writer.WriteStartAttribute(SamlStrings.NotBefore, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.NotBefore, null);
                 writer.WriteString(conditions.NotBefore.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
                 writer.WriteEndAttribute();
             }
 
             if (conditions.NotOnOrAfter != SecurityUtils.MaxUtcDateTime)
             {
-                writer.WriteStartAttribute(SamlStrings.NotOnOrAfter, null);
+                writer.WriteStartAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
                 writer.WriteString(conditions.NotOnOrAfter.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
                 writer.WriteEndAttribute();
             }
@@ -1207,7 +1207,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.DoNotCacheCondition, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace);
             writer.WriteEndElement();
         }
 
@@ -1219,11 +1219,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (evidence == null)
                 throw LogHelper.LogArgumentNullException(nameof(evidence));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Evidence, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Evidence, SamlConstants.Namespace);
 
             foreach (var assertionId in evidence.AssertionIdReferences)
             {
-                writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.AssertionIdReference, SamlStrings.Namespace);
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace);
                 writer.WriteString(assertionId);
                 writer.WriteEndElement();
             }
@@ -1278,21 +1278,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (string.IsNullOrEmpty(subject.Name) && subject.ConfirmationMethods.Count == 0)
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("both name and confirmation methods can not be null"));
 
-            writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.Subject, SamlStrings.Namespace);
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Subject, SamlConstants.Namespace);
 
             if (!string.IsNullOrEmpty(subject.Name))
             {
-                writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.NameIdentifier, SamlStrings.Namespace);
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.NameIdentifier, SamlConstants.Namespace);
                 if (!string.IsNullOrEmpty(subject.NameFormat))
                 {
-                    writer.WriteStartAttribute(SamlStrings.NameIdentifierFormat, null);
+                    writer.WriteStartAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
                     writer.WriteString(subject.NameFormat);
                     writer.WriteEndAttribute();
                 }
 
                 if (!string.IsNullOrEmpty(subject.NameQualifier))
                 {
-                    writer.WriteStartAttribute(SamlStrings.NameIdentifierNameQualifier, null);
+                    writer.WriteStartAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
                     writer.WriteString(subject.NameQualifier);
                     writer.WriteEndAttribute();
                 }
@@ -1303,12 +1303,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (subject.ConfirmationMethods.Count > 0)
             {
-                writer.WriteStartElement(SamlStrings.PreferredPrefix, SamlStrings.SubjectConfirmation, SamlStrings.Namespace);
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace);
                 foreach (string method in subject.ConfirmationMethods)
-                    writer.WriteElementString(SamlStrings.SubjectConfirmationMethod, SamlStrings.Namespace, method);
+                    writer.WriteElementString(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace, method);
 
                 if (!string.IsNullOrEmpty(subject.ConfirmationData))
-                    writer.WriteElementString(SamlStrings.SubjectConfirmationData, SamlStrings.Namespace, subject.ConfirmationData);
+                    writer.WriteElementString(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace, subject.ConfirmationData);
 
                 if (subject.KeyIdentifier != null)
                 {
@@ -1348,6 +1348,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return (((assertionId[0] >= 'A') && (assertionId[0] <= 'Z')) ||
                 ((assertionId[0] >= 'a') && (assertionId[0] <= 'z')) ||
                 (assertionId[0] == '_'));
+        }
+
+        internal static void WriteStartElementWithPreferredcPrefix(XmlWriter writer, string name, string ns)
+        {
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, name, ns);            
         }
     }
 }

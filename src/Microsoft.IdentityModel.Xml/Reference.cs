@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public Reference(string uri, object resolvedXmlSource)
         {
-            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureStrings.DigestMethod);
+            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
             Uri = uri;
             _resolvedXmlSource = resolvedXmlSource;
         }
@@ -227,14 +227,14 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
-            reader.MoveToStartElement(XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             Id = reader.GetAttribute(UtilityStrings.Id, null);
             Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
             Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
             reader.Read();
 
-            if (reader.IsStartElement(XmlSignatureStrings.Transforms, XmlSignatureStrings.Namespace))
+            if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
                 _transformChain.ReadFrom(reader, transformFactory, ShouldPreserveComments(Uri));
 
             _digestMethodElement.ReadFrom(reader);
@@ -251,15 +251,15 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(_prefix, XmlSignatureStrings.Reference, XmlSignatureStrings.Namespace);
+            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             if (Id != null)
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 
             if (Uri != null)
-                writer.WriteAttributeString(XmlSignatureStrings.URI, null, Uri);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, Uri);
 
             if (Type != null)
-                writer.WriteAttributeString(XmlSignatureStrings.Type, null, Type);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, null, Type);
 
             if (_transformChain.TransformCount > 0)
                 _transformChain.WriteTo(writer);
@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public void ReadFrom(XmlDictionaryReader reader)
             {
-                reader.MoveToStartElement(XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
+                reader.MoveToStartElement(XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 _prefix = reader.Prefix;
                 reader.Read();
                 reader.MoveToContent();
@@ -302,7 +302,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public void WriteTo(XmlDictionaryWriter writer)
             {
-                writer.WriteStartElement(_prefix ?? XmlSignatureStrings.Prefix, XmlSignatureStrings.DigestValue, XmlSignatureStrings.Namespace);
+                writer.WriteStartElement(_prefix ?? XmlSignatureConstants.Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 if (_digestText != null)
                     writer.WriteString(_digestText);
                 else

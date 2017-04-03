@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Xml
         private readonly bool _includeComments;
         private string _inclusiveNamespacesPrefixList;
         private string[] _inclusivePrefixes;
-        private string _prefix = XmlSignatureStrings.Prefix;
+        private string _prefix = XmlSignatureConstants.Prefix;
         private TranformationParameters _transformationParameters = new TranformationParameters();
 
         public StrTransform()
@@ -159,10 +159,10 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
-            reader.MoveToStartElement(XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
-            string algorithm = reader.GetAttribute(XmlSignatureStrings.Algorithm, null);
+            string algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             if (algorithm != Algorithm)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("AlgorithmMismatchForTransform"));
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Xml
 
             if (!isEmptyElement)
             {
-                if (reader.IsStartElement(XmlSignatureStrings.TransformationParameters, XmlSignatureStrings.SecurityJan2004Namespace))
+                if (reader.IsStartElement(XmlSignatureConstants.Elements.TransformationParameters, XmlSignatureConstants.SecurityJan2004Namespace))
                     _transformationParameters.ReadFrom(reader);
 
                 reader.MoveToContent();
@@ -181,8 +181,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(_prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
-            writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
+            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+            writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             writer.WriteString(Algorithm);
             writer.WriteEndAttribute();
             _transformationParameters.WriteTo(writer);
@@ -231,22 +231,22 @@ namespace Microsoft.IdentityModel.Xml
 
         public string CanonicalizationAlgorithm
         {
-            get { return SecurityAlgorithmStrings.ExclusiveC14n; }
+            get { return XmlSignatureConstants.ExclusiveC14n; }
         }
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
             reader.MoveToContent();
-            reader.MoveToStartElement(XmlSignatureStrings.TransformationParameters, XmlSignatureStrings.SecurityJan2004Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.TransformationParameters, XmlSignatureConstants.SecurityJan2004Namespace);
             string prefix = reader.Prefix;
 
             bool skipReadingTransformEnd = reader.IsEmptyElement;
             reader.ReadStartElement();
 
-            if (reader.IsStartElement(XmlSignatureStrings.CanonicalizationMethod, XmlSignatureStrings.Namespace))
+            if (reader.IsStartElement(XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace))
             {
 
-                string algorithm = reader.GetAttribute(XmlSignatureStrings.Algorithm, null);
+                string algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 // Canonicalization Method can be empty.
                 // <elementNOTempty></elementNOTempty>
                 // <elementEmpty/>
@@ -279,10 +279,10 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(XmlSignatureStrings.SecurityJan2004Prefix, XmlSignatureStrings.TransformationParameters, XmlSignatureStrings.SecurityJan2004Namespace);  //<wsse:TransformationParameters>
-            writer.WriteStartElement(XmlSignatureStrings.Prefix, XmlSignatureStrings.CanonicalizationMethod, XmlSignatureStrings.Namespace);
-            writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
-            writer.WriteString(SecurityAlgorithmStrings.ExclusiveC14n);
+            writer.WriteStartElement(XmlSignatureConstants.SecurityJan2004Prefix, XmlSignatureConstants.Elements.TransformationParameters, XmlSignatureConstants.SecurityJan2004Namespace);  //<wsse:TransformationParameters>
+            writer.WriteStartElement(XmlSignatureConstants.Prefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+            writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
             writer.WriteEndAttribute();
             writer.WriteEndElement(); // CanonicalizationMethod 
             writer.WriteEndElement(); // TransformationParameters

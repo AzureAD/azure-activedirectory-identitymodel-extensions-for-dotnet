@@ -42,10 +42,10 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             reader.MoveToContent();
-            if (!reader.IsStartElement(XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace))
+            if (!reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace))
                 return;
 
-            Algorithm = reader.GetAttribute(XmlEncryptionStrings.Algorithm, null);
+            Algorithm = reader.GetAttribute(XmlEncryptionConstants.Attributes.Algorithm, null);
 
             if (!reader.IsEmptyElement)
             {
@@ -67,9 +67,9 @@ namespace Microsoft.IdentityModel.Xml
         public void WriteXml(XmlWriter writer)
         {
             // <EncryptionMethod>
-            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.EncryptionMethod, XmlEncryptionStrings.Namespace);
+            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace);
 
-            writer.WriteAttributeString(XmlEncryptionStrings.Algorithm, null, Algorithm);
+            writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Algorithm, null, Algorithm);
 
             // </EncryptionMethod>
             writer.WriteEndElement();

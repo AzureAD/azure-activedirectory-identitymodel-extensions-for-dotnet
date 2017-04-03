@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
-            reader.MoveToStartElement(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             Id = reader.GetAttribute(UtilityStrings.Id, null);
             reader.Read();
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(_prefix, XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
+            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             if (Id != null)
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public void ReadFrom(XmlDictionaryReader reader)
             {
-                reader.MoveToStartElement(XmlSignatureStrings.SignatureValue, XmlSignatureStrings.Namespace);
+                reader.MoveToStartElement(XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
                 _prefix = reader.Prefix;
                 Id = reader.GetAttribute(UtilityStrings.Id, null);
                 reader.Read();
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public void WriteTo(XmlDictionaryWriter writer)
             {
-                writer.WriteStartElement(_prefix, XmlSignatureStrings.SignatureValue, XmlSignatureStrings.Namespace);
+                writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
                 if (Id != null)
                     writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 

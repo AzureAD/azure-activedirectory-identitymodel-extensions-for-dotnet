@@ -51,10 +51,10 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
-            reader.MoveToStartElement(_elementName, XmlSignatureStrings.Namespace);
+            reader.MoveToStartElement(_elementName, XmlSignatureConstants.Namespace);
             Prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
-            Algorithm = reader.GetAttribute(XmlSignatureStrings.Algorithm, null);
+            Algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             if (Algorithm == null)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredAttributeMissing"));
 
@@ -70,8 +70,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(Prefix, _elementName, XmlSignatureStrings.Namespace);
-            writer.WriteStartAttribute(XmlSignatureStrings.Algorithm, null);
+            writer.WriteStartElement(Prefix, _elementName, XmlSignatureConstants.Namespace);
+            writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             writer.WriteString(Algorithm);
             writer.WriteEndAttribute();
             writer.WriteEndElement();

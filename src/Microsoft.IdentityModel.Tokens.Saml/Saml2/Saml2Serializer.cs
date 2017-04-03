@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         if (reader.IsStartElement(Saml2Constants.Elements.AssertionIDRef, Saml2Constants.Namespace))
                             advice.AssertionIdReferences.Add(ReadSimpleNCNameElement(reader, Saml2Constants.Elements.AssertionIDRef));
                         else if (reader.IsStartElement(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace))
-                            advice.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Strings.Advice, UriKind.RelativeOrAbsolute, false));
+                            advice.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.Advice, UriKind.RelativeOrAbsolute, false));
                         else if (reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
                             advice.Assertions.Add(ReadAssertion(reader));
                         else if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Strings.Advice);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Advice);
             }
         }
 
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                     if (0 == assertion.Statements.Count)
-                        throw LogReadException(LogMessages.IDX11108, Saml2Strings.Assertion);
+                        throw LogReadException(LogMessages.IDX11108, Saml2Constants.Elements.Assertion);
 
                     // Furthermore, the built-in statement types all require the presence of a subject.
                     // [Saml2Core, lines 1050, 1168, 1280]
@@ -242,7 +242,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             || statement is Saml2AttributeStatement
                             || statement is Saml2AuthorizationDecisionStatement)
                         {
-                            throw LogReadException(LogMessages.IDX11109, Saml2Strings.Assertion);
+                            throw LogReadException(LogMessages.IDX11109, Saml2Constants.Elements.Assertion);
                         }
                     }
                 }
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Strings.Assertion);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Assertion);
             }
         }
 
@@ -1722,7 +1722,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 //plaintextWriter = null;
 
                 //EncryptedDataElement encryptedData = new EncryptedDataElement();
-                //encryptedData.Type = XmlEncryptionStrings.EncryptedDataTypes.Element;
+                //encryptedData.Type = XmlEncryptionConstants.Elements.EncryptedDataTypes;
                 //encryptedData.Algorithm = assertion.EncryptingCredentials.Algorithm;
                 //encryptedData.KeyIdentifier = assertion.EncryptingCredentials.SecurityKeyIdentifier;
 

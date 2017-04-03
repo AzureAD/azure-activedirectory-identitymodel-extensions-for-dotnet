@@ -36,11 +36,11 @@ namespace Microsoft.IdentityModel.Xml
 {
     internal class ExclusiveCanonicalizationTransform : Transform
     {
-        private string _inclusiveListElementPrefix = ExclusiveC14NStrings.Prefix;
+        private string _inclusiveListElementPrefix = ExclusiveC14NConstants.Prefix;
         private string _inclusiveNamespacesPrefixList;
         private string[] _inclusivePrefixes;
         private readonly bool _isCanonicalizationMethod;
-        private string _prefix = XmlSignatureStrings.Prefix;
+        private string _prefix = XmlSignatureConstants.Prefix;
 
         public ExclusiveCanonicalizationTransform()
             : this(false)
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _isCanonicalizationMethod = isCanonicalizationMethod;
             IncludeComments = includeComments;
-            Algorithm = includeComments ? SecurityAlgorithmStrings.ExclusiveC14nWithComments : SecurityAlgorithmStrings.ExclusiveC14n;
+            Algorithm = includeComments ? XmlSignatureConstants.ExclusiveC14nWithComments : XmlSignatureConstants.ExclusiveC14n;
         }
 
         public bool IncludeComments
@@ -173,24 +173,24 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
-            string elementName = _isCanonicalizationMethod ? XmlSignatureStrings.CanonicalizationMethod : XmlSignatureStrings.Transform;
-            reader.MoveToStartElement(elementName, XmlSignatureStrings.Namespace);
+            string elementName = _isCanonicalizationMethod ? XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
+            reader.MoveToStartElement(elementName, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
-            Algorithm = reader.GetAttribute(XmlSignatureStrings.Algorithm, null);
+            Algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             if (string.IsNullOrEmpty(Algorithm))
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("dictionaryManager.XmlSignatureDictionary.Algorithm"));
             }
 
-            if (Algorithm == SecurityAlgorithmStrings.ExclusiveC14nWithComments)
+            if (Algorithm == XmlSignatureConstants.ExclusiveC14nWithComments)
             {
                 // to include comments in canonicalization, two conditions need to be met
                 // 1. the Reference must be an xpointer.
                 // 2. the transform must be #withComments
                 IncludeComments = preserveComments && true;
             }
-            else if (Algorithm == SecurityAlgorithmStrings.ExclusiveC14n)
+            else if (Algorithm == XmlSignatureConstants.ExclusiveC14n)
             {
                 IncludeComments = false;
             }
@@ -205,13 +205,13 @@ namespace Microsoft.IdentityModel.Xml
 
             if (!isEmptyElement)
             {
-                if (reader.IsStartElement(ExclusiveC14NStrings.InclusiveNamespaces, ExclusiveC14NStrings.Namespace))
+                if (reader.IsStartElement(ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace))
                 {
-                    reader.MoveToStartElement(ExclusiveC14NStrings.InclusiveNamespaces, ExclusiveC14NStrings.Namespace);
+                    reader.MoveToStartElement(ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace);
                     _inclusiveListElementPrefix = reader.Prefix;
                     bool emptyElement = reader.IsEmptyElement;
                     // We treat PrefixList as optional Attribute.
-                    InclusiveNamespacesPrefixList = reader.GetAttribute(ExclusiveC14NStrings.PrefixList, null);
+                    InclusiveNamespacesPrefixList = reader.GetAttribute(ExclusiveC14NConstants.PrefixList, null);
                     reader.Read();
                     if (!emptyElement)
                         reader.ReadEndElement();
@@ -224,14 +224,14 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteTo(XmlDictionaryWriter writer)
         {
             var elementName = _isCanonicalizationMethod ?
-                XmlSignatureStrings.CanonicalizationMethod : XmlSignatureStrings.Transform;
-            writer.WriteStartElement(_prefix, elementName, XmlSignatureStrings.Namespace);
-            writer.WriteAttributeString(XmlSignatureStrings.Algorithm, null, Algorithm);
+                XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
+            writer.WriteStartElement(_prefix, elementName, XmlSignatureConstants.Namespace);
+            writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, Algorithm);
 
             if (InclusiveNamespacesPrefixList != null)
             {
-                writer.WriteStartElement(_inclusiveListElementPrefix, ExclusiveC14NStrings.InclusiveNamespaces, ExclusiveC14NStrings.Namespace);
-                writer.WriteAttributeString(ExclusiveC14NStrings.PrefixList, null, InclusiveNamespacesPrefixList);
+                writer.WriteStartElement(_inclusiveListElementPrefix, ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace);
+                writer.WriteAttributeString(ExclusiveC14NConstants.PrefixList, null, InclusiveNamespacesPrefixList);
                 writer.WriteEndElement(); // InclusiveNamespaces
             }
 

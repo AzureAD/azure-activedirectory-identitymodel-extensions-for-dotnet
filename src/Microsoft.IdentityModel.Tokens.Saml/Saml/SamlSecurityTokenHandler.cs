@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     {
                         return false;
                     }
-                    return reader.IsStartElement(SamlConstants.ElementNames.Assertion, SamlConstants.Saml11Namespace);
+                    return reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Saml11Namespace);
                 }
             }
         }

@@ -34,13 +34,13 @@ namespace Microsoft.IdentityModel.Xml
 {
     sealed class EnvelopedSignatureTransform : Transform
     {
-        private string _prefix = XmlSignatureStrings.Prefix;
+        private string _prefix = XmlSignatureConstants.Prefix;
 
         public EnvelopedSignatureTransform() { }
 
         public override string Algorithm
         {
-            get { return XmlSignatureStrings.EnvelopedSignature; }
+            get { return XmlSignatureConstants.Algorithms.EnvelopedSignature; }
         }
 
         public override object Process(object input, SignatureResourcePool resourcePool)
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Xml
             XmlTokenStream tokenStream = input as XmlTokenStream;
             if (tokenStream != null)
             {
-                tokenStream.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace);
+                tokenStream.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
                 return tokenStream;
             }
 
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Xml
                 // as the depth, we narrow our range of support so that we require
                 // that the enveloped signature be a direct child of the element
                 // being signed.
-                reader.XmlTokens.SetElementExclusion(XmlSignatureStrings.Signature, XmlSignatureStrings.Namespace, 1);
+                reader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace, 1);
                 return reader;
             }
 
@@ -79,15 +79,15 @@ namespace Microsoft.IdentityModel.Xml
         {
             reader.MoveToContent();
             string algorithm = XmlUtil.ReadEmptyElementAndRequiredAttribute(reader,
-                XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace, XmlSignatureStrings.Algorithm, out _prefix);
+                XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace, XmlSignatureConstants.Attributes.Algorithm, out _prefix);
             if (algorithm != Algorithm)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("AlgorithmMismatchForTransform"));
         }
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            writer.WriteStartElement(_prefix, XmlSignatureStrings.Transform, XmlSignatureStrings.Namespace);
-            writer.WriteAttributeString(XmlSignatureStrings.Algorithm, null, Algorithm);
+            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+            writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, Algorithm);
             writer.WriteEndElement();
         }
     }

@@ -62,11 +62,11 @@ namespace Microsoft.IdentityModel.Xml
                 LogHelper.LogArgumentNullException(nameof(reader));
 
             reader.MoveToContent();
-            if (!reader.IsStartElement(XmlEncryptionStrings.CipherData, XmlEncryptionStrings.Namespace))
-                throw LogHelper.LogExceptionMessage(new XmlEncryptionException($"Expection start element {XmlEncryptionStrings.CipherData}"));
+            if (!reader.IsStartElement(XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace))
+                throw LogHelper.LogExceptionMessage(new XmlEncryptionException($"Expection start element {XmlEncryptionConstants.Elements.CipherData}"));
 
-            reader.ReadStartElement(XmlEncryptionStrings.CipherData, XmlEncryptionStrings.Namespace);
-            reader.ReadStartElement(XmlEncryptionStrings.CipherValue, XmlEncryptionStrings.Namespace);
+            reader.ReadStartElement(XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
+            reader.ReadStartElement(XmlEncryptionConstants.Elements.CipherValue, XmlEncryptionConstants.Namespace);
 
             _cipherText = reader.ReadContentAsBase64();
             _iv         = null;
@@ -90,8 +90,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteXml(XmlWriter writer)
         {
-            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.CipherData, XmlEncryptionStrings.Namespace);
-            writer.WriteStartElement(XmlEncryptionStrings.Prefix, XmlEncryptionStrings.CipherValue, XmlEncryptionStrings.Namespace);
+            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
+            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.CipherValue, XmlEncryptionConstants.Namespace);
 
             if (_iv != null)
                 writer.WriteBase64(_iv, 0, _iv.Length);

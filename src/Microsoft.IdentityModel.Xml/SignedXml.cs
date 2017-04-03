@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class SignedXml : ISignatureValueSecurityElement
     {
-        internal const string DefaultPrefix = XmlSignatureStrings.Prefix;
+        internal const string DefaultPrefix = XmlSignatureConstants.Prefix;
 
         public SignedXml(SignedInfo signedInfo)
         {
