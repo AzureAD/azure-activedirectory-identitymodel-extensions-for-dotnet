@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class SignedInfo : ISecurityElement
     {
-        readonly ExclusiveCanonicalizationTransform _canonicalizationMethodElement = new ExclusiveCanonicalizationTransform(true);
+        readonly ExclusiveCanonicalizationTransform _exclusiveCanonicalizationTransform = new ExclusiveCanonicalizationTransform(true);
         ElementWithAlgorithmAttribute _signatureMethodElement;
         SignatureResourcePool _resourcePool;
         List<Reference> _references;
@@ -74,22 +74,13 @@ namespace Microsoft.IdentityModel.Xml
 
         public string CanonicalizationMethod
         {
-            get { return _canonicalizationMethodElement.Algorithm; }
+            get { return _exclusiveCanonicalizationTransform.Algorithm; }
             set
             {
-                if (value != _canonicalizationMethodElement.Algorithm)
+                if (value != _exclusiveCanonicalizationTransform.Algorithm)
                 {
                     throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
                 }
-            }
-        }
-
-        public XmlDictionaryString CanonicalizationMethodDictionaryString
-        {
-            set
-            {
-                if (value != null && value.Value != _canonicalizationMethodElement.Algorithm)
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
             }
         }
 
@@ -148,7 +139,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (SendSide)
             {
-                using (XmlDictionaryWriter utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
+                using (var utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
                 {
                     utf8Writer.StartCanonicalization(stream, false, null);
                     WriteTo(utf8Writer);
@@ -166,10 +157,10 @@ namespace Microsoft.IdentityModel.Xml
                 // are creating over an already buffered content. The content was initially read off user provided XmlDictionaryReader
                 // with the correct quotas and hence we know the data is valid.
                 // Note: signedinfoReader will close _bufferedStream on Dispose.
-                using (XmlDictionaryReader signedinfoReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
+                using (var signedinfoReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
                 {
                     signedinfoReader.MoveToContent();
-                    using (XmlDictionaryWriter bufferingWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
+                    using (var bufferingWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
                     {
                         bufferingWriter.WriteStartElement("a", _defaultNamespace);
                         string[] inclusivePrefix = GetInclusivePrefixes();
@@ -211,7 +202,7 @@ namespace Microsoft.IdentityModel.Xml
 
         protected string[] GetInclusivePrefixes()
         {
-            return _canonicalizationMethodElement.GetInclusivePrefixes();
+            return _exclusiveCanonicalizationTransform.GetInclusivePrefixes();
         }
 
         protected virtual string GetNamespaceForInclusivePrefix(string prefix)
@@ -290,7 +281,7 @@ namespace Microsoft.IdentityModel.Xml
                 Prefix = canonicalizingReader.Prefix;
                 Id = canonicalizingReader.GetAttribute(UtilityStrings.Id, null);
                 canonicalizingReader.Read();
-                _canonicalizationMethodElement.ReadFrom(canonicalizingReader, false);
+                _exclusiveCanonicalizationTransform.ReadFrom(canonicalizingReader, false);
                 _signatureMethodElement.ReadFrom(canonicalizingReader);
                 SignatureMethod = _signatureMethodElement.Algorithm;
                 while (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
@@ -334,7 +325,7 @@ namespace Microsoft.IdentityModel.Xml
 
         protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)
         {
-            _canonicalizationMethodElement.WriteTo(writer);
+            _exclusiveCanonicalizationTransform.WriteTo(writer);
         }
 
         protected void WriteSignatureMethod(XmlDictionaryWriter writer)
