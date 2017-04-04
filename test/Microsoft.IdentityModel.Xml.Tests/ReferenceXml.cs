@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
-    public class RefrenceXml
+    public class RefernceXml
     {
         public static SecurityKey Saml2Token_Valid_SecurityKey
         {
@@ -151,5 +151,52 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 </AuthnStatement>
             </Assertion>";
 
+        public static string SignInfo =
+            @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
+                <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
+                <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
+                <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
+                  <Transforms>
+                    <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
+                    <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
+                  </Transforms>
+                  <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
+                  <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
+                </Reference>
+             </SignedInfo>";
+
+        public static string SignInfoStartsWithWhiteSpace =
+            @"    <SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
+                <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
+                <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
+                <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
+                  <Transforms>
+                    <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
+                    <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
+                  </Transforms>
+                  <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
+                  <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
+                </Reference>
+             </SignedInfo>";
+
+        public static SignedInfo ExpectedSignedInfo
+        {
+            get
+            {
+                var signedInfo = new SignedInfo();
+                signedInfo.CanonicalizationMethod = @"http://www.w3.org/2001/10/xml-exc-c14n#";
+                signedInfo.SignatureMethod = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+
+                var reference = new Reference();
+                reference.DigestMethod = @"http://www.w3.org/2001/04/xmlenc#sha256";
+                reference.Uri = "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2";
+                reference.AddTransform(new EnvelopedSignatureTransform());
+                reference.AddTransform(new ExclusiveCanonicalizationTransform());
+
+                signedInfo.AddReference(reference);
+
+                return signedInfo;
+            }            
+        }
     }
 }

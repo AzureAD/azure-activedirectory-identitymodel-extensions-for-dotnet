@@ -26,14 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
-using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
@@ -125,46 +120,46 @@ namespace Microsoft.IdentityModel.Xml.Tests
             {
                 var theoryData = new TheoryData<EnvelopedSignatureTheoryData>();
 
-                var sr = new StringReader(RefrenceXml.Saml2Token_Valid);
+                var sr = new StringReader(RefernceXml.Saml2Token_Valid);
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     ExpectSignedXml = true,
-                    TestId = nameof(RefrenceXml.Saml2Token_Valid) + " No Key",
+                    TestId = nameof(RefernceXml.Saml2Token_Valid) + " No Key",
                     XmlReader = reader
                 });
 
-                sr = new StringReader(RefrenceXml.Saml2Token_Valid);
+                sr = new StringReader(RefernceXml.Saml2Token_Valid);
                 reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.NoExceptionExpected,
                     ExpectSignedXml = true,
-                    SecurityKey = RefrenceXml.Saml2Token_Valid_SecurityKey,
-                    TestId = nameof(RefrenceXml.Saml2Token_Valid),
+                    SecurityKey = RefernceXml.Saml2Token_Valid_SecurityKey,
+                    TestId = nameof(RefernceXml.Saml2Token_Valid),
                     XmlReader = reader
                 });
 
-                sr = new StringReader(RefrenceXml.Saml2Token_Valid_SignatureNOTFormated);
+                sr = new StringReader(RefernceXml.Saml2Token_Valid_SignatureNOTFormated);
                 reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.CryptographicException(),
                     ExpectSignedXml = true,
-                    SecurityKey = RefrenceXml.Saml2Token_Valid_SecurityKey,
-                    TestId = nameof(RefrenceXml.Saml2Token_Valid_SignatureNOTFormated),
+                    SecurityKey = RefernceXml.Saml2Token_Valid_SecurityKey,
+                    TestId = nameof(RefernceXml.Saml2Token_Valid_SignatureNOTFormated),
                     XmlReader = reader
                 });
 
-                sr = new StringReader(RefrenceXml.Saml2Token_Valid_Formated);
+                sr = new StringReader(RefernceXml.Saml2Token_Valid_Formated);
                 reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.CryptographicException(),
                     ExpectSignedXml = true,
-                    SecurityKey = RefrenceXml.Saml2Token_Valid_SecurityKey,
-                    TestId = nameof(RefrenceXml.Saml2Token_Valid_Formated),
+                    SecurityKey = RefernceXml.Saml2Token_Valid_SecurityKey,
+                    TestId = nameof(RefernceXml.Saml2Token_Valid_Formated),
                     XmlReader = reader
                 });
 

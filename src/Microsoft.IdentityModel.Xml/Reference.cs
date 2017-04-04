@@ -33,6 +33,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Represents the &lt;Reference> element in a &lt;SignedInfo> clause.
+    /// </summary>
     public class Reference
     {
         private ElementWithAlgorithmAttribute _digestMethodElement;
@@ -227,6 +230,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
+            if (reader == null)
+                LogHelper.LogArgumentNullException(nameof(reader));
+
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             Id = reader.GetAttribute(UtilityStrings.Id, null);

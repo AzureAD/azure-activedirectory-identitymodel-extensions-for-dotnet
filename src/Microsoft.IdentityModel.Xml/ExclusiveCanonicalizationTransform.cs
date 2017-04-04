@@ -34,7 +34,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    internal class ExclusiveCanonicalizationTransform : Transform
+    public class ExclusiveCanonicalizationTransform : Transform
     {
         private string _inclusiveListElementPrefix = ExclusiveC14NConstants.Prefix;
         private string _inclusiveNamespacesPrefixList;
