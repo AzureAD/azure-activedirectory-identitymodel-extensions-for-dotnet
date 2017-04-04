@@ -44,7 +44,14 @@ namespace Microsoft.IdentityModel.Xml
         List<Reference> _references;
         MemoryStream _bufferedStream;
         string _defaultNamespace = string.Empty;
-//        bool _disposed;
+        //        bool _disposed;
+
+        public SignedInfo(string canonicalizationMethod, string signatureMethod, string uri, IEnumerable<Transform> transforms)
+        {
+            _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
+            _references = new List<Reference>();
+            Prefix = SignedXml.DefaultPrefix;
+        }
 
         public SignedInfo()
         {
@@ -103,7 +110,7 @@ namespace Microsoft.IdentityModel.Xml
             get { return _references[index]; }
         }
 
-        public string SignatureMethod { get; protected set; }
+        public string SignatureMethod { get; set; }
 
         public string SignatureMethodDictionaryString { get; set; }
 
@@ -247,23 +254,19 @@ namespace Microsoft.IdentityModel.Xml
             return false;
         }
 
-        protected void ReadCanonicalizationMethod(XmlDictionaryReader reader)
-        {
-            _canonicalizationMethodElement.ReadFrom(reader, false);
-        }
-
         public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
-            reader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace, false);
 
+            // TODO - get rid of this flag
             SendSide = false;
-            _defaultNamespace = reader.LookupNamespace(String.Empty);
+            _defaultNamespace = reader.LookupNamespace(string.Empty);
             _bufferedStream = new MemoryStream();
-
-
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Encoding = Encoding.UTF8;
-            settings.NewLineHandling = NewLineHandling.None;
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                NewLineHandling = NewLineHandling.None
+            };
 
             using (XmlWriter bufferWriter = XmlTextWriter.Create(_bufferedStream, settings))
             {
@@ -279,28 +282,26 @@ namespace Microsoft.IdentityModel.Xml
             // with the correct quotas and hence we know the data is valid.
             // Note: effectiveReader will close _bufferedStream on Dispose.
             //
-            using (XmlDictionaryReader effectiveReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
+            using (var canonicalizingReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
             {
                 CanonicalStream = new MemoryStream();
-                effectiveReader.StartCanonicalization(CanonicalStream, false, null);
-
-                effectiveReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
-                Prefix = effectiveReader.Prefix;
-                // TODO - need to use dictionary
-                Id = effectiveReader.GetAttribute(UtilityStrings.Id, null);
-                effectiveReader.Read();
-
-                ReadCanonicalizationMethod(effectiveReader);
-                ReadSignatureMethod(effectiveReader);
-                while (effectiveReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
+                canonicalizingReader.StartCanonicalization(CanonicalStream, false, null);
+                canonicalizingReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+                Prefix = canonicalizingReader.Prefix;
+                Id = canonicalizingReader.GetAttribute(UtilityStrings.Id, null);
+                canonicalizingReader.Read();
+                _canonicalizationMethodElement.ReadFrom(canonicalizingReader, false);
+                _signatureMethodElement.ReadFrom(canonicalizingReader);
+                SignatureMethod = _signatureMethodElement.Algorithm;
+                while (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                 {
                     Reference reference = new Reference();
-                    reference.ReadFrom(effectiveReader, transformFactory);
+                    reference.ReadFrom(canonicalizingReader, transformFactory);
                     AddReference(reference);
                 }
-                effectiveReader.ReadEndElement();
 
-                effectiveReader.EndCanonicalization();
+                canonicalizingReader.ReadEndElement();
+                canonicalizingReader.EndCanonicalization();
             }
 
             string[] inclusivePrefixes = GetInclusivePrefixes();
@@ -331,12 +332,6 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement(); // SignedInfo
         }
 
-        protected void ReadSignatureMethod(XmlDictionaryReader reader)
-        {
-            _signatureMethodElement.ReadFrom(reader);
-            SignatureMethod = _signatureMethodElement.Algorithm;
-        }
-
         protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)
         {
             _canonicalizationMethodElement.WriteTo(writer);
@@ -350,5 +345,18 @@ namespace Microsoft.IdentityModel.Xml
         protected string Prefix { get; set; }
 
         protected Dictionary<string, string> Context { get; set; }
+
+        internal static void CheckReaderOnEntry(XmlReader reader, string element, string ns, bool allowEmptyElement = false)
+        {
+            if (null == reader)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            reader.MoveToContent();
+            if (!allowEmptyElement && reader.IsEmptyElement)
+                throw XmlUtil.LogReadException(LogMessages.IDX11104, XmlSignatureConstants.Elements.SignedInfo, element);
+
+            if (!reader.IsStartElement(element, ns))
+                throw XmlUtil.LogReadException(LogMessages.IDX11105, XmlSignatureConstants.Elements.SignedInfo, element, reader.LocalName);
+        }
     }
 }

@@ -32,7 +32,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    sealed class EnvelopedSignatureTransform : Transform
+    public sealed class EnvelopedSignatureTransform : Transform
     {
         private string _prefix = XmlSignatureConstants.Prefix;
 
