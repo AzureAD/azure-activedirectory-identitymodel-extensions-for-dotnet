@@ -357,21 +357,21 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        internal static void WriteAttributeStringAsUniqueId(XmlDictionaryWriter writer, string prefix, XmlDictionaryString localName, XmlDictionaryString ns, System.Xml.UniqueId id)
+        internal static void WriteAttributeStringAsUniqueId(XmlDictionaryWriter writer, string prefix, string localName, string ns, System.Xml.UniqueId id)
         {
             writer.WriteStartAttribute(prefix, localName, ns);
             writer.WriteValue(id);
             writer.WriteEndAttribute();
         }
 
-        public static void WriteElementStringAsUniqueId(XmlDictionaryWriter writer, XmlDictionaryString localName, XmlDictionaryString ns, string id)
+        public static void WriteElementStringAsUniqueId(XmlDictionaryWriter writer, string localName, string ns, string id)
         {
             writer.WriteStartElement(localName, ns);
             writer.WriteValue(id);
             writer.WriteEndElement();
         }
 
-        public static void WriteElementContentAsInt64(XmlDictionaryWriter writer, XmlDictionaryString localName, XmlDictionaryString ns, Int64 value)
+        public static void WriteElementContentAsInt64(XmlDictionaryWriter writer, string localName, string ns, Int64 value)
         {
             writer.WriteStartElement(localName, ns);
             writer.WriteValue(value);
