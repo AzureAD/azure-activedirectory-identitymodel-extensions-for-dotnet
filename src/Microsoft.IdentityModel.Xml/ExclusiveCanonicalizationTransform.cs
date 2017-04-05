@@ -174,14 +174,13 @@ namespace Microsoft.IdentityModel.Xml
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
             string elementName = _isCanonicalizationMethod ? XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
-            reader.MoveToStartElement(elementName, XmlSignatureConstants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, elementName, XmlSignatureConstants.Namespace, true);
+
             _prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
             Algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             if (string.IsNullOrEmpty(Algorithm))
-            {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException("dictionaryManager.XmlSignatureDictionary.Algorithm"));
-            }
 
             if (Algorithm == XmlSignatureConstants.ExclusiveC14nWithComments)
             {

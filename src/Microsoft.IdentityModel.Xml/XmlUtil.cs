@@ -52,10 +52,10 @@ namespace Microsoft.IdentityModel.Xml
 
             reader.MoveToContent();
             if (!allowEmptyElement && reader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX11104, element);
+                throw LogReadException(LogMessages.IDX21010, element);
 
             if (!reader.IsStartElement(element, ns))
-                throw LogReadException(LogMessages.IDX11105, reader.LocalName);
+                throw LogReadException(LogMessages.IDX21011, element, reader.LocalName);
         }
 
         public static bool EqualsQName(XmlQualifiedName qname, string localName, string namespaceUri)
@@ -172,17 +172,17 @@ namespace Microsoft.IdentityModel.Xml
 
         internal static Exception OnRequiredAttributeMissing(string element, string attribute)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX11106, element, attribute)));
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21013, element, attribute)));
         }
 
-        internal static Exception OnRequiredElementMissing(string element, string ns, XmlReader reader)
+        internal static Exception OnRequiredElementMissing(XmlReader reader, string element, string ns)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX11105, element, reader.LocalName)));
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21014, element, ns, reader.LocalName)));
         }
 
-        internal static Exception OnUnexpectedChildNode(string reading, XmlReader reader)
+        internal static Exception OnUnexpectedChildNode(XmlReader reader, string reading)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX11106, reading, reader.LocalName)));
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, reading, reader.LocalName)));
         }
 
         // TODO - localize error messages

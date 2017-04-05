@@ -1022,26 +1022,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/></returns>
-        public virtual Saml2NameIdentifier ReadNameIdType(XmlReader reader)
+        internal Saml2NameIdentifier ReadNameIdType(XmlReader reader)
         {
+            // check that reader is on correct element is made by caller
             try
             {
-                reader.MoveToContent();
-
                 Saml2NameIdentifier nameIdentifier = new Saml2NameIdentifier("__TemporaryName__");
-
-                // @attributes
-                string value;
 
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.NameIDType, Saml2Constants.Namespace);
 
                 // @Format - optional
-                value = reader.GetAttribute(Saml2Constants.Attributes.Format);
+                string value = reader.GetAttribute(Saml2Constants.Attributes.Format);
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (!UriUtil.CanCreateValidUri(value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.NameIDType, Saml2Constants.Attributes.Format, reader.LocalName);
+                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.NameIDType, Saml2Constants.Attributes.Format, value);
 
                     nameIdentifier.Format = new Uri(value);
                 }
@@ -1065,18 +1061,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 nameIdentifier.Value = reader.ReadElementContentAsString();
 
                 // According to section 8.3.6, if the name identifier format is of type 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity'
-                // the name identifier value must be a uri and name qualifier, spname qualifier, and spproded id must be omitted.
+                // the name identifier value must be a uri and name qualifier, spname qualifier, and spprovided id must be omitted.
                 if (nameIdentifier.Format != null &&
                     StringComparer.Ordinal.Equals(nameIdentifier.Format.AbsoluteUri, Saml2Constants.NameIdentifierFormats.Entity.AbsoluteUri))
                 {
                     if (!UriUtil.CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, reader.LocalName);
+                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, nameIdentifier.Value);
 
                     if (!string.IsNullOrEmpty(nameIdentifier.NameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPNameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPProvidedId))
                         throw LogReadException(LogMessages.IDX11124, nameIdentifier.Value, Saml2Constants.NameIdentifierFormats.Entity.AbsoluteUri);
                 }
+
                 return nameIdentifier;
             }
             catch (Exception ex)
@@ -1470,24 +1467,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             else if (reader.IsStartElement(Saml2Constants.Elements.BaseID, Saml2Constants.Namespace))
             {
                 // Since BaseID is an abstract type, we have to switch off the xsi:type declaration
-                XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
+                var declaredType = XmlUtil.GetXsiType(reader);
 
-                // No declaration, or declaring that this is just a "BaseID", is invalid since
-                // statement is abstract
+                // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
                 if (null == declaredType
                     || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.BaseIDAbstractType, Saml2Constants.Namespace))
-                    throw LogReadException(LogMessages.IDX11103, typeof(Saml2NameIdentifier));
+                    throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
 
                 // If it's NameID we can handle it
                 if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.NameIDType, Saml2Constants.Namespace))
-                {
                     return ReadNameIdType(reader);
-                }
                 else
-                {
                     // Instruct the user to override to handle custom <BaseID>
-                    throw LogReadException(LogMessages.IDX11103, typeof(Saml2NameIdentifier));
-                }
+                    throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
             }
 
             return null;

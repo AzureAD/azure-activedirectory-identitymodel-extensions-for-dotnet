@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11100 = "IDX11100: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX11101 = "IDX11101: Creating Saml2SecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX11102 = "IDX11102: Exception thrown while reading '{0}' for Saml2SecurityToken.";
-        internal const string IDX11103 = "IDX11103: Unable to read '{0}' for Saml2SecurityToken. Format is custom.";
+        internal const string IDX11103 = "IDX11103: Unable to read '{0}' for Saml2SecurityToken. The element type '{1}' appears to have a custom format that cannot be parsed. If this is expected, you will need to override '{2}.{3}'.";
         internal const string IDX11104 = "IDX11104: Unable to read Saml2SecurityToken. Expecting XmlReader to be at element: '{0}', found 'Empty Element'";
         internal const string IDX11105 = "IDX11105: Unable to read Saml2SecurityToken. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX11106 = "IDX11106: Unable to read for Saml2SecurityToken. Element: '{0}' as missing Attribute: '{1}'.";

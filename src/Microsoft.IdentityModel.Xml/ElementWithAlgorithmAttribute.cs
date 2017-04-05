@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    struct ElementWithAlgorithmAttribute
+    internal struct ElementWithAlgorithmAttribute
     {
         private readonly string _elementName;
 
@@ -51,12 +51,13 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
+            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace, true);
             reader.MoveToStartElement(_elementName, XmlSignatureConstants.Namespace);
-            Prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
+            Prefix = reader.Prefix;
             Algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             if (Algorithm == null)
-                throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredAttributeMissing"));
+                throw XmlUtil.OnRequiredAttributeMissing(_elementName, XmlSignatureConstants.Attributes.Algorithm);
 
             reader.Read();
             reader.MoveToContent();
