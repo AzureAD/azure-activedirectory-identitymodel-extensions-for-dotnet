@@ -81,7 +81,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.TestHeader($"{this}.Constructor", theoryData.TestId, ref _firstSignedInfoConstructor);
             try
             {
-
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -121,7 +120,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                     if (signedInfo.ReferenceCount != theoryData.SignedInfo.ReferenceCount)
                         errors.Add("signedInfo.SignatureMethod != theoryData.SignedInfo.SignatureMethod");
-                    else  if (signedInfo.ReferenceCount > 0)
+                    else if (signedInfo.ReferenceCount > 0)
                     {
                         for (int i = 0; i < signedInfo.ReferenceCount; i++)
                         {
@@ -160,6 +159,9 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get
             {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
                 var theoryData = new TheoryData<DSigTheoryData>();
 
                 theoryData.Add(new DSigTheoryData
@@ -190,7 +192,18 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     TransformFactory = TransformFactory.Instance,
                     XmlReader = reader
                 });
-                
+
+                sr = new StringReader(RefernceXml.SignedInfoCanonicalizationMethodMissing);
+                reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException)),
+                    SignedInfo = RefernceXml.ExpectedSignedInfo,
+                    TestId = nameof(RefernceXml.SignedInfoCanonicalizationMethodMissing),
+                    TransformFactory = TransformFactory.Instance,
+                    XmlReader = reader
+                });
+
                 return theoryData;
             }
         }

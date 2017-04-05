@@ -66,8 +66,8 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="signingCredentials">SigningCredentials to be used to generate the signature.</param>
         /// <param name="referenceId">The reference Id of the envelope.</param>
         /// <param name="securityTokenSerializer">SecurityTokenSerializer to serialize the signature KeyInfo.</param>
-        /// <exception cref="ArgumentNullException">One of he input parameter is null.</exception>
-        /// <exception cref="ArgumentException">The string 'referenceId' is either null or empty.</exception>
+        /// <exception cref="ArgumentNullException">One of he input parameters is null.</exception>
+        /// <exception cref="ArgumentNullException">The parameter 'referenceId' is empty.</exception>
         public EnvelopedSignatureWriter(XmlWriter innerWriter, SigningCredentials signingCredentials, string referenceId)
         {
             if (innerWriter == null)

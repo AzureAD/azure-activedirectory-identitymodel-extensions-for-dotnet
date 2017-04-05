@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Xml
         public void ComputeHash(HashAlgorithm algorithm)
         {
             if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
-                throw LogHelper.LogExceptionMessage(new CryptographicException("UnsupportedTransformAlgorithm"));
+                throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
 
             var hashStream = ResourcePool.TakeHashStream(algorithm);
             ComputeHash(hashStream);
@@ -286,7 +286,7 @@ namespace Microsoft.IdentityModel.Xml
                 SignatureMethod = _signatureMethodElement.Algorithm;
                 while (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                 {
-                    Reference reference = new Reference();
+                    var reference = new Reference();
                     reference.ReadFrom(canonicalizingReader, transformFactory);
                     AddReference(reference);
                 }
@@ -298,8 +298,7 @@ namespace Microsoft.IdentityModel.Xml
             string[] inclusivePrefixes = GetInclusivePrefixes();
             if (inclusivePrefixes != null)
             {
-                // Clear the canonicalized stream. We cannot use this while inclusive prefixes are
-                // specified.
+                // We cannot use the canonicalized stream when inclusive prefixes are specified.
                 CanonicalStream = null;
                 Context = new Dictionary<string, string>(inclusivePrefixes.Length);
                 for (int i = 0; i < inclusivePrefixes.Length; i++)
@@ -336,18 +335,5 @@ namespace Microsoft.IdentityModel.Xml
         protected string Prefix { get; set; }
 
         protected Dictionary<string, string> Context { get; set; }
-
-        internal static void CheckReaderOnEntry(XmlReader reader, string element, string ns, bool allowEmptyElement = false)
-        {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (!allowEmptyElement && reader.IsEmptyElement)
-                throw XmlUtil.LogReadException(LogMessages.IDX11104, XmlSignatureConstants.Elements.SignedInfo, element);
-
-            if (!reader.IsStartElement(element, ns))
-                throw XmlUtil.LogReadException(LogMessages.IDX11105, XmlSignatureConstants.Elements.SignedInfo, element, reader.LocalName);
-        }
     }
 }
