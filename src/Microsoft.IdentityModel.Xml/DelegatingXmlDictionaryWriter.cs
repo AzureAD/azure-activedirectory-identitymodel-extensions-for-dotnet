@@ -88,9 +88,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.Close();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.Close();
-            }
         }
 
         /// <summary>
@@ -100,9 +98,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.Flush();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.Flush();
-            }
         }
 
         /// <summary>
@@ -128,9 +124,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteCData(text);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteCData(text);
-            }
         }
 
         /// <summary>
@@ -141,9 +135,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteCharEntity(ch);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteCharEntity(ch);
-            }
         }
 
         /// <summary>
@@ -156,9 +148,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteChars(buffer, index, count);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteChars(buffer, index, count);
-            }
         }
 
         /// <summary>
@@ -169,9 +159,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteComment(text);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteComment(text);
-            }
         }
 
         /// <summary>
@@ -188,9 +176,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteDocType(name, pubid, sysid, subset);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteDocType(name, pubid, sysid, subset);
-            }
         }
 
         /// <summary>
@@ -200,9 +186,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteEndAttribute();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteEndAttribute();
-            }
         }
 
         /// <summary>
@@ -212,9 +196,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteEndDocument();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteEndDocument();
-            }
         }
 
         /// <summary>
@@ -224,9 +206,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteEndElement();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteEndElement();
-            }
         }
 
         /// <summary>
@@ -237,9 +217,8 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteEntityRef(name);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteEntityRef(name);
-            }
+
         }
 
         /// <summary>
@@ -249,9 +228,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteFullEndElement();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteFullEndElement();
-            }
         }
 
         /// <summary>
@@ -263,9 +240,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteProcessingInstruction(name, text);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteProcessingInstruction(name, text);
-            }
         }
 
         /// <summary>
@@ -278,9 +253,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteRaw(buffer, index, count);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteRaw(buffer, index, count);
-            }
         }
 
         /// <summary>
@@ -291,9 +264,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteRaw(data);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteRaw(data);
-            }
         }
 
         /// <summary>
@@ -306,9 +277,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteStartAttribute(prefix, localName, ns);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteStartAttribute(prefix, localName, ns);
-            }
         }
 
         /// <summary>
@@ -318,9 +287,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteStartDocument();
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteStartDocument();
-            }
         }
 
         /// <summary>
@@ -332,9 +299,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteStartDocument(standalone);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteStartDocument(standalone);
-            }
         }
 
         /// <summary>
@@ -348,9 +313,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteStartElement(prefix, localName, ns);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteStartElement(prefix, localName, ns);
-            }
         }
 
         /// <summary>
@@ -369,9 +332,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteString(text);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteString(text);
-            }
         }
 
         /// <summary>
@@ -383,9 +344,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteSurrogateCharEntity(lowChar, highChar);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteSurrogateCharEntity(lowChar, highChar);
-            }
         }
 
         /// <summary>
@@ -396,9 +355,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteWhitespace(ws);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteWhitespace(ws);
-            }
         }
 
         /// <summary>
@@ -410,9 +367,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteXmlAttribute(localName, value);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteAttributeString(localName, value);
-            }
         }
 
         /// <summary>
@@ -424,9 +379,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerWriter.WriteXmlnsAttribute(prefix, namespaceUri);
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteAttributeString(prefix, String.Empty, namespaceUri, String.Empty);
-            }
         }
 
         /// <summary>

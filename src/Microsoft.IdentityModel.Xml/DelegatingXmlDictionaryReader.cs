@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
     /// Class wraps a given reader and delegates all XmlDictionaryReader calls 
     /// to the inner wrapped reader.
     /// </summary>
-    public class DelegatingXmlDictionaryReader : XmlDictionaryReader
+    public class DelegatingXmlDictionaryReader : XmlDictionaryReader, IXmlLineInfo
     {
         private XmlDictionaryReader _innerReader;
 
@@ -85,12 +85,12 @@ namespace Microsoft.IdentityModel.Xml
         /// System.Xml.XmlReader.NamespaceURI from the wrapped reader.
         /// </summary>
         /// <param name="name">The local name of the attribute.</param>
-        /// <param name="namespaceURI">The namespace URI of the attribute.</param>
+        /// <param name="ns">The namespace URI of the attribute.</param>
         /// <returns>The value of the specified attribute. If the attribute is not found, 
         /// null is returned.</returns>
-        public override string this[string name, string namespaceURI]
+        public override string this[string name, string ns]
         {
-            get { return _innerReader[name, namespaceURI]; }
+            get { return _innerReader[name, ns]; }
         }
 
         /// <summary>
@@ -107,6 +107,16 @@ namespace Microsoft.IdentityModel.Xml
         public override string BaseURI
         {
             get { return _innerReader.BaseURI; }
+        }
+
+        public override bool CanReadBinaryContent
+        {
+            get { return _innerReader.CanReadBinaryContent; }
+        }
+
+        public override bool CanReadValueChunk
+        {
+            get { return _innerReader.CanReadValueChunk; }
         }
 
         /// <summary>
@@ -149,6 +159,30 @@ namespace Microsoft.IdentityModel.Xml
         public override bool IsEmptyElement
         {
             get { return _innerReader.IsEmptyElement; }
+        }
+
+        public int LineNumber
+        {
+            get
+            {
+                var lineInfo = _innerReader as IXmlLineInfo;
+                if (lineInfo == null)
+                    return 1;
+
+                return lineInfo.LineNumber;
+            }
+        }
+
+        public int LinePosition
+        {
+            get
+            {
+                var lineInfo = _innerReader as IXmlLineInfo;
+                if (lineInfo == null)
+                    return 1;
+
+                return lineInfo.LinePosition;
+            }
         }
 
         /// <summary>
@@ -284,13 +318,33 @@ namespace Microsoft.IdentityModel.Xml
         /// Gets the value of the attribute with the given name and namespace Uri.
         /// </summary>
         /// <param name="name">The local name of the attribute.</param>
-        /// <param name="namespaceURI">The namespace of the attribute.</param>
+        /// <param name="ns">The namespace of the attribute.</param>
         /// <returns>The value of the attribute. If the attribute is not found
         /// null is returned.</returns>
         /// <remarks>The method does not move the reader.</remarks>
-        public override string GetAttribute(string name, string namespaceURI)
+        public override string GetAttribute(string name, string ns)
         {
-            return _innerReader.GetAttribute(name, namespaceURI);
+            return _innerReader.GetAttribute(name, ns);
+        }
+
+        public bool HasLineInfo()
+        {
+            var lineInfo = _innerReader as IXmlLineInfo;
+
+            if (lineInfo == null)
+                return false;
+
+            return lineInfo.HasLineInfo();
+        }
+
+        public override bool IsStartElement(string name)
+        {
+            return _innerReader.IsStartElement(name);
+        }
+
+        public override bool IsStartElement(string name, string ns)
+        {
+            return _innerReader.IsStartElement(name, ns);
         }
 
         /// <summary>
@@ -307,10 +361,10 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Moves to the attribute with the specified index.
         /// </summary>
-        /// <param name="i">The index of the attribute.</param>
-        public override void MoveToAttribute(int i)
+        /// <param name="index">The index of the attribute.</param>
+        public override void MoveToAttribute(int index)
         {
-            _innerReader.MoveToAttribute(i);
+            _innerReader.MoveToAttribute(index);
         }
 
         /// <summary>
@@ -384,6 +438,11 @@ namespace Microsoft.IdentityModel.Xml
             return _innerReader.ReadAttributeValue();
         }
 
+        public override object ReadContentAs(Type valueType, IXmlNamespaceResolver namespaceResolver)
+        {
+            return _innerReader.ReadContentAs(valueType, namespaceResolver);
+        }
+
         /// <summary>
         /// Reads the content and returns the Base64 decoded binary bytes.
         /// </summary>
@@ -408,12 +467,106 @@ namespace Microsoft.IdentityModel.Xml
             return _innerReader.ReadContentAsBinHex(buffer, index, count);
         }
 
+        public override bool ReadContentAsBoolean()
+        {
+            return _innerReader.ReadContentAsBoolean();
+        }
+
+        public override DateTime ReadContentAsDateTime()
+        {
+            return _innerReader.ReadContentAsDateTime();
+        }
+
+        public override decimal ReadContentAsDecimal()
+        {
+            return (decimal)_innerReader.ReadContentAs(typeof(decimal), null);
+        }
+
+        public override double ReadContentAsDouble()
+        {
+            return _innerReader.ReadContentAsDouble();
+        }
+
+        public override int ReadContentAsInt()
+        {
+            return _innerReader.ReadContentAsInt();
+        }
+
+        public override long ReadContentAsLong()
+        {
+            return _innerReader.ReadContentAsLong();
+        }
+
+        public override float ReadContentAsFloat()
+        {
+            return _innerReader.ReadContentAsFloat();
+        }
+
+        public override string ReadContentAsString()
+        {
+            return _innerReader.ReadContentAsString();
+        }
+
         /// <summary>
         /// Reads the content and returns the contained string.
         /// </summary>
         public override UniqueId ReadContentAsUniqueId()
         {
             return _innerReader.ReadContentAsUniqueId();
+        }
+
+        public override int ReadElementContentAsBase64(byte[] buffer, int offset, int count)
+        {
+            return _innerReader.ReadElementContentAsBase64(buffer, offset, count);
+        }
+
+        public override int ReadElementContentAsBinHex(byte[] buffer, int offset, int count)
+        {
+            return _innerReader.ReadElementContentAsBinHex(buffer, offset, count);
+        }
+
+        public override string ReadElementString(string name)
+        {
+            return _innerReader.ReadElementString(name);
+        }
+
+        public override string ReadElementString(string name, string ns)
+        {
+            return _innerReader.ReadElementString(name, ns);
+        }
+
+        public override string ReadInnerXml()
+        {
+            return _innerReader.ReadInnerXml();
+        }
+
+        public override string ReadOuterXml()
+        {
+            return _innerReader.ReadOuterXml();
+        }
+        public override void ReadEndElement()
+        {
+            _innerReader.ReadEndElement();
+        }
+
+        public override void ReadStartElement(string name)
+        {
+            _innerReader.ReadStartElement(name);
+        }
+
+        public override void ReadStartElement(string name, string ns)
+        {
+            _innerReader.ReadStartElement(name, ns);
+        }
+
+        public override string ReadString()
+        {
+            return _innerReader.ReadString();
+        }
+
+        public override void ResolveEntity()
+        {
+            _innerReader.ResolveEntity();
         }
 
         /// <summary>
@@ -430,14 +583,6 @@ namespace Microsoft.IdentityModel.Xml
         public override int ReadValueChunk(char[] buffer, int index, int count)
         {
             return _innerReader.ReadValueChunk(buffer, index, count);
-        }
-
-        /// <summary>
-        /// Resolves the entity reference for EntityReference nodes.
-        /// </summary>
-        public override void ResolveEntity()
-        {
-            _innerReader.ResolveEntity();
         }
     }
 }
