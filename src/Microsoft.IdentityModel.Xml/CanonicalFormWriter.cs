@@ -31,7 +31,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    abstract class CanonicalFormWriter
+    internal abstract class CanonicalFormWriter
     {
         internal static readonly UTF8Encoding Utf8WithoutPreamble = new UTF8Encoding(false);
 

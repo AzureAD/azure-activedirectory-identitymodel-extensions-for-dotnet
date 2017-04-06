@@ -33,6 +33,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Essentially a performance enhancement used when writing signed info.
+    /// Common elements have their hashes pre calculated.
+    /// </summary>
     internal class PreDigestedSignedInfo : SignedInfo
     {
         private const int _initialReferenceArraySize = 8;

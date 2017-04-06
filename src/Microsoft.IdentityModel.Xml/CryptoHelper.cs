@@ -50,9 +50,7 @@ namespace Microsoft.IdentityModel.Xml
             quotient = dividend / divisor;
 
             if (remainder > 0)
-            {
                 quotient++;
-            }
 
             return quotient;
         }
@@ -62,23 +60,12 @@ namespace Microsoft.IdentityModel.Xml
             get
             {
                 if (_random == null)
-                {
                     _random = new RNGCryptoServiceProvider();
-                }
 
                 return _random;
             }
         }
 
-        /// <summary>
-        /// This generates the entropy using random number. This is usually used on the sending 
-        /// side to generate the requestor's entropy.
-        /// </summary>
-        /// <param name="data">The array to fill with cryptographically strong random nonzero bytes.</param>
-        public static void GenerateRandomBytes(byte[] data)
-        {
-            RandomNumberGenerator.GetNonZeroBytes(data);
-        }
 
         /// <summary>
         /// This method generates a random byte array used as entropy with the given size. 
@@ -89,17 +76,12 @@ namespace Microsoft.IdentityModel.Xml
         {
             int sizeInBytes = sizeInBits / 8;
             if (sizeInBits <= 0)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("sizeInBits"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits)));
             else if (sizeInBytes * 8 != sizeInBits)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException("sizeInBits"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(sizeInBits)));
 
             byte[] data = new byte[sizeInBytes];
-            GenerateRandomBytes(data);
-
+            RandomNumberGenerator.GetNonZeroBytes(data);
             return data;
         }
     }

@@ -34,7 +34,7 @@ using HexBinary = System.Runtime.Remoting.Metadata.W3cXsd2001.SoapHexBinary;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class WrappedReader : DelegatingXmlDictionaryReader, IXmlLineInfo
+    public class WrappedReader : DelegatingXmlDictionaryReader
     {
         private MemoryStream _contentStream;
         private TextReader _contentReader;
@@ -56,32 +56,6 @@ namespace Microsoft.IdentityModel.Xml
             Record();
         }
 
-        public int LineNumber
-        {
-            get
-            {
-                IXmlLineInfo lineInfo = base.InnerReader as IXmlLineInfo;
-                if (lineInfo == null)
-                {
-                    return 1;
-                }
-                return lineInfo.LineNumber;
-            }
-        }
-
-        public int LinePosition
-        {
-            get
-            {
-                IXmlLineInfo lineInfo = base.InnerReader as IXmlLineInfo;
-                if (lineInfo == null)
-                {
-                    return 1;
-                }
-                return lineInfo.LinePosition;
-            }
-        }
-
         public XmlTokenStream XmlTokens
         {
             get { return _xmlTokens; }
@@ -91,12 +65,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             OnEndOfContent();
             base.InnerReader.Close();
-        }
-
-        public bool HasLineInfo()
-        {
-            IXmlLineInfo lineInfo = base.InnerReader as IXmlLineInfo;
-            return lineInfo != null && lineInfo.HasLineInfo();
         }
 
         public override void MoveToAttribute(int index)
@@ -142,6 +110,7 @@ namespace Microsoft.IdentityModel.Xml
                 _contentReader.Close();
                 _contentReader = null;
             }
+
             if (_contentStream != null)
             {
                 _contentStream.Close();
@@ -156,10 +125,12 @@ namespace Microsoft.IdentityModel.Xml
             {
                 return false;
             }
+
             if (!_recordDone)
             {
                 Record();
             }
+
             return true;
         }
 
