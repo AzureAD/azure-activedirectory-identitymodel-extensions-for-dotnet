@@ -337,16 +337,6 @@ namespace Microsoft.IdentityModel.Xml
             return lineInfo.HasLineInfo();
         }
 
-        public override bool IsStartElement(string name)
-        {
-            return _innerReader.IsStartElement(name);
-        }
-
-        public override bool IsStartElement(string name, string ns)
-        {
-            return _innerReader.IsStartElement(name, ns);
-        }
-
         /// <summary>
         /// Resolves a namespace prefix in the current element scope.
         /// </summary>
@@ -438,11 +428,6 @@ namespace Microsoft.IdentityModel.Xml
             return _innerReader.ReadAttributeValue();
         }
 
-        public override object ReadContentAs(Type valueType, IXmlNamespaceResolver namespaceResolver)
-        {
-            return _innerReader.ReadContentAs(valueType, namespaceResolver);
-        }
-
         /// <summary>
         /// Reads the content and returns the Base64 decoded binary bytes.
         /// </summary>
@@ -465,103 +450,6 @@ namespace Microsoft.IdentityModel.Xml
         public override int ReadContentAsBinHex(byte[] buffer, int index, int count)
         {
             return _innerReader.ReadContentAsBinHex(buffer, index, count);
-        }
-
-        public override bool ReadContentAsBoolean()
-        {
-            return _innerReader.ReadContentAsBoolean();
-        }
-
-        public override DateTime ReadContentAsDateTime()
-        {
-            return _innerReader.ReadContentAsDateTime();
-        }
-
-        public override decimal ReadContentAsDecimal()
-        {
-            return (decimal)_innerReader.ReadContentAs(typeof(decimal), null);
-        }
-
-        public override double ReadContentAsDouble()
-        {
-            return _innerReader.ReadContentAsDouble();
-        }
-
-        public override int ReadContentAsInt()
-        {
-            return _innerReader.ReadContentAsInt();
-        }
-
-        public override long ReadContentAsLong()
-        {
-            return _innerReader.ReadContentAsLong();
-        }
-
-        public override float ReadContentAsFloat()
-        {
-            return _innerReader.ReadContentAsFloat();
-        }
-
-        public override string ReadContentAsString()
-        {
-            return _innerReader.ReadContentAsString();
-        }
-
-        /// <summary>
-        /// Reads the content and returns the contained string.
-        /// </summary>
-        public override UniqueId ReadContentAsUniqueId()
-        {
-            return _innerReader.ReadContentAsUniqueId();
-        }
-
-        public override int ReadElementContentAsBase64(byte[] buffer, int offset, int count)
-        {
-            return _innerReader.ReadElementContentAsBase64(buffer, offset, count);
-        }
-
-        public override int ReadElementContentAsBinHex(byte[] buffer, int offset, int count)
-        {
-            return _innerReader.ReadElementContentAsBinHex(buffer, offset, count);
-        }
-
-        public override string ReadElementString(string name)
-        {
-            return _innerReader.ReadElementString(name);
-        }
-
-        public override string ReadElementString(string name, string ns)
-        {
-            return _innerReader.ReadElementString(name, ns);
-        }
-
-        public override string ReadInnerXml()
-        {
-            return _innerReader.ReadInnerXml();
-        }
-
-        public override string ReadOuterXml()
-        {
-            return _innerReader.ReadOuterXml();
-        }
-        public override void ReadEndElement()
-        {
-            _innerReader.ReadEndElement();
-        }
-
-        public override void ReadStartElement(string name)
-        {
-            _innerReader.ReadStartElement(name);
-        }
-
-        public override void ReadStartElement(string name, string ns)
-        {
-            _innerReader.ReadStartElement(name, ns);
-        }
-
-        public override string ReadString()
-        {
-            return _innerReader.ReadString();
         }
 
         public override void ResolveEntity()
