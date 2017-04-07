@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Xml
         private bool _disposed;
         private int _elementCount;
         private SignedXml _signedXml;
-        private WrappedReader _wrappedReader;
+        private TokenStreamingReader _tokenStreamingReader;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
@@ -53,15 +53,16 @@ namespace Microsoft.IdentityModel.Xml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            _wrappedReader = new WrappedReader(CreateDictionaryReader(reader));
-            _wrappedReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
-            SetCanonicalizingReader(_wrappedReader);
+
+            _tokenStreamingReader = new TokenStreamingReader(CreateDictionaryReader(reader));
+            InnerReader = _tokenStreamingReader;
+            _tokenStreamingReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
         }
 
         protected virtual void OnEndOfRootElement()
         {
             if (_signedXml != null)
-                _signedXml.TokenSource = _wrappedReader;
+                _signedXml.TokenSource = _tokenStreamingReader;
         }
 
         public SignedXml SignedXml { get { return _signedXml; } }
@@ -73,7 +74,7 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public XmlTokenStream XmlTokens
         {
-            get { return _wrappedReader.XmlTokens.Trim(); }
+            get { return _tokenStreamingReader.XmlTokens.Trim(); }
         }
 
         /// <summary>
@@ -88,7 +89,6 @@ namespace Microsoft.IdentityModel.Xml
             if (NodeType == XmlNodeType.EndElement)
             {
                 _elementCount--;
-                // TODO - read signature to be processed later
                 if (_elementCount == 0)
                     OnEndOfRootElement();
             }
@@ -96,8 +96,8 @@ namespace Microsoft.IdentityModel.Xml
             bool result = base.Read();
             if (result
                 && _signedXml == null
-                && InnerReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
-                && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
+                && _tokenStreamingReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
+                && _tokenStreamingReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
                 ReadSignature();
             }
@@ -109,11 +109,9 @@ namespace Microsoft.IdentityModel.Xml
         {
             _signedXml = new SignedXml(new SignedInfo());
             _signedXml.TransformFactory = TransformFactory.Instance;
-            _signedXml.ReadFrom(_wrappedReader);
+            _signedXml.ReadFrom(_tokenStreamingReader);
             if (_signedXml.Signature.SignedInfo.ReferenceCount != 1)
-            {
-                throw LogHelper.LogExceptionMessage(new CryptographicException("SR.ID3057"));
-            }
+                throw XmlUtil.LogReadException(LogMessages.IDX21101, _signedXml.Signature.SignedInfo.ReferenceCount);
         }
 
         /// <summary>
@@ -155,10 +153,10 @@ namespace Microsoft.IdentityModel.Xml
                 // Free all of our managed resources
                 //
 
-                if (_wrappedReader != null)
+                if (_tokenStreamingReader != null)
                 {
-                    _wrappedReader.Close();
-                    _wrappedReader = null;
+                    _tokenStreamingReader.Close();
+                    _tokenStreamingReader = null;
                 }
             }
 

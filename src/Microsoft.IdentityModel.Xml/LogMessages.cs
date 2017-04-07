@@ -47,6 +47,8 @@ namespace Microsoft.IdentityModel.Xml
 
         // NotSupported Exceptions
         internal const string IDX21100 = "IDX21100: Unable to process signature. This cannonizalization method is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
+        internal const string IDX21101 = "IDX21101: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
+        internal const string IDX21102 = "IDX21102: The reader passed to the {0}, must be pointing to a StartElement.";
 
 #pragma warning restore 1591
     }

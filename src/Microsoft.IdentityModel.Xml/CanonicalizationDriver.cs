@@ -115,8 +115,8 @@ namespace Microsoft.IdentityModel.Xml
                         }
                     }
                     writer.StartCanonicalization(canonicalStream, IncludeComments, _inclusivePrefixes);
-                    if (_reader is WrappedReader)
-                        ((WrappedReader)_reader).XmlTokens.GetWriter().WriteTo(writer);
+                    if (_reader is TokenStreamingReader)
+                        ((TokenStreamingReader)_reader).XmlTokens.GetWriter().WriteTo(writer);
                     else
 
                         writer.WriteNode(_reader, false);
