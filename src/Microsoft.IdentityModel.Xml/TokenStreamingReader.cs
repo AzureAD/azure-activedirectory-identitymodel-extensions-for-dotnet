@@ -34,7 +34,7 @@ using HexBinary = System.Runtime.Remoting.Metadata.W3cXsd2001.SoapHexBinary;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class WrappedReader : DelegatingXmlDictionaryReader
+    public class TokenStreamingReader : DelegatingXmlDictionaryReader
     {
         private MemoryStream _contentStream;
         private TextReader _contentReader;
@@ -43,16 +43,16 @@ namespace Microsoft.IdentityModel.Xml
         private bool _recordDone;
         private XmlTokenStream _xmlTokens;
 
-        public WrappedReader(XmlDictionaryReader reader)
+        public TokenStreamingReader(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             if (!reader.IsStartElement())
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException("InnerReaderMustBeAtElement"));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX21102));
 
+            InnerReader = reader;
             _xmlTokens = new XmlTokenStream(32);
-            SetCanonicalizingReader(reader);
             Record();
         }
 

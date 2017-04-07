@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Xml
                 return tokenStream;
             }
 
-            WrappedReader reader = input as WrappedReader;
+            TokenStreamingReader reader = input as TokenStreamingReader;
             if (reader != null)
             {
                 // The Enveloped Signature Transform is supposed to remove the

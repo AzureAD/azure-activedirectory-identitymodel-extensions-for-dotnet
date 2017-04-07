@@ -33,23 +33,12 @@ namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Class wraps a given reader and delegates all XmlDictionaryReader calls 
-    /// to the inner wrapped reader.
+    /// to the inner wrapped reader it is used to set up a callback relationship
+    /// so that special processing can be performed on 'Read'.
     /// </summary>
     public class DelegatingXmlDictionaryReader : XmlDictionaryReader, IXmlLineInfo
     {
         private XmlDictionaryReader _innerReader;
-
-        /// <summary>
-        /// Initializes the Inner reader that this instance wraps.
-        /// </summary>
-        /// <param name="innerReader">XmlDictionaryReader to wrap.</param>
-        protected void SetCanonicalizingReader(XmlDictionaryReader innerReader)
-        {
-            if (innerReader == null)
-                throw LogHelper.LogArgumentNullException(nameof(innerReader));
-
-            _innerReader = innerReader;
-        }
 
         /// <summary>
         /// Gets the wrapped inner reader.
@@ -57,6 +46,13 @@ namespace Microsoft.IdentityModel.Xml
         protected XmlDictionaryReader InnerReader
         {
             get { return _innerReader; }
+            set
+            {
+                if (value == null)
+                    throw LogHelper.LogArgumentNullException(nameof(value));
+
+                _innerReader = value;
+            }
         }
 
         /// <summary>
