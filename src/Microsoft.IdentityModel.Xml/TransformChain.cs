@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class TransformChain
     {
-        private string _prefix = SignedXml.DefaultPrefix;
+        private string _prefix = = XmlSignatureConstants.Prefix;
         private List<Transform> _transforms = new List<Transform>();
 
         public TransformChain() { }

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Tokens.Tests;
@@ -407,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
-                        ExpectedException = ExpectedException.CryptographicException(),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_Formated),
                         Token = RefrenceTokens.Saml2Token_Formated,
@@ -424,7 +425,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
-                        ExpectedException = ExpectedException.CryptographicException(),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_AttributeTampered),
                         Token = RefrenceTokens.Saml2Token_AttributeTampered,
@@ -441,7 +442,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
-                        ExpectedException = ExpectedException.CryptographicException(),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_DigestTampered),
                         Token = RefrenceTokens.Saml2Token_DigestTampered,
@@ -458,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(
                     new CreateAndValidateParams
                     {
-                        ExpectedException = ExpectedException.CryptographicException(),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_SignatureTampered),
                         Token = RefrenceTokens.Saml2Token_SignatureTampered,

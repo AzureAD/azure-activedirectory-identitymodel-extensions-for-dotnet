@@ -36,6 +36,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Essentially a performance enhancement used when writing signed info.
     /// Common elements have their hashes pre calculated.
+    /// Only used for writting
     /// </summary>
     internal class PreDigestedSignedInfo : SignedInfo
     {
@@ -43,23 +44,28 @@ namespace Microsoft.IdentityModel.Xml
         private int _count;
         private ReferenceEntry[] _references;
 
-        public PreDigestedSignedInfo()
-        {
-            _references = new ReferenceEntry[_initialReferenceArraySize];
-        }
-
         public PreDigestedSignedInfo(
             string canonicalizationMethod,
             string digestMethod,
-            string signatureMethod)
+            string signatureAlgorithm)
         {
+            if (string.IsNullOrEmpty(canonicalizationMethod))
+                throw LogHelper.LogArgumentNullException(nameof(canonicalizationMethod));
+
+            if (string.IsNullOrEmpty(digestMethod))
+                throw LogHelper.LogArgumentNullException(nameof(digestMethod));
+
+            if (string.IsNullOrEmpty(signatureAlgorithm))
+                throw LogHelper.LogArgumentNullException(nameof(signatureAlgorithm));
+
             _references = new ReferenceEntry[_initialReferenceArraySize];
             CanonicalizationMethod = canonicalizationMethod;
             DigestMethod = digestMethod;
-            SignatureMethod = signatureMethod;
+            SignatureAlgorithm = signatureAlgorithm;
+            SendSide = true;
         }
 
-        public bool AddEnvelopedSignatureTransform { get; set; }
+        public bool AddEnvelopedSignatureTransform { get; private set; } = true;
 
         public string DigestMethod { get; private set; }
 
@@ -84,7 +90,7 @@ namespace Microsoft.IdentityModel.Xml
             _references[_count++].Set(id, digest, useStrTransform);
         }
 
-        public override void ComputeHash(HashStream hashStream)
+        internal override void ComputeHash(HashStream hashStream)
         {
             GetCanonicalBytes(hashStream);
         }
@@ -98,7 +104,7 @@ namespace Microsoft.IdentityModel.Xml
             else
             {
                 SignedInfoCanonicalFormWriter.Instance.WriteSignedInfoCanonicalForm(
-                    stream, SignatureMethod, DigestMethod,
+                    stream, SignatureAlgorithm, DigestMethod,
                     _references, _count,
                     ResourcePool.TakeEncodingBuffer(), ResourcePool.TakeBase64Buffer());
             }
@@ -129,24 +135,23 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            string prefix = XmlSignatureConstants.Prefix;
-            writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
             if (!string.IsNullOrEmpty(Id))
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
             for (int i = 0; i < _count; i++)
             {
-                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
                 writer.WriteStartAttribute(XmlSignatureConstants.Attributes.URI, null);
                 writer.WriteString("#");
                 writer.WriteString(_references[i]._id);
                 writer.WriteEndAttribute();
 
-                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
                 if (AddEnvelopedSignatureTransform)
                 {
-                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
                     writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                     writer.WriteString(XmlSignatureConstants.Algorithms.EnvelopedSignature);
                     writer.WriteEndAttribute();
@@ -155,12 +160,12 @@ namespace Microsoft.IdentityModel.Xml
 
                 if (_references[i]._useStrTransform)
                 {
-                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
                     writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                     writer.WriteString(SecurityAlgorithms.StrTransform);
                     writer.WriteEndAttribute();
                     writer.WriteStartElement(XmlSignatureConstants.SecurityJan2004Prefix, XmlSignatureConstants.TransformationParameters, XmlSignatureConstants.SecurityJan2004Namespace);  //<wsse:TransformationParameters>
-                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
                     writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                     writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
                     writer.WriteEndAttribute();
@@ -170,7 +175,7 @@ namespace Microsoft.IdentityModel.Xml
                 }
                 else
                 {
-                    writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
                     writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                     writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
                     writer.WriteEndAttribute();
@@ -179,14 +184,14 @@ namespace Microsoft.IdentityModel.Xml
 
                 writer.WriteEndElement(); // Transforms
 
-                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
                 writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 writer.WriteString(DigestMethod);
                 writer.WriteEndAttribute();
                 writer.WriteEndElement(); // DigestMethod
 
                 byte[] digest = _references[i]._digest;
-                writer.WriteStartElement(prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 writer.WriteBase64(digest, 0, digest.Length);
                 writer.WriteEndElement(); // DigestValue
 
@@ -204,7 +209,7 @@ namespace Microsoft.IdentityModel.Xml
             public void Set(string id, byte[] digest, bool useStrTransform)
             {
                 if (useStrTransform && string.IsNullOrEmpty(id))
-                    throw LogHelper.LogExceptionMessage(new XmlSignedInfoException(id));
+                    throw LogHelper.LogExceptionMessage(new XmlException(LogMessages.IDX21200));
 
                 _id = id;
                 _digest = digest;

@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 // attach signedXml for validation of signature
-                assertion.SignedXml = envelopeReader.SignedXml;
+                assertion.Signature = envelopeReader.Signature;
                 return assertion;
             }
             catch (Exception ex)

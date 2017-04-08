@@ -195,12 +195,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
         protected virtual void ValidateAssertion(Saml2Assertion assertion, TokenValidationParameters validationParameters)
         {
-            if (assertion.SignedXml == null && validationParameters.RequireSignedTokens)
+            if (assertion.Signature == null && validationParameters.RequireSignedTokens)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException("token not signed"));
 
-            assertion.SignedXml.VerifySignature(validationParameters.IssuerSigningKey);
-            assertion.SignedXml.EnsureDigestValidity(assertion.SignedXml.Signature.SignedInfo[0].ExtractReferredId(), assertion.SignedXml.TokenSource);
-            assertion.SignedXml.CompleteSignatureVerification();
+            try
+            {
+                assertion.Signature.Verify(validationParameters.IssuerSigningKey);
+            }
+            catch(Exception ex)
+            {
+                throw new SecurityTokenInvalidSignatureException(LogMessages.IDX11047, ex);
+            }
         }
 
         protected virtual Saml2SecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)

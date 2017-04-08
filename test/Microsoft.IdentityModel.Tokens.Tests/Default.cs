@@ -325,7 +325,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 return new SigningCredentials(
                     KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
-                    KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Algorithm);
+                    KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Algorithm,
+                    KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Digest
+                    );
             }
         }
 

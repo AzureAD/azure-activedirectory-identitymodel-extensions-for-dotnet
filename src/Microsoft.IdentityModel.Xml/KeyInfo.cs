@@ -104,12 +104,12 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace))
-                throw new XmlSignedInfoException($"Expecting: {XmlSignatureConstants.Elements.X509IssuerName}, found {reader.LocalName}.");
+                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Elements.X509IssuerName, reader.LocalName);
 
             _issuerName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace))
-                throw new XmlSignedInfoException($"Expecting: {XmlSignatureConstants.Elements.X509SerialNumber}, found {reader.LocalName}.");
+                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Elements.X509SerialNumber, reader.LocalName);
 
             _serialNumber = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace);
 

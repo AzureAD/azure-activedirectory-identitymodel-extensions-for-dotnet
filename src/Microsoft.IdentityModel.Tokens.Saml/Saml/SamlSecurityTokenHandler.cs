@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     {
                         reader.MoveToContent();
                     }
-                    catch (XmlException)
+                    catch (Xml.XmlException)
                     {
                         return false;
                     }

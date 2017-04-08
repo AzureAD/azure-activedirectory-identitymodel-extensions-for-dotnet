@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11044 = "IDX11044: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
         internal const string IDX11045 = "IDX11045: Replay detection requires that token's expiration period, '{0}', does not exceed the expiration period configured with '{1}' on the TokenReplayCache.";
         internal const string IDX11046 = "IDX11046: A SAML2 assertion that specifies an AuthenticationContext DeclarationReference is not supported.To handle DeclarationReference, extend the Saml2SecurityTokenHandler and override ProcessAuthenticationStatement.";
+        internal const string IDX11047 = "IDX11047: Signature validation failed, see inner exception";
 
         // Saml2SecurityTokenHandler logging
         internal const string IDX11070 = "IDX11070: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";

@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 throw XmlUtil.LogReadException(LogMessages.IDX13000, ex);
             }
 
-            configuration.SignedXml = envelopeReader.SignedXml;
+            configuration.Signature = envelopeReader.Signature;
 
             return configuration;
         }

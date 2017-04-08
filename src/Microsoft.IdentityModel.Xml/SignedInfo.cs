@@ -44,23 +44,18 @@ namespace Microsoft.IdentityModel.Xml
         List<Reference> _references;
         MemoryStream _bufferedStream;
         string _defaultNamespace = string.Empty;
-        //        bool _disposed;
-
-        public SignedInfo(string canonicalizationMethod, string signatureMethod, string uri, IEnumerable<Transform> transforms)
-        {
-            _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
-            _references = new List<Reference>();
-            Prefix = SignedXml.DefaultPrefix;
-        }
 
         public SignedInfo()
         {
             _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
             _references = new List<Reference>();
-            Prefix = SignedXml.DefaultPrefix;
         }
 
         public MemoryStream CanonicalStream { get; set; }
+
+        protected Dictionary<string, string> Context { get; set; }
+
+        protected string Prefix { get; set; } = XmlSignatureConstants.Prefix;
 
         public bool SendSide { get; set; }
 
@@ -69,8 +64,6 @@ namespace Microsoft.IdentityModel.Xml
             reference.ResourcePool = ResourcePool;
             _references.Add(reference);
         }
-
-        public object SignatureReaderProviderCallbackContext { get; set; }
 
         public string CanonicalizationMethod
         {
@@ -101,11 +94,9 @@ namespace Microsoft.IdentityModel.Xml
             get { return _references[index]; }
         }
 
-        public string SignatureMethod { get; set; }
+        public string SignatureAlgorithm { get; set; }
 
-        public string SignatureMethodDictionaryString { get; set; }
-
-        public SignatureResourcePool ResourcePool
+        internal protected SignatureResourcePool ResourcePool
         {
             get
             {
@@ -120,7 +111,7 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        public void ComputeHash(HashAlgorithm algorithm)
+        internal void ComputeHash(HashAlgorithm algorithm)
         {
             if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
                 throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
@@ -130,7 +121,7 @@ namespace Microsoft.IdentityModel.Xml
             hashStream.FlushHash();
         }
 
-        public virtual void ComputeHash(HashStream hashStream)
+        internal virtual void ComputeHash(HashStream hashStream)
         {
             GetCanonicalBytes(hashStream);
         }
@@ -181,7 +172,6 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-
         public virtual void ComputeReferenceDigests()
         {
             if (_references.Count == 0)
@@ -196,7 +186,7 @@ namespace Microsoft.IdentityModel.Xml
             for (int i = 0; i < _references.Count; i++)
             {
                 if (!_references[i].Verified)
-                    throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.references[i].Uri"));
+                    throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21201, _references[i].Uri));
             }
         }
 
@@ -219,7 +209,7 @@ namespace Microsoft.IdentityModel.Xml
         public void EnsureDigestValidity(string id, object resolvedXmlSource)
         {
             if (!EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
-                throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredTargetNotSigned, id"));
+                throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21201, id));
         }
 
         public virtual bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
@@ -232,7 +222,6 @@ namespace Microsoft.IdentityModel.Xml
 
             return false;
         }
-
 
         public virtual bool HasUnverifiedReference(string id)
         {
@@ -283,7 +272,7 @@ namespace Microsoft.IdentityModel.Xml
                 canonicalizingReader.Read();
                 _exclusiveCanonicalizationTransform.ReadFrom(canonicalizingReader, false);
                 _signatureMethodElement.ReadFrom(canonicalizingReader);
-                SignatureMethod = _signatureMethodElement.Algorithm;
+                SignatureAlgorithm = _signatureMethodElement.Algorithm;
                 while (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                 {
                     var reference = new Reference();
@@ -332,8 +321,5 @@ namespace Microsoft.IdentityModel.Xml
             _signatureMethodElement.WriteTo(writer);
         }
 
-        protected string Prefix { get; set; }
-
-        protected Dictionary<string, string> Context { get; set; }
     }
 }

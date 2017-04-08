@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         protected Transform() { }
 
-        public virtual string Algorithm { get; set; }
+        public string Algorithm { get; protected set; }
 
         public virtual bool NeedsInclusiveContext
         {

@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Represents an exception thrown when encrypting or decrypting xml.
     /// </summary>
-    public class XmlEncryptionException : Exception
+    public class XmlEncryptionException : XmlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlEncryptionException"/> class.
