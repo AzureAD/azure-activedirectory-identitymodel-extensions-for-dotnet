@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("MetadataTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadMetadataTest(WsFederationMetadataTestParams theoryData)
+        public void ReadMetadataTest(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.TestHeader($"{this}.ReadMetadataTest", theoryData.TestId, ref _firstTest);
             try
@@ -65,14 +65,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        public static TheoryData<WsFederationMetadataTestParams> MetadataTheoryData
+        public static TheoryData<WsFederationMetadataTheoryData> MetadataTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMetadataTestParams>();
+                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
 
                 theoryData.Add(
-                    new WsFederationMetadataTestParams
+                    new WsFederationMetadataTheoryData
                     {
                         Metadata = ReferenceMetadata.Metadata,
                         Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     });
 
                 theoryData.Add(
-                    new WsFederationMetadataTestParams
+                    new WsFederationMetadataTheoryData
                     {
                         Metadata = ReferenceMetadata.MetadataNoIssuer,
                         TestId = nameof(ReferenceMetadata.MetadataNoIssuer),
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     });
 
                 theoryData.Add(
-                    new WsFederationMetadataTestParams
+                    new WsFederationMetadataTheoryData
                     {
                         Metadata = ReferenceMetadata.MetadataNoTokenUri,
                         TestId = nameof(ReferenceMetadata.MetadataNoTokenUri),
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        public class WsFederationMetadataTestParams
+        public class WsFederationMetadataTheoryData
         {
             public string Metadata { get; set; }
 
