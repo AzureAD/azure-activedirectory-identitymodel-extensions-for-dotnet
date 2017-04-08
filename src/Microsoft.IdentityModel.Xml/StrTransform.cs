@@ -36,7 +36,6 @@ namespace Microsoft.IdentityModel.Xml
 {
     internal class StrTransform : Transform
     {
-        private readonly bool _includeComments;
         private string _inclusiveNamespacesPrefixList;
         private string[] _inclusivePrefixes;
         private string _prefix = XmlSignatureConstants.Prefix;
@@ -44,18 +43,10 @@ namespace Microsoft.IdentityModel.Xml
 
         public StrTransform()
         {
-            _includeComments = false;
+            Algorithm = SecurityAlgorithms.StrTransform;
         }
 
-        public override string Algorithm
-        {
-            get { return SecurityAlgorithms.StrTransform; }
-        }
-
-        public bool IncludeComments
-        {
-            get { return _includeComments; }
-        }
+        public bool IncludeComments { get; } = false;
 
         public string InclusiveNamespacesPrefixList
         {
@@ -186,7 +177,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteString(Algorithm);
             writer.WriteEndAttribute();
             _transformationParameters.WriteTo(writer);
-            writer.WriteEndElement(); // Transform
+            writer.WriteEndElement();
         }
 
         static string[] TokenizeInclusivePrefixList(string prefixList)

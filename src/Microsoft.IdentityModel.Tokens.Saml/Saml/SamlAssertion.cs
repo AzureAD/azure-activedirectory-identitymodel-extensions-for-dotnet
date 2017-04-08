@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         public SigningCredentials SigningCredentials { get; set; }
 
-        public SignedXml Signature { get; set; }
+        public Signature Signature { get; set; }
 
         public SecurityKey SignatureVerificationKey { get; set; }
 
@@ -186,47 +186,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             // TODO capturing of tokens, where to do this
             _sourceData = reader.XmlTokens;
-        }
-
-        protected void ReadSignature(XmlDictionaryReader reader, SamlSerializer samlSerializer)
-        {
-            if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            if (samlSerializer == null)
-                throw LogHelper.LogArgumentNullException(nameof(samlSerializer));
-
-            //if (this.signature != null)
-            //    throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLSignatureAlreadyRead"));
-
-            // If the reader cannot canonicalize then buffer the signature element to a canonicalizing reader.
-            XmlDictionaryReader effectiveReader = reader;
-            if (!effectiveReader.CanCanonicalize)
-            {
-                MemoryStream stream = new MemoryStream();
-                XmlDictionaryWriter writer = XmlDictionaryWriter.CreateBinaryWriter(stream);
-                writer.WriteNode(effectiveReader, false);
-                writer.Flush();
-                stream.Position = 0;
-                effectiveReader = XmlDictionaryReader.CreateBinaryReader(stream.GetBuffer(), 0, (int)stream.Length, reader.Quotas);
-                effectiveReader.MoveToContent();
-                writer.Close();
-            }
-            SignedXml signedXml = new SignedXml(new SignedInfo());
-            signedXml.TransformFactory = TransformFactory.Instance;
-            signedXml.ReadFrom(effectiveReader);
-            SecurityKey securityKey = signedXml.Signature.Key;
-            //this.verificationKey = SamlSerializer.ResolveSecurityKey(securityKeyIdentifier, outOfBandTokenResolver);
-            //if (this.verificationKey == null)
-            //    throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLUnableToResolveSignatureKey"));
-
-            //this.signature = signedXml;
-            //this.signingToken = SamlSerializer.ResolveSecurityToken(securityKeyIdentifier, outOfBandTokenResolver);
-            if (SecurityKey == null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SecurityKey not found"));
-
-            if (!ReferenceEquals(reader, effectiveReader))
-                effectiveReader.Close();
         }
 
         bool IsAssertionIdValid(string assertionId)

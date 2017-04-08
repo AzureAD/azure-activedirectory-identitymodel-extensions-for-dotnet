@@ -52,9 +52,40 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the algorithm which used for signature valdiation.
+        /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/></param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="digest">The digest algorithm to apply.</param>
+        public SigningCredentials(SecurityKey key, string algorithm, string digest)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException("algorithm");
+
+            Algorithm = algorithm;
+            Key = key;
+
+            // digest can be null
+            if (!string.IsNullOrEmpty(digest))
+                Digest = digest;
+        }
+
+        /// <summary>
+        /// Gets the algorithm used for signatures.
         /// </summary>
         public string Algorithm
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the algorithm used for digests.
+        /// </summary>
+        public string Digest
         {
             get;
             private set;

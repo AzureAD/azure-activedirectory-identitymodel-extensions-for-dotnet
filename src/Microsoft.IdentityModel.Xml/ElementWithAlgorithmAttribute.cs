@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Xml
 
             _elementName = elementName;
             Algorithm = null;
-            Prefix = SignedXml.DefaultPrefix;
+            Prefix = XmlSignatureConstants.Prefix;
         }
 
         public string Algorithm { get; set; }

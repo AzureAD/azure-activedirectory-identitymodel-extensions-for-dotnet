@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
     {
         public ExpectedException ExpectedException { get; set; }
 
-        public bool ExpectSignedXml { get; set; }
+        public bool ExpectSignature { get; set; }
 
         public string ReferenceId { get; set; }
 
@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
         public SigningCredentials SigningCredentials { get; set; }
 
-        public SignedXml SignedXml { get; set; }
+        public Signature Signature { get; set; }
 
         public string TestId { get; set; }
 
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
         public override string ToString()
         {
-            return TestId + ", ExpectSignedXml: " + ExpectSignedXml;
+            return TestId + ", ExpectSignature: " + ExpectSignature;
         }
     }
 }

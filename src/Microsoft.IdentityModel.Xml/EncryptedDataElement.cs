@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Xml
                 LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (CipherData == null || CipherData.CipherValue == null)
-                LogHelper.LogExceptionMessage(new XmlSignedInfoException("no cipherData to decrypt"));
+                LogHelper.LogExceptionMessage(new XmlEncryptionException("no cipherData to decrypt"));
 
             byte[] cipherText = CipherData.CipherValue;
 
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Xml
             // Make sure cipherText has enough bytes after the offset, for Buffer.BlockCopy to copy.
             //
             if (cipherText.Length - offset < iv.Length)
-                LogHelper.LogExceptionMessage(new XmlSignedInfoException("cipherText.Length"));
+                LogHelper.LogExceptionMessage(new XmlEncryptionException("cipherText.Length"));
 
             Buffer.BlockCopy(cipherText, offset, iv, 0, iv.Length);
             algorithm.Padding = PaddingMode.ISO10126;

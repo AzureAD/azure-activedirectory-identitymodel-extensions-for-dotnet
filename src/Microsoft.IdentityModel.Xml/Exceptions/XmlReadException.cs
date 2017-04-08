@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// This exception is thrown when a problem is hit when reading xml.
     /// </summary>
-    public class XmlReadException : Exception
+    public class XmlReadException : XmlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlReadException"/> class.

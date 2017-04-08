@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Signed xml.
         /// </summary>
-        public SignedXml SignedXml { get; set; }
+        public Signature Signature { get; set; }
 
         /// <summary>
         /// Get the <see cref="ICollection{KeyInfo}"/> that the IdentityProvider indicates are to be used signing tokens.

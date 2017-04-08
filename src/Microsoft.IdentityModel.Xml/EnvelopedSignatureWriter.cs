@@ -89,8 +89,8 @@ namespace Microsoft.IdentityModel.Xml
 
             var effectiveWriter = XmlDictionaryWriter.CreateTextWriter(_writerStream, Encoding.UTF8, false);
             SetCanonicalizingWriter(effectiveWriter);
-            // TODO - do not hard code hash algorithm
-            _hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(SecurityAlgorithms.Sha256);
+            // TODO - create when needed
+            _hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(signingCredentials.Digest);
             _hashStream = new HashStream(_hashAlgorithm);
             // TODO - why exclude comments?
             InnerWriter.StartCanonicalization(_hashStream, false, null);
@@ -98,17 +98,12 @@ namespace Microsoft.IdentityModel.Xml
 
         private void ComputeSignature()
         {
-            var signedInfo = new PreDigestedSignedInfo() { SendSide = true };
-            signedInfo.AddEnvelopedSignatureTransform = true;
-            signedInfo.CanonicalizationMethod = XmlSignatureConstants.Algorithms.ExcC14N;
-            //signedInfo.SignatureMethod = _signingCreds.SignatureAlgorithm;
-            //signedInfo.DigestMethod = _signingCreds.DigestAlgorithm;
+            var signedInfo = new PreDigestedSignedInfo(XmlSignatureConstants.Algorithms.ExcC14N,_signingCredentials.Digest, _signingCredentials.Algorithm) { SendSide = true };
             signedInfo.AddReference(_referenceId, _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream));
 
-            SignedXml signedXml = new SignedXml(signedInfo);
-            signedXml.ComputeSignature(_signingCredentials);
-            //signedXml.Signature.KeyIdentifier = _signingCreds.SigningKeyIdentifier;
-            signedXml.WriteTo(base.InnerWriter);
+            var signature = new Signature(signedInfo);
+            signature.ComputeSignature(_signingCredentials);
+            signature.WriteTo(base.InnerWriter);
             ((IDisposable)_hashStream).Dispose();
             _hashStream = null;
         }

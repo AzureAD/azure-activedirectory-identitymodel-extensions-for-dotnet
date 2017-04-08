@@ -201,10 +201,10 @@ namespace Microsoft.IdentityModel.Xml.Tests
             {
                 var signedInfo = new SignedInfo();
                 signedInfo.CanonicalizationMethod = @"http://www.w3.org/2001/10/xml-exc-c14n#";
-                signedInfo.SignatureMethod = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+                signedInfo.SignatureAlgorithm = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
                 var reference = new Reference();
-                reference.DigestMethod = @"http://www.w3.org/2001/04/xmlenc#sha256";
+                reference.DigestAlgorithm = @"http://www.w3.org/2001/04/xmlenc#sha256";
                 reference.Uri = "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2";
                 reference.AddTransform(new EnvelopedSignatureTransform());
                 reference.AddTransform(new ExclusiveCanonicalizationTransform());

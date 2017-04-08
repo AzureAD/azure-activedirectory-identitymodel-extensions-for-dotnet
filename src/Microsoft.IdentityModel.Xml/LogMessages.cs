@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
     {
 #pragma warning disable 1591
         // general
-        internal const string IDX11000 = "IDX11000: The parameter '{0}' cannot be a 'null' or an empty object.";
+        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
 
         // Xml reading
@@ -45,11 +45,17 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21013 = "IDX21013: Unable to read xml. While reading '{0}', Required attribute was not found : '{1}'.";
         internal const string IDX21014 = "IDX21014: Unable to read xml. Required element was not found : '{0}:{1}'. Reader is positioned at: '{2}'.";
 
-        // NotSupported Exceptions
+        // xml structure, supported exceptions
         internal const string IDX21100 = "IDX21100: Unable to process signature. This cannonizalization method is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
         internal const string IDX21101 = "IDX21101: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
         internal const string IDX21102 = "IDX21102: The reader passed to the {0}, must be pointing to a StartElement.";
+        internal const string IDX21103 = "IDX21103: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
+        internal const string IDX21104 = "IDX21200: The 'Reference' specifies to use 'StrTransform'. The id parameter cannot be null or empty.";
 
+        // signature validation
+        internal const string IDX21200 = "IDX21200: The 'Signature' did not validate.";
+        internal const string IDX21201 = "IDX21201: A reference was not signed: '{0}'.";
+        internal const string IDX21202 = "IDX21202: A reference was included: '{0}'.";
 #pragma warning restore 1591
     }
 }

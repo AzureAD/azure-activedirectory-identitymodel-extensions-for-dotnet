@@ -28,12 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
-using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
@@ -44,15 +41,17 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
         public bool ExpectSignedXml { get; set; }
 
+        public string Prefix { get; set; }
+
         public string ReferenceId { get; set; }
 
         public SecurityKey SecurityKey { get; set; }
 
+        public string SignatureAlgorithm { get; set; }
+
         public SigningCredentials SigningCredentials { get; set; }
 
         public SignedInfo SignedInfo { get; set; }
-
-        public SignedXml SignedXml { get; set; }
 
         public string TestId { get; set; }
 
@@ -70,17 +69,19 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
     public class DSigTests
     {
+        static bool _firstSignatureConstructor = true;
         static bool _firstSignedInfoConstructor = true;
         static bool _firstSignedInfoReadFrom = true;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ConstructorTheoryData")]
+        [Theory, MemberData("SignatureConstructorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void Constructor(DSigTheoryData theoryData)
+        public void SignatureConstructor(DSigTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.Constructor", theoryData.TestId, ref _firstSignedInfoConstructor);
+            TestUtilities.TestHeader($"{this}.SignatureConstructor", theoryData.TestId, ref _firstSignatureConstructor);
             try
             {
+                var signature = new Signature(theoryData.SignedInfo);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -89,22 +90,73 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        public static TheoryData<DSigTheoryData> ConstructorTheoryData
+        public static TheoryData<DSigTheoryData> SignatureConstructorTheoryData
         {
             get
             {
                 var theoryData = new TheoryData<DSigTheoryData>();
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    SignedInfo = null,
+                    TestId = "SignedInfo NULL"
+                });
 
                 return theoryData;
             }
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadFromTheoryData")]
+        [Theory, MemberData("SignedInfoConstructorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadFrom(DSigTheoryData theoryData)
+        public void SignedInfoConstructor(DSigTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.ReadFrom", theoryData.TestId, ref _firstSignedInfoReadFrom);
+            TestUtilities.TestHeader($"{this}.SignedInfoConstructor", theoryData.TestId, ref _firstSignedInfoConstructor);
+            List<string> errors = new List<string>();
+            try
+            {
+                var signedInfo = new SignedInfo();
+                if (signedInfo.ReferenceCount != 0)
+                    errors.Add("signedInfo.ReferenceCount != 0");
+
+                if (!string.IsNullOrEmpty(signedInfo.SignatureAlgorithm))
+                    errors.Add("!string.IsNullOrEmpty(signedInfo.SignatureAlgorithm)");
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        public static TheoryData<DSigTheoryData> SignedInfoConstructorTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<DSigTheoryData>();
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    Prefix = XmlSignatureConstants.Prefix,
+                    SignatureAlgorithm = XmlSignatureConstants.Elements.SignatureMethod,
+                    TestId = "Constructor"
+                });
+
+                return theoryData;
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("SignedInfoReadFromTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignedInfoReadFrom(DSigTheoryData theoryData)
+        {
+            TestUtilities.TestHeader($"{this}.SignedInfoReadFrom", theoryData.TestId, ref _firstSignedInfoReadFrom);
             List<string> errors = new List<string>();
             try
             {
@@ -115,7 +167,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     if (signedInfo.CanonicalizationMethod != theoryData.SignedInfo.CanonicalizationMethod)
                         errors.Add("signedInfo.CanonicalizationMethod != theoryData.SignedInfo.CanonicalizationMethod");
 
-                    if (signedInfo.SignatureMethod != theoryData.SignedInfo.SignatureMethod)
+                    if (signedInfo.SignatureAlgorithm != theoryData.SignedInfo.SignatureAlgorithm)
                         errors.Add("signedInfo.SignatureMethod != theoryData.SignedInfo.SignatureMethod");
 
                     if (signedInfo.ReferenceCount != theoryData.SignedInfo.ReferenceCount)
@@ -124,8 +176,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     {
                         for (int i = 0; i < signedInfo.ReferenceCount; i++)
                         {
-                            if (signedInfo[i].DigestMethod != theoryData.SignedInfo[i].DigestMethod)
-                                errors.Add($"signedInfo[i].DigestMethod != theoryData.SignedInfo[i].DigestMethod. {signedInfo[i].DigestMethod} : {theoryData.SignedInfo[i].DigestMethod}");
+                            if (signedInfo[i].DigestAlgorithm != theoryData.SignedInfo[i].DigestAlgorithm)
+                                errors.Add($"signedInfo[i].DigestMethod != theoryData.SignedInfo[i].DigestMethod. {signedInfo[i].DigestAlgorithm} : {theoryData.SignedInfo[i].DigestAlgorithm}");
 
                             if (signedInfo[i].Uri != theoryData.SignedInfo[i].Uri)
                                 errors.Add($"signedInfo[i].Uri != theoryData.SignedInfo[i].Uri. {signedInfo[i].Uri} : {theoryData.SignedInfo[i].Uri}");
@@ -155,7 +207,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(errors);
         }
 
-        public static TheoryData<DSigTheoryData> ReadFromTheoryData
+        public static TheoryData<DSigTheoryData> SignedInfoReadFromTheoryData
         {
             get
             {
@@ -167,7 +219,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    TestId = "null reader",
+                    TestId = "Null XmlReader",
                     XmlReader = null
                 });
 

@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private ElementWithAlgorithmAttribute _digestMethodElement;
         private DigestValueElement _digestValueElement = new DigestValueElement();
-        private string _prefix = SignedXml.DefaultPrefix;
+        private string _prefix = XmlSignatureConstants.Prefix;
         private string _referredId;
         private object _resolvedXmlSource;
         private readonly TransformChain _transformChain = new TransformChain();
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Xml
             _resolvedXmlSource = resolvedXmlSource;
         }
 
-        public string DigestMethod
+        public string DigestAlgorithm
         {
             get { return _digestMethodElement.Algorithm; }
             set { _digestMethodElement.Algorithm = value; }
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Xml
             if (_resolvedXmlSource == null)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
 
-            return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestMethod);
+            return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
         }
 
         public byte[] GetDigestValue()

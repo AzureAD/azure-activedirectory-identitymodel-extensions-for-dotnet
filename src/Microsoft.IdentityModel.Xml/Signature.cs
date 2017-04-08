@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.IO;
+using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -34,22 +36,16 @@ namespace Microsoft.IdentityModel.Xml
     public class Signature
     {
         private KeyInfo _keyInfo;
-        private string _prefix = SignedXml.DefaultPrefix;
+        private string _prefix = XmlSignatureConstants.Prefix;
         readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
 
-        public Signature(SignedXml signedXml, SignedInfo signedInfo)
+        public Signature(SignedInfo signedInfo)
         {
-            if (signedXml == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedXml));
-
             if (signedInfo == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedInfo));
 
-            SignedXml = signedXml;
             SignedInfo = signedInfo;
         }
-
-        public SecurityKey Key { get; set; }
 
         public string Id { get; set; }
 
@@ -58,14 +54,12 @@ namespace Microsoft.IdentityModel.Xml
             get; private set;
         }
 
-        public SignedXml SignedXml
+        public void ComputeSignature(SigningCredentials credentials)
         {
-            get; private set;
-        }
-
-        public ISignatureValueSecurityElement SignatureValue
-        {
-            get { return _signatureValueElement; }
+            var hash = credentials.Key.CryptoProviderFactory.CreateHashAlgorithm(credentials.Digest);
+            SignedInfo.ComputeReferenceDigests();
+            SignedInfo.ComputeHash(hash);
+            _signatureValueElement.Signature = hash.Hash;
         }
 
         public byte[] GetSignatureBytes()
@@ -80,7 +74,7 @@ namespace Microsoft.IdentityModel.Xml
             Id = reader.GetAttribute(UtilityStrings.Id, null);
             reader.Read();
 
-            SignedInfo.ReadFrom(reader, SignedXml.TransformFactory);
+            SignedInfo.ReadFrom(reader, TransformFactory);
             _signatureValueElement.ReadFrom(reader);
             _keyInfo = new KeyInfo();
             _keyInfo.ReadFrom(reader);
@@ -88,10 +82,25 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadEndElement(); // Signature
         }
 
-        public void SetSignatureValue(byte[] signatureValue)
+        public object TokenSource { get; set; }
+
+        public TransformFactory TransformFactory { get; set; } = TransformFactory.Instance;
+
+        public void Verify(SecurityKey key)
         {
-            _signatureValueElement.Signature = signatureValue;
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureAlgorithm);
+            var memoryStream = new MemoryStream();
+            SignedInfo.GetCanonicalBytes(memoryStream);
+            if (!signatureProvider.Verify(memoryStream.ToArray(), GetSignatureBytes()))
+                throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
+
+            SignedInfo.EnsureDigestValidity(SignedInfo[0].ExtractReferredId(), TokenSource);
+            SignedInfo.EnsureAllReferencesVerified();
         }
+
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
@@ -107,7 +116,7 @@ namespace Microsoft.IdentityModel.Xml
 
         sealed class SignatureValueElement : ISignatureValueSecurityElement
         {
-            string _prefix = SignedXml.DefaultPrefix;
+            string _prefix = XmlSignatureConstants.Prefix;
             byte[] _signatureValue;
             string _signatureText;
 
@@ -138,8 +147,10 @@ namespace Microsoft.IdentityModel.Xml
                 _signatureText = reader.ReadString();
                 _signatureValue = System.Convert.FromBase64String(_signatureText.Trim());
 
-                reader.ReadEndElement(); // SignatureValue
+                // </SignatureValue>
+                reader.ReadEndElement(); 
             }
+
 
             public void WriteTo(XmlDictionaryWriter writer)
             {

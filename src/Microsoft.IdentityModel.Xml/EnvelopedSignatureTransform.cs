@@ -36,11 +36,9 @@ namespace Microsoft.IdentityModel.Xml
     {
         private string _prefix = XmlSignatureConstants.Prefix;
 
-        public EnvelopedSignatureTransform() { }
-
-        public override string Algorithm
+        public EnvelopedSignatureTransform()
         {
-            get { return XmlSignatureConstants.Algorithms.EnvelopedSignature; }
+            Algorithm = XmlSignatureConstants.Algorithms.EnvelopedSignature;
         }
 
         public override object Process(object input, SignatureResourcePool resourcePool)

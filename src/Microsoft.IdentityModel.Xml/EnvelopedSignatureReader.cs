@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private bool _disposed;
         private int _elementCount;
-        private SignedXml _signedXml;
+        private Signature _signature;
         private TokenStreamingReader _tokenStreamingReader;
 
         /// <summary>
@@ -61,11 +61,11 @@ namespace Microsoft.IdentityModel.Xml
 
         protected virtual void OnEndOfRootElement()
         {
-            if (_signedXml != null)
-                _signedXml.TokenSource = _tokenStreamingReader;
+            if (_signature != null)
+                _signature.TokenSource = _tokenStreamingReader;
         }
 
-        public SignedXml SignedXml { get { return _signedXml; } }
+        public Signature Signature { get { return _signature; } }
 
         /// <summary>
         /// Gets a XmlBuffer of the envelope that was enveloped signed.
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Xml
 
             bool result = base.Read();
             if (result
-                && _signedXml == null
+                && _signature == null
                 && _tokenStreamingReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
                 && _tokenStreamingReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
@@ -107,11 +107,10 @@ namespace Microsoft.IdentityModel.Xml
 
         void ReadSignature()
         {
-            _signedXml = new SignedXml(new SignedInfo());
-            _signedXml.TransformFactory = TransformFactory.Instance;
-            _signedXml.ReadFrom(_tokenStreamingReader);
-            if (_signedXml.Signature.SignedInfo.ReferenceCount != 1)
-                throw XmlUtil.LogReadException(LogMessages.IDX21101, _signedXml.Signature.SignedInfo.ReferenceCount);
+            _signature = new Signature(new SignedInfo());
+            _signature.ReadFrom(_tokenStreamingReader);
+            if (_signature.SignedInfo.ReferenceCount != 1)
+                throw XmlUtil.LogReadException(LogMessages.IDX21101, _signature.SignedInfo.ReferenceCount);
         }
 
         /// <summary>
