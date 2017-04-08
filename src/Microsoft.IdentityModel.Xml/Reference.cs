@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Xml
         public bool EnsureDigestValidityIfIdMatches(string id, byte[] computedDigest)
         {
             if (_verified || id != ExtractReferredId())
-                return false;
+                return true;
 
             if (!Utility.AreEqual(computedDigest, GetDigestValue()))
                 throw LogHelper.LogExceptionMessage(new CryptographicException($"DigestVerificationFailedForReference: id: {id}"));
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Xml
         public bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
         {
             if (_verified)
-                return false;
+                return true;
 
             // During StrTransform the extractedReferredId on the reference will point to STR and hence will not be 
             // equal to the referred element ie security token Id.
