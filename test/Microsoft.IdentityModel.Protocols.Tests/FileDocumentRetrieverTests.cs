@@ -38,30 +38,63 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class FileDocumentRetrieverTests
     {
-        private void GetDocument(string address, IDocumentRetriever docRetriever, CancellationToken token, ExpectedException ee)
+        private static bool _firstGetMetadataTest = true;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("GetMetadataTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
+            TestUtilities.TestHeader($"{this}.GetMetadataTest", theoryData.TestId, ref _firstGetMetadataTest);
             try
             {
-                string doc = docRetriever.GetDocumentAsync(address, token).Result;
-                ee.ProcessNoException();
+                string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
+                Assert.NotNull(doc);
+                theoryData.ExpectedException.ProcessNoException();
             }
-            catch (AggregateException ex)
+            catch (AggregateException aex)
             {
-                ex.Handle((x) =>
+                aex.Handle((x) =>
                 {
-                    ee.ProcessException(x);
+                    theoryData.ExpectedException.ProcessException(x);
                     return true;
                 });
             }
         }
 
-        [Fact]
-        public void GetDocuments()
+        public static TheoryData<DocumentRetrieverTheoryData> GetMetadataTheoryData
         {
-            FileDocumentRetriever docRetriever = new FileDocumentRetriever();
-            GetDocument(null, docRetriever, CancellationToken.None, ExpectedException.ArgumentNullException());
-            GetDocument("OpenIdConnectMetadata.json", docRetriever, CancellationToken.None, ExpectedException.IOException("IDX10804:", typeof(FileNotFoundException), "IDX10814:"));
-            GetDocument("ValidJson.json", docRetriever, CancellationToken.None, ExpectedException.NoExceptionExpected);
+            get
+            {
+                var theoryData = new TheoryData<DocumentRetrieverTheoryData>();
+
+                var documentRetriever = new FileDocumentRetriever();
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = null,
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = ExpectedException.ArgumentNullException(),
+                    TestId = "Address NULL"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "OpenIdConnectMetadata.json",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = ExpectedException.IOException("IDX10804:", typeof(FileNotFoundException), "IDX10814:"),
+                    TestId = "File not found: OpenIdConnectMetadata.json"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "ValidJson.json",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "ValidJson.json - JsonWebKeySet"
+                });
+
+                return theoryData;
+            }
         }
     }
 }
