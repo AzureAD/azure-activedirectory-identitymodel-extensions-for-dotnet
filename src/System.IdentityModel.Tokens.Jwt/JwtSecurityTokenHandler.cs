@@ -775,46 +775,9 @@ namespace System.IdentityModel.Tokens.Jwt
             DateTime? expires = (jwt.Payload.Exp == null) ? null : new DateTime?(jwt.ValidTo);
             DateTime? notBefore = (jwt.Payload.Nbf == null) ? null : new DateTime?(jwt.ValidFrom);
 
-            if (validationParameters.ValidateLifetime)
-            {
-                if (validationParameters.LifetimeValidator != null)
-                {
-                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, jwt))
-                        { NotBefore = notBefore, Expires = expires });
-                }
-                else
-                {
-                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: jwt, validationParameters: validationParameters);
-                }
-            }
-
-            if (validationParameters.ValidateAudience)
-            {
-                if (validationParameters.AudienceValidator != null)
-                {
-                    if (!validationParameters.AudienceValidator(jwt.Audiences, jwt, validationParameters))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, jwt.ToString())));
-                }
-                else
-                {
-                    ValidateAudience(jwt.Audiences, jwt, validationParameters);
-                }
-            }
-
-            string issuer = jwt.Issuer;
-            if (validationParameters.ValidateIssuer)
-            {
-                if (validationParameters.IssuerValidator != null)
-                {
-                    issuer = validationParameters.IssuerValidator(issuer, jwt, validationParameters);
-                }
-                else
-                {
-                    issuer = ValidateIssuer(issuer, jwt, validationParameters);
-                }
-            }
-
+            ValidateLifetime(notBefore, expires, jwt, validationParameters);
+            ValidateAudience(jwt.Audiences, jwt, validationParameters);
+            string issuer = ValidateIssuer(jwt.Issuer, jwt, validationParameters);
             Validators.ValidateTokenReplay(jwt.RawData, expires, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwt.Actor))
             {
@@ -822,20 +785,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 ValidateToken(jwt.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out actor);
             }
 
-            if (jwt.SigningKey != null && validationParameters.ValidateIssuerSigningKey)
-            {
-                if (validationParameters.IssuerSigningKeyValidator != null)
-                {
-                    if (!validationParameters.IssuerSigningKeyValidator(jwt.SigningKey, jwt, validationParameters))
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10232, jwt.SigningKey)){ SigningKey = jwt.SigningKey });
-                }
-                else
-                {
-                    ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
-                }
-            }
-
-            ClaimsIdentity identity = CreateClaimsIdentity(jwt, issuer, validationParameters);
+            ValidateIssuerSecurityKey(jwt.SigningKey, jwt, validationParameters);
+            var identity = CreateClaimsIdentity(jwt, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwt.RawData;
 
@@ -1230,7 +1181,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
         protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
+            Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
         }
 
         /// <summary>

@@ -57,6 +57,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11070 = "IDX11070: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX11071 = "IDX11071: Creating SamlSecurityToken: Issuer: '{0}', Audience: '{1}'";
 
+        // signature creation / validation
+        internal const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
+        internal const string IDX10501 = "IDX10501: Signature validation failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
+        internal const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
+        internal const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'.";
+        internal const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
+        internal const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
+        internal const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
+        internal const string IDX10508 = "IDX10508: Signing Saml2 is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
+
         // Saml2SecurityTokenHandler reading
         internal const string IDX11100 = "IDX11100: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX11101 = "IDX11101: Creating Saml2SecurityToken: Issuer: '{0}', Audience: '{1}'";

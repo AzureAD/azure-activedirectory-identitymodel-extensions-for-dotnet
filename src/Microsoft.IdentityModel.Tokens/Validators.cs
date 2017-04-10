@@ -28,7 +28,6 @@
 using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -56,6 +55,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (!validationParameters.ValidateAudience)
             {
                 IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10233);
+                return;
+            }
+
+            if (validationParameters.AudienceValidator != null)
+            {
+                validationParameters.AudienceValidator(audiences, securityToken, validationParameters);
+                if (!validationParameters.AudienceValidator(audiences, securityToken, validationParameters))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10231, securityToken)));
+
                 return;
             }
 
@@ -95,8 +103,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             throw LogHelper.LogExceptionMessage(
-                new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), (validationParameters.ValidAudience ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)))
-                {    InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
+                new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), (validationParameters.ValidAudience ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)))
+                    { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
         }
     
         /// <summary>
@@ -121,6 +129,9 @@ namespace Microsoft.IdentityModel.Tokens
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10235);
                 return issuer;
             }
+
+            if (validationParameters.IssuerValidator != null)
+                return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
 
             if (string.IsNullOrWhiteSpace(issuer))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10211)
@@ -150,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             throw LogHelper.LogExceptionMessage(
-                new SecurityTokenInvalidIssuerException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)))
+                new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)))
                 { InvalidIssuer = issuer });
         }
 
@@ -172,6 +183,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10237);
                 return;
+            }
+
+            if (validationParameters.IssuerSigningKeyValidator != null)
+            {
+                if (!validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)){ SigningKey = securityKey });
             }
 
             if (securityKey == null)
@@ -211,20 +228,29 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
+            if (validationParameters.LifetimeValidator != null)
+            {
+                if (!validationParameters.LifetimeValidator(notBefore, expires, securityToken, validationParameters))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10230, securityToken))
+                        { NotBefore = notBefore, Expires = expires });
+
+                return;
+            }
+
             if (!expires.HasValue && validationParameters.RequireExpirationTime)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10225, securityToken == null ? "null" : securityToken.GetType().ToString())));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10225, securityToken == null ? "null" : securityToken.GetType().ToString())));
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10224, notBefore.Value, expires.Value))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10224, notBefore.Value, expires.Value))
                 { NotBefore = notBefore, Expires = expires });
 
             DateTime utcNow = DateTime.UtcNow;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenNotYetValidException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10222, notBefore.Value, utcNow))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenNotYetValidException(LogHelper.FormatInvariant(LogMessages.IDX10222, notBefore.Value, utcNow))
                     { NotBefore = notBefore.Value });
  
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenExpiredException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10223, expires.Value, utcNow))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenExpiredException(LogHelper.FormatInvariant(LogMessages.IDX10223, expires.Value, utcNow))
                     { Expires = expires.Value });
 
             // if it reaches here, that means lifetime of the token is valid
@@ -254,13 +280,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.TokenReplayCache != null)
             {
                 if (!expirationTime.HasValue)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10227, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10227, securityToken)));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10228, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken)));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayAddFailedException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10229, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayAddFailedException(LogHelper.FormatInvariant(LogMessages.IDX10229, securityToken)));
             }
 
             // if it reaches here, that means no token replay is detected.

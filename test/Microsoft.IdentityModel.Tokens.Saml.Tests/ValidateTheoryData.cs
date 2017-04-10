@@ -197,6 +197,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public TokenValidationParameters ActorTokenValidationParameters { get; set; }
 
+        public IEnumerable<string> Audiences { get; set; }
+
         public bool CanRead { get; set; }
 
         public SecurityToken CompareTo { get; set; }
@@ -206,8 +208,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public SecurityTokenHandler Handler { get; set; }
 
         public string Issuer { get; set; }
-
-        public IEnumerable<string> Audiences { get; set; }
 
         public SecurityTokenDescriptor TokenDescriptor { get; set; }
 
@@ -220,5 +220,4 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             return $"{TestId}, {Token}, {ExpectedException}";
         }
     }
-
 }

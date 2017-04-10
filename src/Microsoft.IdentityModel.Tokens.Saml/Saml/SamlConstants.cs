@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public const string SenderVouches = "urn:oasis:names:tc:SAML:1.0:cm:sender-vouches";
         public const string Statement = "Statement";
         public const string SubjectStatement = "SubjectStatement";
+        public const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
         public const string UserName = "UserName";
         public const string UserNameNamespace = "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName";
         public const string UnspecifiedAuthenticationMethod = "urn:oasis:names:tc:SAML:1.0:am:unspecified";
