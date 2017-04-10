@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     Address = "https://login.microsoftonline.com/common/.well-known/openid-configuration",
                     DocumentRetriever = documentRetriever,
                     ExpectedException = ExpectedException.NoExceptionExpected,
-                    TestId = "AAD common: https://login.microsoftonline.com/common/.well-known/openid-configuration"
+                    TestId = "AAD common: https"
                 });
 
                 theoryData.Add(new DocumentRetrieverTheoryData
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     Address = "HTTPS://login.microsoftonline.com/common/.well-known/openid-configuration",
                     DocumentRetriever = documentRetriever,
                     ExpectedException = ExpectedException.NoExceptionExpected,
-                    TestId = "AAD common: HTTPS://login.microsoftonline.com/common/.well-known/openid-configuration"
+                    TestId = "AAD common: HTTPS"
                 });
 
                 documentRetriever = new HttpDocumentRetriever() { RequireHttps = false };
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     Address = "https://login.microsoftonline.com/common/FederationMetadata/2007-06/FederationMetadata.xml",
                     DocumentRetriever = documentRetriever,
                     ExpectedException = ExpectedException.NoExceptionExpected,
-                    TestId = "AAD common: https://login.microsoftonline.com/common/FederationMetadata/2007-06/FederationMetadata.xml"
+                    TestId = "AAD common: WsFed"
                 });
 
                 return theoryData;
