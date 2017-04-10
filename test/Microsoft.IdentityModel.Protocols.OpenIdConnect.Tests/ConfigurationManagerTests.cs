@@ -39,65 +39,113 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class ConfigurationManagerTests
     {
-        [Fact]
-        public void Constructors()
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ConstructorTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void OpenIdConnectConstructor(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData.TestId, ConfigurationManagerTheoryData<OpenIdConnectConfiguration>.First);
+            ConfigurationManagerTheoryData<OpenIdConnectConfiguration>.First = false;
+            try
+            {
+                var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetreiver, theoryData.DocumentRetriever);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> ConstructorTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>>();
+
+                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new HttpDocumentRetriever(),
+                    MetadataAddress = null,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    TestId = "MetadataAddress: NULL"
+                });
+
+                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = null,
+                    DocumentRetriever = new HttpDocumentRetriever(),
+                    MetadataAddress = "OpenIdConnectMetadata.json",
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    TestId = "ConfigurationRetreiver: NULL"
+                });
+
+                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = null,
+                    MetadataAddress = "OpenIdConnectMetadata.json",
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    TestId = "DocumentRetriever: NULL"
+                });
+
+                return theoryData;
+            }
         }
 
         [Fact]
         public void Defaults()
         {
+            TestUtilities.WriteHeader($"{this}.Defaults", "Defaults", true);
+
+            Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval, new TimeSpan(1, 0, 0, 0));
+            Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval, new TimeSpan(0, 0, 0, 30));
+            Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.MinimumAutomaticRefreshInterval, new TimeSpan(0, 0, 5, 0));
+            Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.MinimumRefreshInterval, new TimeSpan(0, 0, 0, 1));
         }
 
         [Fact]
         public void GetSets()
         {
-            FileDocumentRetriever docRetriever = new FileDocumentRetriever();
-            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
+
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 2)
                 Assert.True(false, "Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
 
-            TimeSpan defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
-            TimeSpan defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
-
-            GetSetContext context =
-                new GetSetContext
+            var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
+            var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>> 
-                    { 
-                        new KeyValuePair<string, List<object>>("AutomaticRefreshInterval", new List<object>{defaultAutomaticRefreshInterval, TimeSpan.FromHours(1), TimeSpan.FromHours(10)}),
-                        new KeyValuePair<string, List<object>>("RefreshInterval", new List<object>{defaultRefreshInterval, TimeSpan.FromHours(1), TimeSpan.FromHours(10)}),
-                    },
-                    Object = configManager,
-                };
+                    new KeyValuePair<string, List<object>>("AutomaticRefreshInterval", new List<object>{defaultAutomaticRefreshInterval, TimeSpan.FromHours(1), TimeSpan.FromHours(10)}),
+                    new KeyValuePair<string, List<object>>("RefreshInterval", new List<object>{defaultRefreshInterval, TimeSpan.FromHours(1), TimeSpan.FromHours(10)}),
+                },
+                Object = configManager,
+            };
 
             TestUtilities.GetSet(context);
             TestUtilities.AssertFailIfErrors("ConfigurationManager_GetSets", context.Errors);
-
             TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"));
             TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
             TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
         }
 
         [Fact]
-        public void Publics()
-        {
-            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
-            OpenIdConnectConfiguration config = configManager.GetConfigurationAsync(CancellationToken.None).Result;
-        }
-
-        [Fact]
         public void GetConfiguration()
         {
-            FileDocumentRetriever docRetriever = new FileDocumentRetriever();
-            ConfigurationManager<OpenIdConnectConfiguration> configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
 
             // AutomaticRefreshInterval interval should return same config.
-            OpenIdConnectConfiguration configuration = configManager.GetConfigurationAsync().Result;
+            var configuration = configManager.GetConfigurationAsync().Result;
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
-            OpenIdConnectConfiguration configuration2 = configManager.GetConfigurationAsync().Result;
+            var configuration2 = configManager.GetConfigurationAsync().Result;
             Assert.True(IdentityComparer.AreEqual(configuration, configuration2));
             Assert.True(object.ReferenceEquals(configuration, configuration2));
 
@@ -148,7 +196,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // get configuration from http address, should throw
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever());
-            ExpectedException ee = new ExpectedException(typeof(InvalidOperationException), "IDX10803:", typeof(ArgumentException));
+            var ee = new ExpectedException(typeof(InvalidOperationException), "IDX10803:", typeof(ArgumentException));
             try
             {
                 configuration = configManager.GetConfigurationAsync().Result;
@@ -164,6 +212,32 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ee.ProcessException(x);
                     return true;
                 });
+            }
+        }
+
+        public class ConfigurationManagerTheoryData<T>
+        {
+            public TimeSpan AutomaticRefreshInterval { get; set; }
+
+            public IConfigurationRetriever<T> ConfigurationRetreiver { get; set; }
+
+            public IDocumentRetriever DocumentRetriever { get; set; }
+
+            public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
+
+            public static bool First { get; set; } = true;
+
+            public string MetadataAddress { get; set; }
+
+            public TimeSpan RefreshInterval { get; set; }
+
+            public bool RequestRefresh { get; set; }
+
+            public string TestId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{TestId}, {MetadataAddress}, {ExpectedException}";
             }
         }
     }
