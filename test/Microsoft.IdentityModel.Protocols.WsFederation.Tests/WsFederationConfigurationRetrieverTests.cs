@@ -31,6 +31,8 @@ using System;
 using System.IO;
 using System.Xml;
 using Xunit;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
@@ -50,8 +52,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             try
             {
                 XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));
-                WsFederationMetadataSerializer serializer = new WsFederationMetadataSerializer();
-                WsFederationConfiguration configuration = serializer.ReadMetadata(reader);
+                var serializer = new WsFederationMetadataSerializer();
+                var configuration = serializer.ReadMetadata(reader);
+                if (theoryData.SigingKey != null)
+                    configuration.Signature.Verify(theoryData.SigingKey);
 
                 Assert.Equal(theoryData.Issuer, configuration.Issuer);
                 Assert.Equal(theoryData.TokenEndpoint, configuration.TokenEndpoint);
@@ -74,27 +78,50 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-                        Metadata = ReferenceMetadata.Metadata,
-                        Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
-                        TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                        Issuer = "https://sts.windows.net/{tenantid}/",
+                        Metadata = ReferenceMetadata.AADCommonMetadata,
                         KeyInfoCount = 3,
-                        TestId = nameof(ReferenceMetadata.Metadata)
+                        SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
+                        TestId = nameof(ReferenceMetadata.AADCommonMetadata),
+                        TokenEndpoint = "https://login.microsoftonline.com/common/wsfed"
                     });
 
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+                        Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
+                        KeyInfoCount = 3,
+                        Metadata = ReferenceMetadata.Metadata,
+                        TestId = nameof(ReferenceMetadata.Metadata),
+                        TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                    });
+
+                theoryData.Add(
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
+                        Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
+                        KeyInfoCount = 3,
+                        Metadata = ReferenceMetadata.Metadata,
+                        SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
+                        TestId = nameof(ReferenceMetadata.Metadata) + " Signature Failure",
+                        TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                    });
+
+                theoryData.Add(
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13001:"),
                         Metadata = ReferenceMetadata.MetadataNoIssuer,
-                        TestId = nameof(ReferenceMetadata.MetadataNoIssuer),
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13001")
+                        TestId = nameof(ReferenceMetadata.MetadataNoIssuer)
                     });
 
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003:"),
                         Metadata = ReferenceMetadata.MetadataNoTokenUri,
-                        TestId = nameof(ReferenceMetadata.MetadataNoTokenUri),
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003")
+                        TestId = nameof(ReferenceMetadata.MetadataNoTokenUri)
                     });
 
                 return theoryData;
@@ -103,17 +130,24 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
         public class WsFederationMetadataTheoryData
         {
-            public string Metadata { get; set; }
+            public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
 
             public string Issuer { get; set; }
 
-            public string TokenEndpoint { get; set; }
-
             public int KeyInfoCount { get; set; }
+
+            public string Metadata { get; set; }
+
+            public SecurityKey SigingKey { get; set; }
 
             public string TestId { get; set; }
 
-            public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
+            public string TokenEndpoint { get; set; }
+
+            public override string ToString()
+            {
+                return $"TestId: {TestId}, EE: {ExpectedException}, Metadata: {Metadata}.";
+            }
         }
     }
 }

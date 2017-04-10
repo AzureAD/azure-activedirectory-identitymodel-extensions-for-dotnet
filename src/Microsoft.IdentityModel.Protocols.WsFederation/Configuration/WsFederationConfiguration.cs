@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         }
 
         /// <summary>
-        /// Signed xml.
+        /// The &lt;Signature> element that was found when reading metadata.
         /// </summary>
         public Signature Signature { get; set; }
 

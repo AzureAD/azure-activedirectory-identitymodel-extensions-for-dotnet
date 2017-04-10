@@ -295,6 +295,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public string SubstringExpected { get; set; }
 
+        public override string ToString()
+        {
+            if (TypeExpected == null)
+                return $"NoExpectionExpected";
+            else
+                return $"{TypeExpected}, Substring: {SubstringExpected}";
+        }
+
         public Type TypeExpected { get; set; }
 
         public bool Verbose { get; set; } = false;
