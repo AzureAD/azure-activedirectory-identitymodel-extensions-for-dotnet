@@ -31,10 +31,8 @@ using Microsoft.IdentityModel.Tokens.Tests;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
-    public class EnvelopedSignatureTheoryData
+    public class EnvelopedSignatureTheoryData : TheoryDataBase
     {
-        public ExpectedException ExpectedException { get; set; }
-
         public bool ExpectSignature { get; set; }
 
         public string ReferenceId { get; set; }
@@ -44,8 +42,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public SigningCredentials SigningCredentials { get; set; }
 
         public Signature Signature { get; set; }
-
-        public string TestId { get; set; }
 
         public XmlReader XmlReader { get; set; }
 

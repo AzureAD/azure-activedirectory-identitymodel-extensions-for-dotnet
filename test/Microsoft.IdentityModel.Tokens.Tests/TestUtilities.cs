@@ -64,10 +64,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
+
+    // Mixed bag of funtionality. Could move to M.IM.Test.dll.
+
     /// <summary>
-    /// Mixed bag of funtionality:
-    ///     Generically calling Properties
+    /// Set defaults for TheoryData
     /// </summary>
+    public class TheoryDataBase
+    {
+        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
+
+        public bool First { get; set; } = false;
+
+        public string TestId { get; set; }
+
+        public override string ToString()
+        {
+            return $"{TestId}, {ExpectedException}";
+        }
+    }
+
     public static class TestUtilities
     {
         /// <summary>

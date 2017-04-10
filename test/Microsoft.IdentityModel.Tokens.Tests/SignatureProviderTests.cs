@@ -33,23 +33,6 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    public class SignatureProviderTestParams
-    {
-        public string Algorithm { get; set; }
-        public ExpectedException EE { get; set; }
-        public SecurityKey Key { get; set; }
-        public SignatureProvider ProviderForSigning { get; set; }
-        public SignatureProvider ProviderForVerifying { get; set; }
-        public byte[] RawBytes { get; set; }
-        public bool ShouldVerify { get; set; }
-        public byte[] Signature { get; set; }
-        public string TestId { get; set; }
-        public override string ToString()
-        {
-            return TestId + ", " + Algorithm + ", " + Key;
-        }
-    }
-
     /// <summary>
     /// This class tests:
     /// CryptoProviderFactory
@@ -59,9 +42,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class SignatureProviderTests
     {
-        private static bool _firstSignatureTampering = true;
-        private static bool _firstSignatureTruncation = true;
-
         [Fact]
         public void CryptoProviderFactory_Tests()
         {
@@ -375,44 +355,44 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void AsymmetricSignatureProvidersVerify(SignatureProviderTestParams testParams)
+        public void AsymmetricSignatureProvidersVerify(SignatureProviderTheoryData theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProvidersVerify", theoryData.TestId, theoryData.First);
             try
             {
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(testParams.Key, testParams.Algorithm);
-                if (provider.Verify(testParams.RawBytes, testParams.Signature) != testParams.ShouldVerify)
-                    Assert.True(false, testParams.TestId + " - SignatureProvider.Verify did not return expected: " + testParams.ShouldVerify + " , algorithm: " + testParams.Algorithm);
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(theoryData.Key, theoryData.Algorithm);
+                if (provider.Verify(theoryData.RawBytes, theoryData.Signature) != theoryData.ShouldVerify)
+                    Assert.True(false, theoryData.TestId + " - SignatureProvider.Verify did not return expected: " + theoryData.ShouldVerify + " , algorithm: " + theoryData.Algorithm);
 
-                testParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
-                testParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 
-        public static TheoryData<SignatureProviderTestParams> AsymmetricSignatureProviderVerifyTheoryData()
+        public static TheoryData<SignatureProviderTheoryData> AsymmetricSignatureProviderVerifyTheoryData()
         {
-            var theoryData = new TheoryData<SignatureProviderTestParams>();
+            var theoryData = new TheoryData<SignatureProviderTheoryData>();
 
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha256,
-                EE = ExpectedException.NoExceptionExpected,
-                RawBytes = rawBytes,
+                First = true,
                 Key = KeyingMaterial.ECDsa256Key,
+                RawBytes = rawBytes,
                 ShouldVerify = true,
                 Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
                 TestId = "Test1"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 RawBytes = rawBytes,
                 Key = KeyingMaterial.ECDsa256Key_Public,
                 ShouldVerify = true,
@@ -420,10 +400,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test2"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha384,
-                EE = ExpectedException.ArgumentOutOfRangeException("IDX10641:"),
+                ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10641:"),
                 RawBytes = rawBytes,
                 Key = KeyingMaterial.ECDsa256Key,
                 ShouldVerify = false,
@@ -433,10 +413,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             if (IsRunningOn462OrGreaterOrCore())
             {
-                theoryData.Add(new SignatureProviderTestParams
+                theoryData.Add(new SignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.EcdsaSha384,
-                    EE = ExpectedException.NoExceptionExpected,
                     RawBytes = rawBytes,
                     Key = KeyingMaterial.ECDsa384Key,
                     ShouldVerify = false,
@@ -446,12 +425,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             else //running on 461 or below
              {
-                theoryData.Add(new SignatureProviderTestParams
+                theoryData.Add(new SignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.EcdsaSha384,
-                    EE = new ExpectedException(typeof(System.Security.Cryptography.CryptographicException), "The parameter is incorrect."),
-                    RawBytes = rawBytes,
+                    ExpectedException = new ExpectedException(typeof(System.Security.Cryptography.CryptographicException), "The parameter is incorrect."),
                     Key = KeyingMaterial.ECDsa384Key,
+                    RawBytes = rawBytes,
                     ShouldVerify = false,
                     Signature = GetSignature(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, rawBytes),
                     TestId = "Test4 (for < 4.6.2)"
@@ -469,43 +448,40 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         //        TestId = "Test4"
         //    });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha384,
-                EE = ExpectedException.NoExceptionExpected,
-                RawBytes = rawBytes,
                 Key = KeyingMaterial.ECDsa384Key,
+                RawBytes = rawBytes,
                 ShouldVerify = true,
                 Signature = GetSignature(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.EcdsaSha384, rawBytes),
                 TestId = "Test5"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha256,
-                EE = ExpectedException.NoExceptionExpected,
-                RawBytes = rawBytes,
                 Key = KeyingMaterial.JsonWebKeyEcdsa256,
+                RawBytes = rawBytes,
                 ShouldVerify = true,
                 Signature = GetSignature(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes),
                 TestId = "Test6"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.EcdsaSha256,
-                EE = ExpectedException.NoExceptionExpected,
-                RawBytes = rawBytes,
                 Key = KeyingMaterial.JsonWebKeyEcdsa256Public,
+                RawBytes = rawBytes,
                 ShouldVerify = true,
                 Signature = GetSignature(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, rawBytes),
                 TestId = "Test7"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = KeyingMaterial.RsaSecurityKey_2048,
                 RawBytes = null,
                 Signature = null,
@@ -513,10 +489,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test8"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = KeyingMaterial.RsaSecurityKey_2048,
                 RawBytes = new byte[1],
                 Signature = null,
@@ -524,10 +500,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test9"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = KeyingMaterial.RsaSecurityKey_2048,
                 RawBytes = new byte[0],
                 Signature = new byte[1],
@@ -535,10 +511,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test10"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = KeyingMaterial.RsaSecurityKey_2048,
                 RawBytes = new byte[1],
                 Signature = new byte[0],
@@ -546,10 +522,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test11"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = KeyingMaterial.RsaSecurityKey_2048,
                 RawBytes = new byte[0],
                 Signature = new byte[1],
@@ -558,10 +534,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             var signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes);
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_2048,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -570,10 +545,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
 #if NET451
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -582,10 +556,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 #endif
             // wrong hash
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha384Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_2048_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -593,10 +566,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test15"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha512Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_2048_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -605,10 +577,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // wrong key
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_4096_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -617,10 +588,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             signature = GetSignature(KeyingMaterial.RsaSecurityKey_4096, SecurityAlgorithms.RsaSha256Signature, rawBytes);
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_4096,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -628,10 +598,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test18"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_4096_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -640,10 +609,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // wrong hash
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha384Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_4096_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -651,10 +619,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test20"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha512Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_4096_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -663,10 +630,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // wrong key
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_2048_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -677,10 +643,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NET451
             // sha384, 512
             signature = GetSignature(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha384Signature, rawBytes);
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha384Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_2048_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -690,10 +655,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
 #endif
             signature = GetSignature(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, rawBytes);
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha512Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.RsaSecurityKey_2048_Public,
                 RawBytes = rawBytes,
                 Signature = signature,
@@ -702,26 +666,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             signature = GetSignature(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, rawBytes);
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.JsonWebKeyRsa256,
                 RawBytes = rawBytes,
                 Signature = signature,
                 ShouldVerify = true,
-                TestId = "Test25"
+                TestId = nameof(KeyingMaterial.JsonWebKeyRsa256)
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.JsonWebKeyRsa256Public,
                 RawBytes = rawBytes,
                 Signature = signature,
                 ShouldVerify = true,
-                TestId = "Test26"
+                TestId = nameof(KeyingMaterial.JsonWebKeyRsa256Public)
             });
 
             return theoryData;
@@ -824,7 +786,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SymmetricSignatureProviderVerifyTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SymmetricSignatureProvidersVerify(SignatureProviderTestParams testParams)
+        public void SymmetricSignatureProvidersVerify(SignatureProviderTheoryData testParams)
         {
             try
             {
@@ -832,28 +794,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 if (provider.Verify(testParams.RawBytes, testParams.Signature) != testParams.ShouldVerify)
                     Assert.True(false, testParams.TestId + " - SignatureProvider.Verify did not return expected: " + testParams.ShouldVerify + " , algorithm: " + testParams.Algorithm);
 
-                testParams.EE.ProcessNoException();
+                testParams.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
-                testParams.EE.ProcessException(ex);
+                testParams.ExpectedException.ProcessException(ex);
             }
         }
 #endregion
 
-        public static TheoryData <SignatureProviderTestParams> SymmetricSignatureProviderVerifyTheoryData()
+        public static TheoryData <SignatureProviderTheoryData> SymmetricSignatureProviderVerifyTheoryData()
         {
-            var theoryData = new TheoryData<SignatureProviderTestParams>();
+            var theoryData = new TheoryData<SignatureProviderTheoryData>();
 
             byte[] rawBytes = new byte[8192];
             (new Random()).NextBytes(rawBytes);
 
 #region Parameter Validation
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
+                First = true,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = null,
                 ShouldVerify = false,
@@ -861,10 +824,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test1"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = new byte[0],
                 ShouldVerify = false,
@@ -872,10 +835,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test2"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = new byte[1],
                 ShouldVerify = false,
@@ -883,10 +846,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test3"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 RawBytes = new byte[1],
                 Key = Default.SymmetricSigningKey256,
                 ShouldVerify = false,
@@ -894,10 +857,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test4"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = new byte[1],
                 ShouldVerify = false,
@@ -910,10 +872,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #region positive tests
 
             // HmacSha256 <-> HmacSha256Signature
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 RawBytes = rawBytes,
                 Key = Default.SymmetricSigningKey256,
                 ShouldVerify = true,
@@ -921,10 +882,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test6"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = true,
@@ -933,10 +893,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // HmacSha384 <-> HmacSha384Signature
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha384,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = true,
@@ -944,10 +903,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test8"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha384Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = true,
@@ -956,10 +914,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // HmacSha512 <-> HmacSha512Signature
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha512,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = true,
@@ -967,10 +924,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test10"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha512Signature,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = true,
@@ -979,10 +935,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // JsonWebKey
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.JsonWebKeySymmetric256,
                 RawBytes = rawBytes,
                 ShouldVerify = true,
@@ -996,10 +951,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // different algorithm
             // HmacSha256 -> HmacSha384
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
+                ExpectedException = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1008,10 +963,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // HmacSha256 -> HmacSha512
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1020,10 +974,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // HmacSha384 -> HmacSha512
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha384,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1032,10 +985,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // Default.SymmetricSigningKey256 -> NotDefault.SymmetricSigningKey256
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = NotDefault.SymmetricSigningKey256,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1044,10 +996,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // Default.SymmetricSigningKey256 -> Default.SymmetricSigningKey384
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = Default.SymmetricSigningKey384,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1056,10 +1007,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // Default.SymmetricSigningKey384 -> NotDefault.SymmetricSigningKey384
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha384,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = NotDefault.SymmetricSigningKey384,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1068,10 +1018,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // Default.SymmetricSigningKey384 -> Default.SymmetricSigningKey512
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha384,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = NotDefault.SymmetricSigningKey384,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1080,10 +1029,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // Default.SymmetricSigningKey512 -> NoDefault.SymmetricSigningKey512
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha512,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = NotDefault.SymmetricSigningKey512,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1092,10 +1040,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
 
             // Default.SymmetricSigningKey512 -> Default.SymmetricSigningKey1024
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha512,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = NotDefault.SymmetricSigningKey1024,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1103,10 +1050,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test20"
             });
 
-            theoryData.Add(new SignatureProviderTestParams
+            theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.HmacSha256,
-                EE = ExpectedException.NoExceptionExpected,
                 Key = KeyingMaterial.JsonWebKeySymmetric256,
                 RawBytes = rawBytes,
                 ShouldVerify = false,
@@ -1210,155 +1156,170 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static TheoryData<string, SecurityKey, string, ExpectedException> KeyDisposeData()
         {
-            var dataSet = new TheoryData<string, SecurityKey, string, ExpectedException>();
+            var theoryData = new TheoryData<string, SecurityKey, string, ExpectedException>();
 
 #if NET451
-            dataSet.Add(
+            theoryData.Add(
                 "Test1",
                 new RsaSecurityKey(new RSACryptoServiceProvider(2048)),
                 SecurityAlgorithms.RsaSha256,
                 ExpectedException.NoExceptionExpected
             );
 #endif
-            dataSet.Add(
+            theoryData.Add(
                 "Test2",
                 new RsaSecurityKey(KeyingMaterial.RsaParameters_2048),
                 SecurityAlgorithms.RsaSha256,
                 ExpectedException.NoExceptionExpected
             );
 
-            dataSet.Add(
+            theoryData.Add(
                 "Test3",
                 KeyingMaterial.JsonWebKeyRsa256,
                 SecurityAlgorithms.RsaSha256,
                 ExpectedException.NoExceptionExpected
             );
 
-            dataSet.Add(
+            theoryData.Add(
                 "Test4",
                 KeyingMaterial.JsonWebKeyEcdsa256,
                 SecurityAlgorithms.EcdsaSha256,
                 ExpectedException.NoExceptionExpected
             );
 
-            dataSet.Add(
+            theoryData.Add(
                 "Test5",
                 KeyingMaterial.ECDsa256Key,
                 SecurityAlgorithms.EcdsaSha256,
                 ExpectedException.NoExceptionExpected
             );
 
-            dataSet.Add(
+            theoryData.Add(
                 "Test6",
                 KeyingMaterial.SymmetricSecurityKey2_256,
                 SecurityAlgorithms.HmacSha256,
                 ExpectedException.NoExceptionExpected
             );
 
-            return dataSet;
+            return theoryData;
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SignatureTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SignatureTampering(SignatureProviderTestParams testParams)
+        public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.SignatureTampering", testParams.TestId, ref _firstSignatureTampering);
-            var copiedSignature = testParams.Signature.CloneByteArray();
-            for (int i = 0; i < testParams.Signature.Length; i++)
+            TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData.TestId, theoryData.First);
+            var copiedSignature = theoryData.Signature.CloneByteArray();
+            for (int i = 0; i < theoryData.Signature.Length; i++)
             {
-                var originalB = testParams.Signature[i];
+                var originalB = theoryData.Signature[i];
                 for (byte b = 0; b < byte.MaxValue; b++)
                 {
                     // skip here as this will succeed
-                    if (b == testParams.Signature[i])
+                    if (b == theoryData.Signature[i])
                         continue;
 
                     copiedSignature[i] = b;
-                    Assert.False(testParams.ProviderForVerifying.Verify(testParams.RawBytes, copiedSignature), $"signature should not have verified: {testParams.TestId} : {i} : {b} : {copiedSignature[i]}");
+                    Assert.False(theoryData.ProviderForVerifying.Verify(theoryData.RawBytes, copiedSignature), $"signature should not have verified: {theoryData.TestId} : {i} : {b} : {copiedSignature[i]}");
 
                     // reset so we move to next byte
                     copiedSignature[i] = originalB;
                 }
             }
 
-            Assert.True(testParams.ProviderForVerifying.Verify(testParams.RawBytes, copiedSignature), "Final check should have verified");
+            Assert.True(theoryData.ProviderForVerifying.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SignatureTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SignatureTruncation(SignatureProviderTestParams testParams)
+        public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.SignatureTruncation", testParams.TestId, ref _firstSignatureTruncation);
-            for (int i = 0; i < testParams.Signature.Length - 1; i++)
+            TestUtilities.WriteHeader($"{this}.SignatureTruncation", theoryData.TestId, theoryData.First);
+            for (int i = 0; i < theoryData.Signature.Length - 1; i++)
             {
                 var truncatedSignature = new byte[i + 1];
-                Array.Copy(testParams.Signature, truncatedSignature, i + 1);
-                Assert.False(testParams.ProviderForVerifying.Verify(testParams.RawBytes, truncatedSignature), $"signature should not have verified: {testParams.TestId} : {i}");
+                Array.Copy(theoryData.Signature, truncatedSignature, i + 1);
+                Assert.False(theoryData.ProviderForVerifying.Verify(theoryData.RawBytes, truncatedSignature), $"signature should not have verified: {theoryData.TestId} : {i}");
             }
 
-            Assert.True(testParams.ProviderForVerifying.Verify(testParams.RawBytes, testParams.Signature), "Final check should have verified");
+            Assert.True(theoryData.ProviderForVerifying.Verify(theoryData.RawBytes, theoryData.Signature), "Final check should have verified");
         }
 
-        public static TheoryData<SignatureProviderTestParams> SignatureTheoryData()
+        public static TheoryData<SignatureProviderTheoryData> SignatureTheoryData()
         {
-            var theoryData = new TheoryData<SignatureProviderTestParams>();
+            var theoryData = new TheoryData<SignatureProviderTheoryData>();
 
             var rawBytes = Guid.NewGuid().ToByteArray();
             var asymmetricProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256, true);
-            theoryData.Add(
-                new SignatureProviderTestParams
-                {
-                    Algorithm = SecurityAlgorithms.RsaSha256,
-                    Key = KeyingMaterial.DefaultX509Key_2048,
-                    ProviderForVerifying = asymmetricProvider,
-                    RawBytes = rawBytes,
-                    Signature = asymmetricProvider.Sign(rawBytes),
-                    TestId = SecurityAlgorithms.RsaSha256
-                }
-            );
+            theoryData.Add(new SignatureProviderTheoryData
+            {
+                Algorithm = SecurityAlgorithms.RsaSha256,
+                First = true,
+                Key = KeyingMaterial.DefaultX509Key_2048,
+                ProviderForVerifying = asymmetricProvider,
+                RawBytes = rawBytes,
+                Signature = asymmetricProvider.Sign(rawBytes),
+                TestId = SecurityAlgorithms.RsaSha256
+            });
 
             var asymmetricProvider2 = new AsymmetricSignatureProvider(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true);
-            theoryData.Add(
-                new SignatureProviderTestParams
-                {
-                    Algorithm = SecurityAlgorithms.EcdsaSha256,
-                    Key = KeyingMaterial.ECDsa256Key,
-                    ProviderForVerifying = asymmetricProvider,
-                    RawBytes = rawBytes,
-                    Signature = asymmetricProvider.Sign(rawBytes),
-                    TestId = SecurityAlgorithms.EcdsaSha256
-                }
-            );
+            theoryData.Add(new SignatureProviderTheoryData
+            {
+                Algorithm = SecurityAlgorithms.EcdsaSha256,
+                Key = KeyingMaterial.ECDsa256Key,
+                ProviderForVerifying = asymmetricProvider,
+                RawBytes = rawBytes,
+                Signature = asymmetricProvider.Sign(rawBytes),
+                TestId = SecurityAlgorithms.EcdsaSha256
+            });
 
             var symmetricProvider = new SymmetricSignatureProvider(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256);
-            theoryData.Add(
-                new SignatureProviderTestParams
-                {
-                    Algorithm = SecurityAlgorithms.HmacSha256,
-                    Key = KeyingMaterial.SymmetricSecurityKey2_256,
-                    ProviderForVerifying = symmetricProvider,
-                    RawBytes = rawBytes,
-                    Signature = symmetricProvider.Sign(rawBytes),
-                    TestId = SecurityAlgorithms.HmacSha256
-                }
-            );
+            theoryData.Add(new SignatureProviderTheoryData
+            {
+                Algorithm = SecurityAlgorithms.HmacSha256,
+                Key = KeyingMaterial.SymmetricSecurityKey2_256,
+                ProviderForVerifying = symmetricProvider,
+                RawBytes = rawBytes,
+                Signature = symmetricProvider.Sign(rawBytes),
+                TestId = SecurityAlgorithms.HmacSha256
+            });
 
             var symmetricProvider2 = new SymmetricSignatureProvider(KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512);
-            theoryData.Add(
-                new SignatureProviderTestParams
-                {
-                    Algorithm = SecurityAlgorithms.HmacSha512,
-                    Key = KeyingMaterial.SymmetricSecurityKey2_512,
-                    ProviderForVerifying = symmetricProvider2,
-                    RawBytes = rawBytes,
-                    Signature = symmetricProvider2.Sign(rawBytes),
-                    TestId = SecurityAlgorithms.HmacSha512
-                }
-            );
+            theoryData.Add(new SignatureProviderTheoryData
+            {
+                Algorithm = SecurityAlgorithms.HmacSha512,
+                Key = KeyingMaterial.SymmetricSecurityKey2_512,
+                ProviderForVerifying = symmetricProvider2,
+                RawBytes = rawBytes,
+                Signature = symmetricProvider2.Sign(rawBytes),
+                TestId = SecurityAlgorithms.HmacSha512
+            });
 
             return theoryData;
+        }
+    }
+
+    public class SignatureProviderTheoryData : TheoryDataBase
+    {
+        public string Algorithm { get; set; }
+
+        public SecurityKey Key { get; set; }
+
+        public SignatureProvider ProviderForSigning { get; set; }
+
+        public SignatureProvider ProviderForVerifying { get; set; }
+
+        public byte[] RawBytes { get; set; }
+
+        public bool ShouldVerify { get; set; }
+
+        public byte[] Signature { get; set; }
+
+        public override string ToString()
+        {
+            return TestId + ", " + Algorithm + ", " + Key;
         }
     }
 }

@@ -40,8 +40,6 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class HttpDocumentRetrieverTests
     {
-        private static bool _firstGetMetadataTest = true;
-
         [Fact]
         public void Constructors()
         {
@@ -82,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.GetMetadataTest", theoryData.TestId, ref _firstGetMetadataTest);
+            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData.TestId, theoryData.First);
             try
             {
                 string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
@@ -111,6 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     Address = null,
                     DocumentRetriever = documentRetriever,
                     ExpectedException = ExpectedException.ArgumentNullException(),
+                    First = true,
                     TestId = "Address NULL"
                 });
 
@@ -134,7 +133,6 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "https://login.microsoftonline.com/common/.well-known/openid-configuration",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "AAD common: https"
                 });
 
@@ -142,7 +140,6 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "HTTPS://login.microsoftonline.com/common/.well-known/openid-configuration",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "AAD common: HTTPS"
                 });
 
@@ -159,7 +156,6 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "https://login.microsoftonline.com/common/FederationMetadata/2007-06/FederationMetadata.xml",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "AAD common: WsFed"
                 });
 
@@ -168,15 +164,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
     }
 
-    public class DocumentRetrieverTheoryData
+    public class DocumentRetrieverTheoryData : TheoryDataBase
     {
         public string Address { get; set; }
 
         public IDocumentRetriever DocumentRetriever { get; set; }
-
-        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
-
-        public string TestId { get; set; }
 
         public override string ToString()
         {
