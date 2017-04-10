@@ -414,6 +414,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 bytes[i] = (byte)(bytes[i] ^ bytes[i + 1]);
             }
         }
+
         public static void TestHeader(string testcase, string variation, ref bool first)
         {
             TestHeader($"{testcase} : {variation}", ref first);
@@ -422,18 +423,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static void TestHeader(string testcase, ref bool first)
         {
             if (first)
-            {
                 Console.WriteLine("====================================");
-                first = false;
-            }
 
+            first = false;
             Console.WriteLine(">>>> " + testcase);
-
-            //S2SLogger.LogAlways("");
-            //S2SLogger.LogAlways("====================================");
-            //S2SLogger.LogAlways(">>>> " + testcase);
-            //S2SLogger.LogAlways("");
         }
 
+        public static void WriteHeader(string testcase, string variation, bool first)
+        {
+            WriteHeader($"{testcase} : {variation}", first);
+        }
+
+        public static void WriteHeader(string testcase, bool first)
+        {
+            if (first)
+                Console.WriteLine("====================================");
+
+            Console.WriteLine(">>>> " + testcase);
+        }
     }
 }
