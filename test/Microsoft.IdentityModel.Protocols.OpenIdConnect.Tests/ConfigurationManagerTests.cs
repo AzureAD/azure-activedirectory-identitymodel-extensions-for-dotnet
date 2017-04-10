@@ -45,8 +45,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void OpenIdConnectConstructor(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData.TestId, ConfigurationManagerTheoryData<OpenIdConnectConfiguration>.First);
-            ConfigurationManagerTheoryData<OpenIdConnectConfiguration>.First = false;
+            TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData.TestId, theoryData.First);
             try
             {
                 var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetreiver, theoryData.DocumentRetriever);
@@ -68,8 +67,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = new HttpDocumentRetriever(),
-                    MetadataAddress = null,
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    First = true,
+                    MetadataAddress = null,
                     TestId = "MetadataAddress: NULL"
                 });
 
@@ -77,8 +77,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ConfigurationRetreiver = null,
                     DocumentRetriever = new HttpDocumentRetriever(),
-                    MetadataAddress = "OpenIdConnectMetadata.json",
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    MetadataAddress = "OpenIdConnectMetadata.json",
                     TestId = "ConfigurationRetreiver: NULL"
                 });
 
@@ -86,8 +86,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = null,
-                    MetadataAddress = "OpenIdConnectMetadata.json",
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    MetadataAddress = "OpenIdConnectMetadata.json",
                     TestId = "DocumentRetriever: NULL"
                 });
 
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public class ConfigurationManagerTheoryData<T>
+        public class ConfigurationManagerTheoryData<T> : TheoryDataBase
         {
             public TimeSpan AutomaticRefreshInterval { get; set; }
 
@@ -223,17 +223,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             public IDocumentRetriever DocumentRetriever { get; set; }
 
-            public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
-
-            public static bool First { get; set; } = true;
-
             public string MetadataAddress { get; set; }
 
             public TimeSpan RefreshInterval { get; set; }
 
             public bool RequestRefresh { get; set; }
-
-            public string TestId { get; set; }
 
             public override string ToString()
             {

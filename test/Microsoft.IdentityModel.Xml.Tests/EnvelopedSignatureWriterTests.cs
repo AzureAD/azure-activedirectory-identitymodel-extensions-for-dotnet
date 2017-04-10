@@ -41,14 +41,12 @@ namespace Microsoft.IdentityModel.Xml.Tests
     public class EnvelopedSignatureWriterTests
     {
 
-        static bool _firstWriteSignedXml = true;
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("EnvelopedSignatureReaderTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.Constructor", theoryData.TestId, ref _firstWriteSignedXml);
+            TestUtilities.WriteHeader($"{this}.Constructor", theoryData.TestId, theoryData.First);
             try
             {
                 var envelopedReader = new EnvelopedSignatureWriter(theoryData.XmlWriter, theoryData.SigningCredentials, theoryData.ReferenceId);
@@ -69,6 +67,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    First = true,
                     ReferenceId = null,
                     SigningCredentials = null,
                     TestId = "Null XmlWriter",

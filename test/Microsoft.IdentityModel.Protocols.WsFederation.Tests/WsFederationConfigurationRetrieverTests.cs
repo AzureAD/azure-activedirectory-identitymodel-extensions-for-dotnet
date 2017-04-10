@@ -41,14 +41,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
-        private static bool _firstTest = true;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("MetadataTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadMetadataTest(WsFederationMetadataTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.ReadMetadataTest", theoryData.TestId, ref _firstTest);
+            TestUtilities.WriteHeader($"{this}.ReadMetadataTest", theoryData.TestId, theoryData.First);
             try
             {
                 XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));
@@ -78,9 +77,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+                        First = true,
                         Issuer = "https://sts.windows.net/{tenantid}/",
-                        Metadata = ReferenceMetadata.AADCommonMetadata,
                         KeyInfoCount = 3,
+                        Metadata = ReferenceMetadata.AADCommonMetadata,
                         SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
                         TestId = nameof(ReferenceMetadata.AADCommonMetadata),
                         TokenEndpoint = "https://login.microsoftonline.com/common/wsfed"
@@ -128,10 +128,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        public class WsFederationMetadataTheoryData
+        public class WsFederationMetadataTheoryData : TheoryDataBase
         {
-            public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
-
             public string Issuer { get; set; }
 
             public int KeyInfoCount { get; set; }
@@ -140,13 +138,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
             public SecurityKey SigingKey { get; set; }
 
-            public string TestId { get; set; }
-
             public string TokenEndpoint { get; set; }
 
             public override string ToString()
             {
-                return $"TestId: {TestId}, EE: {ExpectedException}, Metadata: {Metadata}.";
+                return $"TestId: {TestId}, {ExpectedException}, Metadata: {Metadata}.";
             }
         }
     }

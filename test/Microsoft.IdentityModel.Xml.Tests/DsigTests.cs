@@ -35,50 +35,15 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
-    public class DSigTheoryData
-    {
-        public ExpectedException ExpectedException { get; set; }
-
-        public bool ExpectSignedXml { get; set; }
-
-        public string Prefix { get; set; }
-
-        public string ReferenceId { get; set; }
-
-        public SecurityKey SecurityKey { get; set; }
-
-        public string SignatureAlgorithm { get; set; }
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public SignedInfo SignedInfo { get; set; }
-
-        public string TestId { get; set; }
-
-        public TransformFactory TransformFactory { get; set; }
-
-        public XmlDictionaryReader XmlReader { get; set; }
-
-        public XmlDictionaryWriter XmlWriter { get; set; }
-
-        public override string ToString()
-        {
-            return TestId;
-        }
-    }
-
     public class DSigTests
     {
-        static bool _firstSignatureConstructor = true;
-        static bool _firstSignedInfoConstructor = true;
-        static bool _firstSignedInfoReadFrom = true;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SignatureConstructorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureConstructor(DSigTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.SignatureConstructor", theoryData.TestId, ref _firstSignatureConstructor);
+            TestUtilities.WriteHeader($"{this}.SignatureConstructor", theoryData.TestId, theoryData.First);
             try
             {
                 var signature = new Signature(theoryData.SignedInfo);
@@ -99,6 +64,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    First = true,
                     SignedInfo = null,
                     TestId = "SignedInfo NULL"
                 });
@@ -112,7 +78,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignedInfoConstructor(DSigTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.SignedInfoConstructor", theoryData.TestId, ref _firstSignedInfoConstructor);
+            TestUtilities.WriteHeader($"{this}.SignedInfoConstructor", theoryData.TestId, theoryData.First);
             List<string> errors = new List<string>();
             try
             {
@@ -141,7 +107,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new DSigTheoryData
                 {
-                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    First = true,
                     Prefix = XmlSignatureConstants.Prefix,
                     SignatureAlgorithm = XmlSignatureConstants.Elements.SignatureMethod,
                     TestId = "Constructor"
@@ -156,7 +122,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignedInfoReadFrom(DSigTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.SignedInfoReadFrom", theoryData.TestId, ref _firstSignedInfoReadFrom);
+            TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData.TestId, theoryData.First);
             List<string> errors = new List<string>();
             try
             {
@@ -219,6 +185,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    First = true,
                     TestId = "Null XmlReader",
                     XmlReader = null
                 });
@@ -227,7 +194,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new DSigTheoryData
                 {
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     SignedInfo = RefernceXml.ExpectedSignedInfo,
                     TestId = nameof(RefernceXml.SignInfo),
                     TransformFactory = TransformFactory.Instance,
@@ -238,7 +204,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new DSigTheoryData
                 {
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     SignedInfo = RefernceXml.ExpectedSignedInfo,
                     TestId = nameof(RefernceXml.SignInfoStartsWithWhiteSpace),
                     TransformFactory = TransformFactory.Instance,
@@ -259,6 +224,27 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 return theoryData;
             }
         }
+        public class DSigTheoryData : TheoryDataBase
+        {
+            public bool ExpectSignedXml { get; set; }
 
+            public string Prefix { get; set; }
+
+            public string ReferenceId { get; set; }
+
+            public SecurityKey SecurityKey { get; set; }
+
+            public string SignatureAlgorithm { get; set; }
+
+            public SigningCredentials SigningCredentials { get; set; }
+
+            public SignedInfo SignedInfo { get; set; }
+
+            public TransformFactory TransformFactory { get; set; }
+
+            public XmlDictionaryReader XmlReader { get; set; }
+
+            public XmlDictionaryWriter XmlWriter { get; set; }
+        }
     }
 }

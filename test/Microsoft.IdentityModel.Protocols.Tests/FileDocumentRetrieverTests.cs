@@ -38,14 +38,13 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class FileDocumentRetrieverTests
     {
-        private static bool _firstGetMetadataTest = true;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("GetMetadataTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.GetMetadataTest", theoryData.TestId, ref _firstGetMetadataTest);
+            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData.TestId, theoryData.First);
             try
             {
                 string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
@@ -74,6 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     Address = null,
                     DocumentRetriever = documentRetriever,
                     ExpectedException = ExpectedException.ArgumentNullException(),
+                    First = true,
                     TestId = "Address NULL"
                 });
 
@@ -89,7 +89,6 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "ValidJson.json",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ValidJson.json - JsonWebKeySet"
                 });
 

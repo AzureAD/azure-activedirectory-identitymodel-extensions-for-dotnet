@@ -36,15 +36,12 @@ namespace Microsoft.IdentityModel.Xml.Tests
     public class EnvelopedSignatureReaderTests
     {
 
-        static bool _firstConstructor = true;
-        static bool _firstReadSignedXml = true;
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ConstructorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.Constructor", theoryData.TestId, ref _firstConstructor);
+            TestUtilities.WriteHeader($"{this}.Constructor", theoryData.TestId, theoryData.First);
             try
             {
                 var envelopedReader = new EnvelopedSignatureReader(theoryData.XmlReader);
@@ -77,6 +74,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    First = true,
                     TestId = "Null XmlReader",
                     XmlReader = null
                 });
@@ -90,7 +88,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadSignedXml(EnvelopedSignatureTheoryData theoryData)
         {
-            TestUtilities.TestHeader($"{this}.ReadSignedXml", theoryData.TestId, ref _firstReadSignedXml);
+            TestUtilities.WriteHeader($"{this}.ReadSignedXml", theoryData.TestId, theoryData.First);
             try
             {
                 var envelopedReader = new EnvelopedSignatureReader(theoryData.XmlReader);
@@ -125,6 +123,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     ExpectSignature = true,
+                    First = true,
                     TestId = nameof(RefernceXml.Saml2Token_Valid) + " No Key",
                     XmlReader = reader
                 });
@@ -133,7 +132,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     ExpectSignature = true,
                     SecurityKey = RefernceXml.Saml2Token_Valid_SecurityKey,
                     TestId = nameof(RefernceXml.Saml2Token_Valid),
