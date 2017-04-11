@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CanReadToken(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadToken(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadToken", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
             try
             {
                 theoryData.Handler.ReadToken(theoryData.Token);
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateAudience(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateIssuer(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateToken(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
 
             ClaimsPrincipal retVal = null;
             try

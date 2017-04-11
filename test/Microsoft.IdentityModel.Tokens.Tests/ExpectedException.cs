@@ -298,7 +298,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public override string ToString()
         {
             if (TypeExpected == null)
-                return $"NoExpectionExpected";
+                return $"NoExceptionExpected";
             else
                 return $"{TypeExpected}, Substring: {SubstringExpected}";
         }

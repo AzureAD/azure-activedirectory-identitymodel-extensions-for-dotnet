@@ -47,14 +47,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     ///
     public class SamlSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
-        internal const string SamlTokenProfile11 = "urn:oasis:names:tc:SAML:1.0:assertion";
-        internal const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
         internal const string Actor = "Actor";
-        internal const string Attribute = "saml:Attribute";
 
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-        private static string[] _tokenTypeIdentifiers = new string[] { SamlTokenProfile11, OasisWssSamlTokenProfile11 };
+        private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
         private SamlSerializer serializer = new SamlSerializer();
         private Dictionary<string, string> _shortToLongClaimTypeMapping;
         /// <summary>
@@ -146,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets the InboundClaimTypeMap used by JwtSecurityTokenHandler when producing claims from jwt. 
+        /// Gets the OutClaimTypeMap
         /// </summary>
         public IDictionary<string, string> ShortToLongClaimTypeMap
         {
@@ -320,14 +317,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Default behavior is to create a new SamlAttributeStatement for each Subject in the tokenDescriptor.Subjects collection.
         /// </para>
         /// </summary>
-        /// <param name="samlSubject">The SamlSubject to use in the SamlAttributeStatement that are created.</param>
-        /// <param name="subject">The ClaimsIdentity that contains claims which will be converted to SAML Attributes.</param>
+        /// <param name="subject">The SamlSubject to use in the SamlAttributeStatement that are created.</param>
         /// <param name="tokenDescriptor">Contains all the other information that is used in token issuance.</param>
         /// <returns>SamlAttributeStatement</returns>
         /// <exception cref="ArgumentNullException">Thrown when 'samlSubject' is null.</exception>
-        protected virtual SamlAttributeStatement CreateAttributeStatement(
-            SamlSubject subject,
-            SecurityTokenDescriptor tokenDescriptor)
+        protected virtual SamlAttributeStatement CreateAttributeStatement(SamlSubject subject, SecurityTokenDescriptor tokenDescriptor)
         {
 
             if (subject == null)
@@ -486,7 +480,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     {
                         xmlReader.MoveToContent();
                         xmlReader.ReadStartElement(Actor);
-                        while (xmlReader.IsStartElement(Attribute))
+                        while (xmlReader.IsStartElement(SamlConstants.Elements.Attribute))
                         {
                             var innerAttribute = serializer.ReadAttribute(xmlReader);
                             if (innerAttribute != null)
@@ -577,9 +571,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="tokenDescriptor">Contains all the other information that is used in token issuance.</param>
         /// <returns>SamlAuthenticationStatement</returns>
         /// <exception cref="ArgumentNullException">Thrown when 'samlSubject' or 'authInfo' is null.</exception>
-        protected virtual SamlAuthenticationStatement CreateAuthenticationStatement(
-                                                                SamlSubject subject,
-                                                                SecurityTokenDescriptor tokenDescriptor)
+        protected virtual SamlAuthenticationStatement CreateAuthenticationStatement(SamlSubject subject, SecurityTokenDescriptor tokenDescriptor)
         {
             if (subject == null)
                 throw LogHelper.LogArgumentNullException(nameof(subject));
@@ -828,7 +820,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (string.IsNullOrWhiteSpace(securityToken))
                 throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
-
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
@@ -852,84 +843,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             DateTime? notBefore = null;
             DateTime? expires = null;
 
-            // TODO - make the same a JWT
-            //if (samlToken.Conditions != null)
-            //{
-            //    notBefore = samlToken.Conditions.NotBefore;
-            //    expires = samlToken.Conditions.Expires;
-            //}
+            if (samlToken.Assertion.Conditions != null)
+            {
+                notBefore = samlToken.Assertion.Conditions.NotBefore;
+                expires = samlToken.Assertion.Conditions.NotOnOrAfter;
+            }
 
             Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
+            ValidateLifetime(notBefore, expires, samlToken, validationParameters);
 
-            if (validationParameters.ValidateLifetime)
+            var audiences = new List<string>();
+            if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.Conditions != null)
             {
-                if (validationParameters.LifetimeValidator != null)
+                foreach (SamlCondition condition in samlToken.Assertion.Conditions.Conditions)
                 {
-                    if (!validationParameters.LifetimeValidator(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters))
+                    SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
+                    if (null == audienceRestriction)
                     {
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10230, securityToken))
-                        { NotBefore = notBefore, Expires = expires });
+                        continue;
                     }
-                }
-                else
-                {
-                    ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: samlToken, validationParameters: validationParameters);
+
+                    foreach (Uri uri in audienceRestriction.Audiences)
+                    {
+                        audiences.Add(uri.OriginalString);
+                    }
                 }
             }
 
-            if (validationParameters.ValidateAudience)
-            {
-                var audiences = new List<string>();
-                //if (samlToken.Conditions != null && samlToken.Conditions.Conditions != null)
-                //{
-                //    foreach (SamlCondition condition in samlToken.Conditions.Conditions)
-                //    {
-                //        SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
-                //        if (null == audienceRestriction)
-                //        {
-                //            continue;
-                //        }
-
-                //        foreach (Uri uri in audienceRestriction.Audiences)
-                //        {
-                //            audiences.Add(uri.OriginalString);
-                //        }
-                //    }
-                //}
-
-                if (validationParameters.AudienceValidator != null)
-                {
-                    if (!validationParameters.AudienceValidator(audiences, samlToken, validationParameters))
-                    {
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10231, securityToken))
-                        { InvalidAudience = String.Join(", ", audiences) });
-                    }
-                }
-                else
-                {
-                    ValidateAudience(audiences, samlToken, validationParameters);
-                }
-            }
+            ValidateAudience(audiences, samlToken, validationParameters);
 
             string issuer = null;
             issuer = samlToken.Issuer == null ? null : samlToken.Issuer;
+            issuer = ValidateIssuer(issuer, samlToken, validationParameters);
 
-            if (validationParameters.ValidateIssuer)
-            {
-                if (validationParameters.IssuerValidator != null)
-                {
-                    issuer = validationParameters.IssuerValidator(issuer, samlToken, validationParameters);
-                }
-                else
-                {
-                    issuer = ValidateIssuer(issuer, samlToken, validationParameters);
-                }
-            }
-
-            if (samlToken.SigningKey != null)
-            {
-                ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
-            }
+            ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
 
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
@@ -950,16 +897,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            if (validationParameters.ValidateAudience)
-            {
-                if (validationParameters.AudienceValidator != null)
-                    validationParameters.AudienceValidator(audiences, securityToken, validationParameters);
-                else
-                    Validators.ValidateAudience(audiences, securityToken, validationParameters);
-            }
+            Validators.ValidateAudience(audiences, securityToken, validationParameters);
         }
 
         /// <summary>
@@ -972,42 +910,37 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
         protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            if (validationParameters.ValidateIssuer)
-            {
-                if (validationParameters.IssuerValidator != null)
-                    return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
-                else
-                    return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
-            }
-
-            return issuer;
+            return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
         }
 
         /// <summary>
-        /// Validates the <see cref="SecurityToken"/> was signed by a valid <see cref="SecurityKey"/>.
+        /// Validates the lifetime of a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <param name="notBefore">The 'notBefore' time found in the <see cref="SamlSecurityToken"/>.</param>
-        /// <param name="expires">The 'expiration' time found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="notBefore">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="expires">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
         protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateLifetime(notBefore: notBefore, expires: expires, securityToken: securityToken, validationParameters: validationParameters);
+            Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
         }
 
         /// <summary>
         /// Validates the <see cref="SecurityToken"/> was signed by a valid <see cref="SecurityKey"/>.
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> to validate.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+            if (validationParameters.ValidateIssuerSigningKey)
+            {
+                if (validationParameters.IssuerSigningKeyValidator != null)
+                    validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters);
+                else
+                    Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+            }
         }
 
         /// <summary>

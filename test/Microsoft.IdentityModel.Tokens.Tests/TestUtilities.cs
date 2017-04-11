@@ -450,6 +450,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             WriteHeader($"{testcase} : {variation}", first);
         }
 
+        public static void WriteHeader(string testcase, TheoryDataBase theoryData)
+        {
+            WriteHeader($"{testcase} : {theoryData.TestId}", theoryData.First);
+        }
+
         public static void WriteHeader(string testcase, bool first)
         {
             if (first)
