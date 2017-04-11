@@ -25,8 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tokens.Tests;
 using System;
-using System.Reflection;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
@@ -36,93 +38,167 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     /// </summary>
     public class WsFederationMessageTests
     {
-        [Fact]
-        public void Constructors()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("MessageTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ConstructorTest(WsFederationMessageTheoryData theoryData)
         {
-            WsFederationMessage wsFederationMessage = new WsFederationMessage();
-            Assert.AreEqual(wsFederationMessage.IssuerAddress, string.Empty);
-
-            wsFederationMessage = new WsFederationMessage("http://www.got.jwt.com");
-            Assert.AreEqual(wsFederationMessage.IssuerAddress, "http://www.got.jwt.com");
-
-            ExpectedException expectedException = ExpectedException.ArgumentNullException("issuerAddress");
+            TestUtilities.WriteHeader($"{this}.ConstructorTest", theoryData);
             try
             {
-                wsFederationMessage = new WsFederationMessage((string)null);
-                expectedException.ProcessNoException();
+                // check default constructor
+                WsFederationMessage wsFederationMessage1 = new WsFederationMessage
+                {
+                    IssuerAddress = theoryData.IssuerAddress,
+                    Wreply = theoryData.Wreply,
+                    Wct = theoryData.Wct
+                };
+
+                Assert.Equal(theoryData.IssuerAddress, wsFederationMessage1.IssuerAddress);
+                Assert.Equal(theoryData.Wreply, wsFederationMessage1.Wreply);
+                Assert.Equal(theoryData.Wct, wsFederationMessage1.Wct);
+
+                // check copy constructor
+                WsFederationMessage wsFederationMessage2 = new WsFederationMessage(wsFederationMessage1);
+
+                Assert.Equal(theoryData.IssuerAddress, wsFederationMessage2.IssuerAddress);
+                Assert.Equal(theoryData.Wreply, wsFederationMessage2.Wreply);
+                Assert.Equal(theoryData.Wct, wsFederationMessage2.Wct);
+
+                theoryData.ExpectedException.ProcessNoException();
             }
-            catch(Exception exception)
+            catch (Exception ex)
             {
-                expectedException.ProcessException(exception);
-            }
-        }
-
-        [Fact]
-        public void Defaults()
-        {
-            WsFederationMessage wsFederationMessage = new WsFederationMessage();
-
-            Assert.AreEqual(wsFederationMessage.IssuerAddress, string.Empty);
-            Assert.IsNull(wsFederationMessage.Wa);
-            Assert.IsNull(wsFederationMessage.Wauth);
-            Assert.IsNull(wsFederationMessage.Wct);
-            Assert.IsNull(wsFederationMessage.Wctx);
-            Assert.IsNull(wsFederationMessage.Wencoding);
-            Assert.IsNull(wsFederationMessage.Wfed);
-            Assert.IsNull(wsFederationMessage.Wfresh);
-            Assert.IsNull(wsFederationMessage.Whr);
-            Assert.IsNull(wsFederationMessage.Wp);
-            Assert.IsNull(wsFederationMessage.Wpseudo);
-            Assert.IsNull(wsFederationMessage.Wpseudoptr);
-            Assert.IsNull(wsFederationMessage.Wreply);
-            Assert.IsNull(wsFederationMessage.Wreq);
-            Assert.IsNull(wsFederationMessage.Wreqptr);
-            Assert.IsNull(wsFederationMessage.Wres);
-            Assert.IsNull(wsFederationMessage.Wresult);
-            Assert.IsNull(wsFederationMessage.Wresultptr);
-            Assert.IsNull(wsFederationMessage.Wtrealm);
-        }
-
-        [Fact]
-        public void GetSets()
-        {
-            WsFederationMessage wsFederationMessage = new WsFederationMessage();
-
-            Type type = typeof(WsFederationParameterNames);
-            FieldInfo[] fields = type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
-            foreach( FieldInfo fieldInfo in fields)
-            {
-                TestUtilities.GetSet(wsFederationMessage, fieldInfo.Name, null, new object[]{ fieldInfo.Name, null, fieldInfo.Name + fieldInfo.Name } );
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 
-        [Fact]
-        public void Publics()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("MessageTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ParametersTest(WsFederationMessageTheoryData theoryData)
         {
-            string issuerAdderss = @"http://www.gotjwt.com";
-            string wreply = @"http://www.relyingparty.com";
-            string wct = Guid.NewGuid().ToString();
-            WsFederationMessage wsFederationMessage = new WsFederationMessage
+            TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
+            try
             {
-                IssuerAddress = issuerAdderss,
-                Wreply = wreply,
-                Wct = wct,
-            };
+                WsFederationMessage wsFederationMessage = new WsFederationMessage
+                {
+                    IssuerAddress = theoryData.IssuerAddress,
+                    Wreply = theoryData.Wreply,
+                    Wct = theoryData.Wct
+                };
 
-            wsFederationMessage.SetParameter("bob", null);
-            wsFederationMessage.Parameters.Add("bob", null);
-            string uriString = wsFederationMessage.BuildRedirectUrl();
-            Uri uri = new Uri(uriString);
+                Assert.Equal(theoryData.IssuerAddress, wsFederationMessage.IssuerAddress);
+                Assert.Equal(theoryData.Wreply, wsFederationMessage.Wreply);
+                Assert.Equal(theoryData.Wct, wsFederationMessage.Wct);
 
-            WsFederationMessage wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);
-            wsFederationMessageReturned.IssuerAddress = issuerAdderss;
-            wsFederationMessageReturned.Parameters.Add("bob", null);
-            Assert.IsTrue(MessageComparer.AreEqual(wsFederationMessage, wsFederationMessageReturned));
+                // add parameter
+                wsFederationMessage.SetParameter(theoryData.Parameter1.Key, theoryData.Parameter1.Value);
 
-            wsFederationMessageReturned = WsFederationMessage.FromUri(uri);
-            wsFederationMessageReturned.IssuerAddress = issuerAdderss;
-            wsFederationMessageReturned.Parameters.Add("bob", null);
-            Assert.IsTrue(MessageComparer.AreEqual(wsFederationMessage, wsFederationMessageReturned));
+                // add parameters
+                var nameValueCollection = new NameValueCollection();
+                nameValueCollection.Add(theoryData.Parameter2.Key, theoryData.Parameter2.Value);
+                nameValueCollection.Add(theoryData.Parameter3.Key, theoryData.Parameter3.Value);
+                wsFederationMessage.SetParameters(nameValueCollection);
+
+                // validate the parameters are added
+                Assert.Equal(theoryData.Parameter1.Value, wsFederationMessage.Parameters[theoryData.Parameter1.Key]);
+                Assert.Equal(theoryData.Parameter2.Value, wsFederationMessage.Parameters[theoryData.Parameter2.Key]);
+                Assert.Equal(theoryData.Parameter3.Value, wsFederationMessage.Parameters[theoryData.Parameter3.Key]);
+
+                // remove parameter
+                wsFederationMessage.SetParameter(theoryData.Parameter1.Key, null);
+
+                // validate the parameter is removed
+                Assert.Equal(false, wsFederationMessage.Parameters.ContainsKey(theoryData.Parameter1.Key));
+
+                // create redirectUri
+                var uriString = wsFederationMessage.BuildRedirectUrl();
+                Uri uri = new Uri(uriString);
+
+                // convert query back to WsFederationMessage
+                WsFederationMessage wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);
+
+                // validate the parameters in the returned wsFederationMessage
+                Assert.Equal(theoryData.Parameter2.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter2.Key]);
+                Assert.Equal(theoryData.Parameter3.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter3.Key]);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<WsFederationMessageTheoryData> MessageTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
+
+                theoryData.Add(
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        IssuerAddress = @"http://www.gotjwt.com",
+                        Parameter1 = new KeyValuePair<string, string>("bob", "123"),
+                        Parameter2 = new KeyValuePair<string, string>("tom", "456"),
+                        Parameter3 = new KeyValuePair<string, string>("jerry", "789"),
+                        Wct = Guid.NewGuid().ToString(),
+                        Wreply = @"http://www.relyingparty.com", 
+                        TestId = "WsFederationMessage test"
+                    });
+
+                return theoryData;
+            }
+        }
+
+        public class WsFederationMessageTheoryData : TheoryDataBase
+        {
+            public string IssuerAddress { get; set; }
+
+            public KeyValuePair<string, string> Parameter1 { get; set; }
+
+            public KeyValuePair<string, string> Parameter2 { get; set; }
+
+            public KeyValuePair<string, string> Parameter3 { get; set; }
+
+            public string Wa { get; set; }
+
+            public string Wauth { get; set; }
+
+            public string Wct { get; set; }
+
+            public string Wctx { get; set; }
+
+            public string Wencoding { get; set; }
+
+            public string Wfed { get; set; }
+
+            public string Wfresh { get; set; }
+
+            public string Whr { get; set; }
+
+            public string Wp { get; set; }
+
+            public string Wpseudo { get; set; }
+
+            public string Wpseudoptr { get; set; }
+
+            public string Wreply { get; set; }
+
+            public string Wreq { get; set; }
+
+            public string Wreqptr { get; set; }
+
+            public string Wres { get; set; }
+
+            public string Wresult { get; set; }
+
+            public string Wresultptr { get; set; }
+
+            public string Wtrealm { get; set; }
         }
     }
 }
