@@ -20,7 +20,6 @@
     }
   },
   "buildOptions": {
-    "warningsAsErrors": true,
-    "compile": { "exclude": [ "WsFederationMessageTests.cs" ] }
+    "warningsAsErrors": true
   }
 }

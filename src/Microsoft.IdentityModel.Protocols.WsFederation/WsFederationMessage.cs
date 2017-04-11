@@ -53,8 +53,15 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             WsFederationMessage wsFederationMessage = new WsFederationMessage();
             if (!string.IsNullOrWhiteSpace(queryString))
             {
-                // TODO replace HttpUtility
-                //wsFederationMessage.SetParameters(HttpUtility.ParseQueryString(query: queryString));
+                var result = QueryHelper.ParseQuery(queryString);
+
+                foreach(var keyValuePair in result)
+                {
+                    foreach(var value in keyValuePair.Value)
+                    {
+                        wsFederationMessage.SetParameter(keyValuePair.Key, value);
+                    }
+                }
             } 
 
             return wsFederationMessage;
