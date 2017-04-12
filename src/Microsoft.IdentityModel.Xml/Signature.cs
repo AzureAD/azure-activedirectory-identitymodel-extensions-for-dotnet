@@ -35,7 +35,6 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class Signature
     {
-        private KeyInfo _keyInfo;
         private string _prefix = XmlSignatureConstants.Prefix;
         readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
 
@@ -48,6 +47,8 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         public string Id { get; set; }
+
+        public KeyInfo KeyInfo { get; protected set; }
 
         public SignedInfo SignedInfo
         {
@@ -76,8 +77,8 @@ namespace Microsoft.IdentityModel.Xml
 
             SignedInfo.ReadFrom(reader, TransformFactory);
             _signatureValueElement.ReadFrom(reader);
-            _keyInfo = new KeyInfo();
-            _keyInfo.ReadFrom(reader);
+            KeyInfo = new KeyInfo();
+            KeyInfo.ReadFrom(reader);
 
             reader.ReadEndElement(); // Signature
         }

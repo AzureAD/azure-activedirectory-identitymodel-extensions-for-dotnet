@@ -52,6 +52,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11045 = "IDX11045: Replay detection requires that token's expiration period, '{0}', does not exceed the expiration period configured with '{1}' on the TokenReplayCache.";
         internal const string IDX11046 = "IDX11046: A SAML2 assertion that specifies an AuthenticationContext DeclarationReference is not supported.To handle DeclarationReference, extend the Saml2SecurityTokenHandler and override ProcessAuthenticationStatement.";
         internal const string IDX11047 = "IDX11047: Signature validation failed, see inner exception";
+        internal const string IDX11048 = "IDX11048: Reading issuer signing keys from validation parameters.";
+        internal const string IDX11049 = "IDX11049: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
+
 
         // Saml2SecurityTokenHandler logging
         internal const string IDX11070 = "IDX11070: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
@@ -59,13 +62,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
         // signature creation / validation
         internal const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
-        internal const string IDX10501 = "IDX10501: Signature validation failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
+        internal const string IDX10501 = "IDX10501: Signature validation failed. Unable to match 'kid': '{0}', token: '{1}'.";
         internal const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         internal const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'.";
         internal const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
         internal const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
         internal const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
         internal const string IDX10508 = "IDX10508: Signing Saml2 is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
+        internal const string IDX10509 = "IDX10509: Unable to validate token, Subject is null.";
+        internal const string IDX10510 = "IDX10510: The Saml2SecurityToken cannot be validated because the Assertion specifies a OneTimeUse condition.Enforcement of the OneTimeUse condition is not supported by default.To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
+        internal const string IDX10511 = "IDX10511: The Saml2SecurityToken cannot be validated because the Assertion specifies a ProxyRestriction condition.Enforcement of the ProxyRestriction condition is not supported by default. To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
+        internal const string IDX10512 = "IDX10512: Unable to validate token. A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
+
 
         // Saml2SecurityTokenHandler reading
         internal const string IDX11100 = "IDX11100: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
@@ -109,8 +117,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11138 = "IDX11138: Unable to read for Saml2SecurityToken. the AttributeStatement does not contain any Attributes.";
 
         // Saml2SecurityTokenHandler writing
-        internal const string IDX11200 = "IDX11200: The Saml2SecurityTokenHandler can only write SecurityToken objects of type Saml2SecurityToken.";
-        internal const string IDX11201 = "IDX11201: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
         internal const string IDX11142 = "IDX11142: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
         internal const string IDX11143 = "IDX11143: A Saml2SecurityToken cannot be created from the Saml2Assertion because it has no Subject.";
         internal const string IDX11144 = "IDX11144: A Saml2SecurityToken cannot be created from the Saml2Assertion because it has no SubjectConfirmation.";
@@ -119,6 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11147 = "IDX11147: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies the Holder-of-key confirmation method but identifies no keys in the SubjectConfirmationData.";
         internal const string IDX11148 = "IDX11148: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies an unsupported confirmation method: '{0}'";
         internal const string IDX11149 = "IDX11149: Both AuthenticationContext ClassReference DeclarationReference can not be null.";
+        internal const string IDX11150 = "IDX11150: The Saml2SecurityTokenHandler can only write a token was of type: '{0}'.";
 
         internal const string IDX11300 = "IDX11300: '{0}' must be an absolute Uri, was: '{1}'";
 

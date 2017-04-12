@@ -224,9 +224,65 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 return theoryData;
             }
         }
+
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("KeyInfoReadFromTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void KeyInfoReadFrom(DSigTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.KeyInfoReadFrom", theoryData);
+            List<string> errors = new List<string>();
+            try
+            {
+                var sr = new StringReader(theoryData.KeyInfoDataSet.Xml);
+                var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
+                var keyInfo = new KeyInfo();
+                keyInfo.ReadFrom(reader);
+                theoryData.ExpectedException.ProcessNoException();
+
+                theoryData.KeyInfoDataSet.KeyInfo.GetDiffs(keyInfo, errors);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        public static TheoryData<DSigTheoryData> KeyInfoReadFromTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                var theoryData = new TheoryData<DSigTheoryData>();
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    First = true,
+                    KeyInfoDataSet = RefernceXml.KeyInfoSingleX509Certificate,
+                    TestId = nameof(RefernceXml.KeyInfoSingleX509Certificate),
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                    KeyInfoDataSet = RefernceXml.KeyInfoMultipleX509Certificates,
+                    TestId = nameof(RefernceXml.KeyInfoMultipleX509Certificates),
+                });
+
+                return theoryData;
+            }
+        }
+
         public class DSigTheoryData : TheoryDataBase
         {
             public bool ExpectSignedXml { get; set; }
+
+            public KeyInfoDataSet KeyInfoDataSet { get; set; }
 
             public string Prefix { get; set; }
 

@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 // TODO - need to pass actual Saml2Token
-                ((theoryData.Handler)as DerivedSaml2SecurityTokenHandler).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
+                ((theoryData.Handler)as Saml2SecurityTokenHandlerPublic).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             get
             {
                 var theoryData = new TheoryData<CreateAndValidateTheoryData>();
-                var handler = new DerivedSaml2SecurityTokenHandler();
+                var handler = new Saml2SecurityTokenHandlerPublic();
 
                 ValidateTheoryData.AddValidateAudienceTheoryData(theoryData, handler);
 
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 // TODO - need to pass actual Saml2Token
-                ((theoryData.Handler)as DerivedSaml2SecurityTokenHandler).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
+                ((theoryData.Handler)as Saml2SecurityTokenHandlerPublic).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             get
             {
                 var theoryData = new TheoryData<CreateAndValidateTheoryData>();
-                var handler = new DerivedSaml2SecurityTokenHandler();
+                var handler = new Saml2SecurityTokenHandlerPublic();
 
                 ValidateTheoryData.AddValidateIssuerTheoryData(theoryData, handler);
 
@@ -373,7 +373,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateTheoryData
                     {
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.Saml2Token_Valid),
+                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKey set.",
+                        Token = RefrenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = new X509SecurityKey(aadCert),
+                            IssuerSigningKeys = keySet.GetSigningKeys(),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    });
+
+                theoryData.Add(
+                    new CreateAndValidateTheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKeys set.",
                         Token = RefrenceTokens.Saml2Token_Valid,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -486,7 +502,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        private class DerivedSaml2SecurityTokenHandler : Saml2SecurityTokenHandler
+        private class Saml2SecurityTokenHandlerPublic : Saml2SecurityTokenHandler
         {
             public string ValidateIssuerPublic(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
             {
@@ -499,9 +515,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        private class DerivedSaml2SecurityToken : Saml2SecurityToken
+        private class Saml2SecurityTokenPublic : Saml2SecurityToken
         {
-            public DerivedSaml2SecurityToken(Saml2Assertion assertion)
+            public Saml2SecurityTokenPublic(Saml2Assertion assertion)
                 : base(assertion)
             { }
         }

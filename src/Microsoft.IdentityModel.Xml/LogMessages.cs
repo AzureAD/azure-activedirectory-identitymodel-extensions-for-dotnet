@@ -44,6 +44,8 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21012 = "IDX21012: Unable to read xml. While reading '{0}', This node was not expected: '{1}'.";
         internal const string IDX21013 = "IDX21013: Unable to read xml. While reading '{0}', Required attribute was not found : '{1}'.";
         internal const string IDX21014 = "IDX21014: Unable to read xml. Required element was not found : '{0}:{1}'. Reader is positioned at: '{2}'.";
+        internal const string IDX21015 = "IDX21015: Only a single X509Certificate is supported. Found more than one.";
+        internal const string IDX21016 = "IDX21016: Exception thrown while reading '{0}'. See inner exception for more details.";
 
         // xml structure, supported exceptions
         internal const string IDX21100 = "IDX21100: Unable to process signature. This cannonizalization method is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
@@ -56,6 +58,11 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21200 = "IDX21200: The 'Signature' did not validate.";
         internal const string IDX21201 = "IDX21201: A reference was not signed: '{0}'.";
         internal const string IDX21202 = "IDX21202: A reference was included: '{0}'.";
+
+        // logging messages
+
+        internal const string IDX21300 = "IDX21300: KeyInfo skipped unknown element: '{0}'.";
+
 #pragma warning restore 1591
     }
 }

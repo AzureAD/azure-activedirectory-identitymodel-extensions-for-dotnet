@@ -677,6 +677,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return context.Merge(localContext);
         }
 
+        public static bool AreStringsEqual(string str1, string str2)
+        {
+            if (string.IsNullOrEmpty(str1) && string.IsNullOrEmpty(str2))
+                return true;
+
+            if (ReferenceEquals(str1, str2))
+                return true;
+
+            if (str1 == null || str2 == null)
+                return false;
+
+            return string.Equals(str1, str2, StringComparison.Ordinal);
+        }
+
         public static bool AreStringsEqual(string str1, string str2, CompareContext context)
         {
             var localContext = new CompareContext(context);
