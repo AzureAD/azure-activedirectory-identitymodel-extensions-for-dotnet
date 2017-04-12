@@ -47,7 +47,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10232 = "IDX10232: IssuerSigningKey validation failed. Delegate returned false, securityKey: '{0}'.";
         internal const string IDX10241 = "IDX10241: Security token validated. token: '{0}'.";
         internal const string IDX10242 = "IDX10242: Security token: '{0}' has a valid signature.";
-        internal const string IDX10243 = "IDX10243: Reading issuer signing keys from validaiton parameters.";
+        internal const string IDX10243 = "IDX10243: Reading issuer signing keys from validation parameters.";
         internal const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
 
         // token creation
