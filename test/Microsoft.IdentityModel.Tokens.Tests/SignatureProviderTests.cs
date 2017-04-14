@@ -357,7 +357,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void AsymmetricSignatureProvidersVerify(SignatureProviderTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProvidersVerify", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProvidersVerify", theoryData);
             try
             {
                 AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(theoryData.Key, theoryData.Algorithm);
@@ -1209,7 +1209,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData);
             var copiedSignature = theoryData.Signature.CloneByteArray();
             for (int i = 0; i < theoryData.Signature.Length; i++)
             {
@@ -1236,7 +1236,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignatureTruncation", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.SignatureTruncation", theoryData);
             for (int i = 0; i < theoryData.Signature.Length - 1; i++)
             {
                 var truncatedSignature = new byte[i + 1];

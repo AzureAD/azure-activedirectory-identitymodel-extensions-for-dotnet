@@ -26,14 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
-using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
@@ -46,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.Constructor", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
             try
             {
                 var envelopedReader = new EnvelopedSignatureWriter(theoryData.XmlWriter, theoryData.SigningCredentials, theoryData.ReferenceId);

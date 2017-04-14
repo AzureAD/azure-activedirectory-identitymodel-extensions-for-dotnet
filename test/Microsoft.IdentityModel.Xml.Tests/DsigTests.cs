@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureConstructor(DSigTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignatureConstructor", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.SignatureConstructor", theoryData);
             try
             {
                 var signature = new Signature(theoryData.SignedInfoDataSet.SignedInfo);
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignedInfoConstructor(DSigTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignedInfoConstructor", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.SignedInfoConstructor", theoryData);
             List<string> errors = new List<string>();
             try
             {
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignedInfoReadFrom(DSigTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
             List<string> errors = new List<string>();
             try
             {
@@ -164,6 +164,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new DSigTheoryData
                 {
+                    First = true,
                     SignedInfoDataSet = RefernceXml.SignedInfoValid,
                     TestId = nameof(RefernceXml.SignedInfoValid),
                     TransformFactory = TransformFactory.Instance
@@ -178,16 +179,63 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new DSigTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException)),
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoCanonicalizationMethodMissing,
                     TestId = nameof(RefernceXml.SignedInfoCanonicalizationMethodMissing),
+                    TransformFactory = TransformFactory.Instance
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                    SignedInfoDataSet = RefernceXml.SignedInfoReferenceMissing,
+                    TestId = nameof(RefernceXml.SignedInfoReferenceMissing),
+                    TransformFactory = TransformFactory.Instance
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                    SignedInfoDataSet = RefernceXml.SignedInfoTransformsMissing,
+                    TestId = nameof(RefernceXml.SignedInfoTransformsMissing),
+                    TransformFactory = TransformFactory.Instance
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                    SignedInfoDataSet = RefernceXml.SignedInfoNoTransforms,
+                    TestId = nameof(RefernceXml.SignedInfoNoTransforms),
+                    TransformFactory = TransformFactory.Instance
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018:"),
+                    SignedInfoDataSet = RefernceXml.SignedInfoUnknownTransform,
+                    TestId = nameof(RefernceXml.SignedInfoUnknownTransform),
+                    TransformFactory = TransformFactory.Instance
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                    SignedInfoDataSet = RefernceXml.SignedInfoMissingDigestMethod,
+                    TestId = nameof(RefernceXml.SignedInfoMissingDigestMethod),
+                    TransformFactory = TransformFactory.Instance
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                    SignedInfoDataSet = RefernceXml.SignedInfoMissingDigestValue,
+                    TestId = nameof(RefernceXml.SignedInfoMissingDigestValue),
                     TransformFactory = TransformFactory.Instance
                 });
 
                 return theoryData;
             }
         }
-
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("KeyInfoReadFromTheoryData")]

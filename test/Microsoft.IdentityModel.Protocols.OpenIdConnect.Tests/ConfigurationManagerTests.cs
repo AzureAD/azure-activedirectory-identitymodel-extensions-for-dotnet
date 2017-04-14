@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void OpenIdConnectConstructor(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData);
             try
             {
                 var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetreiver, theoryData.DocumentRetriever);

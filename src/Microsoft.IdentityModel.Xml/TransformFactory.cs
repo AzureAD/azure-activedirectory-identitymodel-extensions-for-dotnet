@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -44,26 +43,19 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual Transform CreateTransform(string transform)
         {
+            if (string.IsNullOrEmpty(transform))
+                LogHelper.LogArgumentNullException(nameof(transform));
+
             if (transform == SecurityAlgorithms.ExclusiveC14n)
-            {
                 return new ExclusiveCanonicalizationTransform();
-            }
             else if (transform == SecurityAlgorithms.ExclusiveC14nWithComments)
-            {
                 return new ExclusiveCanonicalizationTransform(false, true);
-            }
             else if (transform == SecurityAlgorithms.StrTransform)
-            {
                 return new StrTransform();
-            }
             else if (transform == SecurityAlgorithms.EnvelopedSignature)
-            {
                 return new EnvelopedSignatureTransform();
-            }
-            else
-            {
-                throw LogHelper.LogExceptionMessage(new CryptographicException("UnsupportedTransformAlgorithm"));
-            }
+
+            throw LogHelper.LogExceptionMessage(new XmlException(LogHelper.FormatInvariant(LogMessages.IDX21018, transform)));
         }
     }
 }
