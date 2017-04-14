@@ -244,6 +244,8 @@ namespace Microsoft.IdentityModel.Xml
                 _exclusiveCanonicalizationTransform.ReadFrom(canonicalizingReader, false);
                 _signatureMethodElement.ReadFrom(canonicalizingReader);
                 SignatureAlgorithm = _signatureMethodElement.Algorithm;
+
+                XmlUtil.CheckReaderOnEntry(canonicalizingReader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
                 while (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                 {
                     var reference = new Reference();

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.Constructor", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
             try
             {
                 var envelopedReader = new EnvelopedSignatureReader(theoryData.XmlReader);
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadSignedXml(EnvelopedSignatureTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadSignedXml", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ReadSignedXml", theoryData);
             try
             {
                 var envelopedReader = new EnvelopedSignatureReader(theoryData.XmlReader);

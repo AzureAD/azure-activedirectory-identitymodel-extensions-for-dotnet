@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
                 string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;

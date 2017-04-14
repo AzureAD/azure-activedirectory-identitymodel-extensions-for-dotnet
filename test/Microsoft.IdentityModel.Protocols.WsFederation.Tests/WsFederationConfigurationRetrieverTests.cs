@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadMetadataTest(WsFederationMetadataTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadMetadataTest", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ReadMetadataTest", theoryData);
             try
             {
                 XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));

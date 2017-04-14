@@ -191,6 +191,8 @@ namespace Microsoft.IdentityModel.Xml
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
                 _transformChain.ReadFrom(reader, transformFactory, ShouldPreserveComments(Uri));
+            else
+                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Transforms, reader.NamespaceURI, reader.LocalName);
 
             _digestMethodElement.ReadFrom(reader);
             _digestValueElement.ReadFrom(reader);
@@ -243,6 +245,8 @@ namespace Microsoft.IdentityModel.Xml
 
             public void ReadFrom(XmlDictionaryReader reader)
             {
+                XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace, true);
+
                 reader.MoveToStartElement(XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 _prefix = reader.Prefix;
                 reader.Read();
@@ -251,8 +255,9 @@ namespace Microsoft.IdentityModel.Xml
                 _digestText = reader.ReadString();
                 _digestValue = System.Convert.FromBase64String(_digestText.Trim());
 
+                // </ DigestValue>
                 reader.MoveToContent();
-                reader.ReadEndElement(); // DigestValue
+                reader.ReadEndElement();
             }
 
             public void WriteTo(XmlDictionaryWriter writer)

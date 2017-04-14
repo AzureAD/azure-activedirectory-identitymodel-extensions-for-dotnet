@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Xml
 
         internal static Exception OnRequiredElementMissing(XmlReader reader, string element, string ns)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21014, element, ns, reader.LocalName)));
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21011, element, ns, reader.LocalName, reader.NamespaceURI)));
         }
 
         internal static Exception OnUnexpectedChildNode(XmlReader reader, string reading)

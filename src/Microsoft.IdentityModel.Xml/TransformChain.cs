@@ -69,21 +69,27 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory, bool preserveComments)
         {
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace, false);
+
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             reader.Read();
 
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace, true);
             while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
             {
                 string transformAlgorithmUri = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                Transform transform = transformFactory.CreateTransform(transformAlgorithmUri);
+                var transform = transformFactory.CreateTransform(transformAlgorithmUri);
                 transform.ReadFrom(reader, preserveComments);
                 Add(transform);
             }
+
+            // </ Transforms>
             reader.MoveToContent();
-            reader.ReadEndElement(); // Transforms
+            reader.ReadEndElement();
+
             if (TransformCount == 0)
-                throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneTransformRequired"));
+                throw XmlUtil.LogReadException(LogMessages.IDX21014);
         }
 
         //public byte[] TransformToDigest(TokenStreamingReader data, SignatureResourcePool resourcePool, string digestMethod)

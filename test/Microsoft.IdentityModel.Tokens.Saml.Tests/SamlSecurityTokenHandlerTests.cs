@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateAudience(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
             {
                 ((theoryData.Handler)as DerivedSamlSecurityTokenHandler).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateIssuer(CreateAndValidateTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData.TestId, theoryData.First);
+            TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
             {
                 ((theoryData.Handler)as DerivedSamlSecurityTokenHandler).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
