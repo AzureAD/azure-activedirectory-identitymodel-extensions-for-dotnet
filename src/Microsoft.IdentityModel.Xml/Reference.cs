@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -44,21 +43,10 @@ namespace Microsoft.IdentityModel.Xml
         private string _referredId;
         private object _resolvedXmlSource;
         private readonly TransformChain _transformChain = new TransformChain();
-        private bool _verified;
 
         public Reference()
-            : this(null)
-        { }
-
-        public Reference(string uri)
-            : this(uri, null)
-        { }
-
-        public Reference(string uri, object resolvedXmlSource)
         {
             _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
-            Uri = uri;
-            _resolvedXmlSource = resolvedXmlSource;
         }
 
         public string DigestAlgorithm
@@ -66,6 +54,8 @@ namespace Microsoft.IdentityModel.Xml
             get { return _digestMethodElement.Algorithm; }
             set { _digestMethodElement.Algorithm = value; }
         }
+
+        public string  DigestValue { get; set; }
 
         public string Id { get; set; }
 
@@ -87,7 +77,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool Verified
         {
-            get { return _verified; }
+            get; set;
         }
 
         public void AddTransform(Transform transform)
@@ -95,57 +85,16 @@ namespace Microsoft.IdentityModel.Xml
             _transformChain.Add(transform);
         }
 
-        public void EnsureDigestValidity(string id, byte[] computedDigest)
+        public bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream )
         {
-            if (!EnsureDigestValidityIfIdMatches(id, computedDigest))
-            {
-                throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredTargetNotSigned, id"));
-            }
-        }
-
-        public void EnsureDigestValidity(string id, object resolvedXmlSource)
-        {
-            if (!EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
-            {
-                throw LogHelper.LogExceptionMessage(new CryptographicException("RequiredTargetNotSigned, id"));
-            }
-        }
-
-        public bool EnsureDigestValidityIfIdMatches(string id, byte[] computedDigest)
-        {
-            if (_verified || id != ExtractReferredId())
-                return true;
-
-            if (!Utility.AreEqual(computedDigest, GetDigestValue()))
-                throw LogHelper.LogExceptionMessage(new CryptographicException($"DigestVerificationFailedForReference: id: {id}"));
-
-            _verified = true;
-            return true;
-        }
-
-        public bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
-        {
-            if (_verified)
-                return true;
-
-            // During StrTransform the extractedReferredId on the reference will point to STR and hence will not be 
-            // equal to the referred element ie security token Id.
-            if (id != ExtractReferredId() && !IsStrTranform())
-                return false;
-
-            _resolvedXmlSource = resolvedXmlSource;
-            if (!CheckDigest())
-                throw LogHelper.LogExceptionMessage(new CryptographicException($"DigestVerificationFailedForReference: id: {id}"));
-
-            _verified = true;
-            return true;
+            Verified = Utility.AreEqual(ComputeDigest(tokenStream), GetDigestValue());
+            return Verified;
         }
 
         public bool IsStrTranform()
         {
             return TransformChain.TransformCount == 1 && TransformChain[0].Algorithm == SecurityAlgorithms.StrTransform;
         }
-
 
         public string ExtractReferredId()
         {
@@ -195,32 +144,32 @@ namespace Microsoft.IdentityModel.Xml
             return preserveComments;
         }
 
-        public bool CheckDigest()
-        {
-            byte[] computedDigest = ComputeDigest();
-            bool result = Utility.AreEqual(computedDigest, GetDigestValue());
-#if LOG_DIGESTS
-            Console.WriteLine(">>> Checking digest for reference '{0}', result {1}", uri, result);
-            Console.WriteLine("    Computed digest {0}", Convert.ToBase64String(computedDigest));
-            Console.WriteLine("    Received digest {0}", Convert.ToBase64String(GetDigestValue()));
-#endif
-            return result;
-        }
-
+        // TODO - hook this up to write
         public void ComputeAndSetDigest()
         {
-            _digestValueElement.Value = ComputeDigest();
+            //_digestValueElement.Value = ComputeDigest();
         }
 
-        public byte[] ComputeDigest()
+        //public byte[] ComputeDigest()
+        //{
+        //    if (_transformChain.TransformCount == 0)
+        //        throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
+
+        //    if (_resolvedXmlSource == null)
+        //        throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
+
+        //    return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
+        //}
+
+        public byte[] ComputeDigest(TokenStreamingReader tokenStream)
         {
+            if (tokenStream == null)
+                throw LogHelper.LogArgumentNullException(nameof(tokenStream));
+
             if (_transformChain.TransformCount == 0)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
-            if (_resolvedXmlSource == null)
-                throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
-
-            return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
+            return _transformChain.TransformToDigest(tokenStream, ResourcePool, DigestAlgorithm);
         }
 
         public byte[] GetDigestValue()
@@ -230,14 +179,14 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
-            if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
 
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             Id = reader.GetAttribute(UtilityStrings.Id, null);
             Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
             Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
+
             reader.Read();
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
