@@ -53,8 +53,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                         Assert.False(true, "theoryData.ExpectSignature == true && envelopedReader.ExpectSignature == null");
 
                     envelopedReader.Signature.Verify(theoryData.SecurityKey);
-                    envelopedReader.Signature.SignedInfo.EnsureDigestValidity(envelopedReader.Signature.SignedInfo[0].ExtractReferredId(), envelopedReader.Signature.TokenSource);
-                    envelopedReader.Signature.SignedInfo.EnsureAllReferencesVerified();
                 }
 
                 theoryData.ExpectedException.ProcessNoException();

@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // multi-transform case, inefficient path
-        public override object Process(object input, SignatureResourcePool resourcePool)
+        public override object Process(TokenStreamingReader input, SignatureResourcePool resourcePool)
         {
             var xmlReader = input as XmlReader;
             if (xmlReader != null)
@@ -123,14 +123,14 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // common single-transform case; fold directly into a digest
-        public override byte[] ProcessAndDigest(object input, SignatureResourcePool resourcePool, string digestAlgorithm)
+        public override byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             var hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
             ProcessAndDigest(input, resourcePool, hash);
             return hash.Hash;
         }
 
-        public void ProcessAndDigest(object input, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        public void ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
             var hashStream = resourcePool.TakeHashStream(hash);
             var reader = input as XmlReader;

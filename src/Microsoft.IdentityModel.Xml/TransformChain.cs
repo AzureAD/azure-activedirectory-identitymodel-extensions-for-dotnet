@@ -86,12 +86,20 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneTransformRequired"));
         }
 
-        public byte[] TransformToDigest(object data, SignatureResourcePool resourcePool, string digestMethod)
+        //public byte[] TransformToDigest(TokenStreamingReader data, SignatureResourcePool resourcePool, string digestMethod)
+        //{
+        //    for (int i = 0; i < TransformCount - 1; i++)
+        //        data = this[i].Process(data, resourcePool);
+
+        //    return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
+        //}
+
+        public byte[] TransformToDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool, string digestMethod)
         {
             for (int i = 0; i < TransformCount - 1; i++)
-                data = this[i].Process(data, resourcePool);
+                tokenStream = this[i].Process(tokenStream, resourcePool) as TokenStreamingReader;
 
-            return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
+            return this[TransformCount - 1].ProcessAndDigest(tokenStream, resourcePool, digestMethod);
         }
 
         public void WriteTo(XmlDictionaryWriter writer)

@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.Xml
         public void ReadFrom(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace, true);
+
             reader.MoveToStartElement(_elementName, XmlSignatureConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
             Prefix = reader.Prefix;

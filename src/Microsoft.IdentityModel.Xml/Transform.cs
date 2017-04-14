@@ -40,9 +40,9 @@ namespace Microsoft.IdentityModel.Xml
             get { return false; }
         }
 
-        public abstract object Process(object input, SignatureResourcePool resourcePool);
+        public abstract object Process(TokenStreamingReader input, SignatureResourcePool resourcePool);
 
-        public abstract byte[] ProcessAndDigest(object input, SignatureResourcePool resourcePool, string digestAlgorithm);
+        public abstract byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm);
 
         public abstract void ReadFrom(XmlDictionaryReader reader, bool preserveComments);
 

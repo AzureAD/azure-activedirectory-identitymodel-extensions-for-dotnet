@@ -49,10 +49,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <returns>WsFed configuration</returns>
         public WsFederationConfiguration ReadMetadata(XmlReader reader)
         {
-            WsFederationConfiguration configuration = new WsFederationConfiguration();
-
             XmlUtil.CheckReaderOnEntry(reader, WsFederationConstants.Elements.EntityDescriptor, WsFederationConstants.Namespaces.MetadataNamespace);
 
+            var configuration = new WsFederationConfiguration();
             var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
 
             try
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX13000, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX13000, ex, WsFederationConstants.Elements.EntityDescriptor, ex);
             }
 
             configuration.Signature = envelopeReader.Signature;

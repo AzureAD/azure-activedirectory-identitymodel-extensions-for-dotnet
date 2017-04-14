@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Xml
             return driver;
         }
 
-        public override object Process(object input, SignatureResourcePool resourcePool)
+        public override object Process(TokenStreamingReader input, SignatureResourcePool resourcePool)
         {
             if (input is XmlReader)
             {
@@ -100,14 +100,14 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        public override byte[] ProcessAndDigest(object input, SignatureResourcePool resourcePool, string digestAlgorithm)
+        public override byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             HashAlgorithm hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
             ProcessAndDigest(input, resourcePool, hash);
             return hash.Hash;
         }
 
-        public void ProcessAndDigest(object input, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        public void ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
             var hashStream = resourcePool.TakeHashStream(hash);
             var reader = input as XmlReader;

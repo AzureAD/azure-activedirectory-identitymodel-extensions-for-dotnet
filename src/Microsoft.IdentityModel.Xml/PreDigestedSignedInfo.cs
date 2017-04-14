@@ -122,16 +122,17 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         public override void EnsureAllReferencesVerified()
+
         {
             // WriteOnly
             throw LogHelper.LogExceptionMessage(new NotSupportedException());
         }
 
-        public override bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
-        {
-            // WriteOnly
-            throw LogHelper.LogExceptionMessage(new NotSupportedException());
-        }
+        //public override bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
+        //{
+        //    // WriteOnly
+        //    throw LogHelper.LogExceptionMessage(new NotSupportedException());
+        //}
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {

@@ -41,34 +41,24 @@ namespace Microsoft.IdentityModel.Xml
             Algorithm = XmlSignatureConstants.Algorithms.EnvelopedSignature;
         }
 
-        public override object Process(object input, SignatureResourcePool resourcePool)
+        public override object Process(TokenStreamingReader tokenStreamingReader, SignatureResourcePool resourcePool)
         {
-            XmlTokenStream tokenStream = input as XmlTokenStream;
-            if (tokenStream != null)
-            {
-                tokenStream.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
-                return tokenStream;
-            }
+            if (tokenStreamingReader == null)
+                LogHelper.LogArgumentNullException(nameof(tokenStreamingReader));
 
-            TokenStreamingReader reader = input as TokenStreamingReader;
-            if (reader != null)
-            {
-                // The Enveloped Signature Transform is supposed to remove the
-                // Signature which encloses the transform element. Previous versions
-                // of this code stripped out all Signature elements at any depth, 
-                // which did not allow nested signed structures. By specifying '1' 
-                // as the depth, we narrow our range of support so that we require
-                // that the enveloped signature be a direct child of the element
-                // being signed.
-                reader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace, 1);
-                return reader;
-            }
-
-            throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedInputTypeForTransform, input.GetType()"));
+            // The Enveloped Signature Transform is supposed to remove the
+            // Signature which encloses the transform element. Previous versions
+            // of this code stripped out all Signature elements at any depth,
+            // which did not allow nested signed structures. By specifying '1'
+            // as the depth, we narrow our range of support so that we require
+            // that the enveloped signature be a direct child of the element
+            // being signed.
+            tokenStreamingReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace, 1);
+            return tokenStreamingReader;
         }
 
         // this transform is not allowed as the last one in a chain
-        public override byte[] ProcessAndDigest(object input, SignatureResourcePool resourcePool, string digestAlgorithm)
+        public override byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
         }

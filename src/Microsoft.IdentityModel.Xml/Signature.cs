@@ -36,6 +36,7 @@ namespace Microsoft.IdentityModel.Xml
     public class Signature
     {
         private string _prefix = XmlSignatureConstants.Prefix;
+        private byte[] _signature;
         readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
 
         public Signature(SignedInfo signedInfo)
@@ -61,6 +62,7 @@ namespace Microsoft.IdentityModel.Xml
             SignedInfo.ComputeReferenceDigests();
             SignedInfo.ComputeHash(hash);
             _signatureValueElement.Signature = hash.Hash;
+            _signature = _signatureValueElement.Signature;
         }
 
         public byte[] GetSignatureBytes()
@@ -70,6 +72,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
+
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
             Id = reader.GetAttribute(UtilityStrings.Id, null);
@@ -83,7 +87,7 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadEndElement(); // Signature
         }
 
-        public object TokenSource { get; set; }
+        public TokenStreamingReader TokenSource { get; set; }
 
         public TransformFactory TransformFactory { get; set; } = TransformFactory.Instance;
 
@@ -98,13 +102,18 @@ namespace Microsoft.IdentityModel.Xml
             if (!signatureProvider.Verify(memoryStream.ToArray(), GetSignatureBytes()))
                 throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
 
-            SignedInfo.EnsureDigestValidity(SignedInfo[0].ExtractReferredId(), TokenSource);
-            SignedInfo.EnsureAllReferencesVerified();
+            var reference = SignedInfo[0];
+            if (!reference.Verify(key.CryptoProviderFactory, TokenSource))
+                throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX21201, reference.Uri)));
         }
 
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
+            if (writer == null)
+                LogHelper.LogArgumentNullException(nameof(writer));
+
+            // <Signature>
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             if (Id != null)
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
@@ -112,10 +121,24 @@ namespace Microsoft.IdentityModel.Xml
             SignedInfo.WriteTo(writer);
             _signatureValueElement.WriteTo(writer);
 
+            // <SignatureValue>
+            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
+
+            // TODO - need different id for SignatureValue
+            // @Id
+            //if (Id != null)
+            //    writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+
+            writer.WriteBase64(_signature, 0, _signature.Length);
+
+             // </ SignatureValue >
+            writer.WriteEndElement();
+
+            // </ Signature>
             writer.WriteEndElement(); // Signature
         }
 
-        sealed class SignatureValueElement : ISignatureValueSecurityElement
+        internal sealed class SignatureValueElement : ISignatureValueSecurityElement
         {
             string _prefix = XmlSignatureConstants.Prefix;
             byte[] _signatureValue;

@@ -41,14 +41,13 @@ namespace Microsoft.IdentityModel.Xml
         readonly ExclusiveCanonicalizationTransform _exclusiveCanonicalizationTransform = new ExclusiveCanonicalizationTransform(true);
         ElementWithAlgorithmAttribute _signatureMethodElement;
         SignatureResourcePool _resourcePool;
-        List<Reference> _references;
+        List<Reference> _references = new List<Reference>();
         MemoryStream _bufferedStream;
         string _defaultNamespace = string.Empty;
 
         public SignedInfo()
         {
             _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
-            _references = new List<Reference>();
         }
 
         public MemoryStream CanonicalStream { get; set; }
@@ -206,34 +205,6 @@ namespace Microsoft.IdentityModel.Xml
             return Context[prefix];
         }
 
-        public void EnsureDigestValidity(string id, object resolvedXmlSource)
-        {
-            if (!EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
-                throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21201, id));
-        }
-
-        public virtual bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
-        {
-            for (int i = 0; i < _references.Count; i++)
-            {
-                if (_references[i].EnsureDigestValidityIfIdMatches(id, resolvedXmlSource))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public virtual bool HasUnverifiedReference(string id)
-        {
-            for (int i = 0; i < _references.Count; i++)
-            {
-                if (!_references[i].Verified && _references[i].ExtractReferredId() == id)
-                    return true;
-            }
-
-            return false;
-        }
-
         public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace, false);
@@ -299,7 +270,13 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual void WriteTo(XmlDictionaryWriter writer)
         {
+            if (writer == null)
+                LogHelper.LogArgumentNullException(nameof(writer));
+
+            // <SignedInfo>
             writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+
+            // @Id
             if (Id != null)
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
 
@@ -308,7 +285,8 @@ namespace Microsoft.IdentityModel.Xml
             foreach (var reference in _references)
                 reference.WriteTo(writer);
 
-            writer.WriteEndElement(); // SignedInfo
+            // </ SignedInfo>
+            writer.WriteEndElement();
         }
 
         protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)

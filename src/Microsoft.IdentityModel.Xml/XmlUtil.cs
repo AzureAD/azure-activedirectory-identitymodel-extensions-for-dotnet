@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogReadException(LogMessages.IDX21010, element);
 
             if (!reader.IsStartElement(element, ns))
-                throw LogReadException(LogMessages.IDX21011, element, reader.LocalName);
+                throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
         }
 
         public static bool EqualsQName(XmlQualifiedName qname, string localName, string namespaceUri)

@@ -72,6 +72,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
+                // uncomment to see exception displayed to user.
+                // ExpectedException.DefaultVerbose = true;
+
                 var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
 
                 theoryData.Add(
