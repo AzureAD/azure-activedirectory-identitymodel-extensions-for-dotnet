@@ -37,16 +37,23 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class Reference
     {
-        private ElementWithAlgorithmAttribute _digestMethodElement;
+        private ElementWithAlgorithmAttribute _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         private DigestValueElement _digestValueElement = new DigestValueElement();
         private string _prefix = XmlSignatureConstants.Prefix;
         private string _referredId;
-        private object _resolvedXmlSource;
         private readonly TransformChain _transformChain = new TransformChain();
 
         public Reference()
         {
-            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
+        }
+
+        public Reference(params Transform[] transforms)
+        {
+            if (transforms == null)
+                LogHelper.LogArgumentNullException(nameof(transforms));
+
+            foreach (var transform in transforms)
+                _transformChain.Add(transform);
         }
 
         public string DigestAlgorithm
@@ -55,45 +62,28 @@ namespace Microsoft.IdentityModel.Xml
             set { _digestMethodElement.Algorithm = value; }
         }
 
-        public string  DigestValue { get; set; }
+        public string  DigestText { get; set; }
+
+        public byte[]  DigestValue { get; set; }
 
         public string Id { get; set; }
-
-        public SignatureResourcePool ResourcePool { get; set; }
 
         public TransformChain TransformChain
         {
             get { return _transformChain; }
         }
 
-        public int TransformCount
-        {
-            get { return _transformChain.TransformCount; }
-        }
-
         public string Type { get; set; }
 
         public string Uri { get; set; }
 
-        public bool Verified
-        {
-            get; set;
-        }
+        public bool Verified { get; set; }
 
-        public void AddTransform(Transform transform)
+        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
         {
-            _transformChain.Add(transform);
-        }
-
-        public bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream )
-        {
-            Verified = Utility.AreEqual(ComputeDigest(tokenStream), GetDigestValue());
+            // TODO - hash algorithm needs to be passed in.
+            Verified = Utility.AreEqual(ComputeDigest(tokenStream, resourcePool), _digestValueElement.Value);
             return Verified;
-        }
-
-        public bool IsStrTranform()
-        {
-            return TransformChain.TransformCount == 1 && TransformChain[0].Algorithm == SecurityAlgorithms.StrTransform;
         }
 
         public string ExtractReferredId()
@@ -145,7 +135,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // TODO - hook this up to write
-        public void ComputeAndSetDigest()
+        internal void ComputeAndSetDigest(SignatureResourcePool resourcePool)
         {
             //_digestValueElement.Value = ComputeDigest();
         }
@@ -161,7 +151,7 @@ namespace Microsoft.IdentityModel.Xml
         //    return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
         //}
 
-        public byte[] ComputeDigest(TokenStreamingReader tokenStream)
+        private byte[] ComputeDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool)
         {
             if (tokenStream == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenStream));
@@ -169,28 +159,23 @@ namespace Microsoft.IdentityModel.Xml
             if (_transformChain.TransformCount == 0)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
-            return _transformChain.TransformToDigest(tokenStream, ResourcePool, DigestAlgorithm);
+            return _transformChain.TransformToDigest(tokenStream, resourcePool, DigestAlgorithm);
         }
 
-        public byte[] GetDigestValue()
-        {
-            return _digestValueElement.Value;
-        }
-
-        public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
+        public void ReadFrom(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
 
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
-            Id = reader.GetAttribute(UtilityStrings.Id, null);
+            Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
             Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
             Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
 
             reader.Read();
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
-                _transformChain.ReadFrom(reader, transformFactory, ShouldPreserveComments(Uri));
+                _transformChain.ReadFrom(reader, ShouldPreserveComments(Uri));
             else
                 throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Transforms, reader.NamespaceURI, reader.LocalName);
 
@@ -201,16 +186,11 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadEndElement(); // Reference
         }
 
-        public void SetResolvedXmlSource(object resolvedXmlSource)
-        {
-            _resolvedXmlSource = resolvedXmlSource;
-        }
-
         public void WriteTo(XmlDictionaryWriter writer)
         {
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             if (Id != null)
-                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
 
             if (Uri != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, Uri);

@@ -25,11 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -41,40 +38,43 @@ namespace Microsoft.IdentityModel.Xml
     {
         private bool _disposed;
         private int _elementCount;
-        private Signature _signature;
         private TokenStreamingReader _tokenStreamingReader;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
         /// </summary>
-        /// <param name="reader">Reader pointing to the enveloped signed XML.</param>
+        /// <param name="reader">Reader pointing to the XML that contains an enveloped signature.</param>
         public EnvelopedSignatureReader(XmlReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
-
 
             _tokenStreamingReader = new TokenStreamingReader(CreateDictionaryReader(reader));
             InnerReader = _tokenStreamingReader;
             _tokenStreamingReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
         }
 
+        /// <summary>
+        /// Called when the root element is read.
+        /// Attaches a <see cref="TokenStreamingReader"/> to the signature.
+        /// </summary>
         protected virtual void OnEndOfRootElement()
         {
-            if (_signature != null)
-                _signature.TokenSource = _tokenStreamingReader;
+            if (Signature != null)
+                Signature.TokenSource = _tokenStreamingReader;
         }
 
-        public Signature Signature { get { return _signature; } }
+        /// <summary>
+        /// Gets the <see cref="Signature"/> associated with the XML.
+        /// </summary>
+        public Signature Signature { get; private set; }
 
         /// <summary>
-        /// Gets a XmlBuffer of the envelope that was enveloped signed.
-        /// The buffer is available after the XML has been read and
-        /// signature validated.
+        /// Gets the <see cref="XmlTokenStream"/> that was collected during the read.
         /// </summary>
         public XmlTokenStream XmlTokens
         {
-            get { return _tokenStreamingReader.XmlTokens.Trim(); }
+            get { return _tokenStreamingReader.XmlTokens; }
         }
 
         /// <summary>
@@ -95,37 +95,24 @@ namespace Microsoft.IdentityModel.Xml
 
             bool result = base.Read();
             if (result
-                && _signature == null
                 && _tokenStreamingReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
                 && _tokenStreamingReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
+                if (Signature != null)
+                   throw XmlUtil.LogReadException(LogMessages.IDX21019);
+
                 ReadSignature();
             }
 
             return result;
         }
 
-        void ReadSignature()
+        private void ReadSignature()
         {
-            _signature = new Signature(new SignedInfo());
-            _signature.ReadFrom(_tokenStreamingReader);
-            if (_signature.SignedInfo.ReferenceCount != 1)
-                throw XmlUtil.LogReadException(LogMessages.IDX21101, _signature.SignedInfo.ReferenceCount);
-        }
-
-        /// <summary>
-        /// Reads the signature if the reader is currently positioned at a Signature element.
-        /// </summary>
-        /// <returns>true if the signature was successfully read else false.</returns>
-        /// <remarks>Does not move the reader when returning false.</remarks>
-        public bool TryReadSignature()
-        {
-            if (IsStartElement(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace))
-            {
-                ReadSignature();
-                return true;
-            }
-            return false;
+            Signature = new Signature(new SignedInfo());
+            Signature.ReadFrom(_tokenStreamingReader);
+            if (Signature.SignedInfo.Reference == null)
+                throw XmlUtil.LogReadException(LogMessages.IDX21101);
         }
 
         #region IDisposable Members

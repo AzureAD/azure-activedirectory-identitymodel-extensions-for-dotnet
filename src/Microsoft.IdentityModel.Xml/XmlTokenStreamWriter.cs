@@ -25,24 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class XmlTokenStreamWriter : ISecurityElement
+    internal class XmlTokenStreamWriter
     {
-        XmlTokenEntry[] _entries;
+        IList<XmlTokenEntry> _entries;
         int _count;
         int _position;
         string _excludedElement;
         int? _excludedElementDepth;
         string _excludedElementNamespace;
 
-        public XmlTokenStreamWriter(XmlTokenEntry[] entries,
-                                     int count,
+        public XmlTokenStreamWriter(IList<XmlTokenEntry> entries,
                                      string excludedElement,
                                      int? excludedElementDepth,
                                      string excludedElementNamespace)
@@ -52,7 +51,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogArgumentNullException(nameof(entries));
             }
             _entries = entries;
-            _count = count;
+            _count = entries.Count;
             _excludedElement = excludedElement;
             _excludedElementDepth = excludedElementDepth;
             _excludedElementNamespace = excludedElementNamespace;
@@ -107,15 +106,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             get { return _excludedElementNamespace; }
         }
-        bool ISecurityElement.HasId
-        {
-            get { return false; }
-        }
 
-        string ISecurityElement.Id
-        {
-            get { return null; }
-        }
 
         public bool MoveToFirst()
         {

@@ -982,6 +982,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (samlSecurityToken == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
+            if (samlSecurityToken.Assertion == null)
+                throw LogHelper.LogArgumentNullException(nameof(samlSecurityToken.Assertion));
+
             var envelopedWriter = new EnvelopedSignatureWriter(writer, samlSecurityToken.Assertion.SigningCredentials, Guid.NewGuid().ToString());
             serializer.WriteToken(envelopedWriter, samlSecurityToken);
         }

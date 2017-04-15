@@ -938,7 +938,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLTokenNotSerialized", ex));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException($"SAMLTokenNotSerialized, {ex}"));
             }
         }
 

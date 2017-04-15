@@ -209,7 +209,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // This call will properly just reuse the existing writer if it already qualifies
             _sourceData.SetElementExclusion(null, null);
-            _sourceData.GetWriter().WriteTo(XmlDictionaryWriter.CreateDictionaryWriter(writer));
+            _sourceData.WriteTo(XmlDictionaryWriter.CreateDictionaryWriter(writer));
         }
 
         /// <summary>

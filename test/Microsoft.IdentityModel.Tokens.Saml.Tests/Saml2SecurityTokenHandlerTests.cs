@@ -373,7 +373,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateTheoryData
                     {
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKey set.",
+                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKey set",
                         Token = RefrenceTokens.Saml2Token_Valid,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new CreateAndValidateTheoryData
                     {
                         Handler = new Saml2SecurityTokenHandler(),
-                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKeys set.",
+                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKeys set",
                         Token = RefrenceTokens.Saml2Token_Valid,
                         ValidationParameters = new TokenValidationParameters
                         {

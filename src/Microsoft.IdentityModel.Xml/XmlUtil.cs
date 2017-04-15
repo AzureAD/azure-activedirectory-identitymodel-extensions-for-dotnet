@@ -332,6 +332,18 @@ namespace Microsoft.IdentityModel.Xml
             return s;
         }
 
+        internal static void ValidateBufferBounds(Array buffer, int offset, int count)
+        {
+            if (buffer == null)
+                throw LogHelper.LogArgumentNullException(nameof(buffer));
+
+            if (count < 0 || count > buffer.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(count), LogHelper.FormatInvariant(LogMessages.IDX20001, 0, buffer.Length)));
+
+            if (offset < 0 || offset > buffer.Length - count)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(offset), LogHelper.FormatInvariant(LogMessages.IDX20001, 0,  buffer.Length - count)));
+        }
+
         public static void ValidateXsiType(XmlReader reader, string expectedTypeName, string expectedTypeNamespace)
         {
             ValidateXsiType(reader, expectedTypeName, expectedTypeNamespace, false);

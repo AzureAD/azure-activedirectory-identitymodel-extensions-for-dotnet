@@ -32,7 +32,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public sealed class CanonicalizationDriver
+    internal sealed class CanonicalizationDriver
     {
         private string[] _inclusivePrefixes;
         private XmlReader _reader;
@@ -87,6 +87,11 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(Stream canonicalStream)
         {
+            WriteTo(canonicalStream, _reader as TokenStreamingReader);
+        }
+
+        public void WriteTo(Stream canonicalStream, TokenStreamingReader reader)
+        {
             if (_reader != null)
             {
                 XmlDictionaryReader dicReader = _reader as XmlDictionaryReader;
@@ -116,9 +121,8 @@ namespace Microsoft.IdentityModel.Xml
                     }
                     writer.StartCanonicalization(canonicalStream, IncludeComments, _inclusivePrefixes);
                     if (_reader is TokenStreamingReader)
-                        ((TokenStreamingReader)_reader).XmlTokens.GetWriter().WriteTo(writer);
+                        ((TokenStreamingReader)_reader).XmlTokens.WriteTo(writer);
                     else
-
                         writer.WriteNode(_reader, false);
 
                     writer.Flush();
@@ -140,5 +144,4 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
     }
-
 }

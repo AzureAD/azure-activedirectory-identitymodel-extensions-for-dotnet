@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Xml
             _transforms.Add(transform);
         }
 
-        public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory, bool preserveComments)
+        public void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace, false);
 
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Xml
             while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
             {
                 string transformAlgorithmUri = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                var transform = transformFactory.CreateTransform(transformAlgorithmUri);
+                var transform = CreateTransform(transformAlgorithmUri);
                 transform.ReadFrom(reader, preserveComments);
                 Add(transform);
             }
@@ -92,6 +92,21 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogReadException(LogMessages.IDX21014);
         }
 
+        public virtual Transform CreateTransform(string transform)
+        {
+            if (string.IsNullOrEmpty(transform))
+                LogHelper.LogArgumentNullException(nameof(transform));
+
+            if (transform == SecurityAlgorithms.ExclusiveC14n)
+                return new ExclusiveCanonicalizationTransform();
+            else if (transform == SecurityAlgorithms.ExclusiveC14nWithComments)
+                return new ExclusiveCanonicalizationTransform(false, true);
+            else if (transform == SecurityAlgorithms.EnvelopedSignature)
+                return new EnvelopedSignatureTransform();
+
+            throw LogHelper.LogExceptionMessage(new XmlException(LogHelper.FormatInvariant(LogMessages.IDX21018, transform)));
+        }
+
         //public byte[] TransformToDigest(TokenStreamingReader data, SignatureResourcePool resourcePool, string digestMethod)
         //{
         //    for (int i = 0; i < TransformCount - 1; i++)
@@ -100,7 +115,7 @@ namespace Microsoft.IdentityModel.Xml
         //    return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
         //}
 
-        public byte[] TransformToDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool, string digestMethod)
+        internal byte[] TransformToDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool, string digestMethod)
         {
             for (int i = 0; i < TransformCount - 1; i++)
                 tokenStream = this[i].Process(tokenStream, resourcePool) as TokenStreamingReader;

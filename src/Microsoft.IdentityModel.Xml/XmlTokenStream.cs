@@ -27,6 +27,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 
@@ -34,59 +35,31 @@ namespace Microsoft.IdentityModel.Xml
 {
     public class XmlTokenStream
     {
-        // TODO - remove dynamic adding.
-        // Add constructor to TokenEntry that takes type / value
-        private int _count;
-        private XmlTokenEntry[] _entries;
+        private List<XmlTokenEntry> _entries = new List<XmlTokenEntry>();
         private string _excludedElement;
         private int? _excludedElementDepth;
         private string _excludedElementNamespace;
 
-        public XmlTokenStream(int initialSize)
+        public XmlTokenStream()
         {
-            if (initialSize < 1)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("initialSize ValueMustBeGreaterThanZero"));
-
-            _entries = new XmlTokenEntry[initialSize];
-        }
-
-        // This constructor is used by the Trim method to reduce the size of the XmlTokenEntry array to the minimum required.
-        public XmlTokenStream(XmlTokenStream other)
-        {
-            _count = other._count;
-            _excludedElement = other._excludedElement;
-            _excludedElementDepth = other._excludedElementDepth;
-            _excludedElementNamespace = other._excludedElementNamespace;
-            _entries = new XmlTokenEntry[_count];
-            Array.Copy(other._entries, _entries, _count);
         }
 
         public void Add(XmlNodeType type, string value)
         {
-            EnsureCapacityToAdd();
-            _entries[_count++].Set(type, value);
+            var tokenEntry = new XmlTokenEntry();
+            _entries.Add(tokenEntry.Set(type, value));
         }
 
         public void AddAttribute(string prefix, string localName, string namespaceUri, string value)
         {
-            EnsureCapacityToAdd();
-            _entries[_count++].SetAttribute(prefix, localName, namespaceUri, value);
+            var tokenEntry = new XmlTokenEntry();
+            _entries.Add(tokenEntry.SetAttribute(prefix, localName, namespaceUri, value));
         }
 
         public void AddElement(string prefix, string localName, string namespaceUri, bool isEmptyElement)
         {
-            EnsureCapacityToAdd();
-            _entries[_count++].SetElement(prefix, localName, namespaceUri, isEmptyElement);
-        }
-
-        void EnsureCapacityToAdd()
-        {
-            if (_count == _entries.Length)
-            {
-                XmlTokenEntry[] newBuffer = new XmlTokenEntry[_entries.Length * 2];
-                Array.Copy(_entries, 0, newBuffer, 0, _count);
-                _entries = newBuffer;
-            }
+             var tokenEntry = new XmlTokenEntry();
+            _entries.Add(tokenEntry.SetElement(prefix, localName, namespaceUri, isEmptyElement));
         }
 
         public void SetElementExclusion(string excludedElement, string excludedElementNamespace)
@@ -101,23 +74,10 @@ namespace Microsoft.IdentityModel.Xml
             _excludedElementNamespace = excludedElementNamespace;
         }
 
-        /// <summary>
-        /// Free unneeded entries from array
-        /// </summary>
-        /// <returns></returns>
-        public XmlTokenStream Trim()
-        {
-            return new XmlTokenStream(this);
-        }
-
-        public XmlTokenStreamWriter GetWriter()
-        {
-            return new XmlTokenStreamWriter(_entries, _count, _excludedElement, _excludedElementDepth, _excludedElementNamespace);
-        }
-
         public void WriteTo(XmlDictionaryWriter writer)
         {
-            GetWriter().WriteTo(writer);
+            var streamWriter = new XmlTokenStreamWriter(_entries, _excludedElement, _excludedElementDepth, _excludedElementNamespace);
+            streamWriter.WriteTo(writer);
         }
     }
 }

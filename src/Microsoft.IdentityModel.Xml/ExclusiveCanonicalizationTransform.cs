@@ -26,20 +26,22 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Canonicalization algorithms are found in &lt;SignedInfo> and &lt;Transform>.
+    /// The elment name can be: CanonicalizationMethod or Transform the actions are the same.
+    /// </summary>
     public class ExclusiveCanonicalizationTransform : Transform
     {
+        private string _elementName;
         private string _inclusiveListElementPrefix = ExclusiveC14NConstants.Prefix;
         private string _inclusiveNamespacesPrefixList;
         private string[] _inclusivePrefixes;
-        private readonly bool _isCanonicalizationMethod;
         private string _prefix = XmlSignatureConstants.Prefix;
 
         public ExclusiveCanonicalizationTransform()
@@ -54,7 +56,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public ExclusiveCanonicalizationTransform(bool isCanonicalizationMethod, bool includeComments)
         {
-            _isCanonicalizationMethod = isCanonicalizationMethod;
+            _elementName = isCanonicalizationMethod ? XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
             IncludeComments = includeComments;
             Algorithm = includeComments ? XmlSignatureConstants.ExclusiveC14nWithComments : XmlSignatureConstants.ExclusiveC14n;
         }
@@ -88,99 +90,46 @@ namespace Microsoft.IdentityModel.Xml
             return _inclusivePrefixes;
         }
 
-        private CanonicalizationDriver GetConfiguredDriver(SignatureResourcePool resourcePool)
-        {
-            var driver = resourcePool.TakeCanonicalizationDriver();
-            driver.IncludeComments = IncludeComments;
-            driver.SetInclusivePrefixes(_inclusivePrefixes);
-            return driver;
-        }
-
         // multi-transform case, inefficient path
-        public override object Process(TokenStreamingReader input, SignatureResourcePool resourcePool)
+        internal override object Process(TokenStreamingReader reader, SignatureResourcePool resourcePool)
         {
-            var xmlReader = input as XmlReader;
-            if (xmlReader != null)
-            {
-                var driver = GetConfiguredDriver(resourcePool);
-                driver.SetInput(xmlReader);
-                return driver.GetMemoryStream();
-            }
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            var securityElement = input as ISecurityElement;
-            if (securityElement != null)
-            {
-                var stream = new MemoryStream();
-                var utf8Writer = resourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(stream, false, null);
-                securityElement.WriteTo(utf8Writer);
-                utf8Writer.EndCanonicalization();
-                stream.Seek(0, SeekOrigin.Begin);
-                return stream;
-            }
-
-            throw LogHelper.LogExceptionMessage(new SecurityTokenException("UnsupportedInputTypeForTransform"));
+            var driver = resourcePool.TakeCanonicalizationDriver(reader, IncludeComments, _inclusivePrefixes);
+            return driver.GetMemoryStream();
         }
 
         // common single-transform case; fold directly into a digest
-        public override byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             var hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
-            ProcessAndDigest(input, resourcePool, hash);
+            ProcessAndDigest(reader, resourcePool, hash);
             return hash.Hash;
         }
 
-        public void ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        internal void ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
+            if (reader == null)
+                LogHelper.LogArgumentNullException(nameof(reader));
+
             var hashStream = resourcePool.TakeHashStream(hash);
-            var reader = input as XmlReader;
-            if (reader != null)
-            {
-                ProcessReaderInput(reader, resourcePool, hashStream);
-            }
-            else if (input is ISecurityElement)
-            {
-                var utf8Writer = resourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
-                (input as ISecurityElement).WriteTo(utf8Writer);
-                utf8Writer.EndCanonicalization();
-            }
-            else
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException("UnsupportedInputTypeForTransform"));
-            }
+            reader.MoveToContent();
+            var driver = resourcePool.TakeCanonicalizationDriver(reader, IncludeComments, _inclusivePrefixes);
+            driver.WriteTo(hashStream);
 
             hashStream.FlushHash();
         }
 
-        void ProcessReaderInput(XmlReader reader, SignatureResourcePool resourcePool, HashStream hashStream)
-        {
-            reader.MoveToContent();
-            var dictionaryReader = reader as XmlDictionaryReader;
-            if (dictionaryReader != null && dictionaryReader.CanCanonicalize)
-            {
-                dictionaryReader.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
-                dictionaryReader.Skip();
-                dictionaryReader.EndCanonicalization();
-            }
-            else
-            {
-                var driver = GetConfiguredDriver(resourcePool);
-                driver.SetInput(reader);
-                driver.WriteTo(hashStream);
-            }
-        }
-
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
-            string elementName = _isCanonicalizationMethod ? XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
-            XmlUtil.CheckReaderOnEntry(reader, elementName, XmlSignatureConstants.Namespace, true);
+            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace, true);
 
             _prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;
             Algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
             if (string.IsNullOrEmpty(Algorithm))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException("dictionaryManager.XmlSignatureDictionary.Algorithm"));
+                throw XmlUtil.LogReadException(LogMessages.IDX21013, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Attributes.Algorithm);
 
             if (Algorithm == XmlSignatureConstants.ExclusiveC14nWithComments)
             {
@@ -190,14 +139,9 @@ namespace Microsoft.IdentityModel.Xml
                 IncludeComments = preserveComments && true;
             }
             else if (Algorithm == XmlSignatureConstants.ExclusiveC14n)
-            {
                 IncludeComments = false;
-            }
             else
-            {
-                throw LogHelper.LogExceptionMessage(new CryptographicException("dictionaryManager.XmlSignatureDictionary.Algorithm"));
-                //throw LogHelper.LogExceptionMessage(new CryptographicException(SR.GetString(SR.ID6005, algorithm)));
-            }
+                XmlUtil.LogReadException(LogMessages.IDX21100, Algorithm, XmlSignatureConstants.ExclusiveC14nWithComments, XmlSignatureConstants.ExclusiveC14n);
 
             reader.Read();
             reader.MoveToContent();
@@ -209,24 +153,24 @@ namespace Microsoft.IdentityModel.Xml
                     reader.MoveToStartElement(ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace);
                     _inclusiveListElementPrefix = reader.Prefix;
                     bool emptyElement = reader.IsEmptyElement;
+
                     // We treat PrefixList as optional Attribute.
                     InclusiveNamespacesPrefixList = reader.GetAttribute(ExclusiveC14NConstants.PrefixList, null);
                     reader.Read();
                     if (!emptyElement)
                         reader.ReadEndElement();
                 }
+
+                // </Transform>
                 reader.MoveToContent();
-                reader.ReadEndElement(); // Transform
+                reader.ReadEndElement();
             }
         }
 
         public override void WriteTo(XmlDictionaryWriter writer)
         {
-            var elementName = _isCanonicalizationMethod ?
-                XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
-            writer.WriteStartElement(_prefix, elementName, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(_prefix, _elementName, XmlSignatureConstants.Namespace);
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, Algorithm);
-
             if (InclusiveNamespacesPrefixList != null)
             {
                 writer.WriteStartElement(_inclusiveListElementPrefix, ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace);
@@ -257,6 +201,7 @@ namespace Microsoft.IdentityModel.Xml
                     prefixes[count++] = prefix;
                 }
             }
+
             if (count == 0)
             {
                 return null;

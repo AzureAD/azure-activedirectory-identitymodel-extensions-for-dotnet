@@ -34,8 +34,9 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    // for sequential use by one thread
-    public class SignatureResourcePool
+    // For sequential use by one thread, so reusable objects are only created once.
+    // The model for use is the upper layer that Verifies a signature will create a new SignatureResourcePool
+    internal class SignatureResourcePool
     {
         private char[] _base64Buffer;
         private const int _bufferSize = 64;
@@ -45,7 +46,6 @@ namespace Microsoft.IdentityModel.Xml
         private HashAlgorithm _hashAlgorithm;
         private XmlDictionaryWriter _utf8Writer;
 
-
         public char[] TakeBase64Buffer()
         {
             if (_base64Buffer == null)
@@ -54,12 +54,16 @@ namespace Microsoft.IdentityModel.Xml
             return _base64Buffer;
         }
 
-        public CanonicalizationDriver TakeCanonicalizationDriver()
+        public CanonicalizationDriver TakeCanonicalizationDriver(XmlReader reader, bool includeComments, string[] inclusivePrefixes)
         {
             if (_canonicalizationDriver == null)
                 _canonicalizationDriver = new CanonicalizationDriver();
             else
                 _canonicalizationDriver.Reset();
+
+            _canonicalizationDriver.IncludeComments = includeComments;
+            _canonicalizationDriver.SetInclusivePrefixes(inclusivePrefixes);
+            _canonicalizationDriver.SetInput(reader);
 
             return _canonicalizationDriver;
         }
@@ -78,7 +82,7 @@ namespace Microsoft.IdentityModel.Xml
             if (_hashAlgorithm == null)
             {
                 if (string.IsNullOrEmpty(algorithm))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException("algorithm, EmptyOrNullArgumentString"));
+                    throw LogHelper.LogArgumentNullException(algorithm);
 
                 _hashAlgorithm = SHA256.Create();
             }
