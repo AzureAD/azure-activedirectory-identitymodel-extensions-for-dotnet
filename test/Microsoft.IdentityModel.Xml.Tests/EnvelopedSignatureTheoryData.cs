@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 {
     public class EnvelopedSignatureTheoryData : TheoryDataBase
     {
-        public bool ExpectSignature { get; set; }
+        public bool ExpectSignature { get; set; } = true;
 
         public string ReferenceId { get; set; }
 

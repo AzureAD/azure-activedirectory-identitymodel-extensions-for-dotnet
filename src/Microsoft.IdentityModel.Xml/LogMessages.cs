@@ -48,11 +48,13 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21016 = "IDX21016: Exception thrown while reading '{0}'. See inner exception for more details.";
         internal const string IDX21017 = "IDX21017: Exception thrown while reading '{0}'. Caught exception: '{1}'.";
         internal const string IDX21018 = "IDX21018: Unable to read xml. A Reference contains an unknown transform '{0}'.";
+        internal const string IDX21019 = "IDX21019: Unable to read xml. A second <Signature> element was found. The EnvelopedSignatureReader can only process one <Signature>.";
+        internal const string IDX21020 = "IDX21020: Unable to read xml. A second <Reference> element was found. The EnvelopedSignatures can only have one <Reference>.";
 
 
         // xml structure, supported exceptions
         internal const string IDX21100 = "IDX21100: Unable to process signature. This cannonizalization method is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
-        internal const string IDX21101 = "IDX21101: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
+        internal const string IDX21101 = "IDX21101: An EnvelopedSignature must have a <Reference> element. None were found.";
         internal const string IDX21102 = "IDX21102: The reader passed to the {0}, must be pointing to a StartElement.";
         internal const string IDX21103 = "IDX21103: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
         internal const string IDX21104 = "IDX21200: The 'Reference' specifies to use 'StrTransform'. The id parameter cannot be null or empty.";

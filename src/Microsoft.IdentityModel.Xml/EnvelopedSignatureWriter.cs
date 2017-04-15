@@ -102,8 +102,7 @@ namespace Microsoft.IdentityModel.Xml
             signedInfo.AddReference(_referenceId, _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream));
 
             var signature = new Signature(signedInfo);
-            signature.ComputeSignature(_signingCredentials);
-            signature.WriteTo(base.InnerWriter);
+            signature.WriteTo(base.InnerWriter, _signingCredentials);
             ((IDisposable)_hashStream).Dispose();
             _hashStream = null;
         }

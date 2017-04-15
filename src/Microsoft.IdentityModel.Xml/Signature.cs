@@ -56,11 +56,12 @@ namespace Microsoft.IdentityModel.Xml
             get; private set;
         }
 
-        public void ComputeSignature(SigningCredentials credentials)
+        internal void ComputeSignature(SigningCredentials credentials)
         {
+            var resourcePool = new SignatureResourcePool();
             var hash = credentials.Key.CryptoProviderFactory.CreateHashAlgorithm(credentials.Digest);
-            SignedInfo.ComputeReferenceDigests();
-            SignedInfo.ComputeHash(hash);
+            SignedInfo.ComputeReferenceDigests(resourcePool);
+            SignedInfo.ComputeHash(hash, resourcePool);
             _signatureValueElement.Signature = hash.Hash;
             _signature = _signatureValueElement.Signature;
         }
@@ -98,20 +99,25 @@ namespace Microsoft.IdentityModel.Xml
 
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureAlgorithm);
             var memoryStream = new MemoryStream();
-            SignedInfo.GetCanonicalBytes(memoryStream);
-            if (!signatureProvider.Verify(memoryStream.ToArray(), GetSignatureBytes()))
+            var resourcePool = new SignatureResourcePool();
+            SignedInfo.GetCanonicalBytes(memoryStream, resourcePool);
+
+            if (!signatureProvider.Verify(SignedInfo.CanonicalStream.ToArray(), GetSignatureBytes()))
                 throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
 
-            var reference = SignedInfo[0];
-            if (!reference.Verify(key.CryptoProviderFactory, TokenSource))
-                throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX21201, reference.Uri)));
+            if (!SignedInfo.Reference.Verify(key.CryptoProviderFactory, TokenSource, resourcePool))
+                throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX21201, SignedInfo.Reference.Uri)));
         }
 
-
-        public void WriteTo(XmlDictionaryWriter writer)
+        public virtual void WriteTo(XmlDictionaryWriter writer, SigningCredentials credentials)
         {
             if (writer == null)
                 LogHelper.LogArgumentNullException(nameof(writer));
+
+            if (credentials == null)
+                LogHelper.LogArgumentNullException(nameof(credentials));
+
+            ComputeSignature(credentials);
 
             // <Signature>
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);

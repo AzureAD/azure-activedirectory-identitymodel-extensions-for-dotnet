@@ -41,11 +41,21 @@ namespace Microsoft.IdentityModel.Xml
         private DigestValueElement _digestValueElement = new DigestValueElement();
         private string _prefix = XmlSignatureConstants.Prefix;
         private string _referredId;
-        private object _resolvedXmlSource;
         private readonly TransformChain _transformChain = new TransformChain();
 
         public Reference()
         {
+            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
+        }
+
+        public Reference(params Transform[] transforms)
+        {
+            if (transforms == null)
+                LogHelper.LogArgumentNullException(nameof(transforms));
+
+            foreach (var transform in transforms)
+                _transformChain.Add(transform);
+
             _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         }
 
@@ -55,43 +65,30 @@ namespace Microsoft.IdentityModel.Xml
             set { _digestMethodElement.Algorithm = value; }
         }
 
-        public string  DigestValue { get; set; }
+        public string  DigestText { get; set; }
+
+        public byte[]  DigestValue { get; set; }
 
         public string Id { get; set; }
-
-        public SignatureResourcePool ResourcePool { get; set; }
 
         public TransformChain TransformChain
         {
             get { return _transformChain; }
         }
 
-        public int TransformCount
-        {
-            get { return _transformChain.TransformCount; }
-        }
-
         public string Type { get; set; }
 
         public string Uri { get; set; }
 
-        public bool Verified
-        {
-            get; set;
-        }
+        public bool Verified { get; set; }
 
-        public void AddTransform(Transform transform)
+        public bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
         {
-            _transformChain.Add(transform);
-        }
-
-        public bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream )
-        {
-            Verified = Utility.AreEqual(ComputeDigest(tokenStream), GetDigestValue());
+            Verified = Utility.AreEqual(ComputeDigest(tokenStream, resourcePool), _digestValueElement.Value);
             return Verified;
         }
 
-        public bool IsStrTranform()
+        private bool IsStrTranform()
         {
             return TransformChain.TransformCount == 1 && TransformChain[0].Algorithm == SecurityAlgorithms.StrTransform;
         }
@@ -145,7 +142,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // TODO - hook this up to write
-        public void ComputeAndSetDigest()
+        public void ComputeAndSetDigest(SignatureResourcePool resourcePool)
         {
             //_digestValueElement.Value = ComputeDigest();
         }
@@ -161,7 +158,7 @@ namespace Microsoft.IdentityModel.Xml
         //    return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
         //}
 
-        public byte[] ComputeDigest(TokenStreamingReader tokenStream)
+        private byte[] ComputeDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool)
         {
             if (tokenStream == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenStream));
@@ -169,12 +166,7 @@ namespace Microsoft.IdentityModel.Xml
             if (_transformChain.TransformCount == 0)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
-            return _transformChain.TransformToDigest(tokenStream, ResourcePool, DigestAlgorithm);
-        }
-
-        public byte[] GetDigestValue()
-        {
-            return _digestValueElement.Value;
+            return _transformChain.TransformToDigest(tokenStream, resourcePool, DigestAlgorithm);
         }
 
         public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
@@ -199,11 +191,6 @@ namespace Microsoft.IdentityModel.Xml
 
             reader.MoveToContent();
             reader.ReadEndElement(); // Reference
-        }
-
-        public void SetResolvedXmlSource(object resolvedXmlSource)
-        {
-            _resolvedXmlSource = resolvedXmlSource;
         }
 
         public void WriteTo(XmlDictionaryWriter writer)

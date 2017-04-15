@@ -87,6 +87,11 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(Stream canonicalStream)
         {
+            WriteTo(canonicalStream, _reader as TokenStreamingReader);
+        }
+
+        public void WriteTo(Stream canonicalStream, TokenStreamingReader reader)
+        {
             if (_reader != null)
             {
                 XmlDictionaryReader dicReader = _reader as XmlDictionaryReader;
@@ -118,7 +123,6 @@ namespace Microsoft.IdentityModel.Xml
                     if (_reader is TokenStreamingReader)
                         ((TokenStreamingReader)_reader).XmlTokens.GetWriter().WriteTo(writer);
                     else
-
                         writer.WriteNode(_reader, false);
 
                     writer.Flush();
@@ -140,5 +144,4 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
     }
-
 }

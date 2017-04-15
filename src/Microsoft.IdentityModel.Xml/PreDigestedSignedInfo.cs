@@ -40,9 +40,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     internal class PreDigestedSignedInfo : SignedInfo
     {
-        private const int _initialReferenceArraySize = 8;
-        private int _count;
-        private ReferenceEntry[] _references;
+        private ReferenceEntry _referenceEntry;
 
         public PreDigestedSignedInfo(
             string canonicalizationMethod,
@@ -58,7 +56,6 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(signatureAlgorithm))
                 throw LogHelper.LogArgumentNullException(nameof(signatureAlgorithm));
 
-            _references = new ReferenceEntry[_initialReferenceArraySize];
             CanonicalizationMethod = canonicalizationMethod;
             DigestMethod = digestMethod;
             SignatureAlgorithm = signatureAlgorithm;
@@ -69,11 +66,6 @@ namespace Microsoft.IdentityModel.Xml
 
         public string DigestMethod { get; private set; }
 
-        public override int ReferenceCount
-        {
-            get { return _count; }
-        }
-
         public void AddReference(string id, byte[] digest)
         {
             AddReference(id, digest, false);
@@ -81,36 +73,30 @@ namespace Microsoft.IdentityModel.Xml
 
         public void AddReference(string id, byte[] digest, bool useStrTransform)
         {
-            if (_count == _references.Length)
-            {
-                ReferenceEntry[] newReferences = new ReferenceEntry[_references.Length * 2];
-                Array.Copy(_references, 0, newReferences, 0, _count);
-                _references = newReferences;
-            }
-            _references[_count++].Set(id, digest, useStrTransform);
+            _referenceEntry = new ReferenceEntry();
+            _referenceEntry.Set(id, digest, useStrTransform);
         }
 
-        internal override void ComputeHash(HashStream hashStream)
+        internal override void ComputeHash(HashStream hashStream, SignatureResourcePool resourcePool)
         {
-            GetCanonicalBytes(hashStream);
+            GetCanonicalBytes(hashStream, resourcePool);
         }
 
-        public override void GetCanonicalBytes(Stream stream)
+        internal override void GetCanonicalBytes(Stream stream, SignatureResourcePool resourcePool)
         {
             if (AddEnvelopedSignatureTransform)
             {
-                base.GetCanonicalBytes(stream);
+                base.GetCanonicalBytes(stream, resourcePool);
             }
             else
             {
                 SignedInfoCanonicalFormWriter.Instance.WriteSignedInfoCanonicalForm(
                     stream, SignatureAlgorithm, DigestMethod,
-                    _references, _count,
-                    ResourcePool.TakeEncodingBuffer(), ResourcePool.TakeBase64Buffer());
+                    _referenceEntry, resourcePool.TakeEncodingBuffer(), resourcePool.TakeBase64Buffer());
             }
         }
 
-        public override void ComputeReferenceDigests()
+        internal override void ComputeReferenceDigests(SignatureResourcePool resourcePool)
         {
             // all digests pre-computed
         }
@@ -121,7 +107,7 @@ namespace Microsoft.IdentityModel.Xml
             throw LogHelper.LogExceptionMessage(new NotSupportedException());
         }
 
-        public override void EnsureAllReferencesVerified()
+        internal override void EnsureReferenceVerified()
 
         {
             // WriteOnly
@@ -141,12 +127,12 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteAttributeString(UtilityStrings.Id, null, Id);
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
-            for (int i = 0; i < _count; i++)
+            if (_referenceEntry._digest != null)
             {
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
                 writer.WriteStartAttribute(XmlSignatureConstants.Attributes.URI, null);
                 writer.WriteString("#");
-                writer.WriteString(_references[i]._id);
+                writer.WriteString(_referenceEntry._id);
                 writer.WriteEndAttribute();
 
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
@@ -159,7 +145,7 @@ namespace Microsoft.IdentityModel.Xml
                     writer.WriteEndElement(); // Transform
                 }
 
-                if (_references[i]._useStrTransform)
+                if (_referenceEntry._useStrTransform)
                 {
                     writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
                     writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
@@ -191,7 +177,7 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteEndAttribute();
                 writer.WriteEndElement(); // DigestMethod
 
-                byte[] digest = _references[i]._digest;
+                byte[] digest = _referenceEntry._digest;
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 writer.WriteBase64(digest, 0, digest.Length);
                 writer.WriteEndElement(); // DigestValue
@@ -285,8 +271,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public void WriteSignedInfoCanonicalForm(
                 Stream stream, string signatureMethod, string digestMethod,
-                ReferenceEntry[] references, int referenceCount,
-                byte[] workBuffer, char[] base64WorkBuffer)
+                ReferenceEntry reference, byte[] workBuffer, char[] base64WorkBuffer)
             {
                 stream.Write(_fragment1, 0, _fragment1.Length);
                 byte[] signatureMethodBytes = EncodeSignatureAlgorithm(signatureMethod);
@@ -294,21 +279,17 @@ namespace Microsoft.IdentityModel.Xml
                 stream.Write(_fragment2, 0, _fragment2.Length);
 
                 byte[] digestMethodBytes = EncodeDigestAlgorithm(digestMethod);
-                for (int i = 0; i < referenceCount; i++)
-                {
-                    stream.Write(_fragment3, 0, _fragment3.Length);
-                    EncodeAndWrite(stream, workBuffer, references[i]._id);
-                    if (references[i]._useStrTransform)
-                        stream.Write(_fragment4StrTransform, 0, _fragment4StrTransform.Length);
-                    else
-                        stream.Write(_fragment4, 0, _fragment4.Length);
+                stream.Write(_fragment3, 0, _fragment3.Length);
+                EncodeAndWrite(stream, workBuffer, reference._id);
+                if (reference._useStrTransform)
+                    stream.Write(_fragment4StrTransform, 0, _fragment4StrTransform.Length);
+                else
+                    stream.Write(_fragment4, 0, _fragment4.Length);
 
-                    stream.Write(digestMethodBytes, 0, digestMethodBytes.Length);
-                    stream.Write(_fragment5, 0, _fragment5.Length);
-                    Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, references[i]._digest);
-                    stream.Write(_fragment6, 0, _fragment6.Length);
-                }
-
+                stream.Write(digestMethodBytes, 0, digestMethodBytes.Length);
+                stream.Write(_fragment5, 0, _fragment5.Length);
+                Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, reference._digest);
+                stream.Write(_fragment6, 0, _fragment6.Length);
                 stream.Write(_fragment7, 0, _fragment7.Length);
             }
         }

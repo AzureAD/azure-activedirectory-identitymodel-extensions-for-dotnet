@@ -86,8 +86,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
             try
             {
                 var signedInfo = new SignedInfo();
-                if (signedInfo.ReferenceCount != 0)
-                    errors.Add("signedInfo.ReferenceCount != 0");
+                if (signedInfo.Reference != null)
+                    errors.Add("signedInfo.Reference != null");
 
                 if (!string.IsNullOrEmpty(signedInfo.SignatureAlgorithm))
                     errors.Add("!string.IsNullOrEmpty(signedInfo.SignatureAlgorithm)");

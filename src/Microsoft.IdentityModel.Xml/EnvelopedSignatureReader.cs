@@ -25,11 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -95,22 +92,24 @@ namespace Microsoft.IdentityModel.Xml
 
             bool result = base.Read();
             if (result
-                && _signature == null
                 && _tokenStreamingReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
                 && _tokenStreamingReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
+                if (_signature != null)
+                   throw XmlUtil.LogReadException(LogMessages.IDX21019);
+
                 ReadSignature();
             }
 
             return result;
         }
 
-        void ReadSignature()
+        private void ReadSignature()
         {
             _signature = new Signature(new SignedInfo());
             _signature.ReadFrom(_tokenStreamingReader);
-            if (_signature.SignedInfo.ReferenceCount != 1)
-                throw XmlUtil.LogReadException(LogMessages.IDX21101, _signature.SignedInfo.ReferenceCount);
+            if (_signature.SignedInfo.Reference == null)
+                throw XmlUtil.LogReadException(LogMessages.IDX21101);
         }
 
         /// <summary>
