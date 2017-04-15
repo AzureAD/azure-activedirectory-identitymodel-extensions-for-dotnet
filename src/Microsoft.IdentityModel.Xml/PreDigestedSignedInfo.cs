@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Essentially a performance enhancement used when writing signed info.
-    /// Common elements have their hashes pre calculated.
+    /// Common elements have their hashes pre-calculated.
     /// Only used for writting
     /// </summary>
     internal class PreDigestedSignedInfo : SignedInfo

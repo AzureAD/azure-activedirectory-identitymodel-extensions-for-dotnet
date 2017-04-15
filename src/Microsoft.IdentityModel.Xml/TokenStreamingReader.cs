@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX21102));
 
             InnerReader = reader;
-            _xmlTokens = new XmlTokenStream(32);
+            _xmlTokens = new XmlTokenStream();
             Record();
         }
 
@@ -136,15 +136,12 @@ namespace Microsoft.IdentityModel.Xml
 
         int ReadBinaryContent(byte[] buffer, int offset, int count, bool isBase64)
         {
-            // TODO - check for bounds
-            //CryptoHelper.ValidateBufferBounds(buffer, offset, count);
+            XmlUtil.ValidateBufferBounds(buffer, offset, count);
 
-            //
             // Concatentate text nodes to get entire element value before attempting to convert
-            // XmlDictionaryReader.CreateDictionaryReader( XmlReader ) creates a reader that returns base64 in a single text node
-            // XmlDictionaryReader.CreateTextReader( Stream ) creates a reader that produces multiple text and whitespace nodes
+            // XmlDictionaryReader.CreateDictionaryReader(XmlReader) creates a reader that returns base64 in a single text node
+            // XmlDictionaryReader.CreateTextReader(Stream) creates a reader that produces multiple text and whitespace nodes
             // Attribute nodes consist of only a single value
-            //
             if (_contentStream == null)
             {
                 string encodedValue;

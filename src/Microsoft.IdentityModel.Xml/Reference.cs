@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class Reference
     {
-        private ElementWithAlgorithmAttribute _digestMethodElement;
+        private ElementWithAlgorithmAttribute _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         private DigestValueElement _digestValueElement = new DigestValueElement();
         private string _prefix = XmlSignatureConstants.Prefix;
         private string _referredId;
@@ -45,7 +45,6 @@ namespace Microsoft.IdentityModel.Xml
 
         public Reference()
         {
-            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         }
 
         public Reference(params Transform[] transforms)
@@ -55,8 +54,6 @@ namespace Microsoft.IdentityModel.Xml
 
             foreach (var transform in transforms)
                 _transformChain.Add(transform);
-
-            _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         }
 
         public string DigestAlgorithm
@@ -84,6 +81,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
         {
+            // TODO - hash algorithm needs to be passed in.
             Verified = Utility.AreEqual(ComputeDigest(tokenStream, resourcePool), _digestValueElement.Value);
             return Verified;
         }

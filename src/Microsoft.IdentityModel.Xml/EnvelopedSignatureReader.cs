@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public XmlTokenStream XmlTokens
         {
-            get { return _tokenStreamingReader.XmlTokens.Trim(); }
+            get { return _tokenStreamingReader.XmlTokens; }
         }
 
         /// <summary>

@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 

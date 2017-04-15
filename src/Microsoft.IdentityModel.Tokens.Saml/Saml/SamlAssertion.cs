@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (string.IsNullOrEmpty(assertionId))
                 throw LogHelper.LogArgumentNullException(nameof(assertionId));
 
-            _tokenStream = new XmlTokenStream(32);
+            _tokenStream = new XmlTokenStream();
 
             // TODO warning
             //if (!IsAssertionIdValid(assertionId))

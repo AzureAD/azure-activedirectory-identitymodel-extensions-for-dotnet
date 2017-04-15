@@ -37,8 +37,8 @@ namespace Microsoft.IdentityModel.Xml
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
-
         // Xml reading
+        internal const string IDX20001 = "IDX10001: The value of this argument must fall within the range {0} to {1}.";
         internal const string IDX21010 = "IDX21010: Unable to read xml. Expecting XmlReader to be at element: '{0}', found 'Empty Element'";
         internal const string IDX21011 = "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'.";
         internal const string IDX21012 = "IDX21012: Unable to read xml. While reading '{0}', This node was not expected: '{1}'.";
