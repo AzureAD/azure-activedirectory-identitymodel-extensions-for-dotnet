@@ -31,8 +31,6 @@ namespace Microsoft.IdentityModel.Xml
 {
     public abstract class Transform
     {
-        protected Transform() { }
-
         public string Algorithm { get; protected set; }
 
         public virtual bool NeedsInclusiveContext
@@ -40,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml
             get { return false; }
         }
 
-        public abstract object Process(TokenStreamingReader input, SignatureResourcePool resourcePool);
+        internal abstract object Process(TokenStreamingReader input, SignatureResourcePool resourcePool);
 
         public abstract byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm);
 

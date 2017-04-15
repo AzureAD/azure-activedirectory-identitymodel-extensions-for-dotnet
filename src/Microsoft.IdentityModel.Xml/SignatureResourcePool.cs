@@ -54,12 +54,16 @@ namespace Microsoft.IdentityModel.Xml
             return _base64Buffer;
         }
 
-        public CanonicalizationDriver TakeCanonicalizationDriver()
+        public CanonicalizationDriver TakeCanonicalizationDriver(XmlReader reader, bool includeComments, string[] inclusivePrefixes)
         {
             if (_canonicalizationDriver == null)
                 _canonicalizationDriver = new CanonicalizationDriver();
             else
                 _canonicalizationDriver.Reset();
+
+            _canonicalizationDriver.IncludeComments = includeComments;
+            _canonicalizationDriver.SetInclusivePrefixes(inclusivePrefixes);
+            _canonicalizationDriver.SetInput(reader);
 
             return _canonicalizationDriver;
         }

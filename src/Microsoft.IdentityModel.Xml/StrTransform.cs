@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -68,84 +67,32 @@ namespace Microsoft.IdentityModel.Xml
             return _inclusivePrefixes;
         }
 
-        CanonicalizationDriver GetConfiguredDriver(SignatureResourcePool resourcePool)
+        internal override object Process(TokenStreamingReader reader, SignatureResourcePool resourcePool)
         {
-            var driver = resourcePool.TakeCanonicalizationDriver();
-            driver.IncludeComments = IncludeComments;
-            driver.SetInclusivePrefixes(_inclusivePrefixes);
-            return driver;
+            if (reader == null)
+                LogHelper.LogArgumentNullException(nameof(reader));
+
+            var driver = resourcePool.TakeCanonicalizationDriver(reader, IncludeComments, _inclusivePrefixes);
+            return driver.GetMemoryStream();
         }
 
-        public override object Process(TokenStreamingReader input, SignatureResourcePool resourcePool)
-        {
-            if (input is XmlReader)
-            {
-                var driver = GetConfiguredDriver(resourcePool);
-                driver.SetInput(input as XmlReader);
-                return driver.GetMemoryStream();
-            }
-            else if (input is ISecurityElement)
-            {
-                var stream = new MemoryStream();
-                var utf8Writer = resourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(stream, false, null);
-                (input as ISecurityElement).WriteTo(utf8Writer);
-                utf8Writer.EndCanonicalization();
-                stream.Seek(0, SeekOrigin.Begin);
-                return stream;
-            }
-            else
-            {
-                throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedInputTypeForTransform"));
-            }
-        }
-
-        public override byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm)
+        public override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             HashAlgorithm hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
-            ProcessAndDigest(input, resourcePool, hash);
+            ProcessAndDigest(reader, resourcePool, hash);
             return hash.Hash;
         }
 
-        public void ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        public void ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
+            if (reader == null)
+                LogHelper.LogArgumentNullException(nameof(reader));
+
             var hashStream = resourcePool.TakeHashStream(hash);
-            var reader = input as XmlReader;
-            if (reader != null)
-            {
-                ProcessReaderInput(reader, resourcePool, hashStream);
-            }
-            else if (input is ISecurityElement)
-            {
-                var utf8Writer = resourcePool.TakeUtf8Writer();
-                utf8Writer.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
-                (input as ISecurityElement).WriteTo(utf8Writer);
-                utf8Writer.EndCanonicalization();
-            }
-            else
-            {
-                throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedInputTypeForTransform"));
-            }
+            var driver = resourcePool.TakeCanonicalizationDriver(reader, IncludeComments, _inclusivePrefixes);
+            driver.WriteTo(hashStream);
 
             hashStream.FlushHash();
-        }
-
-        void ProcessReaderInput(XmlReader reader, SignatureResourcePool resourcePool, HashStream hashStream)
-        {
-            reader.MoveToContent();
-            var dictionaryReader = reader as XmlDictionaryReader;
-            if (dictionaryReader != null && dictionaryReader.CanCanonicalize)
-            {
-                dictionaryReader.StartCanonicalization(hashStream, IncludeComments, GetInclusivePrefixes());
-                dictionaryReader.Skip();
-                dictionaryReader.EndCanonicalization();
-            }
-            else
-            {
-                var driver = GetConfiguredDriver(resourcePool);
-                driver.SetInput(reader);
-                driver.WriteTo(hashStream);
-            }
         }
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)

@@ -41,10 +41,10 @@ namespace Microsoft.IdentityModel.Xml
             Algorithm = XmlSignatureConstants.Algorithms.EnvelopedSignature;
         }
 
-        public override object Process(TokenStreamingReader tokenStreamingReader, SignatureResourcePool resourcePool)
+        internal override object Process(TokenStreamingReader reader, SignatureResourcePool resourcePool)
         {
-            if (tokenStreamingReader == null)
-                LogHelper.LogArgumentNullException(nameof(tokenStreamingReader));
+            if (reader == null)
+                LogHelper.LogArgumentNullException(nameof(reader));
 
             // The Enveloped Signature Transform is supposed to remove the
             // Signature which encloses the transform element. Previous versions
@@ -53,12 +53,12 @@ namespace Microsoft.IdentityModel.Xml
             // as the depth, we narrow our range of support so that we require
             // that the enveloped signature be a direct child of the element
             // being signed.
-            tokenStreamingReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace, 1);
-            return tokenStreamingReader;
+            reader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace, 1);
+            return reader;
         }
 
         // this transform is not allowed as the last one in a chain
-        public override byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm)
+        public override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
         }

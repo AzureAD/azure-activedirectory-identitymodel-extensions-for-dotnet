@@ -26,9 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -100,7 +98,7 @@ namespace Microsoft.IdentityModel.Xml
         //    return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
         //}
 
-        public byte[] TransformToDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool, string digestMethod)
+        internal byte[] TransformToDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool, string digestMethod)
         {
             for (int i = 0; i < TransformCount - 1; i++)
                 tokenStream = this[i].Process(tokenStream, resourcePool) as TokenStreamingReader;
