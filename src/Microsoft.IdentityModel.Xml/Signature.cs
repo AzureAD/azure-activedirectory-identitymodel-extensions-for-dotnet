@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Xml
             Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
             reader.Read();
 
-            SignedInfo.ReadFrom(reader, TransformFactory);
+            SignedInfo.ReadFrom(reader);
             _signatureValueElement.ReadFrom(reader);
             KeyInfo = new KeyInfo();
             KeyInfo.ReadFrom(reader);
@@ -89,8 +89,6 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         public TokenStreamingReader TokenSource { get; set; }
-
-        public TransformFactory TransformFactory { get; set; } = TransformFactory.Instance;
 
         public void Verify(SecurityKey key)
         {

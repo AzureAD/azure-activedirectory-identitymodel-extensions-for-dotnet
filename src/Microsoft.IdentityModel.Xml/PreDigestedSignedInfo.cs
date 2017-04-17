@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Xml
             // all digests pre-computed
         }
 
-        public override void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
+        public override void ReadFrom(XmlDictionaryReader reader)
         {
             // WriteOnly
             throw LogHelper.LogExceptionMessage(new NotSupportedException());

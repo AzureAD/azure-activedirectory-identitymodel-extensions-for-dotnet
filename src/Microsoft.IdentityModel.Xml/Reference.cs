@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Xml
             return _transformChain.TransformToDigest(tokenStream, resourcePool, DigestAlgorithm);
         }
 
-        public void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
+        public void ReadFrom(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
 
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Xml
             reader.Read();
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
-                _transformChain.ReadFrom(reader, transformFactory, ShouldPreserveComments(Uri));
+                _transformChain.ReadFrom(reader, ShouldPreserveComments(Uri));
             else
                 throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Transforms, reader.NamespaceURI, reader.LocalName);
 

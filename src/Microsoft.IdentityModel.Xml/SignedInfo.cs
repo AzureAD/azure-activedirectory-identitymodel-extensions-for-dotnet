@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.Xml
             return Context[prefix];
         }
 
-        public virtual void ReadFrom(XmlDictionaryReader reader, TransformFactory transformFactory)
+        public virtual void ReadFrom(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace, false);
 
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 XmlUtil.CheckReaderOnEntry(canonicalizingReader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
                 Reference = new Reference();
-                Reference.ReadFrom(canonicalizingReader, transformFactory);
+                Reference.ReadFrom(canonicalizingReader);
 
                 if (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                     throw XmlUtil.LogReadException(LogMessages.IDX21020);

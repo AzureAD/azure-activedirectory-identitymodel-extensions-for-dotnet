@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 var sr = new StringReader(theoryData.SignedInfoDataSet.Xml);
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 var signedInfo = new SignedInfo();
-                signedInfo.ReadFrom(reader, theoryData.TransformFactory);
+                signedInfo.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException();
 
                 DSigXmlComparer.GetDiffs(signedInfo, theoryData.SignedInfoDataSet.SignedInfo, errors);
@@ -166,71 +166,62 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     First = true,
                     SignedInfoDataSet = RefernceXml.SignedInfoValid,
-                    TestId = nameof(RefernceXml.SignedInfoValid),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoValid)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     SignedInfoDataSet = RefernceXml.SignInfoStartsWithWhiteSpace,
                     TestId = nameof(RefernceXml.SignInfoStartsWithWhiteSpace),
-                    TransformFactory = TransformFactory.Instance
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoCanonicalizationMethodMissing,
-                    TestId = nameof(RefernceXml.SignedInfoCanonicalizationMethodMissing),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoCanonicalizationMethodMissing)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoReferenceMissing,
-                    TestId = nameof(RefernceXml.SignedInfoReferenceMissing),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoReferenceMissing)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoTransformsMissing,
-                    TestId = nameof(RefernceXml.SignedInfoTransformsMissing),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoTransformsMissing)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoNoTransforms,
-                    TestId = nameof(RefernceXml.SignedInfoNoTransforms),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoNoTransforms)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoUnknownTransform,
-                    TestId = nameof(RefernceXml.SignedInfoUnknownTransform),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoUnknownTransform)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoMissingDigestMethod,
-                    TestId = nameof(RefernceXml.SignedInfoMissingDigestMethod),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoMissingDigestMethod)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                     SignedInfoDataSet = RefernceXml.SignedInfoMissingDigestValue,
-                    TestId = nameof(RefernceXml.SignedInfoMissingDigestValue),
-                    TransformFactory = TransformFactory.Instance
+                    TestId = nameof(RefernceXml.SignedInfoMissingDigestValue)
                 });
 
                 return theoryData;
@@ -391,8 +382,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
             public SigningCredentials SigningCredentials { get; set; }
 
             public SignedInfoTestSet SignedInfoDataSet { get; set; }
-
-            public TransformFactory TransformFactory { get; set; }
 
             public XmlDictionaryWriter XmlWriter { get; set; }
         }
