@@ -32,7 +32,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public sealed class CanonicalizationDriver
+    internal sealed class CanonicalizationDriver
     {
         private string[] _inclusivePrefixes;
         private XmlReader _reader;

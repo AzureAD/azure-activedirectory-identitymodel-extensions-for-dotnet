@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -176,8 +177,10 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        sealed class SignedInfoCanonicalFormWriter : CanonicalFormWriter
+        sealed class SignedInfoCanonicalFormWriter
         {
+            internal static readonly UTF8Encoding Utf8WithoutPreamble = new UTF8Encoding(false);
+
             const string _xml1 = "<SignedInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></CanonicalizationMethod><SignatureMethod Algorithm=\"";
             const string _xml2 = "\"></SignatureMethod>";
             const string _xml3 = "<Reference URI=\"#";
@@ -236,6 +239,80 @@ namespace Microsoft.IdentityModel.Xml
                     return _rsaSha2Signature;
                 else
                     return Utf8WithoutPreamble.GetBytes(algorithm);
+            }
+
+            static void Base64EncodeAndWrite(Stream stream, byte[] workBuffer, char[] base64WorkBuffer, byte[] data)
+            {
+                if ((data.Length / 3) * 4 + 4 > base64WorkBuffer.Length)
+                {
+                    EncodeAndWrite(stream, Convert.ToBase64String(data));
+                    return;
+                }
+
+                int encodedLength = Convert.ToBase64CharArray(data, 0, data.Length, base64WorkBuffer, 0, Base64FormattingOptions.None);
+                EncodeAndWrite(stream, workBuffer, base64WorkBuffer, encodedLength);
+            }
+
+            static void EncodeAndWrite(Stream stream, byte[] workBuffer, string s)
+            {
+                if (s.Length > workBuffer.Length)
+                {
+                    EncodeAndWrite(stream, s);
+                    return;
+                }
+
+                for (int i = 0; i < s.Length; i++)
+                {
+                    char c = s[i];
+                    if (c < 127)
+                    {
+                        workBuffer[i] = (byte)c;
+                    }
+                    else
+                    {
+                        EncodeAndWrite(stream, s);
+                        return;
+                    }
+                }
+
+                stream.Write(workBuffer, 0, s.Length);
+            }
+
+            static void EncodeAndWrite(Stream stream, byte[] workBuffer, char[] chars, int count)
+            {
+                if (count > workBuffer.Length)
+                {
+                    EncodeAndWrite(stream, chars, count);
+                    return;
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    char c = chars[i];
+                    if (c < 127)
+                    {
+                        workBuffer[i] = (byte)c;
+                    }
+                    else
+                    {
+                        EncodeAndWrite(stream, chars, count);
+                        return;
+                    }
+                }
+
+                stream.Write(workBuffer, 0, count);
+            }
+
+            static void EncodeAndWrite(Stream stream, string s)
+            {
+                byte[] buffer = Utf8WithoutPreamble.GetBytes(s);
+                stream.Write(buffer, 0, buffer.Length);
+            }
+
+            static void EncodeAndWrite(Stream stream, char[] chars, int count)
+            {
+                byte[] buffer = Utf8WithoutPreamble.GetBytes(chars, 0, count);
+                stream.Write(buffer, 0, buffer.Length);
             }
 
             public void WriteSignedInfoCanonicalForm(

@@ -46,7 +46,6 @@ namespace Microsoft.IdentityModel.Xml
         private HashAlgorithm _hashAlgorithm;
         private XmlDictionaryWriter _utf8Writer;
 
-
         public char[] TakeBase64Buffer()
         {
             if (_base64Buffer == null)
@@ -83,7 +82,7 @@ namespace Microsoft.IdentityModel.Xml
             if (_hashAlgorithm == null)
             {
                 if (string.IsNullOrEmpty(algorithm))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException("algorithm, EmptyOrNullArgumentString"));
+                    throw LogHelper.LogArgumentNullException(algorithm);
 
                 _hashAlgorithm = SHA256.Create();
             }
