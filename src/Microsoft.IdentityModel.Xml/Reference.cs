@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool Verified { get; set; }
 
-        public bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
+        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
         {
             // TODO - hash algorithm needs to be passed in.
             Verified = Utility.AreEqual(ComputeDigest(tokenStream, resourcePool), _digestValueElement.Value);
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // TODO - hook this up to write
-        public void ComputeAndSetDigest(SignatureResourcePool resourcePool)
+        internal void ComputeAndSetDigest(SignatureResourcePool resourcePool)
         {
             //_digestValueElement.Value = ComputeDigest();
         }

@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement(); // Signature
         }
 
-        internal sealed class SignatureValueElement : ISignatureValueSecurityElement
+        internal sealed class SignatureValueElement
         {
             string _prefix = XmlSignatureConstants.Prefix;
             byte[] _signatureValue;
@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteEndElement(); // SignatureValue
             }
 
-            byte[] ISignatureValueSecurityElement.GetSignatureValue()
+            byte[] GetSignatureValue()
             {
                 return Signature;
             }

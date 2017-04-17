@@ -101,14 +101,14 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // common single-transform case; fold directly into a digest
-        public override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             var hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
             ProcessAndDigest(reader, resourcePool, hash);
             return hash.Hash;
         }
 
-        public void ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        internal void ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
             if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));

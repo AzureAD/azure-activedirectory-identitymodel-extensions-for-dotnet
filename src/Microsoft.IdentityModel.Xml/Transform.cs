@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Xml
 
         internal abstract object Process(TokenStreamingReader input, SignatureResourcePool resourcePool);
 
-        public abstract byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm);
+        internal abstract byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm);
 
         public abstract void ReadFrom(XmlDictionaryReader reader, bool preserveComments);
 

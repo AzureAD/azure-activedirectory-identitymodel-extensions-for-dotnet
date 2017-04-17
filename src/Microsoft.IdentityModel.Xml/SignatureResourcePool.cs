@@ -34,8 +34,9 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    // for sequential use by one thread
-    public class SignatureResourcePool
+    // For sequential use by one thread, so reusable objects are only created once.
+    // The model for use is the upper layer that Verifies a signature will create a new SignatureResourcePool
+    internal class SignatureResourcePool
     {
         private char[] _base64Buffer;
         private const int _bufferSize = 64;

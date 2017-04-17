@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Xml
             return driver.GetMemoryStream();
         }
 
-        public override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
         {
             HashAlgorithm hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
             ProcessAndDigest(reader, resourcePool, hash);

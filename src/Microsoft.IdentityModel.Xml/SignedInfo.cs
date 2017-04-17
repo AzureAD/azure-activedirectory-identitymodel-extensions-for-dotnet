@@ -36,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class SignedInfo : ISecurityElement
+    public class SignedInfo
     {
         readonly ExclusiveCanonicalizationTransform _exclusiveCanonicalizationTransform = new ExclusiveCanonicalizationTransform(true);
         ElementWithAlgorithmAttribute _signatureMethodElement;
