@@ -560,20 +560,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Indicates if the current XML element is pointing to a Saml2SecurityKeyIdentifierClause.
-        /// </summary>
-        /// <param name="reader">An <see cref="XmlReader"/> reader.</param>
-        /// <returns>'True' if reader contains a <see cref="Saml2SecurityKeyIdentifierClause"/>. 'False' otherwise.</returns>
-        internal static bool IsSaml2KeyIdentifierClause(XmlReader reader)
-        {
-            if (!reader.IsStartElement(WSWSSecurity10Strings.SecurityTokenReference, WSWSSecurity10Strings.Namespace))
-                return false;
-
-            string tokenType = reader.GetAttribute(WSWSSecurity11Strings.TokenType, WSWSSecurity11Strings.Namespace);
-            return _tokenTypeIdentifiers.Contains(tokenType);
-        }
-
-        /// <summary>
         /// Indicates if the current XML element is pointing to a Saml2Assertion.
         /// </summary>
         /// <param name="reader">A reader that may contain a <see cref="Saml2Assertion"/>.</param>
@@ -583,8 +569,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             return reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace)
                || reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace);
         }
-
-        // Read an element that must not contain content.
 
         /// <summary>
         /// Creates the conditions for the assertion.

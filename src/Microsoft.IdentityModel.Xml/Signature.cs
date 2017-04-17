@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Xml
 
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
-            Id = reader.GetAttribute(UtilityStrings.Id, null);
+            Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
             reader.Read();
 
             SignedInfo.ReadFrom(reader, TransformFactory);
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Xml
             // <Signature>
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             if (Id != null)
-                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
 
             SignedInfo.WriteTo(writer);
             _signatureValueElement.WriteTo(writer);
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Xml
             // TODO - need different id for SignatureValue
             // @Id
             //if (Id != null)
-            //    writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+            //    writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
 
             writer.WriteBase64(_signature, 0, _signature.Length);
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 reader.MoveToStartElement(XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
                 _prefix = reader.Prefix;
-                Id = reader.GetAttribute(UtilityStrings.Id, null);
+                Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
                 reader.Read();
 
                 _signatureText = reader.ReadString();
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
                 if (Id != null)
-                    writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
 
                 if (_signatureText != null)
                     writer.WriteString(_signatureText);

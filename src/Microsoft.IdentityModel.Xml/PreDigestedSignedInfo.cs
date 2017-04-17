@@ -68,13 +68,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public void AddReference(string id, byte[] digest)
         {
-            AddReference(id, digest, false);
-        }
-
-        public void AddReference(string id, byte[] digest, bool useStrTransform)
-        {
             _referenceEntry = new ReferenceEntry();
-            _referenceEntry.Set(id, digest, useStrTransform);
+            _referenceEntry.Set(id, digest);
         }
 
         internal override void ComputeHash(HashStream hashStream, SignatureResourcePool resourcePool)
@@ -124,7 +119,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
             if (!string.IsNullOrEmpty(Id))
-                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
             if (_referenceEntry._digest != null)
@@ -145,29 +140,11 @@ namespace Microsoft.IdentityModel.Xml
                     writer.WriteEndElement(); // Transform
                 }
 
-                if (_referenceEntry._useStrTransform)
-                {
-                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                    writer.WriteString(SecurityAlgorithms.StrTransform);
-                    writer.WriteEndAttribute();
-                    writer.WriteStartElement(XmlSignatureConstants.SecurityJan2004Prefix, XmlSignatureConstants.TransformationParameters, XmlSignatureConstants.SecurityJan2004Namespace);  //<wsse:TransformationParameters>
-                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                    writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
-                    writer.WriteEndAttribute();
-                    writer.WriteEndElement(); //CanonicalizationMethod 
-                    writer.WriteEndElement(); // TransformationParameters
-                    writer.WriteEndElement(); // Transform
-                }
-                else
-                {
-                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                    writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
-                    writer.WriteEndAttribute();
-                    writer.WriteEndElement(); // Transform
-                }
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
+                writer.WriteEndAttribute();
+                writer.WriteEndElement(); // Transform
 
                 writer.WriteEndElement(); // Transforms
 
@@ -191,16 +168,11 @@ namespace Microsoft.IdentityModel.Xml
         {
             internal string _id;
             internal byte[] _digest;
-            internal bool _useStrTransform;
 
-            public void Set(string id, byte[] digest, bool useStrTransform)
+            public void Set(string id, byte[] digest)
             {
-                if (useStrTransform && string.IsNullOrEmpty(id))
-                    throw LogHelper.LogExceptionMessage(new XmlException(LogMessages.IDX21200));
-
                 _id = id;
                 _digest = digest;
-                _useStrTransform = useStrTransform;
             }
         }
 
@@ -210,7 +182,6 @@ namespace Microsoft.IdentityModel.Xml
             const string _xml2 = "\"></SignatureMethod>";
             const string _xml3 = "<Reference URI=\"#";
             const string _xml4 = "\"><Transforms><Transform Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></Transform></Transforms><DigestMethod Algorithm=\"";
-            const string _xml4WithStrTransform = "\"><Transforms><Transform Algorithm=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#STR-Transform\"><o:TransformationParameters xmlns:o=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\"><CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></CanonicalizationMethod></o:TransformationParameters></Transform></Transforms><DigestMethod Algorithm=\"";
             const string _xml5 = "\"></DigestMethod><DigestValue>";
             const string _xml6 = "</DigestValue></Reference>";
             const string _xml7 = "</SignedInfo>";
@@ -219,7 +190,6 @@ namespace Microsoft.IdentityModel.Xml
             readonly byte[] _fragment2;
             readonly byte[] _fragment3;
             readonly byte[] _fragment4;
-            readonly byte[] _fragment4StrTransform;
             readonly byte[] _fragment5;
             readonly byte[] _fragment6;
             readonly byte[] _fragment7;
@@ -236,7 +206,6 @@ namespace Microsoft.IdentityModel.Xml
                 _fragment2 = encoding.GetBytes(_xml2);
                 _fragment3 = encoding.GetBytes(_xml3);
                 _fragment4 = encoding.GetBytes(_xml4);
-                _fragment4StrTransform = encoding.GetBytes(_xml4WithStrTransform);
                 _fragment5 = encoding.GetBytes(_xml5);
                 _fragment6 = encoding.GetBytes(_xml6);
                 _fragment7 = encoding.GetBytes(_xml7);
@@ -281,11 +250,7 @@ namespace Microsoft.IdentityModel.Xml
                 byte[] digestMethodBytes = EncodeDigestAlgorithm(digestMethod);
                 stream.Write(_fragment3, 0, _fragment3.Length);
                 EncodeAndWrite(stream, workBuffer, reference._id);
-                if (reference._useStrTransform)
-                    stream.Write(_fragment4StrTransform, 0, _fragment4StrTransform.Length);
-                else
-                    stream.Write(_fragment4, 0, _fragment4.Length);
-
+                stream.Write(_fragment4, 0, _fragment4.Length);
                 stream.Write(digestMethodBytes, 0, digestMethodBytes.Length);
                 stream.Write(_fragment5, 0, _fragment5.Length);
                 Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, reference._digest);

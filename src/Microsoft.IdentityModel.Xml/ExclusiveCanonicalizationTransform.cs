@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Canonicalization algorithms are found in &lt;SignedInfo> and &lt;Transform.
+    /// Canonicalization algorithms are found in &lt;SignedInfo> and &lt;Transform>.
     /// The elment name can be: CanonicalizationMethod or Transform the actions are the same.
     /// </summary>
     public class ExclusiveCanonicalizationTransform : Transform

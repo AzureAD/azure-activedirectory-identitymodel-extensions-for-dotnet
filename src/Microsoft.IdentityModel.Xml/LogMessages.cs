@@ -57,7 +57,6 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21101 = "IDX21101: An EnvelopedSignature must have a <Reference> element. None were found.";
         internal const string IDX21102 = "IDX21102: The reader passed to the {0}, must be pointing to a StartElement.";
         internal const string IDX21103 = "IDX21103: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
-        internal const string IDX21104 = "IDX21200: The 'Reference' specifies to use 'StrTransform'. The id parameter cannot be null or empty.";
 
         // signature validation
         internal const string IDX21200 = "IDX21200: The 'Signature' did not validate.";

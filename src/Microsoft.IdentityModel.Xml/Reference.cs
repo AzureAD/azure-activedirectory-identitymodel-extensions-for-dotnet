@@ -86,11 +86,6 @@ namespace Microsoft.IdentityModel.Xml
             return Verified;
         }
 
-        private bool IsStrTranform()
-        {
-            return TransformChain.TransformCount == 1 && TransformChain[0].Algorithm == SecurityAlgorithms.StrTransform;
-        }
-
         public string ExtractReferredId()
         {
             if (_referredId == null)
@@ -173,7 +168,7 @@ namespace Microsoft.IdentityModel.Xml
 
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
-            Id = reader.GetAttribute(UtilityStrings.Id, null);
+            Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
             Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
             Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
 
@@ -195,7 +190,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             if (Id != null)
-                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
 
             if (Uri != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, Uri);

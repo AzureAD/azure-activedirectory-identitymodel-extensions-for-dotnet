@@ -50,8 +50,6 @@ namespace Microsoft.IdentityModel.Xml
                 return new ExclusiveCanonicalizationTransform();
             else if (transform == SecurityAlgorithms.ExclusiveC14nWithComments)
                 return new ExclusiveCanonicalizationTransform(false, true);
-            else if (transform == SecurityAlgorithms.StrTransform)
-                return new StrTransform();
             else if (transform == SecurityAlgorithms.EnvelopedSignature)
                 return new EnvelopedSignatureTransform();
 

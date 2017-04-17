@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Xml
                 canonicalizingReader.StartCanonicalization(CanonicalStream, false, null);
                 canonicalizingReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
                 Prefix = canonicalizingReader.Prefix;
-                Id = canonicalizingReader.GetAttribute(UtilityStrings.Id, null);
+                Id = canonicalizingReader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
                 canonicalizingReader.Read();
                 _exclusiveCanonicalizationTransform.ReadFrom(canonicalizingReader, false);
                 _signatureMethodElement.ReadFrom(canonicalizingReader);
@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Xml
 
             // @Id
             if (Id != null)
-                writer.WriteAttributeString(UtilityStrings.Id, null, Id);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
 
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
@@ -267,6 +267,5 @@ namespace Microsoft.IdentityModel.Xml
         {
             _signatureMethodElement.WriteTo(writer);
         }
-
     }
 }

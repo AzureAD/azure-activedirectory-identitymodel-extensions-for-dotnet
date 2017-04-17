@@ -106,9 +106,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes192CbcHmacSha384 = "A192CBC-HS384";
         public const string Aes256CbcHmacSha512 = "A256CBC-HS512";
 
-
-        public const string StrTransform = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#STR-Transform";
-
 #pragma warning restore 1591
     }
 }
