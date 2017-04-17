@@ -54,8 +54,6 @@ namespace Microsoft.IdentityModel.Xml
 
         protected string Prefix { get; set; } = XmlSignatureConstants.Prefix;
 
-        public bool SendSide { get; set; }
-
         public Reference Reference { get; set; }
 
         public string CanonicalizationMethod
@@ -96,16 +94,7 @@ namespace Microsoft.IdentityModel.Xml
 
         internal virtual void GetCanonicalBytes(Stream stream, SignatureResourcePool resourcePool)
         {
-            if (SendSide)
-            {
-                using (var utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
-                {
-                    utf8Writer.StartCanonicalization(stream, false, null);
-                    WriteTo(utf8Writer);
-                    utf8Writer.EndCanonicalization();
-                }
-            }
-            else if (CanonicalStream != null)
+            if (CanonicalStream != null)
             {
                 CanonicalStream.WriteTo(stream);
             }
@@ -177,8 +166,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace, false);
 
-            // TODO - get rid of this flag
-            SendSide = false;
             _defaultNamespace = reader.LookupNamespace(string.Empty);
             _bufferedStream = new MemoryStream();
             var settings = new XmlWriterSettings

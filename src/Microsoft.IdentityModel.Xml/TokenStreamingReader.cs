@@ -34,7 +34,7 @@ using HexBinary = System.Runtime.Remoting.Metadata.W3cXsd2001.SoapHexBinary;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class TokenStreamingReader : DelegatingXmlDictionaryReader
+    internal class TokenStreamingReader : DelegatingXmlDictionaryReader
     {
         private MemoryStream _contentStream;
         private TextReader _contentReader;

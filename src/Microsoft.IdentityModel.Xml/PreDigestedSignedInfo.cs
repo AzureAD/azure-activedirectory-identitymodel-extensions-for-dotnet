@@ -60,7 +60,6 @@ namespace Microsoft.IdentityModel.Xml
             CanonicalizationMethod = canonicalizationMethod;
             DigestMethod = digestMethod;
             SignatureAlgorithm = signatureAlgorithm;
-            SendSide = true;
         }
 
         public bool AddEnvelopedSignatureTransform { get; private set; } = true;
@@ -82,7 +81,12 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (AddEnvelopedSignatureTransform)
             {
-                base.GetCanonicalBytes(stream, resourcePool);
+                using (var utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
+                {
+                    utf8Writer.StartCanonicalization(stream, false, null);
+                    WriteTo(utf8Writer);
+                    utf8Writer.EndCanonicalization();
+                }
             }
             else
             {

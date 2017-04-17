@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 {
     public enum SamlAccessDecision
     {
-        // TODO can be get rid of this enum
+        // TODO can we get rid of this enum
         [EnumMember]
         Permit,
         [EnumMember]

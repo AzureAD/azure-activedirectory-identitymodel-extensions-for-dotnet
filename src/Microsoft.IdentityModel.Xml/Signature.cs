@@ -33,6 +33,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Represents an XmlDsig Signature element.
+    /// </summary>
     public class Signature
     {
         private string _prefix = XmlSignatureConstants.Prefix;
@@ -88,7 +91,7 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadEndElement(); // Signature
         }
 
-        public TokenStreamingReader TokenSource { get; set; }
+        internal TokenStreamingReader TokenSource { get; set; }
 
         public void Verify(SecurityKey key)
         {

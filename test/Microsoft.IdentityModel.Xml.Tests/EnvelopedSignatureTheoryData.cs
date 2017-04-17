@@ -43,6 +43,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
         public Signature Signature { get; set; }
 
+        public string Xml { get; set; }
+
         public XmlReader XmlReader { get; set; }
 
         public XmlWriter XmlWriter { get; set; }
