@@ -81,8 +81,7 @@ namespace Microsoft.IdentityModel.Xml
 
         internal bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
         {
-            // TODO - hash algorithm needs to be passed in.
-            Verified = Utility.AreEqual(ComputeDigest(tokenStream, resourcePool), _digestValueElement.Value);
+            Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream, resourcePool), _digestValueElement.Value);
             return Verified;
         }
 
@@ -151,7 +150,7 @@ namespace Microsoft.IdentityModel.Xml
         //    return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
         //}
 
-        private byte[] ComputeDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool)
+        private byte[] ComputeDigest(CryptoProviderFactory providerFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool)
         {
             if (tokenStream == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenStream));
@@ -159,7 +158,11 @@ namespace Microsoft.IdentityModel.Xml
             if (_transformChain.TransformCount == 0)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
-            return _transformChain.TransformToDigest(tokenStream, resourcePool, DigestAlgorithm);
+            var hashAlg = providerFactory.CreateHashAlgorithm(DigestAlgorithm);
+            var bytes = _transformChain.TransformToDigest(tokenStream, resourcePool, hashAlg);
+            providerFactory.ReleaseHashAlgorithm(hashAlg);
+
+            return bytes;
         }
 
         public void ReadFrom(XmlDictionaryReader reader)
