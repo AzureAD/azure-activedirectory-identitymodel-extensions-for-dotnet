@@ -25,10 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Xml;
+using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using System.Xml.Schema;
-using System;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -121,6 +123,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 KeyInfo keyInfo = new KeyInfo();
                 keyInfo.ReadFrom(reader);
                 configuration.KeyInfos.Add(keyInfo);
+
+                var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
+                configuration.SigningKeys.Add(new X509SecurityKey(cert));
             }
             else
             {
