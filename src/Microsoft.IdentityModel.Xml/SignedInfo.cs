@@ -77,22 +77,22 @@ namespace Microsoft.IdentityModel.Xml
 
         public string SignatureAlgorithm { get; set; }
 
-        internal void ComputeHash(HashAlgorithm algorithm, SignatureResourcePool resourcePool)
+        internal void ComputeHash(HashAlgorithm algorithm)
         {
             if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
                 throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
 
-            var hashStream = resourcePool.TakeHashStream(algorithm);
-            ComputeHash(hashStream, resourcePool);
+            var hashStream = new HashStream(algorithm);
+            ComputeHash(hashStream);
             hashStream.FlushHash();
         }
 
-        internal virtual void ComputeHash(HashStream hashStream, SignatureResourcePool resourcePool)
+        internal virtual void ComputeHash(HashStream hashStream)
         {
-            GetCanonicalBytes(hashStream, resourcePool);
+            GetCanonicalBytes(hashStream);
         }
 
-        internal virtual void GetCanonicalBytes(Stream stream, SignatureResourcePool resourcePool)
+        internal virtual void GetCanonicalBytes(Stream stream)
         {
             if (CanonicalStream != null)
             {
@@ -129,12 +129,12 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        internal virtual void ComputeReferenceDigests(SignatureResourcePool resourcePool)
+        internal virtual void ComputeReferenceDigests()
         {
             if (Reference == null)
                 throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneReferenceRequired"));
 
-            Reference.ComputeAndSetDigest(resourcePool);
+            Reference.ComputeAndSetDigest();
         }
 
         internal virtual void EnsureReferenceVerified()

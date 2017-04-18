@@ -108,20 +108,12 @@ namespace Microsoft.IdentityModel.Xml
             throw LogHelper.LogExceptionMessage(new XmlException(LogHelper.FormatInvariant(LogMessages.IDX21018, transform)));
         }
 
-        //public byte[] TransformToDigest(TokenStreamingReader data, SignatureResourcePool resourcePool, string digestMethod)
-        //{
-        //    for (int i = 0; i < TransformCount - 1; i++)
-        //        data = this[i].Process(data, resourcePool);
-
-        //    return this[TransformCount - 1].ProcessAndDigest(data, resourcePool, digestMethod);
-        //}
-
-        internal byte[] TransformToDigest(TokenStreamingReader tokenStream, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        internal byte[] TransformToDigest(TokenStreamingReader tokenStream, HashAlgorithm hash)
         {
             for (int i = 0; i < TransformCount - 1; i++)
-                tokenStream = this[i].Process(tokenStream, resourcePool) as TokenStreamingReader;
+                tokenStream = this[i].Process(tokenStream) as TokenStreamingReader;
 
-            return this[TransformCount - 1].ProcessAndDigest(tokenStream, resourcePool, hash);
+            return this[TransformCount - 1].ProcessAndDigest(tokenStream, hash);
         }
 
         public void WriteTo(XmlDictionaryWriter writer)

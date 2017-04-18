@@ -41,8 +41,6 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     internal class PreDigestedSignedInfo : SignedInfo
     {
-        private ReferenceEntry _referenceEntry;
-
         public PreDigestedSignedInfo(
             string canonicalizationMethod,
             string digestMethod,
@@ -62,41 +60,24 @@ namespace Microsoft.IdentityModel.Xml
             SignatureAlgorithm = signatureAlgorithm;
         }
 
-        public bool AddEnvelopedSignatureTransform { get; private set; } = true;
-
         public string DigestMethod { get; private set; }
 
-        public void AddReference(string id, byte[] digest)
+        internal override void ComputeHash(HashStream hashStream)
         {
-            _referenceEntry = new ReferenceEntry();
-            _referenceEntry.Set(id, digest);
+            GetCanonicalBytes(hashStream);
         }
 
-        internal override void ComputeHash(HashStream hashStream, SignatureResourcePool resourcePool)
+        internal override void GetCanonicalBytes(Stream stream)
         {
-            GetCanonicalBytes(hashStream, resourcePool);
-        }
-
-        internal override void GetCanonicalBytes(Stream stream, SignatureResourcePool resourcePool)
-        {
-            if (AddEnvelopedSignatureTransform)
+            using (var utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
             {
-                using (var utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
-                {
-                    utf8Writer.StartCanonicalization(stream, false, null);
-                    WriteTo(utf8Writer);
-                    utf8Writer.EndCanonicalization();
-                }
-            }
-            else
-            {
-                SignedInfoCanonicalFormWriter.Instance.WriteSignedInfoCanonicalForm(
-                    stream, SignatureAlgorithm, DigestMethod,
-                    _referenceEntry, resourcePool.TakeEncodingBuffer(), resourcePool.TakeBase64Buffer());
+                utf8Writer.StartCanonicalization(stream, false, null);
+                WriteTo(utf8Writer);
+                utf8Writer.EndCanonicalization();
             }
         }
 
-        internal override void ComputeReferenceDigests(SignatureResourcePool resourcePool)
+        internal override void ComputeReferenceDigests()
         {
             // all digests pre-computed
         }
@@ -125,60 +106,57 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
             if (!string.IsNullOrEmpty(Id))
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
+
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
-            if (_referenceEntry._digest != null)
+            if (Reference.DigestValue != null)
             {
+                // <Reference>
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
                 writer.WriteStartAttribute(XmlSignatureConstants.Attributes.URI, null);
                 writer.WriteString("#");
-                writer.WriteString(_referenceEntry._id);
+                writer.WriteString(Reference.Id);
                 writer.WriteEndAttribute();
 
+                // <Transforms>
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
-                if (AddEnvelopedSignatureTransform)
-                {
-                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
-                    writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                    writer.WriteString(XmlSignatureConstants.Algorithms.EnvelopedSignature);
-                    writer.WriteEndAttribute();
-                    writer.WriteEndElement(); // Transform
-                }
-
+                
+                // <Transform>
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                writer.WriteString(XmlSignatureConstants.Algorithms.EnvelopedSignature);
+                writer.WriteEndAttribute();
+                writer.WriteEndElement();
+                
+                // <Transform>
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
                 writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 writer.WriteString(XmlSignatureConstants.ExclusiveC14n);
                 writer.WriteEndAttribute();
-                writer.WriteEndElement(); // Transform
+                writer.WriteEndElement();
 
-                writer.WriteEndElement(); // Transforms
+                // </Transforms>
+                writer.WriteEndElement();
 
+                // <DigestMethod>
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
                 writer.WriteStartAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 writer.WriteString(DigestMethod);
                 writer.WriteEndAttribute();
-                writer.WriteEndElement(); // DigestMethod
+                writer.WriteEndElement();
 
-                byte[] digest = _referenceEntry._digest;
+                // <DigestValue>
+                byte[] digest = Reference.DigestValue;
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 writer.WriteBase64(digest, 0, digest.Length);
-                writer.WriteEndElement(); // DigestValue
+                writer.WriteEndElement(); 
 
-                writer.WriteEndElement(); // Reference
+                // </Reference>
+                writer.WriteEndElement();
             }
-            writer.WriteEndElement(); // SignedInfo
-        }
 
-        struct ReferenceEntry
-        {
-            internal string _id;
-            internal byte[] _digest;
-
-            public void Set(string id, byte[] digest)
-            {
-                _id = id;
-                _digest = digest;
-            }
+            // </SignedInfo>
+            writer.WriteEndElement();
         }
 
         sealed class SignedInfoCanonicalFormWriter
@@ -321,7 +299,7 @@ namespace Microsoft.IdentityModel.Xml
 
             public void WriteSignedInfoCanonicalForm(
                 Stream stream, string signatureMethod, string digestMethod,
-                ReferenceEntry reference, byte[] workBuffer, char[] base64WorkBuffer)
+                Reference reference, byte[] workBuffer, char[] base64WorkBuffer)
             {
                 stream.Write(_fragment1, 0, _fragment1.Length);
                 byte[] signatureMethodBytes = EncodeSignatureAlgorithm(signatureMethod);
@@ -330,11 +308,11 @@ namespace Microsoft.IdentityModel.Xml
 
                 byte[] digestMethodBytes = EncodeDigestAlgorithm(digestMethod);
                 stream.Write(_fragment3, 0, _fragment3.Length);
-                EncodeAndWrite(stream, workBuffer, reference._id);
+                EncodeAndWrite(stream, workBuffer, reference.Id);
                 stream.Write(_fragment4, 0, _fragment4.Length);
                 stream.Write(digestMethodBytes, 0, digestMethodBytes.Length);
                 stream.Write(_fragment5, 0, _fragment5.Length);
-                Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, reference._digest);
+                Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, reference.DigestValue);
                 stream.Write(_fragment6, 0, _fragment6.Length);
                 stream.Write(_fragment7, 0, _fragment7.Length);
             }

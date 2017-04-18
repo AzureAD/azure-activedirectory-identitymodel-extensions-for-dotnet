@@ -33,9 +33,9 @@ namespace Microsoft.IdentityModel.Xml
         [Serializable]
 #endif
     /// <summary>
-    /// This exception is thrown when a problem is hit when writing xml.
+    /// This exception is thrown when a problem occurs when writing xml.
     /// </summary>
-    public class XmlWriteException : Exception
+    public class XmlWriteException : XmlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlWriteException"/> class.

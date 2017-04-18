@@ -91,24 +91,26 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // multi-transform case, inefficient path
-        internal override object Process(TokenStreamingReader reader, SignatureResourcePool resourcePool)
+        internal override object Process(TokenStreamingReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            var driver = resourcePool.TakeCanonicalizationDriver(reader, IncludeComments, _inclusivePrefixes);
-            return driver.GetMemoryStream();
+            return CanonicalizationDriver.GetMemoryStream(reader, IncludeComments, _inclusivePrefixes);
         }
 
-        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, HashAlgorithm hash)
         {
             if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
 
-            var hashStream = resourcePool.TakeHashStream(hash);
+            if (hash == null)
+                LogHelper.LogArgumentNullException(nameof(hash));
+
+            var hashStream = new HashStream(hash);
             reader.MoveToContent();
-            var driver = resourcePool.TakeCanonicalizationDriver(reader, IncludeComments, _inclusivePrefixes);
-            driver.WriteTo(hashStream);
+
+            CanonicalizationDriver.WriteTo(hashStream, reader, IncludeComments, _inclusivePrefixes);
 
             hashStream.FlushHash();
             return hash.Hash;
