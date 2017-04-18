@@ -79,9 +79,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool Verified { get; set; }
 
-        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool )
+        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream)
         {
-            Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream, resourcePool), _digestValueElement.Value);
+            Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream), _digestValueElement.Value);
             return Verified;
         }
 
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // TODO - hook this up to write
-        internal void ComputeAndSetDigest(SignatureResourcePool resourcePool)
+        internal void ComputeAndSetDigest()
         {
             //_digestValueElement.Value = ComputeDigest();
         }
@@ -147,10 +147,10 @@ namespace Microsoft.IdentityModel.Xml
         //    if (_resolvedXmlSource == null)
         //        throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
 
-        //    return _transformChain.TransformToDigest(_resolvedXmlSource, ResourcePool, DigestAlgorithm);
+        //    return _transformChain.TransformToDigest(_resolvedXmlSource, DigestAlgorithm);
         //}
 
-        private byte[] ComputeDigest(CryptoProviderFactory providerFactory, TokenStreamingReader tokenStream, SignatureResourcePool resourcePool)
+        private byte[] ComputeDigest(CryptoProviderFactory providerFactory, TokenStreamingReader tokenStream)
         {
             if (tokenStream == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenStream));
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Xml
             var hashAlg = providerFactory.CreateHashAlgorithm(DigestAlgorithm);
             try
             {
-                return _transformChain.TransformToDigest(tokenStream, resourcePool, hashAlg);
+                return _transformChain.TransformToDigest(tokenStream, hashAlg);
             }
             finally
             {

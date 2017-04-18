@@ -67,10 +67,9 @@ namespace Microsoft.IdentityModel.Xml
 
         internal void ComputeSignature(SigningCredentials credentials)
         {
-            var resourcePool = new SignatureResourcePool();
             var hash = credentials.Key.CryptoProviderFactory.CreateHashAlgorithm(credentials.Digest);
-            SignedInfo.ComputeReferenceDigests(resourcePool);
-            SignedInfo.ComputeHash(hash, resourcePool);
+            SignedInfo.ComputeReferenceDigests();
+            SignedInfo.ComputeHash(hash);
             _signatureValueElement.Signature = hash.Hash;
             _signature = _signatureValueElement.Signature;
         }
@@ -109,11 +108,10 @@ namespace Microsoft.IdentityModel.Xml
             if (signatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new XmlValidationException(LogHelper.FormatInvariant(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureAlgorithm)));
 
-            var resourcePool = new SignatureResourcePool();
             try
             {
                 var memoryStream = new MemoryStream();
-                SignedInfo.GetCanonicalBytes(memoryStream, resourcePool);
+                SignedInfo.GetCanonicalBytes(memoryStream);
 
                 if (!signatureProvider.Verify(SignedInfo.CanonicalStream.ToArray(), GetSignatureBytes()))
                     throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
@@ -124,7 +122,7 @@ namespace Microsoft.IdentityModel.Xml
                     key.CryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
 
-            if (!SignedInfo.Reference.Verify(key.CryptoProviderFactory, TokenSource, resourcePool))
+            if (!SignedInfo.Reference.Verify(key.CryptoProviderFactory, TokenSource))
                 throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX21201, SignedInfo.Reference.Uri)));
         }
 

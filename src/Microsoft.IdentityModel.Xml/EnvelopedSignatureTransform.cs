@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml
             Algorithm = XmlSignatureConstants.Algorithms.EnvelopedSignature;
         }
 
-        internal override object Process(TokenStreamingReader reader, SignatureResourcePool resourcePool)
+        internal override object Process(TokenStreamingReader reader)
         {
             if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // this transform is not allowed as the last one in a chain
-        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, HashAlgorithm hash)
         {
             throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
         }

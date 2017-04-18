@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Represents an exception thrown when validating xml.
     /// </summary>
-    public class XmlValidationException : Exception
+    public class XmlValidationException : XmlException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlValidationException"/> class.

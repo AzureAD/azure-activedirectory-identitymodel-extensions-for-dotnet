@@ -945,7 +945,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Serializes to <see cref="SamlSecurityToken"/> to a string.
+        /// Serializes a <see cref="SamlSecurityToken"/> to a string.
         /// </summary>
         /// <param name="token">A <see cref="SamlSecurityToken"/>.</param>
         public override string WriteToken(SecurityToken token)
@@ -955,7 +955,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token)));
 
             var stringBuilder = new StringBuilder();
             using (var writer = XmlWriter.Create(stringBuilder))
@@ -987,7 +987,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(samlSecurityToken.Assertion));
 
             var envelopedWriter = new EnvelopedSignatureWriter(writer, samlSecurityToken.Assertion.SigningCredentials, Guid.NewGuid().ToString());
-            serializer.WriteToken(envelopedWriter, samlSecurityToken);
+            Serializer.WriteToken(envelopedWriter, samlSecurityToken);
         }
     }
 }
