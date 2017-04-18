@@ -33,6 +33,7 @@ using System.Xml;
 using Xunit;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
@@ -48,6 +49,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         public void ReadMetadataTest(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadMetadataTest", theoryData);
+            List<string> errors = new List<string>();
+
             try
             {
                 XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));
@@ -56,16 +59,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 if (theoryData.SigingKey != null)
                     configuration.Signature.Verify(theoryData.SigingKey);
 
-                Assert.Equal(theoryData.Issuer, configuration.Issuer);
-                Assert.Equal(theoryData.TokenEndpoint, configuration.TokenEndpoint);
-                Assert.Equal(theoryData.KeyInfoCount, configuration.KeyInfos.Count);
-
                 theoryData.ExpectedException.ProcessNoException();
+
+                WsFederationMetadataComparer.GetDiffs(new WsFederationTestResult(theoryData), new WsFederationTestResult(configuration), errors);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
+
+            TestUtilities.AssertFailIfErrors(errors);
         }
 
         public static TheoryData<WsFederationMetadataTheoryData> MetadataTheoryData
@@ -125,6 +128,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003:"),
                         Metadata = ReferenceMetadata.MetadataNoTokenUri,
                         TestId = nameof(ReferenceMetadata.MetadataNoTokenUri)
+                    });
+
+                theoryData.Add(
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21017:", typeof(FormatException)),
+                        Metadata = ReferenceMetadata.MetadataMalformedCertificate,
+                        TestId = nameof(ReferenceMetadata.MetadataMalformedCertificate)
                     });
 
                 return theoryData;
