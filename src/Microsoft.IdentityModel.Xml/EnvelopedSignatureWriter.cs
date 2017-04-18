@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Xml
 
         private void ComputeSignature()
         {
-            var signedInfo = new PreDigestedSignedInfo(XmlSignatureConstants.Algorithms.ExcC14N,_signingCredentials.Digest, _signingCredentials.Algorithm);
+            var signedInfo = new PreDigestedSignedInfo(XmlSignatureConstants.Algorithms.ExcC14N, _signingCredentials.Digest, _signingCredentials.Algorithm);
             signedInfo.AddReference(_referenceId, _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream));
 
             var signature = new Signature(signedInfo);
