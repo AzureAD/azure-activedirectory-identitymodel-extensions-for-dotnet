@@ -52,7 +52,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
-        private SamlSerializer serializer = new SamlSerializer();
         private Dictionary<string, string> _shortToLongClaimTypeMapping;
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -141,6 +140,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 { "winaccountname", ClaimTypes.WindowsAccountName },
             };
         }
+
+
+        public SamlSerializer Serializer { get; set; } = new SamlSerializer();
 
         /// <summary>
         /// Gets the OutClaimTypeMap
@@ -415,7 +417,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                                 writer.WriteStartElement(Actor);
                                 actorElementWritten = true;
                             }
-                            serializer.WriteAttribute(writer, samlAttribute);
+                            Serializer.WriteAttribute(writer, samlAttribute);
                         }
                     }
 
@@ -482,7 +484,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         xmlReader.ReadStartElement(Actor);
                         while (xmlReader.IsStartElement(SamlConstants.Elements.Attribute))
                         {
-                            var innerAttribute = serializer.ReadAttribute(xmlReader);
+                            var innerAttribute = Serializer.ReadAttribute(xmlReader);
                             if (innerAttribute != null)
                             {
                                 string claimType = string.IsNullOrEmpty(innerAttribute.Namespace) ? innerAttribute.Name : innerAttribute.Namespace + "/" + innerAttribute.Name;
@@ -772,9 +774,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
         public override SecurityToken ReadToken(string token)
         {
-            var sr = new StringReader(token);
-            var envelopedDictionaryReader = new EnvelopedSignatureReader(XmlReader.Create(sr));
-            return serializer.ReadToken(envelopedDictionaryReader);
+            if (string.IsNullOrEmpty(token))
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (token.Length > MaximumTokenSizeInBytes)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10105, token.Length, MaximumTokenSizeInBytes)));
+
+            using (StringReader sr = new StringReader(token))
+            {
+                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    var assertion = Serializer.ReadAssertion(reader);
+                    return new SamlSecurityToken(assertion);
+                }
+            }
         }
 
         /// <summary>
@@ -785,26 +798,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            // TODO - who sets reader to XmlDictionaryReader?
-            return serializer.ReadToken(reader as XmlDictionaryReader);
+            using (var dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader))
+            {
+                var assertion = Serializer.ReadAssertion(dictionaryReader);
+
+                return new SamlSecurityToken(assertion);
+            }
         }
 
-        /// <summary>
-        /// Resolves the SecurityKeyIdentifier specified in a saml:Subject element. 
-        /// </summary>
-        /// <param name="subjectKeyIdentifier">SecurityKeyIdentifier to resolve into a key.</param>
-        /// <returns>SecurityKey</returns>
-        /// <exception cref="ArgumentNullException">The input parameter 'subjectKeyIdentifier' is null.</exception>
-
-        protected virtual SecurityKey ResolveSubjectKeyIdentifier(SecurityKeyIdentifier subjectKeyIdentifier)
-        {
-            if (subjectKeyIdentifier == null)
-                throw LogHelper.LogArgumentNullException(nameof(subjectKeyIdentifier));
-
-            SecurityKey key = null;
-
-            return key;
-        }
         /// <summary>
         /// Reads and validates a well formed <see cref="SamlSecurityToken"/>.
         /// </summary>
@@ -824,7 +825,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
 
             SamlSecurityToken samlToken;
             using (var sr = new StringReader(securityToken))

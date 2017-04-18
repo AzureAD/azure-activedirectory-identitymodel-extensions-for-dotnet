@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // properties, configuration 
         internal const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
         internal const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
+        internal const string IDX10105 = "IDX10105: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
 
         // token validation
         internal const string IDX10209 = "IDX10209: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";

@@ -194,9 +194,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (securityToken.Length* 2 > MaximumTokenSizeInBytes)
+            if (securityToken.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11013, securityToken.Length, MaximumTokenSizeInBytes)));
-
 
             var samlToken = ValidateSignature(securityToken, validationParameters);
             ValidateConditions(samlToken, validationParameters);
@@ -239,7 +238,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Validates that the signature, if found or required, is valid.
+        /// Reads the 'token' as a Saml2 SecurityToken and validates the signature is valid.
         /// </summary>
         /// <param name="token">A signed Saml2 token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
@@ -260,28 +259,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.SignatureValidator != null)
-            {
-                var validatedToken = validationParameters.SignatureValidator(token, validationParameters);
-                if (validatedToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX10505, token)));
-
-                var validatedSaml2Token = validatedToken as Saml2SecurityToken;
-                if (validatedSaml2Token == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSaml2Token.GetType(), token)));
-
-                return validatedSaml2Token;
-            }
-
-            Saml2Assertion assertion = null;
-            using (StringReader sr = new StringReader(token))
-            {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    assertion = Serializer.ReadAssertion(reader);
-                }
-            }
-
+            var samlToken = ReadSaml2Token(token);
             if (validationParameters.SignatureValidator != null)
             {
                 var validatedSamlToken = validationParameters.SignatureValidator(token, validationParameters);
@@ -295,10 +273,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return validatedSaml;
             }
 
-            if (assertion.Signature == null && validationParameters.RequireSignedTokens)
+            if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(LogMessages.IDX10504, token)));
 
-            var samlToken = new Saml2SecurityToken(assertion);
             IEnumerable<SecurityKey> securityKeys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -311,7 +288,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     try
                     {
-                        assertion.Signature.Verify(securityKey);
+                        samlToken.Assertion.Signature.Verify(securityKey);
                     }
                     catch (Exception ex)
                     {
@@ -337,7 +314,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 try
                 {
-                    assertion.Signature.Verify(securityKey);
+                    samlToken.Assertion.Signature.Verify(securityKey);
                     samlToken.SigningKey = securityKey;
                     return samlToken;
                 }
@@ -397,7 +374,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 if (validationParameters.IssuerSigningKeys != null)
                 {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    foreach (var signingKey in validationParameters.IssuerSigningKeys)
                     {
                         if (signingKey != null && string.Equals(signingKey.KeyId, securityToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
                             return signingKey;
@@ -430,12 +407,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             Serializer.WriteAssertion(writer, samlToken.Assertion);
         }
 
-        public override SecurityToken ReadToken(string token)
+        public virtual Saml2SecurityToken ReadSaml2Token(string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
-            if (token.Length* 2 > MaximumTokenSizeInBytes)
+            if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11013, token.Length, MaximumTokenSizeInBytes)));
 
             using (StringReader sr = new StringReader(token))
@@ -448,15 +425,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
         }
 
+        public override SecurityToken ReadToken(string token)
+        {
+            return ReadSaml2Token(token);
+        }
+
         /// <summary>
-        /// Reads a SAML 2.0 token from the XmlReader.
+        /// Reads and validates a SAML 2.0 token using the XmlReader.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="Saml2SecurityToken"/> element.</param>
+        /// <param name="validationParameters"> validation parameters for the <see cref="Saml2SecurityToken"/>.</param>
         /// <returns>An instance of <see cref="Saml2SecurityToken"/>.</returns>
-        /// <exception cref="InvalidOperationException">Is thrown if 'Configuration', 'Configruation.IssuerTokenResolver' or 'Configuration.ServiceTokenResolver is null.</exception>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            return new Saml2SecurityToken(Serializer.ReadAssertion(reader));
+            throw new NotSupportedException("API is not supported");
         }
 
         internal static XmlDictionaryReader CreatePlaintextReaderFromEncryptedData(
