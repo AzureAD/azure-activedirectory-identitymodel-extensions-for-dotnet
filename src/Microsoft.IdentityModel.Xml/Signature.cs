@@ -42,6 +42,7 @@ namespace Microsoft.IdentityModel.Xml
         private byte[] _signature;
         readonly SignatureValueElement _signatureValueElement = new SignatureValueElement();
 
+        // TODO - consider constructor without SignedInfo
         public Signature(SignedInfo signedInfo)
         {
             if (signedInfo == null)
@@ -52,7 +53,12 @@ namespace Microsoft.IdentityModel.Xml
 
         public string Id { get; set; }
 
-        public KeyInfo KeyInfo { get; protected set; }
+        public KeyInfo KeyInfo { get; set; }
+
+        public string SignatureValue
+        {
+            get; set;
+        }
 
         public SignedInfo SignedInfo
         {
@@ -85,13 +91,14 @@ namespace Microsoft.IdentityModel.Xml
 
             SignedInfo.ReadFrom(reader);
             _signatureValueElement.ReadFrom(reader);
+            SignatureValue = _signatureValueElement.SignatureValue;
             KeyInfo = new KeyInfo();
             KeyInfo.ReadFrom(reader);
 
             reader.ReadEndElement(); // Signature
         }
 
-        internal TokenStreamingReader TokenSource { get; set; }
+        public TokenStreamingReader TokenSource { get; set; }
 
         public void Verify(SecurityKey key)
         {
@@ -99,8 +106,10 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureAlgorithm);
-            var resourcePool = new SignatureResourcePool();
+            if (signatureProvider == null)
+                throw LogHelper.LogExceptionMessage(new XmlValidationException(LogHelper.FormatInvariant(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureAlgorithm)));
 
+            var resourcePool = new SignatureResourcePool();
             try
             {
                 var memoryStream = new MemoryStream();
@@ -140,7 +149,7 @@ namespace Microsoft.IdentityModel.Xml
             // <SignatureValue>
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
 
-            // TODO - need different id for SignatureValue
+            // TODO  need different id for SignatureValue
             // @Id
             //if (Id != null)
             //    writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
@@ -175,6 +184,11 @@ namespace Microsoft.IdentityModel.Xml
                     _signatureValue = value;
                     _signatureText = null;
                 }
+            }
+
+            public string SignatureValue
+            {
+                get { return _signatureText; }
             }
 
             public void ReadFrom(XmlDictionaryReader reader)

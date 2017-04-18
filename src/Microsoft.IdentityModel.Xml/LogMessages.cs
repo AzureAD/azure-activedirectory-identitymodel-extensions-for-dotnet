@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21200 = "IDX21200: The 'Signature' did not validate.";
         internal const string IDX21201 = "IDX21201: The 'Reference' did not validate: '{0}'.";
         internal const string IDX21202 = "IDX21202: A reference was included: '{0}'.";
+        internal const string IDX21203 = "IDX21203: '{0}.CreateForVerifying' returned null for key: '{1}', signatureAlgorithm: '{2}'.";
 
         // logging messages
 

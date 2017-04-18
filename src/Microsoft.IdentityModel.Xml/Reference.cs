@@ -159,10 +159,15 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
             var hashAlg = providerFactory.CreateHashAlgorithm(DigestAlgorithm);
-            var bytes = _transformChain.TransformToDigest(tokenStream, resourcePool, hashAlg);
-            providerFactory.ReleaseHashAlgorithm(hashAlg);
+            try
+            {
+                return _transformChain.TransformToDigest(tokenStream, resourcePool, hashAlg);
+            }
+            finally
+            {
 
-            return bytes;
+                providerFactory.ReleaseHashAlgorithm(hashAlg);
+            }
         }
 
         public void ReadFrom(XmlDictionaryReader reader)

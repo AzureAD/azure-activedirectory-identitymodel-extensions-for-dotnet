@@ -43,7 +43,6 @@ namespace Microsoft.IdentityModel.Xml
         private CanonicalizationDriver _canonicalizationDriver;
         private byte[] _encodingBuffer;
         private HashStream _hashStream;
-        private HashAlgorithm _hashAlgorithm;
         private XmlDictionaryWriter _utf8Writer;
 
         public char[] TakeBase64Buffer()
@@ -76,24 +75,6 @@ namespace Microsoft.IdentityModel.Xml
             return _encodingBuffer;
         }
 
-        // TODO - do not lock on SHA256
-        public HashAlgorithm TakeHashAlgorithm(string algorithm)
-        {
-            if (_hashAlgorithm == null)
-            {
-                if (string.IsNullOrEmpty(algorithm))
-                    throw LogHelper.LogArgumentNullException(algorithm);
-
-                _hashAlgorithm = SHA256.Create();
-            }
-            else
-            {
-                _hashAlgorithm.Initialize();
-            }
-
-            return _hashAlgorithm;
-        }
-
         public HashStream TakeHashStream(HashAlgorithm hash)
         {
             if (_hashStream == null)
@@ -102,11 +83,6 @@ namespace Microsoft.IdentityModel.Xml
                 _hashStream.Reset(hash);
 
             return _hashStream;
-        }
-
-        public HashStream TakeHashStream(string algorithm)
-        {
-            return TakeHashStream(TakeHashAlgorithm(algorithm));
         }
 
         public XmlDictionaryWriter TakeUtf8Writer()

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
@@ -70,6 +71,131 @@ namespace Microsoft.IdentityModel.Xml.Tests
                         SignedInfo = null
                     },
                     TestId = "SignedInfo NULL"
+                });
+
+                return theoryData;
+            }
+        }
+
+        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("SignatureReadFromTheoryData")]
+        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignatureReadFrom(DSigTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.SignatureReadFrom", theoryData);
+            List<string> errors = new List<string>();
+            try
+            {
+                var sr = new StringReader(theoryData.SignatureTestSet.Xml);
+                var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
+                var signature = new Signature(new SignedInfo());
+                signature.ReadFrom(reader);
+                theoryData.ExpectedException.ProcessNoException();
+
+                DSigXmlComparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        public static TheoryData<DSigTheoryData> SignatureReadFromTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                var theoryData = new TheoryData<DSigTheoryData>();
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    First = true,
+                    SignatureTestSet = RefernceXml.Signature_UnknownDigestAlgorithm,
+                    TestId = nameof(RefernceXml.Signature_UnknownDigestAlgorithm)
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    SignatureTestSet = RefernceXml.Signature_UnknownSignatureAlgorithm,
+                    TestId = nameof(RefernceXml.Signature_UnknownSignatureAlgorithm)
+                });
+
+                return theoryData;
+            }
+        }
+
+        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("SignatureVerifyTheoryData")]
+        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignatureVerify(DSigTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.SignatureVerify", theoryData);
+
+            List<string> errors = new List<string>();
+            try
+            {
+                var sr = new StringReader(theoryData.SignatureTestSet.Xml);
+                var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
+                var tokenStreamingReader = new TokenStreamingReader(reader);
+                var signature = new Signature(new SignedInfo());
+                signature.ReadFrom(tokenStreamingReader);
+                signature.TokenSource = tokenStreamingReader;
+                signature.Verify(theoryData.SignatureTestSet.SecurityKey);
+                theoryData.ExpectedException.ProcessNoException();
+
+                DSigXmlComparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        public static TheoryData<DSigTheoryData> SignatureVerifyTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                var theoryData = new TheoryData<DSigTheoryData>();
+
+                // use SecurityKey that will validate the SignedInfo
+                var signatureTestSet = RefernceXml.Signature_UnknownDigestAlgorithm;
+                signatureTestSet.SecurityKey = RefernceXml.Saml2Token_Valid_SecurityKey;
+                signatureTestSet.SecurityKey.CryptoProviderFactory = new DSigCryptoProviderFactory();
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21203:"),
+                    SignatureTestSet = signatureTestSet,
+                    TestId = "CryptoProviderFactory returns null SignatureProvider"
+                });
+
+                signatureTestSet = RefernceXml.Signature_UnknownDigestAlgorithm;
+                signatureTestSet.SecurityKey = RefernceXml.Saml2Token_Valid_SecurityKey;
+                signatureTestSet.SecurityKey.CryptoProviderFactory = new DSigCryptoProviderFactory()
+                {
+                    SignatureProvider = new DSigSignatureProvider(RefernceXml.Saml2Token_Valid_SecurityKey, SecurityAlgorithms.RsaSha256)
+                };
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = ExpectedException.InvalidOperationException("IDX10640:"),
+                    SignatureTestSet = signatureTestSet,
+                    TestId = nameof(RefernceXml.Signature_UnknownDigestAlgorithm)
+                });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX10634:"),          
+                    SignatureTestSet = RefernceXml.Signature_UnknownSignatureAlgorithm,
+                    TestId = nameof(RefernceXml.Signature_UnknownSignatureAlgorithm)
                 });
 
                 return theoryData;
@@ -200,6 +326,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     SignedInfoTestSet = RefernceXml.SignedInfoNoTransforms,
                     TestId = nameof(RefernceXml.SignedInfoNoTransforms)
                 });
+
+                theoryData.Add(new DSigTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                    SignedInfoTestSet = RefernceXml.SignedInfoUnknownCanonicalizationtMethod,
+                    TestId = nameof(RefernceXml.SignedInfoUnknownCanonicalizationtMethod)
+                });
+
 
                 theoryData.Add(new DSigTheoryData
                 {
@@ -367,9 +501,54 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             public KeyInfoTestSet KeyInfoTestSet { get; set; }
 
+            public SignatureTestSet SignatureTestSet { get; set; }
+
             public SigningCredentials SigningCredentials { get; set; }
 
             public SignedInfoTestSet SignedInfoTestSet { get; set; }
+        }
+
+        /// <summary>
+        /// DSigCryptoProviderFactory and DSignatureProvider are used to simulate failures and get deeper in the stack
+        /// </summary>
+        public class DSigCryptoProviderFactory : CryptoProviderFactory
+        {
+            public DSigCryptoProviderFactory() { }
+
+            public SignatureProvider SignatureProvider { get; set; }
+
+            public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
+            {
+                return SignatureProvider;
+            }
+
+            public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
+            {
+                return SignatureProvider;
+            }
+        }
+
+        public class DSigSignatureProvider : SignatureProvider
+        {
+            public DSigSignatureProvider(SecurityKey key, string algorithm)
+                : base(key, algorithm)
+            { }
+
+            protected override void Dispose(bool disposing)
+            {
+            }
+
+            public override byte[] Sign(byte[] input)
+            {
+                return Encoding.UTF8.GetBytes("SignedBytes");
+            }
+
+            public override bool Verify(byte[] input, byte[] signature)
+            {
+                return VerifyResult;
+            }
+
+            public bool VerifyResult { get; set; } = true;
         }
     }
 }
