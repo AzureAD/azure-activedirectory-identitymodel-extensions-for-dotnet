@@ -100,15 +100,7 @@ namespace Microsoft.IdentityModel.Xml
             return driver.GetMemoryStream();
         }
 
-        // common single-transform case; fold directly into a digest
-        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
-        {
-            var hash = resourcePool.TakeHashAlgorithm(digestAlgorithm);
-            ProcessAndDigest(reader, resourcePool, hash);
-            return hash.Hash;
-        }
-
-        internal void ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
             if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
@@ -119,6 +111,7 @@ namespace Microsoft.IdentityModel.Xml
             driver.WriteTo(hashStream);
 
             hashStream.FlushHash();
+            return hash.Hash;
         }
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)

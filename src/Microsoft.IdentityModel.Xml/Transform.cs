@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Security.Cryptography;
 using System.Xml;
 
 namespace Microsoft.IdentityModel.Xml
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml
 
         internal abstract object Process(TokenStreamingReader input, SignatureResourcePool resourcePool);
 
-        internal abstract byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, string digestAlgorithm);
+        internal abstract byte[] ProcessAndDigest(TokenStreamingReader input, SignatureResourcePool resourcePool, HashAlgorithm hash);
 
         public abstract void ReadFrom(XmlDictionaryReader reader, bool preserveComments);
 

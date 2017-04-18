@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Reads and writes a  https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-KeyInfo
     /// </summary>
-    /// <remarks>Only a single 'X509Certificate' is supported. Multiple that include intermediate and root certs are not supported.</remarks>
+    /// <remarks>Only a single 'X509Certificate' is supported. Multiples that include intermediate and root certs are not supported.</remarks>
     public class KeyInfo
     {
         /// <summary>

@@ -99,12 +99,21 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureAlgorithm);
-            var memoryStream = new MemoryStream();
             var resourcePool = new SignatureResourcePool();
-            SignedInfo.GetCanonicalBytes(memoryStream, resourcePool);
 
-            if (!signatureProvider.Verify(SignedInfo.CanonicalStream.ToArray(), GetSignatureBytes()))
-                throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
+            try
+            {
+                var memoryStream = new MemoryStream();
+                SignedInfo.GetCanonicalBytes(memoryStream, resourcePool);
+
+                if (!signatureProvider.Verify(SignedInfo.CanonicalStream.ToArray(), GetSignatureBytes()))
+                    throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
+            }
+            finally
+            {
+                if (signatureProvider != null)
+                    key.CryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+            }
 
             if (!SignedInfo.Reference.Verify(key.CryptoProviderFactory, TokenSource, resourcePool))
                 throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX21201, SignedInfo.Reference.Uri)));

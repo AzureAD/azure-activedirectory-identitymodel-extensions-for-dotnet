@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // this transform is not allowed as the last one in a chain
-        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, string digestAlgorithm)
+        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, SignatureResourcePool resourcePool, HashAlgorithm hash)
         {
             throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
         }
