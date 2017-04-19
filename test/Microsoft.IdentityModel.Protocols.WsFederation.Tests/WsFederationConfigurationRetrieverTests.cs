@@ -25,15 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Xml;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Microsoft.IdentityModel.Xml;
-using System;
-using System.IO;
-using System.Xml;
 using Xunit;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
-using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
@@ -56,12 +56,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));
                 var serializer = new WsFederationMetadataSerializer();
                 var configuration = serializer.ReadMetadata(reader);
+
                 if (theoryData.SigingKey != null)
                     configuration.Signature.Verify(theoryData.SigingKey);
 
                 theoryData.ExpectedException.ProcessNoException();
 
-                WsFederationMetadataComparer.GetDiffs(new WsFederationTestResult(theoryData), new WsFederationTestResult(configuration), errors);
+                WsFederationMetadataComparer.GetDiffs(theoryData.Configuration, configuration, errors);
             }
             catch (Exception ex)
             {
@@ -84,34 +85,28 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     new WsFederationMetadataTheoryData
                     {
                         First = true,
-                        Issuer = "https://sts.windows.net/{tenantid}/",
-                        KeyInfoCount = 3,
+                        Configuration = ReferenceMetadata.GoodConfigurationCommonEndpoint,
                         Metadata = ReferenceMetadata.AADCommonMetadata,
                         SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
-                        TestId = nameof(ReferenceMetadata.AADCommonMetadata),
-                        TokenEndpoint = "https://login.microsoftonline.com/common/wsfed"
+                        TestId = nameof(ReferenceMetadata.AADCommonMetadata)
                     });
 
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-                        Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
-                        KeyInfoCount = 3,
+                        Configuration = ReferenceMetadata.GoodConfiguration,
                         Metadata = ReferenceMetadata.Metadata,
-                        TestId = nameof(ReferenceMetadata.Metadata),
-                        TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                        TestId = nameof(ReferenceMetadata.Metadata)
                     });
 
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
-                        Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
-                        KeyInfoCount = 3,
+                        Configuration = ReferenceMetadata.GoodConfiguration,
                         Metadata = ReferenceMetadata.Metadata,
                         SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
-                        TestId = nameof(ReferenceMetadata.Metadata) + " Signature Failure",
-                        TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                        TestId = nameof(ReferenceMetadata.Metadata) + " Signature Failure"
                     });
 
                 theoryData.Add(
@@ -144,15 +139,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
         public class WsFederationMetadataTheoryData : TheoryDataBase
         {
-            public string Issuer { get; set; }
-
-            public int KeyInfoCount { get; set; }
-
             public string Metadata { get; set; }
 
             public SecurityKey SigingKey { get; set; }
 
-            public string TokenEndpoint { get; set; }
+            public WsFederationConfiguration Configuration { get; set; }
 
             public override string ToString()
             {
