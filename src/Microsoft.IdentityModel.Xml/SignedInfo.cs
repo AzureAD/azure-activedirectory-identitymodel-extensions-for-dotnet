@@ -39,13 +39,12 @@ namespace Microsoft.IdentityModel.Xml
     public class SignedInfo
     {
         readonly ExclusiveCanonicalizationTransform _exclusiveCanonicalizationTransform = new ExclusiveCanonicalizationTransform(true);
-        ElementWithAlgorithmAttribute _signatureMethodElement;
+        ElementWithAlgorithmAttribute _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
         MemoryStream _bufferedStream;
         string _defaultNamespace = string.Empty;
 
         public SignedInfo()
         {
-            _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
         }
 
         internal MemoryStream CanonicalStream { get; set; }
@@ -241,7 +240,7 @@ namespace Microsoft.IdentityModel.Xml
             if (Reference != null)
                 Reference.WriteTo(writer);
 
-            // </ SignedInfo>
+            // </SignedInfo>
             writer.WriteEndElement();
         }
 

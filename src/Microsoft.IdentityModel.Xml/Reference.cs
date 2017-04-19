@@ -40,8 +40,7 @@ namespace Microsoft.IdentityModel.Xml
         private ElementWithAlgorithmAttribute _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         private DigestValueElement _digestValueElement = new DigestValueElement();
         private string _prefix = XmlSignatureConstants.Prefix;
-        private string _referredId;
-        private readonly TransformChain _transformChain = new TransformChain();
+        private TransformChain _transformChain = new TransformChain();
 
         public Reference()
         {
@@ -83,24 +82,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream), _digestValueElement.Value);
             return Verified;
-        }
-
-        public string ExtractReferredId()
-        {
-            if (_referredId == null)
-            {
-                if (StringComparer.OrdinalIgnoreCase.Equals(Uri, String.Empty))
-                {
-                    return String.Empty;
-                }
-
-                if (Uri == null || Uri.Length < 2 || Uri[0] != '#')
-                    throw LogHelper.LogExceptionMessage(new XmlSignedInfoException("UnableToResolveReferenceUriForSignature, this.uri"));
-
-                _referredId = Uri.Substring(1);
-            }
-
-            return _referredId;
         }
 
         /// <summary>

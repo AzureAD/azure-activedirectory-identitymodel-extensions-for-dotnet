@@ -935,7 +935,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
 
         #endregion
-
     }
 
     public class KeyInfoTestSet

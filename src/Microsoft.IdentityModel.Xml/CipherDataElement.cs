@@ -58,13 +58,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadXml(XmlDictionaryReader reader)
         {
-            if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (!reader.IsStartElement(XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace))
-                throw LogHelper.LogExceptionMessage(new XmlEncryptionException($"Expection start element {XmlEncryptionConstants.Elements.CipherData}"));
-
+            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
             reader.ReadStartElement(XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
             reader.ReadStartElement(XmlEncryptionConstants.Elements.CipherValue, XmlEncryptionConstants.Namespace);
 

@@ -132,15 +132,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="reader"></param>
         /// <exception cref="ArgumentNullException">When reader is null</exception>
-        /// <exception cref="ArgumentNullException">When securityTokenSerializer is null</exception>
         public override void ReadXml(XmlDictionaryReader reader)
         {
-            if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (!reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptedData, XmlEncryptionConstants.Namespace))
-                LogHelper.LogExceptionMessage(new XmlEncryptionException("xmlreader not on encryptdata element"));
+            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.EncryptedData, XmlEncryptionConstants.Namespace);
 
             // <EncryptedData> extends <EncryptedType>
             // base will read the start element and the end element.

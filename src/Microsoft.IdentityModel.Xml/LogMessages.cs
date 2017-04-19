@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21010 = "IDX21010: Unable to read xml. Expecting XmlReader to be at element: '{0}', found 'Empty Element'";
         internal const string IDX21011 = "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'.";
         internal const string IDX21012 = "IDX21012: Unable to read xml. While reading '{0}', This node was not expected: '{1}'.";
-        internal const string IDX21013 = "IDX21013: Unable to read xml. While reading '{0}', Required attribute was not found : '{1}'.";
+        internal const string IDX21013 = "IDX21013: Unable to read xml. While reading element '{0}', Required attribute was not found : '{1}'.";
         internal const string IDX21014 = "IDX21014: Unable to read xml. A SignedInfo reference must have at least 1 transform.";
         internal const string IDX21015 = "IDX21015: Only a single '{0}' element is supported. Found more than one.";
         internal const string IDX21016 = "IDX21016: Exception thrown while reading '{0}'. See inner exception for more details.";
@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21018 = "IDX21018: Unable to read xml. A Reference contains an unknown transform '{0}'.";
         internal const string IDX21019 = "IDX21019: Unable to read xml. A second <Signature> element was found. The EnvelopedSignatureReader can only process one <Signature>.";
         internal const string IDX21020 = "IDX21020: Unable to read xml. A second <Reference> element was found. The EnvelopedSignatures can only have one <Reference>.";
+        internal const string IDX21021 = "IDX21021: Unable to read xml. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
 
 
         // xml structure, supported exceptions

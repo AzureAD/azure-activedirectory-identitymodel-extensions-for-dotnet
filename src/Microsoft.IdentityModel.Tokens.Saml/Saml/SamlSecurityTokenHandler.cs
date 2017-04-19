@@ -981,7 +981,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             if (samlSecurityToken.Assertion == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlSecurityToken.Assertion));

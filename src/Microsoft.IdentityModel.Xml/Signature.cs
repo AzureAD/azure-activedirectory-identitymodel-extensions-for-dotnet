@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel.Xml
 
             writer.WriteBase64(_signature, 0, _signature.Length);
 
-             // </ SignatureValue >
+             // </ SignatureValue>
             writer.WriteEndElement();
 
             // </ Signature>
