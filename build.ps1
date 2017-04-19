@@ -2,7 +2,7 @@ param(
     [string]$build="YES",
     [string]$buildType="Debug",
     [string]$clean="YES",
-    [string]$installDotnet="YES",
+    [string]$installDotnet="NO",
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
@@ -102,16 +102,11 @@ if ($clean -eq "YES")
         }
     }
 
-    if (Test-Path $artifactsRoot)
+    $buildRoot = $artifactsRoot + "\build"
+    if (Test-Path $buildRoot)
     {
-        Write-Host ">>> Remove-Item -Recurse -Force $artifactsRoot"
-        Remove-Item  -Recurse -Force $artifactsRoot
-    }
-
-    if (Test-Path $dotnetInstallDir)
-    {
-        Write-Host ">>> Remove-Item -Recurse -Force $dotnetInstallDir"
-        Remove-Item  -Recurse -Force $dotnetInstallDir
+        Write-Host ">>> Remove-Item -Recurse -Force $buildRoot"
+        Remove-Item  -Recurse -Force $buildRoot
     }
 }
 
@@ -130,6 +125,12 @@ if ($installDotnet -eq "YES")
     Write-Host "dotnetLocalInstallFolder = $dotnetInstallDir"
     Write-Host "dotnetexe = $dotnetexe"
     Write-Host ""
+
+    if (Test-Path $dotnetInstallDir)
+    {
+        Write-Host ">>> Remove-Item -Recurse -Force $dotnetInstallDir"
+        Remove-Item  -Recurse -Force $dotnetInstallDir
+    }
 
     if (!(Test-Path $dotnetInstallDir))
     {

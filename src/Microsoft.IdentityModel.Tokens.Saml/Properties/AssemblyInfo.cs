@@ -40,4 +40,4 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(true)]
 [assembly: Guid("63F6E63C-300D-4D4F-9364-0087E4F18477")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.1.4")]
+[assembly: AssemblyVersion("5.2.0")]
