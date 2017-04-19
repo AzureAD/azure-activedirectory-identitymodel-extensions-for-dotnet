@@ -42,5 +42,5 @@ using Xunit;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-[assembly: AssemblyFileVersion("1.1.4")]
+[assembly: AssemblyFileVersion("5.2.0")]
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]

@@ -1,9 +1,9 @@
 {
-  "version": "2.1.4",
+  "version": "5.2.0",
   "description": "Includes types that provide support for WsFederation protocol.",
   "dependencies": {
-    "Microsoft.IdentityModel.Protocols": "2.1.4",
-    "Microsoft.IdentityModel.Xml": "5.1.4"
+    "Microsoft.IdentityModel.Protocols": "5.2.0",
+    "Microsoft.IdentityModel.Xml": "5.2.0"
   },
   "frameworks": {
     "net451": {
