@@ -1083,14 +1083,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(conditions));
 
             writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Conditions, SamlConstants.Namespace);
-            if (conditions.NotBefore != SecurityUtils.MinUtcDateTime)
+            if (conditions.NotBefore != DateTimeUtil.GetMinValue(DateTimeKind.Utc))
             {
                 writer.WriteStartAttribute(SamlConstants.Attributes.NotBefore, null);
                 writer.WriteString(conditions.NotBefore.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
                 writer.WriteEndAttribute();
             }
 
-            if (conditions.NotOnOrAfter != SecurityUtils.MaxUtcDateTime)
+            if (conditions.NotOnOrAfter != DateTimeUtil.GetMaxValue(DateTimeKind.Utc))
             {
                 writer.WriteStartAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
                 writer.WriteString(conditions.NotOnOrAfter.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));

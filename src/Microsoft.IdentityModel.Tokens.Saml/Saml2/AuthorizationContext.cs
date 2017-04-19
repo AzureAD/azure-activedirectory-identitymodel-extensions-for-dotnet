@@ -29,7 +29,7 @@ using System.Collections.ObjectModel;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel
+namespace Microsoft.IdentityModel.Saml2
 {
     /// <summary>
     /// This class is used to specify the context of the authorization event.

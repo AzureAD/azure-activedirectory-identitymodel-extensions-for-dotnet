@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Saml
+namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// The authentication information that an authority asserted when creating a token for a subject.

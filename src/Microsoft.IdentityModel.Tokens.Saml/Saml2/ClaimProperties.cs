@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Saml
+namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Defines the keys for properties contained in <see cref="Claim.Properties"/>.
