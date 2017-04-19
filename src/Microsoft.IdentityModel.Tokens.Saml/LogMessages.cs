@@ -50,14 +50,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         // SecurityTokenHandler messages
         internal const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
-
         internal const string IDX10721 = "IDX10721: Creating SamlSecurityToken: Issuer: '{0}', Audience: '{1}'";
 
-        // NotSupported Exceptions
-        internal const string IDX11002 = "IDX11002: This method is not supported to read a 'saml2token' use the method: ReadToken(XmlReader reader, TokenValidationParameters validationParameters).";
-        internal const string IDX11003 = "IDX11003: This method is not supported to read a 'samltoken' use the method: ReadToken(XmlReader reader, TokenValidationParameters validationParameters).";
-        internal const string IDX11006 = "IDX11006: This method is not supported to read a 'saml2token' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
-        internal const string IDX11007 = "IDX11007: This method is not supported to read a 'samltoken' use the method: ReadToken(string securityToken, TokenValidationParameters validationParameters).";
+
+        // SamlSerializer reading
+        internal const string IDX11100 = "IDX11100: Saml Only one element of type '{0}' is supported.";
+        internal const string IDX11101 = "IDX11101: Saml Unexpected element found '{0}' while reading.";
+        internal const string IDX11102 = "IDX11102: Saml An AuthorizationDecisionStatement must have at least one Action.";
+        internal const string IDX11103 = "IDX11103: Saml Evidence must have at least one assertion.";
+        internal const string IDX11104 = "IDX11104: Saml Name cannot be null or empty.";
+        internal const string IDX11105 = "IDX11105: Saml SubjectConformation Name cannot be null or empty.";
+        internal const string IDX11106 = "IDX11106: Saml No SubjectConfirmation clauses were specified.";
+        internal const string IDX11107 = "IDX11107: Saml A Subject requires a NameIdentifier or ConfirmationMethod";
+        internal const string IDX11108 = "IDX11108: Saml AuthorityBinding.AuthorityKind is not well formed. Is should be of the form str:str, it is '{0}'";
 
 #pragma warning restore 1591
     }

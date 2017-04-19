@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX10512 = "IDX10512: Unable to validate token. A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
 
 
-        // Saml2SecurityTokenHandler reading
+        // SamlSerializing reading
         internal const string IDX11100 = "IDX11100: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX11101 = "IDX11101: Creating Saml2SecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX11102 = "IDX11102: Exception thrown while reading '{0}' for Saml2SecurityToken. See inner exception for more details.";

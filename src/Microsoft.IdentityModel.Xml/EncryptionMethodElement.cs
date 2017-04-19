@@ -38,15 +38,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadXml(XmlDictionaryReader reader)
         {
-            if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (!reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace))
-                return;
+            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace, true);
 
             Algorithm = reader.GetAttribute(XmlEncryptionConstants.Attributes.Algorithm, null);
-
             if (!reader.IsEmptyElement)
             {
                 //

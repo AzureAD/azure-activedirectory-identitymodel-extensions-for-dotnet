@@ -395,6 +395,21 @@ namespace Microsoft.IdentityModel.Xml
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args)));
         }
 
+        public static Exception LogAttributeMissingReadException(string elementName, string attributeName)
+        {
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21013, elementName, attributeName)));
+        }
+
+        public static Exception LogElementMissingReadException(string elementName, string nodeName)
+        {
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, elementName, nodeName)));
+        }
+
+        public static Exception LogUnknownElementReadException(string elementName, string currentElement)
+        {
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21021, elementName, currentElement)));
+        }
+
         public static Exception LogReadException(string format, Exception inner, params object[] args)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args), inner));
