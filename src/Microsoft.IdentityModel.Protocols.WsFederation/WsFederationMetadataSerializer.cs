@@ -124,8 +124,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 keyInfo.ReadFrom(reader);
                 configuration.KeyInfos.Add(keyInfo);
 
-                var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
-                configuration.SigningKeys.Add(new X509SecurityKey(cert));
+                if (!string.IsNullOrEmpty(keyInfo.CertificateData))
+                {
+                    var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
+                    configuration.SigningKeys.Add(new X509SecurityKey(cert));
+                }
             }
             else
             {
