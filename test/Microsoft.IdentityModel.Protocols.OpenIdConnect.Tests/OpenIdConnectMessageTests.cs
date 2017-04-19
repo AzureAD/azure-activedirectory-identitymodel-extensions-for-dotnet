@@ -487,6 +487,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var theoryData = new TheoryData<string, OpenIdConnectMessage, string>();
 
+            bool defaultValue = OpenIdConnectMessage.EnableTelemetryParametersByDefault;
+
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
             var message = new OpenIdConnectMessage();
             theoryData.Add(
@@ -513,6 +515,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 message,
                 string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
             );
+
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = defaultValue;
 
             return theoryData;
         }

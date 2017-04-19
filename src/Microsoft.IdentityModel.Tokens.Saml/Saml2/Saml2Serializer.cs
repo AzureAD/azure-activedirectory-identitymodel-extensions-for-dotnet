@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace);
 
                 // TODO - relax URI.Absolute?
-                if (!UriUtil.CanCreateValidUri(namespaceValue, UriKind.Absolute))
+                if (!XmlUtil.CanCreateValidUri(namespaceValue, UriKind.Absolute))
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace, namespaceValue);
 
                 return new Saml2Action(reader.ReadElementString(), new Uri(namespaceValue));
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = reader.GetAttribute(Saml2Constants.Attributes.NameFormat);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (!UriUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
                         LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Attribute, Saml2Constants.Attributes.NameFormat, value);
 
                     attribute.NameFormat = new Uri(value);
@@ -737,7 +737,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
                 else
                 {
-                    if (!UriUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource, value);
 
                     resource = new Uri(value);
@@ -1036,7 +1036,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Format);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (!UriUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.NameIDType, Saml2Constants.Attributes.Format, value);
 
                     nameIdentifier.Format = new Uri(value);
@@ -1065,7 +1065,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (nameIdentifier.Format != null &&
                     StringComparer.Ordinal.Equals(nameIdentifier.Format.AbsoluteUri, Saml2Constants.NameIdentifierFormats.Entity.AbsoluteUri))
                 {
-                    if (!UriUtil.CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
+                    if (!XmlUtil.CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, nameIdentifier.Value);
 
                     if (!string.IsNullOrEmpty(nameIdentifier.NameQualifier)
@@ -1295,7 +1295,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(method))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Attributes.Method);
 
-                if (!UriUtil.CanCreateValidUri(method, UriKind.Absolute))
+                if (!XmlUtil.CanCreateValidUri(method, UriKind.Absolute))
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.SubjectConfirmationType, Saml2Constants.Attributes.Method, reader.LocalName);
 
                 // Construct the appropriate SubjectConfirmation based on the method
@@ -1394,7 +1394,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = reader.GetAttribute(Saml2Constants.Attributes.Recipient);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (!UriUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Attributes.Recipient, reader.LocalName);
 
                     confirmationData.Recipient = new Uri(value);
@@ -2519,7 +2519,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11136, element);
 
                 // TODO - kind can change.
-                if (requireUri && !UriUtil.CanCreateValidUri(value, kind))
+                if (requireUri && !XmlUtil.CanCreateValidUri(value, kind))
                     throw LogReadException(LogMessages.IDX11107, element, value);
 
                 return new Uri(value, kind);

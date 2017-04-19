@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     return _assertion.Conditions.NotBefore;
                 }
 
-                return SecurityUtils.MinUtcDateTime;
+                return DateTimeUtil.GetMinValue(DateTimeKind.Utc);
             }
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     return _assertion.Conditions.NotOnOrAfter;
                 }
 
-                return SecurityUtils.MaxUtcDateTime;
+                return DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
             }
         }
 

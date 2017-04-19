@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
-        // properties, configuration 
+        // properties, configuration
         internal const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
         internal const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
         internal const string IDX10105 = "IDX10105: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";

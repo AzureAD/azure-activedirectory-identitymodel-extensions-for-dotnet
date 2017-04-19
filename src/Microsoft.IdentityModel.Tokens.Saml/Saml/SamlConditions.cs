@@ -67,8 +67,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             get { return _conditions; }
         }
 
-        public DateTime NotBefore { get; set; } = SecurityUtils.MinUtcDateTime;
+        public DateTime NotBefore { get; set; } = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
 
-        public DateTime NotOnOrAfter { get; set; } = SecurityUtils.MaxUtcDateTime;
+        public DateTime NotOnOrAfter { get; set; } = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
     }
 }

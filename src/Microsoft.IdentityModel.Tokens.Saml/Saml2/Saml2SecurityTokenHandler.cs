@@ -36,8 +36,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Saml;
-using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
@@ -658,7 +656,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (claim.Properties.ContainsKey(ClaimProperties.SamlAttributeNameFormat))
             {
                 string nameFormat = claim.Properties[ClaimProperties.SamlAttributeNameFormat];
-                if (!UriUtil.CanCreateValidUri(nameFormat, UriKind.Absolute))
+                if (!XmlUtil.CanCreateValidUri(nameFormat, UriKind.Absolute))
                     throw LogHelper.LogArgumentNullException("nameof(nameFormat), ID0013");
 
                 attribute.NameFormat = new Uri(nameFormat);
@@ -892,7 +890,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationInstant, SAML2"));
 
             Saml2AuthenticationContext authCtx = new Saml2AuthenticationContext(authenticationMethod);
-            DateTime authInstantTime = DateTime.ParseExact(authenticationInstant, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+            DateTime authInstantTime = DateTime.ParseExact(authenticationInstant, Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
             Saml2AuthenticationStatement authnStatement = new Saml2AuthenticationStatement(authCtx, authInstantTime);
 
             if (authInfo != null)
@@ -960,7 +958,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (nameIdentifierClaim != null)
             {
                 Saml2NameIdentifier nameIdentifier = new Saml2NameIdentifier(nameIdentifierClaim);
-                if (nameIdentifierFormat != null && UriUtil.CanCreateValidUri(nameIdentifierFormat, UriKind.Absolute))
+                if (nameIdentifierFormat != null && XmlUtil.CanCreateValidUri(nameIdentifierFormat, UriKind.Absolute))
                     nameIdentifier.Format = new Uri(nameIdentifierFormat);
 
                 nameIdentifier.NameQualifier = nameIdentifierNameQualifier;
@@ -1324,7 +1322,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     // TODO - should we support nested Actors?
                     if (subject.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10512));
+                        throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10512));
 
                     SetDelegateFromAttribute(attribute, subject, issuer);
                 }
@@ -1373,7 +1371,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             issuer));
             }
 
-            subject.AddClaim(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), SamlConstants.GeneratedDateTimeFormat), ClaimValueTypes.DateTime, issuer));
+            subject.AddClaim(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat), ClaimValueTypes.DateTime, issuer));
         }
 
         /// <summary>
