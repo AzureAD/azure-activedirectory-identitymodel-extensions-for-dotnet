@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateAudienceTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidateAudience(CreateAndValidateTheoryData theoryData)
+        public void ValidateAudience(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
@@ -94,11 +94,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> ValidateAudienceTheoryData
+        public static TheoryData<SamlTheoryData> ValidateAudienceTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
                 var handler = new DerivedSamlSecurityTokenHandler();
 
                 ValidateTheoryData.AddValidateAudienceTheoryData(theoryData, handler);
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateIssuerTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidateIssuer(CreateAndValidateTheoryData theoryData)
+        public void ValidateIssuer(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
@@ -124,11 +124,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> ValidateIssuerTheoryData
+        public static TheoryData<SamlTheoryData> ValidateIssuerTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
                 var handler = new DerivedSamlSecurityTokenHandler();
 
                 ValidateTheoryData.AddValidateIssuerTheoryData(theoryData, handler);

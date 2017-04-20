@@ -46,9 +46,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Reads the &lt;saml:Action> element.
         /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Action"/> element.</param>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a <see cref="Saml2Action"/> element.</param>
         /// <returns>A <see cref="Saml2Action"/> instance.</returns>
-        public virtual Saml2Action ReadAction(XmlReader reader)
+        public virtual Saml2Action ReadAction(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Action, Saml2Constants.Namespace);
             try
@@ -66,14 +66,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!XmlUtil.CanCreateValidUri(namespaceValue, UriKind.Absolute))
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace, namespaceValue);
 
-                return new Saml2Action(reader.ReadElementString(), new Uri(namespaceValue));
+                var action = reader.ReadElementContentAsString();
+                reader.MoveToContent();
+                return new Saml2Action(action, new Uri(namespaceValue));
             }
             catch (Exception ex)
             {
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Action);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Action, ex);
             }
         }
 
@@ -91,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Advice"/> element.</param>
         /// <returns>A <see cref="Saml2Advice"/> instance.</returns>
-        public virtual Saml2Advice ReadAdvice(XmlReader reader)
+        public virtual Saml2Advice ReadAdvice(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Advice, Saml2Constants.Namespace);
             try
@@ -131,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Advice);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Advice, ex);
             }
         }
 
@@ -140,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
-        public virtual Saml2Assertion ReadAssertion(XmlReader reader)
+        public virtual Saml2Assertion ReadAssertion(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
@@ -185,16 +187,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(value))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
 
-                assertion.IssueInstant = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                assertion.IssueInstant = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
-                // Process <elements>
+                // will move to next element
+                // <ds:Signature> 0-1 read by EnvelopedSignatureReader
                 envelopeReader.Read();
-
+               
                 // <Issuer> 1
                 assertion.Issuer = ReadIssuer(envelopeReader);
-
-                // <ds:Signature> 0-1
-                // will be read by enveloped signature reader
 
                 // <Subject> 0-1
                 if (envelopeReader.IsStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace))
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Assertion);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Assertion, ex);
             }
         }
 
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">An <see cref="XmlReader"/> positioned at a <see cref="Saml2Attribute"/> element.</param>
         /// <returns>A <see cref="Saml2Attribute"/> instance.</returns>
-        public virtual Saml2Attribute ReadAttribute(XmlReader reader)
+        public virtual Saml2Attribute ReadAttribute(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
             try
@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         // "some-non-empty-local-prefix:some-non-empty-string" case
                         string attributeValueXsiTypePrefix = null;
                         string attributeValueXsiTypeSuffix = null;
-                        string attributeValueXsiTypeSuffixWithLocalPrefix = reader.GetAttribute(Saml2Constants.Attributes.Type, XmlSchema.InstanceNamespace);
+                        string attributeValueXsiTypeSuffixWithLocalPrefix = reader.GetAttribute(Saml2Constants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);
                         if (!string.IsNullOrEmpty(attributeValueXsiTypeSuffixWithLocalPrefix))
                         {
                             // "some-non-empty-string" case
@@ -373,7 +373,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, Saml2Constants.Elements.Attribute, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Attribute, ex);
             }
         }
 
@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AttributeStatement"/> element.</param>
         /// <returns>A <see cref="Saml2AttributeStatement"/> instance.</returns>
-        public virtual Saml2AttributeStatement ReadAttributeStatement(XmlReader reader)
+        public virtual Saml2AttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
             try
@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeStatement);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeStatement, ex);
             }
         }
 
@@ -430,7 +430,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="attribute">The <see cref="Saml2Attribute"/>.</param>
         /// <returns>The attribute value as a string.</returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        public virtual string ReadAttributeValue(XmlReader reader, Saml2Attribute attribute)
+        public virtual string ReadAttributeValue(XmlDictionaryReader reader, Saml2Attribute attribute)
         {
             // This code was designed realizing that the writter of the xml controls how our
             // reader will report the NodeType. A completely differnet system (IBM, etc) could write the values.
@@ -493,7 +493,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeValue);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeValue, ex);
             }
         }
 
@@ -504,7 +504,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AudienceRestriction"/> element.</param>
         /// <returns>A <see cref="Saml2AudienceRestriction"/> instance.</returns>
-        public virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlReader reader)
+        public virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
         {
             if (null == reader)
                 LogHelper.LogArgumentNullException(nameof(reader));
@@ -552,7 +552,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Audience);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Audience, ex);
             }
         }
 
@@ -566,7 +566,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AuthenticationContext"/> element.</param>
         /// <returns>A <see cref="Saml2AuthenticationContext"/> instance.</returns>
-        public virtual Saml2AuthenticationContext ReadAuthenticationContext(XmlReader reader)
+        public virtual Saml2AuthenticationContext ReadAuthenticationContext(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
             try
@@ -614,7 +614,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnContext);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnContext, ex);
             }
         }
 
@@ -624,7 +624,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AuthenticationStatement"/> element.</param>
         /// <returns>A <see cref="Saml2AuthenticationStatement"/> instance.</returns>
-        public virtual Saml2AuthenticationStatement ReadAuthenticationStatement(XmlReader reader)
+        public virtual Saml2AuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
             try
@@ -651,7 +651,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(value))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Attributes.AuthnInstant);
 
-                authnInstant = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                // TODO - net1.4 doesn't support array of formats.
+                // authnInstant = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                authnInstant = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
                 // @SessionIndex - optional
                 sessionIndex = reader.GetAttribute(Saml2Constants.Attributes.SessionIndex);
@@ -659,7 +661,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @SessionNotOnOrAfter - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.SessionNotOnOrAfter);
                 if (!string.IsNullOrEmpty(value))
-                    sessionNotOnOrAfter = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                    sessionNotOnOrAfter = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
                 // Content
                 reader.Read();
@@ -685,7 +687,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement, ex);
             }
         }
 
@@ -696,7 +698,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AuthorizationDecisionStatement"/> element.</param>
         /// <returns>A <see cref="Saml2AuthorizationDecisionStatement"/> instance.</returns>
-        public virtual Saml2AuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlReader reader)
+        public virtual Saml2AuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
             try
@@ -766,7 +768,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement, ex);
             }
         }
 
@@ -779,7 +781,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Conditions"/> element.</param>
         /// <returns>A <see cref="Saml2Conditions"/> instance.</returns>
-        public virtual Saml2Conditions ReadConditions(XmlReader reader)
+        public virtual Saml2Conditions ReadConditions(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
             try
@@ -793,12 +795,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @NotBefore - optional
                 var value = reader.GetAttribute(Saml2Constants.Attributes.NotBefore);
                 if (!string.IsNullOrEmpty(value))
-                    conditions.NotBefore = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                    conditions.NotBefore = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
                 // @NotOnOrAfter - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.NotOnOrAfter);
                 if (!string.IsNullOrEmpty(value))
-                    conditions.NotOnOrAfter = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                    conditions.NotOnOrAfter = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
                 // Content
                 reader.ReadStartElement();
@@ -881,7 +883,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Conditions);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Conditions, ex);
             }
         }
 
@@ -892,7 +894,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/> representing the EncryptedId that was read</returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
         /// <exception cref="XmlException">The 'reader' is not positioned at an 'EncryptedID' element.</exception>
-        public virtual Saml2NameIdentifier ReadEncryptedId(XmlReader reader)
+        public virtual Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
         {
             throw new NotImplementedException("not implemented yet");
             //if (null == reader)
@@ -940,7 +942,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Evidence"/> element.</param>
         /// <returns>A <see cref="Saml2Evidence"/> instance.</returns>
-        public virtual Saml2Evidence ReadEvidence(XmlReader reader)
+        public virtual Saml2Evidence ReadEvidence(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
             try
@@ -989,7 +991,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Evidence);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Evidence, ex);
             }
         }
 
@@ -998,7 +1000,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>A <see cref="Saml2NameIdentifier"/> instance.</returns>
-        public virtual Saml2NameIdentifier ReadIssuer(XmlReader reader)
+        public virtual Saml2NameIdentifier ReadIssuer(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
             return ReadNameIdType(reader);
@@ -1010,7 +1012,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/></returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        public virtual Saml2NameIdentifier ReadNameId(XmlReader reader)
+        public virtual Saml2NameIdentifier ReadNameId(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
             return ReadNameIdType(reader);
@@ -1022,7 +1024,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/></returns>
-        internal Saml2NameIdentifier ReadNameIdType(XmlReader reader)
+        internal Saml2NameIdentifier ReadNameIdType(XmlDictionaryReader reader)
         {
             // check that reader is on correct element is made by caller
             try
@@ -1081,7 +1083,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Types.NameIDType);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Types.NameIDType, ex);
             }
         }
 
@@ -1095,7 +1097,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2ProxyRestriction"/> element.</param>
         /// <returns>An instance of <see cref="Saml2ProxyRestriction"/></returns>
-        public virtual Saml2ProxyRestriction ReadProxyRestriction(XmlReader reader)
+        public virtual Saml2ProxyRestriction ReadProxyRestriction(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -1146,7 +1148,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.ProxyRestricton);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.ProxyRestricton, ex);
             }
         }
 
@@ -1157,7 +1159,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="assertion">The <see cref="Saml2Assertion"/> that is having the signature checked.</param>
         /// <returns>The <see cref="SecurityKeyIdentifier"/> that defines the key to use to check the signature.</returns>
         /// <exception cref="ArgumentNullException">Input parameter 'reader' is null.</exception>
-        public virtual SecurityKeyIdentifier ReadSigningKeyInfo(XmlReader reader, Saml2Assertion assertion)
+        public virtual SecurityKeyIdentifier ReadSigningKeyInfo(XmlDictionaryReader reader, Saml2Assertion assertion)
         {
             if (null == reader)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -1199,7 +1201,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// saml:AuthnStatementType, and saml:AuthzDecisionStatementType. To
         /// handle custom statements, override this method.
         /// </remarks>
-        public virtual Saml2Statement ReadStatement(XmlReader reader)
+        public virtual Saml2Statement ReadStatement(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Statement, Saml2Constants.Namespace);
 
@@ -1233,7 +1235,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// &lt;EncryptedID> element. To handle encryped IDs in the Subject,
         /// override this method.
         /// </remarks>
-        public virtual Saml2Subject ReadSubject(XmlReader reader)
+        public virtual Saml2Subject ReadSubject(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
             try
@@ -1269,7 +1271,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Subject);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Subject, ex);
             }
         }
 
@@ -1278,7 +1280,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2SubjectConfirmation"/> element.</param>
         /// <returns>An instance of <see cref="Saml2SubjectConfirmation"/> .</returns>
-        public virtual Saml2SubjectConfirmation ReadSubjectConfirmation(XmlReader reader)
+        public virtual Saml2SubjectConfirmation ReadSubjectConfirmation(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace, true);
             try
@@ -1322,7 +1324,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmation);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmation, ex);
             }
         }
 
@@ -1335,7 +1337,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// The default implementation handles the unextended element
         /// as well as the extended type saml:KeyInfoConfirmationDataType.
         /// </remarks>
-        public virtual Saml2SubjectConfirmationData ReadSubjectConfirmationData(XmlReader reader)
+        public virtual Saml2SubjectConfirmationData ReadSubjectConfirmationData(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
             try
@@ -1380,14 +1382,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = reader.GetAttribute(Saml2Constants.Attributes.NotBefore);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    confirmationData.NotBefore = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                    confirmationData.NotBefore = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
                 }
 
                 // @NotOnOrAfter - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.NotOnOrAfter);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    confirmationData.NotOnOrAfter = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
+                    confirmationData.NotOnOrAfter = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
                 }
 
                 // @Recipient - optional
@@ -1433,7 +1435,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmationData);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmationData, ex);
             }
         }
 
@@ -1453,7 +1455,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <param name="parentElement">The parent element this SubjectID is part of.</param>
         /// <returns>A <see cref="Saml2NameIdentifier"/> constructed from the XML.</returns>
-        public virtual Saml2NameIdentifier ReadSubjectId(XmlReader reader, string parentElement)
+        public virtual Saml2NameIdentifier ReadSubjectId(XmlDictionaryReader reader, string parentElement)
         {
             // <NameID>, <EncryptedID>, <BaseID>
             if (reader.IsStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace))
@@ -1491,7 +1493,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="reader">XmlReader positioned at a ds:KeyInfo element.</param>
         /// <returns>A <see cref="SecurityKeyIdentifier"/> instance.</returns>
         /// <exception cref="ArgumentNullException">Input parameter 'reader' is null.</exception>
-        public virtual SecurityKeyIdentifier ReadSubjectKeyInfo(XmlReader reader)
+        public virtual SecurityKeyIdentifier ReadSubjectKeyInfo(XmlDictionaryReader reader)
         {
             // TODO - SecurityKey read / write
             if (null == reader)
@@ -1507,7 +1509,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2SubjectLocality"/> element.</param>
         /// <returns>An instance of <see cref="Saml2SubjectLocality"/> .</returns>
-        public virtual Saml2SubjectLocality ReadSubjectLocality(XmlReader reader)
+        public virtual Saml2SubjectLocality ReadSubjectLocality(XmlDictionaryReader reader)
         {
             CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace);
             try
@@ -1540,7 +1542,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectLocality);
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectLocality, ex);
             }
         }
 
@@ -1790,14 +1792,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 if (null == value)
                 {
-                    writer.WriteAttributeString("nil", XmlSchema.InstanceNamespace, XmlConvert.ToString(true));
+                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.Nil, XmlSignatureConstants.XmlSchemaNamespace, XmlConvert.ToString(true));
                 }
                 else if (value.Length > 0)
                 {
                     if ((xsiTypePrefix != null) && (xsiTypeSuffix != null))
                     {
-                        writer.WriteAttributeString("xmlns", Saml2Constants.ClaimValueTypeSerializationPrefix, null, xsiTypePrefix);
-                        writer.WriteAttributeString("type", XmlSchema.InstanceNamespace, String.Concat(Saml2Constants.ClaimValueTypeSerializationPrefixWithColon, xsiTypeSuffix));
+                        writer.WriteAttributeString(XmlSignatureConstants.XmlNamepspacePrefix, Saml2Constants.ClaimValueTypeSerializationPrefix, null, xsiTypePrefix);
+                        writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, string.Concat(Saml2Constants.ClaimValueTypeSerializationPrefixWithColon, xsiTypeSuffix));
                     }
 
                     WriteAttributeValue(writer, value, attribute);
@@ -2391,7 +2393,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // @xsi:type
             if (data.KeyIdentifiers != null && data.KeyIdentifiers.Count > 0)
-                writer.WriteAttributeString("type", XmlSchema.InstanceNamespace, Saml2Constants.Types.KeyInfoConfirmationDataType);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, Saml2Constants.Types.KeyInfoConfirmationDataType);
 
             // @Address - optional
             if (!string.IsNullOrEmpty(data.Address))
@@ -2473,7 +2475,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             writer.WriteEndElement();
         }
 
-        internal static void ReadEmptyContentElement(XmlReader reader)
+        internal static void ReadEmptyContentElement(XmlDictionaryReader reader)
         {
             bool isEmpty = reader.IsEmptyElement;
             reader.Read();
@@ -2483,14 +2485,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
         }
 
-        internal static Saml2Id ReadSimpleNCNameElement(XmlReader reader, string name)
+        internal static Saml2Id ReadSimpleNCNameElement(XmlDictionaryReader reader, string name)
         {
             try
             {
                 if (reader.IsEmptyElement)
                     throw LogReadException(LogMessages.IDX11104, name);
 
-                XmlUtil.ValidateXsiType(reader, "NCName", XmlSchema.Namespace);
+                XmlUtil.ValidateXsiType(reader, XmlSignatureConstants.Attributes.NcName, XmlSignatureConstants.XmlSchemaNamespace);
 
                 reader.MoveToElement();
                 string value = reader.ReadElementContentAsString();
@@ -2499,19 +2501,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, ex, typeof(Saml2Id));
+                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.NameID, ex);
             }
         }
 
         // allow lax reading of relative URIs in some instances for interop
-        internal static Uri ReadSimpleUriElement(XmlReader reader, string element, UriKind kind, bool requireUri)
+        internal static Uri ReadSimpleUriElement(XmlDictionaryReader reader, string element, UriKind kind, bool requireUri)
         {
             try
             {
                 if (reader.IsEmptyElement)
                     throw LogReadException(LogMessages.IDX11104, "Uri");
 
-                XmlUtil.ValidateXsiType(reader, "anyURI", XmlSchema.Namespace);
+                XmlUtil.ValidateXsiType(reader, XmlSignatureConstants.Attributes.AnyUri, XmlSignatureConstants.XmlSchemaNamespace);
                 reader.MoveToElement();
                 string value = reader.ReadElementContentAsString();
 
@@ -2526,7 +2528,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, element, ex);
+                throw LogReadException(LogMessages.IDX11102, ex, element, ex);
             }
         }
 

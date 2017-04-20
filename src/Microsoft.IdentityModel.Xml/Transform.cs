@@ -39,9 +39,9 @@ namespace Microsoft.IdentityModel.Xml
             get { return false; }
         }
 
-        internal abstract object Process(TokenStreamingReader input);
+        internal abstract object Process(XmlTokenStreamReader input);
 
-        internal abstract byte[] ProcessAndDigest(TokenStreamingReader input, HashAlgorithm hash);
+        internal abstract byte[] ProcessAndDigest(XmlTokenStreamReader input, HashAlgorithm hash);
 
         public abstract void ReadFrom(XmlDictionaryReader reader, bool preserveComments);
 

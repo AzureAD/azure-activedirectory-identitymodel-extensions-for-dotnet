@@ -34,9 +34,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     public class ValidateTheoryData
     {
-        public static void AddValidateAudienceTheoryData(TheoryData<CreateAndValidateTheoryData> theoryData, SecurityTokenHandler handler)
+        public static void AddValidateAudienceTheoryData(TheoryData<SamlTheoryData> theoryData, SecurityTokenHandler handler)
         {
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string>(),
                 First = true,
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 ValidationParameters = null,
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string>(),
                 Handler = handler,
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string>(),
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string> { "John" },
                 Handler = handler,
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Audiences = new List<string> { "John" },
                 Handler = handler,
@@ -124,9 +124,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             });
         }
 
-        public static void AddValidateIssuerTheoryData(TheoryData<CreateAndValidateTheoryData> theoryData, SecurityTokenHandler handler)
+        public static void AddValidateIssuerTheoryData(TheoryData<SamlTheoryData> theoryData, SecurityTokenHandler handler)
         {
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                 First = true,
@@ -136,14 +136,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 ValidationParameters = null,
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Handler = handler,
                 TestId = "ValidateIssuer == false",
                 ValidationParameters = new TokenValidationParameters { ValidateIssuer = false },
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
                 Handler = handler,
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 ValidationParameters = new TokenValidationParameters { ValidIssuer = "frank" }
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Handler = handler,
                 Issuer = "bob",
@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 }
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"),
                 Handler = handler,
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 }
             });
 
-            theoryData.Add(new CreateAndValidateTheoryData
+            theoryData.Add(new SamlTheoryData
             {
                 Handler = handler,
                 Issuer = "bob",
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
     }
 
-    public class CreateAndValidateTheoryData : TheoryDataBase
+    public class SamlTheoryData : TheoryDataBase
     {
         public string Actor { get; set; }
 
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public override string ToString()
         {
-            return $"{TestId}, {Token}, {ExpectedException}";
+            return $"{TestId}, {ExpectedException}";
         }
     }
 }

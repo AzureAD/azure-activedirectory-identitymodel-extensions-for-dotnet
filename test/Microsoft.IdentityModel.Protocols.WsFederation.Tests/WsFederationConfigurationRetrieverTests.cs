@@ -84,6 +84,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+#if !NETCOREAPP1_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#else
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
+#endif
                         First = true,
                         Configuration = ReferenceMetadata.GoodConfigurationCommonEndpoint,
                         Metadata = ReferenceMetadata.AADCommonMetadata,
@@ -94,6 +99,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+#if !NETCOREAPP1_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#else
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
+#endif
                         Configuration = ReferenceMetadata.GoodConfiguration,
                         Metadata = ReferenceMetadata.Metadata,
                         TestId = nameof(ReferenceMetadata.Metadata)
@@ -102,7 +112,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
+#else
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
+#endif
                         Configuration = ReferenceMetadata.GoodConfiguration,
                         Metadata = ReferenceMetadata.Metadata,
                         SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
@@ -120,7 +134,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003:"),
+#else
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
+#endif
                         Metadata = ReferenceMetadata.MetadataNoTokenUri,
                         TestId = nameof(ReferenceMetadata.MetadataNoTokenUri)
                     });
@@ -147,7 +165,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
             public override string ToString()
             {
-                return $"TestId: {TestId}, {ExpectedException}, Metadata: {Metadata}.";
+                return $"TestId: {TestId}, {ExpectedException}";
             }
         }
     }

@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public string  DigestText { get; set; }
 
-        public byte[]  DigestValue { get; set; }
+        public byte[]  DigestBytes { get; set; }
 
         public string Id { get; set; }
 
@@ -78,9 +78,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool Verified { get; set; }
 
-        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, TokenStreamingReader tokenStream)
+        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, XmlTokenStreamReader tokenStream)
         {
-            Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream), _digestValueElement.Value);
+            Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream), DigestBytes);
             return Verified;
         }
 
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Xml
         //    return _transformChain.TransformToDigest(_resolvedXmlSource, DigestAlgorithm);
         //}
 
-        private byte[] ComputeDigest(CryptoProviderFactory providerFactory, TokenStreamingReader tokenStream)
+        private byte[] ComputeDigest(CryptoProviderFactory providerFactory, XmlTokenStreamReader tokenStream)
         {
             if (tokenStream == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenStream));
@@ -168,11 +168,33 @@ namespace Microsoft.IdentityModel.Xml
             else
                 throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Transforms, reader.NamespaceURI, reader.LocalName);
 
-            _digestMethodElement.ReadFrom(reader);
-            _digestValueElement.ReadFrom(reader);
 
+            // <DigestMethod>
+            XmlUtil.ThrowIfReaderIsNotOnExpectedElement(reader, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+            reader.MoveToStartElement(XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+            bool isEmptyElement = reader.IsEmptyElement;
+            DigestAlgorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+            if (string.IsNullOrEmpty(DigestAlgorithm))
+                throw XmlUtil.OnRequiredAttributeMissing(XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Attributes.Algorithm);
+
+            reader.Read();
             reader.MoveToContent();
-            reader.ReadEndElement(); // Reference
+            if (!isEmptyElement)
+            {
+                reader.MoveToContent();
+                reader.ReadEndElement();
+            }
+
+            // <DigestValue>
+            XmlUtil.ThrowIfReaderIsNotOnExpectedElement(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
+            DigestText = reader.ReadElementContentAsString().Trim();
+            DigestBytes = System.Convert.FromBase64String(DigestText);
+
+
+            // </Reference>
+            reader.MoveToContent();
+            reader.ReadEndElement();
+            reader.MoveToContent();
         }
 
         public void WriteTo(XmlDictionaryWriter writer)
@@ -200,7 +222,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             byte[] _digestValue;
             string _digestText;
-            string _prefix;
 
             internal byte[] Value
             {
@@ -212,26 +233,9 @@ namespace Microsoft.IdentityModel.Xml
                 }
             }
 
-            public void ReadFrom(XmlDictionaryReader reader)
-            {
-                XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace, true);
-
-                reader.MoveToStartElement(XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
-                _prefix = reader.Prefix;
-                reader.Read();
-                reader.MoveToContent();
-
-                _digestText = reader.ReadString();
-                _digestValue = System.Convert.FromBase64String(_digestText.Trim());
-
-                // </ DigestValue>
-                reader.MoveToContent();
-                reader.ReadEndElement();
-            }
-
             public void WriteTo(XmlDictionaryWriter writer)
             {
-                writer.WriteStartElement(_prefix ?? XmlSignatureConstants.Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(XmlSignatureConstants.Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 if (_digestText != null)
                     writer.WriteString(_digestText);
                 else

@@ -327,7 +327,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
             if (canMatchKey && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(LogMessages.IDX10501, samlToken.SigningKey.KeyId, samlToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(LogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
 
             if (keysAttempted.Length > 0)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));

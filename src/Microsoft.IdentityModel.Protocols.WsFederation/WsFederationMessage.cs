@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IdentityModel.Protocols.WSTrust;
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -170,19 +169,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 XmlReader xmlReader = XmlReader.Create(sr);
                 xmlReader.MoveToContent();
 
-                WSTrustResponseSerializer serializer = new WSTrust13ResponseSerializer();
-                if (serializer.CanRead(xmlReader))
-                {
-                    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
-                    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
-                }
+                // TODO need serializer to get token from response.
+                //WSTrustResponseSerializer serializer = new WSTrust13ResponseSerializer();
+                //if (serializer.CanRead(xmlReader))
+                //{
+                //    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
+                //    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
+                //}
 
-                serializer = new WSTrustFeb2005ResponseSerializer();
-                if (serializer.CanRead(xmlReader))
-                {
-                    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
-                    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
-                }
+                //serializer = new WSTrustFeb2005ResponseSerializer();
+                //if (serializer.CanRead(xmlReader))
+                //{
+                //    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
+                //    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
+                //}
             }
 
             return null;

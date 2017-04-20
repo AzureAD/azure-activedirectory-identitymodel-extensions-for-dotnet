@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             CertificateData = reader.ReadElementContentAsString();
             var embededCert = new X509Certificate2(Convert.FromBase64String(CertificateData));
-            Kid = embededCert.GetCertHashString();
+            Kid = embededCert.Thumbprint;
         }
 
         /// <summary>

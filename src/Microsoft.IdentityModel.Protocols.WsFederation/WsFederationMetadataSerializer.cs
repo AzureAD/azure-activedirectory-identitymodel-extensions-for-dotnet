@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (null == reader || !reader.IsStartElement(WsFederationConstants.Elements.RoleDescriptor, WsFederationConstants.Namespaces.MetadataNamespace))
                 return false;
 
-            var type = reader.GetAttribute(WsFederationConstants.Attributes.Type, XmlSchema.InstanceNamespace);
+            var type = reader.GetAttribute(WsFederationConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);
             var typeQualifiedName = new XmlQualifiedName();
 
             if (!string.IsNullOrEmpty(type))

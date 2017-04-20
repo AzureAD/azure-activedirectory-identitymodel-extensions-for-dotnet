@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Xml
             get
             {
                 if (_random == null)
-                    _random = new RNGCryptoServiceProvider();
+                    _random = RandomNumberGenerator.Create();
 
                 return _random;
             }
@@ -81,7 +81,10 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(sizeInBits)));
 
             byte[] data = new byte[sizeInBytes];
+#if DESKTOPNET45
+            // TODO .net 1.4
             RandomNumberGenerator.GetNonZeroBytes(data);
+#endif
             return data;
         }
     }

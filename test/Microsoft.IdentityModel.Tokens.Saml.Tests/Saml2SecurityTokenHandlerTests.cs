@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("CanReadTokenTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void CanReadToken(CreateAndValidateTheoryData theoryData)
+        public void CanReadToken(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
             try
@@ -80,16 +80,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> CanReadTokenTheoryData
+        public static TheoryData<SamlTheoryData> CanReadTokenTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
                 
                 // CanReadToken
                 var handler = new Saml2SecurityTokenHandler();
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         CanRead = false,
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         CanRead = false,
                         Handler = handler,
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         CanRead = true,
                         Handler = handler,
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         CanRead = false,
                         Handler = handler,
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadTokenTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadToken(CreateAndValidateTheoryData theoryData)
+        public void ReadToken(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
             try
@@ -147,14 +147,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> ReadTokenTheoryData
+        public static TheoryData<SamlTheoryData> ReadTokenTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
 
-                theoryData.Add(new CreateAndValidateTheoryData
+                theoryData.Add(new SamlTheoryData
                 {
+#if !NETCOREAPP1_0
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+#else
+                    ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                     First = true,
                     Handler = new Saml2SecurityTokenHandler(),
                     TestId = nameof(RefrenceTokens.Saml2Token_Valid),
@@ -168,7 +173,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateAudienceTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidateAudience(CreateAndValidateTheoryData theoryData)
+        public void ValidateAudience(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
@@ -183,11 +188,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> ValidateAudienceTheoryData
+        public static TheoryData<SamlTheoryData> ValidateAudienceTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
                 var handler = new Saml2SecurityTokenHandlerPublic();
 
                 ValidateTheoryData.AddValidateAudienceTheoryData(theoryData, handler);
@@ -199,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateIssuerTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidateIssuer(CreateAndValidateTheoryData theoryData)
+        public void ValidateIssuer(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
@@ -214,11 +219,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> ValidateIssuerTheoryData
+        public static TheoryData<SamlTheoryData> ValidateIssuerTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
                 var handler = new Saml2SecurityTokenHandlerPublic();
 
                 ValidateTheoryData.AddValidateIssuerTheoryData(theoryData, handler);
@@ -230,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateTokenTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidateToken(CreateAndValidateTheoryData theoryData)
+        public void ValidateToken(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
 
@@ -247,14 +252,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public static TheoryData<CreateAndValidateTheoryData> ValidateTokenTheoryData
+        /// <summary>
+        /// Canoncalizing reader is not yet supported in .net core
+        /// </summary>
+        public static TheoryData<SamlTheoryData> ValidateTokenTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateTheoryData>();
+                var theoryData = new TheoryData<SamlTheoryData>();
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         First = true,
@@ -265,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Handler = new Saml2SecurityTokenHandler(),
@@ -277,7 +285,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 var tokenHandler = new Saml2SecurityTokenHandler();
                 tokenHandler.MaximumTokenSizeInBytes = 1;
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentException("IDX11013:"),
                         Handler = tokenHandler,
@@ -287,7 +295,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
                         Handler = new Saml2SecurityTokenHandler(),
@@ -297,7 +305,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11137:"),
                         Handler = new Saml2SecurityTokenHandler(),
@@ -307,7 +315,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
                         Handler = new Saml2SecurityTokenHandler(),
@@ -317,7 +325,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
                         Handler = new Saml2SecurityTokenHandler(),
@@ -327,7 +335,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(FormatException)),
                         Handler = new Saml2SecurityTokenHandler(),
@@ -337,9 +345,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11105:"),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = tokenHandler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerMissing),
                         Token = RefrenceTokens.Saml2Token_IssuerMissing,
@@ -347,9 +359,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11108:"),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_NoSubjectNoStatements),
                         Token = RefrenceTokens.Saml2Token_NoSubjectNoStatements,
@@ -357,9 +373,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11138:"),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_NoAttributes),
                         Token = RefrenceTokens.Saml2Token_NoAttributes,
@@ -370,8 +390,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 var certData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD";
                 var aadCert = new X509Certificate2(Convert.FromBase64String(certData));
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKey set",
                         Token = RefrenceTokens.Saml2Token_Valid,
@@ -386,24 +411,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
-                        Handler = new Saml2SecurityTokenHandler(),
-                        TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKeys set",
-                        Token = RefrenceTokens.Saml2Token_Valid,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        }
-                    });
-
-                theoryData.Add(
-                    new CreateAndValidateTheoryData
-                    {
+#if !NETCOREAPP1_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_Valid_Spaces_Added),
                         Token = RefrenceTokens.Saml2Token_Valid_Spaces_Added,
@@ -419,9 +433,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_Formated),
                         Token = RefrenceTokens.Saml2Token_Formated,
@@ -436,9 +454,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_AttributeTampered),
                         Token = RefrenceTokens.Saml2Token_AttributeTampered,
@@ -453,9 +475,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_DigestTampered),
                         Token = RefrenceTokens.Saml2Token_DigestTampered,
@@ -470,9 +496,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 theoryData.Add(
-                    new CreateAndValidateTheoryData
+                    new SamlTheoryData
                     {
+#if !NETCOREAPP1_0
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_SignatureTampered),
                         Token = RefrenceTokens.Saml2Token_SignatureTampered,

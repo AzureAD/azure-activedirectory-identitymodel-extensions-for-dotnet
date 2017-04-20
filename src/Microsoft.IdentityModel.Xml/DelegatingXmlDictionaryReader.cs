@@ -229,6 +229,8 @@ namespace Microsoft.IdentityModel.Xml
             get { return _innerReader.Prefix; }
         }
 
+#if DESKTOPNET45
+        // TODO - replacement on CORE
         /// <summary>
         /// Gets the quotation mark character used to enclose the attribute node. (" or ')
         /// </summary>
@@ -236,7 +238,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             get { return _innerReader.QuoteChar; }
         }
-
+#endif
         /// <summary>
         /// Gets the System.Xml.ReadState of the reader. 
         /// </summary>
@@ -278,6 +280,8 @@ namespace Microsoft.IdentityModel.Xml
             get { return _innerReader.XmlSpace; }
         }
 
+#if DESKTOPNET45
+        // TODO - replacement on CORE
         /// <summary>
         /// Closes the reader and changes the System.Xml.XmlReader.ReadState
         /// to Closed.
@@ -286,7 +290,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             _innerReader.Close();
         }
-
+#endif
         /// <summary>
         /// Gets the value of the attribute at the given index.
         /// </summary>

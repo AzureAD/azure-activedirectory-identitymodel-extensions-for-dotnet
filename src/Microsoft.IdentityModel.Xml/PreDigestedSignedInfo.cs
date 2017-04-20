@@ -62,11 +62,6 @@ namespace Microsoft.IdentityModel.Xml
 
         public string DigestMethod { get; private set; }
 
-        internal override void ComputeHash(HashStream hashStream)
-        {
-            GetCanonicalBytes(hashStream);
-        }
-
         internal override void GetCanonicalBytes(Stream stream)
         {
             using (var utf8Writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
@@ -95,12 +90,6 @@ namespace Microsoft.IdentityModel.Xml
             throw LogHelper.LogExceptionMessage(new NotSupportedException());
         }
 
-        //public override bool EnsureDigestValidityIfIdMatches(string id, object resolvedXmlSource)
-        //{
-        //    // WriteOnly
-        //    throw LogHelper.LogExceptionMessage(new NotSupportedException());
-        //}
-
         public override void WriteTo(XmlDictionaryWriter writer)
         {
             writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
@@ -109,7 +98,7 @@ namespace Microsoft.IdentityModel.Xml
 
             WriteCanonicalizationMethod(writer);
             WriteSignatureMethod(writer);
-            if (Reference.DigestValue != null)
+            if (Reference.DigestBytes != null)
             {
                 // <Reference>
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
@@ -146,7 +135,7 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteEndElement();
 
                 // <DigestValue>
-                byte[] digest = Reference.DigestValue;
+                byte[] digest = Reference.DigestBytes;
                 writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 writer.WriteBase64(digest, 0, digest.Length);
                 writer.WriteEndElement(); 
@@ -231,7 +220,7 @@ namespace Microsoft.IdentityModel.Xml
                     return;
                 }
 
-                int encodedLength = Convert.ToBase64CharArray(data, 0, data.Length, base64WorkBuffer, 0, Base64FormattingOptions.None);
+                int encodedLength = Convert.ToBase64CharArray(data, 0, data.Length, base64WorkBuffer, 0);// Base64FormattingOptions.None);
                 EncodeAndWrite(stream, workBuffer, base64WorkBuffer, encodedLength);
             }
 
@@ -312,7 +301,7 @@ namespace Microsoft.IdentityModel.Xml
                 stream.Write(_fragment4, 0, _fragment4.Length);
                 stream.Write(digestMethodBytes, 0, digestMethodBytes.Length);
                 stream.Write(_fragment5, 0, _fragment5.Length);
-                Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, reference.DigestValue);
+                Base64EncodeAndWrite(stream, workBuffer, base64WorkBuffer, reference.DigestBytes);
                 stream.Write(_fragment6, 0, _fragment6.Length);
                 stream.Write(_fragment7, 0, _fragment7.Length);
             }
