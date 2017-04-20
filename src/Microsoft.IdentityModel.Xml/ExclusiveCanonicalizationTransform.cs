@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -91,7 +92,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         // multi-transform case, inefficient path
-        internal override object Process(TokenStreamingReader reader)
+        internal override object Process(XmlTokenStreamReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -99,7 +100,7 @@ namespace Microsoft.IdentityModel.Xml
             return CanonicalizationDriver.GetMemoryStream(reader, IncludeComments, _inclusivePrefixes);
         }
 
-        internal override byte[] ProcessAndDigest(TokenStreamingReader reader, HashAlgorithm hash)
+        internal override byte[] ProcessAndDigest(XmlTokenStreamReader reader, HashAlgorithm hash)
         {
             if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
@@ -107,13 +108,44 @@ namespace Microsoft.IdentityModel.Xml
             if (hash == null)
                 LogHelper.LogArgumentNullException(nameof(hash));
 
-            var hashStream = new HashStream(hash);
+            var stream = new MemoryStream();
             reader.MoveToContent();
+            WriteCanonicalStream(stream, reader, IncludeComments, _inclusivePrefixes);
+            stream.Flush();
+            stream.Position = 0;
+            return hash.ComputeHash(stream);
+        }
 
-            CanonicalizationDriver.WriteTo(hashStream, reader, IncludeComments, _inclusivePrefixes);
+        public static void WriteCanonicalStream(Stream canonicalStream, XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixes)
+        {
+            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+            if (inclusivePrefixes != null)
+            {
+                // Add a dummy element at the top and populate the namespace
+                // declaration of all the inclusive prefixes.
+                writer.WriteStartElement("a", reader.LookupNamespace(string.Empty));
+                for (int i = 0; i < inclusivePrefixes.Length; ++i)
+                {
+                    string ns = reader.LookupNamespace(inclusivePrefixes[i]);
+                    if (ns != null)
+                    {
+                        writer.WriteXmlnsAttribute(inclusivePrefixes[i], ns);
+                    }
+                }
+            }
 
-            hashStream.FlushHash();
-            return hash.Hash;
+            writer.StartCanonicalization(canonicalStream, includeComments, inclusivePrefixes);
+            reader.XmlTokens.WriteTo(writer);
+
+            writer.Flush();
+            writer.EndCanonicalization();
+
+            if (inclusivePrefixes != null)
+                writer.WriteEndElement();
+#if DESKTOPNET45
+            // TODO - what to use for net 1.4
+            writer.Close();
+#endif
         }
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)

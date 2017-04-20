@@ -87,7 +87,8 @@ namespace Microsoft.IdentityModel.Xml
                 LogHelper.LogExceptionMessage(new XmlEncryptionException("cipherText.Length"));
 
             Buffer.BlockCopy(cipherText, offset, iv, 0, iv.Length);
-            algorithm.Padding = PaddingMode.ISO10126;
+            // TODO - not available in .net 1.4
+            // algorithm.Padding = PaddingMode.ISO10126;
             algorithm.Mode = CipherMode.CBC;
 
             ICryptoTransform decrTransform = null;

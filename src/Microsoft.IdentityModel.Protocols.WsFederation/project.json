@@ -5,13 +5,33 @@
     "Microsoft.IdentityModel.Protocols": "5.2.0",
     "Microsoft.IdentityModel.Xml": "5.2.0"
   },
-  "frameworks": {
-    "net451": {
-        "frameworkAssemblies": {
-            "System.IdentityModel": ""
+    "frameworks": {
+       "netstandard1.4": {
+            "dependencies": {
+                "System.Collections": "4.3.0-*",
+                "System.Diagnostics.Tools": "4.3.0-*",
+                "System.Runtime": "4.3.0-*",
+                "System.Runtime.Extensions": "4.3.0-*",
+                "System.Runtime.InteropServices": "4.3.0-*",
+                "System.Runtime.InteropServices.RuntimeInformation": "4.3.0-*",
+                "System.Runtime.Serialization.Xml": "4.3.0",
+                "System.Security.Claims": "4.3.0-*",
+                "System.Security.Cryptography.Algorithms": "4.3.0-*",
+                "System.Security.Cryptography.Cng": {
+                    "type": "build",
+                    "version": "4.3.0-*"
+                },
+                "System.Security.Cryptography.X509Certificates": "4.3.0-*",
+                "System.Text.RegularExpressions": "4.3.0-*",
+                "System.Threading": "4.3.0-*",
+                "System.Xml.ReaderWriter": "4.3.0-*"
+            }
+        },
+        "net451": {
+            "frameworkAssemblies": {
+            }
         }
-    }
-  },
+    },
   "buildOptions": {
     "delaySign": true,
     "keyFile": "../../build/35MSSharedLib1024.snk",

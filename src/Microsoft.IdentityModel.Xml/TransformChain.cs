@@ -108,10 +108,10 @@ namespace Microsoft.IdentityModel.Xml
             throw LogHelper.LogExceptionMessage(new XmlException(LogHelper.FormatInvariant(LogMessages.IDX21018, transform)));
         }
 
-        internal byte[] TransformToDigest(TokenStreamingReader tokenStreamReader, HashAlgorithm hash)
+        internal byte[] TransformToDigest(XmlTokenStreamReader tokenStreamReader, HashAlgorithm hash)
         {
             for (int i = 0; i < TransformCount - 1; i++)
-                tokenStreamReader = this[i].Process(tokenStreamReader) as TokenStreamingReader;
+                tokenStreamReader = this[i].Process(tokenStreamReader) as XmlTokenStreamReader;
 
             return this[TransformCount - 1].ProcessAndDigest(tokenStreamReader, hash);
         }

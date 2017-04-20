@@ -30,11 +30,10 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using HexBinary = System.Runtime.Remoting.Metadata.W3cXsd2001.SoapHexBinary;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class TokenStreamingReader : DelegatingXmlDictionaryReader
+    public class XmlTokenStreamReader : DelegatingXmlDictionaryReader
     {
         private MemoryStream _contentStream;
         private TextReader _contentReader;
@@ -43,7 +42,7 @@ namespace Microsoft.IdentityModel.Xml
         private bool _recordDone;
         private XmlTokenStream _xmlTokens;
 
-        public TokenStreamingReader(XmlDictionaryReader reader)
+        public XmlTokenStreamReader(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -61,12 +60,14 @@ namespace Microsoft.IdentityModel.Xml
             get { return _xmlTokens; }
         }
 
+#if DESKTOPNET45
+        // TODO - replacement on CORE
         public override void Close()
         {
             OnEndOfContent();
             base.InnerReader.Close();
         }
-
+#endif
         public override void MoveToAttribute(int index)
         {
             OnEndOfContent();
@@ -107,13 +108,20 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (_contentReader != null)
             {
+#if DESKTOPNET45
+                    // TODO - what to use for net 1.4
+
                 _contentReader.Close();
+#endif
                 _contentReader = null;
             }
 
             if (_contentStream != null)
             {
+                 #if DESKTOPNET45
+                 // TODO - what to use for net 1.4
                 _contentStream.Close();
+                #endif
                 _contentStream = null;
             }
         }
@@ -172,14 +180,20 @@ namespace Microsoft.IdentityModel.Xml
                     encodedValue = fullText.ToString();
                 }
 
-                byte[] value = isBase64 ? Convert.FromBase64String(encodedValue) : HexBinary.Parse(encodedValue).Value;
+                // TODO find Core replacement for HexBinary
+                // byte[] value = isBase64 ? Convert.FromBase64String(encodedValue) : HexBinary.Parse(encodedValue).Value;
+                byte[] value = Convert.FromBase64String(encodedValue);
                 _contentStream = new MemoryStream(value);
             }
 
             int read = _contentStream.Read(buffer, offset, count);
             if (read == 0)
             {
+#if DESKTOPNET45
+                    // TODO - what to use for net 1.4
+
                 _contentStream.Close();
+#endif
                 _contentStream = null;
             }
 

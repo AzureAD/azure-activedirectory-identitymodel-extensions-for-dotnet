@@ -81,14 +81,19 @@ namespace Microsoft.IdentityModel.Xml
             if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
                 throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
 
-            var hashStream = new HashStream(algorithm);
-            ComputeHash(hashStream);
-            hashStream.FlushHash();
+            var stream = new MemoryStream();
+            GetCanonicalBytes(stream);
         }
 
-        internal virtual void ComputeHash(HashStream hashStream)
+        internal byte[] ComputeHashBytes(HashAlgorithm algorithm)
         {
-            GetCanonicalBytes(hashStream);
+            if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
+                throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
+
+            var stream = new MemoryStream();
+            GetCanonicalBytes(stream);
+
+            return algorithm.ComputeHash(stream);
         }
 
         internal virtual void GetCanonicalBytes(Stream stream)
@@ -173,7 +178,7 @@ namespace Microsoft.IdentityModel.Xml
                 NewLineHandling = NewLineHandling.None
             };
 
-            using (XmlWriter bufferWriter = XmlTextWriter.Create(_bufferedStream, settings))
+            using (XmlWriter bufferWriter = XmlDictionaryWriter.Create(_bufferedStream, settings))
             {
                 bufferWriter.WriteNode(reader, true);
                 bufferWriter.Flush();

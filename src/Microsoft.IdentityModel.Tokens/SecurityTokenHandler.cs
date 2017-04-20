@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="reader"><see cref="XmlReader"/>.</param>
         /// <remarks>SecurityToken instance which represents the serialized token.</remarks>
-        public virtual SecurityToken ReadToken(XmlReader reader)
+        public virtual SecurityToken ReadToken(XmlDictionaryReader reader)
         {
             return null;
         }

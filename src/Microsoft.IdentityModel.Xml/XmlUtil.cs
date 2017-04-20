@@ -26,12 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
-using System.Xml.Schema;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -39,12 +37,6 @@ namespace Microsoft.IdentityModel.Xml
 {
     public static class XmlUtil
     {
-        public const string LanguagePrefix = "xml";
-        public const string LanguageLocalname = "lang";
-        public const string LanguageAttribute = LanguagePrefix + ":" + LanguageLocalname;
-        public const string XmlNs = "http://www.w3.org/XML/1998/namespace";
-        public const string XmlNsNs = "http://www.w3.org/2000/xmlns/";
-
         /// <summary>
         /// Determines whether a URI is valid and can be created using the specified UriKind.
         /// Uri.TryCreate is used here, which is more lax than Uri.IsWellFormedUriString.
@@ -83,6 +75,16 @@ namespace Microsoft.IdentityModel.Xml
             if (!allowEmptyElement && reader.IsEmptyElement)
                 throw LogReadException(LogMessages.IDX21010, element);
 
+            if (!reader.IsStartElement(element, ns))
+                throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
+        }
+
+        public static void ThrowIfReaderIsNotOnExpectedElement(XmlReader reader, string element, string ns)
+        {
+            if (null == reader)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            reader.MoveToContent();
             if (!reader.IsStartElement(element, ns))
                 throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
         }
@@ -135,44 +137,20 @@ namespace Microsoft.IdentityModel.Xml
             return sb != null ? sb.ToString() : s;
         }
 
-        // Takes a collection of node list and returns a list of XmlElements
-        // from the list (skipping past any XmlComments and CDATA nodes).
-        public static List<XmlElement> GetXmlElements(XmlNodeList nodeList)
-        {
-            if (nodeList == null)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(nodeList));
-            }
-
-            List<XmlElement> xmlElements = new List<XmlElement>();
-            foreach (XmlNode node in nodeList)
-            {
-                XmlElement tempElement = node as XmlElement;
-                if (tempElement != null)
-                {
-                    xmlElements.Add(tempElement);
-                }
-            }
-
-            return xmlElements;
-        }
-
         public static XmlQualifiedName GetXsiType(XmlReader reader)
         {
-            string xsiType = reader.GetAttribute("type", XmlSchema.InstanceNamespace);
+            string xsiType = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);
             reader.MoveToElement();
 
             if (string.IsNullOrEmpty(xsiType))
-            {
                 return null;
-            }
 
             return ResolveQName(reader, xsiType);
         }
 
         public static bool IsNil(XmlReader reader)
         {
-            string xsiNil = reader.GetAttribute("nil", XmlSchema.InstanceNamespace);
+            string xsiNil = reader.GetAttribute(XmlSignatureConstants.Attributes.Nil, XmlSignatureConstants.XmlSchemaNamespace);
             return !string.IsNullOrEmpty(xsiNil) && XmlConvert.ToBoolean(xsiNil);
         }
 
@@ -267,18 +245,6 @@ namespace Microsoft.IdentityModel.Xml
             Int64 i = reader.ReadContentAsLong();
             reader.ReadEndElement();
             return i;
-        }
-
-        internal static string ReadTextElementAsTrimmedString(XmlElement element)
-        {
-            if (element == null)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(element));
-            }
-
-            XmlReader reader = new XmlNodeReader(element);
-            reader.MoveToContent();
-            return XmlUtil.Trim(reader.ReadElementContentAsString());
         }
 
         public static XmlQualifiedName ResolveQName(XmlReader reader, string qstring)

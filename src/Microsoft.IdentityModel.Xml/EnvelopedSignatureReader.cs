@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private bool _disposed;
         private int _elementCount;
-        private TokenStreamingReader _tokenStreamingReader;
+        private XmlTokenStreamReader _tokenStreamingReader;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
@@ -49,14 +49,14 @@ namespace Microsoft.IdentityModel.Xml
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            _tokenStreamingReader = new TokenStreamingReader(CreateDictionaryReader(reader));
+            _tokenStreamingReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
             InnerReader = _tokenStreamingReader;
             _tokenStreamingReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
         }
 
         /// <summary>
         /// Called when the root element is read.
-        /// Attaches a <see cref="TokenStreamingReader"/> to the signature.
+        /// Attaches a <see cref="XmlTokenStreamReader"/> to the signature.
         /// </summary>
         protected virtual void OnEndOfRootElement()
         {
@@ -141,7 +141,10 @@ namespace Microsoft.IdentityModel.Xml
 
                 if (_tokenStreamingReader != null)
                 {
+#if DESKTOPNET45
+                    // TODO - what to use for net 1.4
                     _tokenStreamingReader.Close();
+#endif
                     _tokenStreamingReader = null;
                 }
             }
@@ -150,7 +153,6 @@ namespace Microsoft.IdentityModel.Xml
 
             _disposed = true;
         }
-
-        #endregion
+#endregion
     }
 }

@@ -42,11 +42,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Read saml:Action element.
         /// </summary>
-        /// <param name="reader">XmlReader positioned at saml:Action element.</param>
+        /// <param name="reader">XmlDictionaryReader positioned at saml:Action element.</param>
         /// <returns>SamlAction</returns>
         /// <exception cref="ArgumentNullException">The parameter 'reader' is null.</exception>
         /// <exception cref="XmlException">The saml:Action element contains unknown elements.</exception>
-        protected virtual SamlAction ReadAction(XmlReader reader)
+        protected virtual SamlAction ReadAction(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Action, SamlConstants.Namespace);
 
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string ns = reader.GetAttribute(SamlConstants.Namespace, null);
 
             reader.MoveToContent();
-            string action = reader.ReadString();
+            string action = reader.ReadElementContentAsString();
             if (string.IsNullOrEmpty(action))
                 throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4073"));
 
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return (string.IsNullOrEmpty(ns)) ? new SamlAction(action) : new SamlAction(action, ns);
         }
 
-        protected virtual SamlAdvice ReadAdvice(XmlReader reader)
+        protected virtual SamlAdvice ReadAdvice(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -83,33 +83,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             reader.MoveToContent();
             reader.Read();
-
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace))
-                {
-                    reader.MoveToContent();
-                    advice.AssertionIdReferences.Add(reader.ReadString());
-                    reader.MoveToContent();
-                    reader.ReadEndElement();
-                }
+                    advice.AssertionIdReferences.Add(reader.ReadElementContentAsString());
                 else if (reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
-                {
                     advice.Assertions.Add(ReadAssertion(reader));
-                }
                 else
-                {
                     throw LogHelper.LogExceptionMessage(new SecurityTokenException("SAMLBadSchema"));
-                }
             }
 
             reader.MoveToContent();
             reader.ReadEndElement();
-
             return advice;
         }
 
-        public virtual SamlAssertion ReadAssertion(XmlReader reader)
+        public virtual SamlAssertion ReadAssertion(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
 
@@ -204,7 +193,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return assertion;
         }
 
-        public virtual SamlAttribute ReadAttribute(XmlReader reader)
+        public virtual SamlAttribute ReadAttribute(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -227,11 +216,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             while (reader.IsStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace))
             {
                 // We will load all Attributes as a string value by default.
-                string attrValue = reader.ReadString();
-                attribute.AttributeValues.Add(attrValue);
-
-                reader.MoveToContent();
-                reader.ReadEndElement();
+                attribute.AttributeValues.Add(reader.ReadElementContentAsString());
             }
 
             if (attribute.AttributeValues.Count == 0)
@@ -243,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return attribute;
         }
 
-        protected virtual SamlAttributeStatement ReadAttributeStatement(XmlReader reader)
+        protected virtual SamlAttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
 
@@ -291,7 +276,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="attribute">The current attribute that is being read.</param>
         /// <returns>The attribute value as a string.</returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        protected virtual string ReadAttributeValue(XmlReader reader, SamlAttribute attribute)
+        protected virtual string ReadAttributeValue(XmlDictionaryReader reader, SamlAttribute attribute)
         {
             // This code was designed realizing that the writter of the xml controls how our
             // reader will report the NodeType. A completely differnet system could write the values.
@@ -351,7 +336,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return result;
         }
 
-        protected virtual SamlAudienceRestrictionCondition ReadAudienceRestrictionCondition(XmlReader reader)
+        protected virtual SamlAudienceRestrictionCondition ReadAudienceRestrictionCondition(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
 
@@ -361,13 +346,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 if (reader.IsStartElement(SamlConstants.Elements.Audience, SamlConstants.Namespace))
                 {
-                    string audience = reader.ReadString();
+                    string audience = reader.ReadElementContentAsString();
                     if (string.IsNullOrEmpty(audience))
                         throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4083"));
 
                     audienceRestrictionCondition.Audiences.Add(new Uri(audience, UriKind.RelativeOrAbsolute));
-                    reader.MoveToContent();
-                    reader.ReadEndElement();
                 }
                 else
                 {
@@ -392,7 +375,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
         /// <exception cref="XmlException">The XmlReader is not positioned on a saml:AuthenticationStatement
         /// or the statement contains a unknown child element.</exception>
-        protected virtual SamlAuthenticationStatement ReadAuthenticationStatement(XmlReader reader)
+        protected virtual SamlAuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -440,7 +423,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return authenticationStatement;
         }
 
-        protected virtual SamlAuthorityBinding ReadAuthorityBinding(XmlReader reader)
+        protected virtual SamlAuthorityBinding ReadAuthorityBinding(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace);
 
@@ -492,7 +475,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return new SamlAuthorityBinding(authorityKind, binding, location);
         }
 
-        protected virtual SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlReader reader)
+        protected virtual SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -547,7 +530,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return statement;
         }
 
-        protected virtual SamlCondition ReadCondition(XmlReader reader)
+        protected virtual SamlCondition ReadCondition(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -564,7 +547,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Conditions, reader.Name);
         }
 
-        protected virtual SamlConditions ReadConditions(XmlReader reader)
+        protected virtual SamlConditions ReadConditions(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -603,7 +586,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return conditions;
         }
 
-        protected virtual SamlDoNotCacheCondition ReadDoNotCacheCondition(XmlReader reader)
+        protected virtual SamlDoNotCacheCondition ReadDoNotCacheCondition(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace, true);
 
@@ -624,7 +607,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return new SamlDoNotCacheCondition();
         }
 
-        protected virtual SamlEvidence ReadEvidence(XmlReader reader)
+        protected virtual SamlEvidence ReadEvidence(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -636,16 +619,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace))
-                {
-                    reader.MoveToContent();
-                    evidence.AssertionIdReferences.Add(reader.ReadString());
-                    reader.ReadEndElement();
-                }
+                    evidence.AssertionIdReferences.Add(reader.ReadElementContentAsString());
                 else if (reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
-                {
                     evidence.Assertions.Add(ReadAssertion(reader));
-                }
-                else
+                 else
                     throw XmlUtil.LogUnknownElementReadException(SamlConstants.Elements.Evidence, reader.Name);
             }
 
@@ -658,7 +635,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return evidence;
         }
 
-        protected virtual SamlStatement ReadStatement(XmlReader reader)
+        protected virtual SamlStatement ReadStatement(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -680,7 +657,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>SamlSubject</returns>
         /// <exception cref="ArgumentNullException">The input argument 'reader' is null.</exception>
         /// <exception cref="XmlException">The reader is not positioned at a SamlSubject.</exception>
-        protected virtual SamlSubject ReadSubject(XmlReader reader)
+        protected virtual SamlSubject ReadSubject(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
 
@@ -691,15 +668,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
                 subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
 
-                // TODO - check for string ??
+                // TODO - check for empty element
                 reader.MoveToContent();
-                subject.Name = reader.ReadString();
+                subject.Name = reader.ReadElementContentAsString();
 
                 if (string.IsNullOrEmpty(subject.Name))
                     throw XmlUtil.LogReadException(LogMessages.IDX11104);
-
-                reader.MoveToContent();
-                reader.ReadEndElement();
             }
 
             if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace))
@@ -709,30 +683,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 while (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace))
                 {
-                    string method = reader.ReadString();
+                    string method = reader.ReadElementContentAsString();
                     if (string.IsNullOrEmpty(method))
                         throw XmlUtil.LogReadException(LogMessages.IDX11105);
 
                     subject.ConfirmationMethods.Add(method);
-                    reader.MoveToContent();
-                    reader.ReadEndElement();
                 }
 
                 if (subject.ConfirmationMethods.Count == 0)
                 {
-                    // A SubjectConfirmaton clause should specify at least one 
-                    // ConfirmationMethod.
+                    // A SubjectConfirmaton clause should specify at least one ConfirmationMethod.
                     throw XmlUtil.LogReadException(LogMessages.IDX11106);
                 }
 
                 if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
                 {
-                    reader.MoveToContent();
                     // An Authentication protocol specified in the confirmation method might need this
                     // data. Just store this content value as string.
-                    subject.ConfirmationData = reader.ReadString();
-                    reader.MoveToContent();
-                    reader.ReadEndElement();
+                    subject.ConfirmationData = reader.ReadElementContentAsString();
                 }
 
                 if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
@@ -769,7 +737,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>SamlSubject Key as a SecurityKeyIdentifier.</returns>
         /// <exception cref="ArgumentNullException">Input parameter 'reader' is null.</exception>
         /// <exception cref="XmlException">XmlReader is not positioned at a valid SecurityKeyIdentifier.</exception>
-        protected virtual KeyInfo ReadSubjectKeyInfo(XmlReader reader)
+        protected virtual KeyInfo ReadSubjectKeyInfo(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
 
@@ -779,7 +747,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return keyInfo;
         }
 
-        public virtual SamlSecurityToken ReadToken(XmlReader reader)
+        public virtual SamlSecurityToken ReadToken(XmlDictionaryReader reader)
         {
             var assertion = ReadAssertion(reader);
 
@@ -1279,7 +1247,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         // Helper metods to read and write SecurityKeyIdentifiers.
-        internal static SecurityKey ReadSecurityKey(XmlReader reader)
+        internal static SecurityKey ReadSecurityKey(XmlDictionaryReader reader)
         {
             throw LogHelper.LogExceptionMessage(new InvalidOperationException("SamlSerializerUnableToReadSecurityKeyIdentifier"));
         }

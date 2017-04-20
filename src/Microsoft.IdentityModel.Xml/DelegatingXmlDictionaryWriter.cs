@@ -81,6 +81,8 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
+    #if DESKTOPNET45
+        // TODO - replacement on CORE
         /// <summary>
         /// Closes the underlying stream.
         /// </summary>
@@ -90,6 +92,7 @@ namespace Microsoft.IdentityModel.Xml
             if (_tracingWriter != null)
                 _tracingWriter.Close();
         }
+    #endif
 
         /// <summary>
         /// Flushes the underlying stream.

@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             {
                 var sr = new StringReader(theoryData.SignatureTestSet.Xml);
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
-                var tokenStreamingReader = new TokenStreamingReader(reader);
+                var tokenStreamingReader = new XmlTokenStreamReader(reader);
                 var signature = new Signature(new SignedInfo());
                 signature.ReadFrom(tokenStreamingReader);
                 signature.TokenSource = tokenStreamingReader;

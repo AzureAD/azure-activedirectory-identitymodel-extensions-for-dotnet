@@ -33,6 +33,8 @@ using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
+// TODO - this is not working at all for core.
+// just commented out code so it will compile.
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
@@ -48,8 +50,8 @@ namespace Microsoft.IdentityModel.Xml
         private int _elementCount;
         private MemoryStream _endFragment;
         private HashAlgorithm _hashAlgorithm;
-        private HashStream _hashStream;
-        private bool _hasSignatureBeenMarkedForInsert;
+        // private HashStream _hashStream;
+        // private bool _hasSignatureBeenMarkedForInsert;
         private XmlWriter _innerWriter;
         private MemoryStream _preCanonicalTracingStream;
         private string _referenceId;
@@ -91,24 +93,26 @@ namespace Microsoft.IdentityModel.Xml
             SetCanonicalizingWriter(effectiveWriter);
             // TODO - create when needed
             _hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(signingCredentials.Digest);
-            _hashStream = new HashStream(_hashAlgorithm);
-            // TODO - why exclude comments?
-            InnerWriter.StartCanonicalization(_hashStream, false, null);
+            //_hashStream = new HashStream(_hashAlgorithm);
+            //// TODO - why exclude comments?
+            //InnerWriter.StartCanonicalization(_hashStream, false, null);
         }
 
         private void ComputeSignature()
         {
             var signedInfo = new PreDigestedSignedInfo(XmlSignatureConstants.Algorithms.ExcC14N, _signingCredentials.Digest, _signingCredentials.Algorithm);
-            signedInfo.Reference = new Reference { Id = _referenceId, DigestValue = _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream) };
+            //signedInfo.Reference = new Reference { Id = _referenceId, DigestBytes = _hashStream.FlushHashAndGetValue(_preCanonicalTracingStream) };
 
-            var signature = new Signature(signedInfo);
-            signature.WriteTo(base.InnerWriter, _signingCredentials);
-            ((IDisposable)_hashStream).Dispose();
-            _hashStream = null;
+            //var signature = new Signature(signedInfo);
+            //signature.WriteTo(base.InnerWriter, _signingCredentials);
+            //((IDisposable)_hashStream).Dispose();
+            //_hashStream = null;
         }
 
         private void OnEndRootElement()
         {
+            /*
+             * not available on net 1.4
             if (!_hasSignatureBeenMarkedForInsert)
             {
                 // Default case. Signature is added as the last child element.
@@ -156,6 +160,7 @@ namespace Microsoft.IdentityModel.Xml
             _innerWriter.Flush();
             reader.Close();
             base.Close();
+            */
         }
 
         /// <summary>
@@ -165,6 +170,7 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public void WriteSignature()
         {
+            /*
             base.Flush();
             if (_writerStream == null || _writerStream.Length == 0)
                 LogHelper.LogExceptionMessage(new InvalidOperationException("ID6029"));
@@ -176,6 +182,7 @@ namespace Microsoft.IdentityModel.Xml
             ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).StartFragment(_endFragment, false);
 
             _hasSignatureBeenMarkedForInsert = true;
+            */
         }
 
         /// <summary>
@@ -254,12 +261,6 @@ namespace Microsoft.IdentityModel.Xml
                 //
                 // Free all of our managed resources
                 //
-                if (_hashStream != null)
-                {
-                    _hashStream.Dispose();
-                    _hashStream = null;
-                }
-
                 if (_hashAlgorithm != null)
                 {
                     ((IDisposable)_hashAlgorithm).Dispose();

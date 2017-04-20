@@ -43,6 +43,10 @@ namespace Microsoft.IdentityModel.Xml
         public const string ExclusiveC14nInclusiveNamespaces = "InclusiveNamespaces";
         public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";
         public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#";
+        public const string XmlNamespace = "http://www.w3.org/XML/1998/namespace";
+        public const string XmlNamespaceNamespace = "http://www.w3.org/2000/xmlns/";
+        public const string XmlNamepspacePrefix = "xmlns";
+        public const string XmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance";
 
         public static class Algorithms
         {
@@ -59,7 +63,10 @@ namespace Microsoft.IdentityModel.Xml
         public static class Attributes
         {
             public const string Algorithm = "Algorithm";
+            public const string AnyUri = "anyURI";
             public const string Id = "Id";
+            public const string NcName = "NCName";
+            public const string Nil = "nil";
             public const string Type = "Type";
             public const string URI = "URI";
         }

@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Xml
 {
     internal static class CanonicalizationDriver
     {
-        public static MemoryStream GetMemoryStream(TokenStreamingReader reader, bool includeComments, string[] inclusivePrefixe)
+        public static MemoryStream GetMemoryStream(XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixe)
         {
             MemoryStream stream = new MemoryStream();
             WriteTo(stream, reader, includeComments, inclusivePrefixe);
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Xml
             return stream;
         }
 
-        public static void WriteTo(Stream canonicalStream, TokenStreamingReader reader, bool includeComments, string[] inclusivePrefixes)
+        public static void WriteTo(Stream canonicalStream, XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixes)
         {
             XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
             if (inclusivePrefixes != null)
@@ -66,8 +66,10 @@ namespace Microsoft.IdentityModel.Xml
 
             if (inclusivePrefixes != null)
                 writer.WriteEndElement();
-
+#if DESKTOPNET45
+            // TODO - what to use for net 1.4
             writer.Close();
+#endif
         }
     }
 }
