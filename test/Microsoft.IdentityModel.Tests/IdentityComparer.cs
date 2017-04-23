@@ -33,6 +33,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Tests
@@ -366,7 +367,7 @@ namespace Microsoft.IdentityModel.Tests
             else if (t1 is IssuerValidator)
                 return AreIssuerValidatorsEqual(t1 as IssuerValidator, t1 as IssuerValidator, context);
             else if (t1 is SignatureValidator)
-                return AreSignaturesValidatorsEqual(t1 as SignatureValidator, t1 as SignatureValidator, context);
+                return AreSignatureValidatorsEqual(t1 as SignatureValidator, t1 as SignatureValidator, context);
             else
             {
                 var localContext = new CompareContext(context);
@@ -758,7 +759,7 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSignaturesValidatorsEqual(SignatureValidator validator1, SignatureValidator validator2, CompareContext context)
+        private static bool AreSignatureValidatorsEqual(SignatureValidator validator1, SignatureValidator validator2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             ContinueCheckingEquality(validator1, validator2, context);

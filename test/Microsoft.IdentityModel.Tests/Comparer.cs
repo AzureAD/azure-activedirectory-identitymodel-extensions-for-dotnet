@@ -25,12 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
 {
-    public static class DSigXmlComparer
+    public static class Comparer
     {
         public static void GetDiffs(KeyInfo keyInfo1, KeyInfo keyInfo2,  List<string> diffs)
         {
@@ -131,6 +133,81 @@ namespace Microsoft.IdentityModel.Tests
                 diffs.Add($" SignedInfo.SignatureAlgorithm: {signedInfo1.SignatureAlgorithm}, {signedInfo2.SignatureAlgorithm}");
 
             GetDiffs(signedInfo1.Reference, signedInfo2.Reference, diffs);
+        }
+
+        public static void GetDiffs(WsFederationConfiguration configuration1, WsFederationConfiguration configuration2, List<string> diffs)
+        {
+            if (configuration1 == null && configuration2 == null)
+                return;
+
+            if (configuration1 == null && configuration2 != null)
+            {
+                diffs.Add($" configuration1 == null && configuration2 != null");
+                return;
+            }
+
+            if (configuration1 != null && configuration2 == null)
+            {
+                diffs.Add($" configuration1 != null && configuration2 == null");
+                return;
+            }
+
+            var stringComparer = StringComparer.Ordinal;
+
+            if (!stringComparer.Equals(configuration1.Issuer, configuration2.Issuer))
+                diffs.Add($" WsFederationConfiguration.Issuer: {configuration1.Issuer}, {configuration2.Issuer}");
+
+            if (!stringComparer.Equals(configuration1.TokenEndpoint, configuration2.TokenEndpoint))
+                diffs.Add($" WsFederationConfiguration.TokenEndpoint: {configuration1.TokenEndpoint}, {configuration2.TokenEndpoint}");
+
+            if (configuration1.KeyInfos.Count != configuration2.KeyInfos.Count)
+                diffs.Add($" WsFederationConfiguration.KeyInfos.Count: {configuration1.KeyInfos.Count}, {configuration2.KeyInfos.Count}");
+        }
+
+        public static void GetDiffs(WsFederationMessage message1, WsFederationMessage message2, List<string> diffs)
+        {
+            if (message1 == null && message2 == null)
+                return;
+
+            if (message1 == null && message2 != null)
+            {
+                diffs.Add($" message1 == null && message2 != null");
+                return;
+            }
+
+            if (message1 != null && message2 == null)
+            {
+                diffs.Add($" message1 != null && message2 == null");
+                return;
+            }
+
+            if (message1.Parameters.Count != message2.Parameters.Count)
+            {
+                diffs.Add($" message1.Parameters.Count != message2.Parameters.Count: {message1.Parameters.Count}, {message2.Parameters.Count}");
+            }
+
+            var stringComparer = StringComparer.Ordinal;
+
+            if (message1.IsSignInMessage != message2.IsSignInMessage)
+                diffs.Add($" WsFederationMessage.IsSignInMessage: {message1.IsSignInMessage}, {message2.IsSignInMessage}");
+
+            foreach (var param in message1.Parameters)
+            {
+                string value2;
+                if (!message2.Parameters.TryGetValue(param.Key, out value2))
+                    diffs.Add($" WsFederationMessage.message1.Parameters.param.Key missing in message2: {param.Key}");
+                else if (param.Value != value2)
+                    diffs.Add($" WsFederationMessage.message1.Parameters.param.Value !=  message2.Parameters.param.Value: {param.Key}, {param.Value}, {value2}");
+            }
+
+            foreach (var param in message2.Parameters)
+            {
+                string value1;
+                if (!message1.Parameters.TryGetValue(param.Key, out value1))
+                    diffs.Add($" WsFederationMessage.message2.Parameters.param.Key missing in message1: {param.Key}");
+                else if (param.Value != value1)
+                    diffs.Add($" WsFederationMessage.message2.Parameters.param.Value !=  message1.Parameters.param.Value: {param.Key}, {param.Value}, {value1}");
+            }
         }
     }
 }

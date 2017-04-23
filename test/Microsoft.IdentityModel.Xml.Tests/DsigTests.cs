@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 signature.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException();
 
-                DSigXmlComparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
+                Comparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 signature.Verify(theoryData.SignatureTestSet.SecurityKey);
                 theoryData.ExpectedException.ProcessNoException();
 
-                DSigXmlComparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
+                Comparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
             }
             catch (Exception ex)
             {
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 signedInfo.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException();
 
-                DSigXmlComparer.GetDiffs(signedInfo, theoryData.SignedInfoTestSet.SignedInfo, errors);
+                Comparer.GetDiffs(signedInfo, theoryData.SignedInfoTestSet.SignedInfo, errors);
             }
             catch (Exception ex)
             {
@@ -375,7 +375,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 keyInfo.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException();
 
-                DSigXmlComparer.GetDiffs(keyInfo, theoryData.KeyInfoTestSet.KeyInfo, errors);
+                Comparer.GetDiffs(keyInfo, theoryData.KeyInfoTestSet.KeyInfo, errors);
             }
             catch (Exception ex)
             {

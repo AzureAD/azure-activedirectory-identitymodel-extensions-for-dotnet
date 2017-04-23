@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
                 theoryData.ExpectedException.ProcessNoException();
 
-                WsFederationMetadataComparer.GetDiffs(theoryData.Configuration, configuration, errors);
+                Comparer.GetDiffs(theoryData.Configuration, configuration, errors);
             }
             catch (Exception ex)
             {
