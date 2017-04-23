@@ -34,8 +34,8 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -516,10 +516,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private JwtSecurityToken CreateValidatedIdToken()
         {
             var jwt = new JwtSecurityToken();
-            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience));
+            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, Default.Audience));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow).ToString()));
-            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
+            jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, Default.Issuer));
             jwt.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, "sub"));
             return jwt;
         }
@@ -602,7 +602,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 );
 
             // exp missing
-            validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience));
+            validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, Default.Audience));
             ValidateIdToken(
                 validatedIdToken,
                 protocolValidationContext,
@@ -631,7 +631,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // add iss, nonce is not required, state not required, sub not required
             validator.RequireNonce = false;
             validator.RequireSub = false;
-            validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer));
+            validatedIdToken.Payload.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, Default.Issuer));
             ValidateIdToken(validatedIdToken, protocolValidationContext, validator, ExpectedException.NoExceptionExpected);
 
             // missing 'sub'
@@ -766,42 +766,42 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             JwtSecurityToken jwtWithCHash1 =
                 new JwtSecurityToken
                 (
-                    audience: IdentityUtilities.DefaultAudience,
+                    audience: Default.Audience,
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash1) },
-                    issuer: IdentityUtilities.DefaultIssuer
+                    issuer: Default.Issuer
                 );
 
             JwtSecurityToken jwtWithEmptyCHash =
                 new JwtSecurityToken
                 (
-                    audience: IdentityUtilities.DefaultAudience,
+                    audience: Default.Audience,
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, string.Empty) },
-                    issuer: IdentityUtilities.DefaultIssuer,
+                    issuer: Default.Issuer,
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 
             JwtSecurityToken jwtWithoutCHash =
                 new JwtSecurityToken
                 (
-                    audience: IdentityUtilities.DefaultAudience,
-                    issuer: IdentityUtilities.DefaultIssuer
+                    audience: Default.Audience,
+                    issuer: Default.Issuer
                 );
 
             JwtSecurityToken jwtWithSignatureChash1 =
                 new JwtSecurityToken
                 (
-                    audience: IdentityUtilities.DefaultAudience,
+                    audience: Default.Audience,
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash1) },
-                    issuer: IdentityUtilities.DefaultIssuer,
+                    issuer: Default.Issuer,
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 
             JwtSecurityToken jwtWithSignatureMultipleChashes =
                 new JwtSecurityToken
                 (
-                    audience: IdentityUtilities.DefaultAudience,
+                    audience: Default.Audience,
                     claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash1), new Claim(JwtRegisteredClaimNames.CHash, chash2) },
-                    issuer: IdentityUtilities.DefaultIssuer,
+                    issuer: Default.Issuer,
                     signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials
                 );
 

@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens.Saml.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     public class RefrenceTokens
     {

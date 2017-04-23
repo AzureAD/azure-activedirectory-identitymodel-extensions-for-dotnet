@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {

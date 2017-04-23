@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
@@ -117,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 TestId = "AudienceValidator throws, validateAudience false",
                 ValidationParameters = new TokenValidationParameters
                 {
-                    AudienceValidator = IdentityUtilities.AudienceValidatorThrows,
+                    AudienceValidator = ValidationDelegates.AudienceValidatorThrows,
                     ValidateAudience = false,
                     ValidAudience = "frank"
                 },
@@ -184,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 TestId = "IssuerValidator - echo",
                 ValidationParameters = new TokenValidationParameters
                 {
-                    IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
+                    IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
                     ValidateAudience = false
                 }
             });

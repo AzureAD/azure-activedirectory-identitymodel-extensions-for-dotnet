@@ -2,22 +2,21 @@
   "version": "5.2.0",
     "dependencies": {
         "Newtonsoft.Json": "9.0.1",
-        "Microsoft.IdentityModel.Protocols.OpenIdConnect": "5.2.0-*",
-        "Microsoft.IdentityModel.Tokens": "5.2.0-*",
-        "Microsoft.IdentityModel.Tests": "5.2.0-*",
-        "Microsoft.Azure.KeyVault.Cryptography": "2.0.5-*",
         "System.IdentityModel.Tokens.Jwt": "5.2.0-*",
+        "Microsoft.IdentityModel.Tokens": "5.2.0-*",
+        "Microsoft.IdentityModel.Xml": "5.2.0-*",
+        "Microsoft.IdentityModel.Protocols.OpenIdConnect": "5.2.0-*",
         "dotnet-test-xunit": "2.2.0-*",
         "xunit": "2.2.0-*"
     },
-  "description": "Microsoft.IdentityModel.Tokens.Tests",
+  "description": "Contains test utilities and data that are shared across Microsoft.IdentityModel.xys.Tests",
   "testRunner": "xunit",
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
-          "type": "platform"
+            "version": "1.0.0-*",
+            "type": "platform"
         },
         "System.Security.Cryptography.Cng": "4.3.0-*",
         "System.Security.Claims": "4.3.0-*"
@@ -34,7 +33,6 @@
     }
   },
   "buildOptions": {
-    "warningsAsErrors": true,
-    "copyToOutput": [ "google-certs.json" ]
+    "warningsAsErrors": true
   }
 }

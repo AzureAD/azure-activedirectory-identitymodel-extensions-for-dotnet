@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
-{    
+{
     /// <summary>
     /// Test some key extensibility scenarios
     /// </summary>

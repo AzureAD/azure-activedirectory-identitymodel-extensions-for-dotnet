@@ -28,7 +28,7 @@
 using System;
 using System.IO;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests

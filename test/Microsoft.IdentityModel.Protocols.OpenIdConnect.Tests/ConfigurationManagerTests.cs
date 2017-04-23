@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests

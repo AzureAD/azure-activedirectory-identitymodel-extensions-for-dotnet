@@ -27,8 +27,8 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -39,8 +39,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void Variations()
         {
             var context = new CompareContext();
-            RunAudienceVariation(ClaimSets.MultipleAudiences(), IdentityUtilities.DefaultAudiences, context);
-            RunAudienceVariation(ClaimSets.SingleAudience(), new List<string> { IdentityUtilities.DefaultAudience }, context);
+            RunAudienceVariation(ClaimSets.MultipleAudiences(), Default.Audiences, context);
+            RunAudienceVariation(ClaimSets.SingleAudience(), new List<string> { Default.Audience }, context);
 
             TestUtilities.AssertFailIfErrors("AudienceValidation: ", context.Diffs);
         }

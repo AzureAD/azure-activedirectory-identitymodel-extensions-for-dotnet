@@ -25,9 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Azure.KeyVault.Cryptography.Algorithms;
 using System;
 using System.Security.Cryptography;
+using Microsoft.Azure.KeyVault.Cryptography.Algorithms;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests

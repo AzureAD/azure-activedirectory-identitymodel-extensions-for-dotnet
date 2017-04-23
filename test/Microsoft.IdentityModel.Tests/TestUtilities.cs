@@ -31,9 +31,10 @@ using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     public class GetSetContext
     {
@@ -63,9 +64,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return OnFindReturnValue;
         }
     }
-
-
-    // Mixed bag of funtionality. Could move to M.IM.Test.dll.
 
     /// <summary>
     /// Set defaults for TheoryData

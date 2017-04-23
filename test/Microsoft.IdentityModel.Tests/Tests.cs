@@ -25,26 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Tokens.Saml2;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 /// <summary>
-/// Tests all the different Saml2 Types such as Saml2Advice, etc.
+/// Dummy test so XUnit succeeds
 /// </summary>
-namespace Microsoft.IdentityModel.Tokens.Saml.Tests
+namespace Microsoft.IdentityModel.Tests
 {
-    public class Saml2ClassTests
+    public class MDotTests
     {
-
         [Fact]
-        public void Saml2AdviceTests()
+        public void Test()
         {
-
+            Assert.True(true);
         }
     }
 }

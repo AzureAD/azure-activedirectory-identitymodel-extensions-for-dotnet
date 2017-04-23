@@ -28,8 +28,9 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     static public class KeyingMaterial
     {

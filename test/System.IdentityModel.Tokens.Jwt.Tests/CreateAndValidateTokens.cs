@@ -28,8 +28,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -784,7 +784,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             JwtPayload payload = new JwtPayload();
             payload.Add(claimSources, JsonClaims.ClaimSourcesAsDictionary);
             payload.Add(claimNames, JsonClaims.ClaimNamesAsDictionary);
-            payload.Add("iss", IdentityUtilities.DefaultIssuer);
+            payload.Add("iss", Default.Issuer);
 
             JwtSecurityToken jwtToken = new JwtSecurityToken(new JwtHeader(), payload);
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
@@ -800,19 +800,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             SecurityToken validatedJwt = null;
             var claimsPrincipal = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedJwt);
             var expectedIdentity = JsonClaims.ClaimsIdentityDistributedClaims(
-                IdentityUtilities.DefaultIssuer,
+                Default.Issuer,
                 TokenValidationParameters.DefaultAuthenticationType,
                 JsonClaims.ClaimSourcesAsDictionary,
                 JsonClaims.ClaimNamesAsDictionary);
             IdentityComparer.AreEqual(claimsPrincipal.Identity as ClaimsIdentity, expectedIdentity, context);
 
-            jwtToken = new JwtSecurityToken( new JwtHeader(), new JwtPayload(IdentityUtilities.DefaultIssuer, null, ClaimSets.EntityAsJsonClaim(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer), null, null));
+            jwtToken = new JwtSecurityToken( new JwtHeader(), new JwtPayload(Default.Issuer, null, ClaimSets.EntityAsJsonClaim(Default.Issuer, Default.Issuer), null, null));
             encodedJwt = jwtHandler.WriteToken(jwtToken);
             SecurityToken validatedToken;
             var cp = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedToken);
             IdentityComparer.AreEqual(
                 cp.FindFirst(typeof(Entity).ToString()),
-                new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), JsonClaimValueTypes.Json, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer, cp.Identity as ClaimsIdentity ),
+                new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity ),
                 context);
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
@@ -831,7 +831,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             DateTime utcNow = DateTime.UtcNow;
             DateTime expire = utcNow + TimeSpan.FromHours(1);
             ClaimsIdentity subject = new ClaimsIdentity(claims: ClaimSets.GetDefaultRoleClaims(null));
-            JwtSecurityToken jwtToken = handler.CreateJwtSecurityToken(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultAudience, subject, utcNow, expire, utcNow);
+            JwtSecurityToken jwtToken = handler.CreateJwtSecurityToken(Default.Issuer, Default.Audience, subject, utcNow, expire, utcNow);
 
             SecurityToken securityToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
@@ -842,11 +842,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     claims: ClaimSets.GetDefaultRoleClaims(handler)
                     );
 
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expire).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, IdentityUtilities.DefaultIssuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, Default.Issuer, ClaimValueTypes.String, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, Default.Audience, ClaimValueTypes.String, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expire).ToString(), ClaimValueTypes.Integer, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, Default.Issuer));
 
             CompareContext context = new CompareContext();
             IdentityComparer.AreEqual(principal.Claims, expectedIdentity.Claims, context);

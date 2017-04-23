@@ -27,8 +27,9 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     /// <summary>
     /// Returns NON default token creation / validation artifacts:
@@ -79,6 +80,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
             }
         }
+
+        public static string AuthorizedParty { get { return "http://relyingparty.notazp.com"; } }
+
         public static ClaimsIdentity CaimsIdentity
         {
             get

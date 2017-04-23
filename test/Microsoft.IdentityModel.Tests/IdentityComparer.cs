@@ -33,8 +33,9 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     public class CompareContext
     {       

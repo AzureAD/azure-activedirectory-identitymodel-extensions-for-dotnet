@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Newtonsoft.Json.Linq;
 using Xunit;
 

@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests

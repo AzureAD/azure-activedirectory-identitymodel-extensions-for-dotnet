@@ -31,7 +31,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens.Saml2;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
@@ -259,6 +258,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
                 var theoryData = new TheoryData<SamlTheoryData>();
 
                 theoryData.Add(

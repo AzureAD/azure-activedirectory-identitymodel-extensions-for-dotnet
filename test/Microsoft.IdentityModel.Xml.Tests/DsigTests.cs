@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
@@ -506,7 +506,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             public SigningCredentials SigningCredentials { get; set; }
 
             public SignedInfoTestSet SignedInfoTestSet { get; set; }
-        }
+       }
 
         /// <summary>
         /// DSigCryptoProviderFactory and DSignatureProvider are used to simulate failures and get deeper in the stack

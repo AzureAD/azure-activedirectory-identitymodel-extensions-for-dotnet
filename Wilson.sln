@@ -49,6 +49,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Xml
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Xml.Tests", "test\Microsoft.IdentityModel.Xml.Tests\Microsoft.IdentityModel.Xml.Tests.xproj", "{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tests", "test\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.xproj", "{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +121,10 @@ Global
 		{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -140,5 +146,6 @@ Global
 		{1332DB7F-91BA-4929-84D7-BBF90D468642} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{5D64C6AF-2AA8-4BB3-B45B-CABF8FBD6271} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{3C338E2D-C1D8-4517-8C52-A86A9F0C8281} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 EndGlobal

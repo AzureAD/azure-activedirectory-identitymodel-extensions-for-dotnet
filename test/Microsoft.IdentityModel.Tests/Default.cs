@@ -29,8 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     /// <summary>
     /// Returns default token creation / validation artifacts:
@@ -47,11 +48,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get { return "http://Default.ActorIssuer.com/Actor"; }
         }
 
-        public static string AuthenticationType
-        {
-            get { return "Default.Federation"; }
-        }
-
         public static string Acr
         {
             get { return "Default.Acr"; }
@@ -65,24 +61,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static List<string> Amrs
         {
             get { return new List<string> { "Default.Amr1", "Default.Amr2", "Default.Amr3", "Default.Amr4" };
-            }
-        }
-
-        public static string Audience
-        {
-            get { return "http://Default.Audience.com"; }
-        }
-
-        public static List<string> Audiences
-        {
-            get
-            {
-                return new List<string>
-                { "http://Default.Audience1.com",
-                  "http://Default.Audience2.com",
-                  "http://Default.Audience3.com",
-                  "http://Default.Audience4.com"
-                };
             }
         }
 
@@ -120,6 +98,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get { return TokenValidationParameters(null, AsymmetricSigningKey); }
         }
+
+        public static string Audience
+        {
+            get { return "http://Default.Audience.com"; }
+        }
+
+        public static List<string> Audiences
+        {
+            get
+            {
+                return new List<string>
+                {
+                  "http://Default.Audience.com",
+                  "http://Default.Audience1.com",
+                  "http://Default.Audience2.com",
+                  "http://Default.Audience3.com",
+                  "http://Default.Audience4.com"
+                };
+            }
+        }
+
+        public static string AuthenticationType
+        {
+            get { return "Default.Federation"; }
+        }
+
+        public static string AuthorizedParty { get { return "http://relyingparty.azp.com"; } }
 
         public static string Azp
         {

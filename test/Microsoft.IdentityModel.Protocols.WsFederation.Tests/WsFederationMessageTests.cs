@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tokens.Tests;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
