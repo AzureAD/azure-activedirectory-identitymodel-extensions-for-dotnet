@@ -2,7 +2,7 @@
     "version": "5.2.0",
     "dependencies": {
         "Microsoft.IdentityModel.Tokens.Saml": "5.2.0-*",
-        "Microsoft.IdentityModel.Tests": "5.2.0",
+        "Microsoft.IdentityModel.Tests": "5.2.0-*",
         "dotnet-test-xunit": "2.2.0-*",
         "xunit": "2.2.0-*"
     },
