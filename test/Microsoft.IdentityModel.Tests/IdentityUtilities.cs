@@ -32,13 +32,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System;
+using Microsoft.IdentityModel.Tokens;
 
 #if NNET451
 using Microsoft.IdentityModel.Tokens.Saml;
 using System.IdentityModel.Tokens;
 #endif
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     /// <summary>
     /// Main purpose of this code is to serve up Identities
@@ -80,8 +81,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string originalIssuer = null)
         {
-            string iss = issuer ?? DefaultIssuer;
-            string originalIss = originalIssuer ?? DefaultOriginalIssuer;
+            string iss = issuer ?? Default.Issuer;
+            string originalIss = originalIssuer ?? Default.OriginalIssuer;
 
             return new JwtSecurityToken(issuer, "http://www.contoso.com", ClaimSets.Simple(iss, originalIss));
         }
@@ -156,13 +157,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         public static string ActorIssuer = "http://www.GotJwt.com/Actor";
-        public const string DefaultAuthenticationType = "Federation";
-        public static string DefaultAcr { get { return "DefaultAuthenticationContextClass"; } }
-        public static string DefaultAmr { get { return "DefaultAuthenticationMethod"; } }
-        public static List<string> DefaultAmrs { get { return new List<string> { "amr1", "amr2", "amr3", "amr4" }; } }
-        public static string DefaultAudience { get { return "http://relyingparty1.com"; } }
-        public static List<string> DefaultAudiences { get { return new List<string> { "http://relyingparty1.com", "http://relyingparty2.com", "http://relyingparty3.com", "http://relyingparty4.com" }; } }
-        public static string DefaultAuthorizedParty { get { return "http://relyingparty.azp.com"; } }
         public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
         public static EncryptingCredentials DefaultSymmetricEncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2;
@@ -172,28 +166,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static SecurityKey DefaultSymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
         public static SecurityKey SymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256); } }
         public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); } }
-        public const string DefaultClaimsIdentityLabel = "DefaultClaimsIdentityLabel";
-        public const string DefaultClaimsIdentityLabelDup = "DefaultClaimsIdentityLabelDup";
-        public const string NotDefaultAuthenticationType = "NotDefaultAuthenticationType";
-        public const string NotDefaultClaimsIdentityLabel = "NotDefaultClaimsIdentityLabel";
-        public const string NotDefaultLabel = "NotDefaultLabel";
-        public const string NotDefaultNameClaimType = "NotDefaultNameClaimType";
-        public const string NotDefaultRoleClaimType = "NotDefaultRoleClaimType";
-        public const string DefaultIssuer = "http://gotjwt.com";
-        public const string DefaultOriginalIssuer = "http://gotjwt.com/Original";
         public static string DefaultAsymmetricJwt {get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }}
-        public const string NotDefaultAudience = "http://notrelyingparty.com";
         public static IEnumerable<Claim> NotDefaultClaims
         {
             get
             {
                 return new List<Claim>()
                 {
-                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
-                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, NotDefaultIssuer, NotDefaultOriginalIssuer),
+                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
+                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
+                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
+                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
+                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
                 };
             }
         }
@@ -203,11 +187,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get { return new ClaimsIdentity(NotDefaultClaims); }
         }
 
-        public const string NotDefaultIssuer = "http://notgotjwt.com";
-        public const string NotDefaultOriginalIssuer = "http://notgotjwt.com/Original";
         public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
         public static SecurityKey NotDefaultSigningKey = KeyingMaterial.RsaSecurityKey_2048;
-        public static string DefaultSubject = "DefaultSubject";
         public static string DefaultSymmetricJwt
         {
             get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2)); }
@@ -247,10 +228,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             return new SecurityTokenDescriptor
             {
-                Audience = DefaultAudience,
+                Audience = Default.Audience,
                 EncryptingCredentials = encryptingCredentials,
                 Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                Issuer = DefaultIssuer,
+                Issuer = Default.Issuer,
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
@@ -272,10 +253,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             return new TokenValidationParameters
             {
-                AuthenticationType = DefaultAuthenticationType,
+                AuthenticationType = Default.AuthenticationType,
                 IssuerSigningKey = key,
-                ValidAudience = DefaultAudience,
-                ValidIssuer = DefaultIssuer,
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
             };
         }
 
@@ -291,10 +272,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             return new TokenValidationParameters
             {
-                AuthenticationType = DefaultAuthenticationType,
+                AuthenticationType = Default.AuthenticationType,
                 TokenDecryptionKey = key,
-                ValidAudience = DefaultAudience,
-                ValidIssuer = DefaultIssuer,
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
             };
         }
 

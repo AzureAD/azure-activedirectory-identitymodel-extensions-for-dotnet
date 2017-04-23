@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
 /// Data sets for testing 
 /// </summary>
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tests
 {
     public class DataSets
     {

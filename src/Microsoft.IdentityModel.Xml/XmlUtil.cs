@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Xml
             if (null == reader)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            reader.MoveToContent();
+            // IsStartElement calls MoveToContent.
             if (!reader.IsStartElement(element, ns))
                 throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
         }

@@ -64,6 +64,9 @@
       <project name="Microsoft.IdentityModel.Logging.Tests">
         <build>yes</build>
       </project>
+      <project name="Microsoft.IdentityModel.Tests">
+        <build>yes</build>
+      </project>
       <project name="Microsoft.IdentityModel.Tokens.Tests">
         <build>yes</build>
       </project>

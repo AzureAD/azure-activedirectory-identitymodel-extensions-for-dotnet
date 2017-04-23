@@ -25,35 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-using Xunit;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
+namespace Microsoft.IdentityModel.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class OpenIdConnectConstantsTests
+
+    public class KeyInfoTestSet
     {
-        [Fact]
-        public void Constructors()
-        {
+        public string Xml { get; set; }
 
-        }
+        public KeyInfo KeyInfo { get; set; }
+    }
 
-        [Fact]
-        public void Defaults()
-        {
-        }
+    public class SignatureTestSet
+    {
+        public SecurityKey SecurityKey { get; set; } = RefernceXml.Saml2Token_Valid_SecurityKey;
 
-        [Fact]
-        public void GetSets()
-        {
-        }
+        public Signature Signature { get; set; }
 
-        [Fact]
-        public void Publics()
-        {
-        }
+        public string Xml { get; set; }
+    }
+
+    public class SignedInfoTestSet
+    {
+        public SignedInfo SignedInfo { get; set; }
+
+        public string Xml { get; set; }
     }
 }
-

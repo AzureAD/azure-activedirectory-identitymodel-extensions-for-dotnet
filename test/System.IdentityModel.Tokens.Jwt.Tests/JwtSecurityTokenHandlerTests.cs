@@ -27,8 +27,8 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -330,22 +330,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             List<Claim> expectedInboundClaimsMapped = new List<Claim>(
                 ClaimSets.ExpectedInClaimsIdentityUsingAllInboundShortClaimTypes(
-                        IdentityUtilities.DefaultIssuer,
-                        IdentityUtilities.DefaultIssuer
+                        Default.Issuer,
+                        Default.Issuer
                         ));
 
             var jwt = handler.CreateJwtSecurityToken(
-                issuer: IdentityUtilities.DefaultIssuer,
-                audience: IdentityUtilities.DefaultAudience,
+                issuer: Default.Issuer,
+                audience: Default.Audience,
                 subject: new ClaimsIdentity(
                     ClaimSets.AllInboundShortClaimTypes(
-                        IdentityUtilities.DefaultIssuer,
-                        IdentityUtilities.DefaultIssuer)));
+                        Default.Issuer,
+                        Default.Issuer)));
 
             List<Claim> expectedInboundClaimsUnMapped = new List<Claim>(
                     ClaimSets.AllInboundShortClaimTypes(
-                        IdentityUtilities.DefaultIssuer,
-                        IdentityUtilities.DefaultIssuer
+                        Default.Issuer,
+                        Default.Issuer
                         ));
 
             var validationParameters = new TokenValidationParameters
@@ -371,11 +371,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // test that setting the NameClaimType override works.
             List<Claim> claims = new List<Claim>()
             {
-                new Claim( JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer ),
-                new Claim( ClaimTypes.Spn, "spn", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer ),
-                new Claim( JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer ),
-                new Claim( JwtRegisteredClaimNames.Prn, "Principal1", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer ),
-                new Claim( JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer ),
+                new Claim( JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, Default.Issuer, Default.Issuer ),
+                new Claim( ClaimTypes.Spn, "spn", ClaimValueTypes.String, Default.Issuer, Default.Issuer ),
+                new Claim( JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, Default.Issuer, Default.Issuer ),
+                new Claim( JwtRegisteredClaimNames.Prn, "Principal1", ClaimValueTypes.String, Default.Issuer, Default.Issuer ),
+                new Claim( JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, Default.Issuer, Default.Issuer ),
             };
 
 
@@ -391,29 +391,29 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 { JwtRegisteredClaimNames.Sub, "Mapped_" + JwtRegisteredClaimNames.Sub },
             };
 
-            jwt = handler.CreateJwtSecurityToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, subject: new ClaimsIdentity(claims));
+            jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new ClaimsIdentity(claims));
 
             List<Claim> expectedClaims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
-                new Claim(JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience, ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
-                new Claim(ClaimTypes.Spn, "spn", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
+                new Claim(JwtRegisteredClaimNames.Iss, Default.Issuer, ClaimValueTypes.String, Default.Issuer, Default.Issuer),
+                new Claim(JwtRegisteredClaimNames.Aud, Default.Audience, ClaimValueTypes.String, Default.Issuer, Default.Issuer),
+                new Claim(ClaimTypes.Spn, "spn", ClaimValueTypes.String, Default.Issuer, Default.Issuer),
             };
 
             Claim claim = null;
-            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Email, "Bob", ClaimValueTypes.String, Default.Issuer, Default.Issuer);
             claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Email));
             expectedClaims.Add(claim);
 
-            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Sub, "Subject1", ClaimValueTypes.String, Default.Issuer, Default.Issuer);
             claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Sub));
             expectedClaims.Add(claim);
 
-            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Prn, "Principal1", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Prn, "Principal1", ClaimValueTypes.String, Default.Issuer, Default.Issuer);
             claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Prn));
             expectedClaims.Add(claim);
 
-            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer);
+            claim = new Claim("Mapped_" + JwtRegisteredClaimNames.Sub, "Subject2", ClaimValueTypes.String, Default.Issuer, Default.Issuer);
             claim.Properties.Add(new KeyValuePair<string, string>(JwtSecurityTokenHandler.ShortClaimTypeProperty, JwtRegisteredClaimNames.Sub));
             expectedClaims.Add(claim);
 
@@ -568,8 +568,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             DateTime? notBefore = DateTime.UtcNow;
             DateTime? expires = DateTime.UtcNow + TimeSpan.FromHours(1);
             var jwt = tokenHandler.CreateEncodedJwt(
-                IdentityUtilities.DefaultIssuer,
-                IdentityUtilities.DefaultAudience,
+                Default.Issuer,
+                Default.Audience,
                 ClaimSets.DefaultClaimsIdentity,
                 notBefore,
                 expires,
@@ -580,8 +580,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 new TokenValidationParameters()
                 {
                     IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey,
-                    ValidAudience = IdentityUtilities.DefaultAudience,
-                    ValidIssuer = IdentityUtilities.DefaultIssuer,
+                    ValidAudience = Default.Audience,
+                    ValidIssuer = Default.Issuer,
                 };
 
             TestUtilities.ValidateTokenReplay(jwt, tokenHandler, validationParameters);
@@ -788,9 +788,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             JwtSecurityToken jwt =
                 new JwtSecurityToken
                 (
-                    issuer: IdentityUtilities.DefaultIssuer,
-                    audience: IdentityUtilities.DefaultAudience,
-                    claims: ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
+                    issuer: Default.Issuer,
+                    audience: Default.Audience,
+                    claims: ClaimSets.Simple(Default.Issuer, Default.Issuer),
                     signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(10),
                     notBefore: DateTime.UtcNow
@@ -867,12 +867,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void IssuerValidation()
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            string jwt = (tokenHandler.CreateJwtSecurityToken(issuer: IdentityUtilities.DefaultIssuer, audience: IdentityUtilities.DefaultAudience, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials) as JwtSecurityToken).RawData;
+            string jwt = (tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials) as JwtSecurityToken).RawData;
             TokenValidationParameters validationParameters = new TokenValidationParameters() { IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey, ValidateAudience = false, ValidateLifetime = false };
             Dictionary<string, object> properties = new Dictionary<string, object>();
 
             // ValidateIssuer == true, validIssuer null, validIssuers null
-            properties.Add("InvalidIssuer", IdentityUtilities.DefaultIssuer);
+            properties.Add("InvalidIssuer", Default.Issuer);
             ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10204", propertiesExpected: properties);
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
 
@@ -898,12 +898,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // matches ValidIssuer
             validationParameters.ValidateIssuer = true;
-            validationParameters.ValidIssuer = IdentityUtilities.DefaultIssuer;
+            validationParameters.ValidIssuer = Default.Issuer;
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // matches ValidIssuers
             validationParameters.ValidIssuer = null;
-            validationParameters.ValidIssuers = new string[] { "http://Simple.CertData_2048", IdentityUtilities.DefaultIssuer };
+            validationParameters.ValidIssuers = new string[] { "http://Simple.CertData_2048", Default.Issuer };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             validationParameters.ValidateIssuer = false;

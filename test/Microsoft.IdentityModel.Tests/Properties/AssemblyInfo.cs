@@ -25,33 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-using Xunit;
+using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
-namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    public class WsFederationConfigurationTests
-    {
-        [Fact]
-        public void Constructors()
-        {
-        }
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
 
-        [Fact]
-        public void Defaults()
-        {
-        }
+[assembly: AssemblyTitle("Microsoft.IdentityModel.Tests")]
+[assembly: AssemblyDescription("Tests data and atrifacts for Microsoft.IdentityModel.")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyProduct("Microsoft.IdentityModel.Tests")]
+[assembly: AssemblyCulture("")]
+[assembly: ComVisible(false)]
+[assembly: CLSCompliant(true)]
+[assembly: AssemblyVersion("5.2.0")]
 
-        [Fact]
-        public void GetSets()
-        {
-        }
-
-        [Fact]
-        public void Publics()
-        {
-        }
-    }
-}

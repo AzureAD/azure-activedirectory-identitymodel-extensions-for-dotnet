@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -57,8 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                List<string> audiences = new List<string> { "", IdentityUtilities.DefaultAudience };
-                List<string> invalidAudiences = new List<string> { "", IdentityUtilities.NotDefaultAudience };
+                List<string> audiences = new List<string> { "", Default.Audience };
+                List<string> invalidAudiences = new List<string> { "", NotDefault.Audience };
                 Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidAudience", TestUtilities.SerializeAsSingleCommaDelimitedString(audiences) } };
 
                 var dataset = new TheoryData<List<string>, SecurityToken, TokenValidationParameters, ExpectedException>();
@@ -67,9 +68,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(null, null, new TokenValidationParameters { ValidateAudience = false }, ExpectedException.NoExceptionExpected);
                 dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10207:"));
                 dataset.Add(audiences, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:", propertiesExpected: properties));
-                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.NotDefaultAudience }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:", propertiesExpected: properties));
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = NotDefault.Audience }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:", propertiesExpected: properties));
                 dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = invalidAudiences }, ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:", propertiesExpected: properties));
-                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = IdentityUtilities.DefaultAudience }, ExpectedException.NoExceptionExpected);
+                dataset.Add(audiences, null, new TokenValidationParameters { ValidAudience = Default.Audience }, ExpectedException.NoExceptionExpected);
                 dataset.Add(audiences, null, new TokenValidationParameters { ValidAudiences = audiences }, ExpectedException.NoExceptionExpected);
 
                 return dataset;
@@ -96,20 +97,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
-                List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
-                Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidIssuer", IdentityUtilities.DefaultIssuer } };
+                List<string> issuers = new List<string> { "", Default.Issuer };
+                List<string> invalidIssuers = new List<string> { "", NotDefault.Issuer };
+                Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidIssuer", Default.Issuer } };
 
                 var dataset = new TheoryData<string, SecurityToken, TokenValidationParameters, ExpectedException>();
 
                 dataset.Add(null, null, null, ExpectedException.ArgumentNullException());
                 dataset.Add(null, null, new TokenValidationParameters { ValidateIssuer = false }, ExpectedException.NoExceptionExpected);
                 dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:", propertiesExpected: new Dictionary<string, object> { { "InvalidIssuer", null } }));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:", propertiesExpected: properties));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.NotDefaultIssuer }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuer = IdentityUtilities.DefaultIssuer }, ExpectedException.NoExceptionExpected);
-                dataset.Add(IdentityUtilities.DefaultIssuer, null, new TokenValidationParameters { ValidIssuers = issuers }, ExpectedException.NoExceptionExpected);
+                dataset.Add(Default.Issuer, null, new TokenValidationParameters(), ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:", propertiesExpected: properties));
+                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuer = NotDefault.Issuer }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
+                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
+                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuer = Default.Issuer }, ExpectedException.NoExceptionExpected);
+                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuers = issuers }, ExpectedException.NoExceptionExpected);
 
                 return dataset;
             }
@@ -135,8 +136,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                List<string> issuers = new List<string> { "", IdentityUtilities.DefaultIssuer };
-                List<string> invalidIssuers = new List<string> { "", IdentityUtilities.NotDefaultIssuer };
+                List<string> issuers = new List<string> { "", Default.Issuer };
+                List<string> invalidIssuers = new List<string> { "", NotDefault.Issuer };
                 DateTime? notBefore;
                 DateTime? expires;
 
