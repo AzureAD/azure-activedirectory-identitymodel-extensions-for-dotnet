@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 
@@ -56,4 +57,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public string Xml { get; set; }
     }
+
+    public class WsFederationMessageTestSet
+    {
+        public WsFederationMessage WsFederationMessage { get; set; }
+
+        public string Xml { get; set; }
+    }
+
 }

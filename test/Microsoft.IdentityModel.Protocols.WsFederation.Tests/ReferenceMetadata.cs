@@ -883,35 +883,4 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
     }
 
-    public static class WsFederationMetadataComparer
-    {
-        public static void GetDiffs(WsFederationConfiguration configuration1, WsFederationConfiguration configuration2, List<string> diffs)
-        {
-            if (configuration1 == null && configuration2 == null)
-                return;
-
-            if (configuration1 == null && configuration2 != null)
-            {
-                diffs.Add($" configuration1 == null && configuration2 != null");
-                return;
-            }
-
-            if (configuration1 != null && configuration2 == null)
-            {
-                diffs.Add($" configuration1 != null && configuration2 == null");
-                return;
-            }
-
-            var stringComparer = StringComparer.Ordinal;
-
-            if (!stringComparer.Equals(configuration1.Issuer, configuration2.Issuer))
-                diffs.Add($" WsFederationConfiguration.Issuer: {configuration1.Issuer}, {configuration2.Issuer}");
-
-            if (!stringComparer.Equals(configuration1.TokenEndpoint, configuration2.TokenEndpoint))
-                diffs.Add($" WsFederationConfiguration.TokenEndpoint: {configuration1.TokenEndpoint}, {configuration2.TokenEndpoint}");
-
-            if (configuration1.KeyInfos.Count != configuration2.KeyInfos.Count)
-                diffs.Add($" WsFederationConfiguration.KeyInfos.Count: {configuration1.KeyInfos.Count}, {configuration2.KeyInfos.Count}");
-        }
-    }
 }

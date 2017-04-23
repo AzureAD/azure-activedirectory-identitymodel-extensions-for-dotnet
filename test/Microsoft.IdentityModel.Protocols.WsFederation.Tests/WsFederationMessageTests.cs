@@ -28,7 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tests;
+
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
@@ -154,8 +156,48 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("QueryStringTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void QueryStringTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
+            var errors = new List<string>();
+            try
+            {
+                var wsFederationMessage = WsFederationMessage.FromQueryString(theoryData.WsFederationMessageTestSet.Xml);
+                theoryData.ExpectedException.ProcessNoException();
+                Comparer.GetDiffs(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, errors);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        public static TheoryData<WsFederationMessageTheoryData> QueryStringTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
+
+                theoryData.Add(
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        WsFederationMessageTestSet = RefernceXml.WsSignInTestSet,
+                        TestId = nameof(RefernceXml.WsSignInTestSet)
+                    });
+
+                return theoryData;
+            }
+        }
         public class WsFederationMessageTheoryData : TheoryDataBase
         {
+            public WsFederationMessageTestSet WsFederationMessageTestSet { get; set; }
+
             public string IssuerAddress { get; set; }
 
             public KeyValuePair<string, string> Parameter1 { get; set; }

@@ -6,6 +6,7 @@
         "Microsoft.IdentityModel.Tokens": "5.2.0-*",
         "Microsoft.IdentityModel.Xml": "5.2.0-*",
         "Microsoft.IdentityModel.Protocols.OpenIdConnect": "5.2.0-*",
+        "Microsoft.IdentityModel.Protocols.WsFederation": "5.2.0-*",
         "dotnet-test-xunit": "2.2.0-*",
         "xunit": "2.2.0-*"
     },
