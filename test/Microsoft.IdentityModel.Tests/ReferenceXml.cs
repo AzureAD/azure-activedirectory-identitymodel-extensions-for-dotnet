@@ -958,9 +958,10 @@ namespace Microsoft.IdentityModel.Tests
                             <wsp:AppliesTo xmlns:wsp=""http://schemas.xmlsoap.org/ws/2004/09/policy"">
                                 <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
                                 <wsa:Address>spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4</wsa:Address></wsa:EndpointReference>
-                            </wsp:AppliesTo><t:RequestedSecurityToken>
-                            <Assertion ID=""_edc15efd-1117-4bf9-89da-28b1663fb890"" IssueInstant=""2017-04-23T16:16:17.348Z"" Version=""2.0"" xmlns=""urn:oasis:names:tc:SAML:2.0:assertion"">
-                                <Issuer>https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/</Issuer>
+                            </wsp:AppliesTo>
+                            <t:RequestedSecurityToken>
+                                <Assertion ID=""_edc15efd-1117-4bf9-89da-28b1663fb890"" IssueInstant=""2017-04-23T16:16:17.348Z"" Version=""2.0"" xmlns=""urn:oasis:names:tc:SAML:2.0:assertion"">
+                                    <Issuer>https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/</Issuer>
                                     <Signature xmlns=""http://www.w3.org/2000/09/xmldsig#"">
                                         <SignedInfo>
                                             <CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" />

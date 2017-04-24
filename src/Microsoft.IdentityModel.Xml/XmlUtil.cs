@@ -400,6 +400,11 @@ namespace Microsoft.IdentityModel.Xml
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, elementName, nodeName)));
         }
 
+        public static Exception LogExpectedStartElement(XmlNodeType nodeType)
+        {
+            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21022, nodeType)));
+        }
+
         public static Exception LogUnknownElementReadException(string elementName, string currentElement)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21021, elementName, currentElement)));
