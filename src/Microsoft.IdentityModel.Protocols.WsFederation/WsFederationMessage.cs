@@ -31,6 +31,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -166,8 +167,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             using (StringReader sr = new StringReader(Wresult))
             {
-                XmlReader xmlReader = XmlReader.Create(sr);
-                xmlReader.MoveToContent();
+                var reader = XmlReader.Create(sr);
+                if (!reader.IsStartElement())
+                    throw XmlUtil.LogExpectedStartElement(reader.NodeType);
 
                 // TODO need serializer to get token from response.
                 //WSTrustResponseSerializer serializer = new WSTrust13ResponseSerializer();

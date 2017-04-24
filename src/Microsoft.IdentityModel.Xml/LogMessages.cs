@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21019 = "IDX21019: Unable to read xml. A second <Signature> element was found. The EnvelopedSignatureReader can only process one <Signature>.";
         internal const string IDX21020 = "IDX21020: Unable to read xml. A second <Reference> element was found. The EnvelopedSignatures can only have one <Reference>.";
         internal const string IDX21021 = "IDX21021: Unable to read xml. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
+        internal const string IDX21022 = "IDX21022: Unable to read xml. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'.";
 
 
         // xml structure, supported exceptions
