@@ -1251,7 +1251,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static TheoryData<SignatureProviderTheoryData> SignatureTheoryData()
         {
             var theoryData = new TheoryData<SignatureProviderTheoryData>();
-            /*
+
             var rawBytes = Guid.NewGuid().ToByteArray();
             var asymmetricProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256, true);
             theoryData.Add(new SignatureProviderTheoryData
@@ -1297,7 +1297,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Signature = symmetricProvider2.Sign(rawBytes),
                 TestId = SecurityAlgorithms.HmacSha512
             });
-            */
+
             return theoryData;
         }
     }
