@@ -61,10 +61,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10317 = "IDX10317: RequireAuthTime is 'true' (default is 'false') but jwt.PayLoad.AuthTime is 'null or whitespace', jwt: '{0}'.";
         internal const string IDX10318 = "IDX10318: RequireAzp is 'true' (default is 'false') but jwt.PayLoad.Azp is 'null or whitespace', jwt: '{0}'.";
         internal const string IDX10319 = "IDX10319: Validating the nonce claim found in the id_token.";
-        internal const string IDX10320 = "IDX10320: RequireNonce is '{0}' but OpenIdConnectProtocolValidationContext.Nonce is null. A nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'.";
+        internal const string IDX10320 = "IDX10320: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce and OpenIdConnectProtocol.ValidatedIdToken.Nonce are both null or empty. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'.";
         internal const string IDX10321 = "IDX10321: The 'nonce' found in the jwt token did not match the expected nonce.\nexpected: '{0}'\nfound in jwt: '{1}'.\njwt: '{2}'.";
         internal const string IDX10322 = "IDX10322: RequireNonce is false, validationContext.Nonce is null and there is no 'nonce' in the OpenIdConnect Response to validate.";
-        internal const string IDX10323 = "IDX10323: RequireNonce is '{0}', the OpenIdConnect request contained nonce but the jwt does not contain a 'nonce' claim. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'.\n jwt: '{1}'.";
+        internal const string IDX10323 = "IDX10323: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce was null, OpenIdConnectProtocol.ValidatedIdToken.Payload.Nonce was not null. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'. Note if a 'nonce' is found it will be evaluated.";
         internal const string IDX10324 = "IDX10324: The 'nonce' has expired: '{0}'. Time from 'nonce': '{1}', Current Time: '{2}'. NonceLifetime is: '{3}'.";
         internal const string IDX10325 = "IDX10325: The 'nonce' did not contain a timestamp: '{0}'.\nFormat expected is: <epochtime>.<noncedata>.";
         internal const string IDX10326 = "IDX10326: The 'nonce' timestamp could not be converted to a positive integer (greater than 0).\ntimestamp: '{0}'\nnonce: '{1}'.";
@@ -90,6 +90,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10346 = "IDX10346: OpenIdConnectProtocolValidationContext.ValidatedIdToken does not contain a 'sub' claim, cannot validate.";
         internal const string IDX10347 = "IDX10347: Validating the 'c_hash' failed, see inner exception.";
         internal const string IDX10348 = "IDX10348: Validating the 'at_hash' failed, see inner exception.";
+        internal const string IDX10349 = "IDX10349: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce was not null, OpenIdConnectProtocol.ValidatedIdToken.Payload.Nonce was null or empty. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'. Note if a 'nonce' is found it will be evaluated.";
 
         // configuration retrieval errors
         internal const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";

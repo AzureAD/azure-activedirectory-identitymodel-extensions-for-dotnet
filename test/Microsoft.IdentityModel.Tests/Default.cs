@@ -146,6 +146,11 @@ namespace Microsoft.IdentityModel.Tests
             get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); }
         }
 
+        public static string ClientId
+        {
+            get { return "http://Default.ClientId"; }
+        }
+
         public static string Issuer
         {
             get { return "http://Default.Issuer.com"; }
@@ -159,6 +164,11 @@ namespace Microsoft.IdentityModel.Tests
         public static string NameClaimType
         {
             get { return "Default.NameClaimType"; }
+        }
+
+        public static string Nonce
+        {
+            get { return "Default.Nonce"; }
         }
 
         public static string OriginalIssuer
