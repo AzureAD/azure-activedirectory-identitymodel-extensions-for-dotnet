@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateTokenResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-                throw LogHelper.LogArgumentNullException("validationContext");
+                throw LogHelper.LogArgumentNullException(nameof(validationContext));
 
             // no 'response' is recieved 
             if (validationContext.ProtocolMessage == null)
@@ -290,7 +290,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             ValidateIdToken(validationContext);
             ValidateNonce(validationContext);
-
 
             // only if 'at_hash' claim exist. 'at_hash' is not required in token response.
             object atHashClaim;
@@ -310,7 +309,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public virtual void ValidateUserInfoResponse(OpenIdConnectProtocolValidationContext validationContext)
         {
             if (validationContext == null)
-                throw LogHelper.LogArgumentNullException("validationContext");
+                throw LogHelper.LogArgumentNullException(nameof(validationContext));
 
             if (string.IsNullOrEmpty(validationContext.UserInfoEndpointResponse))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10337));
@@ -520,10 +519,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10304);
 
             if (validationContext == null)
-                throw LogHelper.LogArgumentNullException("validationContext");
+                throw LogHelper.LogArgumentNullException(nameof(validationContext));
 
             if (validationContext.ValidatedIdToken == null)
-                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
+                throw LogHelper.LogArgumentNullException(nameof(validationContext.ValidatedIdToken));
 
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10333));
@@ -618,35 +617,36 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10319);
 
             if (validationContext == null)
-                throw LogHelper.LogArgumentNullException("validationContext");
+                throw LogHelper.LogArgumentNullException(nameof(validationContext));
 
             if (validationContext.ValidatedIdToken == null)
-                throw LogHelper.LogArgumentNullException("validationContext.ValidatedIdToken");
+                throw LogHelper.LogArgumentNullException(nameof(validationContext.ValidatedIdToken));
 
             string nonceFoundInJwt = validationContext.ValidatedIdToken.Payload.Nonce;
+
+            // if a nonce is not required AND there is no nonce in the context (which represents what was returned from the IDP) and the token log and return
             if (!RequireNonce && string.IsNullOrEmpty(validationContext.Nonce) && string.IsNullOrEmpty(nonceFoundInJwt))
             {
                 IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10322);
                 return;
             }
-            else if (string.IsNullOrEmpty(validationContext.Nonce))
-            {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10320, RequireNonce.ToString())));
 
-            }
+            // if we get here then RequireNonce == true || validationContext.None != null || nonceFoundInJwt != null
+            if (string.IsNullOrEmpty(validationContext.Nonce) && string.IsNullOrEmpty(nonceFoundInJwt))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10320, RequireNonce)));
+            else if (string.IsNullOrEmpty(validationContext.Nonce))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10323, RequireNonce)));
             else if (string.IsNullOrEmpty(nonceFoundInJwt))
-            {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10323, RequireNonce.ToString(), validationContext.ValidatedIdToken)));
-            }
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10349, RequireNonce)));
 
             if (!string.Equals(nonceFoundInJwt, validationContext.Nonce, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken)));
 
             if (RequireTimeStampInNonce)
             {
                 int endOfTimestamp = nonceFoundInJwt.IndexOf('.');
                 if (endOfTimestamp == -1)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10325, validationContext.Nonce)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10325, nonceFoundInJwt)));
 
                 string timestamp = nonceFoundInJwt.Substring(0, endOfTimestamp);
                 DateTime nonceTime = new DateTime(1979, 1, 1);          // initializing to some value otherwise it gives an error
@@ -657,11 +657,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10326, timestamp, validationContext.Nonce), ex));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10326, timestamp, nonceFoundInJwt), ex));
                 }
 
                 if (ticks <= 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10326, timestamp, validationContext.Nonce)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10326, timestamp, nonceFoundInJwt)));
 
                 try
                 {
@@ -669,12 +669,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch(Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10327, timestamp, DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), ex));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10327, timestamp, DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), ex));
                 }
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10324, validationContext.Nonce, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString())));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX10324, nonceFoundInJwt, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString())));
             }
         }
 
