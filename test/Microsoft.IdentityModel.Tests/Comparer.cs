@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#if !NETCOREAPP1_0
 using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Protocols.WsFederation;
@@ -211,3 +212,4 @@ namespace Microsoft.IdentityModel.Tests
         }
     }
 }
+#endif

@@ -242,8 +242,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             ClaimsPrincipal retVal = null;
             try
             {
-                SecurityToken validatedToken;
-                retVal = (theoryData.Handler as Saml2SecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out validatedToken);
+                retVal = (theoryData.Handler as Saml2SecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -290,7 +289,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentException("IDX11013:"),
+                        ExpectedException = ExpectedException.ArgumentException("IDX10209:"),
                         Handler = tokenHandler,
                         TestId = "SecurityTokenTooLarge",
                         Token = "ss",

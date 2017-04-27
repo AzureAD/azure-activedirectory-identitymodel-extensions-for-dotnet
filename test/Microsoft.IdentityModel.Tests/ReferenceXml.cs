@@ -24,6 +24,7 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+#if !NETCOREAPP1_0
 
 using System;
 using System.Security.Cryptography.X509Certificates;
@@ -1052,3 +1053,4 @@ namespace Microsoft.IdentityModel.Tests
         #endregion
     }
 }
+#endif

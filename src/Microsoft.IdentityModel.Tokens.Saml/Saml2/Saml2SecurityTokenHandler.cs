@@ -36,7 +36,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
+
+using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using LogMessages = Microsoft.IdentityModel.Tokens.Saml2.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -177,31 +181,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Validates a <see cref="Saml2SecurityToken"/>.
         /// </summary>
         /// <param name="token">The <see cref="Saml2SecurityToken"/> to validate.</param>
-        /// <returns>A <see cref="ClaimsPrincipal"/> representing the identities contained in the token.</returns>
-        /// <exception cref="ArgumentNullException">The parameter 'token' is null.</exception>
-        /// <exception cref="ArgumentException">The token is not of assignable from <see cref="Saml2SecurityToken"/>.</exception>
-        /// <exception cref="InvalidOperationException">Configuration <see cref="SecurityTokenHandlerConfiguration"/>is null.</exception>
-        /// <exception cref="SecurityTokenValidationException">Thrown if Saml2SecurityToken.Assertion.IssuerToken is null.</exception>
-        /// <exception cref="SecurityTokenValidationException">Thrown if Saml2SecurityToken.Assertion.SigningToken is null.</exception>
-        /// <exception cref="InvalidOperationException">Saml2SecurityToken.Assertion is null.</exception>
-        public ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        /// <param name="validationParameters">Contains validation parameters for the <see cref="Saml2SecurityToken"/>.</param>
+        /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
+        /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentException">token.Length > MamimumTokenSizeInBytes.</exception>
+        /// <returns>A <see cref="ClaimsPrincipal"/> representing the identity contained in the token.</returns>
+        public ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
-            if (securityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+            if (token == null)
+                throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (securityToken.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11013, securityToken.Length, MaximumTokenSizeInBytes)));
+            if (token.Length > MaximumTokenSizeInBytes)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            var samlToken = ValidateSignature(securityToken, validationParameters);
+            var samlToken = ValidateSignature(token, validationParameters);
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
             ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
             validatedToken = samlToken;
+            var identity = CreateClaims(samlToken, validationParameters);
+            if (validationParameters.SaveSigninToken)
+                identity.BootstrapContext = token;
 
-            return null;
+            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, token);
+
+            return new ClaimsPrincipal(identity);
         }
 
         protected virtual void ValidateSubject(Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
@@ -1235,36 +1243,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             foreach (Saml2Statement statement in statements)
             {
-                Saml2AttributeStatement attrStatement = statement as Saml2AttributeStatement;
-                if (attrStatement != null)
-                {
-                    ProcessAttributeStatement(attrStatement, subject, issuer);
-                    continue;
-                }
+	            if (statement is Saml2AttributeStatement attrStatement)
+		            ProcessAttributeStatement(attrStatement, subject, issuer);
+	            else if (statement is Saml2AuthenticationStatement authnStatement)
+		            authnStatements.Add(authnStatement);
+	            else if (statement is Saml2AuthorizationDecisionStatement authzStatement)
+		            ProcessAuthorizationDecisionStatement(authzStatement, subject, issuer);
 
-                Saml2AuthenticationStatement authnStatement = statement as Saml2AuthenticationStatement;
-                if (authnStatement != null)
-                {
-                    authnStatements.Add(authnStatement);
-                    continue;
-                }
-
-                Saml2AuthorizationDecisionStatement authzStatement = statement as Saml2AuthorizationDecisionStatement;
-                if (authzStatement != null)
-                {
-                    ProcessAuthorizationDecisionStatement(authzStatement, subject, issuer);
-                    continue;
-                }
-
-                // We don't process custom statements. Just fall through.
+	            // We don't process custom statements. Just fall through.
             }
 
             foreach (Saml2AuthenticationStatement authStatement in authnStatements)
             {
                 if (authStatement != null)
-                {
                     ProcessAuthenticationStatement(authStatement, subject, issuer);
-                }
             }
         }
 
@@ -1520,19 +1512,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual SecurityKey ResolveIssuerKey(Saml2Assertion assertion, TokenValidationParameters validationParameters)
         {
             if (null == assertion)
-            {
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
-            }
 
-            SecurityKey key;
-            if (TryResolveIssuerToken(assertion, validationParameters, out key))
-            {
-                return key;
-            }
+            if (TryResolveIssuerToken(assertion, validationParameters, out SecurityKey key))
+	            return key;
             else
-            {
                 throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("cannot resolve key"));
-            }
         }
 
         /// <summary>
