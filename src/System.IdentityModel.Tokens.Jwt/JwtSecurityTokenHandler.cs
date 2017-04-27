@@ -728,7 +728,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentNullException">token.Length * 2 > MamimumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException">token.Length > MamimumTokenSizeInBytes.</exception>
         /// <exception cref="ArgumentException">'token' does not have 3 or 5 parts.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
         /// <remarks><see cref="ReadToken(string)"/> for additional exceptions.</remarks>

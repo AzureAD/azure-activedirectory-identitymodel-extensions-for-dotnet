@@ -33,7 +33,9 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+#if !NETCOREAPP1_0
 using Microsoft.IdentityModel.Protocols.WsFederation;
+#endif
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Tests
