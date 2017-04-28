@@ -30,13 +30,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
 using System;
 using Microsoft.IdentityModel.Tokens;
 
-#if NNET451
+#if !NETCOREAPP1_0
 using Microsoft.IdentityModel.Tokens.Saml;
-using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml2;
 #endif
 
 namespace Microsoft.IdentityModel.Tests
@@ -94,230 +93,27 @@ namespace Microsoft.IdentityModel.Tests
             return new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
         }
 
-#if NNET451
-        public static string CreateSaml2Token()
-        {
-            throw new NotImplementedException();
-            //return CreateSaml2Token(DefaultAsymmetricSecurityTokenDescriptor);
-        }
-
-        public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor)
-        {
-            return CreateSaml2Token(securityTokenDescriptor, new Microsoft.IdentityModel.Tokens.Saml.Saml2SecurityTokenHandler());
-        }
-
-        public static string CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, Microsoft.IdentityModel.Tokens.SecurityTokenHandler tokenHandler)
-        {
-            return CreateToken(securityTokenDescriptor, tokenHandler);
-        }
-
-        //public static SamlSecurityToken CreateSamlSecurityToken()
-        //{
-        //    throw new NotImplementedException();
-        //    //return CreateSamlSecurityToken(DefaultAsymmetricSecurityTokenDescriptor, new Saml2SecurityTokenHandler());
-        //}
-
-        //public static SamlSecurityToken CreateSamlSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
-        //{
-        //    return CreateSecurityToken(securityTokenDescriptor, tokenHandler) as SamlSecurityToken;
-        //}
-
-        public static string CreateSamlToken()
-        {
-            return CreateSamlToken(DefaultAsymmetricSecurityTokenDescriptor(ClaimSets.DefaultClaims));
-        }
-
-        public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor)
-        {
-            return CreateToken(securityTokenDescriptor, new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler());
-        }
-
-        public static string CreateSamlToken(SecurityTokenDescriptor securityTokenDescriptor, Microsoft.IdentityModel.Tokens.SecurityTokenHandler tokenHandler)
-        {
-            return CreateToken(securityTokenDescriptor, tokenHandler);
-        }
-
-#endif
-        public static SecurityToken CreateSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
-        {
-            return tokenHandler.CreateToken(securityTokenDescriptor);
-        }
-
-        public static string CreateToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
-        {
-            SecurityToken securityToken = tokenHandler.CreateToken(securityTokenDescriptor);
-            StringBuilder sb = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(sb);
-            tokenHandler.WriteToken(writer, securityToken);
-            writer.Flush();
 #if !NETCOREAPP1_0
-            writer.Close();
+        public static Saml2SecurityToken CreateSaml2Token(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
+        {
+            return null;
+        }
+
+        public static Saml2SecurityToken CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, Saml2SecurityTokenHandler tokenHandler)
+        {
+            return null;
+        }
+
+        public static SamlSecurityToken CreateSamlSecurityToken(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
+        {
+            return null;
+        }
+
+        public static SamlSecurityToken CreateSamlSecurityToken(SecurityTokenDescriptor securityTokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return null;
+        }
+
 #endif
-            return sb.ToString();
-        }
-
-        public static string ActorIssuer = "http://www.GotJwt.com/Actor";
-        public static SigningCredentials DefaultAsymmetricSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
-        public static SigningCredentials DefaultSymmetricSigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
-        public static EncryptingCredentials DefaultSymmetricEncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2;
-        public static SignatureProvider  DefaultAsymmetricSignatureProvider = CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
-        public static SecurityKey DefaultAsymmetricSigningKey { get { return new X509SecurityKey(KeyingMaterial.DefaultCert_2048); } }
-        public static SecurityKey DefaultSymmetricSigningKey {  get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
-        public static SecurityKey DefaultSymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256); } }
-        public static SecurityKey SymmetricEncryptionKey { get { return new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256); } }
-        public static ClaimsPrincipal DefaultClaimsPrincipal { get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); } }
-        public static string DefaultAsymmetricJwt {get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }}
-        public static IEnumerable<Claim> NotDefaultClaims
-        {
-            get
-            {
-                return new List<Claim>()
-                {
-                    new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
-                    new Claim(ClaimTypes.Email, "user@contoso.com", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
-                    new Claim(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
-                    new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
-                    new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, NotDefault.Issuer, NotDefault.OriginalIssuer),
-                };
-            }
-        }
-
-        public static ClaimsIdentity NotDefaultClaimsIdentity
-        {
-            get { return new ClaimsIdentity(NotDefaultClaims); }
-        }
-
-        public static SigningCredentials NotDefaultSigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
-        public static SecurityKey NotDefaultSigningKey = KeyingMaterial.RsaSecurityKey_2048;
-        public static string DefaultSymmetricJwt
-        {
-            get { return DefaultJwt(DefaultSecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2)); }
-        }
-
-        public static string DefaultJwt(SecurityTokenDescriptor tokenDescriptor)
-        {
-            return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
-        }
-
-        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(SigningCredentials signingCredentials)
-        {
-            return DefaultSecurityTokenDescriptor(null, signingCredentials, null);
-        }
-
-        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(EncryptingCredentials encryptingCredentials)
-        {
-            return DefaultSecurityTokenDescriptor(encryptingCredentials, null, null);
-        }
-
-        public static SecurityTokenDescriptor DefaultAsymmetricSecurityTokenDescriptor(List<Claim> claims)
-        {
-            return DefaultSecurityTokenDescriptor(null, DefaultAsymmetricSigningCredentials, claims);
-        }
-
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptor(List<Claim> claims)
-        {
-            return DefaultSecurityTokenDescriptor(null, DefaultSymmetricSigningCredentials, claims);
-        }
-
-        public static SecurityTokenDescriptor DefaultSymmetricSecurityTokenDescriptorJWE(List<Claim> claims)
-        {
-            return DefaultSecurityTokenDescriptor(DefaultSymmetricEncryptingCredentials, DefaultSymmetricSigningCredentials, claims);
-        }
-
-        public static SecurityTokenDescriptor DefaultSecurityTokenDescriptor(EncryptingCredentials encryptingCredentials, SigningCredentials signingCredentials, List<Claim> claims)
-        {
-            return new SecurityTokenDescriptor
-            {
-                Audience = Default.Audience,
-                EncryptingCredentials = encryptingCredentials,
-                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                Issuer = Default.Issuer,
-                IssuedAt = DateTime.UtcNow,
-                NotBefore = DateTime.UtcNow,
-                SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimSets.DefaultClaimsIdentity : new ClaimsIdentity(claims)
-            };
-        }
-
-        public static TokenValidationParameters DefaultAsymmetricTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningKey); }
-        }
-
-        public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters(DefaultSymmetricSigningKey); }
-        }
-
-        public static TokenValidationParameters DefaultTokenValidationParameters(SecurityKey key)
-        {
-            return new TokenValidationParameters
-            {
-                AuthenticationType = Default.AuthenticationType,
-                IssuerSigningKey = key,
-                ValidAudience = Default.Audience,
-                ValidIssuer = Default.Issuer,
-            };
-        }
-
-        /// <summary>
-        ///  For JWE with alg = "dir".
-        /// </summary>
-        public static TokenValidationParameters DefaultDirectKeyTokenValidationParameters
-        {
-            get { return DefaultTokenValidationParameters_JWE(DefaultSymmetricEncryptionKey); }
-        }
-
-        public static TokenValidationParameters DefaultTokenValidationParameters_JWE(SecurityKey key)
-        {
-            return new TokenValidationParameters
-            {
-                AuthenticationType = Default.AuthenticationType,
-                TokenDecryptionKey = key,
-                ValidAudience = Default.Audience,
-                ValidIssuer = Default.Issuer,
-            };
-        }
-
-        public static bool AudienceValidatorReturnsTrue(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
-        {
-            return true;
-        }
-
-        public static bool AudienceValidatorThrows(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
-        {
-            throw new SecurityTokenInvalidAudienceException("AudienceValidatorThrows");
-        }
-
-        public static string IssuerValidatorEcho(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
-        {
-            return issuer;
-        }
-
-        public static string IssuerValidatorThrows(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
-        {
-            throw new SecurityTokenInvalidIssuerException("IssuerValidatorThrows");
-        }
-
-        public static bool LifetimeValidatorReturnsTrue(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
-        {
-            return true;
-        }
-
-        public static bool LifetimeValidatorThrows(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
-        {
-            throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
-        }
-        
-        public static JwtSecurityToken SignatureValidatorReturnsTokenAsIs(string token, TokenValidationParameters validationParameters)
-        {
-            JwtSecurityToken jwt = new JwtSecurityToken(token);
-            return jwt;
-        }
-
-        public static JwtSecurityToken SignatureValidatorThrows(string token, TokenValidationParameters validationParameters)
-        {
-            throw new SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
-        }
     }
 }

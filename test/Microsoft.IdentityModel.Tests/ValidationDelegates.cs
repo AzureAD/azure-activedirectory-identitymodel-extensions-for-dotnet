@@ -27,17 +27,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Tests
 {
     /// <summary>
-    /// Main purpose of this code is to serve up Identities
-    /// ClaimPrincipal
-    /// ClaimIdentiy
-    /// Claim
-    /// SamlTokens
-    /// JwtTokens
+    /// Main purpose of this code is to serve up ValidationDelegates for TokenValidatationParameters
     /// </summary>
     public static class ValidationDelegates
     {
@@ -70,5 +66,17 @@ namespace Microsoft.IdentityModel.Tests
         {
             throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
         }
+
+        public static SecurityToken SignatureValidatorReturnsJwtTokenAsIs(string token, TokenValidationParameters validationParameters)
+        {
+            JwtSecurityToken jwt = new JwtSecurityToken(token);
+            return jwt;
+        }
+
+        public static SecurityToken SignatureValidatorThrows(string token, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
+        }
+
     }
 }

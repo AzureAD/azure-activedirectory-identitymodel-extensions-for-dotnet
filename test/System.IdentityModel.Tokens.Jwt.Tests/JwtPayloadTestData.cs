@@ -40,7 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             ObjectForEachProperty = new Dictionary<string, object>
             {
                 {JwtRegisteredClaimNames.Acr, Default.Acr},
-                {JwtRegisteredClaimNames.Actort, IdentityUtilities.DefaultAsymmetricJwt},
+                {JwtRegisteredClaimNames.Actort, Default.AsymmetricJwt},
                 {JwtRegisteredClaimNames.Amr, Default.Amr},
                 {JwtRegisteredClaimNames.AuthTime, EpochTime.GetIntDate(DateTime.UtcNow)},
                 {JwtRegisteredClaimNames.Aud, Default.Audience},

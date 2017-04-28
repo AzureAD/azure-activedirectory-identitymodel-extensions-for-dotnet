@@ -574,12 +574,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 notBefore,
                 expires,
                 DateTime.UtcNow + TimeSpan.FromHours(1),
-                IdentityUtilities.DefaultAsymmetricSigningCredentials);
+                Default.AsymmetricSigningCredentials);
 
             TokenValidationParameters validationParameters =
                 new TokenValidationParameters()
                 {
-                    IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey,
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
                     ValidAudience = Default.Audience,
                     ValidIssuer = Default.Issuer,
                 };
@@ -600,17 +600,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // validating lifetime validator
             validationParameters.ValidateLifetime = false;
-            validationParameters.LifetimeValidator = IdentityUtilities.LifetimeValidatorThrows;
+            validationParameters.LifetimeValidator = ValidationDelegates.LifetimeValidatorThrows;
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // validating issuer signing key validator
-            validationParameters = SignatureValidationParameters(IdentityUtilities.DefaultAsymmetricSigningKey);
+            validationParameters = SignatureValidationParameters(Default.AsymmetricSigningKey);
             validationParameters.ValidateIssuerSigningKey = true;
             validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return true; };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             properties.Clear();
-            properties.Add("SigningKey", IdentityUtilities.DefaultAsymmetricSigningKey);
+            properties.Add("SigningKey", Default.AsymmetricSigningKey);
             validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return false; };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:", propertiesExpected: properties));
 
@@ -619,7 +619,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"));
 
             // user returns one key
-            validationParameters.IssuerSigningKeyResolver = (token, idToken, kid, parameters) => { return new List<SecurityKey> { IdentityUtilities.DefaultAsymmetricSigningKey }; };
+            validationParameters.IssuerSigningKeyResolver = (token, idToken, kid, parameters) => { return new List<SecurityKey> { Default.AsymmetricSigningKey }; };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // validating custom crypto provider factory
@@ -633,9 +633,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             SecurityToken validatedToken;
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            TokenValidationParameters validationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters;
+            TokenValidationParameters validationParameters = Default.AsymmetricSignTokenValidationParameters;
             validationParameters.SaveSigninToken = false;
-            string jwt = IdentityUtilities.DefaultAsymmetricJwt;
+            string jwt = Default.AsymmetricJwt;
             ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
             var context = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as string;
             Assert.Null(context);
@@ -827,7 +827,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // custom signature validator
             expectedException = ExpectedException.NoExceptionExpected;
             validationParameters = SignatureValidationParameters();
-            validationParameters.SignatureValidator = IdentityUtilities.SignatureValidatorReturnsTokenAsIs;
+            validationParameters.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10505:");
@@ -836,7 +836,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             expectedException = ExpectedException.SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
             validationParameters.RequireSignedTokens = false;
-            validationParameters.SignatureValidator = IdentityUtilities.SignatureValidatorThrows;
+            validationParameters.SignatureValidator = ValidationDelegates.SignatureValidatorThrows;
             TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
 
             // "Symmetric_256"
@@ -867,8 +867,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void IssuerValidation()
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            string jwt = (tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials) as JwtSecurityToken).RawData;
-            TokenValidationParameters validationParameters = new TokenValidationParameters() { IssuerSigningKey = IdentityUtilities.DefaultAsymmetricSigningKey, ValidateAudience = false, ValidateLifetime = false };
+            string jwt = (tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, signingCredentials: Default.AsymmetricSigningCredentials) as JwtSecurityToken).RawData;
+            TokenValidationParameters validationParameters = new TokenValidationParameters() { IssuerSigningKey = Default.AsymmetricSigningKey, ValidateAudience = false, ValidateLifetime = false };
             Dictionary<string, object> properties = new Dictionary<string, object>();
 
             // ValidateIssuer == true, validIssuer null, validIssuers null
@@ -883,7 +883,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // delegate ignored on virtual call
             ee = ExpectedException.NoExceptionExpected;
-            validationParameters.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
+            validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
 
             // VaidateIssuer == false
@@ -907,7 +907,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             validationParameters.ValidateIssuer = false;
-            validationParameters.IssuerValidator = IdentityUtilities.IssuerValidatorThrows;
+            validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorThrows;
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
         }
 
@@ -1003,7 +1003,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
 
             validationParameters.ValidateAudience = false;
-            validationParameters.AudienceValidator = IdentityUtilities.AudienceValidatorThrows;
+            validationParameters.AudienceValidator = ValidationDelegates.AudienceValidatorThrows;
             TestUtilities.ValidateToken(securityToken: jwt, validationParameters: validationParameters, tokenValidator: tokenHandler, expectedException: ExpectedException.NoExceptionExpected);
         }
 

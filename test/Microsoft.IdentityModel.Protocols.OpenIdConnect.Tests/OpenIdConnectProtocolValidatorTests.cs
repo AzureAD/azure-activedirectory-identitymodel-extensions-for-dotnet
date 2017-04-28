@@ -876,7 +876,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage{ Code = code },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials)
+                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: Default.AsymmetricSigningCredentials)
                     }
                 });
 
@@ -899,7 +899,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                        ValidatedIdToken = new JwtSecurityToken( claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash256), new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials)
+                        ValidatedIdToken = new JwtSecurityToken( claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash256), new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: Default.AsymmetricSigningCredentials)
                     }
                 });
 
@@ -1191,7 +1191,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials)
+                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
                     }
                 });
 
@@ -1204,7 +1204,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage{ AccessToken = token},
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue512) }, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials)
+                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue512) }, signingCredentials: Default.AsymmetricSigningCredentials)
                     }
                 });
 
@@ -1216,7 +1216,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials)
+                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
                     }
                 });
 
@@ -1228,7 +1228,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256), new Claim("at_hash", hashClaimValue256) }, signingCredentials: IdentityUtilities.DefaultAsymmetricSigningCredentials)
+                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256), new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
                     }
                 });
 
