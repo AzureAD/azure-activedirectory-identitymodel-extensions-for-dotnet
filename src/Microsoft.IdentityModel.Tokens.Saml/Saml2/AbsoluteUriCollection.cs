@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(item));
 
             if (!item.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11012, item)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11139, item)));
 
             base.InsertItem(index, item);
         }
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(item));
 
             if (!item.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11012, item)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11139, item)));
 
             base.SetItem(index, item);
         }

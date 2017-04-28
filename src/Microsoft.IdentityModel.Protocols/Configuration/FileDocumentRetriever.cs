@@ -30,7 +30,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -67,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new IOException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10804, address), ex));
+                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX10804, address), ex));
             }
         }
     }

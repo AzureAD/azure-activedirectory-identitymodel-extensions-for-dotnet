@@ -37,9 +37,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
         // properties, configuration 
+        public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
         public const string IDX10100 = "IDX10100: ClockSkew must be greater than TimeSpan.Zero. value: '{0}'";
         public const string IDX10102 = "IDX10102: NameClaimType cannot be null or whitespace.";
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
+        public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
 
         // token validation
         public const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
@@ -73,13 +75,41 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
         public const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
 
+        // 10500 - SignatureValidation
+        public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
+        public const string IDX10501 = "IDX10501: Signature validation failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
+        public const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
+        public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'.";
+        public const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
+        public const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
+        public const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
+        public const string IDX10508 = "IDX10508: Signature validation failed, see inner exception";
+
+        // encryption / decryption
+        public const string IDX10600 = "IDX10600: Decryption failed. There are no security keys for decryption.";
+        public const string IDX10601 = "IDX10601: Decryption failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
+        public const string IDX10603 = "IDX10603: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
+        public const string IDX10604 = "IDX10604: Decryption failed. Exception: '{0}'.";
+        public const string IDX10605 = "IDX10605: Decryption failed. Only 'dir' is currently supported. JWE alg is: '{0}'.";
+        public const string IDX10606 = "IDX10606: Decryption failed. To decrypt a JWE there must be 5 parts. 'tokenParts' is of length: '{0}'.";
+        public const string IDX10607 = "IDX10607: Decryption skipping key: '{0}', both validationParameters.CryptoProviderFactory and key.CryptoProviderFactory are null.";
+        public const string IDX10608 = "IDX10608: Decryption skipping key: '{0}', it is not a '{1}'.";
+        public const string IDX10609 = "IDX10609: Decryption failed. No Keys tried: token: '{0}'.";
+        public const string IDX10610 = "IDX10610: Decryption failed. Could not create decryption provider. Key: '{0}', Algorithm: '{1}'.";
+        public const string IDX10611 = "IDX10611: Decryption failed. Encryption is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
+        public const string IDX10612 = "IDX10612: Decryption failed. Header.Enc is null or empty, it must be specified.";
+        //public const string IDX10613 = "IDX10613: Decryption failed. JwtHeader (tokenParts[0]) is null or empty.";
+        public const string IDX10614 = "IDX10614: Decryption failed. JwtHeader.Base64UrlDeserialize(tokenParts[0]): '{0}'. Inner exception: '{1}'.";
+        public const string IDX10615 = "IDX10615: Encryption failed. No support for: Algorithm: '{0}', SecurityKey: '{1}'.";
+        public const string IDX10616 = "IDX10616: Encryption failed. EncryptionProvider failed for: Algorithm: '{0}', SecurityKey: '{1}'. See inner exception.";
+        public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
+
         // Formating
         public const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";
 
         // Crypto Errors
-        public const string IDX10600 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
-        public const string IDX10603 = "IDX10603: The algorithm: '{0}' requires the SecurityKey.KeySize to be greater than '{1}' bits. KeySize reported: '{2}'.";
-        public const string IDX10613 = "IDX10613: Cannot set the MinimumAsymmetricKeySizeInBitsForSigning to less than '{0}'.";
+        public const string IDX10800 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
+        public const string IDX10803 = "IDX10603: The algorithm: '{0}' requires the SecurityKey.KeySize to be greater than '{1}' bits. KeySize reported: '{2}'.";
         public const string IDX10623 = "IDX10623: Cannot sign data because the KeyedHashAlgorithm is null.";
         public const string IDX10624 = "IDX10624: Cannot verify data because the KeyedHashAlgorithm is null.";
         public const string IDX10627 = "IDX10627: Cannot set the MinimumAsymmetricKeySizeInBitsForVerifying to less than '{0}'.";
@@ -87,12 +117,14 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         public const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         public const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
+        public const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
+        public const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX10638 = "IDX10638: Cannot created the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         public const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         public const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
         public const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
         public const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
-        public const string IDX10644 = "IDX10644: Crypto operation not supported.";
+        public const string IDX10644 = "IDX10644: UnwrapKey failed. Algorithm: '{0}'.";
         public const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
         public const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}', Key: '{1}'), but Create.(algorithm, args) as '{2}' == NULL.";
         public const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}'), but Create.(algorithm, args) as '{1}' == NULL.";
@@ -120,6 +152,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10669 = "IDX10669: Failed to create symmetric algorithm.";
         public const string IDX10670 = "IDX10670: The lengths of the two byte arrays do not match. The first one has: '{0}' bytes, the second one has: '{1}' bytes.";
         public const string IDX10671 = "IDX10671: The ECDsa Key: '{0}' must be '{1}' bits. KeySize: '{2}'.";
+
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -94,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
             }
         }
 
@@ -333,7 +332,7 @@ namespace Microsoft.IdentityModel.Tokens
                         if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
                             return new ECDsaCng(cngKey);
                         else
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
                     }
                 }
                 else
@@ -344,7 +343,7 @@ namespace Microsoft.IdentityModel.Tokens
                         if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
                             return new ECDsaCng(cngKey);
                         else
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
                     }
                 }
             }
@@ -358,7 +357,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal RSAParameters CreateRsaParameters()
         {
             if (N == null || E == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, this)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this)));
 
             RSAParameters parameters = new RSAParameters();
 
@@ -410,7 +409,7 @@ namespace Microsoft.IdentityModel.Tokens
                     keyByteCount = 64;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
             }
             return keyByteCount;
         }
@@ -449,7 +448,7 @@ namespace Microsoft.IdentityModel.Tokens
                         magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
             }
             return (uint)magicNumber;
         }

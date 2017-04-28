@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10105, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", LogHelper.FormatInvariant(LogMessages.IDX10105, value)));
                 }
 
                 _nonceLifetime = value;
@@ -336,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10343, validationContext.UserInfoEndpointResponse), ex));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10343, validationContext.UserInfoEndpointResponse), ex));
             }
 
             if (string.IsNullOrEmpty(sub))
@@ -346,7 +346,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX10346));
 
             if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, sub, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10338, validationContext.ValidatedIdToken.Payload.Sub, sub)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10338, validationContext.ValidatedIdToken.Payload.Sub, sub)));
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10313, validationContext.ValidatedIdToken), ex));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10313, validationContext.ValidatedIdToken), ex));
                 }
                 return;
             }
@@ -380,33 +380,33 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                 // required claims
                 if (idToken.Payload.Aud.Count == 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken)));
 
                 if (!idToken.Payload.Exp.HasValue)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken)));
 
                 if (!idToken.Payload.Iat.HasValue)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
 
                 if (idToken.Payload.Iss == null)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
 
                 // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
                 if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Payload.Sub)))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
 
                 // optional claims
                 if (RequireAcr && string.IsNullOrWhiteSpace(idToken.Payload.Acr))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10315, idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10315, idToken)));
 
                 if (RequireAmr && idToken.Payload.Amr.Count == 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10316, idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10316, idToken)));
 
                 if (RequireAuthTime && !(idToken.Payload.AuthTime.HasValue))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10317, idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10317, idToken)));
 
                 if (RequireAzp && string.IsNullOrWhiteSpace(idToken.Payload.Azp))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10318, idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10318, idToken)));
 
                 // if multiple audiences are present in the id_token, 'azp' claim should be present
                 if (idToken.Payload.Aud.Count > 1 && string.IsNullOrEmpty(idToken.Payload.Azp))
@@ -423,7 +423,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     }
                     else if (!string.Equals(idToken.Payload.Azp, validationContext.ClientId, StringComparison.Ordinal))
                     {
-                        throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10340, idToken.Payload.Azp, validationContext.ClientId)));
+                        throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10340, idToken.Payload.Azp, validationContext.ClientId)));
                     }
                 }
             }
@@ -449,10 +449,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10301, algorithm, typeof(HashAlgorithm)), ex));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10301, algorithm, typeof(HashAlgorithm)), ex));
             }
 
-            throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10302, algorithm)));
+            throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10302, algorithm)));
         }
 
         /// <summary>
@@ -501,7 +501,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
             if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10300, expectedValue, hashItem, algorithm)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX10300, expectedValue, hashItem, algorithm)));
             }
         }
 
@@ -536,13 +536,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             object cHashClaim;
             if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.CHash, out cHashClaim))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10307, validationContext.ValidatedIdToken)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX10307, validationContext.ValidatedIdToken)));
             }
 
             var chash = cHashClaim as string;
             if (chash == null)
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10306, validationContext.ValidatedIdToken)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX10306, validationContext.ValidatedIdToken)));
             }
 
             try
@@ -585,11 +585,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             object atHashClaim;
             if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.AtHash, out atHashClaim))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10312, validationContext.ValidatedIdToken)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX10312, validationContext.ValidatedIdToken)));
 
             var atHash = atHashClaim as string;
             if (atHash == null)
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10311, validationContext.ValidatedIdToken)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX10311, validationContext.ValidatedIdToken)));
 
             try
             {
@@ -708,17 +708,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else if (string.IsNullOrEmpty(validationContext.State))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10329, RequireState)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX10329, RequireState)));
             }
             else if (string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
             {
                 // 'state' was sent, but message does not contain 'state'
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10330, RequireState.ToString())));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX10330, RequireState.ToString())));
             }
 
             if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State, StringComparison.Ordinal))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10331, validationContext.State, validationContext.ProtocolMessage.State)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX10331, validationContext.State, validationContext.ProtocolMessage.State)));
             }
         }
     }

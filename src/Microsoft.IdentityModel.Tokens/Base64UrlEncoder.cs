@@ -28,7 +28,6 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new FormatException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX14700, str)));
+                    throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14700, str)));
             }
 
             return Convert.FromBase64String(str);

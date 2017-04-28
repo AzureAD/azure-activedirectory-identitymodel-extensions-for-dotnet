@@ -34,8 +34,6 @@ namespace Microsoft.IdentityModel.Xml
     internal static class LogMessages
     {
 #pragma warning disable 1591
-        // general
-        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
         // Xml reading
         internal const string IDX20001 = "IDX10001: The value of this argument must fall within the range {0} to {1}.";

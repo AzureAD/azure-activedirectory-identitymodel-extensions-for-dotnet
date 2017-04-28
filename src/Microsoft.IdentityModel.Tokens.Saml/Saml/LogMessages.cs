@@ -33,25 +33,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     internal static class LogMessages
     {
 #pragma warning disable 1591
-        // general
-        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
-
-        // properties, configuration
-        internal const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
-        internal const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
-        internal const string IDX10105 = "IDX10105: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
-
-        // token validation
-        internal const string IDX10209 = "IDX10209: token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
-        internal const string IDX10213 = "IDX10213: SecurityTokens must be signed. SecurityToken: '{0}'.";
-        internal const string IDX10221 = "IDX10221: Unable to create claims from securityToken, 'issuer' is null or empty.";
-        internal const string IDX10230 = "IDX10230: Lifetime validation failed. Delegate returned false, securitytoken: '{0}'.";
-        internal const string IDX10231 = "IDX10231: Audience validation failed. Delegate returned false, securitytoken: '{0}'.";
 
         // SecurityTokenHandler messages
         internal const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX10721 = "IDX10721: Creating SamlSecurityToken: Issuer: '{0}', Audience: '{1}'";
-
 
         // SamlSerializer reading
         internal const string IDX11100 = "IDX11100: Saml Only one element of type '{0}' is supported.";
@@ -63,6 +48,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11106 = "IDX11106: Saml No SubjectConfirmation clauses were specified.";
         internal const string IDX11107 = "IDX11107: Saml A Subject requires a NameIdentifier or ConfirmationMethod";
         internal const string IDX11108 = "IDX11108: Saml AuthorityBinding.AuthorityKind is not well formed. Is should be of the form str:str, it is '{0}'";
+        internal const string IDX11109 = "IDX11109: SamlAssertion.Issuer cannont be null or empty when creating claims.";
+        internal const string IDX11110 = "IDX11110: The SamlSecurityToken must have a value for its Assertion property.";
 
 #pragma warning restore 1591
     }
