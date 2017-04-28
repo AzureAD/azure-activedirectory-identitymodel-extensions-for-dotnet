@@ -1,30 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.4|AnyCPU'">
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
+  <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>Includes types that provide support for OpenIdConnect protocol.</Description>
-    <VersionPrefix>5.2.0</VersionPrefix>
-    <TargetFrameworks>netstandard1.4;net451</TargetFrameworks>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DelaySign>true</DelaySign>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Microsoft.IdentityModel.Protocols.OpenIdConnect</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <Description>Includes types that provide support for OpenIdConnect protocol.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Protocols.OpenIdConnect</PackageId>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <ApplicationIcon />
-    <OutputTypeEx>library</OutputTypeEx>
-    <StartupObject />
+    <TargetFrameworks>netstandard1.4;net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -26,19 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Tests")]
-[assembly: AssemblyDescription("Tests data and atrifacts for Microsoft.IdentityModel.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Tests")]
-[assembly: AssemblyCulture("")]
-[assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-[assembly: AssemblyVersion("5.2.0")]
-
+[assembly: ComVisible(false)]

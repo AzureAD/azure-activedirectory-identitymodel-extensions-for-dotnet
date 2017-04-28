@@ -29,15 +29,6 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Xml")]
-[assembly: AssemblyDescription("Support for Xml Signatures, reading and writing.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Xml")]
-[assembly: AssemblyTrademark("")]
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
-[assembly: Guid("63F6E63C-300D-4D4F-9364-0087E4F18477")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.2.0")]
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

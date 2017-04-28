@@ -29,18 +29,6 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols.WsFederation")]
-[assembly: AssemblyDescription("Support for WsFederation.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols.WsFederation")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.2.0")]
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

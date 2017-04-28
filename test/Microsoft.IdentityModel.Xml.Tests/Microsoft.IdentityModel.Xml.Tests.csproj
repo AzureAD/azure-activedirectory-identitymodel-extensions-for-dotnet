@@ -1,18 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\build\commonTest.props" />
+
   <PropertyGroup>
-    <Description>Microsoft.IdentityModel.Xml.Tests</Description>
-    <VersionPrefix>5.2.0</VersionPrefix>
-    <TargetFramework>net451</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Microsoft.IdentityModel.Xml.Tests</AssemblyName>
-    <PackageId>Microsoft.IdentityModel.Xml.Tests</PackageId>
+    <Description>Microsoft.IdentityModel.Xml.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <PackageId>Microsoft.IdentityModel.Xml.Tests</PackageId>
+    <TargetFramework>net451</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,9 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
-    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
+    <PackageReference Include="xunit" Version="2.2.0-*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-*" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

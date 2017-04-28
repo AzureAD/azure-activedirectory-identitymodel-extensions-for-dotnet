@@ -29,16 +29,6 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Protocols")]
-[assembly: AssemblyDescription("Contains classes for OpenId Connect protocol.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Protocols")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
-[assembly: Guid("DDA17899-06A2-4DDF-A552-30A5EBF0E2B0")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.2.0")]
-
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

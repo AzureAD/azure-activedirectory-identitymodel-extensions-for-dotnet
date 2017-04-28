@@ -26,21 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Xunit;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens.Tests")]
-[assembly: AssemblyDescription("Tests for SecurityTokens.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens.Tests")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-[assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-[assembly: AssemblyFileVersion("5.2.0")]
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
+[assembly: ComVisible(false)]

@@ -1,23 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\build\common.props" />
+
   <PropertyGroup>
-    <Description>Includes types that provide support for WsFederation protocol.</Description>
-    <VersionPrefix>5.2.0</VersionPrefix>
-    <TargetFrameworks>net451</TargetFrameworks>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DelaySign>true</DelaySign>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Microsoft.IdentityModel.Protocols.WsFederation</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <Description>Includes types that provide support for WsFederation protocol.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Protocols.WsFederation</PackageId>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <TargetFrameworks>net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
