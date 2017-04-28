@@ -38,6 +38,8 @@ using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
 
+using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
@@ -210,15 +212,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="issuer">The issuer value for each <see cref="Claim"/> in the <see cref="ClaimsIdentity"/>.</param>
         /// <param name="validationParameters"> Contains parameters for validating the securityToken.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
-        protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
+        protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
-                throw LogHelper.LogArgumentNullException("samlToken");
+                throw LogHelper.LogArgumentNullException(nameof(samlToken));
 
-            if (string.IsNullOrWhiteSpace(issuer))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10221));
+            if (samlToken.Assertion == null)
+                throw LogHelper.LogArgumentNullException(LogMessages.IDX11110);
 
-            return validationParameters.CreateClaimsIdentity(samlToken, issuer);
+            if (string.IsNullOrEmpty(samlToken.Assertion.Issuer))
+                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11109));
+
+            return validationParameters.CreateClaimsIdentity(samlToken, samlToken.Assertion.Issuer);
         }
 
         /// <summary>
@@ -736,7 +741,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10104, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10104, value)));
 
                 _defaultTokenLifetimeInMinutes = value;
             }
@@ -760,7 +765,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10101, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10101, value)));
 
                 _maximumTokenSizeInBytes = value;
             }
@@ -778,7 +783,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10105, token.Length, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             using (StringReader sr = new StringReader(token))
             {
@@ -825,7 +830,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (securityToken.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
 
             SamlSecurityToken samlToken;
             using (var sr = new StringReader(securityToken))
@@ -838,7 +843,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (samlToken.SigningKey == null && validationParameters.RequireSignedTokens)
             {
-                throw new SecurityTokenValidationException(LogMessages.IDX10213);
+                throw new SecurityTokenValidationException(TokenLogMessages.IDX10504);
             }
 
             DateTime? notBefore = null;
@@ -879,7 +884,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
 
-            var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
+            var identity = CreateClaimsIdentity(samlToken, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
                 identity.BootstrapContext = securityToken;
@@ -981,7 +986,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             if (samlSecurityToken.Assertion == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlSecurityToken.Assertion));

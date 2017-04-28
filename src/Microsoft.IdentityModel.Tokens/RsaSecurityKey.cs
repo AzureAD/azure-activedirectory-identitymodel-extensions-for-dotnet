@@ -28,7 +28,6 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -47,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, rsaParameters.ToString())));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, rsaParameters.ToString())));
 
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
             Parameters = rsaParameters;

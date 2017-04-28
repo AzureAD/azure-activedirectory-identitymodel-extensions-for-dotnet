@@ -36,11 +36,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
-using LogMessages = Microsoft.IdentityModel.Tokens.Saml2.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -96,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX11010, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10101, value)));
 
                 _maximumTokenSizeInBytes = value;
             }
@@ -270,17 +268,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 var validatedSamlToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedSamlToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX10505, token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
 
                 var validatedSaml = validatedSamlToken as Saml2SecurityToken;
                 if (validatedSaml == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSamlToken.GetType(), token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSamlToken.GetType(), token)));
 
                 return validatedSaml;
             }
 
             if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(LogMessages.IDX10504, token)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10504, token)));
 
             IEnumerable<SecurityKey> securityKeys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
@@ -298,7 +296,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                     catch (Exception ex)
                     {
-                        throw new SecurityTokenInvalidSignatureException(LogMessages.IDX11047, ex);
+                        throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, ex);
                     }
                 }
             }
@@ -335,17 +333,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
             if (canMatchKey && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(LogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
 
-            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogMessages.IDX10500));
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
         }
 
         private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX11048);
+            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10243);
             if (validationParameters.IssuerSigningKey != null)
                 yield return validationParameters.IssuerSigningKey;
 
@@ -419,7 +417,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11013, token.Length, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             using (StringReader sr = new StringReader(token))
             {
@@ -1351,7 +1349,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(subject));
 
             if (statement.AuthenticationContext.DeclarationReference != null)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11046));
+                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX14001));
 
             if (statement.AuthenticationContext.ClassReference != null)
             {

@@ -31,7 +31,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -82,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
             }
         }
 
@@ -126,11 +125,11 @@ namespace Microsoft.IdentityModel.Tokens
                             }
                             catch (CryptographicException ex)
                             {
-                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), ex));
+                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, webKey.X5c[0]), ex));
                             }
                             catch (FormatException fex)
                             {
-                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10802, webKey.X5c[0]), fex));
+                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, webKey.X5c[0]), fex));
                             }
                         }
                     }
@@ -154,11 +153,11 @@ namespace Microsoft.IdentityModel.Tokens
                         }
                         catch (CryptographicException ex)
                         {
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), ex));
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, webKey.E, webKey.N), ex));
                         }
                         catch (FormatException ex)
                         {
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10801, webKey.E, webKey.N), ex));
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, webKey.E, webKey.N), ex));
                         }
                     }
                 }
