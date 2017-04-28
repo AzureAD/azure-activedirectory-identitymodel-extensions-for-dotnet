@@ -29,15 +29,6 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Microsoft.IdentityModel.Tokens.Saml")]
-[assembly: AssemblyDescription("Support for Saml1 and Saml2 SecurityTokens.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyProduct("Microsoft.IdentityModel.Tokens.Saml")]
-[assembly: AssemblyTrademark("")]
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
-[assembly: Guid("63F6E63C-300D-4D4F-9364-0087E4F18477")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.2.0")]
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

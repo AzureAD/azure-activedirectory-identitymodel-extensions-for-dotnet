@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
@@ -164,29 +165,46 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 return null;
             }
 
+            string token = null;
+
             using (StringReader sr = new StringReader(Wresult))
             {
-                var reader = XmlReader.Create(sr);
-                if (!reader.IsStartElement())
-                    throw XmlUtil.LogExpectedStartElement(reader.NodeType);
+                XmlReader xmlReader = XmlReader.Create(sr);
+                xmlReader.MoveToContent();
 
-                // TODO need serializer to get token from response.
-                //WSTrustResponseSerializer serializer = new WSTrust13ResponseSerializer();
-                //if (serializer.CanRead(xmlReader))
-                //{
-                //    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
-                //    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
-                //}
+                XmlUtil.CheckReaderOnEntry(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustConstants.Namespaces.WsTrust2005);
 
-                //serializer = new WSTrustFeb2005ResponseSerializer();
-                //if (serializer.CanRead(xmlReader))
-                //{
-                //    RequestSecurityTokenResponse response = serializer.ReadXml(xmlReader, new WSTrustSerializationContext());
-                //    return response.RequestedSecurityToken.SecurityTokenXml.OuterXml;
-                //}
+                xmlReader.ReadStartElement();
+
+                while (xmlReader.IsStartElement())
+                {
+                    if (!xmlReader.IsStartElement(WsTrustConstants.Elements.RequestedSecurityToken, WsTrustConstants.Namespaces.WsTrust2005))
+                    {
+                        xmlReader.Skip();
+                    }
+                    else
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                            {
+                                writer.WriteNode(xmlReader, true);
+                                writer.Flush();
+                            }
+
+                            ms.Seek(0, SeekOrigin.Begin);
+
+                            XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
+                            XmlDocument dom = new XmlDocument();
+                            dom.PreserveWhitespace = true;
+                            dom.Load(memoryReader);
+                            token = dom.DocumentElement.InnerXml;
+                        }
+                    }
+                }
             }
 
-            return null;
+            return token;
         }
 
         /// <summary>

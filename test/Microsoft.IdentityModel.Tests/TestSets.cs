@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tests
 
     public class SignatureTestSet
     {
-        public SecurityKey SecurityKey { get; set; } = RefernceXml.Saml2Token_Valid_SecurityKey;
+        public SecurityKey SecurityKey { get; set; } = ReferenceXml.Saml2Token_Valid_SecurityKey;
 
         public Signature Signature { get; set; }
 

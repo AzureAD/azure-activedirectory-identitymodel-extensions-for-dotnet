@@ -28,9 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tests;
-
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
@@ -67,6 +67,27 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 Assert.Equal(theoryData.Wreply, wsFederationMessage2.Wreply);
                 Assert.Equal(theoryData.Wct, wsFederationMessage2.Wct);
 
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("GetTokenTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void GetTokenTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.GetTokenTest", theoryData);
+            try
+            {
+                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
+                Assert.Equal(ReferenceXml.Token_Saml2_Valid, token);
+                var tokenHandler = new Saml2SecurityTokenHandler();
+                SecurityToken validatedToken;
+                tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out validatedToken);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -133,6 +154,60 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("QueryStringTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void QueryStringTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
+            var errors = new List<string>();
+            try
+            {
+                var wsFederationMessage = WsFederationMessage.FromQueryString(theoryData.WsFederationMessageTestSet.Xml);
+                theoryData.ExpectedException.ProcessNoException();
+                Comparer.GetDiffs(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, errors);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(errors);
+        }
+
+        public static TheoryData<WsFederationMessageTheoryData> GetTokenTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
+
+                theoryData.Add(
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        TokenValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
+                            ValidateIssuer = true,
+                            ValidIssuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                            ValidateAudience = true,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = false,
+                        },
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Saml2_Valid
+                            }
+                        },
+                        TestId = "WsFederationMessage getToken test"
+                    });
+
+                return theoryData;
+            }
+        }
+
         public static TheoryData<WsFederationMessageTheoryData> MessageTheoryData
         {
             get
@@ -156,27 +231,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("QueryStringTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void QueryStringTest(WsFederationMessageTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
-            var errors = new List<string>();
-            try
-            {
-                var wsFederationMessage = WsFederationMessage.FromQueryString(theoryData.WsFederationMessageTestSet.Xml);
-                theoryData.ExpectedException.ProcessNoException();
-                Comparer.GetDiffs(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, errors);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-
-            TestUtilities.AssertFailIfErrors(errors);
-        }
-
         public static TheoryData<WsFederationMessageTheoryData> QueryStringTheoryData
         {
             get
@@ -187,13 +241,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     new WsFederationMessageTheoryData
                     {
                         First = true,
-                        WsFederationMessageTestSet = RefernceXml.WsSignInTestSet,
-                        TestId = nameof(RefernceXml.WsSignInTestSet)
+                        WsFederationMessageTestSet = ReferenceXml.WsSignInTestSet,
+                        TestId = nameof(ReferenceXml.WsSignInTestSet)
                     });
 
                 return theoryData;
             }
         }
+
         public class WsFederationMessageTheoryData : TheoryDataBase
         {
             public WsFederationMessageTestSet WsFederationMessageTestSet { get; set; }
@@ -205,6 +260,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             public KeyValuePair<string, string> Parameter2 { get; set; }
 
             public KeyValuePair<string, string> Parameter3 { get; set; }
+
+            public string Token { get; set; }
+
+            public TokenValidationParameters TokenValidationParameters { get; set; }
 
             public string Wa { get; set; }
 

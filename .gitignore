@@ -14,7 +14,6 @@ project.lock.json
 [Dd]ebugPublic/
 [Rr]elease/
 x64/
-build/
 .build/dotnetcli/local/*/
 bld/
 [Bb]in/
@@ -200,7 +199,6 @@ node_modules
 # Wilson project folder
 .nuget/*
 Artifacts/*
-build/*
 lib/*
 log
 packages/*
