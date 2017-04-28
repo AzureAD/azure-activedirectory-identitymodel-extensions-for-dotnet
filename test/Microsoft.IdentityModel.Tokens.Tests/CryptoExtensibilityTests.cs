@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SignatureProvider = new CustomSignatureProvider(key, "alg")
                 };
 
-                var tokenDescriptor = IdentityUtilities.DefaultSecurityTokenDescriptor(new SigningCredentials(key, "alg"));
+                var tokenDescriptor = Default.SecurityTokenDescriptor(new SigningCredentials(key, "alg"));
 
                 dataset.Add(tokenDescriptor);
 
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SignatureProvider = new CustomSignatureProvider(key, "alg")
                 };
 
-                tokenDescriptor = IdentityUtilities.DefaultSecurityTokenDescriptor(new SigningCredentials(key, "alg"));
+                tokenDescriptor = Default.SecurityTokenDescriptor(new SigningCredentials(key, "alg"));
                 tokenDescriptor.SigningCredentials.CryptoProviderFactory = new CustomCryptoProviderFactory()
                 {
                     SignatureProvider = new CustomSignatureProvider(key, "alg")

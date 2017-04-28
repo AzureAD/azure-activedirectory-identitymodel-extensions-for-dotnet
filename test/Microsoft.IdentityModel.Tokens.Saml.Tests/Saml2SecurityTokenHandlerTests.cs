@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void GetSets()
         {
             Saml2SecurityTokenHandler samlSecurityTokenHandler = new Saml2SecurityTokenHandler();
-            TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException("IDX11010:"));
+            TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException("IDX10101:"));
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
@@ -438,7 +438,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_0
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_0
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
@@ -480,7 +480,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_0
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
@@ -501,7 +501,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_0
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX11047:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif

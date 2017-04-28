@@ -759,7 +759,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.OutboundClaimTypeMap.Clear();
             var claims = ClaimSets.DefaultClaims;
 
-            string encodedJwt = handler.CreateEncodedJwt(IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor(claims));
+            string encodedJwt = handler.CreateEncodedJwt(Default.AsymmetricSignSecurityTokenDescriptor(claims));
             handler.InboundClaimTypeMap.Clear();
             handler.InboundClaimFilter.Add("aud");
             handler.InboundClaimFilter.Add("exp");
@@ -768,7 +768,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.InboundClaimFilter.Add("nbf");
 
             SecurityToken validatedToken;
-            ClaimsPrincipal claimsPrincipal = handler.ValidateToken(encodedJwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, out validatedToken);
+            ClaimsPrincipal claimsPrincipal = handler.ValidateToken(encodedJwt, Default.AsymmetricSignTokenValidationParameters, out validatedToken);
             var context = new CompareContext();
             IdentityComparer.AreEqual(claimsPrincipal.Claims, claims, context);
             TestUtilities.AssertFailIfErrors(context.Diffs);

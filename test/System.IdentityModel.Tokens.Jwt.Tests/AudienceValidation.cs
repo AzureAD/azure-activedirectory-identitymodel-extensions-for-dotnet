@@ -48,12 +48,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         private void RunAudienceVariation(List<Claim> audienceClaims, List<string> expectedAudiences, CompareContext context)
         {
             var handler = new JwtSecurityTokenHandler();
-            var tokenDescriptor = IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor(audienceClaims);
+            var tokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(audienceClaims);
             tokenDescriptor.Audience = null;
             var jwt = handler.CreateEncodedJwt(tokenDescriptor);
 
             SecurityToken token = null;
-            var claimsPrincipal = handler.ValidateToken(jwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, out token);
+            var claimsPrincipal = handler.ValidateToken(jwt, Default.AsymmetricSignTokenValidationParameters, out token);
             var jwtToken = token as JwtSecurityToken;
             var audiences = jwtToken.Audiences;
 
