@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SerializeAsSingleCommaDelimitedString(IEnumerable<string> strings)
         {
-            if (null == strings)
+            if (strings == null)
             {
                 return "null";
             }

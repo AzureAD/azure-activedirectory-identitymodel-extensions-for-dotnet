@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.ObjectModel;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;

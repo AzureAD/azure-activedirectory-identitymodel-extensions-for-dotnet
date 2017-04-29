@@ -26,11 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Security.Claims;
-using System.Text;
 using System.Xml;
-using System.Xml.Schema;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
 
@@ -41,16 +38,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2Serializer
     {
+        /// <summary>
+        /// Instaniates a new instance of <see cref="Saml2Serializer"/>.
+        /// </summary>
         public Saml2Serializer() { }
+
+        /// <summary>
+        /// Determines whether a URI is valid and can be created using the specified UriKind.
+        /// Uri.TryCreate is used here, which is more lax than Uri.IsWellFormedUriString.
+        /// The reason we use this function is because IsWellFormedUriString will reject valid URIs if they are IPv6 or require escaping.
+        /// </summary>
+        /// <param name="uriString">The string to check.</param>
+        /// <param name="uriKind">The type of URI (usually UriKind.Absolute)</param>
+        /// <returns>True if the URI is valid, false otherwise.</returns>
+        internal static bool CanCreateValidUri(string uriString, UriKind uriKind)
+        {
+            Uri tempUri;
+            return Uri.TryCreate(uriString, uriKind, out tempUri);
+        }
 
         /// <summary>
         /// Reads the &lt;saml:Action> element.
         /// </summary>
         /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a <see cref="Saml2Action"/> element.</param>
         /// <returns>A <see cref="Saml2Action"/> instance.</returns>
-        public virtual Saml2Action ReadAction(XmlDictionaryReader reader)
+        protected virtual Saml2Action ReadAction(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Action, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Action, Saml2Constants.Namespace);
             try
             {
                 // @xsi:type
@@ -63,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace);
 
                 // TODO - relax URI.Absolute?
-                if (!XmlUtil.CanCreateValidUri(namespaceValue, UriKind.Absolute))
+                if (!CanCreateValidUri(namespaceValue, UriKind.Absolute))
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace, namespaceValue);
 
                 var action = reader.ReadElementContentAsString();
@@ -93,9 +107,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Advice"/> element.</param>
         /// <returns>A <see cref="Saml2Advice"/> instance.</returns>
-        public virtual Saml2Advice ReadAdvice(XmlDictionaryReader reader)
+        protected virtual Saml2Advice ReadAdvice(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Advice, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Advice, Saml2Constants.Namespace);
             try
             {
                 Saml2Advice advice = new Saml2Advice();
@@ -144,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
         public virtual Saml2Assertion ReadAssertion(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
             var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
             var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
@@ -228,7 +242,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 envelopeReader.ReadEndElement();
-                if (null == assertion.Subject)
+                if (assertion.Subject == null)
                 {
                     // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                     if (0 == assertion.Statements.Count)
@@ -273,7 +287,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Attribute"/> instance.</returns>
         public virtual Saml2Attribute ReadAttribute(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
+            // TODO this is public temporaroly until 'actor' processing
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
             try
             {
                 Saml2Attribute attribute;
@@ -293,7 +308,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = reader.GetAttribute(Saml2Constants.Attributes.NameFormat);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!CanCreateValidUri(value, UriKind.Absolute))
                         LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Attribute, Saml2Constants.Attributes.NameFormat, value);
 
                     attribute.NameFormat = new Uri(value);
@@ -384,9 +399,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AttributeStatement"/> element.</param>
         /// <returns>A <see cref="Saml2AttributeStatement"/> instance.</returns>
-        public virtual Saml2AttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
+        protected virtual Saml2AttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
             try
             {
                 // @xsi:type
@@ -430,7 +445,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="attribute">The <see cref="Saml2Attribute"/>.</param>
         /// <returns>The attribute value as a string.</returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        public virtual string ReadAttributeValue(XmlDictionaryReader reader, Saml2Attribute attribute)
+        protected virtual string ReadAttributeValue(XmlDictionaryReader reader, Saml2Attribute attribute)
         {
             // This code was designed realizing that the writter of the xml controls how our
             // reader will report the NodeType. A completely differnet system (IBM, etc) could write the values.
@@ -457,7 +472,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // would be missing that part.
             //
 
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
 
             string result = string.Empty;
             string whiteSpace = string.Empty;
@@ -504,9 +519,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AudienceRestriction"/> element.</param>
         /// <returns>A <see cref="Saml2AudienceRestriction"/> instance.</returns>
-        public virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
+        protected virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
         {
-            if (null == reader)
+            if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
 
             // throw if wrong element
@@ -566,9 +581,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AuthenticationContext"/> element.</param>
         /// <returns>A <see cref="Saml2AuthenticationContext"/> instance.</returns>
-        public virtual Saml2AuthenticationContext ReadAuthenticationContext(XmlDictionaryReader reader)
+        protected virtual Saml2AuthenticationContext ReadAuthenticationContext(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
             try
             {
                 // @xsi:type
@@ -595,7 +610,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // If there was no ClassRef, there must be a DeclRef
                 if (reader.IsStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace))
                     declRef = ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthnContextDeclRef, UriKind.RelativeOrAbsolute, false);
-                else if (null == classRef)
+                else if (classRef == null)
                     reader.ReadStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace);
 
                 // Now we have enough data to create the object
@@ -624,9 +639,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AuthenticationStatement"/> element.</param>
         /// <returns>A <see cref="Saml2AuthenticationStatement"/> instance.</returns>
-        public virtual Saml2AuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
+        protected virtual Saml2AuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
             try
             {
                 // Must cache the individual data since the required
@@ -698,38 +713,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2AuthorizationDecisionStatement"/> element.</param>
         /// <returns>A <see cref="Saml2AuthorizationDecisionStatement"/> instance.</returns>
-        public virtual Saml2AuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
+        protected virtual Saml2AuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
             try
             {
                 // Need the attributes before we can instantiate
                 Saml2AuthorizationDecisionStatement statement;
-                Saml2AccessDecision decision;
                 Uri resource;
-
-                // @attributes
-                string value;
 
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthzDecisionStatementType, Saml2Constants.Namespace, false);
 
                 // @Decision - required
-                value = reader.GetAttribute(Saml2Constants.Attributes.Decision);
-                if (string.IsNullOrEmpty(value))
+                var decision = reader.GetAttribute(Saml2Constants.Attributes.Decision);
+                if (string.IsNullOrEmpty(decision))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Decision);
-                else if (StringComparer.Ordinal.Equals(Saml2AccessDecision.Permit.ToString(), value))
-                    decision = Saml2AccessDecision.Permit;
-                else if (StringComparer.Ordinal.Equals(Saml2AccessDecision.Deny.ToString(), value))
-                    decision = Saml2AccessDecision.Deny;
-                else if (StringComparer.Ordinal.Equals(Saml2AccessDecision.Indeterminate.ToString(), value))
-                    decision = Saml2AccessDecision.Indeterminate;
-                else
-                    throw LogReadException(LogMessages.IDX11135, value);
 
                 // @Resource - required
-                value = reader.GetAttribute(Saml2Constants.Attributes.Resource);
-                if (null == value)
+
+                // @attributes
+                string value = reader.GetAttribute(Saml2Constants.Attributes.Resource);
+                if (value == null)
                 {
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource);
                 }
@@ -739,7 +744,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
                 else
                 {
-                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!CanCreateValidUri(value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource, value);
 
                     resource = new Uri(value);
@@ -781,9 +786,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Conditions"/> element.</param>
         /// <returns>A <see cref="Saml2Conditions"/> instance.</returns>
-        public virtual Saml2Conditions ReadConditions(XmlDictionaryReader reader)
+        protected virtual Saml2Conditions ReadConditions(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
             try
             {
                 Saml2Conditions conditions = new Saml2Conditions();
@@ -816,7 +821,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
 
                             // No type, throw
-                            if (null == declaredType
+                            if (declaredType == null
                                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.ConditionAbstractType, Saml2Constants.Namespace))
                             {
                                 throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
@@ -893,11 +898,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="reader"><see cref="XmlReader"/> pointing at the XML EncryptedId element</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/> representing the EncryptedId that was read</returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        /// <exception cref="XmlException">The 'reader' is not positioned at an 'EncryptedID' element.</exception>
-        public virtual Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
+        /// <exception cref="NotImplementedException">Not implemented right now.</exception>
+        protected virtual Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
         {
             throw new NotImplementedException("not implemented yet");
-            //if (null == reader)
+            //if (reader == null)
             //{
             //    throw LogHelper.LogArgumentNullException(nameof(reader));
             //}
@@ -942,9 +947,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Evidence"/> element.</param>
         /// <returns>A <see cref="Saml2Evidence"/> instance.</returns>
-        public virtual Saml2Evidence ReadEvidence(XmlDictionaryReader reader)
+        protected virtual Saml2Evidence ReadEvidence(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
             try
             {
                 Saml2Evidence evidence = new Saml2Evidence();
@@ -1000,9 +1005,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>A <see cref="Saml2NameIdentifier"/> instance.</returns>
-        public virtual Saml2NameIdentifier ReadIssuer(XmlDictionaryReader reader)
+        protected virtual Saml2NameIdentifier ReadIssuer(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
             return ReadNameIdType(reader);
         }
 
@@ -1012,9 +1017,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/></returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        public virtual Saml2NameIdentifier ReadNameId(XmlDictionaryReader reader)
+        protected virtual Saml2NameIdentifier ReadNameId(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
             return ReadNameIdType(reader);
         }
 
@@ -1038,7 +1043,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Format);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!CanCreateValidUri(value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.NameIDType, Saml2Constants.Attributes.Format, value);
 
                     nameIdentifier.Format = new Uri(value);
@@ -1065,15 +1070,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // According to section 8.3.6, if the name identifier format is of type 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity'
                 // the name identifier value must be a uri and name qualifier, spname qualifier, and spprovided id must be omitted.
                 if (nameIdentifier.Format != null &&
-                    StringComparer.Ordinal.Equals(nameIdentifier.Format.AbsoluteUri, Saml2Constants.NameIdentifierFormats.Entity.AbsoluteUri))
+                    StringComparer.Ordinal.Equals(nameIdentifier.Format.OriginalString, Saml2Constants.NameIdentifierFormats.Entity.OriginalString))
                 {
-                    if (!XmlUtil.CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
+                    if (!CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, nameIdentifier.Value);
 
                     if (!string.IsNullOrEmpty(nameIdentifier.NameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPNameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPProvidedId))
-                        throw LogReadException(LogMessages.IDX11124, nameIdentifier.Value, Saml2Constants.NameIdentifierFormats.Entity.AbsoluteUri);
+                        throw LogReadException(LogMessages.IDX11124, nameIdentifier.Value, Saml2Constants.NameIdentifierFormats.Entity.OriginalString);
                 }
 
                 return nameIdentifier;
@@ -1097,7 +1102,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2ProxyRestriction"/> element.</param>
         /// <returns>An instance of <see cref="Saml2ProxyRestriction"/></returns>
-        public virtual Saml2ProxyRestriction ReadProxyRestriction(XmlDictionaryReader reader)
+        protected virtual Saml2ProxyRestriction ReadProxyRestriction(XmlDictionaryReader reader)
         {
             if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
@@ -1153,44 +1158,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Deserializes the SAML Signing KeyInfo
-        /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a than can be positioned at a ds:KeyInfo element.</param>
-        /// <param name="assertion">The <see cref="Saml2Assertion"/> that is having the signature checked.</param>
-        /// <returns>The <see cref="SecurityKeyIdentifier"/> that defines the key to use to check the signature.</returns>
-        /// <exception cref="ArgumentNullException">Input parameter 'reader' is null.</exception>
-        public virtual SecurityKeyIdentifier ReadSigningKeyInfo(XmlDictionaryReader reader, Saml2Assertion assertion)
-        {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            // TODO - SecurityKey read / write
-            reader.Skip();
-
-            return null;
-            //SecurityKeyIdentifier ski;
-
-            //if (this.KeyInfoSerializer.CanReadKeyIdentifier(reader))
-            //{
-            //    ski = this.KeyInfoSerializer.ReadKeyIdentifier(reader);
-            //}
-            //else
-            //{
-            //    KeyInfo keyInfo = new KeyInfo(this.KeyInfoSerializer);
-            //    keyInfo.ReadXml(XmlDictionaryReader.CreateDictionaryReader(reader));
-            //    ski = keyInfo.KeyIdentifier;
-            //}
-
-            //// no key info
-            //if (ski.Count == 0)
-            //{
-            //    return new SecurityKeyIdentifier(new Saml2SecurityKeyIdentifierClause(assertion));
-            //}
-
-            //return ski;
-        }
-
-        /// <summary>
         /// Reads the &lt;saml:Statement> element.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Statement"/> element.</param>
@@ -1201,16 +1168,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// saml:AuthnStatementType, and saml:AuthzDecisionStatementType. To
         /// handle custom statements, override this method.
         /// </remarks>
-        public virtual Saml2Statement ReadStatement(XmlDictionaryReader reader)
+        protected virtual Saml2Statement ReadStatement(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Statement, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Statement, Saml2Constants.Namespace);
 
             // Since Statement is an abstract type, we have to switch off the xsi:type declaration
             XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
 
             // No declaration, or declaring that this is just a "Statement", is invalid since
             // statement is abstract
-            if (null == declaredType
+            if (declaredType == null
                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.StatementAbstractType, Saml2Constants.Namespace))
                 throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
 
@@ -1235,9 +1202,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// &lt;EncryptedID> element. To handle encryped IDs in the Subject,
         /// override this method.
         /// </remarks>
-        public virtual Saml2Subject ReadSubject(XmlDictionaryReader reader)
+        protected virtual Saml2Subject ReadSubject(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
             try
             {
                 // @attributes
@@ -1261,7 +1228,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 reader.ReadEndElement();
 
                 // Must have a NameID or a SubjectConfirmation
-                if (null == subject.NameId && 0 == subject.SubjectConfirmations.Count)
+                if (subject.NameId == null && 0 == subject.SubjectConfirmations.Count)
                     throw LogReadException(LogMessages.IDX11125);
 
                 return subject;
@@ -1280,9 +1247,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2SubjectConfirmation"/> element.</param>
         /// <returns>An instance of <see cref="Saml2SubjectConfirmation"/> .</returns>
-        public virtual Saml2SubjectConfirmation ReadSubjectConfirmation(XmlDictionaryReader reader)
+        protected virtual Saml2SubjectConfirmation ReadSubjectConfirmation(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace, true);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace);
             try
             {
                 bool isEmpty = reader.IsEmptyElement;
@@ -1297,7 +1264,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(method))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Attributes.Method);
 
-                if (!XmlUtil.CanCreateValidUri(method, UriKind.Absolute))
+                if (!CanCreateValidUri(method, UriKind.Absolute))
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.SubjectConfirmationType, Saml2Constants.Attributes.Method, reader.LocalName);
 
                 // Construct the appropriate SubjectConfirmation based on the method
@@ -1337,9 +1304,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// The default implementation handles the unextended element
         /// as well as the extended type saml:KeyInfoConfirmationDataType.
         /// </remarks>
-        public virtual Saml2SubjectConfirmationData ReadSubjectConfirmationData(XmlDictionaryReader reader)
+        protected virtual Saml2SubjectConfirmationData ReadSubjectConfirmationData(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
             try
             {
                 Saml2SubjectConfirmationData confirmationData = new Saml2SubjectConfirmationData();
@@ -1396,7 +1363,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = reader.GetAttribute(Saml2Constants.Attributes.Recipient);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (!XmlUtil.CanCreateValidUri(value, UriKind.Absolute))
+                    if (!CanCreateValidUri(value, UriKind.Absolute))
                         throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Attributes.Recipient, reader.LocalName);
 
                     confirmationData.Recipient = new Uri(value);
@@ -1410,12 +1377,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     // <ds:KeyInfo> 0-OO OR 1-OO
                     if (requireKeyInfo)
                     {
-                        confirmationData.KeyIdentifiers.Add(ReadSubjectKeyInfo(reader));
+                        var keyInfo = new KeyInfo();
+                        keyInfo.ReadFrom(reader);
+                        confirmationData.KeyInfos.Add(keyInfo);
                     }
 
                     while (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     {
-                        confirmationData.KeyIdentifiers.Add(ReadSubjectKeyInfo(reader));
+                        var keyInfo = new KeyInfo();
+                        keyInfo.ReadFrom(reader);
+                        confirmationData.KeyInfos.Add(keyInfo);
                     }
 
                     // If this isn't KeyInfo restricted, there might be open content here ...
@@ -1440,39 +1411,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Writes the &lt;saml:AudienceRestriction> element.
+        /// Deserializes the SAML SubjectId.
         /// </summary>
-        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AudienceRestriction"/>.</param>
-        /// <param name="data">The <see cref="Saml2AudienceRestriction"/> to serialize.</param>
-        /// <summary>
-        /// This handles the construct used in &lt;Subject> and &lt;SubjectConfirmation> for ID:
-        /// <choice>
-        ///     <element ref="saml:BaseID" />
-        ///     <element ref="saml:NameID" />
-        ///     <element ref="saml:EncryptedID" />
-        /// </choice>
-        /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> reader positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
-        /// <param name="parentElement">The parent element this SubjectID is part of.</param>
-        /// <returns>A <see cref="Saml2NameIdentifier"/> constructed from the XML.</returns>
-        public virtual Saml2NameIdentifier ReadSubjectId(XmlDictionaryReader reader, string parentElement)
+        /// <param name="reader">XmlReader positioned at "NameID, EncryptedID, BaseID".</param>
+        /// <param name="parentElement">the element name of the parent element. Used in exception string.</param>
+        /// <exception cref="Saml2SecurityTokenReadException">if Element is 'BaseID' with no xsi type.</exception>
+        /// <exception cref="Saml2SecurityTokenReadException">if reader is pointing at an unknown Element.</exception>
+        /// <returns>A <see cref="Saml2NameIdentifier"/> instance.</returns>
+        protected virtual Saml2NameIdentifier ReadSubjectId(XmlDictionaryReader reader, string parentElement)
         {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
             // <NameID>, <EncryptedID>, <BaseID>
             if (reader.IsStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace))
-            {
                 return ReadNameId(reader);
-            }
             else if (reader.IsStartElement(Saml2Constants.Elements.EncryptedID, Saml2Constants.Namespace))
-            {
                 return ReadEncryptedId(reader);
-            }
             else if (reader.IsStartElement(Saml2Constants.Elements.BaseID, Saml2Constants.Namespace))
             {
                 // Since BaseID is an abstract type, we have to switch off the xsi:type declaration
                 var declaredType = XmlUtil.GetXsiType(reader);
 
                 // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
-                if (null == declaredType
+                if (declaredType == null
                     || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.BaseIDAbstractType, Saml2Constants.Namespace))
                     throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
 
@@ -1484,24 +1446,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
             }
 
-            return null;
-        }
-
-        /// <summary>
-        /// Deserializes the SAML Subject KeyInfo.
-        /// </summary>
-        /// <param name="reader">XmlReader positioned at a ds:KeyInfo element.</param>
-        /// <returns>A <see cref="SecurityKeyIdentifier"/> instance.</returns>
-        /// <exception cref="ArgumentNullException">Input parameter 'reader' is null.</exception>
-        public virtual SecurityKeyIdentifier ReadSubjectKeyInfo(XmlDictionaryReader reader)
-        {
-            // TODO - SecurityKey read / write
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.Skip();
-
-            return null;
+            throw LogReadException(LogMessages.IDX11103, parentElement, reader.Name, GetType(), "ReadSubjectId");
         }
 
         /// <summary>
@@ -1509,9 +1454,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2SubjectLocality"/> element.</param>
         /// <returns>An instance of <see cref="Saml2SubjectLocality"/> .</returns>
-        public virtual Saml2SubjectLocality ReadSubjectLocality(XmlDictionaryReader reader)
+        protected virtual Saml2SubjectLocality ReadSubjectLocality(XmlDictionaryReader reader)
         {
-            CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace);
             try
             {
                 var subjectLocality = new Saml2SubjectLocality();
@@ -1551,7 +1496,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Action"/>.</param>
         /// <param name="action">The <see cref="Saml2Action"/> to serialize.</param>
-        public virtual void WriteAction(XmlWriter writer, Saml2Action action)
+        protected virtual void WriteAction(XmlWriter writer, Saml2Action action)
         {
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
@@ -1559,7 +1504,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (action == null)
                 throw LogHelper.LogArgumentNullException(nameof(action));
 
-            if (null == action.Namespace)
+            if (action.Namespace == null)
                 throw LogHelper.LogArgumentNullException(nameof(action.Namespace));
 
             if (string.IsNullOrEmpty(action.Namespace.ToString()))
@@ -1569,7 +1514,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             writer.WriteStartElement(Saml2Constants.Elements.Action, Saml2Constants.Namespace);
 
             // @Namespace - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.Namespace, action.Namespace.AbsoluteUri);
+            writer.WriteAttributeString(Saml2Constants.Attributes.Namespace, action.Namespace.OriginalString);
 
             // String content
             writer.WriteString(action.Value);
@@ -1583,12 +1528,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Advice"/>.</param>
         /// <param name="advice">The <see cref="Saml2Advice"/> to serialize.</param>
-        public virtual void WriteAdvice(XmlWriter writer, Saml2Advice advice)
+        protected virtual void WriteAdvice(XmlWriter writer, Saml2Advice advice)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == advice)
+            if (advice == null)
                 throw LogHelper.LogArgumentNullException(nameof(advice));
 
             // <Advice>
@@ -1600,7 +1545,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // <AssertionURIRef> 0-OO
             foreach (Uri uri in advice.AssertionUriReferences)
-                writer.WriteElementString(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace, uri.AbsoluteUri);
+                writer.WriteElementString(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace, uri.OriginalString);
 
             // <Assertion> 0-OO
             foreach (Saml2Assertion assertion in advice.Assertions)
@@ -1616,26 +1561,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Assertion"/>.</param>
         /// <param name="assertion">The <see cref="Saml2Assertion"/> to serialize.</param>
         /// <exception cref="ArgumentNullException">The <paramref name="writer"/> or <paramref name="assertion"/> parameters are null.</exception>
-        /// <exception cref="InvalidOperationException"> The <paramref name="assertion"/>  has both <see cref="EncryptingCredentials"/> and <see cref="ReceivedEncryptingCredentials"/> properties null.</exception>
         /// <exception cref="InvalidOperationException">The <paramref name="assertion"/> must have a <see cref="Saml2Subject"/> if no <see cref="Saml2Statement"/> are present.</exception>
         /// <exception cref="InvalidOperationException">The SAML2 authentication, attribute, and authorization decision <see cref="Saml2Statement"/> require a <see cref="Saml2Subject"/>.</exception>
-        /// <exception cref="CryptographicException">Token encrypting credentials must have a Symmetric Key specified.</exception>
         public virtual void WriteAssertion(XmlWriter writer, Saml2Assertion assertion)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == assertion)
+            if (assertion == null)
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
 
-            XmlWriter originalWriter = writer;
-            MemoryStream plaintextStream = null;
-            XmlDictionaryWriter plaintextWriter = null;
-            if ((null != assertion.EncryptingCredentials))
-            {
-                plaintextStream = new MemoryStream();
-                writer = plaintextWriter = XmlDictionaryWriter.CreateTextWriter(plaintextStream, Encoding.UTF8, false);
-            }
+            if (assertion.EncryptingCredentials != null)
+                throw LogHelper.LogExceptionMessage(new NotSupportedException("Encryption not supported."));
 
             // If we've saved off the token stream, re-emit it.
             if (assertion.CanWriteSourceData)
@@ -1649,7 +1586,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null != assertion.SigningCredentials)
                     writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value);
 
-                if (null == assertion.Subject)
+                if (assertion.Subject == null)
                 {
                     // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                     if (assertion.Statements == null || 0 == assertion.Statements.Count)
@@ -1707,40 +1644,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 writer.WriteEndElement();
             }
-
-            // Finish off the encryption
-            if (null != plaintextWriter)
-            {
-                // TODO - use CryptoFactory to encrypt
-                //((IDisposable)plaintextWriter).Dispose();
-                //plaintextWriter = null;
-
-                //EncryptedDataElement encryptedData = new EncryptedDataElement();
-                //encryptedData.Type = XmlEncryptionConstants.Elements.EncryptedDataTypes;
-                //encryptedData.Algorithm = assertion.EncryptingCredentials.Algorithm;
-                //encryptedData.KeyIdentifier = assertion.EncryptingCredentials.SecurityKeyIdentifier;
-
-                //// Get the encryption key, which must be symmetric
-                //SymmetricSecurityKey encryptingKey = assertion.EncryptingCredentials.SecurityKey as SymmetricSecurityKey;
-                //if (encryptingKey == null)
-                //{
-                //    throw LogHelper.LogExceptionMessage(new CryptographicException(SR.GetString(SR.ID3064)));
-                //}
-
-                //// Do the actual encryption
-                //SymmetricAlgorithm symmetricAlgorithm = encryptingKey.GetSymmetricAlgorithm(assertion.EncryptingCredentials.Algorithm);
-                //encryptedData.Encrypt(symmetricAlgorithm, plaintextStream.GetBuffer(), 0, (int)plaintextStream.Length);
-                //((IDisposable)plaintextStream).Dispose();
-
-                //originalWriter.WriteStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace);
-                //encryptedData.WriteXml(originalWriter, this.KeyInfoSerializer);
-                //foreach (EncryptedKeyIdentifierClause clause in assertion.ExternalEncryptedKeys)
-                //{
-                //    this.KeyInfoSerializer.WriteKeyIdentifierClause(originalWriter, clause);
-                //}
-
-                //originalWriter.WriteEndElement();
-            }
         }
 
         /// <summary>
@@ -1750,10 +1653,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="attribute">The <see cref="Saml2Attribute"/> to serialize.</param>
         public virtual void WriteAttribute(XmlWriter writer, Saml2Attribute attribute)
         {
-            if (null == writer)
+            // TODO = temporarily public until actor is processing is complete
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == attribute)
+            if (attribute == null)
                 throw LogHelper.LogArgumentNullException(nameof(attribute));
 
             // <Attribute>
@@ -1764,7 +1668,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // @NameFormat - optional
             if (null != attribute.NameFormat)
-                writer.WriteAttributeString(Saml2Constants.Attributes.NameFormat, attribute.NameFormat.AbsoluteUri);
+                writer.WriteAttributeString(Saml2Constants.Attributes.NameFormat, attribute.NameFormat.OriginalString);
 
             // @FriendlyName - optional
             if (null != attribute.FriendlyName)
@@ -1790,7 +1694,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 writer.WriteStartElement(Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
 
-                if (null == value)
+                if (value == null)
                 {
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.Nil, XmlSignatureConstants.XmlSchemaNamespace, XmlConvert.ToString(true));
                 }
@@ -1817,13 +1721,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AttributeStatement"/>.</param>
         /// <param name="attributeStatement">The <see cref="Saml2AttributeStatement"/> to serialize.</param>
-        public virtual void WriteAttributeStatement(XmlWriter writer, Saml2AttributeStatement attributeStatement)
+        protected virtual void WriteAttributeStatement(XmlWriter writer, Saml2AttributeStatement attributeStatement)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
 
-            if (null == attributeStatement)
+            if (attributeStatement == null)
                 throw LogHelper.LogArgumentNullException(nameof(attributeStatement));
 
             if (attributeStatement.Attributes == null || 0 == attributeStatement.Attributes.Count)
@@ -1848,7 +1752,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="attribute">The <see cref="Saml2Attribute"/> to serialize.</param>
         /// <remarks>By default the method writes the value as a string.</remarks>
         /// <exception cref="ArgumentNullException">The input parameter 'writer' is null.</exception>
-        public virtual void WriteAttributeValue(XmlWriter writer, string value, Saml2Attribute attribute)
+        protected virtual void WriteAttributeValue(XmlWriter writer, string value, Saml2Attribute attribute)
         {
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
@@ -1861,17 +1765,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AudienceRestriction"/>.</param>
         /// <param name="audienceRestriction">The <see cref="Saml2AudienceRestriction"/> to serialize.</param>
-        public virtual void WriteAudienceRestriction(XmlWriter writer, Saml2AudienceRestriction audienceRestriction)
+        protected virtual void WriteAudienceRestriction(XmlWriter writer, Saml2AudienceRestriction audienceRestriction)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == audienceRestriction)
+            if (audienceRestriction == null)
                 throw LogHelper.LogArgumentNullException(nameof(audienceRestriction));
 
             // Schema requires at least one audience.
             if (audienceRestriction.Audiences == null || 0 == audienceRestriction.Audiences.Count)
-                throw LogWriteException(LogMessages.IDX11130);
+                throw LogReadException(LogMessages.IDX11130);
 
             // <AudienceRestriction>
             writer.WriteStartElement(Saml2Constants.Elements.AudienceRestriction, Saml2Constants.Namespace);
@@ -1889,12 +1793,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AuthenticationContext"/>.</param>
         /// <param name="authenticationContext">The <see cref="Saml2AuthenticationContext"/> to serialize.</param>
-        public virtual void WriteAuthenticationContext(XmlWriter writer, Saml2AuthenticationContext authenticationContext)
+        protected virtual void WriteAuthenticationContext(XmlWriter writer, Saml2AuthenticationContext authenticationContext)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == authenticationContext)
+            if (authenticationContext == null)
                 throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
 
             // One of ClassRef and DeclRef must be present.
@@ -1906,15 +1810,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // <AuthnContextClassReference> 0-1
             if (authenticationContext.ClassReference != null)
-                writer.WriteElementString(Saml2Constants.Elements.AuthnContextClassRef, Saml2Constants.Namespace, authenticationContext.ClassReference.AbsoluteUri);
+                writer.WriteElementString(Saml2Constants.Elements.AuthnContextClassRef, Saml2Constants.Namespace, authenticationContext.ClassReference.OriginalString);
 
             // <AuthnContextDeclRef> 0-1
             if (authenticationContext.DeclarationReference != null)
-                writer.WriteElementString(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace, authenticationContext.DeclarationReference.AbsoluteUri);
+                writer.WriteElementString(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace, authenticationContext.DeclarationReference.OriginalString);
 
             // <AuthenticatingAuthority> 0-OO
             foreach (var authority in authenticationContext.AuthenticatingAuthorities)
-                writer.WriteElementString(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace, authority.AbsoluteUri);
+                writer.WriteElementString(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace, authority.OriginalString);
 
             // </AuthnContext>
             writer.WriteEndElement();
@@ -1924,37 +1828,37 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:AuthnStatement> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AuthenticationStatement"/>.</param>
-        /// <param name="data">The <see cref="Saml2AuthenticationStatement"/> to serialize.</param>
-        public virtual void WriteAuthenticationStatement(XmlWriter writer, Saml2AuthenticationStatement data)
+        /// <param name="authenticationStatement">The <see cref="Saml2AuthenticationStatement"/> to serialize.</param>
+        protected virtual void WriteAuthenticationStatement(XmlWriter writer, Saml2AuthenticationStatement authenticationStatement)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (authenticationStatement == null)
+                throw LogHelper.LogArgumentNullException(nameof(authenticationStatement));
 
             // <AuthnStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
 
             // @AuthnInstant - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.AuthnInstant, XmlConvert.ToString(data.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            writer.WriteAttributeString(Saml2Constants.Attributes.AuthnInstant, XmlConvert.ToString(authenticationStatement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // @SessionIndex - optional
-            if (null != data.SessionIndex)
+            if (null != authenticationStatement.SessionIndex)
             {
-                writer.WriteAttributeString(Saml2Constants.Attributes.SessionIndex, data.SessionIndex);
+                writer.WriteAttributeString(Saml2Constants.Attributes.SessionIndex, authenticationStatement.SessionIndex);
             }
 
             // @SessionNotOnOrAfter - optional
-            if (null != data.SessionNotOnOrAfter)
-                writer.WriteAttributeString(Saml2Constants.Attributes.SessionNotOnOrAfter, XmlConvert.ToString(data.SessionNotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            if (null != authenticationStatement.SessionNotOnOrAfter)
+                writer.WriteAttributeString(Saml2Constants.Attributes.SessionNotOnOrAfter, XmlConvert.ToString(authenticationStatement.SessionNotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // <SubjectLocality> 0-1
-            if (null != data.SubjectLocality)
-                WriteSubjectLocality(writer, data.SubjectLocality);
+            if (null != authenticationStatement.SubjectLocality)
+                WriteSubjectLocality(writer, authenticationStatement.SubjectLocality);
 
             // <AuthnContext> 1
-            WriteAuthenticationContext(writer, data.AuthenticationContext);
+            WriteAuthenticationContext(writer, authenticationStatement.AuthenticationContext);
 
             // </AuthnStatement>
             writer.WriteEndElement();
@@ -1964,16 +1868,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:AuthzDecisionStatement> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AuthorizationDecisionStatement"/>.</param>
-        /// <param name="data">The <see cref="Saml2AuthorizationDecisionStatement"/> to serialize.</param>
-        public virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, Saml2AuthorizationDecisionStatement data)
+        /// <param name="authorizationDecisionStatement">The <see cref="Saml2AuthorizationDecisionStatement"/> to serialize.</param>
+        protected virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, Saml2AuthorizationDecisionStatement authorizationDecisionStatement)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (authorizationDecisionStatement == null)
+                throw LogHelper.LogArgumentNullException(nameof(authorizationDecisionStatement));
 
-            if (0 == data.Actions.Count)
+            if (0 == authorizationDecisionStatement.Actions.Count)
             {
                 throw LogHelper.LogExceptionMessage(
                     new Saml2SecurityTokenException("no actions specified ID4122"));
@@ -1983,18 +1887,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             writer.WriteStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
 
             // @Decision - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.Decision, data.Decision.ToString());
+            writer.WriteAttributeString(Saml2Constants.Attributes.Decision, authorizationDecisionStatement.Decision.ToString());
 
             // @Resource - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.Resource, data.Resource.Equals(Saml2AuthorizationDecisionStatement.EmptyResource) ? data.Resource.ToString() : data.Resource.AbsoluteUri);
+            writer.WriteAttributeString(Saml2Constants.Attributes.Resource, authorizationDecisionStatement.Resource.Equals(Saml2AuthorizationDecisionStatement.EmptyResource) ? authorizationDecisionStatement.Resource.ToString() : authorizationDecisionStatement.Resource.OriginalString);
 
             // @Action 1-OO
-            foreach (Saml2Action action in data.Actions)
+            foreach (Saml2Action action in authorizationDecisionStatement.Actions)
                 WriteAction(writer, action);
 
             // Evidence 0-1
-            if (null != data.Evidence)
-                WriteEvidence(writer, data.Evidence);
+            if (null != authorizationDecisionStatement.Evidence)
+                WriteEvidence(writer, authorizationDecisionStatement.Evidence);
 
             // </AuthzDecisionStatement>
             writer.WriteEndElement();
@@ -2004,41 +1908,41 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:Conditions> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Conditions"/>.</param>
-        /// <param name="data">The <see cref="Saml2Conditions"/> to serialize.</param>
-        public virtual void WriteConditions(XmlWriter writer, Saml2Conditions data)
+        /// <param name="conditions">The <see cref="Saml2Conditions"/> to serialize.</param>
+        protected virtual void WriteConditions(XmlWriter writer, Saml2Conditions conditions)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (conditions == null)
+                throw LogHelper.LogArgumentNullException(nameof(conditions));
 
             // <Conditions>
             writer.WriteStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
 
             // @NotBefore - optional
-            if (null != data.NotBefore)
-                writer.WriteAttributeString(Saml2Constants.Attributes.NotBefore, XmlConvert.ToString(data.NotBefore.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            if (null != conditions.NotBefore)
+                writer.WriteAttributeString(Saml2Constants.Attributes.NotBefore, XmlConvert.ToString(conditions.NotBefore.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
 
             // @NotOnOrAfter - optional
-            if (null != data.NotOnOrAfter)
-                writer.WriteAttributeString(Saml2Constants.Attributes.NotOnOrAfter, XmlConvert.ToString(data.NotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            if (null != conditions.NotOnOrAfter)
+                writer.WriteAttributeString(Saml2Constants.Attributes.NotOnOrAfter, XmlConvert.ToString(conditions.NotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // <AudienceRestriction> 0-OO
-            foreach (Saml2AudienceRestriction audienceRestriction in data.AudienceRestrictions)
+            foreach (Saml2AudienceRestriction audienceRestriction in conditions.AudienceRestrictions)
                 WriteAudienceRestriction(writer, audienceRestriction);
 
             // <OneTimeUse> - limited to one in SAML spec
-            if (data.OneTimeUse)
+            if (conditions.OneTimeUse)
             {
                 writer.WriteStartElement(Saml2Constants.Elements.OneTimeUse, Saml2Constants.Namespace);
                 writer.WriteEndElement();
             }
 
             // <ProxyRestriction> - limited to one in SAML spec
-            if (null != data.ProxyRestriction)
-                WriteProxyRestriction(writer, data.ProxyRestriction);
+            if (null != conditions.ProxyRestriction)
+                WriteProxyRestriction(writer, conditions.ProxyRestriction);
 
             // </Conditions>
             writer.WriteEndElement();
@@ -2048,33 +1952,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:Evidence> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Evidence"/>.</param>
-        /// <param name="data">The <see cref="Saml2Evidence"/> to serialize.</param>
-        public virtual void WriteEvidence(XmlWriter writer, Saml2Evidence data)
+        /// <param name="evidence">The <see cref="Saml2Evidence"/> to serialize.</param>
+        protected virtual void WriteEvidence(XmlWriter writer, Saml2Evidence evidence)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (evidence == null)
+                throw LogHelper.LogArgumentNullException(nameof(evidence));
 
-            if ((data.AssertionIdReferences == null || 0 == data.AssertionIdReferences.Count)
-               && (data.Assertions == null || 0 == data.Assertions.Count)
-               && (data.AssertionUriReferences == null || 0 == data.AssertionUriReferences.Count))
+            if ((evidence.AssertionIdReferences == null || 0 == evidence.AssertionIdReferences.Count)
+               && (evidence.Assertions == null || 0 == evidence.Assertions.Count)
+               && (evidence.AssertionUriReferences == null || 0 == evidence.AssertionUriReferences.Count))
                 throw LogWriteException(LogMessages.IDX11122);
 
             // <Evidence>
             writer.WriteStartElement(Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
 
             // <AssertionIDRef> 0-OO
-            foreach (Saml2Id id in data.AssertionIdReferences)
+            foreach (Saml2Id id in evidence.AssertionIdReferences)
                 writer.WriteElementString(Saml2Constants.Elements.AssertionIDRef, Saml2Constants.Namespace, id.Value);
 
             // <AssertionURIRef> 0-OO
-            foreach (Uri uri in data.AssertionUriReferences)
-                writer.WriteElementString(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace, uri.AbsoluteUri);
+            foreach (Uri uri in evidence.AssertionUriReferences)
+                writer.WriteElementString(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace, uri.OriginalString);
 
             // <Assertion> 0-OO
-            foreach (Saml2Assertion assertion in data.Assertions)
+            foreach (Saml2Assertion assertion in evidence.Assertions)
                 WriteAssertion(writer, assertion);
 
             // </Evidence>
@@ -2085,17 +1989,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:Issuer> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2NameIdentifier"/>.</param>
-        /// <param name="data">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
-        public virtual void WriteIssuer(XmlWriter writer, Saml2NameIdentifier data)
+        /// <param name="nameIdentifier">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
+        protected virtual void WriteIssuer(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (nameIdentifier == null)
+                throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
 
             writer.WriteStartElement(Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
-            WriteNameIdType(writer, data);
+            WriteNameIdType(writer, nameIdentifier);
             writer.WriteEndElement();
         }
 
@@ -2104,156 +2008,87 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2NameIdentifier"/>.</param>
         /// <param name="nameIdentifier">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">The input parameter 'writer' or 'data' is null.</exception>
-        /// <exception cref="CryptographicException">Saml2NameIdentifier encrypting credentials must have a Symmetric Key specified.</exception>
-        public virtual void WriteNameId(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
+        /// <exception cref="ArgumentNullException">If 'writer' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'nameIdentifier' null.</exception>
+        protected virtual void WriteNameId(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == nameIdentifier)
+            if (nameIdentifier == null)
                 throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
 
-            // If there are encrypting credentials, then we need to encrypt the name identifier
             if (nameIdentifier.EncryptingCredentials != null)
-            {
-                EncryptingCredentials encryptingCredentials = nameIdentifier.EncryptingCredentials;
+                throw LogHelper.LogExceptionMessage(new NotSupportedException("Encryption not supported."));
 
-                // TODO - do we need keywrap?
-                // Get the encryption key, which must be symmetric
-                SymmetricSecurityKey encryptingKey = encryptingCredentials.Key as SymmetricSecurityKey;
-                if (encryptingKey == null)
-                    throw LogWriteException(LogMessages.IDX11132);
-
-                MemoryStream plaintextStream = null;
-                try
-                {
-                    // Serialize an encrypted name ID
-                    plaintextStream = new MemoryStream();
-
-                    using (XmlWriter plaintextWriter = XmlDictionaryWriter.CreateTextWriter(plaintextStream, Encoding.UTF8, false))
-                    {
-                        plaintextWriter.WriteStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
-                        WriteNameIdType(plaintextWriter, nameIdentifier);
-                        plaintextWriter.WriteEndElement();
-                    }
-
-                    EncryptedDataElement encryptedData = new EncryptedDataElement();
-                    encryptedData.Type = XmlEncryptionConstants.EncryptedDataTypes.Element;
-                    encryptedData.Algorithm = encryptingCredentials.Alg;
-                    encryptedData.Key = encryptingCredentials.Key;
-
-                    // TODO - need to provide access to SecurityProvider
-                    // Perform encryption
-                    //        SymmetricAlgorithm symmetricAlgorithm = encryptingKey.GetSymmetricAlgorithm(encryptingCredentials.Algorithm);
-                    //        encryptedData.Encrypt(symmetricAlgorithm, plaintextStream.GetBuffer(), 0, (int)plaintextStream.Length);
-                    //        ((IDisposable)plaintextStream).Dispose();
-
-                    //        writer.WriteStartElement(Saml2Constants.Elements.EncryptedID, Saml2Constants.Namespace);
-                    //        encryptedData.WriteXml(writer, this.KeyInfoSerializer);
-
-                    //        foreach (EncryptedKeyIdentifierClause clause in nameIdentifier.ExternalEncryptedKeys)
-                    //        {
-                    //            this.KeyInfoSerializer.WriteKeyIdentifierClause(writer, clause);
-                    //        }
-
-                    //        writer.WriteEndElement();
-                }
-                finally
-                {
-                    if (plaintextStream != null)
-                    {
-                        plaintextStream.Dispose();
-                        plaintextStream = null;
-                    }
-                }
-                //}
-                //else
-                //{
-                //    writer.WriteStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
-                //    this.WriteNameIdType(writer, nameIdentifier);
-                //    writer.WriteEndElement();
-                //}
-            }
+            writer.WriteStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
+            this.WriteNameIdType(writer, nameIdentifier);
+            writer.WriteEndElement();
         }
 
         /// <summary>
-        /// Both &lt;Issuer> and &lt;NameID> are of NameIDType. This method writes
-        /// the content of either one of those elements.
+        /// Both &lt;Issuer> and &lt;NameID> are of NameIDType. Writes the content of either one of those elements.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2NameIdentifier"/>.</param>
-        /// <param name="data">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
-        public virtual void WriteNameIdType(XmlWriter writer, Saml2NameIdentifier data)
+        /// <param name="nameIdentifier">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">If 'writer' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'nameIdentifier' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'nameIdentifier.Value' is null or empty.</exception>
+        protected virtual void WriteNameIdType(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
+            if (writer == null)
+                throw LogHelper.LogArgumentNullException(nameof(writer));
+
+            if (nameIdentifier == null)
+                throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
+
+            if (string.IsNullOrEmpty(nameIdentifier.Value))
+                throw LogHelper.LogArgumentNullException(LogHelper.FormatInvariant(LogMessages.IDX11151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
+
             // @Format - optional
-            if (null != data.Format)
-            {
-                writer.WriteAttributeString(Saml2Constants.Attributes.Format, data.Format.AbsoluteUri);
-            }
+            if (null != nameIdentifier.Format)
+                writer.WriteAttributeString(Saml2Constants.Attributes.Format, nameIdentifier.Format.OriginalString);
 
             // @NameQualifier - optional
-            if (!string.IsNullOrEmpty(data.NameQualifier))
-            {
-                writer.WriteAttributeString(Saml2Constants.Attributes.NameQualifier, data.NameQualifier);
-            }
+            if (!string.IsNullOrEmpty(nameIdentifier.NameQualifier))
+                writer.WriteAttributeString(Saml2Constants.Attributes.NameQualifier, nameIdentifier.NameQualifier);
 
             // @SPNameQualifier - optional
-            if (!string.IsNullOrEmpty(data.SPNameQualifier))
-            {
-                writer.WriteAttributeString(Saml2Constants.Attributes.SPNameQualifier, data.SPNameQualifier);
-            }
+            if (!string.IsNullOrEmpty(nameIdentifier.SPNameQualifier))
+                writer.WriteAttributeString(Saml2Constants.Attributes.SPNameQualifier, nameIdentifier.SPNameQualifier);
 
             // @SPProvidedId - optional
-            if (!string.IsNullOrEmpty(data.SPProvidedId))
-            {
-                writer.WriteAttributeString(Saml2Constants.Attributes.SPProvidedID, data.SPProvidedId);
-            }
+            if (!string.IsNullOrEmpty(nameIdentifier.SPProvidedId))
+                writer.WriteAttributeString(Saml2Constants.Attributes.SPProvidedID, nameIdentifier.SPProvidedId);
 
             // Content is string
-            writer.WriteString(data.Value);
+            writer.WriteString(nameIdentifier.Value);
         }
 
         /// <summary>
         /// Writes the &lt;saml:ProxyRestriction> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2ProxyRestriction"/>.</param>
-        /// <param name="data">The <see cref="Saml2ProxyRestriction"/> to serialize.</param>
-        public virtual void WriteProxyRestriction(XmlWriter writer, Saml2ProxyRestriction data)
+        /// <param name="proxyRestriction">The <see cref="Saml2ProxyRestriction"/> to serialize.</param>
+        protected virtual void WriteProxyRestriction(XmlWriter writer, Saml2ProxyRestriction proxyRestriction)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (proxyRestriction == null)
+                throw LogHelper.LogArgumentNullException(nameof(proxyRestriction));
 
             writer.WriteStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace);
 
             // @Count - optional
-            if (null != data.Count)
-                writer.WriteAttributeString(Saml2Constants.Attributes.Count, XmlConvert.ToString(data.Count.Value));
+            if (proxyRestriction.Count != null)
+                writer.WriteAttributeString(Saml2Constants.Attributes.Count, XmlConvert.ToString(proxyRestriction.Count.Value));
 
             // <Audience> - 0-OO
-            foreach (Uri uri in data.Audiences)
-                writer.WriteElementString(Saml2Constants.Elements.Audience, uri.AbsoluteUri);
+            foreach (Uri uri in proxyRestriction.Audiences)
+                writer.WriteElementString(Saml2Constants.Elements.Audience, uri.OriginalString);
 
             writer.WriteEndElement();
-        }
-
-        /// <summary>
-        /// Serializes the Signing KeyInfo into the given XmlWriter.
-        /// </summary>
-        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SecurityKeyIdentifier"/>.</param>
-        /// <param name="data">The <see cref="SecurityKeyIdentifier"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">The input parameter 'writer' or 'signingKeyIdentifier' is null.</exception>
-        public virtual void WriteSigningKeyInfo(XmlWriter writer, SecurityKeyIdentifier data)
-        {
-            if (null == writer)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
-
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
-
-            // TODO - SecurityKey read / write
         }
 
         /// <summary>
@@ -2265,30 +2100,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// classes for writing a &lt;saml:Statement> element, override this method.
         /// </remarks>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Statement"/>.</param>
-        /// <param name="data">The <see cref="Saml2Statement"/> to serialize.</param>
-        public virtual void WriteStatement(XmlWriter writer, Saml2Statement data)
+        /// <param name="statement">The <see cref="Saml2Statement"/> to serialize.</param>
+        protected virtual void WriteStatement(XmlWriter writer, Saml2Statement statement)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (statement == null)
+                throw LogHelper.LogArgumentNullException(nameof(statement));
 
-            Saml2AttributeStatement attributeStatement = data as Saml2AttributeStatement;
+            Saml2AttributeStatement attributeStatement = statement as Saml2AttributeStatement;
             if (null != attributeStatement)
             {
                 WriteAttributeStatement(writer, attributeStatement);
                 return;
             }
 
-            Saml2AuthenticationStatement authnStatement = data as Saml2AuthenticationStatement;
+            Saml2AuthenticationStatement authnStatement = statement as Saml2AuthenticationStatement;
             if (null != authnStatement)
             {
                 WriteAuthenticationStatement(writer, authnStatement);
                 return;
             }
 
-            Saml2AuthorizationDecisionStatement authzStatement = data as Saml2AuthorizationDecisionStatement;
+            Saml2AuthorizationDecisionStatement authzStatement = statement as Saml2AuthorizationDecisionStatement;
             if (null != authzStatement)
             {
                 WriteAuthorizationDecisionStatement(writer, authzStatement);
@@ -2302,17 +2137,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:Subject> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Subject"/>.</param>
-        /// <param name="data">The <see cref="Saml2Subject"/> to serialize.</param>
-        public virtual void WriteSubject(XmlWriter writer, Saml2Subject data)
+        /// <param name="subject">The <see cref="Saml2Subject"/> to serialize.</param>
+        protected virtual void WriteSubject(XmlWriter writer, Saml2Subject subject)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (subject == null)
+                throw LogHelper.LogArgumentNullException(nameof(subject));
 
             // If there's no ID, there has to be a SubjectConfirmation
-            if (null == data.NameId && 0 == data.SubjectConfirmations.Count)
+            if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
                 throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("both id and subjectconfirmation cannot be null"));
 
             // <Subject>
@@ -2321,11 +2156,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // no attributes
 
             // <NameID> 0-1
-            if (null != data.NameId)
-                WriteNameId(writer, data.NameId);
+            if (null != subject.NameId)
+                WriteNameId(writer, subject.NameId);
 
             // <SubjectConfirmation> 0-OO
-            foreach (Saml2SubjectConfirmation subjectConfirmation in data.SubjectConfirmations)
+            foreach (Saml2SubjectConfirmation subjectConfirmation in subject.SubjectConfirmations)
                 WriteSubjectConfirmation(writer, subjectConfirmation);
 
             // </Subject>
@@ -2336,34 +2171,34 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:SubjectConfirmation> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2SubjectConfirmation"/>.</param>
-        /// <param name="data">The <see cref="Saml2SubjectConfirmation"/> to serialize.</param>
-        public virtual void WriteSubjectConfirmation(XmlWriter writer, Saml2SubjectConfirmation data)
+        /// <param name="subjectConfirmation">The <see cref="Saml2SubjectConfirmation"/> to serialize.</param>
+        protected virtual void WriteSubjectConfirmation(XmlWriter writer, Saml2SubjectConfirmation subjectConfirmation)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (subjectConfirmation == null)
+                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation));
 
-            if (null == data.Method)
-                throw LogHelper.LogArgumentNullException(nameof(data.Method));
+            if (subjectConfirmation.Method == null)
+                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation.Method));
 
-            if (string.IsNullOrEmpty(data.Method.ToString()))
-                throw LogHelper.LogArgumentNullException("data.Method");
+            if (string.IsNullOrEmpty(subjectConfirmation.Method.OriginalString))
+                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation.Method.OriginalString));
 
             // <SubjectConfirmation>
             writer.WriteStartElement(Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace);
 
             // @Method - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.Method, data.Method.AbsoluteUri);
+            writer.WriteAttributeString(Saml2Constants.Attributes.Method, subjectConfirmation.Method.OriginalString);
 
             // <NameID> 0-1
-            if (null != data.NameIdentifier)
-                WriteNameId(writer, data.NameIdentifier);
+            if (null != subjectConfirmation.NameIdentifier)
+                WriteNameId(writer, subjectConfirmation.NameIdentifier);
 
             // <SubjectConfirmationData> 0-1
-            if (null != data.SubjectConfirmationData)
-                WriteSubjectConfirmationData(writer, data.SubjectConfirmationData);
+            if (null != subjectConfirmation.SubjectConfirmationData)
+                WriteSubjectConfirmationData(writer, subjectConfirmation.SubjectConfirmationData);
 
             // </SubjectConfirmation>
             writer.WriteEndElement();
@@ -2377,14 +2212,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// attribute will be written specifying saml:KeyInfoConfirmationDataType.
         /// </remarks>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2SubjectConfirmationData"/>.</param>
-        /// <param name="data">The <see cref="Saml2SubjectConfirmationData"/> to serialize.</param>
-        public virtual void WriteSubjectConfirmationData(XmlWriter writer, Saml2SubjectConfirmationData data)
+        /// <param name="subjectConfirmationData">The <see cref="Saml2SubjectConfirmationData"/> to serialize.</param>
+        protected virtual void WriteSubjectConfirmationData(XmlWriter writer, Saml2SubjectConfirmationData subjectConfirmationData)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (subjectConfirmationData == null)
+                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmationData));
 
             // <SubjectConfirmationData>
             writer.WriteStartElement(Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
@@ -2392,83 +2227,65 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // @attributes
 
             // @xsi:type
-            if (data.KeyIdentifiers != null && data.KeyIdentifiers.Count > 0)
+            if (subjectConfirmationData.KeyInfos.Count > 0)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, Saml2Constants.Types.KeyInfoConfirmationDataType);
 
             // @Address - optional
-            if (!string.IsNullOrEmpty(data.Address))
-                writer.WriteAttributeString(Saml2Constants.Attributes.Address, data.Address);
+            if (!string.IsNullOrEmpty(subjectConfirmationData.Address))
+                writer.WriteAttributeString(Saml2Constants.Attributes.Address, subjectConfirmationData.Address);
 
             // @InResponseTo - optional
-            if (null != data.InResponseTo)
-                writer.WriteAttributeString(Saml2Constants.Attributes.InResponseTo, data.InResponseTo.Value);
+            if (null != subjectConfirmationData.InResponseTo)
+                writer.WriteAttributeString(Saml2Constants.Attributes.InResponseTo, subjectConfirmationData.InResponseTo.Value);
 
             // @NotBefore - optional
-            if (null != data.NotBefore)
-                writer.WriteAttributeString(Saml2Constants.Attributes.NotBefore, XmlConvert.ToString(data.NotBefore.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            if (null != subjectConfirmationData.NotBefore)
+                writer.WriteAttributeString(Saml2Constants.Attributes.NotBefore, XmlConvert.ToString(subjectConfirmationData.NotBefore.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // @NotOnOrAfter - optional
-            if (null != data.NotOnOrAfter)
-                writer.WriteAttributeString(Saml2Constants.Attributes.NotOnOrAfter, XmlConvert.ToString(data.NotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            if (null != subjectConfirmationData.NotOnOrAfter)
+                writer.WriteAttributeString(Saml2Constants.Attributes.NotOnOrAfter, XmlConvert.ToString(subjectConfirmationData.NotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // @Recipient - optional
-            if (null != data.Recipient)
-                writer.WriteAttributeString(Saml2Constants.Attributes.Recipient, data.Recipient.OriginalString);
+            if (null != subjectConfirmationData.Recipient)
+                writer.WriteAttributeString(Saml2Constants.Attributes.Recipient, subjectConfirmationData.Recipient.OriginalString);
 
             // Content
 
             // <ds:KeyInfo> 0-OO
-            foreach (SecurityKeyIdentifier keyIdentifier in data.KeyIdentifiers)
-                WriteSubjectKeyInfo(writer, keyIdentifier);
+            foreach (var keyInfo in subjectConfirmationData.KeyInfos)
+                keyInfo.WriteTo(writer);
 
             // </SubjectConfirmationData>
             writer.WriteEndElement();
         }
 
         /// <summary>
-        /// Serializes the Subject KeyInfo into the given XmlWriter.
-        /// </summary>
-        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SecurityKeyIdentifier"/>.</param>
-        /// <param name="data">The <see cref="SecurityKeyIdentifier"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">The input parameter 'writer' or 'data' is null.</exception>
-        public virtual void WriteSubjectKeyInfo(XmlWriter writer, SecurityKeyIdentifier data)
-        {
-            if (null == writer)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
-
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
-
-            // TODO - SecurityKey read / write
-            //this.KeyInfoSerializer.WriteKeyIdentifier(writer, data);
-        }
-
-        /// <summary>
         /// Writes the &lt;saml:SubjectLocality> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2SubjectLocality"/>.</param>
-        /// <param name="data">The <see cref="Saml2SubjectLocality"/> to serialize.</param>
-        public virtual void WriteSubjectLocality(XmlWriter writer, Saml2SubjectLocality data)
+        /// <param name="subjectLocality">The <see cref="Saml2SubjectLocality"/> to serialize.</param>
+        protected virtual void WriteSubjectLocality(XmlWriter writer, Saml2SubjectLocality subjectLocality)
         {
-            if (null == writer)
+            if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == data)
-                throw LogHelper.LogArgumentNullException(nameof(data));
+            if (subjectLocality == null)
+                throw LogHelper.LogArgumentNullException(nameof(subjectLocality));
 
             // <SubjectLocality>
             writer.WriteStartElement(Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace);
 
             // @Address - optional
-            if (null != data.Address)
+            if (null != subjectLocality.Address)
             {
-                writer.WriteAttributeString(Saml2Constants.Attributes.Address, data.Address);
+                writer.WriteAttributeString(Saml2Constants.Attributes.Address, subjectLocality.Address);
             }
 
             // @DNSName - optional
-            if (null != data.DnsName)
+            if (null != subjectLocality.DnsName)
             {
-                writer.WriteAttributeString(Saml2Constants.Attributes.DNSName, data.DnsName);
+                writer.WriteAttributeString(Saml2Constants.Attributes.DNSName, subjectLocality.DnsName);
             }
 
             // </SubjectLocality>
@@ -2521,7 +2338,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11136, element);
 
                 // TODO - kind can change.
-                if (requireUri && !XmlUtil.CanCreateValidUri(value, kind))
+                if (requireUri && !CanCreateValidUri(value, kind))
                     throw LogReadException(LogMessages.IDX11107, element, value);
 
                 return new Uri(value, kind);
@@ -2570,19 +2387,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal static Exception LogWriteException(string format, Exception inner, params object[] args)
         {
             return LogHelper.LogExceptionMessage(new Saml2SecurityTokenWriteException(LogHelper.FormatInvariant(format, args), inner));
-        }
-
-        internal static void CheckReaderOnEntry(XmlReader reader, string element, string ns, bool allowEmptyElement = false)
-        {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            reader.MoveToContent();
-            if (!allowEmptyElement && reader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX11104, element);
-
-            if (!reader.IsStartElement(element, ns))
-                throw LogReadException(LogMessages.IDX11105, element, reader.LocalName);
         }
     }
 }

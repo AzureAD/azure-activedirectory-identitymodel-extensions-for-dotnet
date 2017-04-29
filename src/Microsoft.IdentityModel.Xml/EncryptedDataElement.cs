@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// This class implements a deserialization for: EncryptedData as defined in section 3.4 of http://www.w3.org/TR/2002/REC-xmlenc-core-2002120
     /// </summary>
-    public class EncryptedDataElement : EncryptedTypeElement
+    internal class EncryptedDataElement : EncryptedTypeElement
     {
         public static bool CanReadFrom(XmlReader reader)
         {

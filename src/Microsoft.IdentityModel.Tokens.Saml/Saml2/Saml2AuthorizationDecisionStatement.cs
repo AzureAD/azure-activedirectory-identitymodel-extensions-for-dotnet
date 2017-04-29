@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public static readonly Uri EmptyResource = new Uri(string.Empty, UriKind.Relative);
 
         private Collection<Saml2Action> _actions = new Collection<Saml2Action>();
-        private Saml2AccessDecision _decision;
+        private string _decision;
         private Uri _resource;
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// a resource and decision.
         /// </summary>
         /// <param name="resource">The <see cref="Uri"/> of the resource to be authorized.</param>
-        /// <param name="decision">The <see cref="SamlAccessDecision"/> in use.</param>
-        public Saml2AuthorizationDecisionStatement(Uri resource, Saml2AccessDecision decision)
+        /// <param name="decision">The AccessDecision in use.</param>
+        public Saml2AuthorizationDecisionStatement(Uri resource, string decision)
             : this(resource, decision, null)
         { }
 
@@ -62,20 +62,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// a resource and decision.
         /// </summary>
         /// <param name="resource">The <see cref="Uri"/> of the resource to be authorized.</param>
-        /// <param name="decision">The <see cref="SamlAccessDecision"/> in use.</param>
+        /// <param name="decision">The AccessDecision in use.</param>
         /// <param name="actions">Collection of <see cref="Saml2Action"/> specifications.</param>
-        public Saml2AuthorizationDecisionStatement(Uri resource, Saml2AccessDecision decision, IEnumerable<Saml2Action> actions)
+        public Saml2AuthorizationDecisionStatement(Uri resource, string decision, IEnumerable<Saml2Action> actions)
         {
-            if (null == resource)
+            if (resource == null)
                 throw LogHelper.LogArgumentNullException(nameof(resource));
+
+            if (string.IsNullOrEmpty(decision))
+                throw LogHelper.LogArgumentNullException(nameof(decision));
 
             // This check is making sure the resource is either a well-formed absolute uri or
             // an empty relative uri before passing through to the rest of the constructor.
             if (!(resource.IsAbsoluteUri || resource.Equals(EmptyResource)))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(resource), resource.OriginalString)));
-
-            if (decision < Saml2AccessDecision.Permit || decision > Saml2AccessDecision.Indeterminate)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(decision)));
 
             _resource = resource;
             _decision = decision;
@@ -99,16 +99,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="SamlAccessDecision"/> rendered by the SAML authority with respect to the 
-        /// specified resource. [Saml2Core, 2.7.4]
+        /// Gets or sets the AccessDecision rendered by the SAML authority with respect to the specified resource. [Saml2Core, 2.7.4]
         /// </summary>
-        public Saml2AccessDecision Decision
+        public string Decision
         {
             get { return _decision; }
             set
             {
-                if (value < Saml2AccessDecision.Permit || value > Saml2AccessDecision.Indeterminate)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
+                if (string.IsNullOrEmpty(value))
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _decision = value;
             }
@@ -137,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _resource; }
             set
             {
-                if (null == value)
+                if (value == null)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
                 if (!(value.IsAbsoluteUri || value.Equals(EmptyResource)))

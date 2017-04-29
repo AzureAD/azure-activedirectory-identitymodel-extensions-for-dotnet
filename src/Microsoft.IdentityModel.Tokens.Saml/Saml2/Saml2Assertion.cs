@@ -58,6 +58,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             _issuer = issuer;
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="Signature"/> on the Assertion.
+        /// </summary>
         public Signature Signature { get; set; }
 
         /// <summary>
@@ -130,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _id; }
             set
             {
-                if (null == value)
+                if (value == null)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _id = value;
@@ -226,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="reader"><see cref="EnvelopedSignatureReader"/> that contains the data for the assertion.</param>
         internal virtual void CaptureSourceData(EnvelopedSignatureReader reader)
         {
-            if (null == reader)
+            if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             _sourceData = reader.XmlTokens;

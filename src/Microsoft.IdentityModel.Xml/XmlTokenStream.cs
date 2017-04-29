@@ -46,20 +46,17 @@ namespace Microsoft.IdentityModel.Xml
 
         public void Add(XmlNodeType type, string value)
         {
-            var tokenEntry = new XmlTokenEntry();
-            _entries.Add(tokenEntry.Set(type, value));
+            _entries.Add(new XmlTokenEntry(type, value));
         }
 
         public void AddAttribute(string prefix, string localName, string namespaceUri, string value)
         {
-            var tokenEntry = new XmlTokenEntry();
-            _entries.Add(tokenEntry.SetAttribute(prefix, localName, namespaceUri, value));
+            _entries.Add(new XmlTokenEntry(XmlNodeType.Attribute, prefix, localName, namespaceUri, value));
         }
 
         public void AddElement(string prefix, string localName, string namespaceUri, bool isEmptyElement)
         {
-             var tokenEntry = new XmlTokenEntry();
-            _entries.Add(tokenEntry.SetElement(prefix, localName, namespaceUri, isEmptyElement));
+             _entries.Add(new XmlTokenEntry(XmlNodeType.Element, prefix, localName, namespaceUri, isEmptyElement));
         }
 
         public void SetElementExclusion(string excludedElement, string excludedElementNamespace)

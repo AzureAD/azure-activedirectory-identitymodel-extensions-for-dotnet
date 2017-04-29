@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Attribute(string name, IEnumerable<string> values)
             : this(name)
         {
-            if (null == values)
+            if (values == null)
                 throw LogHelper.LogArgumentNullException(nameof(values));
 
             foreach (string value in values)

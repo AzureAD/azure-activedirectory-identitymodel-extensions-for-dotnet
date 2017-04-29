@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// This class implements a deserialization for: EncryptedType as defined in section 3.1 of http://www.w3.org/TR/2002/REC-xmlenc-core-2002120
     /// </summary>
-    public abstract class EncryptedTypeElement
+    internal abstract class EncryptedTypeElement
     {
         private CipherDataElement _cipherData;
         private EncryptionMethodElement _encryptionMethod;

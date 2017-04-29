@@ -101,6 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11148 = "IDX11148: A Saml2SecurityToken cannot be created from the Saml2Assertion because it specifies an unsupported confirmation method: '{0}'";
         internal const string IDX11149 = "IDX11149: Both AuthenticationContext ClassReference DeclarationReference can not be null.";
         internal const string IDX11150 = "IDX11150: The Saml2SecurityTokenHandler can only write a token was of type: '{0}'.";
+        internal const string IDX11151 = "IDX11151: Cannot write '{0}' because '{1}' is null or empty.";
 
         internal const string IDX11300 = "IDX11300: '{0}' must be an absolute Uri, was: '{1}'";
 

@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Security.Claims;
+
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>

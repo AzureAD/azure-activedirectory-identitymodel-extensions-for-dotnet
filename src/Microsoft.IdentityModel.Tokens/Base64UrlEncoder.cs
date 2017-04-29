@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Base64Url encoding of the UTF8 bytes.</returns>
         public static string Encode(string arg)
         {
-            if (null == arg)
+            if (arg == null)
                 throw LogHelper.LogArgumentNullException("arg");
 
             return Encode(Encoding.UTF8.GetBytes(arg));
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>UTF8 bytes.</returns>
         public static byte[] DecodeBytes(string str)
         {
-            if (null == str)
+            if (str == null)
             {
                 throw new ArgumentNullException("str");
             }

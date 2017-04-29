@@ -65,6 +65,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public const string AssertionIdPrefix = "Saml2SecurityToken-";
         public const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
+        public static class AccessDecision
+        {
+            public static string Deny {  get { return "Deny"; } }
+
+            public static string Indeterminate {  get { return "Indeterminate"; } }
+
+            public static string Permit {  get { return "Permit"; } }
+        }
+
         public static class ActionNamespaces
         {
             /// <summary>

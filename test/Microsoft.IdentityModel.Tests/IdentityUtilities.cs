@@ -33,9 +33,12 @@ using System.Text;
 using System;
 using Microsoft.IdentityModel.Tokens;
 
-#if !NETCOREAPP1_0
-using Microsoft.IdentityModel.Tokens.Saml;
+#if NET452
 using Microsoft.IdentityModel.Tokens.Saml2;
+#endif
+
+#if USING_SAML1
+using Microsoft.IdentityModel.Tokens.Saml;
 #endif
 
 namespace Microsoft.IdentityModel.Tests
@@ -93,7 +96,7 @@ namespace Microsoft.IdentityModel.Tests
             return new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
         }
 
-#if !NETCOREAPP1_0
+#if NET452
         public static Saml2SecurityToken CreateSaml2Token(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
         {
             return null;
@@ -101,9 +104,10 @@ namespace Microsoft.IdentityModel.Tests
 
         public static Saml2SecurityToken CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, Saml2SecurityTokenHandler tokenHandler)
         {
-            return null;
+            return tokenHandler.CreateToken(securityTokenDescriptor) as Saml2SecurityToken;
         }
 
+        #if USING_SAML1
         public static SamlSecurityToken CreateSamlSecurityToken(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
         {
             return null;
@@ -113,6 +117,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             return null;
         }
+        #endif
 
 #endif
     }

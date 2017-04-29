@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // testing constructor that takes Rsa instance
             RsaSecurityKeyConstructorWithRsa(null, ExpectedException.ArgumentNullException("rsa"));
-#if NET451
+#if NET452
             RSA rsaCsp_2048 = new RSACryptoServiceProvider();
             rsaCsp_2048.ImportParameters(KeyingMaterial.RsaParameters_2048);
             RSA rsaCsp_2048_Public = new RSACryptoServiceProvider();
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static TheoryData<string, SecurityKey, bool> HasPrivateKeyTheoryData()
         {
             var theoryData = new TheoryData<string, SecurityKey, bool>();
-#if NET451
+#if NET452
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCspProvider_2048,
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             );
 #endif
 
-#if NETCOREAPP1_0
+#if !NET452
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCngProvider_2048,
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void KeySize()
         {
-#if NET451
+#if NET452
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
 #endif
@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var dataset = new TheoryData<RsaSecurityKey, string, bool, bool>();
-#if NET451
+#if NET452
                 dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, true);
                 dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.HasPrivateKey, true);
                 dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, false);

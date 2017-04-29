@@ -1,38 +1,7 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
-  <dotnetChannel>preview</dotnetChannel>
-  <dotnetVersion>1.0.0-preview2-003121</dotnetVersion>
-  <dotnetUrl>https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0-preview2.1/scripts/obtain/dotnet-install.ps1</dotnetUrl>
-  <coreFxOldVersion>4.3.0-\*</coreFxOldVersion>
-  <coreFxNewVersion>4.3.0</coreFxNewVersion>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
-  <dependencies>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Logging": "1.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Protocols": "2.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Protocols.WsFederation": "2.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Tokens": "5.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Xml": "5.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"Microsoft.IdentityModel.Tokens.Saml": "5.1.4</nugetVersion>
-    </dependency>
-    <dependency>
-      <nugetVersion>"System.IdentityModel.Tokens.Jwt": "5.1.4</nugetVersion>
-    </dependency>
-
-  </dependencies>
+  <runtimes>netstandard1.4,net451</runtimes>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Logging">

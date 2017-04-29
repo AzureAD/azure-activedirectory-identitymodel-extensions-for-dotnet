@@ -38,50 +38,22 @@ namespace Microsoft.IdentityModel.Xml
     public static class XmlUtil
     {
         /// <summary>
-        /// Determines whether a URI is valid and can be created using the specified UriKind.
-        /// Uri.TryCreate is used here, which is more lax than Uri.IsWellFormedUriString.
-        /// The reason we use this function is because IsWellFormedUriString will reject valid URIs if they are IPv6 or require escaping.
+        /// Throws if Reader is on an empty element.
         /// </summary>
-        /// <param name="uriString">The string to check.</param>
-        /// <param name="uriKind">The type of URI (usually UriKind.Absolute)</param>
-        /// <returns>True if the URI is valid, false otherwise.</returns>
-        public static bool CanCreateValidUri(string uriString, UriKind uriKind)
+        /// <param name="reader"><see cref="XmlReader"/> to check.</param>
+        /// <param name="element">the xml element expected.</param>
+        /// <exception cref="ArgumentNullException">If 'reader' is null.</exception>
+        public static void ThrowIfReaderIsOnEmptyElement(XmlReader reader, string element)
         {
-            Uri tempUri;
-
-            return TryCreateValidUri(uriString, uriKind, out tempUri);
-        }
-
-        /// <summary>
-        /// Determines whether a URI is valid and can be created using the specified UriKind.
-        /// Uri.TryCreate is used here, which is more lax than Uri.IsWellFormedUriString.
-        /// The reason we use this function is because IsWellFormedUriString will reject valid URIs if they are IPv6 or require escaping.
-        /// </summary>
-        /// <param name="uriString">The string to check.</param>
-        /// <param name="uriKind">The type of URI (usually UriKind.Absolute)</param>
-        /// <param name="result">An out param representing the created URI</param>
-        /// <returns>True if the URI is valid, false otherwise.</returns>
-        public static bool TryCreateValidUri(string uriString, UriKind uriKind, out Uri result)
-        {
-            return Uri.TryCreate(uriString, uriKind, out result);
-        }
-
-        public static void CheckReaderOnEntry(XmlReader reader, string element, string ns, bool allowEmptyElement = false)
-        {
-            if (null == reader)
+            if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
-            reader.MoveToContent();
-            if (!allowEmptyElement && reader.IsEmptyElement)
-                throw LogReadException(LogMessages.IDX21010, element);
-
-            if (!reader.IsStartElement(element, ns))
-                throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
+            throw LogReadException(LogMessages.IDX21010, element);
         }
 
-        public static void ThrowIfReaderIsNotOnExpectedElement(XmlReader reader, string element, string ns)
+        public static void CheckReaderOnEntry(XmlReader reader, string element, string ns)
         {
-            if (null == reader)
+            if (reader == null)
                 throw LogHelper.LogArgumentNullException(nameof(reader));
 
             // IsStartElement calls MoveToContent.
@@ -89,52 +61,12 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
         }
 
+
         public static bool EqualsQName(XmlQualifiedName qname, string localName, string namespaceUri)
         {
             return null != qname
                 && StringComparer.Ordinal.Equals(localName, qname.Name)
                 && StringComparer.Ordinal.Equals(namespaceUri, qname.Namespace);
-        }
-
-        internal static System.Xml.UniqueId GetAttributeAsUniqueId(XmlDictionaryReader reader, string name, string ns)
-        {
-            if (!reader.MoveToAttribute(name, ns))
-            {
-                return null;
-            }
-
-            System.Xml.UniqueId id = reader.ReadContentAsUniqueId();
-            reader.MoveToElement();
-
-            return id;
-        }
-
-        internal static string GetWhiteSpace(XmlReader reader)
-        {
-            string s = null;
-            StringBuilder sb = null;
-            while (reader.NodeType == XmlNodeType.Whitespace || reader.NodeType == XmlNodeType.SignificantWhitespace)
-            {
-                if (sb != null)
-                {
-                    sb.Append(reader.Value);
-                }
-                else if (s != null)
-                {
-                    sb = new StringBuilder(s);
-                    sb.Append(reader.Value);
-                    s = null;
-                }
-                else
-                {
-                    s = reader.Value;
-                }
-                if (!reader.Read())
-                {
-                    break;
-                }
-            }
-            return sb != null ? sb.ToString() : s;
         }
 
         public static XmlQualifiedName GetXsiType(XmlReader reader)
@@ -152,24 +84,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             string xsiNil = reader.GetAttribute(XmlSignatureConstants.Attributes.Nil, XmlSignatureConstants.XmlSchemaNamespace);
             return !string.IsNullOrEmpty(xsiNil) && XmlConvert.ToBoolean(xsiNil);
-        }
-
-        public static bool IsValidXmlIDValue(string val)
-        {
-            if (string.IsNullOrEmpty(val))
-            {
-                return false;
-            }
-
-            // The first character of the ID should be a letter, '_' or ':'
-            return (((val[0] >= 'A') && (val[0] <= 'Z')) ||
-                ((val[0] >= 'a') && (val[0] <= 'z')) ||
-                (val[0] == '_') || (val[0] == ':'));
-        }
-
-        public static bool IsWhitespace(char ch)
-        {
-            return (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n');
         }
 
         public static string NormalizeEmptyString(string s)
@@ -192,33 +106,6 @@ namespace Microsoft.IdentityModel.Xml
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, reading, reader.LocalName)));
         }
 
-        // TODO - localize error messages
-        public static void ParseQName(XmlReader reader, string qname, out string localName, out string ns)
-        {
-            int index = qname.IndexOf(':');
-            string prefix;
-            if (index < 0)
-            {
-                prefix = "";
-                localName = TrimStart(TrimEnd(qname));
-            }
-            else
-            {
-                if (index == qname.Length - 1)
-                    throw LogHelper.LogExceptionMessage(new XmlException("InvalidXmlQualifiedName, qname"));
-                prefix = TrimStart(qname.Substring(0, index));
-                localName = TrimEnd(qname.Substring(index + 1));
-            }
-            ns = reader.LookupNamespace(prefix);
-            if (ns == null)
-                throw LogHelper.LogExceptionMessage(new XmlException("UnboundPrefixInQName, qname"));
-        }
-
-        public static void ReadContentAsQName(XmlReader reader, out string localName, out string ns)
-        {
-            ParseQName(reader, reader.ReadContentAsString(), out localName, out ns);
-        }
-
         internal static string ReadEmptyElementAndRequiredAttribute(XmlDictionaryReader reader, string name, string namespaceUri, string attributeName,
             out string prefix)
         {
@@ -239,14 +126,6 @@ namespace Microsoft.IdentityModel.Xml
             return value;
         }
 
-        public static Int64 ReadElementContentAsInt64(XmlDictionaryReader reader)
-        {
-            reader.ReadFullStartElement();
-            Int64 i = reader.ReadContentAsLong();
-            reader.ReadEndElement();
-            return i;
-        }
-
         public static XmlQualifiedName ResolveQName(XmlReader reader, string qstring)
         {
             string name = qstring;
@@ -265,68 +144,6 @@ namespace Microsoft.IdentityModel.Xml
             return new XmlQualifiedName(name, ns);
         }
 
-        public static string SerializeSecurityKeyIdentifier(SecurityKeyIdentifier ski)
-        {
-            StringBuilder sb = new StringBuilder();
-            using (StringWriter stringWriter = new StringWriter(sb, CultureInfo.InvariantCulture))
-            {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.OmitXmlDeclaration = true;
-                using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter, settings))
-                {
-                    // TODO write out string
-                    //                    tokenSerializer.WriteKeyIdentifierClause(xmlWriter, ski[0]);
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        public static string Trim(string s)
-        {
-            int i;
-            for (i = 0; i < s.Length && IsWhitespace(s[i]); i++) ;
-            if (i >= s.Length)
-            {
-                return string.Empty;
-            }
-
-            int j;
-            for (j = s.Length; j > 0 && IsWhitespace(s[j - 1]); j--) ;
-
-            if (i != 0 || j != s.Length)
-            {
-                return s.Substring(i, j - i);
-            }
-            return s;
-        }
-
-        public static string TrimEnd(string s)
-        {
-            int i;
-            for (i = s.Length; i > 0 && IsWhitespace(s[i - 1]); i--) ;
-
-            if (i != s.Length)
-            {
-                return s.Substring(0, i);
-            }
-
-            return s;
-        }
-
-        public static string TrimStart(string s)
-        {
-            int i;
-            for (i = 0; i < s.Length && IsWhitespace(s[i]); i++) ;
-
-            if (i != 0)
-            {
-                return s.Substring(i);
-            }
-
-            return s;
-        }
-
         internal static void ValidateBufferBounds(Array buffer, int offset, int count)
         {
             if (buffer == null)
@@ -339,6 +156,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(offset), LogHelper.FormatInvariant(LogMessages.IDX20001, 0,  buffer.Length - count)));
         }
 
+
         public static void ValidateXsiType(XmlReader reader, string expectedTypeName, string expectedTypeNamespace)
         {
             ValidateXsiType(reader, expectedTypeName, expectedTypeNamespace, false);
@@ -348,7 +166,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             XmlQualifiedName declaredType = GetXsiType(reader);
 
-            if (null == declaredType)
+            if (declaredType == null)
             {
                 if (requireDeclaration)
                 {
@@ -364,48 +182,27 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        internal static void WriteAttributeStringAsUniqueId(XmlDictionaryWriter writer, string prefix, string localName, string ns, System.Xml.UniqueId id)
-        {
-            writer.WriteStartAttribute(prefix, localName, ns);
-            writer.WriteValue(id);
-            writer.WriteEndAttribute();
-        }
-
-        public static void WriteElementStringAsUniqueId(XmlDictionaryWriter writer, string localName, string ns, string id)
-        {
-            writer.WriteStartElement(localName, ns);
-            writer.WriteValue(id);
-            writer.WriteEndElement();
-        }
-
-        public static void WriteElementContentAsInt64(XmlDictionaryWriter writer, string localName, string ns, Int64 value)
-        {
-            writer.WriteStartElement(localName, ns);
-            writer.WriteValue(value);
-            writer.WriteEndElement();
-        }
-
         public static Exception LogReadException(string format, params object[] args)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args)));
         }
 
-        public static Exception LogAttributeMissingReadException(string elementName, string attributeName)
+        public static Exception ALogAttributeMissingReadException(string elementName, string attributeName)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21013, elementName, attributeName)));
         }
 
-        public static Exception LogElementMissingReadException(string elementName, string nodeName)
+        public static Exception ALogElementMissingReadException(string elementName, string nodeName)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, elementName, nodeName)));
         }
 
-        public static Exception LogExpectedStartElement(XmlNodeType nodeType)
+        public static Exception ALogExpectedStartElement(XmlNodeType nodeType)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21022, nodeType)));
         }
 
-        public static Exception LogUnknownElementReadException(string elementName, string currentElement)
+        public static Exception aLogUnknownElementReadException(string elementName, string currentElement)
         {
             return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21021, elementName, currentElement)));
         }

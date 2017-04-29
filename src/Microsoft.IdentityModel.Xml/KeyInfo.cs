@@ -225,5 +225,13 @@ namespace Microsoft.IdentityModel.Xml
             SubjectName = reader.ReadElementContentAsString();
             Kid = SubjectName;
         }
+
+        public virtual void WriteTo(XmlWriter writer)
+        {
+            if (writer == null)
+                LogHelper.LogArgumentNullException(nameof(writer));
+
+            // TODO serialize
+        }
     }
 }

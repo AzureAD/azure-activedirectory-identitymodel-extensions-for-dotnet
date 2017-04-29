@@ -44,15 +44,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Address { get; set; }
 
-        // TODO - do we need this.
-        /// <summary>
-        /// Gets the <see cref="AuthorizationContext"/> used by the authenticating authority when issuing tokens.
-        /// </summary>
-        //public Collection<AuthenticationContext> AuthorizationContexts
-        //{
-        //    get { return _authContexts; }
-        //}
-
         /// <summary>
         /// Gets or sets the DNS name of the authority that created the token.
         /// </summary>

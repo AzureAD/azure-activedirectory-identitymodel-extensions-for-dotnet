@@ -3,11 +3,11 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>Includes Event Source based logging support.</Description>
-    <TargetFrameworks>netstandard1.4;net451</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Microsoft.IdentityModel.Logging</AssemblyName>
+    <Description>Includes Event Source based logging support.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Logging</PackageId>
+    <TargetFrameworks>netstandard1.4;net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">

@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public class Saml2SubjectConfirmationData
     {
         private string _address;
-        private Collection<SecurityKeyIdentifier> _keyIdentifiers = new Collection<SecurityKeyIdentifier>();
+        private Collection<KeyInfo> _keyInfos = new Collection<KeyInfo>();
         private DateTime? _notBefore;
         private DateTime? _notOnOrAfter;
         private Uri _recipient;
@@ -68,11 +68,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Id InResponseTo { get; set; }
 
         /// <summary>
-        /// Gets a collection of <see cref="SecurityKeyIdentifier"/> which can be used to authenticate an attesting entity. [Saml2Core, 2.4.1.3]
+        /// Gets a collection of <see cref="SecurityKey"/> which can be used to authenticate an attesting entity. [Saml2Core, 2.4.1.3]
         /// </summary>
-        public Collection<SecurityKeyIdentifier> KeyIdentifiers
+        public Collection<KeyInfo> KeyInfos
         {
-            get { return _keyIdentifiers; }
+            get { return _keyInfos; }
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public DateTime? NotOnOrAfter
         {
             get { return _notOnOrAfter; }
-            set { _notOnOrAfter = DateTimeUtil.ToUniversalTime(value); }
+            set { _notOnOrAfter = value?.ToUniversalTime(); }
         }
 
         /// <summary>

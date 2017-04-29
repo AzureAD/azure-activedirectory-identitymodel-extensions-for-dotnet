@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="assertion">A <see cref="Saml2Assertion"/> to initialize from.</param>
         public Saml2SecurityToken(Saml2Assertion assertion)
         {
-            if (null == assertion)
+            if (assertion == null)
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
 
             _assertion = assertion;
@@ -109,12 +109,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
         }
 
+        /// <summary>
+        /// Gets the issuer of this token
+        /// </summary>
         public override string Issuer
         {
             // TODO - is this right, Saml2NameIdentifier is a complex type
             get { return _assertion.Issuer.Value; }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that was used to Sign this assertion.
+        /// </summary>
         public override SecurityKey SigningKey
         {
             get; set;
