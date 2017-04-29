@@ -1,12 +1,11 @@
 param(
     [string]$build="YES",
     [string]$buildType="Debug",
+    [string]$dotnetDir="c:\dotnet.1.0.3",
     [string]$clean="YES",
-    [string]$installDotnet="NO",
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
-    [string]$updateCoreFxVersion="NO",
     [string]$failBuildOnTestFailure="YES")
 
 Write-Host ""
@@ -15,53 +14,26 @@ Write-Host "build.ps1"
 Write-Host "build: " $build;
 Write-Host "buildType: " $buildType;
 Write-Host "clean: " $clean;
-Write-Host "installDotnet: " $installDotnet;
 Write-Host "restore: " $restore;
 Write-Host "root: " $root;
 Write-Host "runTests: " $runTests;
 Write-Host "PSScriptRoot: " $PSScriptRoot;
-Write-Host "updateCoreFxVersion: " $updateCoreFxVersion;
 Write-Host "failBuildOnTestFailure: " $failBuildOnTestFailure;
+Write-Host "dotnetDir: " $dotnetDir
 
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $artifactsRoot = "$root\artifacts";
-$dotnetArchitecture  = $buildConfiguration.SelectSingleNode("root/dotnetArchitecture").InnerText;
-$dotnetChannel = $buildConfiguration.SelectSingleNode("root/dotnetChannel").InnerText;
-$dotnetVersion = $buildConfiguration.SelectSingleNode("root/dotnetVersion").InnerText;
-$dotnetInstallDir = "$PSScriptRoot\artifacts\dotnet" + $dotnetVersion;
-$dotnetexe = "$dotnetInstallDir\dotnet.exe";
-$dotnetUrl =  $buildConfiguration.SelectSingleNode("root/dotnetUrl").InnerText;
-$coreFxOldVersion = $buildConfiguration.SelectSingleNode("root/coreFxOldVersion").InnerText;
-$coreFxNewVersion = $buildConfiguration.SelectSingleNode("root/coreFxNewVersion").InnerText;
+$dotnetexe = "$dotnetDir\dotnet.exe";
 $nugetVersion = $buildConfiguration.SelectSingleNode("root/nugetVersion").InnerText;
 $rootNode = $buildConfiguration.root
 
 Write-Host ""
 Write-Host "============================"
 Write-Host "artifactsRoot: " $artifactsRoot;
-Write-Host "dotnetArchitecture: " $dotnetArchitecture;
-Write-Host "dotnetChannel: " $dotnetChannel;
-Write-Host "dotnetInstallDir: " $dotnetInstallDir;
-Write-Host "dotnetVersion: " $dotnetVersion;
 Write-Host "dotnetexe: " $dotnetexe;
-Write-Host "coreFxOldVersion: " $coreFxOldVersion;
-Write-Host "coreFxNewVersion: " $coreFxNewVersion;
 Write-Host "nugetVersion: " $nugetVersion;
 
 $ErrorActionPreference = "Stop"
-
-function SetCoreFxVersion([string]$fileName, [string]$oldVersion, [string]$newVersion)
-{
-    Write-Host ""
-    Write-Host "============================"
-    Write-Host ">>> SetCoreFxVersion: " $fileName ", " $oldVersion ", " $newVersion
-
-    $content = Get-Content -Path $fileName -raw;
-    $newContent = $content -replace $oldVersion, $newVersion;
-    Set-Content $fileName $newContent;
-
-    Write-Host "============================"
-}
 
 if ($clean -eq "YES")
 {
@@ -102,85 +74,11 @@ if ($clean -eq "YES")
         }
     }
 
-    $buildRoot = $artifactsRoot + "\build"
-    if (Test-Path $buildRoot)
+    if (Test-Path $artifactsRoot)
     {
         Write-Host ">>> Remove-Item -Recurse -Force $buildRoot"
-        Remove-Item  -Recurse -Force $buildRoot
+        Remove-Item  -Recurse -Force $artifactsRoot
     }
-}
-
-if (!(Test-Path $artifactsRoot))
-{
-    Write-Host ">>> mkdir $artifactsRoot | Out-Null"
-    mkdir $artifactsRoot | Out-Null
-}
-
-if ($installDotnet -eq "YES")
-{
-    Write-Host ""
-    Write-Host "============================"
-    Write-Host "Install dotnet"
-    Write-Host "dotnetVersion = $dotnetVersion"
-    Write-Host "dotnetLocalInstallFolder = $dotnetInstallDir"
-    Write-Host "dotnetexe = $dotnetexe"
-    Write-Host ""
-
-    if (Test-Path $dotnetInstallDir)
-    {
-        Write-Host ">>> Remove-Item -Recurse -Force $dotnetInstallDir"
-        Remove-Item  -Recurse -Force $dotnetInstallDir
-    }
-
-    if (!(Test-Path $dotnetInstallDir))
-    {
-        Write-Host "mkdir $dotnetInstallDir | Out-Null"
-        mkdir $dotnetInstallDir | Out-Null
-    }
-
-    # download script to install dotnet
-    Write-Host "Invoke-WebRequest $dotnetUrl -OutFile $dotnetInstallDir\dotnet-install.ps1"
-    Invoke-WebRequest $dotnetUrl -OutFile "$dotnetInstallDir\dotnet-install.ps1"
-
-    & "$dotnetInstallDir\dotnet-install.ps1" -Channel $dotnetChannel -Version $dotnetVersion -Architecture x64 -InstallDir $dotnetInstallDir -Verbose
-    if($LASTEXITCODE -ne 0)
-    {
-        throw "Failed to install dotnet"
-    }
-}
-
-if ($updateCoreFxVersion -eq "YES")
-{
-    Write-Host ""
-    Write-Host "============================"
-    Write-Host "updateCoreFxVersion"
-    Write-Host ""
-
-    Write-Host "root = $root"
-
-    foreach($project in $projects) {
-        $name = $project.name;
-        SetCoreFxVersion "$root\src\$name\project.json" $coreFxOldVersion $coreFxNewVersion;
-    }
-
-    $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
-    foreach ($testProject in $testProjects) {
-        $name = $testProject.name;
-        SetCoreFxVersion "$root\test\$name\project.json" $coreFxOldVersion $coreFxNewVersion;
-    }
-}
-
-if ($restore -eq "YES")
-{
-    Write-Host ""
-    Write-Host "============================"
-    Write-Host "RestoreAssemblies"
-    Write-Host ""
-
-    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe restore"
-    Write-Host ""
-
-    Start-Process -wait -NoNewWindow $dotnetexe "restore"
 }
 
 if ($build -eq "YES")
@@ -190,29 +88,35 @@ if ($build -eq "YES")
     Write-Host "Build and pack assemblies"
     Write-Host ""
 
+    if (!(Test-Path $artifactsRoot))
+    {
+        Write-Host ">>> mkdir $artifactsRoot | Out-Null"
+        mkdir $artifactsRoot | Out-Null
+    }
+
+    $date = Get-Date
+    $postfix = "." + ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmm");
+    $versionPropsFile = $PSScriptRoot + "/build/version.props";
+    $versionProps = Get-Content $versionPropsFile
+    $newVersion = "5.2.0" + $postfix;
+    $newVersionProps = $versionProps -replace "5.2.0", $newVersion;
+    Set-Content "dynamicVersion.props" $newVersionProps;
     $rootNode = $buildConfiguration.projects
     $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
     foreach($project in $projects) {
         $name = $project.name;
-        if (Test-Path("$artifactsRoot\build\$name\$buildType"))
-        {
-            Write-Host ">>> Remove-Item -Recurse -Force $artifactsRoot\build\$name\$buildType (artifacts)"
-            Remove-Item -Recurse -Force $artifactsRoot\build\$name\$buildType
-        }
-
-        if (Test-Path("$root\src\$name\bin\$buildType"))
-        {
-            Write-Host ">>> Remove-Item -Recurse -Force $root\src\$name\bin\$buildType (src)"
-            Remove-Item -Recurse -Force $root\src\$name\bin\$buildType
-        }
-
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType -s"
+        Write-Host "======================"
+        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\src\$name\$name.csproj"
         Write-Host ""
-        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name -c $buildType -o $root\src\$name\bin\$buildType -s"
+        Start-Process -wait -NoNewWindow $dotnetexe "restore $root\src\$name\$name.csproj"
+        Write-Host "======================"
+        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\src\$name\$name.csproj"
         Write-Host ""
-        Write-Host ">>> Copy-Item $root\src\$name\bin\$buildType $artifactsRoot\build\$name\$buildType -Recurse"
+        Start-Process -wait -NoNewWindow $dotnetexe "build $root\src\$name\$name.csproj"
+        Write-Host "======================"
+        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build $root\src\$name -c $buildType -o $artifactsRoot -s"
         Write-Host ""
-        Copy-Item src\$name\bin\$buildType $artifactsRoot\build\$name\$buildType -Recurse
+        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name\$name.csproj --no-build -c $buildType -o $artifactsRoot -s"
     }
 }
 
@@ -228,10 +132,15 @@ if ($runTests -eq "YES")
         $name = $testProject.name;
         Write-Host "";
         Write-Host ">>> Set-Location $root\test\$name"
-        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe test -c $buildType"
-        Write-Host ""
         pushd
         Set-Location $root\test\$name
+        Write-Host "======================"
+        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $name.csproj"
+        Write-Host ""
+        Start-Process -wait -NoNewWindow $dotnetexe "restore $name.csproj"
+        Write-Host "======================"
+        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test' -c $buildType"
+        Write-Host ""
         $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test -c $buildType"
         if($p.ExitCode -ne 0)
         {

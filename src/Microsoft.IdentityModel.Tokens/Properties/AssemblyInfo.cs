@@ -30,5 +30,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyMetadata("Serviceable", "True")]
+[assembly: AssemblyVersion("5.2.0")]
 [assembly: CLSCompliant(true)]
 [assembly: ComVisible(false)]

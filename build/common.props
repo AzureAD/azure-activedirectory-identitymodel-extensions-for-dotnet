@@ -1,11 +1,16 @@
 <Project>
   <Import Project="dependencies.props" />
-  <Import Project="version.props" />
+  <Import Project="version.props" Condition="!Exists('dynamicVersion.props')" />
+  <Import Project="dynamicVersion.props" Condition="Exists('dynamicVersion.props')" />
 
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation.</Company>
     <DelaySign>true</DelaySign>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <OutputTypeEx>library</OutputTypeEx>
     <Product>Microsoft IdentityModel</Product>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
@@ -14,9 +19,4 @@
     <SignAssembly>true</SignAssembly>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework' AND '$(OutputType)'=='library'">
-    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)" />
-  </ItemGroup>
-
 </Project>
