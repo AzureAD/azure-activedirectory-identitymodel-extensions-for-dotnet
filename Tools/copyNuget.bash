@@ -1,1 +1,2 @@
-cp /c/workspace/wilson/artifacts/build/*/Debug/*.nupkg /c/feed
+rm -f /c/feed/*
+cp /c/workspace/wilson/src/*/bin/Debug/*.nupkg /c/feed
