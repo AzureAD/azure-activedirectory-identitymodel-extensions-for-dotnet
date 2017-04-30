@@ -927,7 +927,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
         /// This can indicate that a key refresh is required.</exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
-        /// <returns><see cref="JwtSecurityToken"/> that has the signature validated if token was signed and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</returns>
+        /// <returns>A <see cref="JwtSecurityToken"/> that has the signature validated if token was signed.</returns>
         /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
         /// <para>If the 'token' signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'token'.</para></remarks>
         protected virtual JwtSecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
