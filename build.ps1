@@ -100,7 +100,7 @@ if ($build -eq "YES")
     $versionProps = Get-Content $versionPropsFile
     $newVersion = "5.2.0" + $postfix;
     $newVersionProps = $versionProps -replace "5.2.0", $newVersion;
-    Set-Content "dynamicVersion.props" $newVersionProps;
+    Set-Content "build\dynamicVersion.props" $newVersionProps;
     $rootNode = $buildConfiguration.projects
     $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
     foreach($project in $projects) {
