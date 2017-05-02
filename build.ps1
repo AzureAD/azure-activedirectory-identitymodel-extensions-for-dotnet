@@ -141,7 +141,7 @@ if ($runTests -eq "YES")
         Write-Host "======================"
         Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test' -c $buildType"
         Write-Host ""
-        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test -c $buildType"
+        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj -c $buildType"
         if($p.ExitCode -ne 0)
         {
             if (!$testExitCode)
