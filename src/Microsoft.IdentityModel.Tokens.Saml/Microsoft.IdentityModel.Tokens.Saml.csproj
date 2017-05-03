@@ -5,7 +5,7 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.Tokens.Saml</AssemblyName>
     <Description>Includes types that provide support for SamlTokens version 1 and 2.</Description>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Tokens.Saml</PackageId>
     <TargetFrameworks>net451</TargetFrameworks>
   </PropertyGroup>
@@ -20,6 +20,10 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Saml\*.cs" />
   </ItemGroup>
 
 </Project>

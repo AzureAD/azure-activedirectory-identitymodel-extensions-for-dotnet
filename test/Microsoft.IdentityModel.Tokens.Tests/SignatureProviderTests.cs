@@ -152,11 +152,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, new byte[0], ExpectedException.ArgumentNullException(), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.ArgumentOutOfRangeException("IDX10630:"), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
-#if NET451
+#if NET452
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
-#endif
-
-#if NETCOREAPP1_0
+#else
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
             Assert.ThrowsAny<CryptographicException>(() =>
             {
@@ -164,8 +162,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 provider.Sign(rawBytes);
             });
 #endif
-
-#if NET451
+#if NET452
             // since the actual exception thrown is private - WindowsCryptographicException, using this pattern to match the derived exception
             Assert.ThrowsAny<CryptographicException>(() =>
             {
@@ -340,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static bool IsRunningOn462OrGreaterOrCore()
         {
-#if NETCOREAPP1_0
+#if NETCOREAPP1_1
             // test for Core
             return true;
 #else
@@ -545,7 +542,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test13"
             });
 
-#if NET451
+#if NET452
             theoryData.Add(new SignatureProviderTheoryData
             {
                 Algorithm = SecurityAlgorithms.RsaSha256Signature,
@@ -641,7 +638,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = "Test22"
             });
 
-#if NET451
+#if NET452
             // sha384, 512
             signature = GetSignature(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha384Signature, rawBytes);
             theoryData.Add(new SignatureProviderTheoryData
@@ -1159,7 +1156,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<string, SecurityKey, string, ExpectedException>();
 
-#if NET451
+#if NET452
             theoryData.Add(
                 "Test1",
                 new RsaSecurityKey(new RSACryptoServiceProvider(2048)),

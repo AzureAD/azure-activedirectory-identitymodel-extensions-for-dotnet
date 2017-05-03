@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class CipherDataElement
+    internal class CipherDataElement
     {
         private byte[] _cipherText;
         private byte[] _iv;

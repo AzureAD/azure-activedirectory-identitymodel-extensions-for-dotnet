@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-#if !NETCOREAPP1_0
+#if !NETCOREAPP1_1
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #else
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-#if !NETCOREAPP1_0
+#if !NETCOREAPP1_1
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #else
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-#if !NETCOREAPP1_0
+#if !NETCOREAPP1_1
                         ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
 #else
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-#if !NETCOREAPP1_0
+#if !NETCOREAPP1_1
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003:"),
 #else
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13000:", typeof(NotSupportedException)),

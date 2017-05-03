@@ -48,34 +48,28 @@ namespace Microsoft.IdentityModel.Xml
             get; private set;
         }
 
-        public XmlTokenEntry Set(XmlNodeType nodeType, string value)
+        public XmlTokenEntry(XmlNodeType nodeType, string value)
         {
             NodeType = nodeType;
             Value = value;
-
-            return this;
         }
 
-        public XmlTokenEntry SetAttribute(string prefix, string localName, string namespaceUri, string value)
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string namespaceUri, string value)
         {
-            NodeType = XmlNodeType.Attribute;
+            NodeType = nodeType;
             _prefix = prefix;
             _localName = localName;
             _namespaceUri = namespaceUri;
             Value = value;
-
-            return this;
         }
 
-        public XmlTokenEntry SetElement(string prefix, string localName, string namespaceUri, bool isEmptyElement)
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string namespaceUri, bool isEmptyElement)
         {
-            NodeType = XmlNodeType.Element;
+            NodeType = nodeType;
             _prefix = prefix;
             _localName = localName;
             _namespaceUri = namespaceUri;
             IsEmptyElement = isEmptyElement;
-
-            return this;
         }
     }
 }

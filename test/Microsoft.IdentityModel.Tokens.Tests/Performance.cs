@@ -28,9 +28,8 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 
-#if NNET451
+#if NET452
 using Microsoft.IdentityModel.Tokens.Saml;
-using System.IdentityModel.Tokens;
 #endif
 using System.IO;
 using System.Xml;
@@ -221,33 +220,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Console.WriteLine( string.Format( created, "JwtHandler - signatureProvider == null", iterations, DateTime.UtcNow - started ) );
             }
-#if NNET451
-            started = DateTime.UtcNow;
-            for ( int i = 0; i < iterations; i++ )
-            {
-                // TODO - populate descriptor
-                var descriptor2 = new System.IdentityModel.Tokens.SecurityTokenDescriptor();
-                CreateSaml2Tokens( descriptor2 );
-            }
 
-            if ( display )
-            {
-                Console.WriteLine( string.Format( written, "Saml2", iterations, DateTime.UtcNow - started ) );
-            }
-
-            started = DateTime.UtcNow;
-            for ( int i = 0; i < iterations; i++ )
-            {
-                // TODO - populate descriptor
-                var descriptor = new System.IdentityModel.Tokens.SecurityTokenDescriptor();
-                CreateSamlTokens( descriptor );
-            }
-
-            if ( display )
-            {
-                Console.WriteLine( string.Format( written, "Saml1", iterations, DateTime.UtcNow - started ) );
-            }
-#endif
             started = DateTime.UtcNow;
             for ( int i = 0; i < iterations; i++ )
             {
@@ -260,25 +233,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
 
         }
-
-#if NNET451
-        private void CreateSaml2Tokens( System.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor )
-        {
-            var samlTokenHandler = new System.IdentityModel.Tokens.Saml2SecurityTokenHandler();
-            var  token = samlTokenHandler.CreateToken( tokenDescriptor ) as Saml2SecurityToken;
-            MemoryStream ms = new MemoryStream();
-            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter( ms );
-            samlTokenHandler.WriteToken( writer, token );
-        }
-
-        private void CreateSamlTokens( System.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor )
-        {
-            var samlTokenHandler = new System.IdentityModel.Tokens.SamlSecurityTokenHandler();
-            var token = samlTokenHandler.CreateToken( tokenDescriptor ) as SamlSecurityToken;
-            MemoryStream ms = new MemoryStream();
-            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter( ms );
-            samlTokenHandler.WriteToken( writer, token );
-        }
-#endif
     }
 }

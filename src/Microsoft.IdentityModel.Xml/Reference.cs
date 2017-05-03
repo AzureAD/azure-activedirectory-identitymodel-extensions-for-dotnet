@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
 
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Xml
 
 
             // <DigestMethod>
-            XmlUtil.ThrowIfReaderIsNotOnExpectedElement(reader, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
             reader.MoveToStartElement(XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
             DigestAlgorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Xml
             }
 
             // <DigestValue>
-            XmlUtil.ThrowIfReaderIsNotOnExpectedElement(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
             DigestText = reader.ReadElementContentAsString().Trim();
             DigestBytes = System.Convert.FromBase64String(DigestText);
 

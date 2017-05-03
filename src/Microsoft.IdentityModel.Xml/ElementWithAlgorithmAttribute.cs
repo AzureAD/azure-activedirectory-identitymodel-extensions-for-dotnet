@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace, true);
+            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace);
 
             reader.MoveToStartElement(_elementName, XmlSignatureConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;

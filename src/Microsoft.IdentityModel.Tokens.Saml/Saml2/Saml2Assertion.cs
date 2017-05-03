@@ -58,6 +58,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             _issuer = issuer;
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="Signature"/> on the Assertion.
+        /// </summary>
         public Signature Signature { get; set; }
 
         /// <summary>

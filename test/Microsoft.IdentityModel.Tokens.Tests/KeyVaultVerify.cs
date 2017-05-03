@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "AES256_KeyWrap"
                 });
 
-#if NET451
+#if NET452
                 Rsa15 rsa15 = new Rsa15();
                 theoryData.Add(new KeyWrapTestParams
                 {

@@ -30,7 +30,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class EncryptionMethodElement
+    internal class EncryptionMethodElement
     {
         public string Algorithm { get; set; }
 
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadXml(XmlDictionaryReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace, true);
+            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace);
 
             Algorithm = reader.GetAttribute(XmlEncryptionConstants.Attributes.Algorithm, null);
             if (!reader.IsEmptyElement)

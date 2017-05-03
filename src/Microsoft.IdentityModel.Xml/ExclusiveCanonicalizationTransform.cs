@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
-            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace, true);
+            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace);
 
             _prefix = reader.Prefix;
             bool isEmptyElement = reader.IsEmptyElement;

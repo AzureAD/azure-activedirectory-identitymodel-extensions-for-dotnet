@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public virtual void ReadFrom(XmlDictionaryReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace, false);
+            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
 
             _defaultNamespace = reader.LookupNamespace(string.Empty);
             _bufferedStream = new MemoryStream();
@@ -204,7 +204,7 @@ namespace Microsoft.IdentityModel.Xml
                 _signatureMethodElement.ReadFrom(canonicalizingReader);
                 SignatureAlgorithm = _signatureMethodElement.Algorithm;
 
-                XmlUtil.CheckReaderOnEntry(canonicalizingReader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace, false);
+                XmlUtil.CheckReaderOnEntry(canonicalizingReader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
                 Reference = new Reference();
                 Reference.ReadFrom(canonicalizingReader);
 

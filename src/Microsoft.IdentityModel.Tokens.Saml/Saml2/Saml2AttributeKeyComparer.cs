@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// Comparison class supporting multi-part keys for a dicitionary
     /// </summary>
-    public class Saml2AttributeKeyComparer : IEqualityComparer<Saml2AttributeKeyComparer.AttributeKey>
+    internal class Saml2AttributeKeyComparer : IEqualityComparer<Saml2AttributeKeyComparer.AttributeKey>
     {
         public class AttributeKey
         {
