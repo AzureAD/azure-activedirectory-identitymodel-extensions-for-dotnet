@@ -32,11 +32,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Xml;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -80,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets the value if this instance can write a token.
+        /// Gets the value that indicates if this instance can write a token.
         /// </summary>
         public override bool CanWriteToken
         {
@@ -107,7 +105,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Determines if the string is a valid Saml2 token by examining the xml for the correct start element.
         /// </summary>
         /// <param name="token">a Saml2 token as a string.</param>
-        /// <returns>true if the string is valid XML and has a startelement == 'Saml2Constants.Elements.Assertion'.</returns>
+        /// <returns>true if the string has a start element == 'Saml2Constants.Elements.Assertion'.</returns>
         public override bool CanReadToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -213,10 +211,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             var samlToken = ValidateSignature(token, validationParameters);
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
-            ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
+            var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
             Validators.ValidateTokenReplay(token, samlToken.Assertion.Conditions.NotBefore, validationParameters);
             validatedToken = samlToken;
-            var identity = CreateClaims(samlToken, validationParameters);
+            var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = token;
 
@@ -230,6 +228,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="securityToken">the Saml2 token that is being validated.</param>
         /// <param name="validationParameters">validation parameters.</param>
+        /// <exception cref="ArgumentNullException">If 'securityToken' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="Saml2SecurityTokenException">If 'securityToken.Subject' is null.</exception>
         protected virtual void ValidateSubject(Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (securityToken == null)
@@ -273,13 +274,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
         /// <exception cref="ArgumentNullException">If 'token' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="SecurityTokenValidationException">If <see cref="TokenValidationParameters.SignatureValidator"/> returns null OR an object other than a <see cref="Saml2SecurityToken"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
         /// This can indicate that a key refresh is required.</exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/> that has had the signature validated if token was signed.</returns>
         /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
-        /// <para>If the 'token' signature is validated, then the <see cref="Saml2SecurityToken.SigningKey"/> will be set to the key that signed the 'token'.</para></remarks>
+        /// <para>If the 'token' signature is validated, then the <see cref="Saml2SecurityToken.SigningKey"/> will be set to the key that signed the 'token'. It is the responsibility of <see cref="TokenValidationParameters.SignatureValidator"/> to set the <see cref="Saml2SecurityToken.SigningKey"/></para></remarks>
         protected virtual Saml2SecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -293,11 +295,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 var validatedSamlToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedSamlToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
 
                 var validatedSaml = validatedSamlToken as Saml2SecurityToken;
                 if (validatedSaml == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSamlToken.GetType(), token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSamlToken.GetType(), token)));
 
                 return validatedSaml;
             }
@@ -305,6 +307,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10504, token)));
 
+            bool keyMatched = false;
             IEnumerable<SecurityKey> securityKeys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -315,14 +318,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 var securityKey = ResolveIssuerSigningKey(token, samlToken, validationParameters);
                 if (securityKey != null)
                 {
-                    try
-                    {
-                        samlToken.Assertion.Signature.Verify(securityKey);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, ex);
-                    }
+                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
+                    keyMatched = true;
+                    securityKeys = new List<SecurityKey> { securityKey };
                 }
             }
 
@@ -336,14 +334,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             // keep track of exceptions thrown, keys that were tried
-            StringBuilder exceptionStrings = new StringBuilder();
-            StringBuilder keysAttempted = new StringBuilder();
+            var exceptionStrings = new StringBuilder();
+            var keysAttempted = new StringBuilder();
             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
-            foreach (SecurityKey securityKey in securityKeys)
+            foreach (var securityKey in securityKeys)
             {
                 try
                 {
                     samlToken.Assertion.Signature.Verify(securityKey);
+                    IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10242, token);
                     samlToken.SigningKey = securityKey;
                     return samlToken;
                 }
@@ -353,11 +352,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 if (securityKey != null)
+                {
                     keysAttempted.AppendLine(securityKey.ToString() + " , KeyId: " + securityKey.KeyId);
+                    if (canMatchKey && !keyMatched && securityKey.KeyId != null)
+                        keyMatched = securityKey.KeyId.Equals(samlToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal);
+                }
             }
 
-            // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
-            if (canMatchKey && keysAttempted.Length > 0)
+            // if there was a keymatch with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
+            if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
 
             if (keysAttempted.Length > 0)
@@ -1171,7 +1174,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                                         if (innerAttribute.NameFormat != null)
                                         {
-                                            claim.Properties[ClaimProperties.SamlAttributeNameFormat] = innerAttribute.NameFormat.AbsoluteUri;
+                                            claim.Properties[ClaimProperties.SamlAttributeNameFormat] = innerAttribute.NameFormat.OriginalString;
                                         }
 
                                         if (innerAttribute.FriendlyName != null)
@@ -1243,7 +1246,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 var claim = new Claim(ClaimTypes.NameIdentifier, nameId.Value, ClaimValueTypes.String, issuer);
                 if (nameId.Format != null)
-                    claim.Properties[ClaimProperties.SamlNameIdentifierFormat] = nameId.Format.AbsoluteUri;
+                    claim.Properties[ClaimProperties.SamlNameIdentifierFormat] = nameId.Format.OriginalString;
 
                 if (nameId.NameQualifier != null)
                     claim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier] = nameId.NameQualifier;
@@ -1284,14 +1287,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
                 else
                 {
+                    // each value has same issuer
+                    string originalIssuer = attribute.OriginalIssuer ?? issuer;
                     foreach (string value in attribute.Values)
                     {
                         if (value != null)
                         {
-                            string originalIssuer = attribute.OriginalIssuer ?? issuer;
                             var claim = new Claim(attribute.Name, value, attribute.AttributeValueXsiType, issuer, originalIssuer);
                             if (attribute.NameFormat != null)
-                                claim.Properties[ClaimProperties.SamlAttributeNameFormat] = attribute.NameFormat.AbsoluteUri;
+                                claim.Properties[ClaimProperties.SamlAttributeNameFormat] = attribute.NameFormat.OriginalString;
 
                             if (attribute.FriendlyName != null)
                                 claim.Properties[ClaimProperties.SamlAttributeDisplayName] = attribute.FriendlyName;
@@ -1322,7 +1326,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 subject.AddClaim(
                         new Claim(
                             ClaimTypes.AuthenticationMethod,
-                            statement.AuthenticationContext.ClassReference.AbsoluteUri,
+                            statement.AuthenticationContext.ClassReference.OriginalString,
                             ClaimValueTypes.String,
                             issuer));
             }
@@ -1346,9 +1350,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates claims from a Saml2 token.
         /// </summary>
         /// <param name="samlToken">The Saml2SecurityToken.</param>
+       /// <param name="issuer">The value to set <see cref="Claim.Issuer"/></param>
         /// <param name="validationParameters">creates the <see cref="ClaimsIdentity"/> using <see cref="TokenValidationParameters.CreateClaimsIdentity(SecurityToken, string)"/>.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> with claims from the saml statements.</returns>
-        protected virtual ClaimsIdentity CreateClaims(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
+        protected virtual ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(samlToken));
@@ -1357,12 +1362,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (assertion == null)
                 throw LogHelper.LogArgumentNullException(LogMessages.IDX11110);
 
-            if (string.IsNullOrEmpty(assertion.Issuer.Value))
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11111));
+            var actualIssuer = issuer;
+            if (string.IsNullOrWhiteSpace(issuer))
+            {
+                IdentityModelEventSource.Logger.WriteVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                actualIssuer = ClaimsIdentity.DefaultIssuer;
+            }
 
-            var identity = validationParameters.CreateClaimsIdentity(samlToken, assertion.Issuer.Value);
-            ProcessSamlSubject(assertion.Subject, identity, assertion.Issuer.Value);
-            ProcessStatements(assertion.Statements, identity, assertion.Issuer.Value);
+            var identity = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
+            ProcessSamlSubject(assertion.Subject, identity, actualIssuer);
+            ProcessStatements(assertion.Statements, identity, actualIssuer);
 
             return identity;
         }
@@ -1380,7 +1389,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Determines if an issuer found in a <see cref="Saml2SecurityToken"/> is valid.
+        /// Determines if the issuer found in a <see cref="Saml2SecurityToken"/> is valid.
         /// </summary>
         /// <param name="issuer">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
@@ -1389,9 +1398,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
         protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
             return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
         }
 
@@ -1400,8 +1406,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SecurityToken"/>.</param>
         /// <param name="token">The <see cref="SecurityToken"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">The input argument 'writer' or 'token' is null.</exception>
-        /// <exception cref="ArgumentException">The input argument 'token' is not a <see cref="Saml2SecurityToken"/>.</exception>
+        /// <exception cref="ArgumentNullException">If 'writer' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'token' is null.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">If 'token' is not a <see cref="Saml2SecurityToken"/>.</exception>
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)

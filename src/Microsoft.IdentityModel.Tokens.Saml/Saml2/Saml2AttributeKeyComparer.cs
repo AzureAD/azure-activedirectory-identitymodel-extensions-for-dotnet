@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             //    _friendlyName = attribute.FriendlyName ?? String.Empty;
             //    _name = attribute.Name;
-            //    _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.AbsoluteUri;
+            //    _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.OriginalString;
             //    _namespace = String.Empty;
             //    _valueType = attribute.AttributeValueXsiType ?? String.Empty;
             //    _originalIssuer = attribute.OriginalIssuer ?? String.Empty;

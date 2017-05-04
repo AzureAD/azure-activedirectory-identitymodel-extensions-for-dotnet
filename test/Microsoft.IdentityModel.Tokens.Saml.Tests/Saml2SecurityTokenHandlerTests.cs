@@ -438,7 +438,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_1
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_1
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
@@ -480,7 +480,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_1
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
@@ -501,7 +501,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
 #if !NETCOREAPP1_1
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10508:", typeof(CryptographicException)),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+#else
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
+#endif
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(RefrenceTokens.Saml2Token_AttributeTampered_NoKeyMatch),
+                        Token = RefrenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = new X509SecurityKey(aadCert),
+                            IssuerSigningKeys = keySet.GetSigningKeys(),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    });
+
+
+                theoryData.Add(
+                    new SamlTheoryData
+                    {
+#if !NETCOREAPP1_1
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
 #else
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(NotSupportedException)),
 #endif
