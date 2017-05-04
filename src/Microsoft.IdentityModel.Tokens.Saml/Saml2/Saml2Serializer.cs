@@ -242,7 +242,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 envelopeReader.ReadEndElement();
-                if (null == assertion.Subject)
+                if (assertion.Subject == null)
                 {
                     // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                     if (0 == assertion.Statements.Count)
@@ -521,7 +521,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2AudienceRestriction"/> instance.</returns>
         protected virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
         {
-            if (null == reader)
+            if (reader == null)
                 LogHelper.LogArgumentNullException(nameof(reader));
 
             // throw if wrong element
@@ -610,7 +610,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // If there was no ClassRef, there must be a DeclRef
                 if (reader.IsStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace))
                     declRef = ReadSimpleUriElement(reader, Saml2Constants.Elements.AuthnContextDeclRef, UriKind.RelativeOrAbsolute, false);
-                else if (null == classRef)
+                else if (classRef == null)
                     reader.ReadStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace);
 
                 // Now we have enough data to create the object
@@ -734,7 +734,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // @attributes
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Resource);
-                if (null == value)
+                if (value == null)
                 {
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource);
                 }
@@ -821,7 +821,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
 
                             // No type, throw
-                            if (null == declaredType
+                            if (declaredType == null
                                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.ConditionAbstractType, Saml2Constants.Namespace))
                             {
                                 throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
@@ -902,7 +902,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
         {
             throw new NotImplementedException("not implemented yet");
-            //if (null == reader)
+            //if (reader == null)
             //{
             //    throw LogHelper.LogArgumentNullException(nameof(reader));
             //}
@@ -1177,7 +1177,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // No declaration, or declaring that this is just a "Statement", is invalid since
             // statement is abstract
-            if (null == declaredType
+            if (declaredType == null
                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.StatementAbstractType, Saml2Constants.Namespace))
                 throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
 
@@ -1228,7 +1228,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 reader.ReadEndElement();
 
                 // Must have a NameID or a SubjectConfirmation
-                if (null == subject.NameId && 0 == subject.SubjectConfirmations.Count)
+                if (subject.NameId == null && 0 == subject.SubjectConfirmations.Count)
                     throw LogReadException(LogMessages.IDX11125);
 
                 return subject;
@@ -1434,7 +1434,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 var declaredType = XmlUtil.GetXsiType(reader);
 
                 // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
-                if (null == declaredType
+                if (declaredType == null
                     || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.BaseIDAbstractType, Saml2Constants.Namespace))
                     throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
 
@@ -1504,7 +1504,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (action == null)
                 throw LogHelper.LogArgumentNullException(nameof(action));
 
-            if (null == action.Namespace)
+            if (action.Namespace == null)
                 throw LogHelper.LogArgumentNullException(nameof(action.Namespace));
 
             if (string.IsNullOrEmpty(action.Namespace.ToString()))
@@ -1533,7 +1533,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == advice)
+            if (advice == null)
                 throw LogHelper.LogArgumentNullException(nameof(advice));
 
             // <Advice>
@@ -1586,7 +1586,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null != assertion.SigningCredentials)
                     writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value);
 
-                if (null == assertion.Subject)
+                if (assertion.Subject == null)
                 {
                     // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                     if (assertion.Statements == null || 0 == assertion.Statements.Count)
@@ -1657,7 +1657,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == attribute)
+            if (attribute == null)
                 throw LogHelper.LogArgumentNullException(nameof(attribute));
 
             // <Attribute>
@@ -1694,7 +1694,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 writer.WriteStartElement(Saml2Constants.Elements.AttributeValue, Saml2Constants.Namespace);
 
-                if (null == value)
+                if (value == null)
                 {
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.Nil, XmlSignatureConstants.XmlSchemaNamespace, XmlConvert.ToString(true));
                 }
@@ -1727,7 +1727,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
 
-            if (null == attributeStatement)
+            if (attributeStatement == null)
                 throw LogHelper.LogArgumentNullException(nameof(attributeStatement));
 
             if (attributeStatement.Attributes == null || 0 == attributeStatement.Attributes.Count)
@@ -2015,7 +2015,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (null == nameIdentifier)
+            if (nameIdentifier == null)
                 throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
 
             if (nameIdentifier.EncryptingCredentials != null)
@@ -2147,7 +2147,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(subject));
 
             // If there's no ID, there has to be a SubjectConfirmation
-            if (null == subject.NameId && 0 == subject.SubjectConfirmations.Count)
+            if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
                 throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("both id and subjectconfirmation cannot be null"));
 
             // <Subject>

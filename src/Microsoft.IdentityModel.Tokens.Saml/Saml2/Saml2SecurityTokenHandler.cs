@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentNullException">If 'tokenDescriptor' is null.</exception>
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             // Assertion/issuer
@@ -509,7 +509,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 //}
 
                 //EncryptedKeyIdentifierClause encryptedKeyClause = skic as EncryptedKeyIdentifierClause;
-                //if (null == encryptedKeyClause)
+                //if (encryptedKeyClause == null)
                 //{
                 //    throw LogHelper.ThrowHelperXml(reader, SR.GetString(SR.ID4172));
                 //}
@@ -533,7 +533,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             //    }
             //}
 
-            //if (null == decryptionKey)
+            //if (decryptionKey == null)
             //{
             //    foreach (SecurityKeyIdentifierClause clause in clauses)
             //    {
@@ -545,7 +545,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             //    }
             //}
 
-            //if (null == decryptionKey)
+            //if (decryptionKey == null)
             //{
             //    throw LogHelper.LogExceptionMessage(
             //        new EncryptedTokenDecryptionFailedException());
@@ -553,7 +553,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             //// Need a symmetric key
             //SymmetricSecurityKey symmetricKey = decryptionKey as SymmetricSecurityKey;
-            //if (null == symmetricKey)
+            //if (symmetricKey == null)
             //{
             //    throw LogHelper.LogExceptionMessage(
             //        new SecurityTokenException(SR.GetString(SR.ID4023)));
@@ -605,7 +605,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A Saml2Conditions object.</returns>
         protected virtual Saml2Conditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             var conditions = new Saml2Conditions();
@@ -644,7 +644,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <remarks>Uses tokenDescriptor.Issuer.</remarks>
         protected virtual Saml2NameIdentifier CreateIssuerNameIdentifier(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             // Must have an issuer
@@ -936,7 +936,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A Saml2Subject.</returns>
         protected virtual Saml2Subject CreateSamlSubject(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             var saml2Subject = new Saml2Subject();
@@ -988,7 +988,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // Add subject confirmation data
             Saml2SubjectConfirmation subjectConfirmation;
-            //if (null == tokenDescriptor.Proof)
+            //if (tokenDescriptor.Proof == null)
             {
                 subjectConfirmation = new Saml2SubjectConfirmation(Saml2Constants.ConfirmationMethods.Bearer);
             }
@@ -1011,7 +1011,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentNullException">When the given tokenDescriptor is null</exception>
         protected virtual EncryptingCredentials GetEncryptingCredentials(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             EncryptingCredentials encryptingCredentials = null;
@@ -1041,7 +1041,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>The signing credential.</returns>
         protected virtual SigningCredentials GetSigningCredentials(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             return tokenDescriptor.SigningCredentials;
@@ -1418,7 +1418,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
             var samlToken = token as Saml2SecurityToken;
-            if (null == samlToken)
+            if (samlToken == null)
                 throw Saml2Serializer.LogWriteException(LogMessages.IDX11150, token.GetType());
 
             Serializer.WriteAssertion(writer, samlToken.Assertion);

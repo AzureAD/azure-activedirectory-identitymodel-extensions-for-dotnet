@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public static DateTime? ToUniversalTime(DateTime? value)
         {
-            if (null == value || value.Value.Kind == DateTimeKind.Utc)
+            if (value == null || value.Value.Kind == DateTimeKind.Utc)
                 return value;
 
             return ToUniversalTime(value.Value);

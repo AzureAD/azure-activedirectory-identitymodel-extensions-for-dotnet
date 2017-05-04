@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // SAML 2.0 errata at the time of this implementation:
             // http://docs.oasis-open.org/security/saml/v2.0/sstc-saml-approved-errata-2.0-cd-02.pdf
             // ==
-            if (null == actionNamespace)
+            if (actionNamespace == null)
                 throw LogHelper.LogArgumentNullException(nameof(actionNamespace));
 
             if (!actionNamespace.IsAbsoluteUri)
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 // See note in constructor about why this is required.
-                if (null == value)
+                if (value == null)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)

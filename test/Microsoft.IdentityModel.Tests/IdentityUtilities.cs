@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Tests
             return new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
         }
 
-#if NET52
+#if NET452
         public static Saml2SecurityToken CreateSaml2Token(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
         {
             return null;
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static Saml2SecurityToken CreateSaml2Token(SecurityTokenDescriptor securityTokenDescriptor, Saml2SecurityTokenHandler tokenHandler)
         {
-            return null;
+            return tokenHandler.CreateToken(securityTokenDescriptor) as Saml2SecurityToken;
         }
 
         #if USING_SAML1

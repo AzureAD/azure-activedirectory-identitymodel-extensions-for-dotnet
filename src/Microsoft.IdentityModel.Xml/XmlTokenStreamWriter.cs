@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Xml
                         bool isEmpty = IsEmptyElement;
                         depth++;
                         if (include
-                            && (null == _excludedElementDepth || _excludedElementDepth == (depth - 1))
+                            && (_excludedElementDepth == null || _excludedElementDepth == (depth - 1))
                             && LocalName == _excludedElement
                             && NamespaceUri == _excludedElementNamespace)
                         {

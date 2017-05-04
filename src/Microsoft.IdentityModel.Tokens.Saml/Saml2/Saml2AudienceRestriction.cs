@@ -62,12 +62,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="audiences">The collection of audience elements contained in this restriction.</param>
         public Saml2AudienceRestriction(IEnumerable<string> audiences)
         {
-            if (null == audiences)
+            if (audiences == null)
                 throw LogHelper.LogArgumentNullException(nameof(audiences));
 
             foreach (var audience in audiences)
             {
-                if (null == audience)
+                if (audience == null)
                     throw LogHelper.LogArgumentNullException(nameof(audiences));
 
                 _audiences.Add(audience);

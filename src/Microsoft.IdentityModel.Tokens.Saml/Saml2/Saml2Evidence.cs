@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="assertion"><see cref="Saml2Assertion"/> containing the evidence.</param>
         public Saml2Evidence(Saml2Assertion assertion)
         {
-            if (null == assertion)
+            if (assertion == null)
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
 
             _assertions.Add(assertion);
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="idReference"><see cref="Saml2Id"/> containing the evidence.</param>
         public Saml2Evidence(Saml2Id idReference)
         {
-            if (null == idReference)
+            if (idReference == null)
                 throw LogHelper.LogArgumentNullException(nameof(idReference));
 
             _assertionIdReferences.Add(idReference);
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="uriReference"><see cref="Uri"/> containing the evidence.</param>
         public Saml2Evidence(Uri uriReference)
         {
-            if (null == uriReference)
+            if (uriReference == null)
                 throw LogHelper.LogArgumentNullException(nameof(uriReference));
 
             _assertionUriReferences.Add(uriReference);

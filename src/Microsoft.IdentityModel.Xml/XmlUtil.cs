@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             XmlQualifiedName declaredType = GetXsiType(reader);
 
-            if (null == declaredType)
+            if (declaredType == null)
             {
                 if (requireDeclaration)
                 {

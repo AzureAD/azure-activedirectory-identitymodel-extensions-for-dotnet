@@ -212,7 +212,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
         private bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
         {
-            if (null == reader || !reader.IsStartElement(WsFederationConstants.Elements.RoleDescriptor, WsFederationConstants.Namespaces.MetadataNamespace))
+            if (reader == null || !reader.IsStartElement(WsFederationConstants.Elements.RoleDescriptor, WsFederationConstants.Namespaces.MetadataNamespace))
                 return false;
 
             var type = reader.GetAttribute(WsFederationConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);

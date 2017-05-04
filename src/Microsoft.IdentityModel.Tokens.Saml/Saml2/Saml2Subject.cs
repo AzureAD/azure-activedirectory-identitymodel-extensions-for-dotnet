@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="subjectConfirmation">The <see cref="Saml2SubjectConfirmation"/> to use for initialization.</param>
         public Saml2Subject(Saml2SubjectConfirmation subjectConfirmation)
         {
-            if (null == subjectConfirmation)
+            if (subjectConfirmation == null)
                 throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation));
 
             _subjectConfirmations.Add(subjectConfirmation);

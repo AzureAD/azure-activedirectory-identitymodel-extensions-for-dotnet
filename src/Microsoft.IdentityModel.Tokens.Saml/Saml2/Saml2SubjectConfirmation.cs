@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="data">The <see cref="Saml2SubjectConfirmationData"/> to use for initialization.</param>
         public Saml2SubjectConfirmation(Uri method, Saml2SubjectConfirmationData data)
         {
-            if (null == method)
+            if (method == null)
                 throw LogHelper.LogArgumentNullException(nameof(method));
 
             if (!method.IsAbsoluteUri)
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             set
             {
-                if (null == value)
+                if (value == null)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)

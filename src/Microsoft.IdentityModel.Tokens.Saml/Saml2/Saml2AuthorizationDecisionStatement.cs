@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="actions">Collection of <see cref="Saml2Action"/> specifications.</param>
         public Saml2AuthorizationDecisionStatement(Uri resource, string decision, IEnumerable<Saml2Action> actions)
         {
-            if (null == resource)
+            if (resource == null)
                 throw LogHelper.LogArgumentNullException(nameof(resource));
 
             if (string.IsNullOrEmpty(decision))
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _resource; }
             set
             {
-                if (null == value)
+                if (value == null)
                     throw LogHelper.LogArgumentNullException(nameof(value));
 
                 if (!(value.IsAbsoluteUri || value.Equals(EmptyResource)))

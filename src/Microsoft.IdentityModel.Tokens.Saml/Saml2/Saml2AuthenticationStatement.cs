@@ -56,10 +56,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="authenticationInstant">The time of the authentication.</param>
         public Saml2AuthenticationStatement(Saml2AuthenticationContext authenticationContext, DateTime authenticationInstant)
         {
-            if (null == authenticationContext)
-                throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
-
-            _authnContext = authenticationContext;
+            _authnContext = authenticationContext ?? throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
             _authnInstant = DateTimeUtil.ToUniversalTime(authenticationInstant);
         }
 
@@ -72,10 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _authnContext; }
             set
             {
-                if (null == value)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _authnContext = value;
+                _authnContext = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             }
         }
 

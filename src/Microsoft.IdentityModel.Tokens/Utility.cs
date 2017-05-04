@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </returns>
         internal static string SerializeAsSingleCommaDelimitedString(IEnumerable<string> strings)
         {
-            if (null == strings)
+            if (strings == null)
             {
                 return Utility.Null;
             }
@@ -213,7 +213,7 @@ namespace Microsoft.IdentityModel.Tokens
             int result = 0;
             byte[] a1, a2;
 
-            if (((null == a) || (null == b))
+            if (((a == null) || (b == null))
             || (a.Length != b.Length))
             {
                 a1 = s_bytesA;
@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.Tokens
             int lenToUse = 0;
             byte[] a1, a2;
 
-            if (((null == a) || (null == b))
+            if (((a == null) || (b == null))
             || (a.Length < length || b.Length < length))
             {
                 a1 = s_bytesA;

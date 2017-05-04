@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="assertion">A <see cref="Saml2Assertion"/> to initialize from.</param>
         public Saml2SecurityToken(Saml2Assertion assertion)
         {
-            if (null == assertion)
+            if (assertion == null)
                 throw LogHelper.LogArgumentNullException(nameof(assertion));
 
             _assertion = assertion;
