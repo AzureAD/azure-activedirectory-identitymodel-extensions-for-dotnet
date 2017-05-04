@@ -204,6 +204,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 }
             }
 
+            if (token == null)
+                throw XmlUtil.LogReadException(LogMessages.IDX10902);
+
             return token;
         }
 

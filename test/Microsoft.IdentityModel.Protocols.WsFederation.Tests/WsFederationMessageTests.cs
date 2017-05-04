@@ -31,6 +31,7 @@ using System.Collections.Specialized;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
@@ -88,6 +89,23 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 var tokenHandler = new Saml2SecurityTokenHandler();
                 SecurityToken validatedToken;
                 tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out validatedToken);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("GetTokenNegativeTestTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.GetTokenNegativeTest", theoryData);
+            try
+            {
+                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -202,6 +220,69 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                             }
                         },
                         TestId = "WsFederationMessage getToken test"
+                    });
+
+                theoryData.Add(
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        TokenValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
+                            ValidateIssuer = true,
+                            ValidIssuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                            ValidateAudience = true,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = false,
+                        },
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Saml2_Valid_With_Spaces
+                            }
+                        },
+                        TestId = "WsFederationMessage getToken test with white spaces"
+                    });
+
+                return theoryData;
+            }
+        }
+
+        public static TheoryData<WsFederationMessageTheoryData> GetTokenNegativeTestTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
+
+                theoryData.Add(
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityTokenResponse
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityTokenResponse element"
+                    });
+
+                theoryData.Add(
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityToken
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX10902:"),
+                        TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityToken element"
                     });
 
                 return theoryData;

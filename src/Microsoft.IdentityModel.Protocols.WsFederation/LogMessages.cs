@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         // wsfederation messages
         internal const string IDX10900 = "IDX10900: Building wsfederation message from query string: '{0}'.";
         internal const string IDX10901 = "IDX10901: Building wsfederation message from uri: '{0}'.";
+        internal const string IDX10902 = "IDX10902: Token is not found in wresult";
 
         // xml metadata messages
         internal const string IDX13000 = "IDX13000: Exception thrown while reading WsFedereationMetadata. Element '{0}'. Caught exception: '{1}'.";
@@ -47,6 +48,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX13003 = "IDX13003: Token reference address is missing metadata file.";
         internal const string IDX13004 = "IDX13004: Security token type role descriptor is expected.";
         internal const string IDX13005 = "IDX13005: Key descriptor for signing is expected.";
+        internal const string IDX13006 = "IDX13006: Key descriptor for signing is missing in security token service type RoleDescriptor.";
+        internal const string IDX13007 = "IDX13007: Security token endpoint element is missing in security token service type RoleDescriptor.";
 
 #pragma warning restore 1591
 
