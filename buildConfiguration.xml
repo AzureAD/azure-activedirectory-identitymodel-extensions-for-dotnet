@@ -1,6 +1,7 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
+  <runtimes>netstandard1.4,net451</runtimes>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Logging">
