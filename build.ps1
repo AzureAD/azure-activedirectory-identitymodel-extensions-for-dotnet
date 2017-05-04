@@ -6,7 +6,9 @@ param(
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
-    [string]$failBuildOnTestFailure="YES")
+    [string]$failBuildOnTestFailure="YES",
+    [string]$pack="YES",
+    [string]$addAdditionalFileInfo="NO")
 
 Write-Host ""
 Write-Host "============================"
@@ -95,7 +97,16 @@ if ($build -eq "YES")
     }
 
     $date = Get-Date
-    $postfix = "." + ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmm");
+    if ($addAdditionalFileInfo -eq "YES")
+    {
+        $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss");
+        $additionFileInfo = "5.2.0." + $dateTimeStamp + "." + (git rev-parse HEAD);
+        $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd");
+        $fileVersion = "5.2.0." + $dateTimeStamp;
+    }
+
+    $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmm")
+    $postfix = "." + $dateTimeStamp;
     $versionPropsFile = $PSScriptRoot + "/build/version.props";
     $versionProps = Get-Content $versionPropsFile
     $newVersion = "5.2.0" + $postfix;
@@ -103,8 +114,18 @@ if ($build -eq "YES")
     Set-Content "build\dynamicVersion.props" $newVersionProps;
     $rootNode = $buildConfiguration.projects
     $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
-    foreach($project in $projects) {
+    foreach($project in $projects)
+    {
         $name = $project.name;
+        if ($addAdditionalFileInfo -eq "YES")
+        {
+            $assemblyInfoPath = "$root\src\$name\properties\assemblyinfo.cs";
+            $content = Get-Content $assemblyInfoPath;
+            $content = $content + "[assembly: AssemblyInformationalVersion(""$additionFileInfo"")]";
+            $content = $content + "[assembly: AssemblyFileVersion(""$fileVersion"")]";
+            Set-Content $assemblyInfoPath $content
+        }
+
         Write-Host "======================"
         Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\src\$name\$name.csproj"
         Write-Host ""
@@ -113,6 +134,25 @@ if ($build -eq "YES")
         Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\src\$name\$name.csproj"
         Write-Host ""
         Start-Process -wait -NoNewWindow $dotnetexe "build $root\src\$name\$name.csproj"
+    }
+}
+
+if ($pack -eq "YES")
+{
+    Write-Host ""
+    Write-Host "============================"
+    Write-Host "Pack assemblies"
+    Write-Host ""
+
+    if (!(Test-Path $artifactsRoot))
+    {
+        Write-Host ">>> mkdir $artifactsRoot | Out-Null"
+        mkdir $artifactsRoot | Out-Null
+    }
+
+    $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
+    foreach($project in $projects) {
+        $name = $project.name;
         Write-Host "======================"
         Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build $root\src\$name -c $buildType -o $artifactsRoot -s"
         Write-Host ""
