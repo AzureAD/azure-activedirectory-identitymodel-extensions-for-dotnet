@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (string.IsNullOrEmpty(configuration.Issuer))
                 throw XmlUtil.LogReadException(LogMessages.IDX13001);
 
-            // Process <EntityDescriptor>            
+            // <EntityDescriptor>
             reader.ReadStartElement();
 
             // flag for the existence of SecurityTokenSeviceType RoleDescriptor
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 }
             }
 
-            // Process </EntityDescriptor>
+            // </EntityDescriptor>
             reader.ReadEndElement();
 
             // The metadata xml should contain a SecurityTokenServiceType RoleDescriptor
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             else if (!use.Equals(WsFederationConstants.keyUse.Signing))
                 throw XmlUtil.LogReadException(LogMessages.IDX13009, WsFederationConstants.Attributes.Use, WsFederationConstants.keyUse.Signing, use);
 
-            // Process <KeyDescriptor>
+            // <KeyDescriptor>
             reader.ReadStartElement();  
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 throw XmlUtil.LogReadException(LogMessages.IDX13002, reader.LocalName, reader.NamespaceURI, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
             }
 
-            // Process </KeyDescriptor>
+            // </KeyDescriptor>
             reader.ReadEndElement();
         }
 
@@ -176,9 +176,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (!IsSecurityTokenServiceTypeRoleDescriptor(reader))
                 throw XmlUtil.LogReadException(LogMessages.IDX13004);
 
-            // Process <RoleDescriptorr>
+            // <RoleDescriptorr>
             reader.ReadStartElement();
-
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(WsFederationConstants.Elements.KeyDescriptor, WsFederationConstants.Namespaces.MetadataNamespace) && reader.GetAttribute(WsFederationConstants.Attributes.Use).Equals(WsFederationConstants.keyUse.Signing))
@@ -191,11 +190,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     throw XmlUtil.LogReadException(LogMessages.IDX13003, reader.Name);
             }
 
-            // Process </RoleDescriptorr>
+            // </RoleDescriptorr>
             reader.ReadEndElement();
 
             if (configuration.KeyInfos.Count == 0)
                 IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX13006);
+
             if (string.IsNullOrEmpty(configuration.TokenEndpoint))
                 IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX13007);
         }
@@ -212,7 +212,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             XmlUtil.CheckReaderOnEntry(reader, WsFederationConstants.Elements.SecurityTokenEndpoint, WsFederationConstants.Namespaces.FederationNamespace);
 
-            reader.ReadStartElement();  // SecurityTokenServiceEndpoint
+            // <SecurityTokenServiceEndpoint>
+            reader.ReadStartElement();
             reader.MoveToContent();
 
             XmlUtil.CheckReaderOnEntry(reader, WsFederationConstants.Elements.EndpointReference, WsFederationConstants.Namespaces.AddressingNamspace);
@@ -228,14 +229,17 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (string.IsNullOrEmpty(configuration.TokenEndpoint))
                 throw XmlUtil.LogReadException(LogMessages.IDX13003);
 
+            // </Address>
             reader.MoveToContent();
-            reader.ReadEndElement();  // Address
+            reader.ReadEndElement();
 
+            // </EndpointReference>
             reader.MoveToContent();
-            reader.ReadEndElement();  // EndpointReference
+            reader.ReadEndElement();
 
+            // </SecurityTokenServiceEndpoint>
             reader.MoveToContent();
-            reader.ReadEndElement();  // SecurityTokenServiceEndpoint
+            reader.ReadEndElement();
         }
 
         private bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)

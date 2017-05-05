@@ -226,7 +226,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMessageTheoryData
                     {
-                        First = true,
                         TokenValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
@@ -274,7 +273,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMessageTheoryData
                     {
-                        First = true,
                         WsFederationMessageTestSet = new WsFederationMessageTestSet
                         {
                             WsFederationMessage = new WsFederationMessage
