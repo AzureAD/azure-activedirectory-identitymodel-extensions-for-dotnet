@@ -31,6 +31,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.WsFederation.Exceptions;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
@@ -205,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             if (token == null)
-                throw XmlUtil.LogReadException(LogMessages.IDX10902);
+                throw new WsFederationException(LogMessages.IDX10902);
 
             return token;
         }

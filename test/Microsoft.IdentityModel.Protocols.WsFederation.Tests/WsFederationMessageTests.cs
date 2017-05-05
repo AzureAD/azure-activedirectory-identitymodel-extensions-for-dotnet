@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Microsoft.IdentityModel.Protocols.WsFederation.Exceptions;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -281,7 +282,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityToken
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX10902:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityToken element"
                     });
 

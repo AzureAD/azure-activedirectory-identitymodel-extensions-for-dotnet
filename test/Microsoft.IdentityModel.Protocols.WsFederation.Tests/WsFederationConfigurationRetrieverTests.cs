@@ -128,6 +128,24 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadKeyDescriptorForSigningKeyUseTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadKeyDescriptorForSigningKeyUseTest(WsFederationMetadataTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigningTheoryData", theoryData);
+            var serializer = new WsFederationMetadataSerializerPublic();
+            try
+            {
+                serializer.ReadKeyDescriptorForSigningPublic(new WsFederationConfiguration(), XmlReader.Create(new StringReader(theoryData.Metadata)));
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadSecurityTokenServiceTypeRoleDescriptorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadSecurityTokenServiceTypeRoleDescriptorTest(WsFederationMetadataTheoryData theoryData)
@@ -309,7 +327,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 theoryData.Add(
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13007:"),
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Configuration = new WsFederationConfiguration
+                        {
+                            Issuer = ReferenceMetadata.Issuer
+                        },
                         Metadata = ReferenceMetadata.MetadataNoSecurityTokenSeviceEndpointInRoleDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoSecurityTokenSeviceEndpointInRoleDescriptor)
                     });
@@ -362,6 +384,32 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadKeyDescriptorForSigning"
+                    });
+
+                return theoryData;
+            }
+        }
+
+        public static TheoryData<WsFederationMetadataTheoryData> ReadKeyDescriptorForSigningKeyUseTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
+
+                theoryData.Add(
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Metadata = ReferenceMetadata.KeyDescriptorNoKeyUse,
+                        TestId = "ReadKeyDescriptorForSigning: 'use' is null"
+                    });
+
+                theoryData.Add(
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13009:"),
+                        Metadata = ReferenceMetadata.KeyDescriptorKeyUseNotForSigning,
+                        TestId = "ReadKeyDescriptorForSigning: 'use' is not 'signing'"
                     });
 
                 return theoryData;
