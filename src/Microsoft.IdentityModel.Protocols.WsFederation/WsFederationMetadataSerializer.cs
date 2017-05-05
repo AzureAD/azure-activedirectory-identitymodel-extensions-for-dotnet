@@ -131,8 +131,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             XmlUtil.CheckReaderOnEntry(reader, WsFederationConstants.Elements.KeyDescriptor, WsFederationConstants.Namespaces.MetadataNamespace);
 
-            if (!IsKeyDescriptorForSigning(reader))
-                throw XmlUtil.LogReadException(LogMessages.IDX13005);
+            var use = reader.GetAttribute(WsFederationConstants.Attributes.Use);
+            if (string.IsNullOrEmpty(use))
+                IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX13008);
+            else if (!use.Equals(WsFederationConstants.keyUse.Signing))
+                throw XmlUtil.LogReadException(LogMessages.IDX13009, WsFederationConstants.Attributes.Use, WsFederationConstants.keyUse.Signing, use);
 
             // Process <KeyDescriptor>
             reader.ReadStartElement();  
@@ -176,40 +179,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             // Process <RoleDescriptorr>
             reader.ReadStartElement();
 
-            // Warn if there is no KeyDescriptor element for Signing
-            // Throw if there is no SecurityTokenEndpoint element
-            var hasKeyDescriptorForSigning = false;
-            var hasSecurityTokenEndpoint = false;
-
             while (reader.IsStartElement())
             {
-                if (IsKeyDescriptorForSigning(reader))
-                {
-                    hasKeyDescriptorForSigning = true;
+                if (reader.IsStartElement(WsFederationConstants.Elements.KeyDescriptor, WsFederationConstants.Namespaces.MetadataNamespace) && reader.GetAttribute(WsFederationConstants.Attributes.Use).Equals(WsFederationConstants.keyUse.Signing))
                     ReadKeyDescriptorForSigning(configuration, reader);
-                }
                 else if (reader.IsStartElement(WsFederationConstants.Elements.SecurityTokenEndpoint, WsFederationConstants.Namespaces.FederationNamespace))
-                {
-                    hasSecurityTokenEndpoint = true;
                     ReadSecurityTokenEndpoint(configuration, reader);
-                }
                 else if (reader.IsStartElement())
-                {
                     reader.ReadOuterXml();
-                }
                 else
-                {
                     throw XmlUtil.LogReadException(LogMessages.IDX13003, reader.Name);
-                }
             }
 
             // Process </RoleDescriptorr>
             reader.ReadEndElement();
 
-            if (!hasKeyDescriptorForSigning)
+            if (configuration.KeyInfos.Count == 0)
                 IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX13006);
-            if (!hasSecurityTokenEndpoint)
-                throw XmlUtil.LogReadException(LogMessages.IDX13007);
+            if (string.IsNullOrEmpty(configuration.TokenEndpoint))
+                IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX13007);
         }
 
         /// <summary>
@@ -248,13 +236,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             reader.MoveToContent();
             reader.ReadEndElement();  // SecurityTokenServiceEndpoint
-        }
-
-        private bool IsKeyDescriptorForSigning(XmlReader reader)
-        {
-            return null != reader &&
-                reader.IsStartElement(WsFederationConstants.Elements.KeyDescriptor, WsFederationConstants.Namespaces.MetadataNamespace) &&
-                reader.GetAttribute(WsFederationConstants.Attributes.Use).Equals(WsFederationConstants.keyUse.Signing);
         }
 
         private bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)

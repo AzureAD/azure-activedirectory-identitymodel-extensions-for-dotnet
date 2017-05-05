@@ -49,7 +49,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX13004 = "IDX13004: Security token type role descriptor is expected.";
         internal const string IDX13005 = "IDX13005: Key descriptor for signing is expected.";
         internal const string IDX13006 = "IDX13006: Key descriptor for signing is missing in security token service type RoleDescriptor.";
-        internal const string IDX13007 = "IDX13007: Security token endpoint element is missing in security token service type RoleDescriptor.";
+        internal const string IDX13007 = "IDX13007: Token endpoint is missing in security token service type RoleDescriptor.";
+        internal const string IDX13008 = "IDX13008: 'Use' attribute is missing in KeyDescriptor.";
+        internal const string IDX13009 = "IDX13009: The expected value for attribute '{0}' is '{1}', but the current one is '{2}'.";
 
 #pragma warning restore 1591
 
