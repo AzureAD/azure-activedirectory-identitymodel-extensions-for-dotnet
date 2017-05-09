@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
             if (keyBytes.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyBytes), LogHelper.FormatInvariant(LogMessages.IDX10664, keyBytes.Length << 3)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10664, keyBytes.Length << 3), nameof(keyBytes)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
             if (keyBytes.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(keyBytes), LogHelper.FormatInvariant(LogMessages.IDX10664, keyBytes.Length << 3)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10664, keyBytes.Length << 3), nameof(keyBytes)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
