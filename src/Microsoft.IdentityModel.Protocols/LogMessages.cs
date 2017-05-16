@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols
         // properties, configuration 
         internal const string IDX10106 = "IDX10106: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'.";
         internal const string IDX10107 = "IDX10107: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'.";
-        internal const string IDX10108 = "IDX10108: The address specified is not valid as per HTTPS scheme. Please specify an https address for security reasons. If you want to test with http address, set the RequireHttps property  on IDocumentRetriever to false.";
+        internal const string IDX10108 = "IDX10108: The address specified '{0}' is not valid as per HTTPS scheme. Please specify an https address for security reasons. If you want to test with http address, set the RequireHttps property  on IDocumentRetriever to false.";
 
         // configuration retrieval errors
         internal const string IDX10803 = "IDX10803: Unable to obtain configuration from: '{0}'.";
