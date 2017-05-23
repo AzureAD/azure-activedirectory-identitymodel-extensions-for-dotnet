@@ -309,13 +309,29 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="ArgumentException">'key' is not a <see cref="SymmetricSecurityKey"/>.</exception>
         /// <remarks>
         /// <para>When finished with the <see cref="KeyWrapProvider"/> call <see cref="ReleaseKeyWrapProvider(KeyWrapProvider)"/>.</para>
         /// </remarks>
         public virtual KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm)
         {
             return CreateKeyWrapProvider(key, algorithm, false);
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="KeyWrapProvider"/> for a specific &lt;SecurityKey, Algorithm>.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to use.</param>
+        /// <returns>an instance of <see cref="KeyWrapProvider"/></returns>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <remarks>
+        /// <para>When finished with the <see cref="KeyWrapProvider"/> call <see cref="ReleaseKeyWrapProvider(KeyWrapProvider)"/>.</para>
+        /// </remarks>
+        public virtual KeyWrapProvider CreateKeyWrapProviderForUnwrap(SecurityKey key, string algorithm)
+        {
+            return CreateKeyWrapProvider(key, algorithm, true);
         }
 
         private KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)

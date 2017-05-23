@@ -1151,6 +1151,79 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             return theoryData;
         }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(KeyWrapTokenTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void KeyWrapTokenTest(KeyWrapTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.KeyWrapTokenTest", theoryData);
+
+            try
+            {
+                var signingCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2;
+                var securityTokenDescriptor = Default.SecurityTokenDescriptor(theoryData.EncryptingCredentials, signingCredentials, null);
+
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.CreateToken(securityTokenDescriptor);
+                var tokenString = handler.WriteToken(token);
+
+                var validationParameters = Default.TokenValidationParameters(theoryData.DecryptingCredentials.Key, signingCredentials.Key);
+                var principal = handler.ValidateToken(tokenString, validationParameters, out var validatedToken);
+
+                Assert.NotNull(principal);
+                theoryData.ExpectedException.ProcessNoException();
+            } catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<KeyWrapTokenTheoryData> KeyWrapTokenTheoryData()
+        {
+            var theoryData = new TheoryData<KeyWrapTokenTheoryData>();
+            var handler = new JwtSecurityTokenHandler();
+            var rsaOAEPEncryptingCredential = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512);
+            var rsaPKCS1EncryptingCredential = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512);
+
+            theoryData.Add(new KeyWrapTokenTheoryData
+            {
+                EncryptingCredentials = rsaOAEPEncryptingCredential,
+                DecryptingCredentials = rsaOAEPEncryptingCredential,
+                TestId = "Key wrap token test using OAEP padding"
+            });
+
+            theoryData.Add(new KeyWrapTokenTheoryData
+            {
+                EncryptingCredentials = rsaPKCS1EncryptingCredential,
+                DecryptingCredentials = rsaPKCS1EncryptingCredential,
+                TestId = "Key wrap token test using PKCS1 padding"
+            });
+
+            theoryData.Add(new KeyWrapTokenTheoryData
+            {
+                EncryptingCredentials = rsaPKCS1EncryptingCredential,
+                DecryptingCredentials = Default.SymmetricEncryptingCredentials,
+                ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
+                TestId = "Key wrap token test using RSA to wrap but symmetric key to unwrap"
+            });
+
+            theoryData.Add(new KeyWrapTokenTheoryData
+            {
+                EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                DecryptingCredentials = rsaPKCS1EncryptingCredential,
+                ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
+                TestId = "Key wrap token test using symmetric key to wrap but RSA to unwrap"
+            });
+
+            return theoryData;
+        }
+    }
+
+    public class KeyWrapTokenTheoryData : TheoryDataBase
+    {
+        public EncryptingCredentials EncryptingCredentials;
+        public EncryptingCredentials DecryptingCredentials;
     }
 
     public enum TokenType
