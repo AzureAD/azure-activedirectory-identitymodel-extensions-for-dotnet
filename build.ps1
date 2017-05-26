@@ -1,7 +1,7 @@
 param(
     [string]$build="YES",
     [string]$buildType="Debug",
-    [string]$dotnetDir="c:\dotnet.1.0.3",
+    [string]$dotnetDir="c:\Program Files\dotnet",
     [string]$clean="YES",
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
