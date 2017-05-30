@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
                 return new AuthenticatedEncryptionProvider(key, algorithm);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
         }
 
         /// <summary>
@@ -521,7 +521,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return new HMACSHA512(keyBytes);
 
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10666, algorithm)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10666, algorithm), nameof(algorithm)));
             }
         }
 

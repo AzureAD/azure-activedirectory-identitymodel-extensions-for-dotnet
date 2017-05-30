@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.Sha512;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
         }
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
