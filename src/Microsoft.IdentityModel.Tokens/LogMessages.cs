@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         internal const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
-        internal const string IDX10638 = "IDX10638: Cannot created the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
+        internal const string IDX10638 = "IDX10638: Cannot create the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         internal const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         internal const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
         internal const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
