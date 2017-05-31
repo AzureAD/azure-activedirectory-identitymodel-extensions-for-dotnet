@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#if NET451
+#if !NETSTANDARD1_4
 
 using System;
 using System.Security.Cryptography;

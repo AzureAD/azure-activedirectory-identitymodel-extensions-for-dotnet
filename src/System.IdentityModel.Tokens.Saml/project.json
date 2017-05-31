@@ -11,7 +11,7 @@
         "System.Runtime.Serialization.Xml": "4.3.0-*"
       }
     },
-    "net451": {
+    "net45": {
       "frameworkAssemblies": {
         "System.Runtime.Serialization": ""
       }
