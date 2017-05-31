@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <AssemblyName>System.IdentityModel.Tokens.Jwt</AssemblyName>
-    <Description>Includes types that provide support for creating, serializing and validating JWT tokens.</Description>
+    <Description>Includes types that provide support for creating, serializing and validating JSON Web Tokens.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>System.IdentityModel.Tokens.Jwt</PackageId>
     <TargetFrameworks>netstandard1.4;net451</TargetFrameworks>
