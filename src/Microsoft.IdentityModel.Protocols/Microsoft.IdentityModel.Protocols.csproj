@@ -7,7 +7,7 @@
     <Description>Provides base protocol support for OpenIdConnect and WsFederation.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Protocols</PackageId>
-    <TargetFrameworks>netstandard1.4;net451</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

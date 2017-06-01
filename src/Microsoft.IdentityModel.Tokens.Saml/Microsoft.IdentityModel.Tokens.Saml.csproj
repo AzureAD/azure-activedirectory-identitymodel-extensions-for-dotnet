@@ -7,7 +7,7 @@
     <Description>Includes types that provide support for SamlTokens version 1 and 2.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Tokens.Saml</PackageId>
-    <TargetFrameworks>net451</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -6,8 +6,8 @@
     <AssemblyName>Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests</AssemblyName>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests</PackageId>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">1.1.0</RuntimeFrameworkVersion>
-    <TargetFrameworks>netcoreapp1.1;net452</TargetFrameworks>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
+    <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.csproj" />
   </ItemGroup>
 
@@ -26,7 +27,7 @@
     <PackageReference Include="xunit" Version="2.2.0-*" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0-*" />
     <PackageReference Include="System.Net.Http" Version="4.3.0-*" />    
   </ItemGroup>

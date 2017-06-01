@@ -32,10 +32,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System;
 using Microsoft.IdentityModel.Tokens;
-
-#if NET452
 using Microsoft.IdentityModel.Tokens.Saml2;
-#endif
 
 #if USING_SAML1
 using Microsoft.IdentityModel.Tokens.Saml;

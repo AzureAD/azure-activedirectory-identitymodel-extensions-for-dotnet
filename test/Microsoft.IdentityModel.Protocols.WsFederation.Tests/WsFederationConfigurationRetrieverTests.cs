@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-#if NET452
 
 using System;
 using System.Collections.Generic;
@@ -488,5 +487,3 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
     }
 }
-
-#endif

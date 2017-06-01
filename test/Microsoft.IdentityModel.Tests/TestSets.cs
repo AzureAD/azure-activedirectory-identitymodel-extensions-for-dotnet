@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#if NET452
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
@@ -66,5 +65,3 @@ namespace Microsoft.IdentityModel.Tests
         public string Xml { get; set; }
     }
 }
-
-#endif
