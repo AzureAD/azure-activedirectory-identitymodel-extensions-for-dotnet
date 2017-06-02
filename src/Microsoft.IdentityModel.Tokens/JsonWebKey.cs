@@ -299,9 +299,17 @@ namespace Microsoft.IdentityModel.Tokens
                 uint cbKey = GetKeyByteCount(Crv);
                 byte[] keyBlob;
                 if (usePrivateKey)
+#if NET45
+                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
+#else
                     keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
+#endif
                 else
+#if NET45
+                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
+#else
                     keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+#endif
 
                 keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
                 IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();

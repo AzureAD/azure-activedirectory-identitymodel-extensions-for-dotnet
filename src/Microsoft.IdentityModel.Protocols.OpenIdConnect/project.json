@@ -10,7 +10,7 @@
         "System.Dynamic.Runtime": "4.3.0-*"
       }
     },
-    "net451": { }
+    "net45": { }
   },
   "buildOptions": {
     "warningsAsErrors": true,

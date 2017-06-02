@@ -11,7 +11,7 @@
         "System.IO.FileSystem": "4.3.0-*"
       }
     },
-    "net451": { }
+    "net45": { }
   },
   "buildOptions": {
     "warningsAsErrors": true,
