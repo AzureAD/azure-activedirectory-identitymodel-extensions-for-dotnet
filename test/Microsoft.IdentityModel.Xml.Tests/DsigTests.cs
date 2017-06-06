@@ -60,20 +60,19 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get
             {
-                var theoryData = new TheoryData<DSigTheoryData>();
-
-                theoryData.Add(new DSigTheoryData
+                return new TheoryData<DSigTheoryData>()
                 {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    First = true,
-                    SignedInfoTestSet = new SignedInfoTestSet
+                    new DSigTheoryData
                     {
-                        SignedInfo = null
-                    },
-                    TestId = "SignedInfo NULL"
-                });
-
-                return theoryData;
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        First = true,
+                        SignedInfoTestSet = new SignedInfoTestSet
+                        {
+                            SignedInfo = null
+                        },
+                        TestId = "SignedInfo NULL"
+                    }
+                };
             }
         }
 
@@ -109,20 +108,20 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                var theoryData = new TheoryData<DSigTheoryData>();
-
-                theoryData.Add(new DSigTheoryData
+                var theoryData = new TheoryData<DSigTheoryData>
                 {
-                    First = true,
-                    SignatureTestSet = ReferenceXml.Signature_UnknownDigestAlgorithm,
-                    TestId = nameof(ReferenceXml.Signature_UnknownDigestAlgorithm)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    SignatureTestSet = ReferenceXml.Signature_UnknownSignatureAlgorithm,
-                    TestId = nameof(ReferenceXml.Signature_UnknownSignatureAlgorithm)
-                });
+                    new DSigTheoryData
+                    {
+                        First = true,
+                        SignatureTestSet = ReferenceXml.Signature_UnknownDigestAlgorithm,
+                        TestId = nameof(ReferenceXml.Signature_UnknownDigestAlgorithm)
+                    },
+                    new DSigTheoryData
+                    {
+                        SignatureTestSet = ReferenceXml.Signature_UnknownSignatureAlgorithm,
+                        TestId = nameof(ReferenceXml.Signature_UnknownSignatureAlgorithm)
+                    }
+                };
 
                 return theoryData;
             }
@@ -232,15 +231,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get
             {
-                var theoryData = new TheoryData<DSigTheoryData>();
-
-                theoryData.Add(new DSigTheoryData
+                return new TheoryData<DSigTheoryData>
                 {
-                    First = true,
-                    TestId = "Constructor"
-                });
-
-                return theoryData;
+                    new DSigTheoryData
+                    {
+                        First = true,
+                        TestId = "Constructor"
+                    }
+                };
             }
         }
 
@@ -276,87 +274,68 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                var theoryData = new TheoryData<DSigTheoryData>();
-
-                //theoryData.Add(new DSigTheoryData
-                //{
-                //    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                //    First = true,
-                //    TestId = "Null XmlReader",
-                //    XmlReader = null
-                //});
-
-                theoryData.Add(new DSigTheoryData
+                return new TheoryData<DSigTheoryData>
                 {
-                    First = true,
-                    SignedInfoTestSet = ReferenceXml.SignedInfoValid,
-                    TestId = nameof(ReferenceXml.SignedInfoValid)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    SignedInfoTestSet = ReferenceXml.SignInfoStartsWithWhiteSpace,
-                    TestId = nameof(ReferenceXml.SignInfoStartsWithWhiteSpace),
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoCanonicalizationMethodMissing,
-                    TestId = nameof(ReferenceXml.SignedInfoCanonicalizationMethodMissing)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoReferenceMissing,
-                    TestId = nameof(ReferenceXml.SignedInfoReferenceMissing)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoTransformsMissing,
-                    TestId = nameof(ReferenceXml.SignedInfoTransformsMissing)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoNoTransforms,
-                    TestId = nameof(ReferenceXml.SignedInfoNoTransforms)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoUnknownCanonicalizationtMethod,
-                    TestId = nameof(ReferenceXml.SignedInfoUnknownCanonicalizationtMethod)
-                });
-
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoUnknownTransform,
-                    TestId = nameof(ReferenceXml.SignedInfoUnknownTransform)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestMethod,
-                    TestId = nameof(ReferenceXml.SignedInfoMissingDigestMethod)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestValue,
-                    TestId = nameof(ReferenceXml.SignedInfoMissingDigestValue)
-                });
-
-                return theoryData;
+                    new DSigTheoryData
+                    {
+                        First = true,
+                        SignedInfoTestSet = ReferenceXml.SignedInfoValid,
+                        TestId = nameof(ReferenceXml.SignedInfoValid)
+                    },
+                    new DSigTheoryData
+                    {
+                        SignedInfoTestSet = ReferenceXml.SignInfoStartsWithWhiteSpace,
+                        TestId = nameof(ReferenceXml.SignInfoStartsWithWhiteSpace),
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoCanonicalizationMethodMissing,
+                        TestId = nameof(ReferenceXml.SignedInfoCanonicalizationMethodMissing)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoReferenceMissing,
+                        TestId = nameof(ReferenceXml.SignedInfoReferenceMissing)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoTransformsMissing,
+                        TestId = nameof(ReferenceXml.SignedInfoTransformsMissing)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoNoTransforms,
+                        TestId = nameof(ReferenceXml.SignedInfoNoTransforms)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoUnknownCanonicalizationtMethod,
+                        TestId = nameof(ReferenceXml.SignedInfoUnknownCanonicalizationtMethod)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoUnknownTransform,
+                        TestId = nameof(ReferenceXml.SignedInfoUnknownTransform)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestMethod,
+                        TestId = nameof(ReferenceXml.SignedInfoMissingDigestMethod)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestValue,
+                        TestId = nameof(ReferenceXml.SignedInfoMissingDigestValue)
+                    }
+                };
             }
         }
 
@@ -392,108 +371,93 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                var theoryData = new TheoryData<DSigTheoryData>();
-
-                theoryData.Add(new DSigTheoryData
+                return new TheoryData<DSigTheoryData>
                 {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    First = true,
-                    KeyInfoTestSet = ReferenceXml.KeyInfoWrongElement,
-                    TestId = nameof(ReferenceXml.KeyInfoWrongElement)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                    First = true,
-                    KeyInfoTestSet = ReferenceXml.KeyInfoWrongNameSpace,
-                    TestId = nameof(ReferenceXml.KeyInfoWrongNameSpace)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoSingleCertificate,
-                    TestId = nameof(ReferenceXml.KeyInfoSingleCertificate)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoSingleIssuerSerial,
-                    TestId = nameof(ReferenceXml.KeyInfoSingleIssuerSerial)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoSingleSKI,
-                    TestId = nameof(ReferenceXml.KeyInfoSingleSKI)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoSingleSubjectName,
-                    TestId = nameof(ReferenceXml.KeyInfoSingleSubjectName)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                    KeyInfoTestSet = ReferenceXml.KeyInfoMultipleCertificates,
-                    TestId = nameof(ReferenceXml.KeyInfoMultipleCertificates)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                    KeyInfoTestSet = ReferenceXml.KeyInfoMultipleIssuerSerial,
-                    TestId = nameof(ReferenceXml.KeyInfoMultipleIssuerSerial)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                    KeyInfoTestSet = ReferenceXml.KeyInfoMultipleSKI,
-                    TestId = nameof(ReferenceXml.KeyInfoMultipleSKI)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                    KeyInfoTestSet = ReferenceXml.KeyInfoMultipleSubjectName,
-                    TestId = nameof(ReferenceXml.KeyInfoMultipleSubjectName)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoWithWhitespace,
-                    TestId = nameof(ReferenceXml.KeyInfoWithWhitespace)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoWithUnknownX509DataElements,
-                    TestId = nameof(ReferenceXml.KeyInfoWithUnknownX509DataElements)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoWithAllElements,
-                    TestId = nameof(ReferenceXml.KeyInfoWithAllElements)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    KeyInfoTestSet = ReferenceXml.KeyInfoWithUnknownElements,
-                    TestId = nameof(ReferenceXml.KeyInfoWithUnknownElements)
-                });
-
-                theoryData.Add(new DSigTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21017:", typeof(FormatException)),
-                    KeyInfoTestSet = ReferenceXml.KeyInfoMalformedCertificate,
-                    TestId = nameof(ReferenceXml.KeyInfoMalformedCertificate)
-                });
-
-                return theoryData;
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        First = true,
+                        KeyInfoTestSet = ReferenceXml.KeyInfoWrongElement,
+                        TestId = nameof(ReferenceXml.KeyInfoWrongElement)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        First = true,
+                        KeyInfoTestSet = ReferenceXml.KeyInfoWrongNameSpace,
+                        TestId = nameof(ReferenceXml.KeyInfoWrongNameSpace)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleCertificate,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleCertificate)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleIssuerSerial,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleIssuerSerial)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleSKI,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleSKI)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleSubjectName,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleSubjectName)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleCertificates,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleCertificates)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleIssuerSerial,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleIssuerSerial)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleSKI,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleSKI)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleSubjectName,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleSubjectName)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoWithWhitespace,
+                        TestId = nameof(ReferenceXml.KeyInfoWithWhitespace)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoWithUnknownX509DataElements,
+                        TestId = nameof(ReferenceXml.KeyInfoWithUnknownX509DataElements)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoWithAllElements,
+                        TestId = nameof(ReferenceXml.KeyInfoWithAllElements)
+                    },
+                    new DSigTheoryData
+                    {
+                        KeyInfoTestSet = ReferenceXml.KeyInfoWithUnknownElements,
+                        TestId = nameof(ReferenceXml.KeyInfoWithUnknownElements)
+                    },
+                    new DSigTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21017:", typeof(FormatException)),
+                        KeyInfoTestSet = ReferenceXml.KeyInfoMalformedCertificate,
+                        TestId = nameof(ReferenceXml.KeyInfoMalformedCertificate)
+                    }
+                };
             }
         }
 

@@ -7,7 +7,8 @@
     <Description>Microsoft.IdentityModel.Protocols.WsFederation.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Protocols.WsFederation.Tests</PackageId>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
+    <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +23,7 @@
     <PackageReference Include="xunit" Version="2.2.0-*" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <PackageReference Include="xunit.runner.console" Version="2.1.0-*" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />

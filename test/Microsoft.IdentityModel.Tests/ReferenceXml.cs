@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-#if NET452
 
 using System;
 using System.Security.Cryptography.X509Certificates;
@@ -1098,4 +1097,3 @@ namespace Microsoft.IdentityModel.Tests
 
     }
 }
-#endif

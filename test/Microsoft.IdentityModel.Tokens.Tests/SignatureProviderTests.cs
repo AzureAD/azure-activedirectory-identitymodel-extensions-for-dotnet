@@ -337,16 +337,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static bool IsRunningOn462OrGreaterOrCore()
         {
-#if NETCOREAPP1_1
-            // test for Core
-            return true;
-#else
+#if NET452
             // test for >=4.6.2
             // AesCng was added to System.Core in 4.6.2. It doesn't exist in .NET Core.
             Module systemCoreModule = typeof(System.Security.Cryptography.AesCryptoServiceProvider).GetTypeInfo().Assembly.GetModules()[0];
             if (systemCoreModule != null && systemCoreModule.GetType("System.Security.Cryptography.AesCng") != null)
                 return true;
             return false;
+#else
+            // test for Core
+            return true;
 #endif
         }
 
