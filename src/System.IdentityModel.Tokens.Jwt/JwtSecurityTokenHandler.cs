@@ -1436,7 +1436,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
                 {
-                    var kwp = key.CryptoProviderFactory.CreateKeyWrapProvider(key, jwtToken.Header.Alg);
+                    var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Header.Alg);
                     var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                     unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                 }
