@@ -1,7 +1,7 @@
 {
-  "version": "2.1.3",
+  "version": "2.1.4",
   "dependencies": {
-    "Microsoft.IdentityModel.Tokens.Tests": "5.1.3",
+    "Microsoft.IdentityModel.Tokens.Tests": "5.1.4",
     "xunit": "2.2.0-*",
     "dotnet-test-xunit": "2.2.0-*"
   },
