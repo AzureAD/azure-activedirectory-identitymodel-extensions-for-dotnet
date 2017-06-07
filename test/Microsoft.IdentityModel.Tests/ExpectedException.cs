@@ -31,7 +31,6 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
-using Xunit;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -190,7 +189,7 @@ namespace Microsoft.IdentityModel.Tests
                 if (errors != null)
                     errors.Add("expectedException.TypeExpected != null: " + TypeExpected);
                 else
-                    Assert.True(false, "expectedException.TypeExpected != null: '" + TypeExpected);
+                    throw new TestException("expectedException.TypeExpected != null: '" + TypeExpected);
             }
         }
 
@@ -205,7 +204,7 @@ namespace Microsoft.IdentityModel.Tests
             if (errors != null)
                 errors.Add(err);
             else
-                Assert.True(false, err);
+                throw new TestException("errors == null, error in test.");
         }
 
         public static ExpectedException SecurityTokenEncryptionKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)

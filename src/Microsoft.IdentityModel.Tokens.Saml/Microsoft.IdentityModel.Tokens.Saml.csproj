@@ -7,7 +7,7 @@
     <Description>Includes types that provide support for SamlTokens version 1 and 2.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Tokens.Saml</PackageId>
-    <TargetFrameworks>net451;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks>net45;net451;netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +16,13 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System" />

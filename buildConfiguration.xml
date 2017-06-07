@@ -1,62 +1,29 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
-  <runtimes>netstandard1.4,net451</runtimes>
+  <runtimes>netstandard1.4,net451,net45</runtimes>
   <projects>
     <src>
-      <project name="Microsoft.IdentityModel.Logging">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Tokens">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Xml">
-        <build>yes</build>
-      </project>
-      <project name="System.IdentityModel.Tokens.Jwt">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Tokens.Saml">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Protocols">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Protocols.WsFederation">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect">
-        <build>yes</build>
-      </project>
+      <project name="Microsoft.IdentityModel.Logging" />
+      <project name="Microsoft.IdentityModel.Tokens" />
+      <project name="Microsoft.IdentityModel.Xml" />
+      <project name="System.IdentityModel.Tokens.Jwt" />
+      <project name="Microsoft.IdentityModel.Tokens.Saml" />
+      <project name="Microsoft.IdentityModel.Protocols" />
+      <project name="Microsoft.IdentityModel.Protocols.WsFederation" />
+      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
     </src>
     <test>
-      <project name="Microsoft.IdentityModel.Logging.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Tokens.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Xml.Tests">
-        <build>yes</build>
-      </project>
-      <project name="System.IdentityModel.Tokens.Jwt.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Tokens.Saml.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Protocols.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests">
-        <build>yes</build>
-      </project>
-      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests">
-        <build>yes</build>
-      </project>
+      <project name="Microsoft.IdentityModel.Logging.Tests" test="yes"/>
+      <project name="Microsoft.IdentityModel.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Tokens.Tests" test="yes" />
+      <project name="System.IdentityModel.Tokens.Jwt.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Xml.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Tokens.Saml.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Protocols.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="yes" />
     </test>
   </projects>
 </root>

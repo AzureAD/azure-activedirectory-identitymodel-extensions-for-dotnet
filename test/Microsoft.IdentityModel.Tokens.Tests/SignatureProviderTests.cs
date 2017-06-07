@@ -154,7 +154,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
 #if NET452
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
-#else
+#endif
+
+#if NETSTANDARD1_4
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
             Assert.ThrowsAny<CryptographicException>(() =>
             {
@@ -162,6 +164,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 provider.Sign(rawBytes);
             });
 #endif
+
 #if NET452
             // since the actual exception thrown is private - WindowsCryptographicException, using this pattern to match the derived exception
             Assert.ThrowsAny<CryptographicException>(() =>

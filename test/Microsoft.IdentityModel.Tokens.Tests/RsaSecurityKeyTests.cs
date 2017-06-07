@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             );
 #endif
 
-#if !NET452
+#if NETSTANDARD1_4
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCngProvider_2048,

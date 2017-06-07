@@ -22,6 +22,8 @@ Write-Host "runTests: " $runTests;
 Write-Host "PSScriptRoot: " $PSScriptRoot;
 Write-Host "failBuildOnTestFailure: " $failBuildOnTestFailure;
 Write-Host "dotnetDir: " $dotnetDir
+$time = Get-Date
+Write-Host "time: " $time
 
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $artifactsRoot = "$root\artifacts";
@@ -125,16 +127,16 @@ if ($build -eq "YES")
             $content = $content + "[assembly: AssemblyFileVersion(""$fileVersion"")]";
             Set-Content $assemblyInfoPath $content
         }
-
-        Write-Host "======================"
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\src\$name\$name.csproj"
-        Write-Host ""
-        Start-Process -wait -NoNewWindow $dotnetexe "restore $root\src\$name\$name.csproj"
-        Write-Host "======================"
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\src\$name\$name.csproj"
-        Write-Host ""
-        Start-Process -wait -NoNewWindow $dotnetexe "build $root\src\$name\$name.csproj"
     }
+
+    Write-Host "======================"
+    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\wilson.sln"
+    Write-Host ""
+    Start-Process -wait -NoNewWindow $dotnetexe "restore $root\wilson.sln"
+    Write-Host "======================"
+    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\wilson.sln"
+    Write-Host ""
+    Start-Process -wait -NoNewWindow $dotnetexe "build $root\wilson.sln"
 }
 
 if ($pack -eq "YES")
@@ -151,7 +153,8 @@ if ($pack -eq "YES")
     }
 
     $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
-    foreach($project in $projects) {
+    foreach($project in $projects)
+    {
         $name = $project.name;
         Write-Host "======================"
         Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build $root\src\$name -c $buildType -o $artifactsRoot -s"
@@ -168,34 +171,54 @@ if ($runTests -eq "YES")
 	Write-Host ""
 
     $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
-    foreach ($testProject in $testProjects) {
-        $name = $testProject.name;
-        Write-Host "";
-        Write-Host ">>> Set-Location $root\test\$name"
-        pushd
-        Set-Location $root\test\$name
-        Write-Host "======================"
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $name.csproj"
-        Write-Host ""
-        Start-Process -wait -NoNewWindow $dotnetexe "restore $name.csproj"
-        Write-Host "======================"
-        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test' -c $buildType"
-        Write-Host ""
-        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj -c $buildType"
-        if($p.ExitCode -ne 0)
+    foreach ($testProject in $testProjects)
+    {
+        if ($testProject.test -eq "yes")
         {
-            if (!$testExitCode)
+            $name = $testProject.name;
+            Write-Host "";
+            Write-Host ">>> Set-Location $root\test\$name"
+            pushd
+            Set-Location $root\test\$name
+            if ($build -ne "YES")
             {
-                $failedTestProjects = "$name"
+                Write-Host "======================"
+                Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $name.csproj"
+                Write-Host ""
+                Start-Process -wait -NoNewWindow $dotnetexe "restore $name.csproj"
+            }
+
+            Write-Host "======================"
+            if ($build -ne "YES")
+            {
+                Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test' -c $buildType"
+                Write-Host ""
+                $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj -c $buildType"
             }
             else
             {
-                $failedTestProjects = "$failedTestProjects, $name"
+                Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test' --no-build -c $buildType"
+                Write-Host ""
+                $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --no-build -c $buildType"
             }
+
+            if($p.ExitCode -ne 0)
+            {
+                if (!$testExitCode)
+                {
+                    $failedTestProjects = "$name"
+                }
+                else
+                {
+                    $failedTestProjects = "$failedTestProjects, $name"
+                }
+            }
+            $testExitCode = $p.ExitCode + $testExitCode
         }
-        $testExitCode = $p.ExitCode + $testExitCode
+
         popd
     }
+
     if($testExitCode -ne 0)
     {
         Write-Host ""
@@ -209,3 +232,5 @@ if ($runTests -eq "YES")
     }
 }
 
+$time = Get-Date
+Write-Host "time: " $time

@@ -25,19 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using Xunit;
+using System;
+using System.Runtime.InteropServices;
 
-/// <summary>
-/// Dummy test so XUnit succeeds
-/// </summary>
-namespace Microsoft.IdentityModel.Tests
-{
-    public class MDotTests
-    {
-        [Fact]
-        public void Test()
-        {
-            Assert.True(true);
-        }
-    }
-}
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

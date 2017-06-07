@@ -32,7 +32,6 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Xunit;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -114,7 +113,7 @@ namespace Microsoft.IdentityModel.Tests
                 }
                 catch (Exception ex)
                 {
-                    Assert.True(false, string.Format("Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex));
+                    throw new TestException(string.Format("Testcase: '{0}', type: '{1}', property: '{2}', exception: '{3}'", type, testcase ?? "testcase is null", propertyInfo.Name, ex));
                 }
             }
         }
@@ -153,8 +152,8 @@ namespace Microsoft.IdentityModel.Tests
         {
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
-
-            Assert.True(propertyInfo != null, "property is not found: " + property + ", type: " + type.ToString());
+            if (propertyInfo == null)
+                throw new TestException("property is not found: " + property + ", type: " + type.ToString());
 
             return propertyInfo.GetValue(obj);
         }
@@ -295,20 +294,28 @@ namespace Microsoft.IdentityModel.Tests
         /// <param name="expectedException">checks that exception is correct.</param>
         public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException)
         {
-            Assert.NotNull(obj);
-            Assert.False(string.IsNullOrWhiteSpace(property));
+            if (obj == null)
+                throw new TestException("obj == null");
+
+            if (string.IsNullOrWhiteSpace(property))
+                throw new TestException("string.IsNullOrWhiteSpace(property)");
 
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
 
-            Assert.True(propertyInfo != null, "'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
-            Assert.True(propertyInfo.CanWrite, "can not write to property: '" + property + "', type: '" + type.ToString() + "'");
+            if (propertyInfo == null)
+                throw new TestException("'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
+
+            if (!propertyInfo.CanWrite)
+                throw new TestException("can not write to property: '" + property + "', type: '" + type.ToString() + "'");
 
             try
             {
                 propertyInfo.SetValue(obj, propertyValue);
                 object retval = propertyInfo.GetValue(obj);
-                Assert.Equal(propertyValue, retval);
+                if (!IdentityComparer.AreEqual(propertyValue, retval))
+                    throw new TestException($"propertyValue != retval: '{propertyValue} : {retval}'");
+
                 expectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -328,8 +335,8 @@ namespace Microsoft.IdentityModel.Tests
         {
             Type type = obj.GetType();
             PropertyInfo propertyInfo = type.GetProperty(property);
-
-            Assert.True(propertyInfo != null, "property is not found: " + property + ", type: " + type.ToString());
+            if (propertyInfo == null)
+                throw new TestException("property is not found: " + property + ", type: " + type.ToString());
 
             object retval = propertyInfo.GetValue(obj);
             if (propertyInfo.CanWrite)
@@ -338,7 +345,7 @@ namespace Microsoft.IdentityModel.Tests
             }
             else
             {
-                Assert.True(false, "property 'set' is not found: " + property + ", type: " + type.ToString());
+                throw new TestException("property 'set' is not found: " + property + ", type: " + type.ToString());
             }
         }
 
@@ -404,7 +411,7 @@ namespace Microsoft.IdentityModel.Tests
                 foreach (string str in errors)
                     sb.AppendLine(str);
 
-                Assert.True(false, sb.ToString());
+                throw new TestException(sb.ToString());
             }
         }
 

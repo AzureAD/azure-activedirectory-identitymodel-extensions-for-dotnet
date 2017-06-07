@@ -402,7 +402,7 @@ namespace Microsoft.IdentityModel.Tests
 
         }
 
-#if NET452
+#if NET452 || NET45
         public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048
         {
             get
@@ -424,7 +424,7 @@ namespace Microsoft.IdentityModel.Tests
         }
 #endif
 
-#if !NET452
+#if NETSTANDARD1_4
         public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048
         {
             get
