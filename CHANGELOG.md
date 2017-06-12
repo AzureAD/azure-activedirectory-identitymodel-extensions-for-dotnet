@@ -1,4 +1,11 @@
 <a name="5.0.0"></a>
+# 5.1.4
+
+## Features
+* **net45 target**
+* Support for customers with legacy projects targeting net45.
+* Tests are being added to the 5.2.0 release (currently in dev) to coordinate with changes to csproj, msbuild and dotnet 2.0.
+
 # 5.1.3
 
 ## Features
