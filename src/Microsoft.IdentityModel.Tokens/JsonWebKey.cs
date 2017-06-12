@@ -298,11 +298,17 @@ namespace Microsoft.IdentityModel.Tokens
                 uint dwMagic = GetMagicValue(Crv, usePrivateKey);
                 uint cbKey = GetKeyByteCount(Crv);
                 byte[] keyBlob;
+#if NET45
                 if (usePrivateKey)
-                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
                 else
-                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
-
+                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
+#else
+                 if (usePrivateKey)
+                     keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                 else
+                     keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+#endif
                 keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
                 IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
                 byte[] x = Base64UrlEncoder.DecodeBytes(X);
