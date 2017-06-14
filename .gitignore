@@ -194,7 +194,7 @@ target
 artifacts
 StyleCop.Cache
 node_modules
-*.snk
+
 
 # Wilson project folder
 .nuget/*
