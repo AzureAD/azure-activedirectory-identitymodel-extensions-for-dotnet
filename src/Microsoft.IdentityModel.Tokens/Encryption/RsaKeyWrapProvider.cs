@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
 
             Algorithm = algorithm;
             Key = key;
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 #endif
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
         }
 
         /// <summary>

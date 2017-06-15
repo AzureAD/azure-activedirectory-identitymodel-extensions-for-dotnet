@@ -93,6 +93,11 @@ namespace Microsoft.IdentityModel.Tests
             } 
         }
 
+        public static ExpectedException NotSupportedException(string substringExpected = null, Type inner = null, string contains = null)
+        {
+            return new ExpectedException(typeof(NotSupportedException), substringExpected, inner);
+        }
+
         public static ExpectedException ObjectDisposedException 
         { 
             get 

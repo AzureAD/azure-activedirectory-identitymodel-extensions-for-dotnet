@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10638, key)));
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key), nameof(algorithm)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return;
                 }
 
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
             }
 
             var ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
         }
 #else
         /// <summary>
@@ -292,7 +292,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return;
                 }
                 else
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
             }
 
             ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
@@ -304,7 +304,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
         }
 #endif
 

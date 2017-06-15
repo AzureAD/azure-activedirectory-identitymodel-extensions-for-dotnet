@@ -1454,7 +1454,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     CryptoProviderFactory = new CryptoProviderFactory()
                 };
 
-                theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(InvalidOperationException)));
+                theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(NotSupportedException)));
 
                 // Adjust mapping table, and Default CryptoProviderFactory will find 'hash' algorithm
                 var sha2 = SHA256.Create();
@@ -1533,7 +1533,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {validator, SecurityAlgorithms.HmacSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
                     {validator, SecurityAlgorithms.RsaSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
 
-                    {validator, SecurityAlgorithms.ExclusiveC14nWithComments, sha5.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(InvalidOperationException))}
+                    {validator, SecurityAlgorithms.ExclusiveC14nWithComments, sha5.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(NotSupportedException))}
                 };
             }
         }

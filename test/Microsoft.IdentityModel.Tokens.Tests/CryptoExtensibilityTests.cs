@@ -204,11 +204,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return new TheoryData<SecurityKey, string, bool, bool, ExpectedException>
                 {
                     {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384, true, true, ExpectedException.NotSupportedException("IDX10641:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, true, true, ExpectedException.NotSupportedException("IDX10641:")},
                     {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384Signature, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512Signature, true, true, ExpectedException.ArgumentOutOfRangeException("IDX10641:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384Signature, true, true, ExpectedException.NotSupportedException("IDX10641:")},
+                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512Signature, true, true, ExpectedException.NotSupportedException("IDX10641:")},
                     {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption, false, false, ExpectedException.NoExceptionExpected},
 
                     {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, true, true, ExpectedException.NoExceptionExpected},
@@ -265,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void DefaultCryptoProviderFactoryGetHashAlgorithm(string algorithm, bool isSupported)
         {
-            var ee = isSupported ? ExpectedException.NoExceptionExpected : ExpectedException.InvalidOperationException("IDX10640:");
+            var ee = isSupported ? ExpectedException.NoExceptionExpected : ExpectedException.NotSupportedException("IDX10640:");
             try
             {
                 CryptoProviderFactory.Default.CreateHashAlgorithm(algorithm);
