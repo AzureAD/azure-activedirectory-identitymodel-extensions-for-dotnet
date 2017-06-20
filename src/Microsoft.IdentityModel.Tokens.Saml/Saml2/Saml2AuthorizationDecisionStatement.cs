@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -41,9 +41,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// The empty URI reference, which may be used with the meaning 
         /// "the start of the current document" for the Resource property.
         /// </summary>
-        public static readonly Uri EmptyResource = new Uri(string.Empty, UriKind.Relative);
+        internal static readonly Uri EmptyResource = new Uri(string.Empty, UriKind.Relative);
 
-        private Collection<Saml2Action> _actions = new Collection<Saml2Action>();
         private string _decision;
         private Uri _resource;
 
@@ -66,36 +65,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="actions">Collection of <see cref="Saml2Action"/> specifications.</param>
         public Saml2AuthorizationDecisionStatement(Uri resource, string decision, IEnumerable<Saml2Action> actions)
         {
-            if (resource == null)
-                throw LogHelper.LogArgumentNullException(nameof(resource));
-
-            if (string.IsNullOrEmpty(decision))
-                throw LogHelper.LogArgumentNullException(nameof(decision));
-
-            // This check is making sure the resource is either a well-formed absolute uri or
-            // an empty relative uri before passing through to the rest of the constructor.
-            if (!(resource.IsAbsoluteUri || resource.Equals(EmptyResource)))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(resource), resource.OriginalString)));
-
-            _resource = resource;
-            _decision = decision;
-
-            if (null != actions)
-            {
-                foreach (Saml2Action action in actions)
-                {
-                    _actions.Add(action);
-                }
-            }
+            Resource = resource;
+            Decision = decision;
+            Actions = (actions == null) ? new List<Saml2Action>() : new List<Saml2Action>(actions);
         }
 
         /// <summary>
         /// Gets of set the set of <see cref="Saml2Action"/> authorized to be performed on the specified
         /// resource. [Saml2Core, 2.7.4]
         /// </summary>
-        public Collection<Saml2Action> Actions
+        public ICollection<Saml2Action> Actions
         {
-            get { return _actions; }
+            get;
         }
 
         /// <summary>
@@ -107,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 _decision = value;
             }
@@ -137,10 +118,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
-                if (!(value.IsAbsoluteUri || value.Equals(EmptyResource)))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(value), value.OriginalString)));
+                if (value.IsAbsoluteUri)
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
 
                 _resource = value;
             }

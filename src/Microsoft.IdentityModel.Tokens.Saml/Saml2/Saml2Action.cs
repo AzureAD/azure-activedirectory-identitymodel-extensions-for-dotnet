@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -42,11 +42,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Constructs an instance of Saml2Action class.
         /// </summary>
         /// <param name="value">Value represented by this class.</param>
-        /// <param name="actionNamespace">Namespace in which the action is interpreted.</param>
-        public Saml2Action(string value, Uri actionNamespace)
+        /// <param name="namespace">Namespace in which the action is interpreted.</param>
+        public Saml2Action(string value, Uri @namespace)
         {
             if (string.IsNullOrEmpty(value))
-                throw LogHelper.LogArgumentNullException(nameof(value));
+                throw LogArgumentNullException(nameof(value));
 
             // ==
             // There is a discrepency between the schema and the text of the 
@@ -59,13 +59,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // SAML 2.0 errata at the time of this implementation:
             // http://docs.oasis-open.org/security/saml/v2.0/sstc-saml-approved-errata-2.0-cd-02.pdf
             // ==
-            if (actionNamespace == null)
-                throw LogHelper.LogArgumentNullException(nameof(actionNamespace));
+            if (@namespace == null)
+                throw LogArgumentNullException(nameof(@namespace));
 
-            if (!actionNamespace.IsAbsoluteUri)
-                throw LogHelper.LogArgumentNullException("nameof(actionNamespace), ID0013");
+            if (!@namespace.IsAbsoluteUri)
+                throw LogExceptionMessage(new ArgumentException(nameof(@namespace), FormatInvariant(LogMessages.IDX11300, @namespace)));
 
-            _namespace = actionNamespace;
+            _namespace = @namespace;
             _value = value;
         }
 
@@ -84,10 +84,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // See note in constructor about why this is required.
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("value is not an AbsoluteUri"));
+                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)));
 
                 _namespace = value;
             }
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 _value = value;
             }

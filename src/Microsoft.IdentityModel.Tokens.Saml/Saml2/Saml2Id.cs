@@ -27,7 +27,7 @@
 
 using System;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -41,8 +41,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </details>
     public class Saml2Id
     {
-        private string _value;
-
         /// <summary>
         /// Creates a new ID value based on a GUID.
         /// </summary>
@@ -59,15 +57,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Id(string value)
         {
             if (string.IsNullOrEmpty(value))
-                throw LogHelper.LogArgumentNullException(nameof(value));
+                throw LogArgumentNullException(nameof(value));
 
             try
             {
-                _value = XmlConvert.VerifyNCName(value);
+                Value = XmlConvert.VerifyNCName(value);
             }
-            catch (XmlException e)
+            catch (XmlException ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException("ID4128), value", e));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10515, value), ex));
             }
         }
 
@@ -76,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Value
         {
-            get { return _value; }
+            get;
         }
 
         /// <summary>
@@ -92,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             Saml2Id other = obj as Saml2Id;
-            return (null != other) && StringComparer.Ordinal.Equals(_value, other.Value);
+            return (null != other) && StringComparer.Ordinal.Equals(Value, other.Value);
         }
 
         /// <summary>
@@ -101,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>The hash code for this object.</returns>
         public override int GetHashCode()
         {
-            return _value.GetHashCode();
+            return Value.GetHashCode();
         }
 
         /// <summary>
@@ -110,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>The string representation of this object.</returns>
         public override string ToString()
         {
-            return _value;
+            return Value;
         }
     }
 }

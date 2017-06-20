@@ -35,6 +35,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -46,7 +47,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public class Saml2SecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
         private const string Actor = "Actor";
-        private static string[] _tokenTypeIdentifiers = new string[] { Saml2Constants.Saml2TokenProfile11, Saml2Constants.OasisWssSaml2TokenProfile11 };
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10101, value)));
+                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10101, value)));
 
                 _maximumTokenSizeInBytes = value;
             }
@@ -116,9 +116,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             try
             {
-                using (StringReader sr = new StringReader(token))
+                using (var sr = new StringReader(token))
                 {
-                    using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                     {
                         return CanReadToken(reader);
                     }
@@ -152,28 +152,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             // Assertion/issuer
-            Saml2Assertion assertion = new Saml2Assertion(CreateIssuerNameIdentifier(tokenDescriptor));
-
-            // Subject
-            assertion.Subject = CreateSamlSubject(tokenDescriptor);
-
-            // Signature
-            assertion.SigningCredentials = GetSigningCredentials(tokenDescriptor);
-
-            // Conditions
-            assertion.Conditions = CreateConditions(tokenDescriptor);
-
-            // Advice
-            assertion.Advice = CreateAdvice(tokenDescriptor);
+            var assertion = new Saml2Assertion(CreateIssuerNameIdentifier(tokenDescriptor))
+            {
+                Subject = CreateSamlSubject(tokenDescriptor),
+                SigningCredentials = GetSigningCredentials(tokenDescriptor),
+                Conditions = CreateConditions(tokenDescriptor),
+                Advice = CreateAdvice(tokenDescriptor)
+            };
 
             // Statements
             IEnumerable<Saml2Statement> statements = CreateStatements(tokenDescriptor);
             if (null != statements)
             {
-                foreach (Saml2Statement statement in statements)
+                foreach (var statement in statements)
                 {
                     assertion.Statements.Add(statement);
                 }
@@ -200,13 +194,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                throw LogArgumentNullException(nameof(token));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                throw LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var samlToken = ValidateSignature(token, validationParameters);
             ValidateConditions(samlToken, validationParameters);
@@ -234,17 +228,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ValidateSubject(Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (securityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+                throw LogArgumentNullException(nameof(securityToken));
 
             if (securityToken.Assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken.Assertion));
+                throw LogArgumentNullException(nameof(securityToken.Assertion));
 
             if (securityToken.Assertion.Subject == null)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10509));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10509));
 
-            var subjectConfirmation = securityToken.Assertion.Subject.SubjectConfirmations[0];
-            if (subjectConfirmation != null && subjectConfirmation.SubjectConfirmationData != null)
-                ValidateConfirmationData(securityToken, validationParameters, subjectConfirmation.SubjectConfirmationData);
+            foreach (var subjectConfirmation in securityToken.Assertion.Subject.SubjectConfirmations)
+            {
+                if (subjectConfirmation != null && subjectConfirmation.SubjectConfirmationData != null)
+                    ValidateConfirmationData(securityToken, validationParameters, subjectConfirmation.SubjectConfirmationData);
+            }
         }
 
         /// <summary>
@@ -259,10 +255,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ValidateConfirmationData(Saml2SecurityToken securityToken, TokenValidationParameters validationParameters, Saml2SubjectConfirmationData confirmationData)
         {
             if (confirmationData == null)
-                throw LogHelper.LogArgumentNullException(nameof(confirmationData));
+                throw LogArgumentNullException(nameof(confirmationData));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                throw LogArgumentNullException(nameof(validationParameters));
 
             Validators.ValidateLifetime(confirmationData.NotBefore, confirmationData.NotOnOrAfter, securityToken, validationParameters);
         }
@@ -285,27 +281,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2SecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(token))
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                throw LogArgumentNullException(nameof(token));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                throw LogArgumentNullException(nameof(validationParameters));
 
             var samlToken = ReadSaml2Token(token);
             if (validationParameters.SignatureValidator != null)
             {
                 var validatedSamlToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedSamlToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10505, token)));
 
                 var validatedSaml = validatedSamlToken as Saml2SecurityToken;
                 if (validatedSaml == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSamlToken.GetType(), token)));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10506, typeof(Saml2SecurityToken), validatedSamlToken.GetType(), token)));
 
                 return validatedSaml;
             }
 
             if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10504, token)));
+                throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
 
             bool keyMatched = false;
             IEnumerable<SecurityKey> securityKeys = null;
@@ -361,12 +357,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // if there was a keymatch with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
             if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
+                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
+                throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
 
-            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
+            throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
         }
 
         private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
@@ -394,13 +390,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (securityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+                throw LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                throw LogArgumentNullException(nameof(validationParameters));
 
             if (securityToken.Assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken.Assertion));
+                throw LogArgumentNullException(nameof(securityToken.Assertion));
 
             if (securityToken.Assertion.Signature != null && securityToken.Assertion.Signature.KeyInfo != null && !string.IsNullOrEmpty(securityToken.Assertion.Signature.KeyInfo.Kid))
             {
@@ -430,14 +426,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public virtual Saml2SecurityToken ReadSaml2Token(string token)
         {
             if (string.IsNullOrEmpty(token))
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                throw LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            using (StringReader sr = new StringReader(token))
+            using (var sr = new StringReader(token))
             {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                 {
                     var assertion = Serializer.ReadAssertion(reader);
                     return new Saml2SecurityToken(assertion);
@@ -475,11 +471,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         out EncryptingCredentials encryptingCredentials)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             reader.MoveToContent();
             if (reader.IsEmptyElement)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID3061"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException("ID3061"));
 
             encryptingCredentials = null;
 
@@ -547,7 +543,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             //if (decryptionKey == null)
             //{
-            //    throw LogHelper.LogExceptionMessage(
+            //    throw LogExceptionMessage(
             //        new EncryptedTokenDecryptionFailedException());
             //}
 
@@ -555,7 +551,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             //SymmetricSecurityKey symmetricKey = decryptionKey as SymmetricSecurityKey;
             //if (symmetricKey == null)
             //{
-            //    throw LogHelper.LogExceptionMessage(
+            //    throw LogExceptionMessage(
             //        new SecurityTokenException(SR.GetString(SR.ID4023)));
             //}
 
@@ -606,7 +602,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2Conditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var conditions = new Saml2Conditions();
             if (tokenDescriptor.NotBefore.HasValue)
@@ -645,11 +641,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2NameIdentifier CreateIssuerNameIdentifier(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             // Must have an issuer
             if (string.IsNullOrEmpty(tokenDescriptor.Issuer))
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4138"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException("ID4138"));
 
             return new Saml2NameIdentifier(tokenDescriptor.Issuer);
         }
@@ -665,9 +661,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2Attribute CreateAttribute(Claim claim, SecurityTokenDescriptor tokenDescriptor)
         {
             if (claim == null)
-                throw LogHelper.LogArgumentNullException(nameof(claim));
+                throw LogArgumentNullException(nameof(claim));
 
-            Saml2Attribute attribute = new Saml2Attribute(claim.Type, claim.Value);
+            var attribute = new Saml2Attribute(claim.Type, claim.Value);
             if (!StringComparer.Ordinal.Equals(claim.Issuer, claim.OriginalIssuer))
                 attribute.OriginalIssuer = claim.OriginalIssuer;
 
@@ -676,7 +672,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 string nameFormat = claim.Properties[ClaimProperties.SamlAttributeNameFormat];
                 if (!Saml2Serializer.CanCreateValidUri(nameFormat, UriKind.Absolute))
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX11300, ClaimProperties.SamlAttributeNameFormat)));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX11300, ClaimProperties.SamlAttributeNameFormat)));
 
                 attribute.NameFormat = new Uri(nameFormat);
             }
@@ -698,16 +694,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2AttributeStatement CreateAttributeStatement(ClaimsIdentity subject, SecurityTokenDescriptor tokenDescriptor)
         {
             if (subject == null)
-            {
                 return null;
-            }
 
             // We treat everything else as an Attribute except the nameId claim, which is already processed
             // for saml2subject
             // AuthenticationInstant and AuthenticationType are not converted to Claims
             if (subject.Claims != null)
             {
-                List<Saml2Attribute> attributes = new List<Saml2Attribute>();
+                var attributes = new List<Saml2Attribute>();
                 foreach (Claim claim in subject.Claims)
                 {
                     if (claim != null && claim.Type != ClaimTypes.NameIdentifier)
@@ -742,12 +736,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             var distinctAttributes = new Dictionary<Saml2AttributeKeyComparer.AttributeKey, Saml2Attribute>(attributes.Count, new Saml2AttributeKeyComparer());
 
             // Use unique attribute if name, value type, or issuer differ
-            foreach (Saml2Attribute saml2Attribute in attributes)
+            foreach (var saml2Attribute in attributes)
             {
                 if (saml2Attribute != null)
                 {
-                    Saml2AttributeKeyComparer.AttributeKey attributeKey = new Saml2AttributeKeyComparer.AttributeKey(saml2Attribute);
-
+                    var attributeKey = new Saml2AttributeKeyComparer.AttributeKey(saml2Attribute);
                     if (distinctAttributes.ContainsKey(attributeKey))
                     {
                         foreach (string attributeValue in saml2Attribute.Values)
@@ -772,10 +765,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void AddDelegateToAttributes(ClaimsIdentity subject, ICollection<Saml2Attribute> attributes, SecurityTokenDescriptor tokenDescriptor)
         {
             if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             if (subject.Actor == null)
                 return;
@@ -802,31 +795,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual string CreateXmlStringFromAttributes(IEnumerable<Saml2Attribute> attributes)
         {
             if (attributes == null)
-                throw LogHelper.LogArgumentNullException(nameof(attributes));
+                throw LogArgumentNullException(nameof(attributes));
 
             bool actorElementWritten = false;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                using (XmlDictionaryWriter dicWriter = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                using (var dictionaryWriter = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
                 {
-                    foreach (Saml2Attribute samlAttribute in attributes)
+                    foreach (var samlAttribute in attributes)
                     {
                         if (samlAttribute != null)
                         {
                             if (!actorElementWritten)
                             {
-                                dicWriter.WriteStartElement(Actor);
+                                dictionaryWriter.WriteStartElement(Actor);
                                 actorElementWritten = true;
                             }
 
-                            Serializer.WriteAttribute(dicWriter, samlAttribute);
+                            Serializer.WriteAttribute(dictionaryWriter, samlAttribute);
                         }
                     }
 
                     if (actorElementWritten)
-                        dicWriter.WriteEndElement();
+                        dictionaryWriter.WriteEndElement();
 
-                    dicWriter.Flush();
+                    dictionaryWriter.Flush();
                 }
 
                 return Encoding.UTF8.GetString(ms.ToArray());
@@ -847,7 +840,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual IEnumerable<Saml2Statement> CreateStatements(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var statements = new Collection<Saml2Statement>();
             var attributeStatement = CreateAttributeStatement(tokenDescriptor.Subject, tokenDescriptor);
@@ -878,7 +871,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2AuthenticationStatement CreateAuthenticationStatement(AuthenticationInformation authInfo, SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             if (tokenDescriptor.Subject == null)
                 return null;
@@ -904,13 +897,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (authenticationMethod == null && authenticationInstant == null)
                 return null;
             else if (authenticationMethod == null)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationMethod, SAML2"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationMethod, SAML2"));
             else if (authenticationInstant == null)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationInstant, SAML2"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationInstant, SAML2"));
 
-            Saml2AuthenticationContext authCtx = new Saml2AuthenticationContext(authenticationMethod);
-            DateTime authInstantTime = DateTime.ParseExact(authenticationInstant, Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
-            Saml2AuthenticationStatement authnStatement = new Saml2AuthenticationStatement(authCtx, authInstantTime);
+            var authContext = new Saml2AuthenticationContext(authenticationMethod);
+            var authInstantTime = DateTime.ParseExact(authenticationInstant, Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+            var authnStatement = new Saml2AuthenticationStatement(authContext, authInstantTime);
 
             if (authInfo != null)
             {
@@ -937,7 +930,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2Subject CreateSamlSubject(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var saml2Subject = new Saml2Subject();
 
@@ -950,13 +943,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Claims != null)
             {
-                foreach (Claim claim in tokenDescriptor.Subject.Claims)
+                foreach (var claim in tokenDescriptor.Subject.Claims)
                 {
                     if (claim.Type == ClaimTypes.NameIdentifier)
                     {
                         // Do not allow multiple name identifier claim.
                         if (null != nameIdentifierClaim)
-                            throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4139"));
+                            throw LogExceptionMessage(new Saml2SecurityTokenException("ID4139"));
 
                         nameIdentifierClaim = claim.Value;
                         if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
@@ -976,7 +969,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (nameIdentifierClaim != null)
             {
-                Saml2NameIdentifier nameIdentifier = new Saml2NameIdentifier(nameIdentifierClaim);
+                var nameIdentifier = new Saml2NameIdentifier(nameIdentifierClaim);
                 if (nameIdentifierFormat != null && Saml2Serializer.CanCreateValidUri(nameIdentifierFormat, UriKind.Absolute))
                     nameIdentifier.Format = new Uri(nameIdentifierFormat);
 
@@ -1012,14 +1005,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual EncryptingCredentials GetEncryptingCredentials(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             EncryptingCredentials encryptingCredentials = null;
             if (null != tokenDescriptor.EncryptingCredentials)
             {
                 encryptingCredentials = tokenDescriptor.EncryptingCredentials;
                 if (encryptingCredentials.Key is AsymmetricSecurityKey)
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID4178"));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException("ID4178"));
             }
 
             return encryptingCredentials;
@@ -1042,7 +1035,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual SigningCredentials GetSigningCredentials(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             return tokenDescriptor.SigningCredentials;
         }
@@ -1060,13 +1053,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ValidateConditions(Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (securityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+                throw LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                throw LogArgumentNullException(nameof(validationParameters));
 
             if (securityToken.Assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken.Assertion));
+                throw LogArgumentNullException(nameof(securityToken.Assertion));
 
             if (securityToken.Assertion.Conditions != null)
             {
@@ -1074,10 +1067,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 Validators.ValidateLifetime(securityToken.Assertion.Conditions.NotBefore, securityToken.Assertion.Conditions.NotOnOrAfter, securityToken, validationParameters);
 
                 if (securityToken.Assertion.Conditions.OneTimeUse)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX10510));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX10510));
 
                 if (securityToken.Assertion.Conditions.ProxyRestriction != null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX10511));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX10511));
             }
 
             // TODO - concat all the audiences together
@@ -1128,59 +1121,48 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             // bail here; nothing to add.
             if (subject == null || attribute == null || attribute.Values == null || attribute.Values.Count < 1)
-            {
                 return;
-            }
 
             Saml2Attribute actingAsAttribute = null;
-            Collection<Claim> claims = new Collection<Claim>();
-
+            var claims = new Collection<Claim>();
             foreach (string attributeValue in attribute.Values)
             {
                 if (attributeValue != null)
                 {
-                    using (XmlDictionaryReader dicReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), XmlDictionaryReaderQuotas.Max))
+                    using (var dictionaryReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), XmlDictionaryReaderQuotas.Max))
                     {
-                        dicReader.MoveToContent();
-                        dicReader.ReadStartElement(Actor);
+                        dictionaryReader.MoveToContent();
+                        dictionaryReader.ReadStartElement(Actor);
 
-                        while (dicReader.IsStartElement(Saml2Constants.Elements.Attribute))
+                        while (dictionaryReader.IsStartElement(Saml2Constants.Elements.Attribute))
                         {
-                            Saml2Attribute innerAttribute = Serializer.ReadAttribute(dicReader);
+                            var innerAttribute = Serializer.ReadAttribute(dictionaryReader);
                             if (innerAttribute != null)
                             {
                                 if (innerAttribute.Name == ClaimTypes.Actor)
                                 {
                                     // In this case, we have two delegates acting as an identity: we do not allow this.
                                     if (actingAsAttribute != null)
-                                        throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11142));
+                                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11142));
 
                                     actingAsAttribute = innerAttribute;
                                 }
                                 else
                                 {
                                     string originalIssuer = innerAttribute.OriginalIssuer;
-                                    for (int k = 0; k < innerAttribute.Values.Count; ++k)
+                                    foreach (var attr in innerAttribute.Values)
                                     {
                                         Claim claim = null;
                                         if (string.IsNullOrEmpty(originalIssuer))
-                                        {
-                                            claim = new Claim(innerAttribute.Name, innerAttribute.Values[k], innerAttribute.AttributeValueXsiType, issuer);
-                                        }
+                                            claim = new Claim(innerAttribute.Name, attr, innerAttribute.AttributeValueXsiType, issuer);
                                         else
-                                        {
-                                            claim = new Claim(innerAttribute.Name, innerAttribute.Values[k], innerAttribute.AttributeValueXsiType, issuer, originalIssuer);
-                                        }
+                                            claim = new Claim(innerAttribute.Name, attr, innerAttribute.AttributeValueXsiType, issuer, originalIssuer);
 
                                         if (innerAttribute.NameFormat != null)
-                                        {
                                             claim.Properties[ClaimProperties.SamlAttributeNameFormat] = innerAttribute.NameFormat.OriginalString;
-                                        }
 
                                         if (innerAttribute.FriendlyName != null)
-                                        {
                                             claim.Properties[ClaimProperties.SamlAttributeDisplayName] = innerAttribute.FriendlyName;
-                                        }
 
                                         claims.Add(claim);
                                     }
@@ -1188,7 +1170,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             }
                         }
 
-                        dicReader.ReadEndElement(); // Actor
+                        dictionaryReader.ReadEndElement(); // Actor
                     }
                 }
             }
@@ -1204,11 +1186,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="statements">A collection of Saml2Statement.</param>
         /// <param name="subject">The subject.</param>
         /// <param name="issuer">The issuer.</param>
-        protected virtual void ProcessStatements(Collection<Saml2Statement> statements, ClaimsIdentity subject, string issuer)
+        protected virtual void ProcessStatements(ICollection<Saml2Statement> statements, ClaimsIdentity subject, string issuer)
         {
-            Collection<Saml2AuthenticationStatement> authnStatements = new Collection<Saml2AuthenticationStatement>();
-
-            foreach (Saml2Statement statement in statements)
+            var authnStatements = new Collection<Saml2AuthenticationStatement>();
+            foreach (var statement in statements)
             {
 	            if (statement is Saml2AttributeStatement attrStatement)
 		            ProcessAttributeStatement(attrStatement, subject, issuer);
@@ -1220,7 +1201,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 	            // We don't process custom statements. Just fall through.
             }
 
-            foreach (Saml2AuthenticationStatement authStatement in authnStatements)
+            foreach (var authStatement in authnStatements)
             {
                 if (authStatement != null)
                     ProcessAuthenticationStatement(authStatement, subject, issuer);
@@ -1236,12 +1217,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ProcessSamlSubject(Saml2Subject assertionSubject, ClaimsIdentity subject, string issuer)
         {
             if (assertionSubject == null)
-                throw LogHelper.LogArgumentNullException(nameof(assertionSubject));
+                throw LogArgumentNullException(nameof(assertionSubject));
 
             if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
-            Saml2NameIdentifier nameId = assertionSubject.NameId;
+            var nameId = assertionSubject.NameId;
             if (nameId != null)
             {
                 var claim = new Claim(ClaimTypes.NameIdentifier, nameId.Value, ClaimValueTypes.String, issuer);
@@ -1270,18 +1251,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ProcessAttributeStatement(Saml2AttributeStatement statement, ClaimsIdentity subject, string issuer)
         {
             if (statement == null)
-                throw LogHelper.LogArgumentNullException(nameof(statement));
+                throw LogArgumentNullException(nameof(statement));
 
             if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
-            foreach (Saml2Attribute attribute in statement.Attributes)
+            foreach (var attribute in statement.Attributes)
             {
                 if (StringComparer.Ordinal.Equals(attribute.Name, ClaimTypes.Actor))
                 {
                     // TODO - should we support nested Actors?
                     if (subject.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10512));
+                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10512));
 
                     SetDelegateFromAttribute(attribute, subject, issuer);
                 }
@@ -1316,19 +1297,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ProcessAuthenticationStatement(Saml2AuthenticationStatement statement, ClaimsIdentity subject, string issuer)
         {
             if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
             if (statement.AuthenticationContext.DeclarationReference != null)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX14001));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX14001));
 
             if (statement.AuthenticationContext.ClassReference != null)
             {
                 subject.AddClaim(
-                        new Claim(
-                            ClaimTypes.AuthenticationMethod,
-                            statement.AuthenticationContext.ClassReference.OriginalString,
-                            ClaimValueTypes.String,
-                            issuer));
+                    new Claim(ClaimTypes.AuthenticationMethod,
+                              statement.AuthenticationContext.ClassReference.OriginalString,
+                              ClaimValueTypes.String,
+                              issuer));
             }
 
             subject.AddClaim(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat), ClaimValueTypes.DateTime, issuer));
@@ -1356,11 +1336,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual ClaimsIdentity CreateClaimsIdentity(Saml2SecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(samlToken));
+                throw LogArgumentNullException(nameof(samlToken));
 
-            Saml2Assertion assertion = samlToken.Assertion;
+            var assertion = samlToken.Assertion;
             if (assertion == null)
-                throw LogHelper.LogArgumentNullException(LogMessages.IDX11110);
+                throw LogArgumentNullException(LogMessages.IDX11110);
 
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
@@ -1412,10 +1392,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (token == null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                throw LogArgumentNullException(nameof(token));
 
             var samlToken = token as Saml2SecurityToken;
             if (samlToken == null)

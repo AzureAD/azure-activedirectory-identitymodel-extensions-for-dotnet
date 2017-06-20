@@ -25,8 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Subject(Saml2SubjectConfirmation subjectConfirmation)
         {
             if (subjectConfirmation == null)
-                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation));
+                throw LogArgumentNullException(nameof(subjectConfirmation));
 
             _subjectConfirmations.Add(subjectConfirmation);
         }
@@ -80,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// them is sufficient to confirm the subject for the purpose of applying the 
         /// assertion.
         /// </remarks>
-        public Collection<Saml2SubjectConfirmation> SubjectConfirmations
+        public ICollection<Saml2SubjectConfirmation> SubjectConfirmations
         {
             get { return _subjectConfirmations; }
         }

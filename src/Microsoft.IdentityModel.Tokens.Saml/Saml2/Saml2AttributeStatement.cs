@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -36,13 +36,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2AttributeStatement : Saml2Statement
     {
-        private Collection<Saml2Attribute> _attributes = new Collection<Saml2Attribute>();
-
         /// <summary>
         /// Creates an instance of Saml2AttributeStatement.
         /// </summary>
         public Saml2AttributeStatement()
-        { }
+        {
+            Attributes = new List<Saml2Attribute>();
+        }
 
         /// <summary>
         /// Creates an instance of Saml2AttributeStatement.
@@ -59,23 +59,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2AttributeStatement(IEnumerable<Saml2Attribute> attributes)
         {
             if (attributes == null)
-                throw LogHelper.LogArgumentNullException(nameof(attributes));
+                throw LogArgumentNullException(nameof(attributes));
 
-            foreach (Saml2Attribute attribute in attributes)
-            {
-                if (attribute == null)
-                    throw LogHelper.LogArgumentNullException(nameof(attributes));
-
-                _attributes.Add(attribute);
-            }
+            Attributes = new List<Saml2Attribute>(attributes);
         }
 
         /// <summary>
         /// Gets the collection of <see cref="Saml2Attribute"/> of this statement. [Saml2Core, 2.7.3]
         /// </summary>
-        public Collection<Saml2Attribute> Attributes
+        public ICollection<Saml2Attribute> Attributes
         {
-            get { return _attributes; }
+            get;
         }
     }
 }

@@ -26,10 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.ObjectModel;
-using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -38,13 +37,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2Assertion
     {
-        private Collection<SecurityKeyIdentifierClause> _externalEncryptedKeys = new Collection<SecurityKeyIdentifierClause>();
-        private Saml2Id _id = new Saml2Id();
-        private DateTime _issueInstant = DateTime.UtcNow;
+        private Saml2Id _id;
+        private DateTime _issueInstant;
         private Saml2NameIdentifier _issuer;
-        private XmlTokenStream _sourceData;
-        private Collection<Saml2Statement> _statements = new Collection<Saml2Statement>();
-        private string _version = "2.0";
 
         /// <summary>
         /// Creates an instance of a Saml2Assertion.
@@ -52,10 +47,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="issuer">Issuer of the assertion.</param>
         public Saml2Assertion(Saml2NameIdentifier issuer)
         {
-            if (issuer == null)
-                throw LogHelper.LogArgumentNullException(nameof(issuer));
-
-            _issuer = issuer;
+            // TODO do we need issuer?
+            Id = new Saml2Id();
+            IssueInstant = DateTime.UtcNow;
+            Issuer = issuer;
+            ExternalEncryptedKeys = new List<SecurityKeyIdentifierClause>();
+            Statements = new List<Saml2Statement>();
+            Version = Saml2Constants.Version;
         }
 
         /// <summary>
@@ -71,30 +69,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Advice Advice
         {
             get; set;
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this assertion was deserialized from XML source
-        /// and can re-emit the XML data unchanged.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The default implementation preserves the source data when read using
-        /// Saml2AssertionSerializer.ReadAssertion and is willing to re-emit the
-        /// original data as long as the Id has not changed from the time that 
-        /// assertion was read.
-        /// </para>
-        /// <para>
-        /// Note that it is vitally important that SAML assertions with different
-        /// data have different IDs. If implementing a scheme whereby an assertion
-        /// "template" is loaded and certain bits of data are filled in, the Id 
-        /// must be changed.
-        /// </para>
-        /// </remarks>
-        /// <returns>'True' if this instance can write the source data.</returns>
-        public virtual bool CanWriteSourceData
-        {
-            get { return null != _sourceData; }
         }
 
         /// <summary>
@@ -120,9 +94,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets additional encrypted keys which will be specified external to the 
         /// EncryptedData element, as children of the EncryptedAssertion element.
         /// </summary>
-        public Collection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
+        public ICollection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
         {
-            get { return _externalEncryptedKeys; }
+            get;
         }
 
         /// <summary>
@@ -133,11 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _id; }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _id = value;
-                _sourceData = null;
+                _id = value ?? throw LogArgumentNullException(nameof(value));
             }
         }
 
@@ -158,10 +128,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _issuer; }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _issuer = value;
+                _issuer = value ?? throw LogArgumentNullException(nameof(value));
             }
         }
 
@@ -184,9 +151,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets the <see cref="Saml2Statement"/>(s) regarding the subject.
         /// </summary>
-        public Collection<Saml2Statement> Statements
+        public ICollection<Saml2Statement> Statements
         {
-            get { return _statements; }
+            get;
         }
 
         /// <summary>
@@ -197,42 +164,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         public string Version
         {
-            get { return _version; }
-        }
-
-        /// <summary>
-        /// Writes the source data, if available.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">When no source data is available</exception>
-        /// <param name="writer">A <see cref="XmlWriter"/> for writting the data.</param>
-        public virtual void WriteSourceData(XmlWriter writer)
-        {
-            if (!CanWriteSourceData)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("SR.ID4140"));
-
-            // This call will properly just reuse the existing writer if it already qualifies
-            _sourceData.SetElementExclusion(null, null);
-            _sourceData.WriteTo(XmlDictionaryWriter.CreateDictionaryWriter(writer));
-        }
-
-        /// <summary>
-        /// Captures the XML source data from an EnvelopedSignatureReader. 
-        /// </summary>
-        /// <remarks>
-        /// The EnvelopedSignatureReader that was used to read the data for this
-        /// assertion should be passed to this method after the &lt;/Assertion>
-        /// element has been read. This method will preserve the raw XML data
-        /// that was read, including the signature, so that it may be re-emitted
-        /// without changes and without the need to re-sign the data. See 
-        /// CanWriteSourceData and WriteSourceData.
-        /// </remarks>
-        /// <param name="reader"><see cref="EnvelopedSignatureReader"/> that contains the data for the assertion.</param>
-        internal virtual void CaptureSourceData(EnvelopedSignatureReader reader)
-        {
-            if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            _sourceData = reader.XmlTokens;
+            get;
         }
     }
 }

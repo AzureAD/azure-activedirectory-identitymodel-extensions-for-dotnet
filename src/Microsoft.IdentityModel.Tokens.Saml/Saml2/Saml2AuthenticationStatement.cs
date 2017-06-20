@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -56,8 +56,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="authenticationInstant">The time of the authentication.</param>
         public Saml2AuthenticationStatement(Saml2AuthenticationContext authenticationContext, DateTime authenticationInstant)
         {
-            _authnContext = authenticationContext ?? throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
-            _authnInstant = DateTimeUtil.ToUniversalTime(authenticationInstant);
+            AuthenticationContext = authenticationContext;
+            AuthenticationInstant = authenticationInstant;
         }
 
         /// <summary>
@@ -67,10 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2AuthenticationContext AuthenticationContext
         {
             get { return _authnContext; }
-            set
-            {
-                _authnContext = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-            }
+            set { _authnContext = value ?? throw LogArgumentNullException(nameof(value)); }
         }
 
         /// <summary>

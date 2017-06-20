@@ -88,8 +88,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
                 Assert.Equal(ReferenceXml.Token_Saml2_Valid, token);
                 var tokenHandler = new Saml2SecurityTokenHandler();
-                SecurityToken validatedToken;
-                tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out validatedToken);
+                tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -138,9 +137,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 wsFederationMessage.SetParameter(theoryData.Parameter1.Key, theoryData.Parameter1.Value);
 
                 // add parameters
-                var nameValueCollection = new NameValueCollection();
-                nameValueCollection.Add(theoryData.Parameter2.Key, theoryData.Parameter2.Value);
-                nameValueCollection.Add(theoryData.Parameter3.Key, theoryData.Parameter3.Value);
+                var nameValueCollection = new NameValueCollection
+                {
+                    { theoryData.Parameter2.Key, theoryData.Parameter2.Value },
+                    { theoryData.Parameter3.Key, theoryData.Parameter3.Value }
+                };
                 wsFederationMessage.SetParameters(nameValueCollection);
 
                 // validate the parameters are added
@@ -198,9 +199,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
-
-                theoryData.Add(
+                var theoryData = new TheoryData<WsFederationMessageTheoryData>
+                {
                     new WsFederationMessageTheoryData
                     {
                         First = true,
@@ -221,9 +221,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                             }
                         },
                         TestId = "WsFederationMessage getToken test"
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMessageTheoryData
                     {
                         TokenValidationParameters = new TokenValidationParameters
@@ -243,8 +241,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                             }
                         },
                         TestId = "WsFederationMessage getToken test with white spaces"
-                    });
-
+                    }
+                };
                 return theoryData;
             }
         }
@@ -253,9 +251,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMessageTheoryData>
+                {
                     new WsFederationMessageTheoryData
                     {
                         First = true,
@@ -268,9 +265,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         },
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityTokenResponse element"
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMessageTheoryData
                     {
                         WsFederationMessageTestSet = new WsFederationMessageTestSet
@@ -282,9 +277,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityToken element"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -292,9 +286,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMessageTheoryData>
+                {
                     new WsFederationMessageTheoryData
                     {
                         First = true,
@@ -303,11 +296,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         Parameter2 = new KeyValuePair<string, string>("tom", "456"),
                         Parameter3 = new KeyValuePair<string, string>("jerry", "789"),
                         Wct = Guid.NewGuid().ToString(),
-                        Wreply = @"http://www.relyingparty.com", 
+                        Wreply = @"http://www.relyingparty.com",
                         TestId = "WsFederationMessage test"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -315,17 +307,15 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMessageTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMessageTheoryData>
+                {
                     new WsFederationMessageTheoryData
                     {
                         First = true,
                         WsFederationMessageTestSet = ReferenceXml.WsSignInTestSet,
                         TestId = nameof(ReferenceXml.WsSignInTestSet)
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 

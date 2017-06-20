@@ -26,8 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets the set of audiences to whom the asserting party permits
         /// new assertions to be issued on the basis of this assertion.
         /// </summary>
-        public Collection<Uri> Audiences
+        public ICollection<Uri> Audiences
         {
             get { return _audiences; }
         }
@@ -67,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null != value)
                 {
                     if (value.Value < 0)
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), "ID0002"));
+                        throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), "ID0002"));
                 }
 
                 _count = value;

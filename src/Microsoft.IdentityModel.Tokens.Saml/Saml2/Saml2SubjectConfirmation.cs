@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -35,9 +35,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2SubjectConfirmation
     {
-        private Saml2SubjectConfirmationData _data;
         private Uri _method;
-        private Saml2NameIdentifier _nameId;
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2SubjectConfirmation"/> from a <see cref="Uri"/> indicating the
@@ -54,17 +52,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// method of confirmation and <see cref="Saml2SubjectConfirmationData"/>.
         /// </summary>
         /// <param name="method">The <see cref="Uri"/> to use for initialization.</param>
-        /// <param name="data">The <see cref="Saml2SubjectConfirmationData"/> to use for initialization.</param>
-        public Saml2SubjectConfirmation(Uri method, Saml2SubjectConfirmationData data)
+        /// <param name="subjectConfirmationData">The <see cref="Saml2SubjectConfirmationData"/> to use for initialization.</param>
+        public Saml2SubjectConfirmation(Uri method, Saml2SubjectConfirmationData subjectConfirmationData)
         {
             if (method == null)
-                throw LogHelper.LogArgumentNullException(nameof(method));
+                throw LogArgumentNullException(nameof(method));
 
             if (!method.IsAbsoluteUri)
-                throw LogHelper.LogArgumentNullException("nameof(method), ID0013");
+                throw LogExceptionMessage(new ArgumentException(nameof(method), FormatInvariant(LogMessages.IDX11300, method)));
 
             _method = method;
-            _data = data;
+            SubjectConfirmationData = subjectConfirmationData;
         }
 
         /// <summary>
@@ -80,10 +78,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("ID0013"));
+                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)));
 
                 _method = value;
             }
@@ -95,8 +93,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2NameIdentifier NameIdentifier
         {
-            get { return _nameId; }
-            set { _nameId = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -105,8 +103,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2SubjectConfirmationData SubjectConfirmationData
         {
-            get { return _data; }
-            set { _data = value; }
+            get;
+            set;
         }
     }
 }

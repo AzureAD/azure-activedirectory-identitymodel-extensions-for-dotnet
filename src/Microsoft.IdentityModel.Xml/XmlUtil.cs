@@ -30,7 +30,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Xml
         public static void ThrowIfReaderIsOnEmptyElement(XmlReader reader, string element)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             throw LogReadException(LogMessages.IDX21010, element);
         }
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Xml
         public static void CheckReaderOnEntry(XmlReader reader, string element, string ns)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             // IsStartElement calls MoveToContent.
             if (!reader.IsStartElement(element, ns))
@@ -93,17 +93,17 @@ namespace Microsoft.IdentityModel.Xml
 
         internal static Exception OnRequiredAttributeMissing(string element, string attribute)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21013, element, attribute)));
+            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21013, element, attribute)));
         }
 
         internal static Exception OnRequiredElementMissing(XmlReader reader, string element, string ns)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21011, element, ns, reader.LocalName, reader.NamespaceURI)));
+            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21011, element, ns, reader.LocalName, reader.NamespaceURI)));
         }
 
         internal static Exception OnUnexpectedChildNode(XmlReader reader, string reading)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, reading, reader.LocalName)));
+            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21012, reading, reader.LocalName)));
         }
 
         internal static string ReadEmptyElementAndRequiredAttribute(XmlDictionaryReader reader, string name, string namespaceUri, string attributeName,
@@ -147,13 +147,13 @@ namespace Microsoft.IdentityModel.Xml
         internal static void ValidateBufferBounds(Array buffer, int offset, int count)
         {
             if (buffer == null)
-                throw LogHelper.LogArgumentNullException(nameof(buffer));
+                throw LogArgumentNullException(nameof(buffer));
 
             if (count < 0 || count > buffer.Length)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(count), LogHelper.FormatInvariant(LogMessages.IDX20001, 0, buffer.Length)));
+                throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(count), FormatInvariant(LogMessages.IDX20001, 0, buffer.Length)));
 
             if (offset < 0 || offset > buffer.Length - count)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(offset), LogHelper.FormatInvariant(LogMessages.IDX20001, 0,  buffer.Length - count)));
+                throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(offset), FormatInvariant(LogMessages.IDX20001, 0,  buffer.Length - count)));
         }
 
 
@@ -170,13 +170,13 @@ namespace Microsoft.IdentityModel.Xml
             {
                 if (requireDeclaration)
                 {
-                    throw LogHelper.LogExceptionMessage(new XmlException("reader.LocalName, reader.NamespaceURI"));
+                    throw LogExceptionMessage(new XmlException("reader.LocalName, reader.NamespaceURI"));
                 }
             }
             else if (!(StringComparer.Ordinal.Equals(expectedTypeNamespace, declaredType.Namespace)
                 && StringComparer.Ordinal.Equals(expectedTypeName, declaredType.Name)))
             {
-                throw LogHelper.LogExceptionMessage(new XmlException("SR.ID4102, expectedTypeName, expectedTypeNamespace, declaredType.Name, declaredType.Namespace"));
+                throw LogExceptionMessage(new XmlException("SR.ID4102, expectedTypeName, expectedTypeNamespace, declaredType.Name, declaredType.Namespace"));
                 //throw LogHelper.ThrowHelperXml(reader,
                 //    SR.GetString(SR.ID4102, expectedTypeName, expectedTypeNamespace, declaredType.Name, declaredType.Namespace));
             }
@@ -184,32 +184,12 @@ namespace Microsoft.IdentityModel.Xml
 
         public static Exception LogReadException(string format, params object[] args)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args)));
-        }
-
-        public static Exception ALogAttributeMissingReadException(string elementName, string attributeName)
-        {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21013, elementName, attributeName)));
-        }
-
-        public static Exception ALogElementMissingReadException(string elementName, string nodeName)
-        {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21012, elementName, nodeName)));
-        }
-
-        public static Exception ALogExpectedStartElement(XmlNodeType nodeType)
-        {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21022, nodeType)));
-        }
-
-        public static Exception aLogUnknownElementReadException(string elementName, string currentElement)
-        {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX21021, elementName, currentElement)));
+            return LogExceptionMessage(new XmlReadException(FormatInvariant(format, args)));
         }
 
         public static Exception LogReadException(string format, Exception inner, params object[] args)
         {
-            return LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(format, args), inner));
+            return LogExceptionMessage(new XmlReadException(FormatInvariant(format, args), inner));
         }
     }
 }

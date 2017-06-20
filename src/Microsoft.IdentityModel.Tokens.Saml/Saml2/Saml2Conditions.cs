@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -36,7 +36,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2Conditions
     {
-        private Collection<Saml2AudienceRestriction> _audienceRestrictions = new Collection<Saml2AudienceRestriction>();
         private DateTime? _notBefore;
         private DateTime? _notOnOrAfter;
 
@@ -44,15 +43,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of <see cref="Saml2Conditions"/>. class.
         /// </summary>
         public Saml2Conditions()
-        { }
+        {
+            AudienceRestrictions = new List<Saml2AudienceRestriction>();
+        }
 
         /// <summary>
         /// Gets a collection of <see cref="Saml2AudienceRestriction"/> that the assertion is addressed to.
         /// [Saml2Core, 2.5.1]
         /// </summary>
-        public Collection<Saml2AudienceRestriction> AudienceRestrictions
+        public ICollection<Saml2AudienceRestriction> AudienceRestrictions
         {
-            get { return _audienceRestrictions; }
+            get;
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null != value && null != _notOnOrAfter)
                 {
                     if (value.Value >= _notOnOrAfter.Value)
-                        throw LogHelper.LogArgumentNullException("nameof(value), ID4116");
+                        throw LogArgumentNullException(FormatInvariant(LogMessages.IDX10513, value, NotOnOrAfter));
                 }
 
                 _notBefore = value;
@@ -92,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (null != value && null != _notBefore)
                 {
                     if (value.Value <= _notBefore.Value)
-                        throw LogHelper.LogArgumentNullException("nameof(value), ID4116");
+                        throw LogArgumentNullException(FormatInvariant(LogMessages.IDX10514, value, NotBefore));
                 }
 
                 _notOnOrAfter = value;

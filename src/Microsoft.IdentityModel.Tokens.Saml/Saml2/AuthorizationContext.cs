@@ -26,21 +26,19 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Logging;
+using static System.String;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Saml2
 {
+    // TODO do we need this class?
     /// <summary>
     /// This class is used to specify the context of the authorization event.
     /// </summary>
     public class AuthorizationContext
     {
-        Collection<System.Security.Claims.Claim> _action = new Collection<System.Security.Claims.Claim>();
-        Collection<System.Security.Claims.Claim> _resource = new Collection<System.Security.Claims.Claim>();
-        ClaimsPrincipal _principal;
-
         /// <summary>
         /// Creates an AuthorizationContext with the specified principal, resource, and action.
         /// </summary>
@@ -52,18 +50,15 @@ namespace Microsoft.IdentityModel.Saml2
         /// </exception>
         public AuthorizationContext(ClaimsPrincipal principal, string resource, string action)
         {
-            if (principal == null)
-                throw LogHelper.LogArgumentNullException(nameof(principal));
+            Principal = principal ?? throw LogArgumentNullException(nameof(principal));
 
-            if (string.IsNullOrEmpty(resource))
-                throw LogHelper.LogArgumentNullException(nameof(resource));
+            if (IsNullOrEmpty(resource))
+                throw LogArgumentNullException(nameof(resource));
 
-            _principal = principal;
-            _resource.Add(new System.Security.Claims.Claim(ClaimTypes.Name, resource));
-            if (action != null)
-            {
-                _action.Add(new System.Security.Claims.Claim(ClaimTypes.Name, action));
-            }
+            Resource.Add(new Claim(ClaimTypes.Name, resource));
+
+            if (!IsNullOrEmpty(action))
+                Action.Add(new Claim(ClaimTypes.Name, action));
         }
 
         /// <summary>
@@ -73,36 +68,27 @@ namespace Microsoft.IdentityModel.Saml2
         /// <param name="resource">The resource for checking authorization to</param>
         /// <param name="action">The action to be performed on the resource</param>
         /// <exception cref="ArgumentNullException">When <paramref name="principal"/> or <paramref name="resource"/> or <paramref name="action"/> is null</exception>
-        public AuthorizationContext(ClaimsPrincipal principal, Collection<System.Security.Claims.Claim> resource, Collection<System.Security.Claims.Claim> action)
+        public AuthorizationContext(ClaimsPrincipal principal, ICollection<Claim> resource, ICollection<Claim> action)
         {
-            if (principal == null)
-                throw LogHelper.LogArgumentNullException(nameof(principal));
-
-            if (resource == null)
-                throw LogHelper.LogArgumentNullException(nameof(resource));
-
-            if (action == null)
-                throw LogHelper.LogArgumentNullException(nameof(action));
-
-            _principal = principal;
-            _resource = resource;
-            _action = action;
+            Principal = principal ?? throw LogArgumentNullException(nameof(principal));
+            Resource = resource ?? throw LogArgumentNullException(nameof(resource));
+            Action = action ?? throw LogArgumentNullException(nameof(action));
         }
 
         /// <summary>
         /// Gets the authorization action
         /// </summary>
-        public Collection<System.Security.Claims.Claim> Action
+        public ICollection<Claim> Action
         {
-            get { return _action; }
+            get;
         }
 
         /// <summary>
         /// Gets the authorization resource
         /// </summary>
-        public Collection<System.Security.Claims.Claim> Resource
+        public ICollection<Claim> Resource
         {
-            get { return _resource; }
+            get;
         }
 
         /// <summary>
@@ -110,7 +96,7 @@ namespace Microsoft.IdentityModel.Saml2
         /// </summary>
         public ClaimsPrincipal Principal
         {
-            get { return _principal; }
+            get;
         }
     }
 }

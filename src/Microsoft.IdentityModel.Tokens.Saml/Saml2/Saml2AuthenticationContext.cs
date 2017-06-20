@@ -27,8 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -46,7 +45,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </remarks>
     public class Saml2AuthenticationContext
     {
-        private Collection<Uri> _authenticatingAuthorities = new Collection<Uri>();
         private Uri _classReference;
         private Uri _declarationReference;
 
@@ -74,16 +72,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="declarationReference">The declaration reference of the authentication context.</param>
         public Saml2AuthenticationContext(Uri classReference, Uri declarationReference)
         {
-            if (null != classReference && !classReference.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(
-                    new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(classReference), classReference)));
-
-            if (null != declarationReference && !declarationReference.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(
-                    new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(declarationReference), declarationReference)));
-
-            _classReference = classReference;
-            _declarationReference = declarationReference;
+            ClassReference = classReference;
+            DeclarationReference = declarationReference;
+            AuthenticatingAuthorities = new List<Uri>();
         }
 
         /// <summary>
@@ -94,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public ICollection<Uri> AuthenticatingAuthorities
         {
-            get { return _authenticatingAuthorities; }
+            get;
         }
 
         /// <summary>
@@ -107,9 +98,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _classReference; }
             set
             {
-                if (null != value && !value.IsAbsoluteUri)
-                    throw LogHelper.LogExceptionMessage(
-                        new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(value), value)));
+                if (value == null)
+                    throw LogArgumentNullException(nameof(value));
+
+                if (!value.IsAbsoluteUri)
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
 
                 _classReference = value;
             }
@@ -124,9 +117,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _declarationReference; }
             set
             {
-                if (null != value && !value.IsAbsoluteUri)
-                    throw LogHelper.LogExceptionMessage(
-                        new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11134, nameof(value), value)));
+                if (value != null && !value.IsAbsoluteUri)
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
 
                 _declarationReference = value;
             }

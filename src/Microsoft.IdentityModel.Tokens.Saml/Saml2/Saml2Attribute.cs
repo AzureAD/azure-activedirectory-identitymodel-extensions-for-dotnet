@@ -27,9 +27,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -42,33 +41,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         private string _friendlyName;
         private string _name;
         private Uri _nameFormat;
-        private Collection<string> _values = new Collection<string>();
 
         /// <summary>
         /// Initializes a new instance of the Saml2Attribute class.
         /// </summary>
         /// <param name="name">The name of the attribute.</param>
         public Saml2Attribute(string name)
+            : this(name, (string)null)
         {
-            if (string.IsNullOrEmpty(name))
-                throw LogHelper.LogArgumentNullException(nameof(name));
-
-            _name = name;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the Saml2Attribute class.
-        /// </summary>
-        /// <param name="name">The name of the attribute.</param>
-        /// <param name="values">The collection of values that define the attribute.</param>
-        public Saml2Attribute(string name, IEnumerable<string> values)
-            : this(name)
-        {
-            if (values == null)
-                throw LogHelper.LogArgumentNullException(nameof(values));
-
-            foreach (string value in values)
-                _values.Add(value);
         }
 
         /// <summary>
@@ -78,7 +58,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="value">The value of the attribute.</param>
         public Saml2Attribute(string name, string value)
             : this(name, new string[] { value })
-        { }
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the Saml2Attribute class.
+        /// </summary>
+        /// <param name="name">The name of the attribute.</param>
+        /// <param name="values">The collection of values that define the attribute.</param>
+        public Saml2Attribute(string name, IEnumerable<string> values)
+        {
+            Name = name;
+            if (values == null)
+                throw LogArgumentNullException(nameof(values));
+
+            Values = new List<string>(values);
+        }
 
         /// <summary>
         /// Gets or sets a string that provides a more human-readable form of the attribute's 
@@ -99,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
+                    throw LogExceptionMessage(new ArgumentNullException(nameof(value)));
 
                 _name = value;
             }
@@ -114,8 +109,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _nameFormat; }
             set
             {
-                if (null != value && !value.IsAbsoluteUri)
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID0013");
+                if (value != null && !value.IsAbsoluteUri)
+                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)));
 
                 _nameFormat = value;
             }
@@ -135,19 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID4254");
-
-                int indexOfHash = value.IndexOf('#');
-                if (indexOfHash == -1)
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID4254");
-
-                string prefix = value.Substring(0, indexOfHash);
-                if (prefix.Length == 0)
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID4254");
-
-                string suffix = value.Substring(indexOfHash + 1);
-                if (suffix.Length == 0)
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID4254");
+                    throw LogArgumentNullException(nameof(value));
 
                 _attributeValueXsiType = value;
             }
@@ -156,9 +139,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets the values of the attribute.
         /// </summary>
-        public Collection<string> Values
+        public ICollection<string> Values
         {
-            get { return _values; }
+            get;
         }
     }
 }

@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets a collection of <see cref="SecurityKey"/> which can be used to authenticate an attesting entity. [Saml2Core, 2.4.1.3]
         /// </summary>
-        public Collection<KeyInfo> KeyInfos
+        public ICollection<KeyInfo> KeyInfos
         {
             get { return _keyInfos; }
         }
@@ -103,10 +104,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
 
                 _recipient = value;
             }

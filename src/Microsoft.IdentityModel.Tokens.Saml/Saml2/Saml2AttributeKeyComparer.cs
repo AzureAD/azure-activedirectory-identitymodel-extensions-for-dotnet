@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public AttributeKey(Saml2Attribute attribute)
             {
                 if (attribute == null)
-                    throw LogHelper.LogArgumentNullException(nameof(attribute));
+                    throw LogArgumentNullException(nameof(attribute));
 
                 _friendlyName = String.Empty;
                 _name = attribute.Name;

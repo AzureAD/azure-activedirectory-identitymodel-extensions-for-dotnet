@@ -28,8 +28,8 @@
 using System;
 using System.Security.Claims;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -53,8 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>True if the URI is valid, false otherwise.</returns>
         internal static bool CanCreateValidUri(string uriString, UriKind uriKind)
         {
-            Uri tempUri;
-            return Uri.TryCreate(uriString, uriKind, out tempUri);
+            return Uri.TryCreate(uriString, uriKind, out Uri tempUri);
         }
 
         /// <summary>
@@ -71,12 +70,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.ActionType, Saml2Constants.Namespace);
 
                 // @Namespace - required
-                // @attributes
                 string namespaceValue = reader.GetAttribute(Saml2Constants.Attributes.Namespace);
                 if (string.IsNullOrEmpty(namespaceValue))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace);
 
-                // TODO - relax URI.Absolute?
                 if (!CanCreateValidUri(namespaceValue, UriKind.Absolute))
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace, namespaceValue);
 
@@ -112,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Advice, Saml2Constants.Namespace);
             try
             {
-                Saml2Advice advice = new Saml2Advice();
+                var advice = new Saml2Advice();
                 bool isEmpty = reader.IsEmptyElement;
 
                 // @xsi:type
@@ -287,7 +284,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Attribute"/> instance.</returns>
         public virtual Saml2Attribute ReadAttribute(XmlDictionaryReader reader)
         {
-            // TODO this is public temporaroly until 'actor' processing
+            // TODO this is public temporarily until 'actor' processing
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
             try
             {
@@ -522,7 +519,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
         {
             if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
+                LogArgumentNullException(nameof(reader));
 
             // throw if wrong element
             bool isConditionElement = false;
@@ -614,7 +611,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     reader.ReadStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace);
 
                 // Now we have enough data to create the object
-                // TODO - relax URI - string?
                 var authnContext = new Saml2AuthenticationContext(classRef, declRef);
 
                 // <AuthenticatingAuthority> - 0-OO
@@ -655,14 +651,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // defer disallowing empty until after xsi:type
                 bool isEmpty = reader.IsEmptyElement;
 
-                // @attributes
-                string value;
-
                 // @xsi:type -- if we're a <Statement> element, this declaration must be present
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthnStatementType, Saml2Constants.Namespace, false);
 
                 // @AuthnInstant - required
-                value = reader.GetAttribute(Saml2Constants.Attributes.AuthnInstant);
+                string value = reader.GetAttribute(Saml2Constants.Attributes.AuthnInstant);
                 if (string.IsNullOrEmpty(value))
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Attributes.AuthnInstant);
 
@@ -691,11 +684,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 reader.ReadEndElement();
 
                 // Construct the actual object
-                var authnStatement = new Saml2AuthenticationStatement(authnContext, authnInstant);
-                authnStatement.SessionIndex = sessionIndex;
-                authnStatement.SessionNotOnOrAfter = sessionNotOnOrAfter;
-                authnStatement.SubjectLocality = subjectLocality;
-                return authnStatement;
+                return new Saml2AuthenticationStatement(authnContext, authnInstant)
+                {
+                    SessionIndex = sessionIndex,
+                    SessionNotOnOrAfter = sessionNotOnOrAfter,
+                    SubjectLocality = subjectLocality
+                };
             }
             catch (Exception ex)
             {
@@ -731,8 +725,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Decision);
 
                 // @Resource - required
-
-                // @attributes
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Resource);
                 if (value == null)
                 {
@@ -904,7 +896,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             throw new NotImplementedException("not implemented yet");
             //if (reader == null)
             //{
-            //    throw LogHelper.LogArgumentNullException(nameof(reader));
+            //    throw LogArgumentNullException(nameof(reader));
             //}
 
             //reader.MoveToContent();
@@ -952,34 +944,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
             try
             {
-                Saml2Evidence evidence = new Saml2Evidence();
-
-                // @attributes
-
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.EvidenceType, Saml2Constants.Namespace);
 
                 reader.Read();
+                var evidence = new Saml2Evidence();
 
                 // <AssertionIDRef|AssertionURIRef|Assertion|EncryptedAssertion> 0-OO
                 while (reader.IsStartElement())
                 {
                     if (reader.IsStartElement(Saml2Constants.Elements.AssertionIDRef, Saml2Constants.Namespace))
-                    {
                         evidence.AssertionIdReferences.Add(ReadSimpleNCNameElement(reader, Saml2Constants.Elements.AssertionIDRef));
-                    }
                     else if (reader.IsStartElement(Saml2Constants.Elements.AssertionURIRef, Saml2Constants.Namespace))
-                    {
                         evidence.AssertionUriReferences.Add(ReadSimpleUriElement(reader, Saml2Constants.Elements.AssertionURIRef, UriKind.RelativeOrAbsolute, false));
-                    }
                     else if (reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace))
-                    {
                         evidence.Assertions.Add(ReadAssertion(reader));
-                    }
                     else if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-                    {
                         evidence.Assertions.Add(ReadAssertion(reader));
-                    }
                 }
 
                 if (0 == evidence.AssertionIdReferences.Count
@@ -1034,11 +1015,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // check that reader is on correct element is made by caller
             try
             {
-                Saml2NameIdentifier nameIdentifier = new Saml2NameIdentifier("__TemporaryName__");
-
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.NameIDType, Saml2Constants.Namespace);
 
+                var nameIdentifier = new Saml2NameIdentifier("__TemporaryName__");
                 // @Format - optional
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Format);
                 if (!string.IsNullOrEmpty(value))
@@ -1105,33 +1085,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2ProxyRestriction ReadProxyRestriction(XmlDictionaryReader reader)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             // throw if wrong element
             bool isConditionElement = false;
             if (reader.IsStartElement(Saml2Constants.Elements.Condition, Saml2Constants.Namespace))
                 isConditionElement = true;
             else if (!reader.IsStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace))
-
                 reader.ReadStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace);
 
             try
             {
-                Saml2ProxyRestriction proxyRestriction = new Saml2ProxyRestriction();
                 bool isEmpty = reader.IsEmptyElement;
-
-                // @attributes
-                string value;
 
                 // @xsi:type -- if we're a <Condition> element, this declaration must be present
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.ProxyRestrictionType, Saml2Constants.Namespace, isConditionElement);
 
+                var proxyRestriction = new Saml2ProxyRestriction();
+
                 // @Count - optional
-                value = reader.GetAttribute(Saml2Constants.Attributes.Count);
+                string value = reader.GetAttribute(Saml2Constants.Attributes.Count);
                 if (!string.IsNullOrEmpty(value))
-                {
                     proxyRestriction.Count = XmlConvert.ToInt32(value);
-                }
 
                 // content
                 reader.Read();
@@ -1207,17 +1182,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
             try
             {
-                // @attributes
-
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.SubjectType, Saml2Constants.Namespace);
 
-                // <elements>
-                Saml2Subject subject = new Saml2Subject();
+                // TODO is the Read needed?
                 reader.Read();
 
                 // <NameID> | <EncryptedID> | <BaseID> 0-1
-                subject.NameId = ReadSubjectId(reader, Saml2Constants.Elements.Subject);
+                var subject = new Saml2Subject()
+                {
+                    NameId = ReadNameIdentifier(reader, Saml2Constants.Elements.Subject)
+                };
 
                 // <SubjectConfirmation> 0-OO
                 while (reader.IsStartElement(Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace))
@@ -1254,8 +1229,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 bool isEmpty = reader.IsEmptyElement;
 
-                // @attributes
-
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.SubjectConfirmationType, Saml2Constants.Namespace);
 
@@ -1268,14 +1241,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.SubjectConfirmationType, Saml2Constants.Attributes.Method, reader.LocalName);
 
                 // Construct the appropriate SubjectConfirmation based on the method
-                Saml2SubjectConfirmation subjectConfirmation = new Saml2SubjectConfirmation(new Uri(method));
+                var subjectConfirmation = new Saml2SubjectConfirmation(new Uri(method));
 
                 // <elements>
                 reader.Read();
                 if (!isEmpty)
                 {
                     // <NameID> | <EncryptedID> | <BaseID> 0-1
-                    subjectConfirmation.NameIdentifier = ReadSubjectId(reader, Saml2Constants.Elements.SubjectConfirmation);
+                    subjectConfirmation.NameIdentifier = ReadNameIdentifier(reader, Saml2Constants.Elements.SubjectConfirmation);
 
                     // <SubjectConfirmationData> 0-1
                     if (reader.IsStartElement(Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace))
@@ -1312,9 +1285,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 Saml2SubjectConfirmationData confirmationData = new Saml2SubjectConfirmationData();
                 bool isEmpty = reader.IsEmptyElement;
 
-                // @attributes
-                string value;
-
                 // @xsi:type
                 bool requireKeyInfo = false;
                 XmlQualifiedName type = XmlUtil.GetXsiType(reader);
@@ -1332,32 +1302,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX11127);
 
                 // @Address - optional
-                value = reader.GetAttribute(Saml2Constants.Attributes.Address);
+                string value = reader.GetAttribute(Saml2Constants.Attributes.Address);
                 if (!string.IsNullOrEmpty(value))
-                {
                     confirmationData.Address = value;
-                }
 
                 // @InResponseTo - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.InResponseTo);
                 if (!string.IsNullOrEmpty(value))
-                {
                     confirmationData.InResponseTo = new Saml2Id(value);
-                }
 
                 // @NotBefore - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.NotBefore);
                 if (!string.IsNullOrEmpty(value))
-                {
                     confirmationData.NotBefore = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
-                }
 
                 // @NotOnOrAfter - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.NotOnOrAfter);
                 if (!string.IsNullOrEmpty(value))
-                {
                     confirmationData.NotOnOrAfter = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
-                }
 
                 // @Recipient - optional
                 value = reader.GetAttribute(Saml2Constants.Attributes.Recipient);
@@ -1371,7 +1333,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // Contents
                 reader.Read();
-
                 if (!isEmpty)
                 {
                     // <ds:KeyInfo> 0-OO OR 1-OO
@@ -1418,10 +1379,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="Saml2SecurityTokenReadException">if Element is 'BaseID' with no xsi type.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">if reader is pointing at an unknown Element.</exception>
         /// <returns>A <see cref="Saml2NameIdentifier"/> instance.</returns>
-        protected virtual Saml2NameIdentifier ReadSubjectId(XmlDictionaryReader reader, string parentElement)
+        protected virtual Saml2NameIdentifier ReadNameIdentifier(XmlDictionaryReader reader, string parentElement)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             // <NameID>, <EncryptedID>, <BaseID>
             if (reader.IsStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace))
@@ -1462,8 +1423,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 var subjectLocality = new Saml2SubjectLocality();
                 bool isEmpty = reader.IsEmptyElement;
 
-                // @attributes
-
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.SubjectLocalityType, Saml2Constants.Namespace);
 
@@ -1476,9 +1435,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // Empty content
                 reader.Read();
                 if (!isEmpty)
-                {
                     reader.ReadEndElement();
-                }
 
                 return subjectLocality;
             }
@@ -1499,16 +1456,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAction(XmlWriter writer, Saml2Action action)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (action == null)
-                throw LogHelper.LogArgumentNullException(nameof(action));
+                throw LogArgumentNullException(nameof(action));
 
             if (action.Namespace == null)
-                throw LogHelper.LogArgumentNullException(nameof(action.Namespace));
+                throw LogArgumentNullException(nameof(action.Namespace));
 
             if (string.IsNullOrEmpty(action.Namespace.ToString()))
-                throw LogHelper.LogArgumentNullException("action.Namespace");
+                throw LogArgumentNullException("action.Namespace");
 
             // <Action>
             writer.WriteStartElement(Saml2Constants.Elements.Action, Saml2Constants.Namespace);
@@ -1531,10 +1488,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAdvice(XmlWriter writer, Saml2Advice advice)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (advice == null)
-                throw LogHelper.LogArgumentNullException(nameof(advice));
+                throw LogArgumentNullException(nameof(advice));
 
             // <Advice>
             writer.WriteStartElement(Saml2Constants.Elements.Advice, Saml2Constants.Namespace);
@@ -1566,84 +1523,78 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public virtual void WriteAssertion(XmlWriter writer, Saml2Assertion assertion)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(assertion));
+                throw LogArgumentNullException(nameof(assertion));
 
             if (assertion.EncryptingCredentials != null)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException("Encryption not supported."));
+                throw LogExceptionMessage(new NotSupportedException("Encryption not supported."));
 
-            // If we've saved off the token stream, re-emit it.
-            if (assertion.CanWriteSourceData)
-                assertion.WriteSourceData(writer);
-            else
+            // Wrap the writer if necessary for a signature
+            // We do not dispose this writer, since as a delegating writer it would
+            // dispose the inner writer, which we don't properly own.
+            EnvelopedSignatureWriter signatureWriter = null;
+            if (null != assertion.SigningCredentials)
+                writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value);
+
+            if (assertion.Subject == null)
             {
-                // Wrap the writer if necessary for a signature
-                // We do not dispose this writer, since as a delegating writer it would
-                // dispose the inner writer, which we don't properly own.
-                EnvelopedSignatureWriter signatureWriter = null;
-                if (null != assertion.SigningCredentials)
-                    writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value);
-
-                if (assertion.Subject == null)
+                // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
+                if (assertion.Statements == null || 0 == assertion.Statements.Count)
                 {
-                    // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
-                    if (assertion.Statements == null || 0 == assertion.Statements.Count)
-                    {
-                        throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("no subject and no statements, not allowed"));
-                    }
-
-                    // Furthermore, the built-in statement types all require the presence of a subject.
-                    // [Saml2Core, lines 1050, 1168, 1280]
-                    foreach (Saml2Statement statement in assertion.Statements)
-                    {
-                        if (statement is Saml2AuthenticationStatement
-                            || statement is Saml2AttributeStatement
-                            || statement is Saml2AuthorizationDecisionStatement)
-                        {
-                            throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("unknown statement type"));
-                        }
-                    }
+                    throw LogExceptionMessage(new Saml2SecurityTokenException("no subject and no statements, not allowed"));
                 }
 
-                // <Assertion>
-                writer.WriteStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
-
-                // @ID - required
-                writer.WriteAttributeString(Saml2Constants.Attributes.ID, assertion.Id.Value);
-
-                // @IssueInstant - required
-                writer.WriteAttributeString(Saml2Constants.Attributes.IssueInstant, XmlConvert.ToString(assertion.IssueInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
-
-                // @Version - required
-                writer.WriteAttributeString(Saml2Constants.Attributes.Version, assertion.Version);
-
-                // <Issuer> 1
-                WriteIssuer(writer, assertion.Issuer);
-
-                // <ds:Signature> 0-1
-                if (null != signatureWriter)
-                    signatureWriter.WriteSignature();
-
-                // <Subject> 0-1
-                if (null != assertion.Subject)
-                    WriteSubject(writer, assertion.Subject);
-
-                // <Conditions> 0-1
-                if (null != assertion.Conditions)
-                    WriteConditions(writer, assertion.Conditions);
-
-                // <Advice> 0-1
-                if (null != assertion.Advice)
-                    WriteAdvice(writer, assertion.Advice);
-
-                // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
+                // Furthermore, the built-in statement types all require the presence of a subject.
+                // [Saml2Core, lines 1050, 1168, 1280]
                 foreach (Saml2Statement statement in assertion.Statements)
-                    WriteStatement(writer, statement);
-
-                writer.WriteEndElement();
+                {
+                    if (statement is Saml2AuthenticationStatement
+                        || statement is Saml2AttributeStatement
+                        || statement is Saml2AuthorizationDecisionStatement)
+                    {
+                        throw LogExceptionMessage(new Saml2SecurityTokenException("unknown statement type"));
+                    }
+                }
             }
+
+            // <Assertion>
+            writer.WriteStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+
+            // @ID - required
+            writer.WriteAttributeString(Saml2Constants.Attributes.ID, assertion.Id.Value);
+
+            // @IssueInstant - required
+            writer.WriteAttributeString(Saml2Constants.Attributes.IssueInstant, XmlConvert.ToString(assertion.IssueInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+
+            // @Version - required
+            writer.WriteAttributeString(Saml2Constants.Attributes.Version, assertion.Version);
+
+            // <Issuer> 1
+            WriteIssuer(writer, assertion.Issuer);
+
+            // <ds:Signature> 0-1
+            if (null != signatureWriter)
+                signatureWriter.WriteSignature();
+
+            // <Subject> 0-1
+            if (null != assertion.Subject)
+                WriteSubject(writer, assertion.Subject);
+
+            // <Conditions> 0-1
+            if (null != assertion.Conditions)
+                WriteConditions(writer, assertion.Conditions);
+
+            // <Advice> 0-1
+            if (null != assertion.Advice)
+                WriteAdvice(writer, assertion.Advice);
+
+            // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
+            foreach (Saml2Statement statement in assertion.Statements)
+                WriteStatement(writer, statement);
+
+            writer.WriteEndElement();
         }
 
         /// <summary>
@@ -1655,10 +1606,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             // TODO = temporarily public until actor is processing is complete
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (attribute == null)
-                throw LogHelper.LogArgumentNullException(nameof(attribute));
+                throw LogArgumentNullException(nameof(attribute));
 
             // <Attribute>
             writer.WriteStartElement(Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
@@ -1724,11 +1675,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAttributeStatement(XmlWriter writer, Saml2AttributeStatement attributeStatement)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
 
             if (attributeStatement == null)
-                throw LogHelper.LogArgumentNullException(nameof(attributeStatement));
+                throw LogArgumentNullException(nameof(attributeStatement));
 
             if (attributeStatement.Attributes == null || 0 == attributeStatement.Attributes.Count)
                 throw LogWriteException(LogMessages.IDX11129);
@@ -1755,7 +1706,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAttributeValue(XmlWriter writer, string value, Saml2Attribute attribute)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             writer.WriteString(value);
         }
@@ -1768,10 +1719,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAudienceRestriction(XmlWriter writer, Saml2AudienceRestriction audienceRestriction)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (audienceRestriction == null)
-                throw LogHelper.LogArgumentNullException(nameof(audienceRestriction));
+                throw LogArgumentNullException(nameof(audienceRestriction));
 
             // Schema requires at least one audience.
             if (audienceRestriction.Audiences == null || 0 == audienceRestriction.Audiences.Count)
@@ -1796,10 +1747,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAuthenticationContext(XmlWriter writer, Saml2AuthenticationContext authenticationContext)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (authenticationContext == null)
-                throw LogHelper.LogArgumentNullException(nameof(authenticationContext));
+                throw LogArgumentNullException(nameof(authenticationContext));
 
             // One of ClassRef and DeclRef must be present.
             if (authenticationContext.ClassReference == null && authenticationContext.DeclarationReference == null)
@@ -1832,10 +1783,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAuthenticationStatement(XmlWriter writer, Saml2AuthenticationStatement authenticationStatement)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (authenticationStatement == null)
-                throw LogHelper.LogArgumentNullException(nameof(authenticationStatement));
+                throw LogArgumentNullException(nameof(authenticationStatement));
 
             // <AuthnStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
@@ -1872,14 +1823,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, Saml2AuthorizationDecisionStatement authorizationDecisionStatement)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (authorizationDecisionStatement == null)
-                throw LogHelper.LogArgumentNullException(nameof(authorizationDecisionStatement));
+                throw LogArgumentNullException(nameof(authorizationDecisionStatement));
 
             if (0 == authorizationDecisionStatement.Actions.Count)
             {
-                throw LogHelper.LogExceptionMessage(
+                throw LogExceptionMessage(
                     new Saml2SecurityTokenException("no actions specified ID4122"));
             }
 
@@ -1912,10 +1863,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteConditions(XmlWriter writer, Saml2Conditions conditions)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (conditions == null)
-                throw LogHelper.LogArgumentNullException(nameof(conditions));
+                throw LogArgumentNullException(nameof(conditions));
 
             // <Conditions>
             writer.WriteStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
@@ -1956,10 +1907,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteEvidence(XmlWriter writer, Saml2Evidence evidence)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (evidence == null)
-                throw LogHelper.LogArgumentNullException(nameof(evidence));
+                throw LogArgumentNullException(nameof(evidence));
 
             if ((evidence.AssertionIdReferences == null || 0 == evidence.AssertionIdReferences.Count)
                && (evidence.Assertions == null || 0 == evidence.Assertions.Count)
@@ -1993,10 +1944,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteIssuer(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (nameIdentifier == null)
-                throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
+                throw LogArgumentNullException(nameof(nameIdentifier));
 
             writer.WriteStartElement(Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
             WriteNameIdType(writer, nameIdentifier);
@@ -2013,13 +1964,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteNameId(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (nameIdentifier == null)
-                throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
+                throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (nameIdentifier.EncryptingCredentials != null)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException("Encryption not supported."));
+                throw LogExceptionMessage(new NotSupportedException("Encryption not supported."));
 
             writer.WriteStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
             this.WriteNameIdType(writer, nameIdentifier);
@@ -2037,13 +1988,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteNameIdType(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (nameIdentifier == null)
-                throw LogHelper.LogArgumentNullException(nameof(nameIdentifier));
+                throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (string.IsNullOrEmpty(nameIdentifier.Value))
-                throw LogHelper.LogArgumentNullException(LogHelper.FormatInvariant(LogMessages.IDX11151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
+                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX11151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
 
             // @Format - optional
             if (null != nameIdentifier.Format)
@@ -2073,10 +2024,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteProxyRestriction(XmlWriter writer, Saml2ProxyRestriction proxyRestriction)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (proxyRestriction == null)
-                throw LogHelper.LogArgumentNullException(nameof(proxyRestriction));
+                throw LogArgumentNullException(nameof(proxyRestriction));
 
             writer.WriteStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace);
 
@@ -2104,27 +2055,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteStatement(XmlWriter writer, Saml2Statement statement)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (statement == null)
-                throw LogHelper.LogArgumentNullException(nameof(statement));
+                throw LogArgumentNullException(nameof(statement));
 
-            Saml2AttributeStatement attributeStatement = statement as Saml2AttributeStatement;
-            if (null != attributeStatement)
+            if (statement is Saml2AttributeStatement attributeStatement)
             {
                 WriteAttributeStatement(writer, attributeStatement);
                 return;
             }
 
-            Saml2AuthenticationStatement authnStatement = statement as Saml2AuthenticationStatement;
-            if (null != authnStatement)
+            if (statement is Saml2AuthenticationStatement authnStatement)
             {
                 WriteAuthenticationStatement(writer, authnStatement);
                 return;
             }
 
-            Saml2AuthorizationDecisionStatement authzStatement = statement as Saml2AuthorizationDecisionStatement;
-            if (null != authzStatement)
+            if (statement is Saml2AuthorizationDecisionStatement authzStatement)
             {
                 WriteAuthorizationDecisionStatement(writer, authzStatement);
                 return;
@@ -2141,14 +2089,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteSubject(XmlWriter writer, Saml2Subject subject)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
             // If there's no ID, there has to be a SubjectConfirmation
             if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
-                throw LogHelper.LogExceptionMessage(new Saml2SecurityTokenException("both id and subjectconfirmation cannot be null"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException("both id and subjectconfirmation cannot be null"));
 
             // <Subject>
             writer.WriteStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
@@ -2175,16 +2123,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteSubjectConfirmation(XmlWriter writer, Saml2SubjectConfirmation subjectConfirmation)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (subjectConfirmation == null)
-                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation));
+                throw LogArgumentNullException(nameof(subjectConfirmation));
 
             if (subjectConfirmation.Method == null)
-                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation.Method));
+                throw LogArgumentNullException(nameof(subjectConfirmation.Method));
 
             if (string.IsNullOrEmpty(subjectConfirmation.Method.OriginalString))
-                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmation.Method.OriginalString));
+                throw LogArgumentNullException(nameof(subjectConfirmation.Method.OriginalString));
 
             // <SubjectConfirmation>
             writer.WriteStartElement(Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Namespace);
@@ -2216,10 +2164,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteSubjectConfirmationData(XmlWriter writer, Saml2SubjectConfirmationData subjectConfirmationData)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (subjectConfirmationData == null)
-                throw LogHelper.LogArgumentNullException(nameof(subjectConfirmationData));
+                throw LogArgumentNullException(nameof(subjectConfirmationData));
 
             // <SubjectConfirmationData>
             writer.WriteStartElement(Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
@@ -2268,10 +2216,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void WriteSubjectLocality(XmlWriter writer, Saml2SubjectLocality subjectLocality)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (subjectLocality == null)
-                throw LogHelper.LogArgumentNullException(nameof(subjectLocality));
+                throw LogArgumentNullException(nameof(subjectLocality));
 
             // <SubjectLocality>
             writer.WriteStartElement(Saml2Constants.Elements.SubjectLocality, Saml2Constants.Namespace);
@@ -2351,42 +2299,42 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
         internal static Exception LogReadException(string message)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenReadException(message));
+            return LogExceptionMessage(new Saml2SecurityTokenReadException(message));
         }
 
         internal static Exception LogReadException(string message, Exception ex)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenReadException(message, ex));
+            return LogExceptionMessage(new Saml2SecurityTokenReadException(message, ex));
         }
 
         internal static Exception LogReadException(string format, params object[] args)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenReadException(LogHelper.FormatInvariant(format, args)));
+            return LogExceptionMessage(new Saml2SecurityTokenReadException(FormatInvariant(format, args)));
         }
 
         internal static Exception LogReadException(string format, Exception inner, params object[] args)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenReadException(LogHelper.FormatInvariant(format, args), inner));
+            return LogExceptionMessage(new Saml2SecurityTokenReadException(FormatInvariant(format, args), inner));
         }
 
         internal static Exception LogWriteException(string message)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenWriteException(message));
+            return LogExceptionMessage(new Saml2SecurityTokenWriteException(message));
         }
 
         internal static Exception LogWriteException(string message, Exception ex)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenWriteException(message, ex));
+            return LogExceptionMessage(new Saml2SecurityTokenWriteException(message, ex));
         }
 
         internal static Exception LogWriteException(string format, params object[] args)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenWriteException(LogHelper.FormatInvariant(format, args)));
+            return LogExceptionMessage(new Saml2SecurityTokenWriteException(FormatInvariant(format, args)));
         }
 
         internal static Exception LogWriteException(string format, Exception inner, params object[] args)
         {
-            return LogHelper.LogExceptionMessage(new Saml2SecurityTokenWriteException(LogHelper.FormatInvariant(format, args), inner));
+            return LogExceptionMessage(new Saml2SecurityTokenWriteException(FormatInvariant(format, args), inner));
         }
     }
 }

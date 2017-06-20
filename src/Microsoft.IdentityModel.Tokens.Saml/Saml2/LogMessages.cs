@@ -48,6 +48,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX10510 = "IDX10510: The Saml2SecurityToken cannot be validated because the Assertion specifies a OneTimeUse condition.Enforcement of the OneTimeUse condition is not supported by default.To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
         internal const string IDX10511 = "IDX10511: The Saml2SecurityToken cannot be validated because the Assertion specifies a ProxyRestriction condition.Enforcement of the ProxyRestriction condition is not supported by default. To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
         internal const string IDX10512 = "IDX10512: Unable to validate token. A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
+        internal const string IDX10513 = "IDX10513: NotBefore '{0}', is after NotOnOrAfter '{1}'.";
+        internal const string IDX10514 = "IDX10514: NotOnOrAfter '{0}', is before NotBefore '{1}'.";
+        internal const string IDX10515 = "IDX10515: SamlId value threw on XmlConvert.VerifyNCName. value: '{0}'";
 
 
         // SamlSerializing reading
@@ -84,7 +87,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11131 = "IDX11131: When writing the Saml2AuthenticationContext, at least one of ClassReference and DeclarationReference must be set.Set one of these properties before serialization.";
         internal const string IDX11132 = "IDX11132: 'Saml2NameIdentifier' encrypting credentials must have a Symmetric Key specified.";
         internal const string IDX11133 = "IDX11133: The Saml2Assertion Statements collection contains an unrecognized Saml2Statement.To handle custom Saml2Statement objects, extend Saml2SecurityTokenHandler and override WriteStatement. Type: '{0}'";
-        internal const string IDX11134 = "IDX11134: '{1}' was not a Absolute Uri, was: '{2}'.";
         internal const string IDX11135 = "IDX11135: An unrecognized value was encountered for the SAML2:AuthorizationDecisionStatement element's Decision attribute: '{0}'";
         internal const string IDX11136 = "IDX11136: Unable to read for Saml2SecurityToken. Required Element: '{0}' is missing or empty.";
         internal const string IDX11137 = "IDX11137: Unable to read for Saml2SecurityToken. Version must be '2.0' was: '{0}'.";

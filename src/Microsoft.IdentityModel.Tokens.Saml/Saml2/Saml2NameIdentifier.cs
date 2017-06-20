@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -37,7 +37,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2NameIdentifier
     {
-        private Collection<SecurityKeyIdentifierClause> _externalEncryptedKeys;
         private Uri _format;
         private string _nameQualifier;
         private string _serviceProviderPointNameQualifier;
@@ -59,15 +58,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="format"><see cref="Uri"/> specifying the identifier format.</param>
         public Saml2NameIdentifier(string name, Uri format)
         {
-            if (string.IsNullOrEmpty(name))
-                throw LogHelper.LogArgumentNullException(nameof(name));
-
-            if (null != format && !format.IsAbsoluteUri)
-                throw LogHelper.LogArgumentNullException("nameof(format), ID0013");
-
-            _format = format;
-            _value = name;
-            _externalEncryptedKeys = new Collection<SecurityKeyIdentifierClause>();
+            Value = name;
+            Format = format;
+            ExternalEncryptedKeys = new List<SecurityKeyIdentifierClause>();
         }
 
         /// <summary>
@@ -82,9 +75,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets additional encrypted keys which will be specified external to the 
         /// EncryptedData element, as children of the EncryptedId element.
         /// </summary>
-        public Collection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
+        public ICollection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
         {
-            get { return _externalEncryptedKeys; }
+            get;
         }
 
         /// <summary>
@@ -97,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (null != value && !value.IsAbsoluteUri)
-                    throw LogHelper.LogArgumentNullException("nameof(value), ID0013");
+                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)));
 
                 _format = value;
             }
@@ -141,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 _value = value;
             }

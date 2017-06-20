@@ -27,7 +27,7 @@
 
 using System;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -41,10 +41,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected override void InsertItem(int index, Uri item)
         {
             if (item == null)
-                throw LogHelper.LogArgumentNullException(nameof(item));
+                throw LogArgumentNullException(nameof(item));
 
             if (!item.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11139, item)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11139, item)));
 
             base.InsertItem(index, item);
         }
@@ -52,10 +52,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected override void SetItem(int index, Uri item)
         {
             if (item == null)
-                throw LogHelper.LogArgumentNullException(nameof(item));
+                throw LogArgumentNullException(nameof(item));
 
             if (!item.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX11139, item)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11139, item)));
 
             base.SetItem(index, item);
         }

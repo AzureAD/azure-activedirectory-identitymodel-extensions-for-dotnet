@@ -354,8 +354,7 @@ namespace Microsoft.IdentityModel.Tests
             ClaimsPrincipal retVal = null;
             try
             {
-                SecurityToken validatedToken;
-                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
+                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out SecurityToken validatedToken);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
@@ -39,39 +40,38 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </remarks>
     public class Saml2Advice
     {
-        private Collection<Saml2Id> _assertionIdReferences = new Collection<Saml2Id>();
-        private Collection<Saml2Assertion> _assertions = new Collection<Saml2Assertion>();
-        private AbsoluteUriCollection _assertionUriReferences = new AbsoluteUriCollection();
-
         /// <summary>
         /// Creates an instance of Saml2Advice.
         /// </summary>
         public Saml2Advice()
         {
+            AssertionIdReferences = new Collection<Saml2Id>();
+            Assertions = new Collection<Saml2Assertion>();
+            AssertionUriReferences = new AbsoluteUriCollection();
         }
 
         /// <summary>
         /// Gets a collection of <see cref="Saml2Id"/> representating the assertions in the <see cref="Saml2Advice"/>.
         /// </summary>
-        public Collection<Saml2Id> AssertionIdReferences
+        public ICollection<Saml2Id> AssertionIdReferences
         {
-            get { return _assertionIdReferences; }
+            get;
         }
 
         /// <summary>
         /// Gets a collection of <see cref="Saml2Assertion"/> representating the assertions in the <see cref="Saml2Advice"/>.
         /// </summary>
-        public Collection<Saml2Assertion> Assertions
+        public ICollection<Saml2Assertion> Assertions
         {
-            get { return _assertions; }
+            get;
         }
 
         /// <summary>
         /// Gets a collection of <see cref="Uri"/> representing the assertions in the <see cref="Saml2Advice"/>.
         /// </summary>
-        public Collection<Uri> AssertionUriReferences
+        public ICollection<Uri> AssertionUriReferences
         {
-            get { return _assertionUriReferences; }
+            get;
         }
     }
 }

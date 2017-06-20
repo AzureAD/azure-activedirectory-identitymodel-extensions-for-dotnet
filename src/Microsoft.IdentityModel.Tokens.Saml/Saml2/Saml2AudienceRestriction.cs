@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -40,8 +40,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </remarks>
     public class Saml2AudienceRestriction
     {
-        private Collection<string> _audiences = new Collection<string>();
-
         /// <summary>
         /// Creates an instance of Saml2AudienceRestriction.
         /// </summary>
@@ -63,15 +61,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2AudienceRestriction(IEnumerable<string> audiences)
         {
             if (audiences == null)
-                throw LogHelper.LogArgumentNullException(nameof(audiences));
+                throw LogArgumentNullException(nameof(audiences));
 
-            foreach (var audience in audiences)
-            {
-                if (audience == null)
-                    throw LogHelper.LogArgumentNullException(nameof(audiences));
-
-                _audiences.Add(audience);
-            }
+            Audiences = new List<string>(audiences);
         }
 
         /// <summary>
@@ -79,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public ICollection<string> Audiences
         {
-            get { return _audiences; }
+            get;
         }
     }
 }

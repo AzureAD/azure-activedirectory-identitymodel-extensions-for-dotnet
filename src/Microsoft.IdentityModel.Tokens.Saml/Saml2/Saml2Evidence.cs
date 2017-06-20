@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
@@ -41,8 +41,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </remarks>
     public class Saml2Evidence
     {
-        private Collection<Saml2Id> _assertionIdReferences = new Collection<Saml2Id>();
-        private Collection<Saml2Assertion> _assertions = new Collection<Saml2Assertion>();
+        private ICollection<Saml2Id> _assertionIdReferences = new List<Saml2Id>();
+        private ICollection<Saml2Assertion> _assertions = new List<Saml2Assertion>();
         private AbsoluteUriCollection _assertionUriReferences = new AbsoluteUriCollection();
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Evidence(Saml2Assertion assertion)
         {
             if (assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(assertion));
+                throw LogArgumentNullException(nameof(assertion));
 
             _assertions.Add(assertion);
         }
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Evidence(Saml2Id idReference)
         {
             if (idReference == null)
-                throw LogHelper.LogArgumentNullException(nameof(idReference));
+                throw LogArgumentNullException(nameof(idReference));
 
             _assertionIdReferences.Add(idReference);
         }
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public Saml2Evidence(Uri uriReference)
         {
             if (uriReference == null)
-                throw LogHelper.LogArgumentNullException(nameof(uriReference));
+                throw LogArgumentNullException(nameof(uriReference));
 
             _assertionUriReferences.Add(uriReference);
         }
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets a collection of <see cref="Saml2Id"/> for use by the <see cref="Saml2Evidence"/>.
         /// </summary>
-        public Collection<Saml2Id> AssertionIdReferences
+        public ICollection<Saml2Id> AssertionIdReferences
         {
             get { return _assertionIdReferences; }
         }
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets a collection of <see cref="Saml2Assertion"/>  for use by the <see cref="Saml2Evidence"/>.
         /// </summary>
-        public Collection<Saml2Assertion> Assertions
+        public ICollection<Saml2Assertion> Assertions
         {
             get { return _assertions; }
         }
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets a collection of <see cref="Uri"/>  for use by the <see cref="Saml2Evidence"/>.
         /// </summary>
-        public Collection<Uri> AssertionUriReferences
+        public ICollection<Uri> AssertionUriReferences
         {
             get { return _assertionUriReferences; }
         }

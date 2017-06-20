@@ -27,8 +27,6 @@
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    using System;
-
     /// <summary>
     /// Represents the StatementAbstractType specified in [Saml2Core, 2.7.1].
     /// </summary>
