@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10672, key, (algorithm ?? "null"))));
         }
 
         /// <summary>
