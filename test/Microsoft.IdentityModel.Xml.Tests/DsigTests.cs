@@ -185,14 +185,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new DSigTheoryData
                 {
-                    ExpectedException = ExpectedException.InvalidOperationException("IDX10640:"),
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10640:"),
                     SignatureTestSet = signatureTestSet,
                     TestId = nameof(ReferenceXml.Signature_UnknownDigestAlgorithm)
                 });
 
                 theoryData.Add(new DSigTheoryData
                 {
-                    ExpectedException = ExpectedException.ArgumentException("IDX10634:"),          
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),          
                     SignatureTestSet = ReferenceXml.Signature_UnknownSignatureAlgorithm,
                     TestId = nameof(ReferenceXml.Signature_UnknownSignatureAlgorithm)
                 });

@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             theoryData.Add("Test1", null, null, ExpectedException.ArgumentNullException());
             theoryData.Add("Test2", Default.SymmetricEncryptionKey128, null, ExpectedException.ArgumentNullException());
-            theoryData.Add("Test3", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test3", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128Encryption, ExpectedException.NotSupportedException("IDX10661:"));
             theoryData.Add("Test4", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
 
@@ -88,11 +88,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test7", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
 
             JsonWebKey key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.Octet };
-            theoryData.Add("Test8", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test8", key, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
 
             key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.RSA, K = KeyingMaterial.JsonWebKeySymmetric128.K };
-            theoryData.Add("Test9", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
-            theoryData.Add("Test10", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test9", key, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
+            theoryData.Add("Test10", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
             theoryData.Add("Test11", KeyingMaterial.JsonWebKeySymmetric128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test12", KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
 

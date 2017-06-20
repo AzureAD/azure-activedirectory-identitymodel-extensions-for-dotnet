@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key), nameof(algorithm)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.KeySize), LogHelper.FormatInvariant(LogMessages.IDX10803, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize)));
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10672, key, (algorithm ?? "null"))));
         }
 
         /// <summary>

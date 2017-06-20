@@ -96,14 +96,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 KeyingMaterial.RsaSecurityKey_1024,
                 SecurityAlgorithms.RsaOAEP,
                 false,
-                ExpectedException.ArgumentException("IDX10661:"));
+                ExpectedException.NotSupportedException("IDX10661:"));
 
             theoryData.Add(
                 "KeyDoesNotRightType",
                 KeyingMaterial.RsaSecurityKey_2048,
                 SecurityAlgorithms.Aes128KW,
                 false,
-                ExpectedException.ArgumentException("IDX10661:"));
+                ExpectedException.NotSupportedException("IDX10661:"));
 
             theoryData.Add(
                 "KeyAlgorithmMatch",

@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Tokens
             if ( symmetricKey != null && IsSymmetricAlgorithmSupported(algorithm))
                 return new SymmetricKeyWrapProvider(symmetricKey, algorithm);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
         }
 
 
@@ -492,7 +492,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SHA512.Create();
             }
 
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10640, algorithm)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10640, algorithm)));
         }
 
         /// <summary>
@@ -537,7 +537,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return new HMACSHA512(keyBytes);
 
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10666, algorithm), nameof(algorithm)));
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10666, algorithm)));
             }
         }
 
@@ -559,7 +559,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
 
             AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
             if (asymmetricKey != null)
@@ -583,7 +583,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // TODO improve this message. Nothing about JsonWebKey is mentioned.
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10800, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10800, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
         }
 
         private bool IsSupportedHashAlgorithm(string algorithm)
