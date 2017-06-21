@@ -85,11 +85,11 @@ namespace Microsoft.IdentityModel.Tests
             if (!IdentityComparer.AreStringsEqual(reference1.Uri, reference2.Uri))
                 diffs.Add($" Reference.Uri: {reference1.Uri}, {reference2.Uri}");
 
-            if (reference1.TransformChain.TransformCount != reference2.TransformChain.TransformCount)
-                    diffs.Add($" Reference.TransformChain.TransformCount: {reference1.TransformChain.TransformCount}, {reference2.TransformChain.TransformCount}");
-            else if (reference1.TransformChain.TransformCount > 0)
+            if (reference1.TransformChain.Count != reference2.TransformChain.Count)
+                    diffs.Add($" Reference.TransformChain.TransformCount: {reference1.TransformChain.Count}, {reference2.TransformChain.Count}");
+            else if (reference1.TransformChain.Count > 0)
             {
-                for (int i = 0; i < reference1.TransformChain.TransformCount; i++)
+                for (int i = 0; i < reference1.TransformChain.Count; i++)
                 {
                     if (reference1.TransformChain[i].GetType() != reference2.TransformChain[i].GetType())
                         diffs.Add($" Reference.TransformChain[{i}].GetType(): {reference1.TransformChain[i].GetType()} : {reference2.TransformChain[i].GetType()}");

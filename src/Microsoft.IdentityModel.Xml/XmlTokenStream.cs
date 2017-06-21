@@ -26,10 +26,8 @@
 //------------------------------------------------------------------------------
 
 
-using System;
 using System.Collections.Generic;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {

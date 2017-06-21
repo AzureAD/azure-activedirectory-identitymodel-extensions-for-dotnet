@@ -27,7 +27,7 @@
 
 using System;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -45,14 +45,8 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         protected XmlDictionaryReader InnerReader
         {
-            get { return _innerReader; }
-            set
-            {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _innerReader = value;
-            }
+            get => _innerReader;
+            set => _innerReader = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>

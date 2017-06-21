@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Xml
         public ElementWithAlgorithmAttribute(string elementName)
         {
             if (string.IsNullOrEmpty(elementName))
-                throw LogHelper.LogArgumentNullException(nameof(elementName));
+                throw LogArgumentNullException(nameof(elementName));
 
             _elementName = elementName;
             Algorithm = null;

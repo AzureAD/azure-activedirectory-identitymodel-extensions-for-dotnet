@@ -28,8 +28,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -58,10 +58,10 @@ namespace Microsoft.IdentityModel.Xml
         public byte[] Decrypt(SymmetricAlgorithm algorithm)
         {
             if (algorithm == null)
-                LogHelper.LogArgumentNullException(nameof(algorithm));
+                LogArgumentNullException(nameof(algorithm));
 
             if (CipherData == null || CipherData.CipherValue == null)
-                LogHelper.LogExceptionMessage(new XmlEncryptionException("no cipherData to decrypt"));
+                LogExceptionMessage(new XmlEncryptionException("no cipherData to decrypt"));
 
             byte[] cipherText = CipherData.CipherValue;
 
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Xml
             // Make sure cipherText has enough bytes after the offset, for Buffer.BlockCopy to copy.
             //
             if (cipherText.Length - offset < iv.Length)
-                LogHelper.LogExceptionMessage(new XmlEncryptionException("cipherText.Length"));
+                LogExceptionMessage(new XmlEncryptionException("cipherText.Length"));
 
             Buffer.BlockCopy(cipherText, offset, iv, 0, iv.Length);
             // TODO - not available in .net 1.4
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void WriteXml(XmlWriter writer)
         {
             if (writer == null)
-                LogHelper.LogArgumentNullException(nameof(writer));
+                LogArgumentNullException(nameof(writer));
 
             // TODO - SecurityKey reader / writer?
             //if ( KeyIdentifier == null )

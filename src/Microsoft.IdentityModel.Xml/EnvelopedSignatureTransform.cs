@@ -28,7 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Xml
         internal override object Process(XmlTokenStreamReader reader)
         {
             if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
+                LogArgumentNullException(nameof(reader));
 
             // The Enveloped Signature Transform is supposed to remove the
             // Signature which encloses the transform element. Previous versions
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Xml
         // this transform is not allowed as the last one in a chain
         internal override byte[] ProcessAndDigest(XmlTokenStreamReader reader, HashAlgorithm hash)
         {
-            throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
+            throw LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
         }
 
         public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Xml
             string algorithm = XmlUtil.ReadEmptyElementAndRequiredAttribute(reader,
                 XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace, XmlSignatureConstants.Attributes.Algorithm, out _prefix);
             if (algorithm != Algorithm)
-                throw LogHelper.LogExceptionMessage(new CryptographicException("AlgorithmMismatchForTransform"));
+                throw LogExceptionMessage(new CryptographicException("AlgorithmMismatchForTransform"));
         }
 
         public override void WriteTo(XmlDictionaryWriter writer)

@@ -28,7 +28,7 @@
 using System;
 using System.IO;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -54,10 +54,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="innerWriter">XmlDictionaryWriter to wrap.</param>
         protected void SetCanonicalizingWriter(XmlDictionaryWriter innerWriter)
         {
-            if (innerWriter == null)
-                throw LogHelper.LogArgumentNullException(nameof(innerWriter));
-
-            _innerWriter = innerWriter;
+            _innerWriter = innerWriter ?? throw LogArgumentNullException(nameof(innerWriter));
         }
 
         /// <summary>

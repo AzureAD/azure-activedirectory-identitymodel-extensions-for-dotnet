@@ -27,8 +27,8 @@
 
 using System;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -40,19 +40,18 @@ namespace Microsoft.IdentityModel.Xml
         private ElementWithAlgorithmAttribute _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
         private DigestValueElement _digestValueElement = new DigestValueElement();
         private string _prefix = XmlSignatureConstants.Prefix;
-        private TransformChain _transformChain = new TransformChain();
 
         public Reference()
         {
+            TransformChain = new TransformChain();
         }
 
         public Reference(params Transform[] transforms)
         {
             if (transforms == null)
-                LogHelper.LogArgumentNullException(nameof(transforms));
+                LogArgumentNullException(nameof(transforms));
 
-            foreach (var transform in transforms)
-                _transformChain.Add(transform);
+            TransformChain = new TransformChain(transforms);
         }
 
         public string DigestAlgorithm
@@ -67,10 +66,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public string Id { get; set; }
 
-        public TransformChain TransformChain
-        {
-            get { return _transformChain; }
-        }
+        public TransformChain TransformChain { get; private set; } = new TransformChain();
 
         public string Type { get; set; }
 
@@ -122,27 +118,27 @@ namespace Microsoft.IdentityModel.Xml
 
         //public byte[] ComputeDigest()
         //{
-        //    if (_transformChain.TransformCount == 0)
-        //        throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
+        //    if (TransformChain.TransformCount == 0)
+        //        throw LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
         //    if (_resolvedXmlSource == null)
-        //        throw LogHelper.LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
+        //        throw LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
 
-        //    return _transformChain.TransformToDigest(_resolvedXmlSource, DigestAlgorithm);
+        //    return TransformChain.TransformToDigest(_resolvedXmlSource, DigestAlgorithm);
         //}
 
         private byte[] ComputeDigest(CryptoProviderFactory providerFactory, XmlTokenStreamReader tokenStream)
         {
             if (tokenStream == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenStream));
+                throw LogArgumentNullException(nameof(tokenStream));
 
-            if (_transformChain.TransformCount == 0)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
+            if (TransformChain.Count == 0)
+                throw LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
 
             var hashAlg = providerFactory.CreateHashAlgorithm(DigestAlgorithm);
             try
             {
-                return _transformChain.TransformToDigest(tokenStream, hashAlg);
+                return TransformChain.TransformToDigest(tokenStream, hashAlg);
             }
             finally
             {
@@ -164,7 +160,7 @@ namespace Microsoft.IdentityModel.Xml
             reader.Read();
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
-                _transformChain.ReadFrom(reader, ShouldPreserveComments(Uri));
+                TransformChain.ReadFrom(reader, ShouldPreserveComments(Uri));
             else
                 throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Transforms, reader.NamespaceURI, reader.LocalName);
 
@@ -190,7 +186,6 @@ namespace Microsoft.IdentityModel.Xml
             DigestText = reader.ReadElementContentAsString().Trim();
             DigestBytes = System.Convert.FromBase64String(DigestText);
 
-
             // </Reference>
             reader.MoveToContent();
             reader.ReadEndElement();
@@ -209,13 +204,13 @@ namespace Microsoft.IdentityModel.Xml
             if (Type != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, null, Type);
 
-            if (_transformChain.TransformCount > 0)
-                _transformChain.WriteTo(writer);
+            if (TransformChain.Count > 0)
+                TransformChain.WriteTo(writer);
 
             _digestMethodElement.WriteTo(writer);
             _digestValueElement.WriteTo(writer);
 
-            writer.WriteEndElement(); // Reference
+            writer.WriteEndElement();
         }
 
         struct DigestValueElement
@@ -241,7 +236,7 @@ namespace Microsoft.IdentityModel.Xml
                 else
                     writer.WriteBase64(_digestValue, 0, _digestValue.Length);
 
-                writer.WriteEndElement(); // DigestValue
+                writer.WriteEndElement();
             }
         }
     }

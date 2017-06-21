@@ -32,17 +32,17 @@ namespace Microsoft.IdentityModel.Xml
 {
     internal static class CanonicalizationDriver
     {
-        public static MemoryStream GetMemoryStream(XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixe)
+        public static MemoryStream GetMemoryStream(XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixes)
         {
-            MemoryStream stream = new MemoryStream();
-            WriteTo(stream, reader, includeComments, inclusivePrefixe);
+            var stream = new MemoryStream();
+            WriteTo(stream, reader, includeComments, inclusivePrefixes);
             stream.Seek(0, SeekOrigin.Begin);
             return stream;
         }
 
         public static void WriteTo(Stream canonicalStream, XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixes)
         {
-            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+            var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
             if (inclusivePrefixes != null)
             {
                 // Add a dummy element at the top and populate the namespace

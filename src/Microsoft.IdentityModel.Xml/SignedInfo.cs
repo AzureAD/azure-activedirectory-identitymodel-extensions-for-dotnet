@@ -31,8 +31,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -61,9 +61,7 @@ namespace Microsoft.IdentityModel.Xml
             set
             {
                 if (value != _exclusiveCanonicalizationTransform.Algorithm)
-                {
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException("UnsupportedTransformAlgorithm"));
-                }
+                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21204, value)));
             }
         }
 
@@ -124,6 +122,7 @@ namespace Microsoft.IdentityModel.Xml
                                 bufferingWriter.WriteXmlnsAttribute(inclusivePrefix[i], ns);
                             }
                         }
+
                         bufferingWriter.StartCanonicalization(stream, false, inclusivePrefix);
                         bufferingWriter.WriteNode(signedinfoReader, false);
                         bufferingWriter.EndCanonicalization();
@@ -136,7 +135,7 @@ namespace Microsoft.IdentityModel.Xml
         internal virtual void ComputeReferenceDigests()
         {
             if (Reference == null)
-                throw LogHelper.LogExceptionMessage(new CryptographicException("AtLeastOneReferenceRequired"));
+                throw LogExceptionMessage(new XmlSignedInfoException(LogMessages.IDX21205));
 
             Reference.ComputeAndSetDigest();
         }
@@ -144,10 +143,10 @@ namespace Microsoft.IdentityModel.Xml
         internal virtual void EnsureReferenceVerified()
         {
             if (Reference == null)
-                throw LogHelper.LogArgumentNullException(nameof(Reference));
+                throw LogArgumentNullException(nameof(Reference));
 
             if (!Reference.Verified)
-                throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21201, Reference.Uri));
+                throw LogExceptionMessage(new XmlSignedInfoException(FormatInvariant(LogMessages.IDX21201, Reference.Uri)));
         }
 
         protected string[] GetInclusivePrefixes()
@@ -158,10 +157,10 @@ namespace Microsoft.IdentityModel.Xml
         protected virtual string GetNamespaceForInclusivePrefix(string prefix)
         {
             if (Context == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException());
+                throw LogExceptionMessage(new InvalidOperationException());
 
             if (prefix == null)
-                throw LogHelper.LogArgumentNullException(nameof(prefix));
+                throw LogArgumentNullException(nameof(prefix));
 
             return Context[prefix];
         }
@@ -231,7 +230,7 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void WriteTo(XmlDictionaryWriter writer)
         {
             if (writer == null)
-                LogHelper.LogArgumentNullException(nameof(writer));
+                LogArgumentNullException(nameof(writer));
 
             // <SignedInfo>
             writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);

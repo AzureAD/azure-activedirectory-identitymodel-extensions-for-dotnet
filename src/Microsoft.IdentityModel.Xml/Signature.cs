@@ -28,8 +28,8 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -43,24 +43,18 @@ namespace Microsoft.IdentityModel.Xml
         // TODO - consider constructor without SignedInfo
         public Signature(SignedInfo signedInfo)
         {
-            if (signedInfo == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedInfo));
-
-            SignedInfo = signedInfo;
+            SignedInfo = signedInfo ?? throw LogArgumentNullException(nameof(signedInfo));
         }
 
         public string Id { get; set; }
 
         public KeyInfo KeyInfo { get; set; }
 
-        public string SignatureValue
-        {
-            get; set;
-        }
+        public string SignatureValue { get; set; }
 
         public SignedInfo SignedInfo
         {
-            get; private set;
+            get;
         }
 
         internal void ComputeSignature(SigningCredentials credentials)
@@ -70,10 +64,7 @@ namespace Microsoft.IdentityModel.Xml
             SignatureBytes = SignedInfo.ComputeHashBytes(hash);
         }
 
-        public byte[] SignatureBytes
-        {
-            get; set;
-        }
+        public byte[] SignatureBytes { get; set; }
 
         public void ReadFrom(XmlDictionaryReader reader)
         {
@@ -101,11 +92,11 @@ namespace Microsoft.IdentityModel.Xml
         public void Verify(SecurityKey key)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
+                throw LogArgumentNullException(nameof(key));
 
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureAlgorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new XmlValidationException(LogHelper.FormatInvariant(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureAlgorithm)));
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureAlgorithm)));
 
             try
             {
@@ -113,7 +104,7 @@ namespace Microsoft.IdentityModel.Xml
                 SignedInfo.GetCanonicalBytes(memoryStream);
 
                 if (!signatureProvider.Verify(SignedInfo.CanonicalStream.ToArray(), SignatureBytes))
-                    throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
+                    throw LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
             }
             finally
             {
@@ -122,16 +113,16 @@ namespace Microsoft.IdentityModel.Xml
             }
 
             if (!SignedInfo.Reference.Verify(key.CryptoProviderFactory, TokenSource))
-                throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX21201, SignedInfo.Reference.Uri)));
+                throw LogExceptionMessage(new CryptographicException(FormatInvariant(LogMessages.IDX21201, SignedInfo.Reference.Uri)));
         }
 
         public virtual void WriteTo(XmlDictionaryWriter writer, SigningCredentials credentials)
         {
             if (writer == null)
-                LogHelper.LogArgumentNullException(nameof(writer));
+                LogArgumentNullException(nameof(writer));
 
             if (credentials == null)
-                LogHelper.LogArgumentNullException(nameof(credentials));
+                LogArgumentNullException(nameof(credentials));
 
             ComputeSignature(credentials);
 
@@ -157,7 +148,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement();
 
             // </ Signature>
-            writer.WriteEndElement(); // Signature
+            writer.WriteEndElement();
         }
     }
 }

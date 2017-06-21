@@ -28,48 +28,55 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
     public class TransformChain
     {
         private string _prefix = XmlSignatureConstants.Prefix;
-        private List<Transform> _transforms = new List<Transform>();
 
-        public TransformChain() { }
-
-        public int TransformCount
+        public TransformChain()
         {
-            get { return _transforms.Count; }
+            Transforms = new List<Transform>();
         }
+
+        public TransformChain(IEnumerable<Transform> transforms)
+        {
+            if (transforms == null)
+                LogArgumentNullException(nameof(transforms));
+
+            Transforms = new List<Transform>(transforms);
+        }
+
+        public int Count
+        {
+            get { return Transforms.Count; }
+        }
+
+        public IList<Transform> Transforms { get; }
 
         public Transform this[int index]
         {
-            get { return _transforms[index]; }
+            get { return Transforms[index]; }
         }
 
         public bool NeedsInclusiveContext
         {
             get
             {
-                for (int i = 0; i < TransformCount; i++)
-                {
+                for (int i = 0; i < Count; i++)
                     if (this[i].NeedsInclusiveContext)
                         return true;
-                }
+
                 return false;
             }
         }
 
-        public void Add(Transform transform)
+        public virtual void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
         {
-            _transforms.Add(transform);
-        }
-
-        public void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
-        {
+            // <Transforms>
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
             reader.MoveToStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
             _prefix = reader.Prefix;
@@ -81,21 +88,21 @@ namespace Microsoft.IdentityModel.Xml
                 string transformAlgorithmUri = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 var transform = CreateTransform(transformAlgorithmUri);
                 transform.ReadFrom(reader, preserveComments);
-                Add(transform);
+                Transforms.Add(transform);
             }
 
             // </ Transforms>
             reader.MoveToContent();
             reader.ReadEndElement();
 
-            if (TransformCount == 0)
+            if (Count == 0)
                 throw XmlUtil.LogReadException(LogMessages.IDX21014);
         }
 
-        public virtual Transform CreateTransform(string transform)
+        internal Transform CreateTransform(string transform)
         {
             if (string.IsNullOrEmpty(transform))
-                LogHelper.LogArgumentNullException(nameof(transform));
+                LogArgumentNullException(nameof(transform));
 
             if (transform == SecurityAlgorithms.ExclusiveC14n)
                 return new ExclusiveCanonicalizationTransform();
@@ -104,24 +111,27 @@ namespace Microsoft.IdentityModel.Xml
             else if (transform == SecurityAlgorithms.EnvelopedSignature)
                 return new EnvelopedSignatureTransform();
 
-            throw LogHelper.LogExceptionMessage(new XmlException(LogHelper.FormatInvariant(LogMessages.IDX21018, transform)));
+            throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX21018, transform)));
         }
 
         internal byte[] TransformToDigest(XmlTokenStreamReader tokenStreamReader, HashAlgorithm hash)
         {
-            for (int i = 0; i < TransformCount - 1; i++)
+            for (int i = 0; i < Count - 1; i++)
                 tokenStreamReader = this[i].Process(tokenStreamReader) as XmlTokenStreamReader;
 
-            return this[TransformCount - 1].ProcessAndDigest(tokenStreamReader, hash);
+            return this[Count - 1].ProcessAndDigest(tokenStreamReader, hash);
         }
 
         public void WriteTo(XmlDictionaryWriter writer)
         {
+            if (writer == null)
+                LogArgumentNullException(nameof(writer));
+
             writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
-            for (int i = 0; i < TransformCount; i++)
+            for (int i = 0; i < Count; i++)
                 this[i].WriteTo(writer);
 
-            writer.WriteEndElement(); // Transforms
+            writer.WriteEndElement();
         }
     }
 }

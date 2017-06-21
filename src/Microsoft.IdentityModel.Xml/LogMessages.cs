@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21020 = "IDX21020: Unable to read xml. A second <Reference> element was found. The EnvelopedSignatures can only have one <Reference>.";
         internal const string IDX21021 = "IDX21021: Unable to read xml. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX21022 = "IDX21022: Unable to read xml. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'.";
-
+        internal const string IDX21023 = "UnsupportedNodeTypeInReader, base.InnerReader.NodeType, base.InnerReader.Name";
 
         // xml structure, supported exceptions
         internal const string IDX21100 = "IDX21100: Unable to process the <Signature> element. This cannonizalization method is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
@@ -63,10 +63,14 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21201 = "IDX21201: The 'Reference' did not validate: '{0}'.";
         internal const string IDX21202 = "IDX21202: A reference was included: '{0}'.";
         internal const string IDX21203 = "IDX21203: '{0}.CreateForVerifying' returned null for key: '{1}', signatureAlgorithm: '{2}'.";
+        internal const string IDX21204 = "IDX21204: 'Canonicalization algorithm is not supported: '{0}'.";
+        internal const string IDX21205 = "IDX21205: 'At least one reference is required";
 
         // logging messages
-
         internal const string IDX21300 = "IDX21300: KeyInfo skipped unknown element: '{0}'.";
+
+        // Xml writting
+        internal const string IDX21400 = "IDX21400: Unable to write xml. XmlTokenBuffer is empty.";
 
 #pragma warning restore 1591
     }

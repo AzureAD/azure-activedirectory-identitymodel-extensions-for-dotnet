@@ -28,38 +28,30 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
     internal class XmlTokenStreamWriter
     {
         IList<XmlTokenEntry> _entries;
-        int _count;
         int _position;
-        string _excludedElement;
-        int? _excludedElementDepth;
-        string _excludedElementNamespace;
 
         public XmlTokenStreamWriter(IList<XmlTokenEntry> entries,
                                      string excludedElement,
                                      int? excludedElementDepth,
                                      string excludedElementNamespace)
         {
-            if (entries == null)
-            {
-                throw LogHelper.LogArgumentNullException(nameof(entries));
-            }
-            _entries = entries;
-            _count = entries.Count;
-            _excludedElement = excludedElement;
-            _excludedElementDepth = excludedElementDepth;
-            _excludedElementNamespace = excludedElementNamespace;
+            _entries = entries ?? throw LogArgumentNullException(nameof(entries));
+            Count = entries.Count;
+            ExcludedElement = excludedElement;
+            ExcludedElementDepth = excludedElementDepth;
+            ExcludedElementNamespace = excludedElementNamespace;
         }
 
         public int Count
         {
-            get { return _count; }
+            get;
         }
 
         public int Position
@@ -99,19 +91,23 @@ namespace Microsoft.IdentityModel.Xml
 
         public string ExcludedElement
         {
-            get { return _excludedElement; }
+            get;
         }
 
         public string ExcludedElementNamespace
         {
-            get { return _excludedElementNamespace; }
+            get;
         }
 
+        public int? ExcludedElementDepth
+        {
+            get;
+        }
 
         public bool MoveToFirst()
         {
             _position = 0;
-            return _count > 0;
+            return Count > 0;
         }
 
         public bool MoveToFirstAttribute()
@@ -129,7 +125,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool MoveToNext()
         {
-            if (_position < _count - 1)
+            if (_position < Count - 1)
             {
                 _position++;
                 return true;
@@ -139,7 +135,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool MoveToNextAttribute()
         {
-            if (_position < _count - 1 && _entries[_position + 1].NodeType == XmlNodeType.Attribute)
+            if (_position < Count - 1 && _entries[_position + 1].NodeType == XmlNodeType.Attribute)
             {
                 _position++;
                 return true;
@@ -153,10 +149,10 @@ namespace Microsoft.IdentityModel.Xml
         public void WriteTo(XmlDictionaryWriter writer)
         {
             if (writer == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("writer"));
+                throw LogExceptionMessage(new ArgumentNullException(nameof(writer)));
 
             if (!MoveToFirst())
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException("XmlTokenBufferIsEmpty"));
+                XmlUtil.LogWriteException("XmlTokenBufferIsEmpty");
 
             int depth = 0;
             int recordedDepth = -1;
@@ -169,9 +165,9 @@ namespace Microsoft.IdentityModel.Xml
                         bool isEmpty = IsEmptyElement;
                         depth++;
                         if (include
-                            && (_excludedElementDepth == null || _excludedElementDepth == (depth - 1))
-                            && LocalName == _excludedElement
-                            && NamespaceUri == _excludedElementNamespace)
+                            && (ExcludedElementDepth == null || ExcludedElementDepth == (depth - 1))
+                            && LocalName == ExcludedElement
+                            && NamespaceUri == ExcludedElementNamespace)
                         {
                             include = false;
                             recordedDepth = depth;

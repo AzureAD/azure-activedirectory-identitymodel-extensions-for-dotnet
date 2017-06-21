@@ -28,7 +28,8 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -133,7 +134,7 @@ namespace Microsoft.IdentityModel.Xml
                             else
                             {
                                 // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>
-                                IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
+                                Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
                             }
                         }
 
@@ -157,7 +158,7 @@ namespace Microsoft.IdentityModel.Xml
                     else
                     {
                         // Skip the element since it is not one of  <RetrievalMethod>, <X509Data>
-                        IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
+                        Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
                     }
                 }
 
@@ -229,7 +230,7 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void WriteTo(XmlWriter writer)
         {
             if (writer == null)
-                LogHelper.LogArgumentNullException(nameof(writer));
+                LogArgumentNullException(nameof(writer));
 
             // TODO serialize
         }

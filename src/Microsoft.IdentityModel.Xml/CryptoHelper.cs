@@ -27,7 +27,7 @@
 
 using System;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -76,9 +76,9 @@ namespace Microsoft.IdentityModel.Xml
         {
             int sizeInBytes = sizeInBits / 8;
             if (sizeInBits <= 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits)));
+                throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits)));
             else if (sizeInBytes * 8 != sizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(nameof(sizeInBits)));
+                throw LogExceptionMessage(new ArgumentException(nameof(sizeInBits)));
 
             byte[] data = new byte[sizeInBytes];
 #if DESKTOPNET45

@@ -26,12 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
-using System.IO;
-using System.Text;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -191,5 +187,16 @@ namespace Microsoft.IdentityModel.Xml
         {
             return LogExceptionMessage(new XmlReadException(FormatInvariant(format, args), inner));
         }
+
+        public static Exception LogWriteException(string format, params object[] args)
+        {
+            return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args)));
+        }
+
+        public static Exception LogWriteException(string format, Exception inner, params object[] args)
+        {
+            return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args), inner));
+        }
+
     }
 }

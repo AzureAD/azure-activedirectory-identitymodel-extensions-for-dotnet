@@ -29,8 +29,8 @@ using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -47,13 +47,13 @@ namespace Microsoft.IdentityModel.Xml
             string signatureAlgorithm)
         {
             if (string.IsNullOrEmpty(canonicalizationMethod))
-                throw LogHelper.LogArgumentNullException(nameof(canonicalizationMethod));
+                throw LogArgumentNullException(nameof(canonicalizationMethod));
 
             if (string.IsNullOrEmpty(digestMethod))
-                throw LogHelper.LogArgumentNullException(nameof(digestMethod));
+                throw LogArgumentNullException(nameof(digestMethod));
 
             if (string.IsNullOrEmpty(signatureAlgorithm))
-                throw LogHelper.LogArgumentNullException(nameof(signatureAlgorithm));
+                throw LogArgumentNullException(nameof(signatureAlgorithm));
 
             CanonicalizationMethod = canonicalizationMethod;
             DigestMethod = digestMethod;
@@ -80,14 +80,14 @@ namespace Microsoft.IdentityModel.Xml
         public override void ReadFrom(XmlDictionaryReader reader)
         {
             // WriteOnly
-            throw LogHelper.LogExceptionMessage(new NotSupportedException());
+            throw LogExceptionMessage(new NotSupportedException());
         }
 
         internal override void EnsureReferenceVerified()
 
         {
             // WriteOnly
-            throw LogHelper.LogExceptionMessage(new NotSupportedException());
+            throw LogExceptionMessage(new NotSupportedException());
         }
 
         public override void WriteTo(XmlDictionaryWriter writer)

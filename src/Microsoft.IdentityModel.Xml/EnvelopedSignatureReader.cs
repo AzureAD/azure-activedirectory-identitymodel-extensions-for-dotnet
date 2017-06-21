@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Xml
         public EnvelopedSignatureReader(XmlReader reader)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             _tokenStreamingReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
             InnerReader = _tokenStreamingReader;

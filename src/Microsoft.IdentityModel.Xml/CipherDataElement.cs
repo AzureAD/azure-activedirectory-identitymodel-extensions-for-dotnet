@@ -27,7 +27,7 @@
 
 using System;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Xml.XmlEncryptionConstants;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -58,9 +58,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public void ReadXml(XmlDictionaryReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
-            reader.ReadStartElement(XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
-            reader.ReadStartElement(XmlEncryptionConstants.Elements.CipherValue, XmlEncryptionConstants.Namespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.CipherData, Namespace);
+            reader.ReadStartElement(Elements.CipherData, Namespace);
+            reader.ReadStartElement(Elements.CipherValue, Namespace);
 
             _cipherText = reader.ReadContentAsBase64();
             _iv         = null;
@@ -84,8 +84,8 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteXml(XmlWriter writer)
         {
-            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.CipherData, XmlEncryptionConstants.Namespace);
-            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.CipherValue, XmlEncryptionConstants.Namespace);
+            writer.WriteStartElement(Prefix, Elements.CipherData, Namespace);
+            writer.WriteStartElement(Prefix, Elements.CipherValue, Namespace);
 
             if (_iv != null)
                 writer.WriteBase64(_iv, 0, _iv.Length);

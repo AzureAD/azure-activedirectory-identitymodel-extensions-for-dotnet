@@ -29,7 +29,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -45,10 +45,10 @@ namespace Microsoft.IdentityModel.Xml
         public XmlTokenStreamReader(XmlDictionaryReader reader)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             if (!reader.IsStartElement())
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX21102));
+                throw LogExceptionMessage(new ArgumentException(LogMessages.IDX21102));
 
             InnerReader = reader;
             _xmlTokens = new XmlTokenStream();
@@ -109,8 +109,7 @@ namespace Microsoft.IdentityModel.Xml
             if (_contentReader != null)
             {
 #if DESKTOPNET45
-                    // TODO - what to use for net 1.4
-
+                 // TODO - what to use for net 1.4
                 _contentReader.Close();
 #endif
                 _contentReader = null;
@@ -118,10 +117,10 @@ namespace Microsoft.IdentityModel.Xml
 
             if (_contentStream != null)
             {
-                 #if DESKTOPNET45
+#if DESKTOPNET45
                  // TODO - what to use for net 1.4
                 _contentStream.Close();
-                #endif
+#endif
                 _contentStream = null;
             }
         }
@@ -130,14 +129,10 @@ namespace Microsoft.IdentityModel.Xml
         {
             OnEndOfContent();
             if (!base.Read())
-            {
                 return false;
-            }
 
             if (!_recordDone)
-            {
                 Record();
-            }
 
             return true;
         }
@@ -190,8 +185,7 @@ namespace Microsoft.IdentityModel.Xml
             if (read == 0)
             {
 #if DESKTOPNET45
-                    // TODO - what to use for net 1.4
-
+                // TODO - what to use for net 1.4
                 _contentStream.Close();
 #endif
                 _contentStream = null;
@@ -223,29 +217,29 @@ namespace Microsoft.IdentityModel.Xml
             switch (NodeType)
             {
                 case XmlNodeType.Element:
+                {
+                    bool isEmpty = base.InnerReader.IsEmptyElement;
+                    _xmlTokens.AddElement(base.InnerReader.Prefix, base.InnerReader.LocalName, base.InnerReader.NamespaceURI, isEmpty);
+                    if (base.InnerReader.MoveToFirstAttribute())
                     {
-                        bool isEmpty = base.InnerReader.IsEmptyElement;
-                        _xmlTokens.AddElement(base.InnerReader.Prefix, base.InnerReader.LocalName, base.InnerReader.NamespaceURI, isEmpty);
-                        if (base.InnerReader.MoveToFirstAttribute())
+                        do
                         {
-                            do
-                            {
-                                _xmlTokens.AddAttribute(base.InnerReader.Prefix, base.InnerReader.LocalName, base.InnerReader.NamespaceURI, base.InnerReader.Value);
-                            }
-                            while (base.InnerReader.MoveToNextAttribute());
-                            base.InnerReader.MoveToElement();
+                            _xmlTokens.AddAttribute(base.InnerReader.Prefix, base.InnerReader.LocalName, base.InnerReader.NamespaceURI, base.InnerReader.Value);
                         }
-                        if (!isEmpty)
-                        {
-                            _depth++;
-                        }
-                        else if (_depth == 0)
-                        {
-                            _recordDone = true;
-                        }
-
-                        break;
+                        while (base.InnerReader.MoveToNextAttribute());
+                        base.InnerReader.MoveToElement();
                     }
+                    if (!isEmpty)
+                    {
+                        _depth++;
+                    }
+                    else if (_depth == 0)
+                    {
+                        _recordDone = true;
+                    }
+
+                    break;
+                }
                 case XmlNodeType.CDATA:
                 case XmlNodeType.Comment:
                 case XmlNodeType.Text:
@@ -253,29 +247,27 @@ namespace Microsoft.IdentityModel.Xml
                 case XmlNodeType.EndEntity:
                 case XmlNodeType.SignificantWhitespace:
                 case XmlNodeType.Whitespace:
-                    {
-                        _xmlTokens.Add(NodeType, Value);
-                        break;
-                    }
+                {
+                    _xmlTokens.Add(NodeType, Value);
+                    break;
+                }
                 case XmlNodeType.EndElement:
-                    {
-                        _xmlTokens.Add(NodeType, Value);
-                        if (--_depth == 0)
-                        {
-                            _recordDone = true;
-                        }
-                        break;
-                    }
+                {
+                    _xmlTokens.Add(NodeType, Value);
+                    if (--_depth == 0)
+                        _recordDone = true;
+
+                    break;
+                }
                 case XmlNodeType.DocumentType:
                 case XmlNodeType.XmlDeclaration:
-                    {
-                        break;
-                    }
+                { 
+                    break;
+                }
                 default:
-                    {
-                        throw LogHelper.LogExceptionMessage(new XmlException("UnsupportedNodeTypeInReader, base.InnerReader.NodeType, base.InnerReader.Name"));
-                    }
-
+                {
+                    throw LogExceptionMessage(new XmlException(LogMessages.IDX21023));
+                }
             }
         }
 

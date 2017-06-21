@@ -29,7 +29,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Xml
         internal override object Process(XmlTokenStreamReader reader)
         {
             if (reader == null)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             return CanonicalizationDriver.GetMemoryStream(reader, IncludeComments, _inclusivePrefixes);
         }
@@ -103,10 +103,10 @@ namespace Microsoft.IdentityModel.Xml
         internal override byte[] ProcessAndDigest(XmlTokenStreamReader reader, HashAlgorithm hash)
         {
             if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
+                LogArgumentNullException(nameof(reader));
 
             if (hash == null)
-                LogHelper.LogArgumentNullException(nameof(hash));
+                LogArgumentNullException(nameof(hash));
 
             var stream = new MemoryStream();
             reader.MoveToContent();

@@ -27,8 +27,8 @@
 
 using System.Collections.Generic;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Xml
             set
             {
                 if (value == null)
-                    LogHelper.LogArgumentNullException(nameof(value));
+                    LogArgumentNullException(nameof(value));
 
                 EncryptionMethod.Algorithm = value;
             }
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Xml
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    LogHelper.LogArgumentNullException(nameof(value));
+                    LogArgumentNullException(nameof(value));
 
                 _id = value;
             }
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Xml
             set
             {
                 if (value == null)
-                    LogHelper.LogArgumentNullException(nameof(value));
+                    LogArgumentNullException(nameof(value));
 
                 _encryptionMethod = value;
             }
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Xml
             set
             {
                 if (value == null)
-                    LogHelper.LogArgumentNullException(nameof(value));
+                    LogArgumentNullException(nameof(value));
 
                 _cipherData = value;
             }
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Xml
         //    set
         //    {
         //        if (value == null)
-        //            LogHelper.LogArgumentNullException(nameof(value));
+        //            LogArgumentNullException(nameof(value));
 
         //        _keyInfo.KeyIdentifier = value;
         //    }
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Xml
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    LogHelper.LogArgumentNullException(nameof(value));
+                    LogArgumentNullException(nameof(value));
 
                 _type = value;
             }
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void ReadXml(XmlDictionaryReader reader)
         {
             if (reader == null)
-                LogHelper.LogArgumentNullException(nameof(reader));
+                LogArgumentNullException(nameof(reader));
 
             reader.MoveToContent();
 

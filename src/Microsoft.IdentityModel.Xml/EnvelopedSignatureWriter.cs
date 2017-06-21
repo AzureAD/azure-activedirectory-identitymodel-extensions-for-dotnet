@@ -30,8 +30,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 // TODO - this is not working at all for core.
 // just commented out code so it will compile.
@@ -73,13 +73,13 @@ namespace Microsoft.IdentityModel.Xml
         public EnvelopedSignatureWriter(XmlWriter innerWriter, SigningCredentials signingCredentials, string referenceId)
         {
             if (innerWriter == null)
-                throw LogHelper.LogArgumentNullException(nameof(innerWriter));
+                throw LogArgumentNullException(nameof(innerWriter));
 
             if (signingCredentials == null)
-                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
+                throw LogArgumentNullException(nameof(signingCredentials));
 
             if (string.IsNullOrEmpty(referenceId))
-                throw LogHelper.LogArgumentNullException(nameof(referenceId));
+                throw LogArgumentNullException(nameof(referenceId));
 
             // the Signature will be written into the innerWriter.
             _innerWriter = innerWriter;
@@ -173,10 +173,10 @@ namespace Microsoft.IdentityModel.Xml
             /*
             base.Flush();
             if (_writerStream == null || _writerStream.Length == 0)
-                LogHelper.LogExceptionMessage(new InvalidOperationException("ID6029"));
+                LogExceptionMessage(new InvalidOperationException("ID6029"));
 
             if (_signatureFragment.Length != 0)
-                LogHelper.LogExceptionMessage(new InvalidOperationException("ID6030"));
+                LogExceptionMessage(new InvalidOperationException("ID6030"));
 
             // Capture the remaing as a seperate fragment.
             ((IFragmentCapableXmlDictionaryWriter)base.InnerWriter).StartFragment(_endFragment, false);
