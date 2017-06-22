@@ -255,6 +255,22 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Get the algorithm used to compress json web token
+        /// </summary>
+        public string Zip
+        {
+            get
+            {
+                return GetStandardClaim(JwtHeaderParameterNames.Zip);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.Zip] = value;
+            }
+        }
+
+        /// <summary>
         /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
         /// </summary>
         /// <param name="base64UrlEncodedJsonString">Base64url encoded JSON to deserialize.</param>

@@ -153,7 +153,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10670 = "IDX10670: The lengths of the two byte arrays do not match. The first one has: '{0}' bytes, the second one has: '{1}' bytes.";
         public const string IDX10671 = "IDX10671: The ECDsa Key: '{0}' must be '{1}' bits. KeySize: '{2}'.";
         public const string IDX10672 = "IDX10672: GetKeyedHasAlgorithm returned null, key: {0}, algorithm {1}.";
-
+        public const string IDX10673 = "IDX10673: Failed to decompress using algorithm '{0}'.";
+        public const string IDX10674 = "IDX10674: Failed to compress using algorithm '{0}'.";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -1214,6 +1216,130 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             });
 
             return theoryData;
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(JWECompressionTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void JWECompressionTest(JWECompressionTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.JWECompressionTest", theoryData);
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var principal = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters, out var validatedToken);
+
+                Assert.NotNull(principal);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<JWECompressionTheoryData> JWECompressionTheoryData()
+        {
+            var theoryData = new TheoryData<JWECompressionTheoryData>();
+            var handler = new JwtSecurityTokenHandler();
+
+            theoryData.Add(new JWECompressionTheoryData
+            {
+                ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                JWECompressionString = RefrenceTokens.JWECompressionTokenWithDEF,
+                TestId = "Valid JWE compression token using DEF algorithm"
+            });
+
+            theoryData.Add(new JWECompressionTheoryData
+            {
+                ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                JWECompressionString = RefrenceTokens.JWECompressionTokenWithUnsupportedAlgorithm,
+                TestId = "Invalid JWE compression token with 'unsupported' compression algorithm",
+                ExpectedException = ExpectedException.SecurityTokenException("IDX10673", typeof(NotSupportedException))
+            });
+
+            theoryData.Add(new JWECompressionTheoryData
+            {
+                ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                JWECompressionString = RefrenceTokens.JWEInvalidCompressionTokenWithDEF,
+                TestId = "Invalid JWE compression token using DEF algorithm",
+                ExpectedException = ExpectedException.SecurityTokenException("IDX10673", typeof(InvalidDataException))
+            });
+
+            var validationParameters = Default.JWECompressionTokenValidationParameters;
+            validationParameters.CompressionProviderFactory = null;
+            theoryData.Add(new JWECompressionTheoryData
+            {
+                ValidationParameters = validationParameters,
+                JWECompressionString = RefrenceTokens.JWECompressionTokenWithDEF,
+                TestId = "CompressionProviderFactory is missing in ValidationParameters",
+                ExpectedException = ExpectedException.SecurityTokenException("IDX10673", typeof(ArgumentNullException))
+            });
+
+            var validationParametersForCustom = Default.JWECompressionTokenValidationParameters;
+            validationParametersForCustom.CompressionProviderFactory.CustomCompressionProvider = new SampleCustomCompressionProvider();
+            theoryData.Add(new JWECompressionTheoryData
+            {
+                ValidationParameters = validationParametersForCustom,
+                JWECompressionString = RefrenceTokens.JWECompressionTokenWithCustomAlgorithm,
+                TestId = "token test using custom compression algorithm"
+            });
+
+            var validationParametersForCustom2 = Default.JWECompressionTokenValidationParameters;
+            validationParametersForCustom2.CompressionProviderFactory.CustomCompressionProvider = new SampleCustomCompressionProviderDecompressAlwaysFail();
+            theoryData.Add(new JWECompressionTheoryData
+            {
+                ValidationParameters = validationParametersForCustom2,
+                JWECompressionString = RefrenceTokens.JWEInvalidCompressionTokenWithDEF,
+                TestId = "test the behavior when custom provider decompression fails",
+                ExpectedException = ExpectedException.SecurityTokenException("IDX10673", typeof(InvalidOperationException))
+            });
+
+            return theoryData;
+        }
+    }
+
+    public class JWECompressionTheoryData : TheoryDataBase
+    {
+        public TokenValidationParameters ValidationParameters;
+        public string JWECompressionString;
+    }
+
+    /// <summary>
+    /// A custom compression provider class implementing ICompressionProvider interface.
+    /// </summary>
+    public class SampleCustomCompressionProvider : ICompressionProvider
+    {
+        public string Decompress(string algorithm, byte[] value)
+        {
+            if (!IsSupportedAlgorithm(algorithm))
+                return null;
+
+            // just encode the bytes to string
+            return UTF8Encoding.UTF8.GetString(value);
+        }
+
+        public bool IsSupportedAlgorithm(string algorithm)
+        {
+            return algorithm != null && algorithm.Equals("MyAlgorithm");
+        }
+    }
+
+    /// <summary>
+    /// A custom compression provider class implementing ICompressionProvider interface, 
+    /// which accepts any algorithm but always return null for decompression.
+    /// </summary>
+    public class SampleCustomCompressionProviderDecompressAlwaysFail : ICompressionProvider
+    {
+        public string Decompress(string algorithm, byte[] value)
+        {
+            return null;
+        }
+
+        public bool IsSupportedAlgorithm(string algorithm)
+        {
+            return true;
         }
     }
 

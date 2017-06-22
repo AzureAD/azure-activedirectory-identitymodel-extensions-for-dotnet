@@ -74,6 +74,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10736 = "IDX10736: JwtSecurityToken.SigningCredentials is not supported when JwtSecurityToken.InnerToken is set.";
         internal const string IDX10737 = "IDX10737: EncryptingCredentials set on JwtSecurityToken.InnerToken is not supported.";
         internal const string IDX10738 = "IDX10738: Header.Cty != null, assuming JWS. Cty: '{0}'.";
+        internal const string IDX10739 = "IDX10739: Compression algorithm '{0}' is not supported.";
 
         // logging
         internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
