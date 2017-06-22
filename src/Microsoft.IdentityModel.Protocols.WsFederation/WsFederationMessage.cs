@@ -30,9 +30,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Protocols.WsFederation.Exceptions;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -43,6 +43,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     public class WsFederationMessage : AuthenticationProtocolMessage
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
+        /// </summary>
+        public WsFederationMessage()
+        {
+        }
+
+        /// <summary>
         /// Creates a <see cref="WsFederationMessage"/> from the contents of a query string.
         /// </summary>
         /// <param name="queryString"> query string to extract parameters.</param>
@@ -50,13 +57,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks>If 'queryString' is null or whitespace, a default <see cref="WsFederationMessage"/> is returned. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromQueryString(string queryString)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(LogHelper.FormatInvariant(LogMessages.IDX10900, queryString));
-            WsFederationMessage wsFederationMessage = new WsFederationMessage();
+            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX10900, queryString));
+
+            var wsFederationMessage = new WsFederationMessage();
             if (!string.IsNullOrWhiteSpace(queryString))
             {
-                var result = QueryHelper.ParseQuery(queryString);
-
-                foreach(var keyValuePair in result)
+                foreach(var keyValuePair in QueryHelper.ParseQuery(queryString))
                 {
                     foreach(var value in keyValuePair.Value)
                     {
@@ -76,20 +82,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(LogHelper.FormatInvariant(LogMessages.IDX10901, uri.ToString()));
+            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX10901, uri.ToString()));
+
             if (uri != null && uri.Query.Length > 1)
             {
-                return WsFederationMessage.FromQueryString(uri.Query.Substring(1));
+                return FromQueryString(uri.Query.Substring(1));
             }
 
             return new WsFederationMessage();
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
-        /// </summary>
-        public WsFederationMessage(){}
-        
+       
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationMessage"/> class.
         /// </summary>
@@ -98,7 +100,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (wsFederationMessage == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(LogHelper.FormatInvariant(LogMessages.IDX10000, "wsfederationMessage"));
+                Logger.WriteWarning(FormatInvariant(LogMessages.IDX10000, "wsfederationMessage"));
                 return;
             }
 
@@ -118,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (parameters == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(LogHelper.FormatInvariant(LogMessages.IDX10000, "parameters"));
+                Logger.WriteWarning(FormatInvariant(LogMessages.IDX10000, "parameters"));
                 return;
             }
 
@@ -138,8 +140,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
         public string CreateSignInUrl()
         {
-            WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
-            wsFederationMessage.Wa = WsFederationConstants.WsFederationActions.SignIn;
+            var wsFederationMessage = new WsFederationMessage(this)
+            {
+                Wa = WsFederationConstants.WsFederationActions.SignIn
+            };
+
             return wsFederationMessage.BuildRedirectUrl();
         }
 
@@ -149,8 +154,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <returns>The uri to use for a redirect.</returns>
         public string CreateSignOutUrl()
         {
-            WsFederationMessage wsFederationMessage = new WsFederationMessage(this);
-            wsFederationMessage.Wa = WsFederationConstants.WsFederationActions.SignOut;
+            var wsFederationMessage = new WsFederationMessage(this)
+            {
+                Wa = WsFederationConstants.WsFederationActions.SignOut
+            };
+
             return wsFederationMessage.BuildRedirectUrl();
         }
         
@@ -162,13 +170,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (Wresult == null)
             {
-                IdentityModelEventSource.Logger.WriteWarning(LogHelper.FormatInvariant(LogMessages.IDX10000, "wresult"));
+                Logger.WriteWarning(FormatInvariant(LogMessages.IDX10000, "wresult"));
                 return null;
             }
 
             string token = null;
 
-            using (StringReader sr = new StringReader(Wresult))
+            using (var sr = new StringReader(Wresult))
             {
                 XmlReader xmlReader = XmlReader.Create(sr);
                 xmlReader.MoveToContent();
@@ -185,9 +193,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     }
                     else
                     {
-                        using (MemoryStream ms = new MemoryStream())
+                        using (var ms = new MemoryStream())
                         {
-                            using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                            using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
                             {
                                 writer.WriteNode(xmlReader, true);
                                 writer.Flush();
@@ -195,9 +203,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
                             ms.Seek(0, SeekOrigin.Begin);
 
-                            XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
-                            XmlDocument dom = new XmlDocument();
-                            dom.PreserveWhitespace = true;
+                            var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
+                            var dom = new XmlDocument()
+                            {
+                                PreserveWhitespace = true
+                            };
                             dom.Load(memoryReader);
                             token = dom.DocumentElement.InnerXml;
                         }

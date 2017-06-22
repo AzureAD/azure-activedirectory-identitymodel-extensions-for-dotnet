@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -83,27 +83,17 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public static async Task<WsFederationConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-            {
-                LogHelper.LogArgumentNullException(nameof(address));
-            }
+                LogArgumentNullException(nameof(address));
 
             if (retriever == null)
-            {
-                LogHelper.LogArgumentNullException(nameof(retriever));
-            }
+                LogArgumentNullException(nameof(retriever));
 
             string document = await retriever.GetDocumentAsync(address, cancel);
 
-            using (XmlReader metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
+            using (var metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {
-                var serializer = new WsFederationMetadataSerializer();
-
-                WsFederationConfiguration configuration = serializer.ReadMetadata(metaDataReader);
-
-                return configuration;
-
+                return (new WsFederationMetadataSerializer()).ReadMetadata(metaDataReader);
             }
-            
         }
     }
 }
