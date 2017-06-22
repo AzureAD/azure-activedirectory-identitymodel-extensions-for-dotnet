@@ -1051,6 +1051,16 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => (new JwtSecurityTokenHandler()).CreateEncodedJwt(Issuer, Audience, ClaimsIdentity, null, null, null, null);
         }
+
+        public static TokenValidationParameters JWECompressionTokenValidationParameters
+        {
+            get
+            {
+                var validationParameters = TokenValidationParameters(KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
+                validationParameters.ValidateLifetime = false;
+                return validationParameters;
+            }
+        }
 #endif
         public static string Uri
         {

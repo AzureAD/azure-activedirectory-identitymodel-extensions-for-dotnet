@@ -326,6 +326,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public string X5t => Header.Value<string>(JwtHeaderParameterNames.X5t) ?? string.Empty;
 
         /// <summary>
+        /// Gets the 'value' of the 'zip' claim { zip, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'zip' claim is not found, an empty string is returned.</remarks>   
+        public string Zip => Header.Value<string>(JwtHeaderParameterNames.Zip) ?? String.Empty;
+
+        /// <summary>
         /// Decodes the string into the header, payload and signature.
         /// </summary>
         /// <param name="tokenParts">the tokenized string.</param>

@@ -172,6 +172,10 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10676 = "IDX10676: ECDsa creation is currently only supported for the Windows operating system.";
         public const string IDX10677 = "IDX10677: GetKeyedHashAlgorithm threw, key: {0}, algorithm {1}.";
         public const string IDX10678 = "IDX10678: Unable to Sign, provider is not available, Algorithm, Key: '{0}', '{1}'.";
+        public const string IDX10679 = "IDX10679: Failed to decompress using algorithm '{0}'.";
+        public const string IDX10680 = "IDX10680: Failed to compress using algorithm '{0}'.";
+        public const string IDX10681 = "IDX10681: Unable to create the CompressionProvider.\nAlgorithm: '{0}' is not supported.";
+        public const string IDX10682 = "IDX10682: Compression algorithm '{0}' is not supported.";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
