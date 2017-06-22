@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using Microsoft.IdentityModel.Protocols.WsFederation.Exceptions;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -51,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             try
             {
                 // check default constructor
-                WsFederationMessage wsFederationMessage1 = new WsFederationMessage
+                var wsFederationMessage1 = new WsFederationMessage
                 {
                     IssuerAddress = theoryData.IssuerAddress,
                     Wreply = theoryData.Wreply,
@@ -122,7 +121,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
             try
             {
-                WsFederationMessage wsFederationMessage = new WsFederationMessage
+                var wsFederationMessage = new WsFederationMessage
                 {
                     IssuerAddress = theoryData.IssuerAddress,
                     Wreply = theoryData.Wreply,
@@ -160,7 +159,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 Uri uri = new Uri(uriString);
 
                 // convert query back to WsFederationMessage
-                WsFederationMessage wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);
+                var wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);
 
                 // validate the parameters in the returned wsFederationMessage
                 Assert.Equal(theoryData.Parameter2.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter2.Key]);
@@ -199,7 +198,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMessageTheoryData>
+                return new TheoryData<WsFederationMessageTheoryData>
                 {
                     new WsFederationMessageTheoryData
                     {
@@ -243,7 +242,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         TestId = "WsFederationMessage getToken test with white spaces"
                     }
                 };
-                return theoryData;
             }
         }
 

@@ -49,11 +49,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         public void ReadMetadataTest(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadMetadataTest", theoryData);
-            List<string> errors = new List<string>();
+            var errors = new List<string>();
 
             try
             {
-                XmlReader reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                var reader = XmlReader.Create(new StringReader(theoryData.Metadata));
                 var serializer = new WsFederationMetadataSerializer();
                 var configuration = serializer.ReadMetadata(reader);
 
@@ -88,6 +88,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
+
             try
             {
                 serializer.ReadEntityDescriptorPublic(new WsFederationConfiguration(), null);
@@ -115,6 +116,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
+
             try
             {
                 serializer.ReadKeyDescriptorForSigningPublic(new WsFederationConfiguration(), null);
@@ -160,6 +162,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
+
             try
             {
                 serializer.ReadSecurityTokenServiceTypeRoleDescriptorPublic(new WsFederationConfiguration(), null);
@@ -187,6 +190,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
+
             try
             { 
                 serializer.ReadSecurityTokenEndpointPublic(new WsFederationConfiguration(), null);
@@ -205,9 +209,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 // uncomment to see exception displayed to user.
                 // ExpectedException.DefaultVerbose = true;
 
-                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -216,18 +219,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         Metadata = ReferenceMetadata.AADCommonMetadata,
                         SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
                         TestId = nameof(ReferenceMetadata.AADCommonMetadata)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Configuration = ReferenceMetadata.GoodConfiguration,
                         Metadata = ReferenceMetadata.Metadata,
                         TestId = nameof(ReferenceMetadata.Metadata)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
@@ -235,18 +234,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         Metadata = ReferenceMetadata.Metadata,
                         SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
                         TestId = nameof(ReferenceMetadata.Metadata) + " Signature Failure"
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Configuration = ReferenceMetadata.GoodConfiguration,
                         Metadata = ReferenceMetadata.MetadataWithBlanks,
                         TestId = nameof(ReferenceMetadata.MetadataWithBlanks)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -257,73 +252,55 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         },
                         Metadata = ReferenceMetadata.MetadataNoKeyDescriptorForSigningInRoleDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoKeyDescriptorForSigningInRoleDescriptor)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13001:"),
                         Metadata = ReferenceMetadata.MetadataNoIssuer,
                         TestId = nameof(ReferenceMetadata.MetadataNoIssuer)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13003:"),
                         Metadata = ReferenceMetadata.MetadataNoTokenUri,
                         TestId = nameof(ReferenceMetadata.MetadataNoTokenUri)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21017:", typeof(FormatException)),
                         Metadata = ReferenceMetadata.MetadataMalformedCertificate,
                         TestId = nameof(ReferenceMetadata.MetadataMalformedCertificate)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         Metadata = ReferenceMetadata.MetadataNoKeyInfoInSignature,
                         TestId = nameof(ReferenceMetadata.MetadataNoKeyInfoInSignature)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         Metadata = ReferenceMetadata.MetadataNoSignedInfoInSignature,
                         TestId = nameof(ReferenceMetadata.MetadataNoSignedInfoInSignature)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         Metadata = ReferenceMetadata.MetadataNoEntityDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoEntityDescriptor)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13004:"),
                         Metadata = ReferenceMetadata.MetadataNoRoleDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoRoleDescriptor)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13002:"),
                         Metadata = ReferenceMetadata.MetadataNoKeyInfoInKeyDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoKeyInfoInKeyDescriptor)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -333,25 +310,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         },
                         Metadata = ReferenceMetadata.MetadataNoSecurityTokenSeviceEndpointInRoleDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoSecurityTokenSeviceEndpointInRoleDescriptor)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         Metadata = ReferenceMetadata.MetadataNoEndpointReference,
                         TestId = nameof(ReferenceMetadata.MetadataNoEndpointReference)
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         Metadata = ReferenceMetadata.MetadataNoAddressInEndpointReference,
                         TestId = nameof(ReferenceMetadata.MetadataNoAddressInEndpointReference)
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -359,16 +331,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadEntityDescriptor"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -376,16 +346,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadKeyDescriptorForSigning"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -393,25 +361,21 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Metadata = ReferenceMetadata.KeyDescriptorNoKeyUse,
                         TestId = "ReadKeyDescriptorForSigning: 'use' is null"
-                    });
-
-                theoryData.Add(
+                    },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX13009:"),
                         Metadata = ReferenceMetadata.KeyDescriptorKeyUseNotForSigning,
                         TestId = "ReadKeyDescriptorForSigning: 'use' is not 'signing'"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -419,16 +383,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadSecurityTokenServiceTypeRoleDescriptor"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
@@ -436,16 +398,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             get
             {
-                var theoryData = new TheoryData<WsFederationMetadataTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadSecurityTokenEndpoint"
-                    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 
