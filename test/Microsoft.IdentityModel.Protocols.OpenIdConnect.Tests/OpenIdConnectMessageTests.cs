@@ -32,6 +32,7 @@ using System.Reflection;
 using Microsoft.IdentityModel.Tests;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using static Microsoft.IdentityModel.Tests.TestUtilities;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -40,76 +41,87 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectMessageTests
     {
-        [Fact]
-        public void Constructors()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ConstructorsTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void Constructors(OpenIdConnectMessageTheoryData theoryData)
         {
-            OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
-            Assert.Equal(openIdConnectMessage.IssuerAddress, string.Empty);
-            openIdConnectMessage = new OpenIdConnectMessage() { IssuerAddress = "http://www.got.jwt.com" };
-            Assert.Equal(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
-            ExpectedException expectedException = ExpectedException.NoExceptionExpected;
-            string json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}";
-            string badJson = @"{""response_mode"":""responseMode"";""respone_mode"":""badResponeMode""}";
+            WriteHeader($"{this}.Constructors", theoryData);
 
-            // null stirng json
-            expectedException = ExpectedException.ArgumentNullException();
-            TestJsonStringConstructor((string)null, expectedException);
-
-            // bad string json
-            expectedException = ExpectedException.ArgumentException("IDX10106");
-            TestJsonStringConstructor(badJson, expectedException);
-
-            // no exception, well-formed json
-            expectedException = ExpectedException.NoExceptionExpected;
-            openIdConnectMessage = TestJsonStringConstructor(json, expectedException);
-            Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
-
-            // no exception, using JObject ctor
-            expectedException = ExpectedException.NoExceptionExpected;
+            OpenIdConnectMessage messageFromJson;
+            OpenIdConnectMessage messageFromJsonObj;
+            var diffs = new List<string>();
             try
             {
-                openIdConnectMessage = new OpenIdConnectMessage(JObject.Parse(json));
-                expectedException.ProcessNoException();
+                messageFromJson = new OpenIdConnectMessage(theoryData.Json);
+                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
+                Comparer.GetDiffs(messageFromJson, messageFromJsonObj, diffs);
+                Comparer.GetDiffs(messageFromJson, theoryData.Message, diffs);
+                theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                theoryData.ExpectedException.ProcessException(exception);
             }
 
-            Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
-
-            // test with an empty JObject
-            openIdConnectMessage = new OpenIdConnectMessage(new JObject());
+            AssertFailIfErrors($"{this}.Constructors.{theoryData.TestId}", diffs);
         }
 
-        private OpenIdConnectMessage TestJsonStringConstructor(string json, ExpectedException expectedException)
+        public static TheoryData<OpenIdConnectMessageTheoryData> ConstructorsTheoryData()
         {
-            OpenIdConnectMessage openIdConnectMessage = null;
-
-            try
+            return new TheoryData<OpenIdConnectMessageTheoryData>
             {
-                openIdConnectMessage = new OpenIdConnectMessage(json);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                expectedException.ProcessException(exception);
-            }
-
-            return openIdConnectMessage;
+                new OpenIdConnectMessageTheoryData
+                {
+                    First = true,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Json = "",
+                    TestId = "empty string"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    TestId = "null string"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}",
+                    TestId = "null jobject"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX10106"),
+                    Json =  @"{""response_mode"":""responseMode"";""respone_mode"":""duplicateResponeMode""}",
+                    TestId = "ResponseMode duplicated"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    JObject = new JObject(),
+                    Json = "{}",
+                    Message = new OpenIdConnectMessage(),
+                    TestId = "empty json string, empty jobj"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    JObject = JObject.Parse(@"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}"),
+                    Json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}",
+                    Message = new OpenIdConnectMessage
+                    {
+                        RefreshToken = "refreshToken",
+                        ResponseMode = "responseMode",
+                        ResponseType = "responseType"
+                    },
+                    TestId = "ValidJson"
+                }
+            };
         }
 
         [Fact]
         public void Defaults()
         {
             List<string> errors = new List<string>();
-            OpenIdConnectMessage message = new OpenIdConnectMessage();
+            var message = new OpenIdConnectMessage();
             
             if (message.AcrValues != null)
                 errors.Add("message.ArcValues != null");
@@ -156,7 +168,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (message.UiLocales != null)
                 errors.Add("message.UiLocales != null");
 
-            TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
+            AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
         }
 
         [Fact]
@@ -525,13 +537,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void NullFormParameters()
         {
-            List<KeyValuePair<string, string[]>> formData = new List<KeyValuePair<string, string[]>>();
-            formData.Add(new KeyValuePair<string, string[]>("key", new string[] { "data" }));
-            formData.Add(new KeyValuePair<string, string[]>("nullData", new string[] { null }));
-            formData.Add(new KeyValuePair<string, string[]>("emptyData", new string[] { string.Empty }));
-            formData.Add(new KeyValuePair<string, string[]>(null, new string[] { null }));
-            formData.Add(new KeyValuePair<string, string[]>(null, null));
-            OpenIdConnectMessage msg = new OpenIdConnectMessage(formData);
+            var msg = new OpenIdConnectMessage(new List<KeyValuePair<string, string[]>>
+            {
+                new KeyValuePair<string, string[]>("key", new string[] { "data" }),
+                new KeyValuePair<string, string[]>("nullData", new string[] { null }),
+                new KeyValuePair<string, string[]>("emptyData", new string[] { string.Empty }),
+                new KeyValuePair<string, string[]>(null, new string[] { null }),
+                new KeyValuePair<string, string[]>(null, null)
+            });
+
             Assert.NotNull(msg);
         }
 
@@ -544,15 +558,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void Extensibility()
         {
-            var customOpenIdConnectMessage =
-                new CustomOpenIdConnectMessage()
-                {
-                    AuthenticationRequestUrl = Guid.NewGuid().ToString(),
-                    LogoutRequestUrl = Guid.NewGuid().ToString(),
-                };
+            var msg = new CustomOpenIdConnectMessage()
+            {
+                AuthenticationRequestUrl = Guid.NewGuid().ToString(),
+                LogoutRequestUrl = Guid.NewGuid().ToString(),
+            };
 
-            Assert.True(customOpenIdConnectMessage.AuthenticationRequestUrl == customOpenIdConnectMessage.CreateAuthenticationRequestUrl(), "AuthenticationRequestUrl, CreateAuthenticationRequestUrl: " + customOpenIdConnectMessage.AuthenticationRequestUrl + ", " + customOpenIdConnectMessage.CreateAuthenticationRequestUrl());
-            Assert.True(customOpenIdConnectMessage.LogoutRequestUrl == customOpenIdConnectMessage.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + customOpenIdConnectMessage.LogoutRequestUrl + ", " + customOpenIdConnectMessage.CreateLogoutRequestUrl());
+            Assert.True(msg.AuthenticationRequestUrl == msg.CreateAuthenticationRequestUrl(), "AuthenticationRequestUrl, CreateAuthenticationRequestUrl: " + msg.AuthenticationRequestUrl + ", " + msg.CreateAuthenticationRequestUrl());
+            Assert.True(msg.LogoutRequestUrl == msg.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + msg.LogoutRequestUrl + ", " + msg.CreateLogoutRequestUrl());
         }
 
         [Fact]
@@ -568,7 +581,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             message.ClientId = clientId;
             url = message.BuildRedirectUrl();
-            var expected = string.Format(CultureInfo.InvariantCulture, @"{0}&client_id={1}", address, clientId);
+            var expected = $"{address}&client_id={clientId}";
 
             Report("2", errors, url, expected);
         }
@@ -586,7 +599,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             public string AuthenticationRequestUrl { get; set; }
+
             public string LogoutRequestUrl { get; set; }
+        }
+
+        public class OpenIdConnectMessageTheoryData : TheoryDataBase
+        {
+            public OpenIdConnectMessage Message { get; set; }
+            
+            public string Json { get; set; }
+
+            public JObject JObject { get; set; }
         }
     }
 }

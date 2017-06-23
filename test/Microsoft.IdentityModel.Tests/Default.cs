@@ -151,6 +151,16 @@ namespace Microsoft.IdentityModel.Tests
             get { return "http://Default.ClientId"; }
         }
 
+        public static byte[] ReferenceDigestBytes
+        {
+            get => Convert.FromBase64String("Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=");
+        }
+
+        public static string ReferenceDigestText
+        {
+            get => "Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=";
+        }
+
         public static string Issuer
         {
             get { return "http://Default.Issuer.com"; }
@@ -211,9 +221,18 @@ namespace Microsoft.IdentityModel.Tests
             return SecurityTokenDescriptor(null, signingCredentials, null);
         }
 
+        public static byte[] SignatureBytes
+        {
+            get => Convert.FromBase64String("NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==");
+        }
+        public static string SignatureText
+        {
+            get => "NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==";
+        }
+
         public static string Subject
         {
-            get { return "Default.Subject"; }
+            get => "Default.Subject";
         }
 
         public static EncryptingCredentials SymmetricEncryptingCredentials

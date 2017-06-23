@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void SignatureReadFrom(DSigTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureReadFrom", theoryData);
-            List<string> errors = new List<string>();
+            var errors = new List<string>();
             try
             {
                 var sr = new StringReader(theoryData.SignatureTestSet.Xml);
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                var theoryData = new TheoryData<DSigTheoryData>
+                return new TheoryData<DSigTheoryData>
                 {
                     new DSigTheoryData
                     {
@@ -122,8 +122,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                         TestId = nameof(ReferenceXml.Signature_UnknownSignatureAlgorithm)
                     }
                 };
-
-                return theoryData;
             }
         }
 
@@ -248,7 +246,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void SignedInfoReadFrom(DSigTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
-            List<string> errors = new List<string>();
+            var errors = new List<string>();
             try
             {
                 var sr = new StringReader(theoryData.SignedInfoTestSet.Xml);

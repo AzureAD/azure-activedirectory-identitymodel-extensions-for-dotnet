@@ -37,14 +37,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     public class WsFederationConfiguration
     {
-        private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
-        private Collection<KeyInfo> _keyInfos = new Collection<KeyInfo>();
-
         /// <summary>
         /// Initializes an new instance of <see cref="WsFederationConfiguration"/>.
         /// </summary>
         public WsFederationConfiguration()
-        {           
+        {
+            SigningKeys = new List<SecurityKey>();
+            KeyInfos = new List<KeyInfo>();
         }
 
         /// <summary>
@@ -53,14 +52,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public string Issuer { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// Gets the <see cref="IList{SecurityKey}"/> that the IdentityProvider indicates are to be used signing keys.
         /// </summary>
-        public ICollection<SecurityKey> SigningKeys
+        public IList<SecurityKey> SigningKeys
         {
-            get
-            {
-                return _signingKeys;
-            }
+            get;
         }
 
         /// <summary>
@@ -69,14 +65,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public Signature Signature { get; set; }
 
         /// <summary>
-        /// Get the <see cref="ICollection{KeyInfo}"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// Get the <see cref="IList{KeyInfo}"/> that the IdentityProvider indicates are to be used signing keys.
         /// </summary>
-        public ICollection<KeyInfo> KeyInfos
+        public IList<KeyInfo> KeyInfos
         {
-            get
-            {
-                return _keyInfos;
-            }
+            get;
         }
 
         /// <summary>

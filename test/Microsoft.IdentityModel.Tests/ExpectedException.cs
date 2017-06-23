@@ -204,12 +204,12 @@ namespace Microsoft.IdentityModel.Tests
                 context.Diffs.Add("expectedException.TypeExpected != null: " + TypeExpected);
         }
 
-        private static void HandleError(string err, List<string> errors )
+        private static void HandleError(string error, List<string> errors )
         {
             if (errors != null)
-                errors.Add(err);
+                errors.Add(error);
             else
-                throw new TestException("errors == null, error in test.");
+                throw new TestException($"List<string> errors == null, error in test: {error}.");
         }
 
         public static ExpectedException SecurityTokenEncryptionKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)

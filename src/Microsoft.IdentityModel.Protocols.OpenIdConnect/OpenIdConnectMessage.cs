@@ -146,8 +146,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             foreach (var pair in json)
             {
-                JToken value;
-                if (json.TryGetValue(pair.Key, out value))
+                if (json.TryGetValue(pair.Key, out JToken value))
                 {
                     SetParameter(pair.Key, value.ToString());
                 }

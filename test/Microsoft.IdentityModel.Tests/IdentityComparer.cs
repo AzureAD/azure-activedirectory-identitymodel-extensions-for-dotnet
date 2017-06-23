@@ -35,6 +35,7 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -232,7 +233,7 @@ namespace Microsoft.IdentityModel.Tests
             var claims2 = new List<Claim>(t2);
             if (claims1.Count != claims2.Count)
             {
-                context.Diffs.Add("claims1.Count != claims2.Count: " + claims1.Count + ", " + claims2.Count);
+                context.Diffs.Add($"claims1.Count != claims2.Count: {claims1.Count}, {claims2.Count}");
                 context.Diffs.Add("claims1:");
                 foreach (var claim in claims1)
                     context.Diffs.Add(claim.Type + ": " + claim.Value + ": " + claim.ValueType + ": " + claim.Issuer + ": " + claim.OriginalIssuer);
@@ -366,6 +367,8 @@ namespace Microsoft.IdentityModel.Tests
                 return AreIssuerSigningKeyValidatorsEqual(t1 as IssuerSigningKeyValidator, t1 as IssuerSigningKeyValidator, context);
             else if (t1 is IssuerValidator)
                 return AreIssuerValidatorsEqual(t1 as IssuerValidator, t1 as IssuerValidator, context);
+            else if (t1 is Signature)
+                return AreSignaturesEqual(t1 as Signature, t2 as Signature, context);
             else if (t1 is SignatureValidator)
                 return AreSignatureValidatorsEqual(t1 as SignatureValidator, t1 as SignatureValidator, context);
             else
@@ -383,7 +386,7 @@ namespace Microsoft.IdentityModel.Tests
                 return context.Merge(localContext);
 
             if (a1.Count != a2.Count)
-                localContext.Diffs.Add("a1.Count != a2.Count");
+                localContext.Diffs.Add($"a1.Count != a2.Count. '{a1.Count}' : '{a2.Count}'");
 
             return context.Merge(localContext);
         }
@@ -469,7 +472,7 @@ namespace Microsoft.IdentityModel.Tests
                 return context.Merge(localContext);
 
             if (dictionary1.Count != dictionary2.Count)
-                localContext.Diffs.Add("(dictionary1.Count != dictionary2.Count: " + dictionary1.Count + ", " + dictionary2.Count + ")");
+                localContext.Diffs.Add($"(dictionary1.Count != dictionary2.Count: {dictionary1.Count}, {dictionary2.Count})");
 
             int numMatched = 0;
             foreach (string key in dictionary1.Keys)
@@ -478,7 +481,7 @@ namespace Microsoft.IdentityModel.Tests
                 {
                     if (dictionary1[key].GetType() != dictionary2[key].GetType())
                     {
-                        localContext.Diffs.Add("dictionary1[key].GetType() != dictionary2[key].GetType(), key: '" + key + "' value1.GetType(), value2.GetType(): '" + dictionary1[key].GetType().ToString() + "', '" + dictionary2[key].GetType().ToString() + "'");
+                        localContext.Diffs.Add($"dictionary1[{key}].GetType() != dictionary2[{key}].GetType(). '{dictionary1[key].GetType()}' : '{dictionary2[key].GetType()}'");
                         continue;
                     }
 
@@ -512,7 +515,7 @@ namespace Microsoft.IdentityModel.Tests
                 return context.Merge(localContext);
 
             if (dictionary1.Count != dictionary2.Count)
-                localContext.Diffs.Add("(dictionary1.Count != dictionary2.Count: " + dictionary1.Count + ", " + dictionary2.Count + ")");
+                localContext.Diffs.Add($"(dictionary1.Count != dictionary2.Count: {dictionary1.Count}, {dictionary2.Count})");
 
             int numMatched = 0;
             foreach (string key in dictionary1.Keys)
@@ -521,7 +524,7 @@ namespace Microsoft.IdentityModel.Tests
                 {
                     if (!dictionary1[key].Equals(dictionary2[key]))
                     {
-                        localContext.Diffs.Add("dictionary1[key] != dictionary2[key], key: '" + key + "' value1, value2: '" + dictionary1[key] + "', '" + dictionary2[key] + "'");
+                        localContext.Diffs.Add($"dictionary1[key] != dictionary2[key], key: '{key}' value1, value2: '{dictionary1[key]}' + '{dictionary2[key]}'");
                     }
                     else
                     {
@@ -709,7 +712,7 @@ namespace Microsoft.IdentityModel.Tests
                 localContext.Diffs.Add("(str1 == null || str2 == null)");
 
             if (!string.Equals(str1, str2, context.StringComparison))
-                localContext.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "'{0}' != '{1}'. StringComparison: '{2}'", str1, str2, context.StringComparison));
+                localContext.Diffs.Add($"'{str1}' != '{str2}'. StringComparison: '{context.StringComparison}'");
 
             return context.Merge(localContext);
         }
@@ -759,6 +762,15 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
+        private static bool AreSignaturesEqual(Signature signature1, Signature signature2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(signature1, signature1, localContext))
+                return CompareAllPublicProperties(signature1, signature2, localContext);
+
+            return context.Merge(localContext);
+        }
+
         private static bool AreSignatureValidatorsEqual(SignatureValidator validator1, SignatureValidator validator2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -775,6 +787,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             Type type = obj1.GetType();
             var localContext = new CompareContext(context);
+
             // public instance properties
             PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
@@ -796,12 +809,12 @@ namespace Microsoft.IdentityModel.Tests
 
                         if ((val1 == null) || (val2 == null))
                         {
-                            localContext.Diffs.Add(IdentityComparer.BuildStringDiff(propertyInfo.Name + ": ", val1, val2));
+                            localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name + ": ", val1, val2));
                         }
                         else if (val1 is int || val1 is long || val1 is DateTime || val1 is bool || val1 is double || val1 is System.TimeSpan)
                         {
                             if (!val1.Equals(val2))
-                                localContext.Diffs.Add(IdentityComparer.BuildStringDiff(propertyInfo.Name + ": ", val1, val2));
+                                localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name + ": ", val1, val2));
                         }
                         else
                         {
@@ -812,14 +825,14 @@ namespace Microsoft.IdentityModel.Tests
                 }
                 catch (Exception ex)
                 {
-                    localContext.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "Reflection failed getting 'PropertyInfo: {0}'. Exception: '{1}'.", propertyInfo.Name, ex));
+                    localContext.Diffs.Add($"Reflection failed getting 'PropertyInfo: {propertyInfo.Name}'. Exception: '{ex}'.");
                 }
             }
 
-            return context.Merge(localContext);
+            return context.Merge($"CompareAllPublicProperties for: {type}", localContext);
         }
 
-        private static bool ContinueCheckingEquality(object obj1, object obj2, CompareContext context)
+        public static bool ContinueCheckingEquality(object obj1, object obj2, CompareContext context)
         {
             if (obj1 == null && obj2 == null)
                 return false;
@@ -840,19 +853,17 @@ namespace Microsoft.IdentityModel.Tests
                 return false;
 
             if (!context.IgnoreType && (obj1.GetType() != obj2.GetType()))
-                context.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "obj1.GetType() != obj2.GetType(). '{0}' : '{1}'", obj1.GetType(), obj2.GetType()));
+                context.Diffs.Add($"obj1.GetType() != obj2.GetType(). '{obj1} : {obj2}'");
 
             return true;
         }
 
         private static string GetString(object str)
         {
-            string retval = str as string;
-            if (retval != null)
+            if (str is string retval)
                 return retval;
 
-            IEnumerable<string> enum1 = str as IEnumerable<string>;
-            if (enum1 != null)
+            if (str is IEnumerable<string> enum1)
                 return TestUtilities.SerializeAsSingleCommaDelimitedString(enum1);
 
             else
