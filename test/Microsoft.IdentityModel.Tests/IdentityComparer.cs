@@ -765,7 +765,7 @@ namespace Microsoft.IdentityModel.Tests
         private static bool AreSignaturesEqual(Signature signature1, Signature signature2, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(signature1, signature1, localContext))
+            if (ContinueCheckingEquality(signature1, signature2, localContext))
                 return CompareAllPublicProperties(signature1, signature2, localContext);
 
             return context.Merge(localContext);
