@@ -179,19 +179,19 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         public void QueryStringTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
-            var errors = new List<string>();
+            var context = new CompareContext($"{this}.QueryStringTest, {theoryData.TestId}");
             try
             {
                 var wsFederationMessage = WsFederationMessage.FromQueryString(theoryData.WsFederationMessageTestSet.Xml);
                 theoryData.ExpectedException.ProcessNoException();
-                Comparer.GetDiffs(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, errors);
+                IdentityComparer.AreWsFederationMessagesEqual(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
 
-            TestUtilities.AssertFailIfErrors(errors);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMessageTheoryData> GetTokenTheoryData

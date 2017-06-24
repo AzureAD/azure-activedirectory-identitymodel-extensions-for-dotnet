@@ -35,6 +35,7 @@ namespace Microsoft.IdentityModel.Tests
 {
     public class ReferenceXml
     {
+        // TODO move this
         public static SecurityKey Saml2Token_Valid_SecurityKey
         {
             get
@@ -264,16 +265,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = @"<NotKeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                                <X509Data>
-                                    <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                </X509Data>
-                            </NotKeyInfo>",
-                    KeyInfo = new KeyInfo
-                    {
-                        CertificateData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD",
-                        Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-                    }
+                    Xml = ReferenceMetadata.KeyInfoXml(Default.KeyInfo).Replace("<KeyInfo", "<NotKeyInfo>").Replace("/KeyInfo>", "/NotKeyInfo>"),
+                    KeyInfo = Default.KeyInfo
                 };
             }
         }
@@ -284,16 +277,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = @"<KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig2#"">
-                                <X509Data>
-                                    <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                </X509Data>
-                            </KeyInfo>",
-                    KeyInfo = new KeyInfo
-                    {
-                        CertificateData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD",
-                        Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-                    }
+                    Xml = ReferenceMetadata.KeyInfoXml(Default.KeyInfo).Replace(XmlSignatureConstants.Namespace, $"_{XmlSignatureConstants.Namespace}_"),
+                    KeyInfo = Default.KeyInfo
                 };
             }
         }
@@ -304,16 +289,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = @"<KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                                <X509Data>
-                                    <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                </X509Data>
-                            </KeyInfo>",
-                    KeyInfo = new KeyInfo
-                    {
-                        CertificateData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD",
-                        Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-                    }
+                    Xml = ReferenceMetadata.KeyInfoXml(Default.KeyInfo),
+                    KeyInfo = Default.KeyInfo
                 };
             }
         }
@@ -594,51 +571,10 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var signedInfo = new SignedInfo
-                {
-                    CanonicalizationMethod = @"http://www.w3.org/2001/10/xml-exc-c14n#",
-                    Reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
-                    {
-                        DigestBytes = Default.ReferenceDigestBytes,
-                        DigestText = Default.ReferenceDigestText,
-                        DigestAlgorithm = @"_http://www.w3.org/2001/04/xmlenc#sha256",
-                        Uri = "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"
-                    },
-                    SignatureAlgorithm = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-                };
-
                 return new SignatureTestSet
                 {
-                    Signature = new Signature(signedInfo)
-                    {
-                        KeyInfo = new KeyInfo
-                        {
-                            CertificateData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD",
-                            Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-                        },
-                        SignatureBytes = Default.SignatureBytes,
-                        SignatureValue = Default.SignatureText
-                    },
-                    Xml = @"<Signature xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                            <SignedInfo>
-                                <CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                <SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                                    <Reference URI=""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                        <Transforms>
-                                            <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                            <Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                        </Transforms>
-                                        <DigestMethod Algorithm=""_http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                        <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                                    </Reference>
-                            </SignedInfo>
-                            <SignatureValue>NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==</SignatureValue>
-                                <KeyInfo>
-                                    <X509Data>
-                                        <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                    </X509Data>
-                                </KeyInfo>
-                        </Signature>"
+                    Signature = Default.Signature,
+                    Xml = ReferenceMetadata.SignatureXml(Default.Signature).Replace(SecurityAlgorithms.Sha256Digest, $"_{SecurityAlgorithms.Sha256Digest}" )
                 };
             }
         }
@@ -647,51 +583,10 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var signedInfo = new SignedInfo
-                {
-                    CanonicalizationMethod = @"http://www.w3.org/2001/10/xml-exc-c14n#",
-                    Reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
-                    {
-                        DigestBytes = Default.ReferenceDigestBytes,
-                        DigestText = Default.ReferenceDigestText,
-                        DigestAlgorithm = @"http://www.w3.org/2001/04/xmlenc#sha256",
-                        Uri = "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"
-                    },
-                    SignatureAlgorithm = @"_http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-                };
-
                 return new SignatureTestSet
                 {
-                    Signature = new Signature(signedInfo)
-                    {
-                        KeyInfo = new KeyInfo
-                        {
-                            CertificateData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD",
-                            Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-                        },
-                        SignatureBytes = Default.SignatureBytes,
-                        SignatureValue = Default.SignatureText
-                    },
-                    Xml = @"<Signature xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                            <SignedInfo>
-                                <CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                <SignatureMethod Algorithm=""_http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                                    <Reference URI=""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                        <Transforms>
-                                            <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                            <Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                        </Transforms>
-                                        <DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                        <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                                    </Reference>
-                            </SignedInfo>
-                            <SignatureValue>NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==</SignatureValue>
-                                <KeyInfo>
-                                    <X509Data>
-                                        <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                    </X509Data>
-                                </KeyInfo>
-                        </Signature>"
+                    Signature = Default.Signature,
+                    Xml = ReferenceMetadata.SignatureXml(Default.Signature).Replace(SecurityAlgorithms.RsaSha256Signature, $"_{SecurityAlgorithms.RsaSha256Signature}" )
                 };
             }
         }
@@ -706,30 +601,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    SignedInfo = new SignedInfo
-                    {
-                        CanonicalizationMethod = @"http://www.w3.org/2001/10/xml-exc-c14n#",
-                        Reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
-                        {
-                            DigestAlgorithm = @"http://www.w3.org/2001/04/xmlenc#sha256",
-                            DigestBytes = Default.ReferenceDigestBytes,
-                            DigestText = Default.ReferenceDigestText,
-                            Uri = "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"
-                        },
-                        SignatureAlgorithm = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-                    },
-                    Xml = @"    <SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                            <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                            <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                            <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                              <Transforms>
-                                <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              </Transforms>
-                              <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                              <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                            </Reference>
-                          </SignedInfo>"
+                    SignedInfo = Default.SignedInfo,
+                    Xml = "       " + ReferenceMetadata.SignedInfoXml(Default.SignedInfo)
                 };
             }
         }
@@ -740,18 +613,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <_CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <Transforms>
-                                  <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </Transforms>
-                                <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                              </Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("CanonicalizationMethod", "_CanonicalizationMethod")
                 };
             }
         }
@@ -762,18 +624,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <_Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <Transforms>
-                                  <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </Transforms>
-                                <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                              </_Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("Reference", "_Reference")
                 };
             }
         }
@@ -784,18 +635,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <_Transforms>
-                                  <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </_Transforms>
-                                <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                              </Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("Transforms", "_Transforms")
                 };
             }
         }
@@ -806,18 +646,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <Transforms>
-                                  <_Transform Algorithm=""_http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <_Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </Transforms>
-                                <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                              </Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("Transform", "_Transform")
                 };
             }
         }
@@ -828,18 +657,16 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo>
-                                <CanonicalizationMethod Algorithm=""_http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                <SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                                    <Reference URI=""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                        <Transforms>
-                                            <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                            <Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                        </Transforms>
-                                        <DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                        <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                                    </Reference>
-                            </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(
+                            XmlSignatureConstants.Namespace,
+                            SecurityAlgorithms.ExclusiveC14n,
+                            SecurityAlgorithms.RsaSha256Signature,
+                            ReferenceMetadata.ReferenceXml(
+                                Guid.NewGuid().ToString(),
+                                SecurityAlgorithms.Aes256KW,
+                                SecurityAlgorithms.EnvelopedSignature,
+                                SecurityAlgorithms.Sha256Digest,
+                                Guid.NewGuid().ToString()))
                 };
             }
         }
@@ -850,18 +677,17 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <Transforms>
-                                  <Transform Algorithm=""_http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </Transforms>
-                                <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                              </Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(
+                            XmlSignatureConstants.Namespace,
+                            SecurityAlgorithms.ExclusiveC14n,
+                            SecurityAlgorithms.RsaSha256Signature,
+                            ReferenceMetadata.ReferenceXml(
+                                "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2",
+                                "_http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+                                SecurityAlgorithms.ExclusiveC14n,
+                                SecurityAlgorithms.Sha256Digest,
+                                "Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI="))
+
                 };
             }
         }
@@ -872,18 +698,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <Transforms>
-                                  <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </Transforms>
-                                <_DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                              </Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("DigestMethod", "_DigestMethod")
                 };
             }
         }
@@ -894,18 +709,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                              <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                              <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                                <Transforms>
-                                  <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                  <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                                </Transforms>
-                                <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                                <_DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</_DigestValue>
-                              </Reference>
-                         </SignedInfo>"
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("DigestValue", "_DigestValue")
                 };
             }
         }
@@ -916,30 +720,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    SignedInfo = new SignedInfo
-                    {
-                        CanonicalizationMethod = @"http://www.w3.org/2001/10/xml-exc-c14n#",
-                        Reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
-                        {
-                            DigestAlgorithm = @"http://www.w3.org/2001/04/xmlenc#sha256",
-                            DigestBytes = Default.ReferenceDigestBytes,
-                            DigestText = Default.ReferenceDigestText,
-                            Uri = "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"
-                        },
-                        SignatureAlgorithm = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-                    },
-                    Xml = @"<SignedInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"" >
-                            <CanonicalizationMethod Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                            <SignatureMethod Algorithm = ""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
-                            <Reference URI = ""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"">
-                              <Transforms>
-                                <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
-                                <Transform Algorithm = ""http://www.w3.org/2001/10/xml-exc-c14n#"" />
-                              </Transforms>
-                              <DigestMethod Algorithm = ""http://www.w3.org/2001/04/xmlenc#sha256"" />
-                              <DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue>
-                            </Reference>
-                         </SignedInfo>"
+                    SignedInfo = Default.SignedInfo,
+                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo)
                 };
             }
         }

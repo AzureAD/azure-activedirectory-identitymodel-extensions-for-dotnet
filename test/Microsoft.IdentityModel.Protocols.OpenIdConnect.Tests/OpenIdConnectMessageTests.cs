@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void Constructors(OpenIdConnectMessageTheoryData theoryData)
         {
             WriteHeader($"{this}.Constructors", theoryData);
-
+            var context = new CompareContext($"{this}.ReadMetadata, {theoryData.TestId}");
             OpenIdConnectMessage messageFromJson;
             OpenIdConnectMessage messageFromJsonObj;
             var diffs = new List<string>();
@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 messageFromJson = new OpenIdConnectMessage(theoryData.Json);
                 messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
-                Comparer.GetDiffs(messageFromJson, messageFromJsonObj, diffs);
-                Comparer.GetDiffs(messageFromJson, theoryData.Message, diffs);
+                IdentityComparer.AreOpenIdConnectMessagesEqual(messageFromJson, messageFromJsonObj, context);
+                IdentityComparer.AreOpenIdConnectMessagesEqual(messageFromJson, theoryData.Message, context);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception exception)
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.ExpectedException.ProcessException(exception);
             }
 
-            AssertFailIfErrors($"{this}.Constructors.{theoryData.TestId}", diffs);
+            AssertFailIfErrors(context);
         }
 
         public static TheoryData<OpenIdConnectMessageTheoryData> ConstructorsTheoryData()

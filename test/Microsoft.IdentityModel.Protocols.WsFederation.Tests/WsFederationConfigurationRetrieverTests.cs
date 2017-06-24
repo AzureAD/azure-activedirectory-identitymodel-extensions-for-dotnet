@@ -49,8 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         public void ReadMetadata(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
-            var errors = new List<string>();
-
+            var context = new CompareContext($"{this}.ReadMetadata, {theoryData.TestId}");
             try
             {
                 var reader = XmlReader.Create(new StringReader(theoryData.Metadata));
@@ -61,14 +60,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
                 theoryData.ExpectedException.ProcessNoException();
 
-                Comparer.GetDiffs(theoryData.Configuration, configuration, errors);
+                IdentityComparer.AreWsFederationConfigurationsEqual(theoryData.Configuration, configuration, context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
 
-            TestUtilities.AssertFailIfErrors(errors);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMetadataTheoryData> ReadMetadataTheoryData
@@ -82,29 +81,29 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 {
                     new WsFederationMetadataTheoryData
                     {
-                        Configuration = ReferenceMetadata.GoodConfigurationCommonEndpoint,
+                        Configuration = ReferenceMetadata.AADCommonEndpoint,
                         First = true,
                         Metadata = ReferenceMetadata.AADCommonMetadata,
-                        SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
+                        SigingKey = ReferenceMetadata.MetadataSigningKey,
                         TestId = nameof(ReferenceMetadata.AADCommonMetadata)
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        Configuration = ReferenceMetadata.GoodConfiguration,
-                        Metadata = ReferenceMetadata.Metadata,
-                        TestId = nameof(ReferenceMetadata.Metadata)
+                        Configuration = ReferenceMetadata.AADCommonFormated,
+                        Metadata = ReferenceMetadata.AADCommonMetadataFormated,
+                        TestId = nameof(ReferenceMetadata.AADCommonMetadataFormated)
                     },
                     new WsFederationMetadataTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
-                        Configuration = ReferenceMetadata.GoodConfiguration,
-                        Metadata = ReferenceMetadata.Metadata,
-                        SigingKey = ReferenceMetadata.AADCommonMetadataSigningKey,
-                        TestId = nameof(ReferenceMetadata.Metadata) + " Signature Failure"
+                        Configuration = ReferenceMetadata.AADCommonFormated,
+                        Metadata = ReferenceMetadata.AADCommonMetadataFormated,
+                        SigingKey = ReferenceMetadata.MetadataSigningKey,
+                        TestId = nameof(ReferenceMetadata.AADCommonMetadataFormated) + " Signature Failure"
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        Configuration = ReferenceMetadata.GoodConfiguration,
+                        Configuration = ReferenceMetadata.AADCommonFormated,
                         Metadata = ReferenceMetadata.MetadataWithBlanks,
                         TestId = nameof(ReferenceMetadata.MetadataWithBlanks)
                     },

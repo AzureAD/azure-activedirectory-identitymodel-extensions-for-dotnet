@@ -192,9 +192,9 @@ namespace Microsoft.IdentityModel.Tests
             if (TypeExpected != null)
             {
                 if (errors != null)
-                    errors.Add("expectedException.TypeExpected != null: " + TypeExpected);
+                    errors.Add("Inside ProcessNoException: expectedException.TypeExpected != null: " + TypeExpected);
                 else
-                    throw new TestException("expectedException.TypeExpected != null: '" + TypeExpected);
+                    throw new TestException("Inside ProcessNoException: expectedException.TypeExpected != null: '" + TypeExpected);
             }
         }
 

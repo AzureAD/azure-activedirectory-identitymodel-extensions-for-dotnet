@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void SignatureReadFrom(DSigTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureReadFrom", theoryData);
-            var errors = new List<string>();
+            var context = new CompareContext($"{this}.SignatureReadFrom, {theoryData.TestId}");
             try
             {
                 var sr = new StringReader(theoryData.SignatureTestSet.Xml);
@@ -91,14 +91,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 signature.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException();
 
-                Comparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
+                IdentityComparer.AreEqual(signature, theoryData.SignatureTestSet.Signature, context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
 
-            TestUtilities.AssertFailIfErrors(errors);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DSigTheoryData> SignatureReadFromTheoryData
@@ -131,8 +131,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void SignatureVerify(DSigTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureVerify", theoryData);
-
-            List<string> errors = new List<string>();
+            var context = new CompareContext($"{this}.SignatureVerify, {theoryData.TestId}");
             try
             {
                 var sr = new StringReader(theoryData.SignatureTestSet.Xml);
@@ -144,14 +143,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 signature.Verify(theoryData.SignatureTestSet.SecurityKey);
                 theoryData.ExpectedException.ProcessNoException();
 
-                Comparer.GetDiffs(signature, theoryData.SignatureTestSet.Signature, errors);
+                IdentityComparer.AreEqual(signature, theoryData.SignatureTestSet.Signature, context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
 
-            TestUtilities.AssertFailIfErrors(errors);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DSigTheoryData> SignatureVerifyTheoryData
@@ -246,6 +245,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void SignedInfoReadFrom(DSigTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
+            var context = new CompareContext($"{this}.SignedInfoReadFrom, {theoryData.TestId}");
+
             var errors = new List<string>();
             try
             {
@@ -253,16 +254,16 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 var signedInfo = new SignedInfo();
                 signedInfo.ReadFrom(reader);
-                theoryData.ExpectedException.ProcessNoException();
-
-                Comparer.GetDiffs(signedInfo, theoryData.SignedInfoTestSet.SignedInfo, errors);
+                theoryData.ExpectedException.ProcessNoException(context.Diffs);
+                if (theoryData.ExpectedException.TypeExpected == null)
+                    IdentityComparer.AreEqual(signedInfo, theoryData.SignedInfoTestSet.SignedInfo, context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
 
-            TestUtilities.AssertFailIfErrors(errors);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DSigTheoryData> SignedInfoReadFromTheoryData
@@ -293,43 +294,43 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Reference'"),
                         SignedInfoTestSet = ReferenceXml.SignedInfoReferenceMissing,
                         TestId = nameof(ReferenceXml.SignedInfoReferenceMissing)
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Transforms'"),
                         SignedInfoTestSet = ReferenceXml.SignedInfoTransformsMissing,
                         TestId = nameof(ReferenceXml.SignedInfoTransformsMissing)
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Transforms', "),
                         SignedInfoTestSet = ReferenceXml.SignedInfoNoTransforms,
                         TestId = nameof(ReferenceXml.SignedInfoNoTransforms)
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018: Unable to read xml. A Reference contains an unknown transform "),
                         SignedInfoTestSet = ReferenceXml.SignedInfoUnknownCanonicalizationtMethod,
                         TestId = nameof(ReferenceXml.SignedInfoUnknownCanonicalizationtMethod)
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018:"),
+                        ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018: Unable to read xml. A Reference contains an unknown transform "),
                         SignedInfoTestSet = ReferenceXml.SignedInfoUnknownTransform,
                         TestId = nameof(ReferenceXml.SignedInfoUnknownTransform)
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestMethod', "),
                         SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestMethod,
                         TestId = nameof(ReferenceXml.SignedInfoMissingDigestMethod)
                     },
                     new DSigTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestValue', "),
                         SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestValue,
                         TestId = nameof(ReferenceXml.SignedInfoMissingDigestValue)
                     }
@@ -343,7 +344,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void KeyInfoReadFrom(DSigTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.KeyInfoReadFrom", theoryData);
-            List<string> errors = new List<string>();
+            var context = new CompareContext($"{this}.QueryStringTest, {theoryData.TestId}");
             try
             {
                 var sr = new StringReader(theoryData.KeyInfoTestSet.Xml);
@@ -352,14 +353,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 keyInfo.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException();
 
-                Comparer.GetDiffs(keyInfo, theoryData.KeyInfoTestSet.KeyInfo, errors);
+                IdentityComparer.AreEqual(keyInfo, theoryData.KeyInfoTestSet.KeyInfo, context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
 
-            TestUtilities.AssertFailIfErrors(errors);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DSigTheoryData> KeyInfoReadFromTheoryData

@@ -49,6 +49,11 @@ namespace Microsoft.IdentityModel.Tests
         {
         }
 
+        public CompareContext(string title)
+        {
+            Title = title;
+        }
+
         public CompareContext(CompareContext other)
         {
             if (other == null)
@@ -60,6 +65,7 @@ namespace Microsoft.IdentityModel.Tests
             IgnoreClaimType = other.IgnoreClaimType;
             IgnoreProperties = other.IgnoreProperties;
             IgnoreSubject = other.IgnoreSubject;
+            IgnoreTokenStreamReader = other.IgnoreTokenStreamReader;
             IgnoreType = other.IgnoreType;
             StringComparison = other.StringComparison;
         }
@@ -101,6 +107,8 @@ namespace Microsoft.IdentityModel.Tests
         public bool IgnoreProperties { get; set; }
 
         public bool IgnoreSubject { get; set; } = true;
+
+        public bool IgnoreTokenStreamReader { get; set; } = true;
 
         public bool IgnoreType { get; set; }
 
@@ -339,8 +347,6 @@ namespace Microsoft.IdentityModel.Tests
                 return AreJwtPayloadsEqual(t1 as JwtPayload, t2 as JwtPayload, context);
             else if (t1 is JwtSecurityToken)
                 return AreJwtSecurityTokensEqual(t1 as JwtSecurityToken, t2 as JwtSecurityToken, context);
-            else if (t1 is OpenIdConnectConfiguration)
-                return AreOpenIdConnectConfigurationEqual(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context);
             else if (t1 is IEnumerable<Claim>)
                 return AreClaimsEnumsEqual(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context);
             else if (t1 is IEnumerable<SecurityKey>)
@@ -367,10 +373,24 @@ namespace Microsoft.IdentityModel.Tests
                 return AreIssuerSigningKeyValidatorsEqual(t1 as IssuerSigningKeyValidator, t1 as IssuerSigningKeyValidator, context);
             else if (t1 is IssuerValidator)
                 return AreIssuerValidatorsEqual(t1 as IssuerValidator, t1 as IssuerValidator, context);
+            else if (t1 is KeyInfo)
+                return AreKeyInfosEqual(t1 as KeyInfo, t2 as KeyInfo, context);
+            else if (t1 is OpenIdConnectConfiguration)
+                return AreOpenIdConnectConfigurationsEqual(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context);
+            else if (t1 is OpenIdConnectMessage)
+                return AreOpenIdConnectMessagesEqual(t1 as OpenIdConnectMessage, t2 as OpenIdConnectMessage, context);
+            else if (t1 is Reference)
+                return AreReferencesEqual(t1 as Reference, t2 as Reference, context);
             else if (t1 is Signature)
                 return AreSignaturesEqual(t1 as Signature, t2 as Signature, context);
+            else if (t1 is SignedInfo)
+                return AreSignedInfosEqual(t1 as SignedInfo, t2 as SignedInfo, context);
             else if (t1 is SignatureValidator)
-                return AreSignatureValidatorsEqual(t1 as SignatureValidator, t1 as SignatureValidator, context);
+                return AreSignatureValidatorsEqual(t1 as SignatureValidator, t2 as SignatureValidator, context);
+            else if (t1 is WsFederationConfiguration)
+                return AreWsFederationConfigurationsEqual(t1 as WsFederationConfiguration, t2 as WsFederationConfiguration, context);
+            else if (t1 is WsFederationMessage)
+                return AreWsFederationMessagesEqual(t1 as WsFederationMessage, t2 as WsFederationMessage, context);
             else
             {
                 var localContext = new CompareContext(context);
@@ -407,7 +427,7 @@ namespace Microsoft.IdentityModel.Tests
             return true;
         }
 
-        private static bool AreBytesEqual(byte[] bytes1, byte[] bytes2)
+        public static bool AreBytesEqual(byte[] bytes1, byte[] bytes2)
         {
             if (bytes1 == null && bytes2 == null)
             {
@@ -561,7 +581,7 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
+        public static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(header1, header2, localContext))
@@ -591,7 +611,7 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreOpenIdConnectConfigurationEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuration2, CompareContext context)
+        public static bool AreOpenIdConnectConfigurationsEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuration2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(configuration1, configuration2, localContext))
@@ -601,7 +621,17 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSecurityKeysEqual(SecurityKey securityKey1, SecurityKey securityKey2, CompareContext context)
+        public static bool AreOpenIdConnectMessagesEqual(OpenIdConnectMessage message1, OpenIdConnectMessage message2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(message1, message1, localContext))
+                return context.Merge(localContext);
+
+            CompareAllPublicProperties(message1, message1, localContext);
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSecurityKeysEqual(SecurityKey securityKey1, SecurityKey securityKey2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(securityKey1, securityKey2, localContext))
@@ -625,6 +655,15 @@ namespace Microsoft.IdentityModel.Tests
                 CompareAllPublicProperties(rsaKey1, rsaKey2, localContext);
                 AreRsaParametersEqual(rsaKey1.Parameters, rsaKey2.Parameters, localContext);
             }
+
+            return context.Merge(localContext);
+        }
+
+        private static bool AreReferencesEqual(Reference reference1, Reference reference2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(reference1, reference2, localContext))
+                CompareAllPublicProperties(reference1, reference2, localContext);
 
             return context.Merge(localContext);
         }
@@ -727,10 +766,19 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreAudienceValidatorsEqual(AudienceValidator validator1, AudienceValidator validator2, CompareContext context)
+        public static bool AreAudienceValidatorsEqual(AudienceValidator validator1, AudienceValidator validator2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             ContinueCheckingEquality(validator1, validator2, context);
+            return context.Merge(localContext);
+        }
+
+        public static bool AreKeyInfosEqual(KeyInfo keyInfo1, KeyInfo keyInfo2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(keyInfo1, keyInfo2, context))
+                CompareAllPublicProperties(keyInfo1, keyInfo2, localContext);
+
             return context.Merge(localContext);
         }
 
@@ -762,11 +810,11 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSignaturesEqual(Signature signature1, Signature signature2, CompareContext context)
+        public static bool AreSignaturesEqual(Signature signature1, Signature signature2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(signature1, signature2, localContext))
-                return CompareAllPublicProperties(signature1, signature2, localContext);
+                CompareAllPublicProperties(signature1, signature2, localContext);
 
             return context.Merge(localContext);
         }
@@ -776,6 +824,53 @@ namespace Microsoft.IdentityModel.Tests
             var localContext = new CompareContext(context);
             ContinueCheckingEquality(validator1, validator2, context);
             return context.Merge(localContext);
+        }
+
+        public static bool AreSignedInfosEqual(SignedInfo signedInfo1, SignedInfo signedInfo2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(signedInfo1, signedInfo2, localContext))
+                CompareAllPublicProperties(signedInfo1, signedInfo2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreWsFederationConfigurationsEqual(WsFederationConfiguration configuration1, WsFederationConfiguration configuration2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(configuration1, configuration2, localContext))
+                CompareAllPublicProperties(configuration1, configuration2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreWsFederationMessagesEqual(WsFederationMessage message1, WsFederationMessage message2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(message1, message2, localContext))
+                CompareAllPublicProperties(message1, message2, localContext);
+
+            return context.Merge(localContext);
+
+            //if (message1.Parameters.Count != message2.Parameters.Count)
+            //    localContext.Diffs.Add($" message1.Parameters.Count != message2.Parameters.Count: {message1.Parameters.Count}, {message2.Parameters.Count}");
+
+            //var stringComparer = StringComparer.Ordinal;
+            //foreach (var param in message1.Parameters)
+            //{
+            //    if (!message2.Parameters.TryGetValue(param.Key, out string value2))
+            //        localContext.Diffs.Add($" WsFederationMessage.message1.Parameters.param.Key missing in message2: {param.Key}");
+            //    else if (param.Value != value2)
+            //        localContext.Diffs.Add($" WsFederationMessage.message1.Parameters.param.Value !=  message2.Parameters.param.Value: {param.Key}, {param.Value}, {value2}");
+            //}
+
+            //foreach (var param in message2.Parameters)
+            //{
+            //    if (!message1.Parameters.TryGetValue(param.Key, out string value1))
+            //        localContext.Diffs.Add($" WsFederationMessage.message2.Parameters.param.Key missing in message1: {param.Key}");
+            //    else if (param.Value != value1)
+            //        localContext.Diffs.Add($" WsFederationMessage.message2.Parameters.param.Value !=  message1.Parameters.param.Value: {param.Key}, {param.Value}, {value1}");
+            //}
         }
 
         public static string BuildStringDiff(string label, object str1, object str2)
@@ -798,6 +893,9 @@ namespace Microsoft.IdentityModel.Tests
                 try
                 {
                     if (type == typeof(Claim) && context.IgnoreSubject && propertyInfo.Name == "Subject")
+                        continue;
+
+                    if (type == typeof(Signature) && context.IgnoreTokenStreamReader)
                         continue;
 
                     if (propertyInfo.GetMethod != null)
