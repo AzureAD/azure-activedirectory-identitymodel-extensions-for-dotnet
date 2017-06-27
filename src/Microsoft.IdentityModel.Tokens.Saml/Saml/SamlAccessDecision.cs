@@ -29,6 +29,7 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+#pragma warning disable 1591
     public enum SamlAccessDecision
     {
         // TODO can we get rid of this enum
@@ -39,4 +40,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         [EnumMember]
         Indeterminate
     }
+#pragma warning restore 1591
 }

@@ -35,6 +35,7 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -391,12 +392,67 @@ namespace Microsoft.IdentityModel.Tests
                 return AreWsFederationConfigurationsEqual(t1 as WsFederationConfiguration, t2 as WsFederationConfiguration, context);
             else if (t1 is WsFederationMessage)
                 return AreWsFederationMessagesEqual(t1 as WsFederationMessage, t2 as WsFederationMessage, context);
+            else if (t1 is SamlAssertion)
+                return AreSamlAssertionEqual(t1 as SamlAssertion, t2 as SamlAssertion, context);
+            else if (t1 is SamlAdvice)
+                return AreSamlAdviceEqual(t1 as SamlAdvice, t2 as SamlAdvice, context);
+            else if (t1 is SamlConditions)
+                return AreSamlConditionsEqual(t1 as SamlConditions, t2 as SamlConditions, context);
+            else if (t1 is SamlCondition)
+                return AreSamlConditionEqual(t1 as SamlCondition, t2 as SamlCondition, context);
+            else if (t1 is SamlStatement)
+                return AreSamlStatementEqual(t1 as SamlStatement, t2 as SamlStatement, context);
             else
             {
                 var localContext = new CompareContext(context);
                 ContinueCheckingEquality(t1, t2, localContext);
                 return context.Merge(localContext);
             }
+        }
+
+        public static bool AreSamlAssertionEqual(SamlAssertion assertion1, SamlAssertion assertion2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(assertion1, assertion2, context))
+                CompareAllPublicProperties(assertion1, assertion2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlAdviceEqual(SamlAdvice advice1, SamlAdvice advice2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(advice1, advice2, context))
+                CompareAllPublicProperties(advice1, advice2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlConditionEqual(SamlCondition condition1, SamlCondition condition2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(condition1, condition2, context))
+                CompareAllPublicProperties(condition1, condition2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlConditionsEqual(SamlConditions conditions1, SamlConditions conditions2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(conditions1, conditions2, context))
+                CompareAllPublicProperties(conditions1, conditions2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlStatementEqual(SamlStatement statement1, SamlStatement statement2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(statement1, statement2, context))
+                CompareAllPublicProperties(statement1, statement2, localContext);
+
+            return context.Merge(localContext);
         }
 
         public static bool AreJArraysEqual(Newtonsoft.Json.Linq.JArray a1, Newtonsoft.Json.Linq.JArray a2, CompareContext context)

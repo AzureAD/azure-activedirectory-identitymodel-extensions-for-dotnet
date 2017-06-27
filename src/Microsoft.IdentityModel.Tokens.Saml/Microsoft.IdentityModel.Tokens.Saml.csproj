@@ -29,8 +29,4 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Saml\*.cs" />
-  </ItemGroup>
-
 </Project>

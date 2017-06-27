@@ -65,6 +65,11 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static string SamlAssertionID
+        {
+            get { return "_b95759d0-73ae-4072-a140-567ade10a7ad"; }
+        }
+
         public static string AsymmetricJwt
         {
             get { return Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }
@@ -157,6 +162,26 @@ namespace Microsoft.IdentityModel.Tests
             get { return "http://Default.ClientId"; }
         }
 
+        public static string ConfirmationMethod
+        {
+            get { return "urn:oasis:names:tc:SAML:1.0:cm:bearer"; }
+        }
+
+        public static string Country
+        {
+            get { return "USA"; }
+        }
+
+        public static string Email
+        {
+            get { return "Bob@contoso.com"; }
+        }
+
+        public static string GivenName
+        {
+            get { return "Bob"; }
+        }
+
         public static KeyInfo KeyInfo
         {
             get => new KeyInfo
@@ -164,6 +189,16 @@ namespace Microsoft.IdentityModel.Tests
                 CertificateData = CertificateData,
                 Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
             };
+        }
+
+        public static string HomePhone
+        {
+            get { return "555.1212"; }
+        }
+
+        public static DateTime IssueInstant
+        {
+            get { return DateTime.Parse("2017 - 03 - 17T18: 33:37.095Z"); }
         }
 
         public static string Issuer
@@ -176,6 +211,11 @@ namespace Microsoft.IdentityModel.Tests
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
         }
 
+        public static string Name
+        {
+            get { return "Jean-Sébastien"; }
+        }
+
         public static string NameClaimType
         {
             get { return "Default.NameClaimType"; }
@@ -186,9 +226,34 @@ namespace Microsoft.IdentityModel.Tests
             get { return "Default.Nonce"; }
         }
 
+        public static DateTime NotBefore
+        {
+            get { return DateTime.Parse("2017-03-17T18:33:37.080Z"); }
+        }
+
+        public static DateTime NotOnOrAfter
+        {
+            get { return DateTime.Parse("2017-03-18T18:33:37.080Z"); }
+        }
+
         public static string OriginalIssuer
         {
             get { return "http://Default.OriginalIssuer.com"; }
+        }
+
+        public static string Role
+        {
+            get { return "role"; }
+        }
+
+        public static string SamlAttributeClaimNamespace
+        {
+            get { return "http://schemas.xmlsoap.org/ws/2005/05/identity/claims"; }
+        }
+
+        public static string SamlTargetNamespace
+        {
+            get { return "urn:oasis:names:tc:SAML:1.0:assertion"; }
         }
 
         public static Reference Reference

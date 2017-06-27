@@ -29,95 +29,61 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Attribute element.
+    /// </summary>
     public class SamlAttribute
     {
         private string _name;
         private string _nameSpace;
-        private Collection<string> _attributeValues = new Collection<string>();
         private string _originalIssuer;
         private string _attributeValueXsiType = ClaimValueTypes.String;
         private List<Claim> _claims;
         private string _claimType;
 
         // TODO remove this internal
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlAttribute"/>.
+        /// </summary>
         internal SamlAttribute()
         {
-        }
-
-        public SamlAttribute(string ns, string name, IEnumerable<string> values)
-        {
-            if (string.IsNullOrEmpty(ns))
-                throw LogHelper.LogArgumentNullException(nameof(ns));
-
-            if (string.IsNullOrEmpty(name))
-                throw LogHelper.LogArgumentNullException(nameof(name));
-
-            if (values == null)
-                throw LogHelper.LogArgumentNullException(nameof(values));
-
-            _name = name;
-            _nameSpace = ns;
-            _claimType = string.IsNullOrEmpty(_nameSpace) ? _name : _nameSpace + "/" + _name;
-
-            foreach (string value in values)
-            {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException("SAMLAttributeValueCannotBeNull");
-
-                _attributeValues.Add(value);
-            }
-
-            if (_attributeValues.Count == 0)
-                throw LogHelper.LogArgumentNullException("SAMLAttributeShouldHaveOneValue");
-        }
-
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _name = value;
-            }
-        }
-
-        public string Namespace
-        {
-            get { return _nameSpace; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _nameSpace = value;
-            }
-        }
-
-        public ICollection<string> AttributeValues
-        {
-            get { return _attributeValues; }
+            Values = new Collection<string>();
         }
 
         /// <summary>
-        /// Gets or Sets the string that represents the OriginalIssuer of the SAML Attribute.
+        /// Initializes a new instance of <see cref="SamlAttribute"/>s.
         /// </summary>
-        public string OriginalIssuer
+        /// <param name="ns">The namespace of the attribute.</param>
+        /// <param name="name">The name of the attribute.</param>
+        /// <param name="value">The value of the attribute.</param>
+        public SamlAttribute(string ns, string name, string value)
+            : this(ns, name, new string[] { value })
         {
-            get { return _originalIssuer; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _originalIssuer = value;
-            }
         }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlAttribute"/>.
+        /// </summary>
+        /// <param name="ns">The namespace of the attribute.</param>
+        /// <param name="name">The name of the attribute.</param>
+        /// <param name="values"><see cref="IEnumerable{String}"/>.</param>
+        public SamlAttribute(string ns, string name, IEnumerable<string> values)
+        {
+            Values = (values == null) ? throw LogArgumentNullException(LogMessages.IDX11504) : new List<string>(values);
+
+            Name = name;
+            Namespace = ns;
+            _claimType = string.IsNullOrEmpty(_nameSpace) ? _name : _nameSpace + "/" + _name;
+        }
+
+        /// <summary>
+        /// Gets a collection of <see cref="ICollection{String}"/> representing attributes.
+        /// </summary>
+        public ICollection<string> Values { get; }
 
         // TODO don't think this is still needed
         /// <summary>
@@ -129,27 +95,68 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 int indexOfHash = value.IndexOf('#');
                 if (indexOfHash == -1)
-                {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException("value, SR.GetString(SR.ID4254)")); ;
-                }
+                    throw LogExceptionMessage(new SecurityTokenInvalidAudienceException("value, SR.GetString(SR.ID4254)")); ;
 
                 string prefix = value.Substring(0, indexOfHash);
                 if (prefix.Length == 0)
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException("value SR.GetString(SR.ID4254)"));
-                }
+                    throw LogExceptionMessage(new ArgumentException("value SR.GetString(SR.ID4254)"));
 
                 string suffix = value.Substring(indexOfHash + 1);
                 if (suffix.Length == 0)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException("value, SR.GetString(SR.ID4254)"));
+                    throw LogExceptionMessage(new ArgumentException("value, SR.GetString(SR.ID4254)"));
                 }
 
                 _attributeValueXsiType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the attribute.
+        /// </summary>
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw LogArgumentNullException(nameof(value));
+
+                _name = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the namespace of the attribute.
+        /// </summary>
+        public string Namespace
+        {
+            get { return _nameSpace; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw LogArgumentNullException(nameof(value));
+
+                _nameSpace = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the string that represents the OriginalIssuer of the SAML Attribute.
+        /// </summary>
+        public string OriginalIssuer
+        {
+            get { return _originalIssuer; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw LogArgumentNullException(nameof(value));
+
+                _originalIssuer = value;
             }
         }
 
@@ -158,15 +165,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             if (_claims == null)
             {
-                List<Claim> tempClaims = new List<Claim>(_attributeValues.Count);
-
-                for (int i = 0; i < _attributeValues.Count; i++)
+                List<Claim> tempClaims = new List<Claim>(Values.Count);
+                foreach (var value in Values)
                 {
-                    if (_attributeValues[i] == null)
-                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAttributeValueCannotBeNull"));
+                    if (value == null)
+                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11504));
 
-                    tempClaims.Add(new Claim(_claimType, _attributeValues[i]));
+                    tempClaims.Add(new Claim(_claimType, value));
                 }
+
                 _claims = tempClaims;
             }
 

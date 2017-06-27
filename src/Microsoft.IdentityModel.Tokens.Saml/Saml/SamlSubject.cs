@@ -26,104 +26,73 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Subject element specified in [Saml2Core, 2.4.2.1].
+    /// </summary>
+    /// <remarks>
+    /// If the NameId is null and the SubjectConfirmations collection is empty,
+    /// an InvalidOperationException will be thrown during serialization.
+    /// </remarks>
     public class SamlSubject
     {
         // Saml SubjectConfirmation parts.
-        Collection<string> _confirmationMethods = new Collection<string>();
-        string _confirmationData;
-        SecurityKeyIdentifier _securityKeyIdentifier;
-        SecurityKey _crypto;
-
-        // Saml NameIdentifier element parts.
-        string _name;
-        string _nameFormat;
-        string _nameQualifier;
+        private string _confirmationData;
+        private SecurityKey _securityKey;
+        private KeyInfo _keyInfo;
 
         // TODO remove this internal
-        internal SamlSubject()
+        /// <summary>
+        /// Initialize an instance of <see cref="SamlSubject"/>.
+        /// </summary>
+        public SamlSubject()
         {
+            ConfirmationMethods = new List<string>();
         }
 
+        /// <summary>
+        /// Initialize an instance of <see cref="SamlSubject"/>.
+        /// </summary>
+        /// <param name="nameFormat">The format of the subject.</param>
+        /// <param name="nameQualifier">The NameIdentifier of the subject.</param>
+        /// <param name="name">The name of the subject.</param>
         public SamlSubject(string nameFormat, string nameQualifier, string name)
-            : this(nameFormat, nameQualifier, name, null, null, null)
+            : this(nameFormat, nameQualifier, name, null, null)
         {
         }
 
+        /// <summary>
+        /// Initialize an instance of <see cref="SamlSubject"/>.
+        /// </summary>
+        /// <param name="nameFormat">The format of the subject.</param>
+        /// <param name="nameQualifier">The NameIdentifier of the subject.</param>
+        /// <param name="name">The name of the subject.</param>
+        /// <param name="confirmations"><see cref="IEnumerable{String}"/>.</param>
+        /// <param name="confirmationData">The confirmation data contained in the subject.</param>
         public SamlSubject(
             string nameFormat,
             string nameQualifier,
             string name,
             IEnumerable<string> confirmations,
-            string confirmationData,
-            SecurityKeyIdentifier securityKeyIdentifier)
+            string confirmationData)
         {
             if (confirmations != null)
-            {
-                foreach (string method in confirmations)
-                {
-                    if (string.IsNullOrEmpty(method))
-                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
+                ConfirmationMethods = new List<string>(confirmations);
 
-                    _confirmationMethods.Add(method);
-                }
-            }
-
-            if ((_confirmationMethods.Count == 0) && (string.IsNullOrEmpty(name)))
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLSubjectRequiresNameIdentifierOrConfirmationMethod"));
-
-            if ((_confirmationMethods.Count == 0) && ((confirmationData != null) || (securityKeyIdentifier != null)))
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLSubjectRequiresConfirmationMethodWhenConfirmationDataOrKeyInfoIsSpecified"));
-
-            _name = name;
-            _nameFormat = nameFormat;
-            _nameQualifier = nameQualifier;
+            Name = name;
+            NameFormat = nameFormat;
+            NameQualifier = nameQualifier;
             _confirmationData = confirmationData;
-            _securityKeyIdentifier = securityKeyIdentifier;
         }
 
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _name = value;
-            }
-        }
-
-        // TODO - can this be null
-        public string NameFormat
-        {
-            get; set;
-        }
-
-        // TODO - can this be null
-        public string NameQualifier
-        {
-            get; set;
-        }
-
-        public static string NameClaimType
-        {
-            get
-            {
-                return ClaimTypes.NameIdentifier;
-            }
-        }
-
-        public ICollection<string> ConfirmationMethods
-        {
-            get { return _confirmationMethods; }
-        }
-
+        /// <summary>
+        /// Gets or sets confirmation data.
+        /// </summary>
         public string ConfirmationData
         {
             get
@@ -132,45 +101,81 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _confirmationData = value;
+                _confirmationData = (!string.IsNullOrEmpty(value)) ? value : throw LogArgumentNullException(nameof(value));
             }
         }
 
-        public SecurityKeyIdentifier KeyIdentifier
-        {
-            get { return _securityKeyIdentifier; }
-            set
-            {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _securityKeyIdentifier = value;
-            }
-        }
+        /// <summary>
+        /// Gets confirmation methods.
+        /// </summary>
+        public ICollection<string> ConfirmationMethods { get; }
 
         // TODO - surface here or from assertion / token
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/>.
+        /// </summary>
         public SecurityKey Key
         {
-            get { return _crypto; }
+            get { return _securityKey; }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException(nameof(value));
-
-                _crypto = value;
+                _securityKey = value ?? throw LogArgumentNullException(nameof(value));
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the<see cref="KeyInfo"/>.
+        /// </summary>
+        public KeyInfo KeyInfo
+        {
+            get { return _keyInfo; }
+            set
+            {
+                _keyInfo = value ?? throw LogArgumentNullException(nameof(value));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the Subject.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets the ClaimType.
+        /// </summary>
+        public static string NameClaimType
+        {
+            get
+            {
+                return ClaimTypes.NameIdentifier;
+            }
+        }
+
+        // TODO - can this be null
+        /// <summary>
+        /// Gets or sets the format of the Subject.
+        /// </summary>
+        public string NameFormat
+        {
+            get; set;
+        }
+
+        // TODO - can this be null
+        /// <summary>
+        /// Gets or sets the name qualifier of the Subject.
+        /// </summary>
+        public string NameQualifier
+        {
+            get; set;
         }
 
         void CheckObjectValidity()
         {
-            if ((_confirmationMethods.Count == 0) && (string.IsNullOrEmpty(_name)))
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLSubjectRequiresNameIdentifierOrConfirmationMethod"));
+            if ((ConfirmationMethods.Count == 0) && (string.IsNullOrEmpty(Name)))
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11107));
 
-            if ((_confirmationMethods.Count == 0) && ((_confirmationData != null) || (_securityKeyIdentifier != null)))
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLSubjectRequiresConfirmationMethodWhenConfirmationDataOrKeyInfoIsSpecified"));
+            if ((ConfirmationMethods.Count == 0) && (_confirmationData != null))
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11510));
         }
 
         // TODO - get out claims

@@ -27,21 +27,32 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the AttributeStatement element.
+    /// </summary>
     public class SamlAuthenticationStatement : SamlSubjectStatement
     {
         private DateTime _authenticationInstant = DateTime.UtcNow.ToUniversalTime();
         private string _authenticationMethod = SamlConstants.UnspecifiedAuthenticationMethod;
-        private Collection<SamlAuthorityBinding> _authorityBindings = new Collection<SamlAuthorityBinding>();
 
         internal SamlAuthenticationStatement()
         {
+            AuthorityBindings = new List<SamlAuthorityBinding>();
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAuthenticationStatement"/>.
+        /// </summary>
+        /// <param name="samlSubject">The Subject of the Statement.</param>
+        /// <param name="authenticationMethod">The URI reference that specifies the type of authentication that took place.</param>
+        /// <param name="authenticationInstant">The time at which the authentication took place.</param>
+        /// <param name="dnsAddress">The DNS domain name for the system entity from which the subject was apparently authenticated.</param>
+        /// <param name="ipAddress">The IP address for the system entity from which the subject was apparently authenticated.</param>
+        /// <param name="authorityBindings"><see cref="IEnumerable{SamlAuthorityBinding}"/>.</param>
         public SamlAuthenticationStatement(
             SamlSubject samlSubject,
             string authenticationMethod,
@@ -52,30 +63,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             : base(samlSubject)
         {
             if (string.IsNullOrEmpty(authenticationMethod))
-                throw LogHelper.LogArgumentNullException(nameof(authenticationMethod));
+                throw LogArgumentNullException(nameof(authenticationMethod));
 
             AuthenticationMethod = authenticationMethod;
             AuthenticationInstant = authenticationInstant.ToUniversalTime();
             DnsAddress = dnsAddress;
             IPAddress = ipAddress;
 
-            if (authorityBindings != null)
-            {
-                foreach (var binding in authorityBindings)
-                {
-                    if (binding == null)
-                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
-
-                    _authorityBindings.Add(binding);
-                }
-            }
+            AuthorityBindings = (authorityBindings == null) ? new List<SamlAuthorityBinding>() : new List<SamlAuthorityBinding>(authorityBindings);
         }
 
+        /// <summary>
+        /// Gets or sets the instant of authentication.
+        /// </summary>
         public DateTime AuthenticationInstant
         {
             get; set;
         }
 
+        /// <summary>
+        /// Gets or sets the method of authentication.
+        /// </summary>
         public string AuthenticationMethod
         {
             get { return _authenticationMethod; }
@@ -89,21 +97,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
+        /// <summary>
+        /// Gets a collection of <see cref="ICollection{SamlAuthorityBinding}"/>.
+        /// </summary>
+        public ICollection<SamlAuthorityBinding> AuthorityBindings
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets ClaimType.
+        /// </summary>
         // TODO what is this for?
         public static string ClaimType
         {
             get {return System.Security.Claims.ClaimTypes.Authentication; }
         }
 
-        public ICollection<SamlAuthorityBinding> AuthorityBindings
-        {
-            get { return _authorityBindings; }
-        }
-
         // TODO - allow null?
+        /// <summary>
+        /// Gets or sets Domain Name Service.
+        /// </summary>
         public string DnsAddress { get; set; }
 
         // TODO - allow null?
+        /// <summary>
+        /// Gets or sets Internet Protocol.
+        /// </summary>
         public string IPAddress { get; set; }
 
         // TODO - how to service claims

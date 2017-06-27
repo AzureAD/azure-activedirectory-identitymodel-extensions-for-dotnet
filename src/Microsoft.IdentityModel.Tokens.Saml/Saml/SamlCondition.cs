@@ -27,6 +27,9 @@
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Saml Condition element.
+    /// </summary>
     public abstract class SamlCondition
     {
     }

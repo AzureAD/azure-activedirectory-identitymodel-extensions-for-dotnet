@@ -25,44 +25,45 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
-
-    public class SamlAudienceRestrictionCondition : SamlCondition
+    /// <summary>
+    /// Represents the AudienceRestrictionCondition.
+    /// </summary>
+    public class SamlAudienceRestriction : SamlCondition
     {
-        // TODO - should this be strings?
-        Collection<Uri> _audiences = new Collection<Uri>();
-
         // TODO - remove this internal
-        internal SamlAudienceRestrictionCondition()
+        internal SamlAudienceRestriction()
         {
+            Audiences = new List<string>();
         }
 
-        public SamlAudienceRestrictionCondition(IEnumerable<Uri> audiences)
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAudienceRestriction"/>.
+        /// </summary>
+        /// <param name="audience">The audience element contained in this restriction.</param>
+        public SamlAudienceRestriction(string audience)
+            : this(new string[] { audience })
+        { }
+
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAudienceRestriction"/>.
+        /// </summary>
+        /// <param name="audiences"><see cref="IEnumerable{String}"/>.</param>
+        public SamlAudienceRestriction(IEnumerable<string> audiences)
         {
-            if (audiences == null)
-                throw LogHelper.LogArgumentNullException(nameof(audiences));
-
-            foreach (Uri audience in audiences)
-            {
-                if (audience == null)
-                    throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
-
-                _audiences.Add(audience);
-            }
-
-            if (_audiences.Count == 0)
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAudienceRestrictionShouldHaveOneAudience"));
+            Audiences = (audiences == null) ? throw LogArgumentNullException(nameof(audiences)) : new List<string>(audiences);
         }
 
-        public ICollection<Uri> Audiences
+        /// <summary>
+        /// Gets the audiences for which the assertion is addressed.
+        /// </summary>
+        public ICollection<string> Audiences
         {
-            get { return _audiences; }
+            get;
         }
     }
 }

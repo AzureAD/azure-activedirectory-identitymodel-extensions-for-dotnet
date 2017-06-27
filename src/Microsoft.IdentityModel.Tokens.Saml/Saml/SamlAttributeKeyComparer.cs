@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
@@ -36,36 +36,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlAttributeKeyComparer : IEqualityComparer<SamlAttributeKeyComparer.AttributeKey>
     {
+        /// <summary>
+        /// A class contains Saml attribute key.
+        /// </summary>
         public class AttributeKey
         {
-            string _friendlyName;
             int _hashCode;
-            string _name;
-            string _nameFormat;
-            string _namespace;
-            string _valueType;
-            string _originalIssuer;
 
-            internal string FriendlyName { get { return _friendlyName; } }
-            internal string Name { get { return _name; } }
-            internal string NameFormat { get { return _nameFormat; } }
-            internal string Namespace { get { return _namespace; } }
-            internal string ValueType { get { return _valueType; } }
-            internal string OriginalIssuer { get { return _originalIssuer; } }
-
+            /// <summary>
+            /// Represents the Saml Attribute Key.
+            /// </summary>
+            /// <param name="attribute"></param>
             public AttributeKey(SamlAttribute attribute)
             {
                 if (attribute == null)
                 {
-                    throw LogHelper.LogArgumentNullException(nameof(attribute));
+                    throw LogArgumentNullException(nameof(attribute));
                 }
 
-                _friendlyName = String.Empty;
-                _name = attribute.Name;
-                _nameFormat = String.Empty;
-                _namespace = attribute.Namespace ?? String.Empty;
-                _valueType = attribute.AttributeValueXsiType ?? String.Empty;
-                _originalIssuer = attribute.OriginalIssuer ?? String.Empty;
+                FriendlyName = String.Empty;
+                Name = attribute.Name;
+                NameFormat = String.Empty;
+                Namespace = attribute.Namespace ?? String.Empty;
+                ValueType = attribute.AttributeValueXsiType ?? String.Empty;
+                OriginalIssuer = attribute.OriginalIssuer ?? String.Empty;
 
                 ComputeHashCode();
             }
@@ -88,24 +82,42 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             //    ComputeHashCode();
             //}
 
-            public override int GetHashCode()
-            {
-                return _hashCode;
-            }
+            internal string FriendlyName { get; }
+            internal string Name { get; }
+            internal string NameFormat { get; }
+            internal string Namespace { get; }
+            internal string OriginalIssuer { get; }
+            internal string ValueType { get; }
+            
 
             void ComputeHashCode()
             {
-                _hashCode = _name.GetHashCode();
-                _hashCode ^= _friendlyName.GetHashCode();
-                _hashCode ^= _nameFormat.GetHashCode();
-                _hashCode ^= _namespace.GetHashCode();
-                _hashCode ^= _valueType.GetHashCode();
-                _hashCode ^= _originalIssuer.GetHashCode();
+                _hashCode = Name.GetHashCode();
+                _hashCode ^= FriendlyName.GetHashCode();
+                _hashCode ^= NameFormat.GetHashCode();
+                _hashCode ^= Namespace.GetHashCode();
+                _hashCode ^= ValueType.GetHashCode();
+                _hashCode ^= OriginalIssuer.GetHashCode();
+            }
+
+            /// <summary>
+            /// Override GetHashCode function.
+            /// </summary>
+            /// <returns></returns>
+            public override int GetHashCode()
+            {
+                return _hashCode;
             }
         }
 
         #region IEqualityComparer<AttributeKey> Members
 
+        /// <summary>
+        /// Compare AttributeKeys.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public bool Equals(AttributeKey x, AttributeKey y)
         {
             return x.Name.Equals(y.Name, StringComparison.Ordinal)
@@ -116,6 +128,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 && x.Namespace.Equals(y.Namespace, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Get the AttributeKey's hash code.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int GetHashCode(AttributeKey obj)
         {
             return obj.GetHashCode();

@@ -25,22 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the SubjectStatement element.
+    /// </summary>
     public abstract class SamlSubjectStatement : SamlStatement
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlSubjectStatement"/>.
+        /// </summary>
         protected SamlSubjectStatement() { }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlSubjectStatement"/>.
+        /// </summary>
+        /// <param name="subject">The subject of the statement.</param>
         protected SamlSubjectStatement(SamlSubject subject)
         {
-            if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
-
-            Subject = subject;
+            Subject = (subject == null) ? throw LogArgumentNullException(nameof(subject)) : subject;
         }
 
+        /// <summary>
+        /// Gets or sets the subject of the statement.
+        /// </summary>
         public virtual SamlSubject Subject { get; set; }
     }
 }

@@ -26,38 +26,44 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the AttributeStatement element.
+    /// </summary>
     public class SamlAttributeStatement : SamlSubjectStatement
     {
-        private Collection<SamlAttribute> _attributes = new Collection<SamlAttribute>();
-
         internal SamlAttributeStatement()
         {
+            Attributes = new List<SamlAttribute>();
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAttributeStatement"/>.
+        /// </summary>
+        /// <param name="samlSubject">The subject of the attribute statement.</param>
+        /// <param name="attribute">The <see cref="SamlAttribute"/> contained in this statement.</param>
+        public SamlAttributeStatement(SamlSubject samlSubject, SamlAttribute attribute)
+            : this(samlSubject, new SamlAttribute[] { attribute })
+        { }
+
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAttributeStatement"/>.
+        /// </summary>
+        /// <param name="samlSubject">The subject of the attribute statement.</param>
+        /// <param name="attributes"><see cref="IEnumerable{SamlAttribute}"/>.</param>
         public SamlAttributeStatement(SamlSubject samlSubject, IEnumerable<SamlAttribute> attributes)
             : base(samlSubject)
         {
-            if (attributes == null)
-                throw LogHelper.LogArgumentNullException(nameof(attributes));
-
-            foreach (SamlAttribute attribute in attributes)
-            {
-                if (attribute == null)
-                    throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
-
-                _attributes.Add(attribute);
-            }
+            Attributes = (attributes == null) ? throw LogArgumentNullException(nameof(attributes)) : new List<SamlAttribute>(attributes);
         }
 
-        public IList<SamlAttribute> Attributes
-        {
-            get { return _attributes; }
-        }
+        /// <summary>
+        ///  Gets a collection of <see cref="ICollection{SamlAttribute}"/>.
+        /// </summary>
+        public ICollection<SamlAttribute> Attributes { get; }
 
         // TODO - how to extract claims
         // SamlSecurityTokenHandler?

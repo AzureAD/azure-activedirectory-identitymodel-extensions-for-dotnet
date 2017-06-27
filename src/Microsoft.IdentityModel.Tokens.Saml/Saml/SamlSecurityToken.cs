@@ -26,91 +26,105 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// A security token backed by a SAML assertion.
+    /// </summary>
     public class SamlSecurityToken : SecurityToken
     {
-        SamlAssertion _assertion;
-
+        /// <summary>
+        /// Initializes an instance of <see cref="SamlSecurityToken"/>.
+        /// </summary>
         protected SamlSecurityToken() { }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="assertion">A <see cref="SamlAssertion"/> to initialize from.</param>
         public SamlSecurityToken(SamlAssertion assertion)
         {
-            Initialize(assertion);
+            Assertion = assertion ?? throw LogArgumentNullException(nameof(assertion));
         }
 
-        protected void Initialize(SamlAssertion assertion)
+        /// <summary>
+        /// Gets the <see cref="SamlAssertion"/> for this token.
+        /// </summary>
+        public SamlAssertion Assertion
         {
-            if (assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(assertion));
-
-            _assertion = assertion;
+            get;
         }
 
+        /// <summary>
+        /// Gets the SecurityToken id.
+        /// </summary>
         public override string Id
         {
-            get { return _assertion.AssertionId; }
+            get { return Assertion.AssertionId; }
         }
 
+        /// <summary>
+        /// Gets the issuer of this token
+        /// </summary>
+        public override string Issuer
+        {
+            get
+            {
+                return Assertion.Issuer;
+            }
+        }
+
+        /// <summary>
+        /// Gets the collection of <see cref="SecurityKey"/> contained in this token.
+        /// </summary>
         public override SecurityKey SecurityKey
         {
             get
             {
-                return _assertion.SecurityKey;
+                return Assertion.SecurityKey;
             }
         }
 
-        public SamlAssertion Assertion
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that was used to Sign this assertion.
+        /// </summary>
+        public override SecurityKey SigningKey
         {
-            get { return _assertion; }
+            get { return Assertion.SigningKey; }
+            set { Assertion.SigningKey = value; }
         }
 
+        /// <summary>
+        /// Gets the time the token is valid from.
+        /// </summary>
         public override DateTime ValidFrom
         {
             get
             {
-                if (_assertion.Conditions != null)
+                if (Assertion.Conditions != null)
                 {
-                    return _assertion.Conditions.NotBefore;
+                    return Assertion.Conditions.NotBefore;
                 }
 
                 return DateTimeUtil.GetMinValue(DateTimeKind.Utc);
             }
         }
 
+        /// <summary>
+        /// Gets the time the token is valid to.
+        /// </summary>
         public override DateTime ValidTo
         {
             get
             {
-                if (_assertion.Conditions != null)
+                if (Assertion.Conditions != null)
                 {
-                    return _assertion.Conditions.NotOnOrAfter;
+                    return Assertion.Conditions.NotOnOrAfter;
                 }
 
                 return DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
-            }
-        }
-
-        public override string Issuer
-        {
-            get
-            {
-                return _assertion.Issuer;
-            }
-        }
-
-        public override SecurityKey SigningKey
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
             }
         }
     }

@@ -33,13 +33,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Tests
 {
-    public enum DefaultClaimType
+    public enum DefaultRoles
     {
-        Country,
-        Email,
-        GivenName,
-        HomePhone,
-        Role,
+        Developer,
+        Sales,
+        role1,
+        roles1
     }
 
     /// <summary>

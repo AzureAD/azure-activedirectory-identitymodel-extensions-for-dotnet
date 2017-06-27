@@ -27,8 +27,14 @@
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the SamlDoNotCacheCondition element.
+    /// </summary>
     public class SamlDoNotCacheCondition : SamlCondition
     {
+        /// <summary>
+        /// Represents the SamlDoNotCacheCondition element.
+        /// </summary>
         public SamlDoNotCacheCondition()
         {
         }

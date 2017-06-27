@@ -117,15 +117,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = RefrenceTokens.Saml2Token_Valid
                     });
 
-                theoryData.Add(
-                    new SamlTheoryData
-                    {
-                        CanRead = false,
-                        Handler = handler,
-                        TestId = nameof(RefrenceTokens.Saml1Token_1),
-                        Token = RefrenceTokens.Saml1Token_1
-                    });
-
                 return theoryData;
             }
         }

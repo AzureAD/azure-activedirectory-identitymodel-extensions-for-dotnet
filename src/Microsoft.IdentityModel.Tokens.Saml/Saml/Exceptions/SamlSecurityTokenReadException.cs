@@ -33,41 +33,41 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         [Serializable]
 #endif
     /// <summary>
-    /// This exception is thrown when a security is missing an ExpirationTime.
+    /// This exception is thrown when reading a <see cref="SamlSecurityToken"/>.
     /// </summary>
-    public class SamlSecurityTokenException : SecurityTokenException
+    public class SamlSecurityTokenReadException : SamlSecurityTokenException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenException"/> class.
+        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
         /// </summary>
-        public SamlSecurityTokenException()
+        public SamlSecurityTokenReadException()
             : base()
         {}
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenException"/> class.
+        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SamlSecurityTokenException(string message)
+        public SamlSecurityTokenReadException(string message)
             : base(message)
         {}
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenException"/> class.
+        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SamlSecurityTokenException(string message, Exception innerException)
+        public SamlSecurityTokenReadException(string message, Exception innerException)
             : base(message, innerException)
         {}
 
 #if DESKTOPNET45
         /// <summary>
-        /// Initializes a new instance of the <see cref="SamlSecurityTokenException"/> class.
+        /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected SamlSecurityTokenException(SerializationInfo info, StreamingContext context)
+        protected SamlSecurityTokenReadException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
 #endif

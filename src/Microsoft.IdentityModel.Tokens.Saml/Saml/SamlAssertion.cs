@@ -27,24 +27,36 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
-    public class SamlAssertion //: ICanonicalWriterEndRootElementCallback
+    /// <summary>
+    /// Represents the Assertion element specified in [Saml, 2.3.2].
+    /// </summary>
+    public class SamlAssertion
     {
         private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
         private string _issuer;
-        private Collection<SamlStatement> _statements = new Collection<SamlStatement>();
-        private XmlTokenStream _tokenStream;
-        private XmlTokenStream _sourceData;
 
-        public SamlAssertion() { }
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAssertion"/>.
+        /// </summary>
+        public SamlAssertion()
+        {
+            Statements = new List<SamlStatement>();
+        }
 
+        /// <summary>
+        /// Creates an instance of <see cref="SamlAssertion"/>.
+        /// </summary>
+        /// <param name="assertionId">AssertionID of the assertion.</param>
+        /// <param name="issuer">Issuer of the assertion.</param>
+        /// <param name="issueInstant">IssueInstant of the assertion.</param>
+        /// <param name="samlConditions">SamlConditions of the assertion.</param>
+        /// <param name="samlAdvice">SamlAdvice of the assertion.</param>
+        /// <param name="samlStatements"><see cref="IEnumerable{SamlStatement}"/>.</param>
         public SamlAssertion(
             string assertionId,
             string issuer,
@@ -54,150 +66,108 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             IEnumerable<SamlStatement> samlStatements
             )
         {
-            if (string.IsNullOrEmpty(assertionId))
-                throw LogHelper.LogArgumentNullException(nameof(assertionId));
-
-            _tokenStream = new XmlTokenStream();
-
-            // TODO warning
-            //if (!IsAssertionIdValid(assertionId))
-            //    throw LogHelper.ExceptionUtility.ThrowHelperArgument(SR.GetString(SR.SAMLAssertionIDIsInvalid, assertionId));
-
-            if (string.IsNullOrEmpty(issuer))
-                throw LogHelper.LogArgumentNullException(nameof(issuer));
-
-            if (samlStatements == null)
-                throw LogHelper.LogArgumentNullException(nameof(samlStatements));
+            Statements = (samlStatements == null) ? throw LogArgumentNullException(nameof(samlStatements)) : new List<SamlStatement>(samlStatements);
 
             AssertionId = assertionId;
             Issuer = issuer;
             IssueInstant = issueInstant.ToUniversalTime();
             Conditions = samlConditions;
             Advice = samlAdvice;
-
-            foreach (SamlStatement samlStatement in samlStatements)
-            {
-                if (samlStatement == null)
-                    throw LogHelper.LogArgumentNullException("SAMLEntityCannotBeNullOrEmpty");
-
-                _statements.Add(samlStatement);
-            }
-
-            if (_statements.Count == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException("SAMLAssertionRequireOneStatement"));
         }
 
-        public SecurityKey SecurityKey { get; set; }
+        /// <summary>
+        /// Gets or sets additional information related to the assertion that assists processing in certain
+        /// situations but which may be ignored by applications that do not understand the
+        /// advice or do not wish to make use of it.
+        /// </summary>
+        public SamlAdvice Advice { get; set; }
 
-        public int MinorVersion
-        {
-            get { return SamlConstants.MinorVersionValue; }
-        }
-
-        public int MajorVersion
-        {
-            get { return SamlConstants.MajorVersionValue; }
-        }
-
+        /// <summary>
+        /// Gets or sets the identifier for this assertion.
+        /// </summary>
         public string AssertionId
         {
             get { return _assertionId; }
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 _assertionId = value;
             }
         }
 
         /// <summary>
-        /// Indicates whether this assertion was deserialized from XML source
-        /// and can re-emit the XML data unchanged.
+        /// Gets or sets conditions that must be evaluated when assessing the validity of and/or
+        /// when using the assertion.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The default implementation preserves the source data when read using
-        /// Saml2AssertionSerializer.ReadAssertion and is willing to re-emit the
-        /// original data as long as the Id has not changed from the time that 
-        /// assertion was read.
-        /// </para>
-        /// <para>
-        /// Note that it is vitally important that SAML assertions with different
-        /// data have different IDs. If implementing a scheme whereby an assertion
-        /// "template" is loaded and certain bits of data are filled in, the Id 
-        /// must be changed.
-        /// </para>
-        /// </remarks>
-        /// <returns></returns>
-        public virtual bool CanWriteSourceData
-        {
-            get { return null != _sourceData; }
-        }
+        public SamlConditions Conditions { get; set; }
 
+        /// <summary>
+        /// Gets or sets the issuer in the assertion.
+        /// </summary>
         public string Issuer
         {
             get { return _issuer; }
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 _issuer = value;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the time instant of issue in UTC.
+        /// </summary>
         public DateTime IssueInstant { get; set; } = DateTime.UtcNow;
 
-        public SamlConditions Conditions { get; set; }
-
-        public SamlAdvice Advice { get; set; }
-
-        public IList<SamlStatement> Statements
+        /// <summary>
+        /// Gets the major version of this assertion. [Saml, 2.3.2]
+        /// <remarks>
+        /// The identifier for the version of SAML defined in this specification is 1.
+        /// </remarks>
+        /// </summary>
+        public int MajorVersion
         {
-            get
-            {
-                return _statements;
-            }
+            get { return SamlConstants.MajorVersionValue; }
         }
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public Signature Signature { get; set; }
-
-        public SecurityKey SignatureVerificationKey { get; set; }
 
         /// <summary>
-        /// Captures the XML source data from an EnvelopedSignatureReader. 
-        /// </summary>
+        /// Gets the minor version of this assertion. [Saml, 2.3.2]
         /// <remarks>
-        /// The EnvelopedSignatureReader that was used to read the data for this
-        /// assertion should be passed to this method after the &lt;/Assertion>
-        /// element has been read. This method will preserve the raw XML data
-        /// that was read, including the signature, so that it may be re-emitted
-        /// without changes and without the need to re-sign the data. See 
-        /// CanWriteSourceData and WriteSourceData.
+        /// The identifier for the version of SAML defined in this specification is 1.
         /// </remarks>
-        /// <param name="reader"></param>
-        internal virtual void CaptureSourceData(EnvelopedSignatureReader reader)
+        /// </summary>
+        public int MinorVersion
         {
-            if (null == reader)
-                throw LogHelper.LogArgumentNullException(nameof(reader));
-
-            // TODO capturing of tokens, where to do this
-            _sourceData = reader.XmlTokens;
+            get { return SamlConstants.MinorVersionValue; }
         }
 
-        bool IsAssertionIdValid(string assertionId)
-        {
-            if (string.IsNullOrEmpty(assertionId))
-                return false;
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/>.
+        /// </summary>
+        public SecurityKey SecurityKey { get; set; }
 
-            // The first character of the Assertion ID should be a letter or a '_'
-            return (((assertionId[0] >= 'A') && (assertionId[0] <= 'Z')) ||
-                ((assertionId[0] >= 'a') && (assertionId[0] <= 'z')) ||
-                (assertionId[0] == '_'));
-        }
+        /// <summary>
+        /// Gets or sets the <see cref="Signature"/> on the Assertion.
+        /// </summary>
+        public Signature Signature { get; set; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> on the Assertion.
+        /// </summary>
+        public SecurityKey SigningKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SigningCredentials"/> used by the issuer to protect the integrity of the assertion.
+        /// </summary>
+        public SigningCredentials SigningCredentials { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="IList{SamlStatement}"/>(s) regarding the subject.
+        /// </summary>
+        public IList<SamlStatement> Statements { get; }
     }
 }

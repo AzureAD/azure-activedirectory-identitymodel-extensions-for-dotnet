@@ -36,14 +36,14 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
-    /// A derived <see cref="System.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler"/> that implements ISecurityTokenValidator,
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml Tokens,
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
@@ -54,114 +54,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
-        private Dictionary<string, string> _shortToLongClaimTypeMapping;
+
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
         /// </summary>
         public static readonly int DefaultTokenLifetimeInMinutes = 60;
 
         /// <summary>
-        /// Initializes an instance of <see cref="SamlSecurityTokenHandler"/>
+        /// Initializes an instance of <see cref="SamlSecurityTokenHandler"/>.
         /// </summary>
         public SamlSecurityTokenHandler()
+            : this(new SamlSerializer())
         {
-            _shortToLongClaimTypeMapping = new Dictionary<string, string>()
-            {
-                { "actort", ClaimTypes.Actor },
-                { "birthdate", ClaimTypes.DateOfBirth },
-                { "email", ClaimTypes.Email },
-                { "family_name", ClaimTypes.Surname },
-                { "gender", ClaimTypes.Gender },
-                { "given_name", ClaimTypes.GivenName },
-                { "nameid", ClaimTypes.NameIdentifier },
-                { "sub", ClaimTypes.NameIdentifier },
-                { "website", ClaimTypes.Webpage },
-                { "unique_name", ClaimTypes.Name },
-                { "oid", "http://schemas.microsoft.com/identity/claims/objectidentifier" },
-                { "scp", "http://schemas.microsoft.com/identity/claims/scope" },
-                { "tid", "http://schemas.microsoft.com/identity/claims/tenantid" },
-                { "acr", "http://schemas.microsoft.com/claims/authnclassreference" },
-                { "adfs1email", "http://schemas.xmlsoap.org/claims/EmailAddress" },
-                { "adfs1upn", "http://schemas.xmlsoap.org/claims/UPN" },
-                { "amr", "http://schemas.microsoft.com/claims/authnmethodsreferences" },
-                { "authmethod", ClaimTypes.AuthenticationMethod },
-                { "certapppolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/applicationpolicy" },
-                { "certauthoritykeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/authoritykeyidentifier" },
-                { "certbasicconstraints", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/basicconstraints" },
-                { "certeku", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/eku" },
-                { "certissuer", "http://schemas.microsoft.com/2012/12/certificatecontext/field/issuer" },
-                { "certissuername", "http://schemas.microsoft.com/2012/12/certificatecontext/field/issuername" },
-                { "certkeyusage", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/keyusage" },
-                { "certnotafter", "http://schemas.microsoft.com/2012/12/certificatecontext/field/notafter" },
-                { "certnotbefore", "http://schemas.microsoft.com/2012/12/certificatecontext/field/notbefore" },
-                { "certpolicy", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatepolicy" },
-                { "certpublickey", ClaimTypes.Rsa },
-                { "certrawdata", "http://schemas.microsoft.com/2012/12/certificatecontext/field/rawdata" },
-                { "certserialnumber", ClaimTypes.SerialNumber },
-                { "certsignaturealgorithm", "http://schemas.microsoft.com/2012/12/certificatecontext/field/signaturealgorithm" },
-                { "certsubject", "http://schemas.microsoft.com/2012/12/certificatecontext/field/subject" },
-                { "certsubjectaltname", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/san" },
-                { "certsubjectkeyidentifier", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/subjectkeyidentifier" },
-                { "certsubjectname", "http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname" },
-                { "certtemplateinformation", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplateinformation" },
-                { "certtemplatename", "http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplatename" },
-                { "certthumbprint", ClaimTypes.Thumbprint },
-                { "certx509version", "http://schemas.microsoft.com/2012/12/certificatecontext/field/x509version" },
-                { "clientapplication", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-application" },
-                { "clientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-ip" },
-                { "clientuseragent", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-user-agent" },
-                { "commonname", "http://schemas.xmlsoap.org/claims/CommonName" },
-                { "denyonlyprimarygroupsid", ClaimTypes.DenyOnlyPrimaryGroupSid },
-                { "denyonlyprimarysid", ClaimTypes.DenyOnlyPrimarySid },
-                { "denyonlysid", ClaimTypes.DenyOnlySid },
-                { "devicedispname", "http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname" },
-                { "deviceid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier" },
-                { "deviceismanaged", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged" },
-                { "deviceostype", "http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype" },
-                { "deviceosver", "http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion" },
-                { "deviceowner", "http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner" },
-                { "deviceregid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid" },
-                { "endpointpath", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path" },
-                { "forwardedclientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip" },
-                { "group", "http://schemas.xmlsoap.org/claims/Group" },
-                { "groupsid", ClaimTypes.GroupSid },
-                { "idp", "http://schemas.microsoft.com/identity/claims/identityprovider" },
-                { "insidecorporatenetwork", "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork" },
-                { "isregistereduser", "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser" },
-                { "ppid", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier" },
-                { "primarygroupsid", ClaimTypes.PrimaryGroupSid },
-                { "primarysid", ClaimTypes.PrimarySid },
-                { "proxy", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy" },
-                { "pwdchgurl", "http://schemas.microsoft.com/ws/2012/01/passwordchangeurl" },
-                { "pwdexpdays", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationdays" },
-                { "pwdexptime", "http://schemas.microsoft.com/ws/2012/01/passwordexpirationtime" },
-                { "relyingpartytrustid", "http://schemas.microsoft.com/2012/01/requestcontext/claims/relyingpartytrustid" },
-                { "role", ClaimTypes.Role },
-                { "roles", ClaimTypes.Role },
-                { "upn", ClaimTypes.Upn },
-                { "winaccountname", ClaimTypes.WindowsAccountName },
-            };
         }
-
-
-        public SamlSerializer Serializer { get; set; } = new SamlSerializer();
 
         /// <summary>
-        /// Gets the OutClaimTypeMap
+        /// Initializes an instance of <see cref="SamlSecurityTokenHandler"/>.
         /// </summary>
-        public IDictionary<string, string> ShortToLongClaimTypeMap
+        /// <param name="serializer"><see cref="SamlSerializer"/>.</param>
+        public SamlSecurityTokenHandler(SamlSerializer serializer)
         {
-            get
-            {
-                return _shortToLongClaimTypeMapping;
-            }
+            Serializer = (serializer == null) ? throw LogArgumentNullException(nameof(serializer)) : serializer;
         }
 
+#region fields
         /// <summary>
         /// Gets a value indicating whether this handler supports validation of tokens
         /// handled by this instance.
         /// </summary>v
-        /// <returns>'True' if the instance is capable of SecurityToken
+        /// <returns>'true' if the instance is capable of SecurityToken
         /// validation.</returns>
         public override bool CanValidateToken
         {
@@ -179,101 +100,151 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Reads the string as XML and looks for the an element <see cref="SamlConstants.Assertion"/> with namespace <see cref="SamlConstants.Saml11Namespace"/>.
+        /// Gets or sets the maximum size in bytes, that a will be processed.
         /// </summary>
-        /// <param name="securityToken">The securitytoken.</param>
-        /// <returns><see cref="XmlDictionaryReader.IsStartElement"/> (<see cref="SamlConstants.Assertion"/>, <see cref="SamlConstants.Saml11Namespace"/>).</returns>
+        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
+        public int MaximumTokenSizeInBytes
+        {
+            get { return _maximumTokenSizeInBytes; }
+            set
+            {
+                if (value < 1)
+                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10101, value)));
+
+                _maximumTokenSizeInBytes = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or set the <see cref="SamlSerializer"/> that will be used to read and write a <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        public SamlSerializer Serializer { get; set; }
+
+        /// <summary>
+        /// Gets or sets a bool that controls if token creation will set default 'NotBefore', 'NotOnOrAfter' and 'IssueInstant' if not specified.
+        /// </summary>
+        /// <remarks>See: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
+        [DefaultValue(true)]
+        public bool SetDefaultTimesOnTokenCreation { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the token lifetime in minutes.
+        /// </summary>
+        /// <remarks>Used by <see cref="CreateToken(SecurityTokenDescriptor)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
+        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
+        public int TokenLifetimeInMinutes
+        {
+            get { return _defaultTokenLifetimeInMinutes; }
+            set
+            {
+                if (value < 1)
+                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10104, value)));
+
+                _defaultTokenLifetimeInMinutes = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the securityToken type supported by this handler.
+        /// </summary>
+        public override Type TokenType
+        {
+            get { return typeof(SamlSecurityToken); }
+        }
+
+        #endregion fields
+
+#region methods
+        /// <summary>
+        /// Adds all Actors.
+        /// </summary>
+        /// <param name="subject"><see cref="ICollection{SamlAttribute}"/>.</param>
+        /// <param name="attributes">Attribute collection to which the Actor added.</param>
+        protected virtual void AddActorToAttributes(ICollection<SamlAttribute> attributes, ClaimsIdentity subject)
+        {
+            if (attributes == null)
+                throw LogArgumentNullException(nameof(attributes));
+
+            if (subject == null)
+                return;
+
+            var actorAttributes = new Collection<SamlAttribute>();
+            foreach (var claim in subject.Claims)
+            {
+                if (claim != null)
+                    actorAttributes.Add(CreateAttribute(claim));
+            }
+
+            // perform depth first recursion
+            AddActorToAttributes(attributes, subject.Actor);
+
+            var collectedAttributes = ConsolidateAttributes(actorAttributes);
+            attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateXmlStringFromAttributes(collectedAttributes))));
+        }
+
+        /// <summary>
+        /// Determines if the string is a valid Saml token by examining the xml for the correct start element.
+        /// </summary>
+        /// <param name="securityToken">A Saml token as a string.</param>
+        /// <returns>'true' if the string has a start element equal <see cref="SamlConstants.Elements.Assertion"/>.</returns>
         public override bool CanReadToken(string securityToken)
         {
             if (string.IsNullOrWhiteSpace(securityToken) || securityToken.Length > MaximumTokenSizeInBytes)
                 return false;
 
-            using (StringReader sr = new StringReader(securityToken))
+            try
             {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                using (var sr = new StringReader(securityToken))
                 {
-                    try
+                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
                     {
-                        reader.MoveToContent();
+                        return CanReadToken(reader);
                     }
-                    catch (Xml.XmlException)
-                    {
-                        return false;
-                    }
-                    return reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Saml11Namespace);
                 }
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
         /// <summary>
-        /// Creates claims from a Saml securityToken.
+        /// Indicates whether the current XML element can be read as a token of the type handled by this instance.
         /// </summary>
-        /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
-        /// <param name="issuer">The issuer value for each <see cref="Claim"/> in the <see cref="ClaimsIdentity"/>.</param>
-        /// <param name="validationParameters"> Contains parameters for validating the securityToken.</param>
-        /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
-        protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, TokenValidationParameters validationParameters)
+        /// <param name="reader">An <see cref="XmlReader"/> reader positioned at a start element. The reader should not be advanced.</param>
+        /// <returns>'true' if <see cref="SamlSecurityTokenHandler.ReadToken(string)"/> can read the element.</returns>
+        public bool CanReadToken(XmlReader reader)
         {
-            if (samlToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(samlToken));
+            if (reader == null)
+                return false;
 
-            if (samlToken.Assertion == null)
-                throw LogHelper.LogArgumentNullException(LogMessages.IDX11110);
-
-            if (string.IsNullOrEmpty(samlToken.Assertion.Issuer))
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11109));
-
-            return validationParameters.CreateClaimsIdentity(samlToken, samlToken.Assertion.Issuer);
+            return reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace);
         }
 
         /// <summary>
-        /// Creates a <see cref="SecurityToken"/> based on a information contained in the <see cref="SecurityTokenDescriptor"/>.
+        /// Collects attributes with a common claim type, claim value type, and original issuer into a single attribute with multiple values.
         /// </summary>
-        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
-        /// <returns>A <see cref="SecurityToken"/> instance.</returns>
-        /// <exception cref="ArgumentNullException">If 'tokenDescriptor' is null.</exception>
-        public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
+        /// <param name="attributes"><see cref="ICollection{SamlAttribute}"/> to consolidate.</param>
+        /// <returns><see cref="ICollection{SamlAttribute}"/>common attributes collected into value lists.</returns>
+        protected virtual ICollection<SamlAttribute> ConsolidateAttributes(ICollection<SamlAttribute> attributes)
         {
-            if (null == tokenDescriptor)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+            var distinctAttributes = new Dictionary<SamlAttributeKeyComparer.AttributeKey, SamlAttribute>(attributes.Count, new SamlAttributeKeyComparer());
+            foreach (var attribute in attributes)
+            {
+                // Use unique attribute if name, value type, or issuer differ
+                var attributeKey = new SamlAttributeKeyComparer.AttributeKey(attribute);
+                if (distinctAttributes.ContainsKey(attributeKey))
+                {
+                    foreach (var attributeValue in attribute.Values)
+                        distinctAttributes[attributeKey].Values.Add(attributeValue);
+                }
+                else
+                {
+                    distinctAttributes.Add(attributeKey, attribute);
+                }
+            }
 
-            var statements = CreateStatements(tokenDescriptor);
-
-            // - NotBefore / NotAfter
-            // - Audience Restriction
-            var conditions = CreateConditions(tokenDescriptor);
-            var advice = CreateAdvice(tokenDescriptor);
-            // TODO - GUID is not correct form.
-            var assertion = new SamlAssertion("_" + Guid.NewGuid().ToString(), tokenDescriptor.Issuer, DateTime.UtcNow, conditions, advice, statements);
-            assertion.SigningCredentials = tokenDescriptor.SigningCredentials;
-            return new SamlSecurityToken(assertion);
-
-            //
-            // TODO - handle encryption
-            //
-        }
-
-        /// <summary>
-        /// Generates all the conditions for saml
-        /// </summary>
-        /// <param name="tokenDescriptor">information that is used in token issuance.</param>
-        /// <returns>SamlConditions</returns>
-        protected virtual SamlConditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
-        {
-            if (null == tokenDescriptor)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
-
-            var conditions = new SamlConditions();
-            if (tokenDescriptor.IssuedAt.HasValue)
-                conditions.NotBefore = tokenDescriptor.IssuedAt.Value;
-
-            if (tokenDescriptor.Expires.HasValue)
-                conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
-
-            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri[] { new Uri(tokenDescriptor.Audience) }));
-
-            return conditions;
+            return distinctAttributes.Values;
         }
 
         /// <summary>
@@ -286,35 +257,37 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return null;
         }
 
+        // TODO - introduce a delegate to return the ns / name pair
         /// <summary>
-        /// Generates an enumeration of SamlStatements from a SecurityTokenDescriptor.
-        /// Only SamlAttributeStatements and SamlAuthenticationStatements are generated.
-        /// Overwrite this method to customize the creation of statements.
-        /// <para>
-        /// Calls in order (all are virtual):
-        /// 1. CreateSamlSubject
-        /// 2. CreateAttributeStatements
-        /// 3. CreateAuthenticationStatements
-        /// </para>
+        /// Generates a SamlAttribute from a claim.
         /// </summary>
-        /// <param name="tokenDescriptor">The SecurityTokenDescriptor to use to build the statements.</param>
-        /// <returns>An enumeration of SamlStatement.</returns>
-        protected virtual ICollection<SamlStatement> CreateStatements(SecurityTokenDescriptor tokenDescriptor)
+        /// <param name="claim">Claim from which to generate a SamlAttribute.</param>
+        /// <returns><see cref="SamlAttribute"/></returns>
+        /// <exception cref="ArgumentNullException">The parameter 'claim' is null.</exception>
+        protected virtual SamlAttribute CreateAttribute(Claim claim)
         {
-            if (null == tokenDescriptor)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+            if (claim == null)
+                LogArgumentNullException(nameof(claim));
 
-            var statements = new Collection<SamlStatement>();
-            var subject = CreateSubject(tokenDescriptor);
-            var attributeStatement = CreateAttributeStatement(subject, tokenDescriptor);
-            if (attributeStatement != null)
-                statements.Add(attributeStatement);
+            // A SamlAttribute 1.0 is required to have the attributeNamespace and attributeName be non-null and non-empty.
+            string claimType = claim.Type;
 
-            var authnStatement = CreateAuthenticationStatement(subject, tokenDescriptor);
-            if (authnStatement != null)
-                statements.Add(authnStatement);
+            int lastSlashIndex = claimType.LastIndexOf('/');
+            if ((lastSlashIndex == 0) || (lastSlashIndex == -1))
+                throw LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4215, claim.Type: {claimType}"));
 
-            return statements;
+            // TODO - see if there is another slash before this one.
+            if (lastSlashIndex == claim.Type.Length - 1)
+                throw LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4216, claim.Type: {claimType}"));
+
+            return new SamlAttribute(
+                claimType.Substring(0, lastSlashIndex),
+                claimType.Substring(lastSlashIndex + 1, claimType.Length - (lastSlashIndex + 1)),
+                new string[] { claim.Value })
+            {
+                OriginalIssuer = claim.OriginalIssuer,
+                AttributeValueXsiType = claim.ValueType
+            };
         }
 
         /// <summary>
@@ -332,10 +305,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
 
             if (subject == null)
-                LogHelper.LogArgumentNullException(nameof(subject));
+                LogArgumentNullException(nameof(subject));
 
             if (tokenDescriptor == null)
-                LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                LogArgumentNullException(nameof(tokenDescriptor));
 
             if (tokenDescriptor.Subject != null)
             {
@@ -373,204 +346,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Adds all Actors.
-        /// </summary>
-        /// <param name="subject">The delegate of this ClaimsIdentity will be serialized into a SamlAttribute.</param>
-        /// <param name="attributes">Attribute collection to which the Actor added.</param>
-        protected virtual void AddActorToAttributes(ICollection<SamlAttribute> attributes, ClaimsIdentity subject)
-        {
-            if (attributes == null)
-                throw LogHelper.LogArgumentNullException(nameof(attributes));
-
-            if (subject == null)
-                return;
-
-            var actorAttributes = new Collection<SamlAttribute>();
-            foreach (var claim in subject.Claims)
-            {
-                if (claim != null)
-                    actorAttributes.Add(CreateAttribute(claim));
-            }
-
-            // perform depth first recursion
-            AddActorToAttributes(attributes, subject.Actor);
-
-            var collectedAttributes = ConsolidateAttributes(actorAttributes);
-            attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateXmlStringFromAttributes(collectedAttributes))));
-        }
-
-        /// <summary>
-        /// Builds an XML formated string from a collection of saml attributes that represent an Actor. 
-        /// </summary>
-        /// <param name="attributes">An enumeration of Saml Attributes.</param>
-        /// <returns>A well formed XML string.</returns>
-        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>        
-        protected virtual string CreateXmlStringFromAttributes(ICollection<SamlAttribute> attributes)
-        {
-            bool actorElementWritten = false;
-
-            using (var ms = new MemoryStream())
-            {
-                using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
-                {
-                    foreach (var samlAttribute in attributes)
-                    {
-                        if (samlAttribute != null)
-                        {
-                            if (!actorElementWritten)
-                            {
-                                writer.WriteStartElement(Actor);
-                                actorElementWritten = true;
-                            }
-                            Serializer.WriteAttribute(writer, samlAttribute);
-                        }
-                    }
-
-                    if (actorElementWritten)
-                        writer.WriteEndElement();
-
-                    writer.Flush();
-                }
-
-                return Encoding.UTF8.GetString(ms.ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Collects attributes with a common claim type, claim value type, and original issuer into a single attribute with multiple values.
-        /// </summary>
-        /// <param name="attributes"><see cref="ICollection{SamlAttribute}"/> to consolidate.</param>
-        /// <returns><see cref="ICollection{SamlAttribute}"/>common attributes collected into value lists.</returns>
-        protected virtual ICollection<SamlAttribute> ConsolidateAttributes(ICollection<SamlAttribute> attributes)
-        {
-            var distinctAttributes = new Dictionary<SamlAttributeKeyComparer.AttributeKey, SamlAttribute>(attributes.Count, new SamlAttributeKeyComparer());
-            foreach (var attribute in attributes)
-            {
-                // Use unique attribute if name, value type, or issuer differ
-                var attributeKey = new SamlAttributeKeyComparer.AttributeKey(attribute);
-                if (distinctAttributes.ContainsKey(attributeKey))
-                {
-                    foreach (var attributeValue in attribute.AttributeValues)
-                        distinctAttributes[attributeKey].AttributeValues.Add(attributeValue);
-                }
-                else
-                {
-                    distinctAttributes.Add(attributeKey, attribute);
-                }
-            }
-
-            return distinctAttributes.Values;
-        }
-
-        /// <summary>
-        /// This method gets called when a special type of SamlAttribute is detected. The SamlAttribute passed in wraps a SamlAttribute 
-        /// that contains a collection of AttributeValues, each of which are mapped to a claim.  All of the claims will be returned
-        /// in an ClaimsIdentity with the specified issuer.
-        /// </summary>
-        /// <param name="attribute">The SamlAttribute to be processed.</param>
-        /// <param name="subject">The identity that should be modified to reflect the SamlAttribute.</param>
-        /// <param name="issuer">Issuer Identity.</param>
-        /// <exception cref="InvalidOperationException">Will be thrown if the SamlAttribute does not contain any valid SamlAttributeValues.</exception>
-        protected virtual void SetDelegateFromAttribute(SamlAttribute attribute, ClaimsIdentity subject, string issuer)
-        {
-            // bail here nothing to add.
-            if (subject == null || attribute == null || attribute.AttributeValues == null || attribute.AttributeValues.Count < 1)
-                return;
-
-            var claims = new Collection<Claim>();
-            SamlAttribute actingAsAttribute = null;
-            foreach (string attributeValue in attribute.AttributeValues)
-            {
-                if (attributeValue != null && attributeValue.Length > 0)
-                {
-                    using (var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), XmlDictionaryReaderQuotas.Max))
-                    {
-                        xmlReader.MoveToContent();
-                        xmlReader.ReadStartElement(Actor);
-                        while (xmlReader.IsStartElement(SamlConstants.Elements.Attribute))
-                        {
-                            var innerAttribute = Serializer.ReadAttribute(xmlReader);
-                            if (innerAttribute != null)
-                            {
-                                string claimType = string.IsNullOrEmpty(innerAttribute.Namespace) ? innerAttribute.Name : innerAttribute.Namespace + "/" + innerAttribute.Name;
-                                if (claimType == ClaimTypes.Actor)
-                                {
-                                    // In this case we have two delegates acting as an identity, we do not allow this
-                                    if (actingAsAttribute != null)
-                                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4034"));
-
-                                    actingAsAttribute = innerAttribute;
-                                }
-                                else
-                                {
-                                    string claimValueType = ClaimValueTypes.String;
-                                    string originalIssuer = null;
-                                    var SamlAttribute = innerAttribute as SamlAttribute;
-                                    if (SamlAttribute != null)
-                                    {
-                                        claimValueType = SamlAttribute.AttributeValueXsiType;
-                                        originalIssuer = SamlAttribute.OriginalIssuer;
-                                    }
-
-                                    foreach (var value in innerAttribute.AttributeValues)
-                                    {
-                                        Claim claim = null;
-                                        if (string.IsNullOrEmpty(originalIssuer))
-                                            claim = new Claim(claimType, value, claimValueType, issuer);
-                                        else
-                                            claim = new Claim(claimType, value, claimValueType, issuer, originalIssuer);
-
-                                        claims.Add(claim);
-                                    }
-                                }
-                            }
-                        }
-
-                        xmlReader.ReadEndElement(); // Actor
-                    }
-                }
-            }
-
-            subject.Actor = new ClaimsIdentity(claims, "Federation");
-            SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
-        }
-
-        // TODO - introduce a delegate to return the ns / name pair
-        /// <summary>
-        /// Generates a SamlAttribute from a claim.
-        /// </summary>
-        /// <param name="claim">Claim from which to generate a SamlAttribute.</param>
-        /// <returns><see cref="SamlAttribute"/></returns>
-        /// <exception cref="ArgumentNullException">The parameter 'claim' is null.</exception>
-        protected virtual SamlAttribute CreateAttribute(Claim claim)
-        {
-            if (claim == null)
-                LogHelper.LogArgumentNullException(nameof(claim));
-
-            // A SamlAttribute 1.0 is required to have the attributeNamespace and attributeName be non-null and non-empty.
-            string claimType;
-            if (!ShortToLongClaimTypeMap.TryGetValue(claim.Type, out claimType))
-                claimType = claim.Type;
-
-            int lastSlashIndex = claimType.LastIndexOf('/');
-            if ((lastSlashIndex == 0) || (lastSlashIndex == -1))
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4215, claim.Type: {claimType}"));
-
-            // TODO - see if there is another slash before this one.
-            if (lastSlashIndex == claim.Type.Length - 1)
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4216, claim.Type: {claimType}"));
-
-            return new SamlAttribute(
-                claimType.Substring(0, lastSlashIndex),
-                claimType.Substring(lastSlashIndex + 1, claimType.Length - (lastSlashIndex + 1)),
-                new string[] { claim.Value })
-            {
-                OriginalIssuer = claim.OriginalIssuer,
-                AttributeValueXsiType = claim.ValueType
-            };
-        }
-
-        /// <summary>
         /// Creates a SamlAuthenticationStatement for each AuthenticationInformation found in AuthenticationInformation. 
         /// Override this method to provide a custom implementation.
         /// </summary>
@@ -581,10 +356,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         protected virtual SamlAuthenticationStatement CreateAuthenticationStatement(SamlSubject subject, SecurityTokenDescriptor tokenDescriptor)
         {
             if (subject == null)
-                throw LogHelper.LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
             if (tokenDescriptor == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             if (tokenDescriptor.Subject == null)
                 return null;
@@ -613,9 +388,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (authenticationMethod == null && authenticationInstant == null)
                 return null;
             else if (authenticationMethod == null)
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4270, AuthenticationMethod, SAML11"));
+                throw LogExceptionMessage(new SamlSecurityTokenException("ID4270, AuthenticationMethod, SAML11"));
             else if (authenticationInstant == null)
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4270, AuthenticationMethod, SAML11"));
+                throw LogExceptionMessage(new SamlSecurityTokenException("ID4270, AuthenticationMethod, SAML11"));
 
             var authInstantTime = DateTime.ParseExact(authenticationInstant,
                                                       SamlConstants.AcceptedDateTimeFormats,
@@ -630,6 +405,85 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             //{
             //    return new SamlAuthenticationStatement(subject, authenticationMethod, authInstantTime, authInfo.DnsName, authInfo.Address, null);
             //}
+        }
+
+        /// <summary>
+        /// Creates claims from a Saml securityToken.
+        /// </summary>
+        /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
+        /// <param name="issuer">The value to set <see cref="Claim.Issuer"/></param>
+        /// <param name="validationParameters"> Contains parameters for validating the securityToken.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
+        protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
+        {
+            if (samlToken == null)
+                throw LogArgumentNullException(nameof(samlToken));
+
+            if (samlToken.Assertion == null)
+                throw LogArgumentNullException(LogMessages.IDX11110);
+
+            var actualIssuer = issuer;
+            if (string.IsNullOrWhiteSpace(issuer))
+            {
+                IdentityModelEventSource.Logger.WriteVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                actualIssuer = ClaimsIdentity.DefaultIssuer;
+            }
+
+            return validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
+        }
+
+        /// <summary>
+        /// Generates all the conditions for saml
+        /// </summary>
+        /// <param name="tokenDescriptor">information that is used in token issuance.</param>
+        /// <returns>SamlConditions</returns>
+        protected virtual SamlConditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (null == tokenDescriptor)
+                throw LogArgumentNullException(nameof(tokenDescriptor));
+
+            var conditions = new SamlConditions();
+            if (tokenDescriptor.IssuedAt.HasValue)
+                conditions.NotBefore = tokenDescriptor.IssuedAt.Value;
+
+            if (tokenDescriptor.Expires.HasValue)
+                conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
+
+            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                conditions.Conditions.Add(new SamlAudienceRestriction(new string[] { tokenDescriptor.Audience }));
+
+            return conditions;
+        }
+
+        /// <summary>
+        /// Generates an enumeration of SamlStatements from a SecurityTokenDescriptor.
+        /// Only SamlAttributeStatements and SamlAuthenticationStatements are generated.
+        /// Overwrite this method to customize the creation of statements.
+        /// <para>
+        /// Calls in order (all are virtual):
+        /// 1. CreateSamlSubject
+        /// 2. CreateAttributeStatements
+        /// 3. CreateAuthenticationStatements
+        /// </para>
+        /// </summary>
+        /// <param name="tokenDescriptor">The SecurityTokenDescriptor to use to build the statements.</param>
+        /// <returns>An enumeration of SamlStatement.</returns>
+        protected virtual ICollection<SamlStatement> CreateStatements(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (null == tokenDescriptor)
+                throw LogArgumentNullException(nameof(tokenDescriptor));
+
+            var statements = new Collection<SamlStatement>();
+            var subject = CreateSubject(tokenDescriptor);
+            var attributeStatement = CreateAttributeStatement(subject, tokenDescriptor);
+            if (attributeStatement != null)
+                statements.Add(attributeStatement);
+
+            var authnStatement = CreateAuthenticationStatement(subject, tokenDescriptor);
+            if (authnStatement != null)
+                statements.Add(authnStatement);
+
+            return statements;
         }
 
         /// <summary>
@@ -648,7 +502,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         protected virtual SamlSubject CreateSubject(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
-                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var samlSubject = new SamlSubject();
             Claim identityClaim = null;
@@ -656,15 +510,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 foreach (var claim in tokenDescriptor.Subject.Claims)
                 {
-                    string claimType;
-                    if (!ShortToLongClaimTypeMap.TryGetValue(claim.Type, out claimType))
-                        claimType = claim.Type;
-
-                    if (claimType == ClaimTypes.NameIdentifier)
+                    if (claim.Type == ClaimTypes.NameIdentifier)
                     {
                         // Do not allow multiple name identifier claim.
                         if (null != identityClaim)
-                            throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("ID4139:"));
+                            throw LogExceptionMessage(new SamlSecurityTokenException("ID4139:"));
 
                         identityClaim = claim;
                     }
@@ -706,6 +556,255 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return samlSubject;
         }
 
+        /// <summary>
+        /// Creates a <see cref="SecurityToken"/> based on a information contained in the <see cref="SecurityTokenDescriptor"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
+        /// <returns>A <see cref="SecurityToken"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">If 'tokenDescriptor' is null.</exception>
+        public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (null == tokenDescriptor)
+                throw LogArgumentNullException(nameof(tokenDescriptor));
+
+            var statements = CreateStatements(tokenDescriptor);
+
+            // - NotBefore / NotAfter
+            // - Audience Restriction
+            var conditions = CreateConditions(tokenDescriptor);
+            var advice = CreateAdvice(tokenDescriptor);
+            // TODO - GUID is not correct form.
+            var assertion = new SamlAssertion("_" + Guid.NewGuid().ToString(), tokenDescriptor.Issuer, DateTime.UtcNow, conditions, advice, statements);
+            assertion.SigningCredentials = tokenDescriptor.SigningCredentials;
+            return new SamlSecurityToken(assertion);
+
+            //
+            // TODO - handle encryption
+            //
+        }
+
+        /// <summary>
+        /// Builds an XML formated string from a collection of saml attributes that represent an Actor. 
+        /// </summary>
+        /// <param name="attributes"><see cref="ICollection{SamlAttribute}"/>.</param>
+        /// <returns>A well formed XML string.</returns>
+        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>        
+        protected virtual string CreateXmlStringFromAttributes(ICollection<SamlAttribute> attributes)
+        {
+            bool actorElementWritten = false;
+
+            using (var ms = new MemoryStream())
+            {
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                {
+                    foreach (var samlAttribute in attributes)
+                    {
+                        if (samlAttribute != null)
+                        {
+                            if (!actorElementWritten)
+                            {
+                                writer.WriteStartElement(Actor);
+                                actorElementWritten = true;
+                            }
+                       //     Serializer.WriteAttribute(writer, samlAttribute);
+                        }
+                    }
+
+                    if (actorElementWritten)
+                        writer.WriteEndElement();
+
+                    writer.Flush();
+                }
+
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
+
+        private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
+        {
+            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10243);
+            if (validationParameters.IssuerSigningKey != null)
+                yield return validationParameters.IssuerSigningKey;
+
+            if (validationParameters.IssuerSigningKeys != null)
+                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+                    yield return securityKey;
+        }
+
+        /// <summary>
+        /// Converts a string into an instance of <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="token">a Saml token as a string.</param>
+        /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <returns>A <see cref="SamlSecurityToken"/></returns>
+        public virtual SamlSecurityToken ReadSamlToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                throw LogArgumentNullException(nameof(token));
+
+            if (token.Length > MaximumTokenSizeInBytes)
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+
+            using (var sr = new StringReader(token))
+            {
+                using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                {
+                    var assertion = Serializer.ReadAssertion(reader);
+                    return new SamlSecurityToken(assertion);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Converts a string into an instance of <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="token">a Saml token as a string.</param>
+        /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <returns>A <see cref="SamlSecurityToken"/></returns>
+        public override SecurityToken ReadToken(string token)
+        {
+            return ReadSamlToken(token);
+        }
+
+        /// <summary>
+        /// Deserializes from XML a token of the type handled by this instance.
+        /// </summary>
+        /// <param name="reader">An XML reader positioned at the token's start 
+        /// element.</param>
+        /// <param name="validationParameters"> validation parameters for the <see cref="SamlSecurityToken"/>.</param>
+        /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
+        public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
+        {
+            throw new NotSupportedException("API is not supported");
+        }
+
+        /// <summary>
+        /// Returns a <see cref="SecurityKey"/> to use for validating the signature of a token.
+        /// </summary>
+        /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
+        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <exception cref="ArgumentNullException">If 'securityToken' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'securityToken.Assertion' is null.</exception>
+        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        protected virtual SecurityKey ResolveIssuerSigningKey(string token, SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            if (securityToken == null)
+                throw LogArgumentNullException(nameof(securityToken));
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
+            if (securityToken.Assertion == null)
+                throw LogArgumentNullException(nameof(securityToken.Assertion));
+
+            if (securityToken.Assertion.Signature != null && securityToken.Assertion.Signature.KeyInfo != null && !string.IsNullOrEmpty(securityToken.Assertion.Signature.KeyInfo.Kid))
+            {
+                if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, securityToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
+                    return validationParameters.IssuerSigningKey;
+
+                if (validationParameters.IssuerSigningKeys != null)
+                {
+                    foreach (var signingKey in validationParameters.IssuerSigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, securityToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
+                            return signingKey;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// This method gets called when a special type of SamlAttribute is detected. The SamlAttribute passed in wraps a SamlAttribute 
+        /// that contains a collection of AttributeValues, each of which are mapped to a claim.  All of the claims will be returned
+        /// in an ClaimsIdentity with the specified issuer.
+        /// </summary>
+        /// <param name="attribute">The SamlAttribute to be processed.</param>
+        /// <param name="subject">The identity that should be modified to reflect the SamlAttribute.</param>
+        /// <param name="issuer">Issuer Identity.</param>
+        /// <exception cref="InvalidOperationException">Will be thrown if the SamlAttribute does not contain any valid SamlAttributeValues.</exception>
+        protected virtual void SetDelegateFromAttribute(SamlAttribute attribute, ClaimsIdentity subject, string issuer)
+        {
+            // bail here nothing to add.
+            if (subject == null || attribute == null || attribute.Values == null || attribute.Values.Count < 1)
+                return;
+
+            var claims = new Collection<Claim>();
+            SamlAttribute actingAsAttribute = null;
+            foreach (string attributeValue in attribute.Values)
+            {
+                if (attributeValue != null && attributeValue.Length > 0)
+                {
+                    using (var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), XmlDictionaryReaderQuotas.Max))
+                    {
+                        xmlReader.MoveToContent();
+                        xmlReader.ReadStartElement(Actor);
+                        while (xmlReader.IsStartElement(SamlConstants.Elements.Attribute))
+                        {
+                            var innerAttribute = Serializer.ReadAttribute(xmlReader);
+                            if (innerAttribute != null)
+                            {
+                                string claimType = string.IsNullOrEmpty(innerAttribute.Namespace) ? innerAttribute.Name : innerAttribute.Namespace + "/" + innerAttribute.Name;
+                                if (claimType == ClaimTypes.Actor)
+                                {
+                                    // In this case we have two delegates acting as an identity, we do not allow this
+                                    if (actingAsAttribute != null)
+                                        throw LogExceptionMessage(new SamlSecurityTokenException("ID4034"));
+
+                                    actingAsAttribute = innerAttribute;
+                                }
+                                else
+                                {
+                                    string claimValueType = ClaimValueTypes.String;
+                                    string originalIssuer = null;
+
+                                    if (innerAttribute is SamlAttribute SamlAttribute)
+                                    {
+                                        claimValueType = SamlAttribute.AttributeValueXsiType;
+                                        originalIssuer = SamlAttribute.OriginalIssuer;
+                                    }
+
+                                    foreach (var value in innerAttribute.Values)
+                                    {
+                                        Claim claim = null;
+                                        if (string.IsNullOrEmpty(originalIssuer))
+                                            claim = new Claim(claimType, value, claimValueType, issuer);
+                                        else
+                                            claim = new Claim(claimType, value, claimValueType, issuer, originalIssuer);
+
+                                        claims.Add(claim);
+                                    }
+                                }
+                            }
+                        }
+
+                        xmlReader.ReadEndElement(); // Actor
+                    }
+                }
+            }
+
+            subject.Actor = new ClaimsIdentity(claims, "Federation");
+            SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
+        }
+
+        /// <summary>
+        /// Determines if the audiences found in a <see cref="SamlSecurityToken"/> are valid.
+        /// </summary>
+        /// <param name="audiences"><see cref="IEnumerable{String}"/>.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateAudience(audiences, securityToken, validationParameters);
+        }
+
         ///// <summary>
         ///// Creates the security securityToken reference when the securityToken is not attached to the message.
         ///// </summary>
@@ -724,186 +823,43 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         //}
 
         /// <summary>
-        /// Gets or sets a bool that controls if token creation will set default 'exp', 'nbf' and 'iat' if not specified.
+        /// Validates the Lifetime and Audience conditions.
         /// </summary>
-        /// <remarks>See: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
-        [DefaultValue(true)]
-        public bool SetDefaultTimesOnTokenCreation { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the token lifetime in minutes.
-        /// </summary>
-        /// <remarks>Used by <see cref="CreateToken(SecurityTokenDescriptor)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int TokenLifetimeInMinutes
+        /// <param name="securityToken">a <see cref="SamlSecurityToken"/> that contains the <see cref="SamlConditions"/>.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <exception cref="ArgumentNullException">If 'securityToken' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'securityToken.Assertion' is null.</exception>
+        /// <exception cref="SecurityTokenValidationException">if the Condition 'OneTimeUse' is specified. Requires overriding.</exception>
+        /// <exception cref="SecurityTokenValidationException">if the Condition 'ProxyRestriction' is specified. Requires overriding.</exception>
+        protected virtual void ValidateConditions(SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            get { return _defaultTokenLifetimeInMinutes; }
-            set
-            {
-                if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10104, value)));
-
-                _defaultTokenLifetimeInMinutes = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the securityToken type supported by this handler.
-        /// </summary>
-        public override Type TokenType
-        {
-            get { return typeof(SamlSecurityToken); }
-        }
-
-        /// <summary>
-        /// Gets and sets the maximum size in bytes, that a will be processed.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int MaximumTokenSizeInBytes
-        {
-            get { return _maximumTokenSizeInBytes; }
-            set
-            {
-                if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10101, value)));
-
-                _maximumTokenSizeInBytes = value;
-            }
-        }
-
-        /// <summary>
-        /// Deserializes from XML a token of the type handled by this instance.
-        /// </summary>
-        /// <param name="reader">An XML reader positioned at the token's start 
-        /// element.</param>
-        /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
-        public override SecurityToken ReadToken(string token)
-        {
-            if (string.IsNullOrEmpty(token))
-                throw LogHelper.LogArgumentNullException(nameof(token));
-
-            if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
-
-            using (StringReader sr = new StringReader(token))
-            {
-                using (XmlDictionaryReader reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    var assertion = Serializer.ReadAssertion(reader);
-                    return new SamlSecurityToken(assertion);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Deserializes from XML a token of the type handled by this instance.
-        /// </summary>
-        /// <param name="reader">An XML reader positioned at the token's start 
-        /// element.</param>
-        /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
-        public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
-        {
-            using (var dictionaryReader = XmlDictionaryReader.CreateDictionaryReader(reader))
-            {
-                var assertion = Serializer.ReadAssertion(dictionaryReader);
-
-                return new SamlSecurityToken(assertion);
-            }
-        }
-
-        /// <summary>
-        /// Reads and validates a well formed <see cref="SamlSecurityToken"/>.
-        /// </summary>
-        /// <param name="securityToken">A string containing a well formed securityToken.</param>
-        /// <param name="validationParameters">Contains data and information needed for validation.</param>
-        /// <param name="validatedToken">The <see cref="SecurityToken"/> that was validated.</param>
-        /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
-        /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
-        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
-        {
-            if (string.IsNullOrWhiteSpace(securityToken))
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+            if (securityToken == null)
+                throw LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                throw LogArgumentNullException(nameof(validationParameters));
 
-            if (securityToken.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, securityToken.Length, MaximumTokenSizeInBytes)));
+            if (securityToken.Assertion == null)
+                throw LogArgumentNullException(nameof(securityToken.Assertion));
 
-            SamlSecurityToken samlToken;
-            using (var sr = new StringReader(securityToken))
+            if (securityToken.Assertion.Conditions == null || securityToken.Assertion.Conditions.Conditions.Count() == 0)
+                return;
+
+            Validators.ValidateLifetime(securityToken.Assertion.Conditions.NotBefore, securityToken.Assertion.Conditions.NotOnOrAfter, securityToken, validationParameters);
+
+            // TODO - concat all the audiences together
+            if (securityToken.Assertion.Conditions.Conditions.ElementAt(0) is SamlAudienceRestriction)
             {
-                using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                foreach (var condition in securityToken.Assertion.Conditions.Conditions)
                 {
-                    samlToken = ReadToken(reader, validationParameters) as SamlSecurityToken;
+                    SamlAudienceRestriction audienceRestriction = condition as SamlAudienceRestriction;
+                    if (validationParameters.AudienceValidator != null)
+                        validationParameters.AudienceValidator(audienceRestriction.Audiences, securityToken, validationParameters);
+                    else
+                        Validators.ValidateAudience(audienceRestriction.Audiences, securityToken, validationParameters);
                 }
-            }
-
-            if (samlToken.SigningKey == null && validationParameters.RequireSignedTokens)
-            {
-                throw new SecurityTokenValidationException(TokenLogMessages.IDX10504);
-            }
-
-            DateTime? notBefore = null;
-            DateTime? expires = null;
-
-            if (samlToken.Assertion.Conditions != null)
-            {
-                notBefore = samlToken.Assertion.Conditions.NotBefore;
-                expires = samlToken.Assertion.Conditions.NotOnOrAfter;
-            }
-
-            Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
-            ValidateLifetime(notBefore, expires, samlToken, validationParameters);
-
-            var audiences = new List<string>();
-            if (samlToken.Assertion.Conditions != null && samlToken.Assertion.Conditions.Conditions != null)
-            {
-                foreach (SamlCondition condition in samlToken.Assertion.Conditions.Conditions)
-                {
-                    SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
-                    if (null == audienceRestriction)
-                    {
-                        continue;
-                    }
-
-                    foreach (Uri uri in audienceRestriction.Audiences)
-                    {
-                        audiences.Add(uri.OriginalString);
-                    }
-                }
-            }
-
-            ValidateAudience(audiences, samlToken, validationParameters);
-
-            string issuer = null;
-            issuer = samlToken.Issuer == null ? null : samlToken.Issuer;
-            issuer = ValidateIssuer(issuer, samlToken, validationParameters);
-
-            ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
-
-            var identity = CreateClaimsIdentity(samlToken, validationParameters);
-            if (validationParameters.SaveSigninToken)
-            {
-                identity.BootstrapContext = securityToken;
-            }
-
-            validatedToken = samlToken;
-            return new ClaimsPrincipal(identity);
-        }
-
-        /// <summary>
-        /// Determines if the audiences found in a <see cref="SamlSecurityToken"/> are valid.
-        /// </summary>
-        /// <param name="audiences">The audiences found in the <see cref="SamlSecurityToken"/>.</param>
-        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
-        protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            Validators.ValidateAudience(audiences, securityToken, validationParameters);
+            }            
         }
 
         /// <summary>
@@ -917,19 +873,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
-        }
-
-        /// <summary>
-        /// Validates the lifetime of a <see cref="SamlSecurityToken"/>.
-        /// </summary>
-        /// <param name="notBefore">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
-        /// <param name="expires">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
-        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
-        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
         }
 
         /// <summary>
@@ -950,17 +893,168 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
+        /// Validates the lifetime of a <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="notBefore">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="expires">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
+        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Validates that the signature, if found is valid.
+        /// </summary>
+        /// <param name="token">A Saml token.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
+        /// <exception cref="ArgumentNullException">If 'token' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="SecurityTokenValidationException">If <see cref="TokenValidationParameters.SignatureValidator"/> returns null OR an object other than a <see cref="SamlSecurityToken"/>.</exception>
+        /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
+        /// This can indicate that a key refresh is required.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
+        /// <returns>A <see cref="SamlSecurityToken"/> that has had the signature validated if token was signed.</returns>
+        /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
+        /// <para>If the 'token' signature is validated, then the <see cref="SamlSecurityToken.SigningKey"/> will be set to the key that signed the 'token'. It is the responsibility of <see cref="TokenValidationParameters.SignatureValidator"/> to set the <see cref="SamlSecurityToken.SigningKey"/></para></remarks>
+        protected virtual SamlSecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                throw LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
+            var samlToken = ReadSamlToken(token);
+            if (validationParameters.SignatureValidator != null)
+            {
+                var validatedSamlToken = validationParameters.SignatureValidator(token, validationParameters);
+                if (validatedSamlToken == null)
+                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10505, token)));
+
+                var validatedSaml = validatedSamlToken as SamlSecurityToken;
+                if (validatedSaml == null)
+                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10506, typeof(SamlSecurityToken), validatedSamlToken.GetType(), token)));
+
+                return validatedSaml;
+            }
+
+            if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
+                throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
+
+            bool keyMatched = false;
+            IEnumerable<SecurityKey> securityKeys = null;
+            if (validationParameters.IssuerSigningKeyResolver != null)
+            {
+                securityKeys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.SigningKey.KeyId, validationParameters);
+            }
+            else
+            {
+                var securityKey = ResolveIssuerSigningKey(token, samlToken, validationParameters);
+                if (securityKey != null)
+                {
+                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
+                    keyMatched = true;
+                    securityKeys = new List<SecurityKey> { securityKey };
+                }
+            }
+
+            if (securityKeys == null)
+            {
+                // control gets here if:
+                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+                // 2. ResolveIssuerSigningKey returned null
+                // Try all the keys. This is the degenerate case, not concerned about perf.
+                securityKeys = GetAllSigningKeys(validationParameters);
+            }
+
+            // keep track of exceptions thrown, keys that were tried
+            var exceptionStrings = new StringBuilder();
+            var keysAttempted = new StringBuilder();
+            bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
+            foreach (var securityKey in securityKeys)
+            {
+                try
+                {
+                    samlToken.Assertion.Signature.Verify(securityKey);
+                    IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10242, token);
+                    samlToken.SigningKey = securityKey;
+                    return samlToken;
+                }
+                catch (Exception ex)
+                {
+                    exceptionStrings.AppendLine(ex.ToString());
+                }
+
+                if (securityKey != null)
+                {
+                    keysAttempted.AppendLine(securityKey.ToString() + " , KeyId: " + securityKey.KeyId);
+                    if (canMatchKey && !keyMatched && securityKey.KeyId != null)
+                        keyMatched = securityKey.KeyId.Equals(samlToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal);
+                }
+            }
+
+            // if there was a keymatch with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
+            if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
+                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
+
+            if (keysAttempted.Length > 0)
+                throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
+
+            throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
+        }
+
+
+        /// <summary>
+        /// Reads and validates a well formed <see cref="SamlSecurityToken"/>.
+        /// </summary>
+        /// <param name="token">A string containing a well formed securityToken.</param>
+        /// <param name="validationParameters">Contains data and information needed for validation.</param>
+        /// <param name="validatedToken">The <see cref="SecurityToken"/> that was validated.</param>
+        /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
+        /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
+        public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                throw LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
+            if (token.Length > MaximumTokenSizeInBytes)
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+
+            var samlToken = ValidateSignature(token, validationParameters);
+            ValidateConditions(samlToken, validationParameters);
+            var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
+            Validators.ValidateTokenReplay(token, samlToken.Assertion.Conditions.NotBefore, validationParameters);
+            validatedToken = samlToken;
+            var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
+            if (validationParameters.SaveSigninToken)
+                identity.BootstrapContext = token;
+
+            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, token);
+
+            return new ClaimsPrincipal(identity);
+        }
+
+        /// <summary>
         /// Serializes a <see cref="SamlSecurityToken"/> to a string.
         /// </summary>
         /// <param name="token">A <see cref="SamlSecurityToken"/>.</param>
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                throw LogArgumentNullException(nameof(token));
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token)));
 
             var stringBuilder = new StringBuilder();
             using (var writer = XmlWriter.Create(stringBuilder))
@@ -979,20 +1073,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
-                throw LogHelper.LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (token == null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                throw LogArgumentNullException(nameof(token));
 
             var samlSecurityToken = token as SamlSecurityToken;
             if (samlSecurityToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             if (samlSecurityToken.Assertion == null)
-                throw LogHelper.LogArgumentNullException(nameof(samlSecurityToken.Assertion));
+                throw LogArgumentNullException(nameof(samlSecurityToken.Assertion));
 
-            var envelopedWriter = new EnvelopedSignatureWriter(writer, samlSecurityToken.Assertion.SigningCredentials, Guid.NewGuid().ToString());
-            Serializer.WriteToken(envelopedWriter, samlSecurityToken);
+           // var envelopedWriter = new EnvelopedSignatureWriter(writer, samlSecurityToken.Assertion.SigningCredentials, Guid.NewGuid().ToString());
+            // Serializer.WriteToken(envelopedWriter, samlSecurityToken);
         }
+
+#endregion methods
     }
 }

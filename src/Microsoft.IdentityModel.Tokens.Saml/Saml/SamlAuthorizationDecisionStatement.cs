@@ -26,22 +26,32 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the AuthorizationDecisionStatement specified in [Saml, 2.4.5].
+    /// </summary>
     public class SamlAuthorizationDecisionStatement : SamlSubjectStatement
     {
-        private Collection<SamlAction> _actions = new Collection<SamlAction>();
         private string _resource;
 
         // TODO - rewrite so this internal is not needed
         internal SamlAuthorizationDecisionStatement()
         {
+            Actions = new List<SamlAction>();
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlAuthorizationDecisionStatement"/> class from
+        /// a resource and decision.
+        /// </summary>
+        /// <param name="subject">The <see cref="SamlSubject"/> of the statement.</param>
+        /// <param name="resource">The resource to be authorized.</param>
+        /// <param name="accessDecision">The AccessDecision in use.</param>
+        /// <param name="actions"><see cref="IEnumerable{SamlAction}"/>.</param>
         public SamlAuthorizationDecisionStatement(
             SamlSubject subject,
             string resource,
@@ -51,6 +61,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlAuthorizationDecisionStatement"/> class from
+        /// a resource and decision.
+        /// </summary>
+        /// <param name="subject">The <see cref="SamlSubject"/> of the statement.</param>
+        /// <param name="resource">The resource to be authorized.</param>
+        /// <param name="accessDecision">The AccessDecision in use.</param>
+        /// <param name="actions"><see cref="IEnumerable{SamlAction}"/>.</param>
+        /// <param name="evidence">Collection of <see cref="SamlEvidence"/> specifications.</param>
         public SamlAuthorizationDecisionStatement(
             SamlSubject subject,
             string resource,
@@ -59,24 +78,34 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             SamlEvidence evidence)
             : base(subject)
         {
-            if (actions == null)
-                throw LogHelper.LogArgumentNullException(nameof(actions));
-
-            foreach (var action in actions)
-            {
-                if (action == null)
-                    throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
-
-                _actions.Add(action);
-            }
-
+            Actions = (actions == null) ? throw LogArgumentNullException(nameof(actions)) : new List<SamlAction>(actions);
             Evidence = evidence;
             AccessDecision = accessDecision;
-            _resource = resource;
+            Resource = resource;
 
             CheckObjectValidity();
         }
 
+        // TODO can this be null ???
+        /// <summary>
+        /// Gets or sets the access decision contained in the AuthorizationDecisionStatement.
+        /// </summary>
+        public SamlAccessDecision AccessDecision
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets a collection of <see cref="ICollection{SamlAction}"/> representing the action values contained in the AuthorizationDecisionStatement.
+        /// </summary>
+        public ICollection<SamlAction> Actions
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the ClaimType.
+        /// </summary>
         public static string ClaimType
         {
             get
@@ -85,31 +114,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        public ICollection<SamlAction> Actions
-        {
-            get { return _actions; }
-        }
-
         // TODO can this be null ???
-        public SamlAccessDecision AccessDecision
-        {
-            get; set;
-        }
-
-        // TODO can this be null ???
+        /// <summary>
+        /// Gets or sets the evidence contained in the AuthorizationDecisionStatement.
+        /// </summary>
         public SamlEvidence Evidence
         {
             get; set;
         }
 
         // TODO can this be null ???
+        /// <summary>
+        /// Gets or sets the resource contained in the AuthorizationDecisionStatement.
+        /// </summary>
         public string Resource
         {
             get { return _resource; }
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw LogHelper.LogArgumentNullException(nameof(value));
+                    throw LogArgumentNullException(nameof(value));
 
                 _resource = value;
             }
@@ -130,8 +154,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // TODO - incorporate validation of #actions
         void CheckObjectValidity()
         {
-            if (_actions.Count == 0)
-                throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAuthorizationDecisionShouldHaveOneAction"));
+            if (Actions.Count == 0)
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11508));
         }
     }
 }

@@ -25,42 +25,83 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
+using System;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Action element specified in [Saml, 2.4.5.1].
+    /// </summary>
     public class SamlAction
     {
-        string _ns;
-        string _action;
+        private Uri _namespace;
+        private string _value;
 
+        /// <summary>
+        /// Constructs an instance of <see cref="SamlAction"/> class.
+        /// </summary>
         internal SamlAction() { }
 
-        public SamlAction(string action)
-            : this(action, null)
+        /// <summary>
+        /// Constructs an instance of <see cref="SamlAction"/> class.
+        /// </summary>
+        /// <param name="value">Action value represented by this class.</param>
+        public SamlAction(string value)
+            : this(value, null)
         {
         }
 
-        public SamlAction(string action, string ns)
+        /// <summary>
+        /// Constructs an instance of <see cref="SamlAction"/> class.
+        /// </summary>
+        /// <param name="value">Value represented by this class.</param>
+        /// <param name="namespace">Namespace in which the action is interpreted.</param>
+        public SamlAction(string value, Uri @namespace)
         {
-            if (string.IsNullOrEmpty(action))
-                throw LogHelper.LogArgumentNullException(nameof(action));
-
-            if (string.IsNullOrEmpty(ns))
-                throw LogHelper.LogArgumentNullException(nameof(ns));
-
-            _action = action;
-            _ns = ns;
+            Value = value;
+            Namespace = @namespace;
         }
 
-        public string Action
+        /// <summary>
+        /// Gets or sets a URI reference representing the namespace in which the name of the
+        /// specified action is to be interpreted. [Saml, 2.4.5.1]
+        /// </summary>
+        public Uri Namespace
         {
-            get { return _action; }
+            get
+            {
+                return _namespace;
+            }
+            set
+            {
+                if (value == null)
+                    throw LogArgumentNullException(nameof(value));
+
+                if (!value.IsAbsoluteUri)
+                    throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11502));
+
+                _namespace = new Uri(SamlConstants.DefaultActionNamespace);
+            }
         }
 
-        public string Namespace
+        /// <summary>
+        /// Gets or sets the label for an action sought to be performed on the
+        /// specified resource. [Saml, 2.4.5.1]
+        /// </summary>
+        public string Value
         {
-            get { return _ns; }
+            get
+            {
+                return _value;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw LogArgumentNullException(nameof(value));
+
+                _value = value;
+            }
         }
     }
 }

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -40,6 +41,12 @@ namespace Microsoft.IdentityModel.Tests
         public string Xml { get; set; }
 
         public KeyInfo KeyInfo { get; set; }
+    }
+
+    public class SamlSecurityTokenTestSet
+    {
+        public SamlSecurityToken SamlSecurityToken { get; set; }
+        public string Xml { get; set; }
     }
 
     public class SignatureTestSet
@@ -56,7 +63,7 @@ namespace Microsoft.IdentityModel.Tests
         public SignedInfo SignedInfo { get; set; }
 
         public string Xml { get; set; }
-    }
+    }  
 
     public class WsFederationMessageTestSet
     {

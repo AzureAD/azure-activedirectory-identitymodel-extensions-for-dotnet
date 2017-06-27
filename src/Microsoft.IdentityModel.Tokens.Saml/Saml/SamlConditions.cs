@@ -27,22 +27,35 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
+    /// <summary>
+    /// Represents the Conditions element specified in [Saml, 2.3.2.1].
+    /// </summary>
     public class SamlConditions
     {
-        Collection<SamlCondition> _conditions = new Collection<SamlCondition>();
+        internal SamlConditions()
+        {
+            Conditions = new List<SamlCondition>();
+        }
 
-        internal SamlConditions() { }
-
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlConditions"/>.
+        /// </summary>
+        /// <param name="notBefore">The earliest time instant at which the assertion is valid</param>
+        /// <param name="notOnOrAfter">The time instant at which the assertion has expired.</param>
         public SamlConditions(DateTime notBefore, DateTime notOnOrAfter)
             : this(notBefore, notOnOrAfter, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SamlConditions"/>.
+        /// </summary>
+        /// <param name="notBefore">The earliest time instant at which the assertion is valid</param>
+        /// <param name="notOnOrAfter">The time instant at which the assertion has expired.</param>
+        /// <param name="conditions"><see cref="IEnumerable{SamlCondition}"/>.</param>
         public SamlConditions(DateTime notBefore, DateTime notOnOrAfter,
             IEnumerable<SamlCondition> conditions
             )
@@ -50,25 +63,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             NotBefore = notBefore.ToUniversalTime();
             NotOnOrAfter = notOnOrAfter.ToUniversalTime();
 
-            if (conditions != null)
-            {
-                foreach (SamlCondition condition in conditions)
-                {
-                    if (condition == null)
-                        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLEntityCannotBeNullOrEmpty"));
-
-                    _conditions.Add(condition);
-                }
-            }
+            Conditions = (conditions == null) ? new List<SamlCondition>() : new List<SamlCondition>(conditions);
         }
 
-        public ICollection<SamlCondition> Conditions
-        {
-            get { return _conditions; }
-        }
+        /// <summary>
+        /// Gets a collection of <see cref="ICollection{SamlCondition}"/> that the assertion is addressed to.
+        /// </summary>
+        public ICollection<SamlCondition> Conditions { get; }
 
+        /// <summary>
+        /// Gets or sets the earliest time instant at which the assertion is valid.
+        /// </summary>
         public DateTime NotBefore { get; set; } = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
 
+        /// <summary>
+        /// Gets or sets the time instant at which the assertion has expired.
+        /// </summary>
         public DateTime NotOnOrAfter { get; set; } = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
     }
 }
