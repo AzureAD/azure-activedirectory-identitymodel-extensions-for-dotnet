@@ -4,7 +4,7 @@
   <Import Project="dynamicVersion.props" Condition="Exists('dynamicVersion.props')" />
 
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)272MSSharedLibSN2048.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <Authors>Microsoft AzureAD</Authors>
     <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation.</Company>
