@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
     {
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("EnvelopedSignatureReaderTheoryData")]
+        [Theory, MemberData("EnvelopedSignatureWriterTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        public static TheoryData<EnvelopedSignatureTheoryData> EnvelopedSignatureReaderTheoryData
+        public static TheoryData<EnvelopedSignatureTheoryData> EnvelopedSignatureWriterTheoryData
         {
             get
             {

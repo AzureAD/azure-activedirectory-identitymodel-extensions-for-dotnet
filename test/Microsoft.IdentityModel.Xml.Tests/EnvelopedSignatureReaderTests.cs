@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
-                    SecurityKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
+                    SecurityKey = ReferenceXml.DefaultAADSigningKey,
                     TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed),
                     Xml = ReferenceXml.Saml2Token_Valid_Signed
                 });
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21019:"),
-                    SecurityKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
+                    SecurityKey = ReferenceXml.DefaultAADSigningKey,
                     TestId = nameof(ReferenceXml.Saml2Token_TwoSignatures),
                     Xml = ReferenceXml.Saml2Token_TwoSignatures
                 });
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.CryptographicException(),
-                    SecurityKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
+                    SecurityKey = ReferenceXml.DefaultAADSigningKey,
                     TestId = nameof(ReferenceXml.Saml2Token_Valid_SignatureNOTFormated),
                     Xml = ReferenceXml.Saml2Token_Valid_SignatureNOTFormated
                 });
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Add(new EnvelopedSignatureTheoryData
                 {
                     ExpectedException = ExpectedException.CryptographicException(),
-                    SecurityKey = ReferenceXml.Saml2Token_Valid_SecurityKey,
+                    SecurityKey = ReferenceXml.DefaultAADSigningKey,
                     TestId = nameof(ReferenceXml.Saml2Token_Valid_Formated),
                     Xml = ReferenceXml.Saml2Token_Valid_Formated
                 });

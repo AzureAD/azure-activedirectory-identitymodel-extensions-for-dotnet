@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Tokens.Saml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -243,7 +241,7 @@ namespace Microsoft.IdentityModel.Tests
                               <saml:AttributeValue>Sales</saml:AttributeValue>
                             </saml:Attribute>
                             <saml:Attribute AttributeName = ""Name"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
-                              <saml:AttributeValue>Jean-Sébastien</saml:AttributeValue>
+                              <saml:AttributeValue>Jean-Sï¿½bastien</saml:AttributeValue>
                             </saml:Attribute>
                             <saml:Attribute AttributeName = ""role"" AttributeNamespace= ""http://schemas.microsoft.com/ws/2008/06/identity/claims"">
                               <saml:AttributeValue>role1</saml:AttributeValue>

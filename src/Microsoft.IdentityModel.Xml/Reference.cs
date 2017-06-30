@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public string Id { get; set; }
 
-        public TransformChain TransformChain { get; private set; } = new TransformChain();
+        public TransformChain TransformChain { get; }
 
         public string Type { get; set; }
 

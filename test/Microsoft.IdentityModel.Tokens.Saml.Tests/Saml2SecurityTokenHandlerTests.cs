@@ -28,12 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Tests;
-using Xunit;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
@@ -83,42 +81,38 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public static TheoryData<SamlTheoryData> CanReadTokenTheoryData
         {
-            get
+            get =>  new TheoryData<SamlTheoryData>
             {
-                var theoryData = new TheoryData<SamlTheoryData>();
-                
-                // CanReadToken
-                var handler = new Saml2SecurityTokenHandler();
-                theoryData.Add(
-                    new SamlTheoryData
-                    {
-                        CanRead = false,
-                        First = true,
-                        Handler = handler,
-                        TestId = "Null Token",
-                        Token = null
-                    });
-
-                theoryData.Add(
-                    new SamlTheoryData
-                    {
-                        CanRead = false,
-                        Handler = handler,
-                        TestId = "DefaultMaximumTokenSizeInBytes + 1",
-                        Token = new string('S', TokenValidationParameters.DefaultMaximumTokenSizeInBytes + 2)
-                    });
-
-                theoryData.Add(
-                    new SamlTheoryData
-                    {
-                        CanRead = true,
-                        Handler = handler,
-                        TestId = nameof(RefrenceTokens.Saml2Token_Valid),
-                        Token = RefrenceTokens.Saml2Token_Valid
-                    });
-
-                return theoryData;
-            }
+                new SamlTheoryData
+                {
+                    CanRead = false,
+                    First = true,
+                    Handler = new Saml2SecurityTokenHandler(),
+                    TestId = "Null Token",
+                    Token = null
+                },
+                new SamlTheoryData
+                {
+                    CanRead = false,
+                    Handler = new Saml2SecurityTokenHandler(),
+                    TestId = "DefaultMaximumTokenSizeInBytes + 1",
+                    Token = new string('S', TokenValidationParameters.DefaultMaximumTokenSizeInBytes + 2)
+                },
+                new SamlTheoryData
+                {
+                    CanRead = true,
+                    Handler = new Saml2SecurityTokenHandler(),
+                    TestId = nameof(RefrenceTokens.Saml2Token_Valid),
+                    Token = RefrenceTokens.Saml2Token_Valid
+                },
+                new SamlTheoryData
+                {
+                    CanRead = false,
+                    Handler = new Saml2SecurityTokenHandler(),
+                    TestId = nameof(RefrenceTokens.SamlToken_Valid),
+                    Token = RefrenceTokens.SamlToken_Valid
+                }
+            };
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -248,9 +242,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                var theoryData = new TheoryData<SamlTheoryData>();
-
-                theoryData.Add(
+                return new TheoryData<SamlTheoryData>
+                {
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
@@ -259,9 +252,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = "Null-SecurityToken",
                         Token = null,
                         ValidationParameters = new TokenValidationParameters()
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
@@ -269,21 +260,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = "NULL-TokenValidationParameters",
                         Token = "s",
                         ValidationParameters = null,
-                    });
-
-                var tokenHandler = new Saml2SecurityTokenHandler();
-                tokenHandler.MaximumTokenSizeInBytes = 1;
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentException("IDX10209:"),
-                        Handler = tokenHandler,
+                        Handler = new Saml2SecurityTokenHandler { MaximumTokenSizeInBytes = 1 },
                         TestId = "SecurityTokenTooLarge",
                         Token = "ss",
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
@@ -291,9 +276,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_MissingVersion),
                         Token = RefrenceTokens.Saml2Token_MissingVersion,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11137:"),
@@ -301,9 +284,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_VersionNotV20),
                         Token = RefrenceTokens.Saml2Token_VersionNotV20,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
@@ -311,9 +292,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_IdMissing),
                         Token = RefrenceTokens.Saml2Token_IdMissing,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
@@ -321,9 +300,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerInstantMissing),
                         Token = RefrenceTokens.Saml2Token_IssuerInstantMissing,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(FormatException)),
@@ -331,19 +308,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerInstantFormatError),
                         Token = RefrenceTokens.Saml2Token_IssuerInstantFormatError,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(XmlReadException)),
-                        Handler = tokenHandler = new Saml2SecurityTokenHandler(),
+                        Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_IssuerMissing),
                         Token = RefrenceTokens.Saml2Token_IssuerMissing,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11108:"),
@@ -351,9 +324,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_NoSubjectNoStatements),
                         Token = RefrenceTokens.Saml2Token_NoSubjectNoStatements,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11138:"),
@@ -361,47 +332,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(RefrenceTokens.Saml2Token_NoAttributes),
                         Token = RefrenceTokens.Saml2Token_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
-                    });
-
-                var keySet = new JsonWebKeySet(RefrenceTokens.AADJWKS);
-                var certData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD";
-                var aadCert = new X509Certificate2(Convert.FromBase64String(certData));
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(RefrenceTokens.Saml2Token_Valid)} IssuerSigningKey set",
                         Token = RefrenceTokens.Saml2Token_Valid,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                             ValidateIssuer = false,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         }
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.NoExceptionExpected,
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(RefrenceTokens.Saml2Token_Valid_Spaces_Added),
                         Token = RefrenceTokens.Saml2Token_Valid_Spaces_Added,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                             ValidateIssuer = false,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         }
-                    });
-
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
@@ -410,15 +367,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = RefrenceTokens.Saml2Token_Formated,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                         }
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
@@ -427,15 +378,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = RefrenceTokens.Saml2Token_AttributeTampered,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                         }
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
@@ -444,15 +389,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = RefrenceTokens.Saml2Token_DigestTampered,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                         }
-                    });
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
@@ -461,16 +400,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = RefrenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                         }
-                    });
-
-
-                theoryData.Add(
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
@@ -479,27 +411,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = RefrenceTokens.Saml2Token_SignatureTampered,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = new X509SecurityKey(aadCert),
-                            IssuerSigningKeys = keySet.GetSigningKeys(),
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
                         }
-                    });
-
-                //tokenHandler = new Saml2SecurityTokenHandler();
-                //string samlToken = IdentityUtilities.CreateSaml2Token();
-                //theoryData.Add(
-                //    new CreateAndValidateParams
-                //    {
-                //        ExpectedException = ExpectedException.NoExceptionExpected,
-                //        SecurityTokenHandler = tokenHandler,
-                //        TestId = "Valid-Saml2SecurityToken",
-                //        Token = samlToken,
-                //        TokenValidationParameters = IdentityUtilities.DefaultAsymmetricTokenValidationParameters,
-                //    });
-
-                return theoryData;
+                    }
+                };
             }
         }
 

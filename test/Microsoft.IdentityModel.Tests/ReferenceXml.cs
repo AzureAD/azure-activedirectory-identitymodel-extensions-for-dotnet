@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.Tests
     public class ReferenceXml
     {
         // TODO move this
-        public static SecurityKey Saml2Token_Valid_SecurityKey
+        public static SecurityKey DefaultAADSigningKey
         {
             get
             {
@@ -265,7 +266,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = ReferenceMetadata.KeyInfoXml(Default.KeyInfo).Replace("<KeyInfo", "<NotKeyInfo>").Replace("/KeyInfo>", "/NotKeyInfo>"),
+                    Xml = XmlGenerator.Generate(Default.KeyInfo).Replace("<KeyInfo", "<NotKeyInfo>").Replace("/KeyInfo>", "/NotKeyInfo>"),
                     KeyInfo = Default.KeyInfo
                 };
             }
@@ -277,7 +278,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = ReferenceMetadata.KeyInfoXml(Default.KeyInfo).Replace(XmlSignatureConstants.Namespace, $"_{XmlSignatureConstants.Namespace}_"),
+                    Xml = XmlGenerator.Generate(Default.KeyInfo).Replace(XmlSignatureConstants.Namespace, $"_{XmlSignatureConstants.Namespace}_"),
                     KeyInfo = Default.KeyInfo
                 };
             }
@@ -289,7 +290,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = ReferenceMetadata.KeyInfoXml(Default.KeyInfo),
+                    Xml = XmlGenerator.Generate(Default.KeyInfo),
                     KeyInfo = Default.KeyInfo
                 };
             }
@@ -343,18 +344,16 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
+                var keyinfo = new KeyInfo
+                {
+                    Kid = "X509SubjectName",
+                    SubjectName = "X509SubjectName"
+                };
+
                 return new KeyInfoTestSet
                 {
-                    Xml = @"<KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                                <X509Data>
-                                    <X509SubjectName>X509SubjectName</X509SubjectName>
-                                </X509Data>
-                            </KeyInfo>",
-                    KeyInfo = new KeyInfo
-                    {
-                        Kid = "X509SubjectName",
-                        SubjectName = "X509SubjectName"
-                    }
+                    KeyInfo = keyinfo,
+                    Xml = XmlGenerator.Generate(keyinfo)
                 };
             }
         }
@@ -365,17 +364,14 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new KeyInfoTestSet
                 {
-                    Xml = @"<KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                                <X509Data>
-                                    <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                    <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
-                                </X509Data>
-                            </KeyInfo>",
-                    KeyInfo = new KeyInfo
-                    {
-                        CertificateData = "MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD",
-                        Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-                    }
+                    KeyInfo = Default.KeyInfo,
+                    Xml = XmlGenerator.KeyInfoXml(
+                        "http://www.w3.org/2000/09/xmldsig#",
+                        new XmlEement("X509Data", new List<XmlEement>
+                        {
+                           new XmlEement("X509Certificate", Default.CertificateData),
+                           new XmlEement("X509Certificate", Default.CertificateData)
+                        }))
                 };
             }
         }
@@ -574,7 +570,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignatureTestSet
                 {
                     Signature = Default.Signature,
-                    Xml = ReferenceMetadata.SignatureXml(Default.Signature).Replace(SecurityAlgorithms.Sha256Digest, $"_{SecurityAlgorithms.Sha256Digest}" )
+                    Xml = XmlGenerator.Generate(Default.Signature).Replace(SecurityAlgorithms.Sha256Digest, $"_{SecurityAlgorithms.Sha256Digest}" )
                 };
             }
         }
@@ -586,7 +582,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignatureTestSet
                 {
                     Signature = Default.Signature,
-                    Xml = ReferenceMetadata.SignatureXml(Default.Signature).Replace(SecurityAlgorithms.RsaSha256Signature, $"_{SecurityAlgorithms.RsaSha256Signature}" )
+                    Xml = XmlGenerator.Generate(Default.Signature).Replace(SecurityAlgorithms.RsaSha256Signature, $"_{SecurityAlgorithms.RsaSha256Signature}" )
                 };
             }
         }
@@ -602,7 +598,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = Default.SignedInfo,
-                    Xml = "       " + ReferenceMetadata.SignedInfoXml(Default.SignedInfo)
+                    Xml = "       " + XmlGenerator.Generate(Default.SignedInfo)
                 };
             }
         }
@@ -613,7 +609,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("CanonicalizationMethod", "_CanonicalizationMethod")
+                    Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("CanonicalizationMethod", "_CanonicalizationMethod")
                 };
             }
         }
@@ -624,7 +620,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("Reference", "_Reference")
+                    Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("Reference", "_Reference")
                 };
             }
         }
@@ -635,7 +631,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("Transforms", "_Transforms")
+                    Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("Transforms", "_Transforms")
                 };
             }
         }
@@ -646,7 +642,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("Transform", "_Transform")
+                    Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("Transform", "_Transform")
                 };
             }
         }
@@ -657,11 +653,11 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(
+                    Xml = XmlGenerator.SignedInfoXml(
                             XmlSignatureConstants.Namespace,
                             SecurityAlgorithms.ExclusiveC14n,
                             SecurityAlgorithms.RsaSha256Signature,
-                            ReferenceMetadata.ReferenceXml(
+                            XmlGenerator.ReferenceXml(
                                 Guid.NewGuid().ToString(),
                                 SecurityAlgorithms.Aes256KW,
                                 SecurityAlgorithms.EnvelopedSignature,
@@ -677,11 +673,11 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(
+                    Xml = XmlGenerator.SignedInfoXml(
                             XmlSignatureConstants.Namespace,
                             SecurityAlgorithms.ExclusiveC14n,
                             SecurityAlgorithms.RsaSha256Signature,
-                            ReferenceMetadata.ReferenceXml(
+                            XmlGenerator.ReferenceXml(
                                 "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2",
                                 "_http://www.w3.org/2000/09/xmldsig#enveloped-signature",
                                 SecurityAlgorithms.ExclusiveC14n,
@@ -698,7 +694,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("DigestMethod", "_DigestMethod")
+                    Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("DigestMethod", "_DigestMethod")
                 };
             }
         }
@@ -709,7 +705,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo).Replace("DigestValue", "_DigestValue")
+                    Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("DigestValue", "_DigestValue")
                 };
             }
         }
@@ -721,7 +717,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = Default.SignedInfo,
-                    Xml = ReferenceMetadata.SignedInfoXml(Default.SignedInfo)
+                    Xml = XmlGenerator.Generate(Default.SignedInfo)
                 };
             }
         }

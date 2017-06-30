@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Xml
     /// <remarks>Only a single 'X509Certificate' is supported. Multiples that include intermediate and root certs are not supported.</remarks>
     public class KeyInfo
     {
+        // TODO - IssuerSerial needs to have a structure as 'IssuerName' and 'SerialNumber'
         /// <summary>
         /// Instantiates a <see cref="Keyinfo"/>.
         /// </summary>

@@ -25,9 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
@@ -35,7 +32,6 @@ using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
 {
-
     public class KeyInfoTestSet
     {
         public string Xml { get; set; }
@@ -51,7 +47,7 @@ namespace Microsoft.IdentityModel.Tests
 
     public class SignatureTestSet
     {
-        public SecurityKey SecurityKey { get; set; } = ReferenceXml.Saml2Token_Valid_SecurityKey;
+        public SecurityKey SecurityKey { get; set; } = ReferenceXml.DefaultAADSigningKey;
 
         public Signature Signature { get; set; }
 
