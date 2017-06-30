@@ -105,6 +105,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // Formating
         public const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";
+        public const string IDX14701 = "IDX14701: Invalid requested key size. Valid key sizes are: 256, 384, and 512.";
 
         // Crypto Errors
         public const string IDX10800 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
