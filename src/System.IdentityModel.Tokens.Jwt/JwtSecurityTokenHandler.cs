@@ -245,7 +245,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the value that indicates if this instance can write a <see cref="SecurityToken"/>.
         /// </summary>
-        /// <returns>'True', indicating this instance can write a <see cref="JwtSecurityToken"/>.</returns>
+        /// <returns>'true', indicating this instance can write a <see cref="JwtSecurityToken"/>.</returns>
         public override bool CanWriteToken
         {
             get { return true; }
@@ -312,9 +312,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
         /// </remarks>
         /// <returns>
-        /// <para>'False' if the token is null or whitespace.</para>
-        /// <para>'False' if token.Length * 2 >  <see cref="MaximumTokenSizeInBytes"/>.</para>
-        /// <para>'True' if the token is in JSON compact serialization format.</para>
+        /// <para>'false' if the token is null or whitespace.</para>
+        /// <para>'false' if token.Length * 2 >  <see cref="MaximumTokenSizeInBytes"/>.</para>
+        /// <para>'true' if the token is in JSON compact serialization format.</para>
         /// </returns>
         public override bool CanReadToken(string token)
         {
@@ -622,11 +622,12 @@ namespace System.IdentityModel.Tokens.Jwt
         private static byte[] GenerateKeyBytes(int sizeInBits)
         {
             byte[] key = null;
-            if (sizeInBits != 256 && sizeInBits != 384 && sizeInBits != 512) return key;
+            if (sizeInBits != 256 && sizeInBits != 384 && sizeInBits != 512)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX14701, nameof(sizeInBits)));
 
             var aes = Aes.Create();
             int halfSizeInBytes = sizeInBits >> 4;
-            key = new byte[halfSizeInBytes * 2];
+            key = new byte[halfSizeInBytes << 1];
             aes.KeySize = sizeInBits >> 1;
             // The design of AuthenticatedEncryption needs two keys of the same size - generate them, each half size of what's required
             aes.GenerateKey();

@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
-        /// <returns>'True', indicating this instance can validate a <see cref="Saml2SecurityToken"/>.</returns>
+        /// <returns>'true', indicating this instance can validate a <see cref="Saml2SecurityToken"/>.</returns>
         public override bool CanValidateToken
         {
             get { return true; }
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets the value that indicates if this instance can write a <see cref="SecurityToken"/>.
         /// </summary>
-        /// <returns>'True', indicating this instance can write a <see cref="Saml2SecurityToken"/>.</returns>
+        /// <returns>'true', indicating this instance can write a <see cref="Saml2SecurityToken"/>.</returns>
         public override bool CanWriteToken
         {
             get { return true; }
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Determines if the string is a valid Saml2 token by examining the xml for the correct start element.
         /// </summary>
         /// <param name="token">A Saml2 token as a string.</param>
-        /// <returns>'True' if the string has a start element equal <see cref="Saml2Constants.Elements.Assertion"/>.</returns>
+        /// <returns>'true' if the string has a start element equal <see cref="Saml2Constants.Elements.Assertion"/>.</returns>
         public override bool CanReadToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Indicates whether the current XML element can be read as a token of the type handled by this instance.
         /// </summary>
         /// <param name="reader">An <see cref="XmlReader"/> reader positioned at a start element. The reader should not be advanced.</param>
-        /// <returns>'True' if <see cref="Saml2SecurityTokenHandler.ReadToken(string)"/> can read the element.</returns>
+        /// <returns>'true' if <see cref="Saml2SecurityTokenHandler.ReadToken(string)"/> can read the element.</returns>
         public bool CanReadToken(XmlReader reader)
         {
             if (reader == null)
@@ -569,7 +569,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Indicates if the current XML element is pointing to a Saml2Assertion.
         /// </summary>
         /// <param name="reader">A reader that may contain a <see cref="Saml2Assertion"/>.</param>
-        /// <returns>'True' if reader contains a <see cref="Saml2Assertion"/>. 'False' otherwise.</returns>
+        /// <returns>'true' if reader contains a <see cref="Saml2Assertion"/>. 'false' otherwise.</returns>
         internal static bool IsSaml2Assertion(XmlReader reader)
         {
             return reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
