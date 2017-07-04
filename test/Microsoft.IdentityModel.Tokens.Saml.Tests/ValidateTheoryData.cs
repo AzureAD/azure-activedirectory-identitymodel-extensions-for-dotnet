@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
@@ -188,36 +187,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     ValidateAudience = false
                 }
             });
-        }
-    }
-
-    public class SamlTheoryData : TheoryDataBase
-    {
-        public string Actor { get; set; }
-
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
-
-        public IEnumerable<string> Audiences { get; set; }
-
-        public bool CanRead { get; set; }
-
-        public SecurityTokenHandler Handler { get; set; }
-
-        public string Issuer { get; set; }
-
-        public SamlSerializer SamlSerializer { get; set; }
-
-        public SamlSecurityTokenTestSet SamlSecurityTokenTestSet { get; set; }
-
-        public SecurityTokenDescriptor TokenDescriptor { get; set; }
-
-        public string Token { get; set; }
-
-        public TokenValidationParameters ValidationParameters { get; set; }
-
-        public override string ToString()
-        {
-            return $"{TestId}, {ExpectedException}";
         }
     }
 }

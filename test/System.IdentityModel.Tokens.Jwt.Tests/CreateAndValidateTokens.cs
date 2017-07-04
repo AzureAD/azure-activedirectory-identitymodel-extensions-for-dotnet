@@ -34,29 +34,6 @@ using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
-    public class CreateAndValidateParams
-    {
-        public string Actor { get; set; }
-
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
-
-        public string Case { get; set; }
-
-        public JwtSecurityToken CompareTo { get; set; }
-
-        public ExpectedException ExpectedException { get; set; }
-
-        public Type ExceptionType { get; set; }
-
-        public string Jwt { get; set; }
-
-        public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
-
-        public SecurityTokenDescriptor SecurityTokenDescriptor { get; set; }
-
-        public TokenValidationParameters TokenValidationParameters { get; set; }
-    }
-
     public class CreateAndValidateTokens
     {
         private static string _roleClaimTypeForDelegate = "RoleClaimTypeForDelegate";
@@ -208,64 +185,64 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(CreationParams))]
+        [Theory, MemberData(nameof(RoundTripTokensTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void RoundTripTokens(CreateAndValidateParams createParams)
+        public void RoundTripTokens(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
-            var encodedJwt1 = handler.CreateEncodedJwt(createParams.SecurityTokenDescriptor);
+            var encodedJwt1 = handler.CreateEncodedJwt(theoryData.TokenDescriptor);
             var encodedJwt2 = handler.CreateEncodedJwt(
-                createParams.SecurityTokenDescriptor.Issuer,
-                createParams.SecurityTokenDescriptor.Audience,
-                createParams.SecurityTokenDescriptor.Subject,
-                createParams.SecurityTokenDescriptor.NotBefore,
-                createParams.SecurityTokenDescriptor.Expires,
-                createParams.SecurityTokenDescriptor.IssuedAt,
-                createParams.SecurityTokenDescriptor.SigningCredentials);
+                theoryData.TokenDescriptor.Issuer,
+                theoryData.TokenDescriptor.Audience,
+                theoryData.TokenDescriptor.Subject,
+                theoryData.TokenDescriptor.NotBefore,
+                theoryData.TokenDescriptor.Expires,
+                theoryData.TokenDescriptor.IssuedAt,
+                theoryData.TokenDescriptor.SigningCredentials);
             var jwtToken1 = new JwtSecurityToken(encodedJwt1);
             var jwtToken2 = new JwtSecurityToken(encodedJwt2);
-            var jwtToken3 = handler.CreateJwtSecurityToken(createParams.SecurityTokenDescriptor);
+            var jwtToken3 = handler.CreateJwtSecurityToken(theoryData.TokenDescriptor);
             var jwtToken4 = handler.CreateJwtSecurityToken(
-                createParams.SecurityTokenDescriptor.Issuer,
-                createParams.SecurityTokenDescriptor.Audience,
-                createParams.SecurityTokenDescriptor.Subject,
-                createParams.SecurityTokenDescriptor.NotBefore,
-                createParams.SecurityTokenDescriptor.Expires,
-                createParams.SecurityTokenDescriptor.IssuedAt,
-                createParams.SecurityTokenDescriptor.SigningCredentials);
-            var jwtToken5 = handler.CreateToken(createParams.SecurityTokenDescriptor) as JwtSecurityToken;
+                theoryData.TokenDescriptor.Issuer,
+                theoryData.TokenDescriptor.Audience,
+                theoryData.TokenDescriptor.Subject,
+                theoryData.TokenDescriptor.NotBefore,
+                theoryData.TokenDescriptor.Expires,
+                theoryData.TokenDescriptor.IssuedAt,
+                theoryData.TokenDescriptor.SigningCredentials);
+            var jwtToken5 = handler.CreateToken(theoryData.TokenDescriptor) as JwtSecurityToken;
             var jwtToken6 = handler.CreateJwtSecurityToken(
-                createParams.SecurityTokenDescriptor.Issuer,
-                createParams.SecurityTokenDescriptor.Audience,
-                createParams.SecurityTokenDescriptor.Subject,
-                createParams.SecurityTokenDescriptor.NotBefore,
-                createParams.SecurityTokenDescriptor.Expires,
-                createParams.SecurityTokenDescriptor.IssuedAt,
-                createParams.SecurityTokenDescriptor.SigningCredentials,
-                createParams.SecurityTokenDescriptor.EncryptingCredentials);
+                theoryData.TokenDescriptor.Issuer,
+                theoryData.TokenDescriptor.Audience,
+                theoryData.TokenDescriptor.Subject,
+                theoryData.TokenDescriptor.NotBefore,
+                theoryData.TokenDescriptor.Expires,
+                theoryData.TokenDescriptor.IssuedAt,
+                theoryData.TokenDescriptor.SigningCredentials,
+                theoryData.TokenDescriptor.EncryptingCredentials);
             var encodedJwt3 = handler.WriteToken(jwtToken3);
             var encodedJwt4 = handler.WriteToken(jwtToken4);
             var encodedJwt5 = handler.WriteToken(jwtToken5);
             var encodedJwt6 = handler.WriteToken(jwtToken6);
 
             SecurityToken validatedJwtToken1 = null;
-            var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, createParams.TokenValidationParameters, out validatedJwtToken1);
+            var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, theoryData.ValidationParameters, out validatedJwtToken1);
 
             SecurityToken validatedJwtToken2 = null;
-            var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, createParams.TokenValidationParameters, out validatedJwtToken2);
+            var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, theoryData.ValidationParameters, out validatedJwtToken2);
 
             SecurityToken validatedJwtToken3 = null;
-            var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, createParams.TokenValidationParameters, out validatedJwtToken3);
+            var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, theoryData.ValidationParameters, out validatedJwtToken3);
 
             SecurityToken validatedJwtToken4 = null;
-            var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, createParams.TokenValidationParameters, out validatedJwtToken4);
+            var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, theoryData.ValidationParameters, out validatedJwtToken4);
 
             SecurityToken validatedJwtToken5 = null;
-            var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, createParams.TokenValidationParameters, out validatedJwtToken5);
+            var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, theoryData.ValidationParameters, out validatedJwtToken5);
 
             SecurityToken validatedJwtToken6 = null;
-            var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, createParams.TokenValidationParameters, out validatedJwtToken6);
+            var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out validatedJwtToken6);
 
             var context = new CompareContext();
             var localContext = new CompareContext();
@@ -359,26 +336,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 context.Diffs.AddRange(localContext.Diffs);
             }
 
-            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripTokens: Case '{0}'", createParams.Case), context.Diffs);
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripTokens: Case '{0}'", theoryData.TestId), context.Diffs);
         }
 
-        public static TheoryData<CreateAndValidateParams> CreationParams()
+        public static TheoryData<JwtTheoryData> RoundTripTokensTheoryData()
         {
-            var theoryData = new TheoryData<CreateAndValidateParams>();
+            var theoryData = new TheoryData<JwtTheoryData>();
             var handler = new JwtSecurityTokenHandler();
 
-            theoryData.Add(new CreateAndValidateParams
+            theoryData.Add(new JwtTheoryData
             {
-                Case = "Test1",
-                SecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(null),
-                TokenValidationParameters = Default.AsymmetricSignTokenValidationParameters,
+                TestId = "Test1",
+                TokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(null),
+                ValidationParameters = Default.AsymmetricSignTokenValidationParameters,
             });
 
-            theoryData.Add(new CreateAndValidateParams
+            theoryData.Add(new JwtTheoryData
             {
-                Case = "Test2",
-                SecurityTokenDescriptor = new SecurityTokenDescriptor(),
-                TokenValidationParameters = new TokenValidationParameters
+                TestId = "Test2",
+                TokenDescriptor = new SecurityTokenDescriptor(),
+                ValidationParameters = new TokenValidationParameters
                 {
                     RequireSignedTokens = false,
                     ValidateAudience = false,
@@ -387,36 +364,32 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 }
             });
 
-            theoryData.Add(new CreateAndValidateParams
+            theoryData.Add(new JwtTheoryData
             {
-                Case = "Test3",
-                ExceptionType = null,
-                SecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(ClaimSets.DuplicateTypes()),
-                TokenValidationParameters = Default.AsymmetricSignTokenValidationParameters,
+                TestId = "Test3",
+                TokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(ClaimSets.DuplicateTypes()),
+                ValidationParameters = Default.AsymmetricSignTokenValidationParameters,
             });
 
-            theoryData.Add(new CreateAndValidateParams
+            theoryData.Add(new JwtTheoryData
             {
-                Case = "Test4",
-                ExceptionType = null,
-                SecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims),
-                TokenValidationParameters = Default.AsymmetricSignTokenValidationParameters
+                TestId = "Test4",
+                TokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims),
+                ValidationParameters = Default.AsymmetricSignTokenValidationParameters
             });
 
-            theoryData.Add(new CreateAndValidateParams
+            theoryData.Add(new JwtTheoryData
             {
-                Case = "Test5",
-                ExceptionType = null,
-                SecurityTokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims),
-                TokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
+                TestId = "Test5",
+                TokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims),
+                ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
-            theoryData.Add(new CreateAndValidateParams
+            theoryData.Add(new JwtTheoryData
             {
-                Case = "Test6",
-                ExceptionType = null,
-                SecurityTokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.GetDefaultRoleClaims(handler)),
-                TokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
+                TestId = "Test6",
+                TokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.GetDefaultRoleClaims(handler)),
+                ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
             return theoryData;

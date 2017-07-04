@@ -96,7 +96,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory]
-        // uncomment once - cryptoExtensibility PR is committed.
         [InlineData(SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256)]
         [InlineData(SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384)]
         [InlineData(SecurityAlgorithms.EcdsaSha512Signature, SecurityAlgorithms.EcdsaSha512)]
@@ -143,30 +142,30 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ActorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ActorTests(CreateAndValidateParams cvp)
+        public void ActorTests(JwtTheoryData theoryData)
         {
             var context = new CompareContext();
             try
             {
                 SecurityToken validatedToken;
-                var claimsIdentity = cvp.JwtSecurityTokenHandler.ValidateToken(cvp.Jwt, cvp.TokenValidationParameters, out validatedToken).Identity as ClaimsIdentity;
-                var actorIdentity = cvp.JwtSecurityTokenHandler.ValidateToken(cvp.Actor, cvp.ActorTokenValidationParameters, out validatedToken).Identity as ClaimsIdentity;
+                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters, out validatedToken).Identity as ClaimsIdentity;
+                var actorIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Actor, theoryData.ActorTokenValidationParameters, out validatedToken).Identity as ClaimsIdentity;
                 IdentityComparer.AreEqual(claimsIdentity.Actor, actorIdentity, context);
-                cvp.ExpectedException.ProcessNoException(context);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                cvp.ExpectedException.ProcessException(ex, context.Diffs);
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<CreateAndValidateParams> ActorTheoryData
+        public static TheoryData<JwtTheoryData> ActorTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<CreateAndValidateParams>();
+                var theoryData = new TheoryData<JwtTheoryData>();
                 var handler = new JwtSecurityTokenHandler();
 
                 // Actor validation is true
@@ -176,15 +175,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = true;
                 theoryData.Add(
-                    new CreateAndValidateParams
+                    new JwtTheoryData
                     {
                         Actor = Default.AsymmetricJwt,
                         ActorTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters,
-                        Case = "Test1",
+                        TestId = "Test1",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
-                        JwtSecurityTokenHandler = handler,
-                        TokenValidationParameters = validationParameters
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
                     }
                 );
 
@@ -197,15 +196,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ValidateActor = true;
                 validationParameters.ActorValidationParameters = Default.AsymmetricSignTokenValidationParameters;
                 theoryData.Add(
-                    new CreateAndValidateParams
+                    new JwtTheoryData
                     {
                         Actor = Default.SymmetricJws,
                         ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        Case = "Test2",
+                        TestId = "Test2",
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
                         Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
-                        JwtSecurityTokenHandler = handler,
-                        TokenValidationParameters = validationParameters
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
                     }
                 );
 
@@ -218,15 +217,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ValidateActor = false;
                 validationParameters.ActorValidationParameters = Default.AsymmetricSignTokenValidationParameters;
                 theoryData.Add(
-                    new CreateAndValidateParams
+                    new JwtTheoryData
                     {
                         Actor = Default.SymmetricJws,
                         ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        Case = "Test3",
+                        TestId = "Test3",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
-                        JwtSecurityTokenHandler = handler,
-                        TokenValidationParameters = validationParameters
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
                     }
                 );
 
@@ -1026,54 +1025,52 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(WriteTokenTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void WriteToken(WriteJwtTokenParams testParams)
+        public void WriteToken(JwtTheoryData theoryData)
         {
             try
             {
-                var token = testParams.TokenHandler.WriteToken(testParams.Token);
-                if (testParams.TokenType == TokenType.JWE)
+                var token = theoryData.TokenHandler.WriteToken(theoryData.Token);
+                if (theoryData.TokenType == TokenType.JWE)
                     Assert.True(token.Split('.').Length == 5);
                 else
                     Assert.True(token.Split('.').Length == 3);
 
-                testParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
-                testParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 
-        public static TheoryData<WriteJwtTokenParams> WriteTokenTheoryData()
+        public static TheoryData<JwtTheoryData> WriteTokenTheoryData()
         {
-            var theoryData = new TheoryData<WriteJwtTokenParams>();
-            var handler = new JwtSecurityTokenHandler();
+            var theoryData = new TheoryData<JwtTheoryData>();
 
-            theoryData.Add(new WriteJwtTokenParams()
+            theoryData.Add(new JwtTheoryData()
             {
-                EE = ExpectedException.ArgumentNullException(),
+                ExpectedException = ExpectedException.ArgumentNullException(),
                 TestId = "Test1",
-                Token = null,
-                TokenHandler = handler
+                Token = null
             });
 
-            theoryData.Add(new WriteJwtTokenParams
+            theoryData.Add(new JwtTheoryData
             {
-                EE = ExpectedException.ArgumentException("IDX10706:"),
+                ExpectedException = ExpectedException.ArgumentException("IDX10706:"),
                 TestId = "Test2",
                 Token = new CustomSecurityToken()
             });
 
-            theoryData.Add(new WriteJwtTokenParams
+            theoryData.Add(new JwtTheoryData
             {
-                EE = ExpectedException.ArgumentException("IDX10706:"),
+                ExpectedException = ExpectedException.ArgumentException("IDX10706:"),
                 TestId = "Test3",
                 Token = new CustomSecurityToken()
             });
 
-            theoryData.Add(new WriteJwtTokenParams
+            theoryData.Add(new JwtTheoryData
             {
-                EE = ExpectedException.SecurityTokenEncryptionFailedException("IDX10736:"),
+                ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10736:"),
                 TestId = "Test4",
                 Token = new JwtSecurityToken(
                                 new JwtHeader(Default.SymmetricSigningCredentials),
@@ -1085,9 +1082,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                                 "ey")
             });
 
-            theoryData.Add(new WriteJwtTokenParams
+            theoryData.Add(new JwtTheoryData
             {
-                EE = ExpectedException.SecurityTokenEncryptionFailedException("IDX10735:"),
+                ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10735:"),
                 TestId = "Test5",
                 Token = new JwtSecurityToken(
                                 new JwtHeader(),
@@ -1101,7 +1098,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             var header = new JwtHeader(Default.SymmetricSigningCredentials);
             var payload = new JwtPayload();
-            theoryData.Add(new WriteJwtTokenParams
+            theoryData.Add(new JwtTheoryData
             {
                 TestId = "Test6",
                 Token = new JwtSecurityToken(
@@ -1115,7 +1112,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 TokenType = TokenType.JWE
             });
 
-            theoryData.Add(new WriteJwtTokenParams()
+            theoryData.Add(new JwtTheoryData()
             {
                 TestId = "Test7",
                 Token = new JwtSecurityToken(
@@ -1135,7 +1132,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     "ey",
                     "ey");
 
-            theoryData.Add(new WriteJwtTokenParams
+            theoryData.Add(new JwtTheoryData
             {
                 TestId = "Test8",
                 Token = new JwtSecurityToken(
@@ -1230,20 +1227,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     {
         JWE,
         JWS
-    }
-
-    public class WriteJwtTokenParams
-    {
-        public bool ExpectSignature { get; set; } = false;
-
-        public ExpectedException EE { get; set; } = ExpectedException.NoExceptionExpected;
-
-        public string TestId { get; set; }
-
-        public SecurityToken Token { get; set; }
-
-        public JwtSecurityTokenHandler TokenHandler { get; set; } = new JwtSecurityTokenHandler();
-
-        public TokenType TokenType { get; set; }
     }
 }
