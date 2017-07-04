@@ -64,17 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Initializes an instance of <see cref="SamlSecurityTokenHandler"/>.
         /// </summary>
         public SamlSecurityTokenHandler()
-            : this(new SamlSerializer())
         {
-        }
-
-        /// <summary>
-        /// Initializes an instance of <see cref="SamlSecurityTokenHandler"/>.
-        /// </summary>
-        /// <param name="serializer"><see cref="SamlSerializer"/>.</param>
-        public SamlSecurityTokenHandler(SamlSerializer serializer)
-        {
-            Serializer = (serializer == null) ? throw LogArgumentNullException(nameof(serializer)) : serializer;
         }
 
 #region fields
@@ -118,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets or set the <see cref="SamlSerializer"/> that will be used to read and write a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        public SamlSerializer Serializer { get; set; }
+        public SamlSerializer Serializer { get; set; } = new SamlSerializer();
 
         /// <summary>
         /// Gets or sets a bool that controls if token creation will set default 'NotBefore', 'NotOnOrAfter' and 'IssueInstant' if not specified.
@@ -250,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Override this method to provide a SamlAdvice to place in the Samltoken. 
         /// </summary>
-        /// <param name="tokenDescriptor">Contains informaiton about the token.</param>
+        /// <param name="tokenDescriptor">Contains information about the token.</param>
         /// <returns>SamlAdvice, default is null.</returns>
         protected virtual SamlAdvice CreateAdvice(SecurityTokenDescriptor tokenDescriptor)
         {
@@ -450,7 +440,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                conditions.Conditions.Add(new SamlAudienceRestriction(new string[] { tokenDescriptor.Audience }));
+                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new string[] { tokenDescriptor.Audience }));
 
             return conditions;
         }
@@ -805,22 +795,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             Validators.ValidateAudience(audiences, securityToken, validationParameters);
         }
 
-        ///// <summary>
-        ///// Creates the security securityToken reference when the securityToken is not attached to the message.
-        ///// </summary>
-        ///// <param name="token">The saml securityToken.</param>
-        ///// <param name="attached">Boolean that indicates if a attached or unattached
-        ///// reference needs to be created.</param>
-        ///// <returns>A <see cref="SamlAssertionKeyIdentifierClause"/>.</returns>
-        //public override SecurityKeyIdentifierClause CreateSecurityTokenReference(SecurityToken token, bool attached)
-        //{
-        //    if (null == token)
-        //    {
-        //        throw new ArgumentNullException("token");
-        //    }
-
-        //    return token.CreateKeyIdentifierClause<SamlAssertionKeyIdentifierClause>();
-        //}
 
         /// <summary>
         /// Validates the Lifetime and Audience conditions.
@@ -849,11 +823,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             Validators.ValidateLifetime(securityToken.Assertion.Conditions.NotBefore, securityToken.Assertion.Conditions.NotOnOrAfter, securityToken, validationParameters);
 
             // TODO - concat all the audiences together
-            if (securityToken.Assertion.Conditions.Conditions.ElementAt(0) is SamlAudienceRestriction)
+            if (securityToken.Assertion.Conditions.Conditions.ElementAt(0) is SamlAudienceRestrictionCondition)
             {
                 foreach (var condition in securityToken.Assertion.Conditions.Conditions)
                 {
-                    SamlAudienceRestriction audienceRestriction = condition as SamlAudienceRestriction;
+                    SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
                     if (validationParameters.AudienceValidator != null)
                         validationParameters.AudienceValidator(audienceRestriction.Audiences, securityToken, validationParameters);
                     else

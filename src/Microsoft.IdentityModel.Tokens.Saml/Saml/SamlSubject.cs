@@ -42,7 +42,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public class SamlSubject
     {
         // Saml SubjectConfirmation parts.
-        private string _confirmationData;
         private SecurityKey _securityKey;
         private KeyInfo _keyInfo;
 
@@ -81,13 +80,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             IEnumerable<string> confirmations,
             string confirmationData)
         {
-            if (confirmations != null)
-                ConfirmationMethods = new List<string>(confirmations);
 
+            ConfirmationMethods = (confirmations == null) ? new List<string>() : new List<string>(confirmations);
             Name = name;
             NameFormat = nameFormat;
             NameQualifier = nameQualifier;
-            _confirmationData = confirmationData;
+            ConfirmationData = confirmationData;
         }
 
         /// <summary>
@@ -95,14 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         public string ConfirmationData
         {
-            get
-            {
-                return _confirmationData;
-            }
-            set
-            {
-                _confirmationData = (!string.IsNullOrEmpty(value)) ? value : throw LogArgumentNullException(nameof(value));
-            }
+            get; set;
         }
 
         /// <summary>
@@ -151,7 +142,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        // TODO - can this be null
         /// <summary>
         /// Gets or sets the format of the Subject.
         /// </summary>
@@ -160,7 +150,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             get; set;
         }
 
-        // TODO - can this be null
         /// <summary>
         /// Gets or sets the name qualifier of the Subject.
         /// </summary>
@@ -174,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if ((ConfirmationMethods.Count == 0) && (string.IsNullOrEmpty(Name)))
                 throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11107));
 
-            if ((ConfirmationMethods.Count == 0) && (_confirmationData != null))
+            if ((ConfirmationMethods.Count == 0) && (ConfirmationData != null))
                 throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11510));
         }
 

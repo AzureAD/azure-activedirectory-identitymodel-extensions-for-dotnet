@@ -27,8 +27,6 @@
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
-    // TODO - combine with SamlSubjectStatement ???
-
     /// <summary>
     /// Represents the StatementAbstractType specified in [Saml, 2.4].
     /// </summary>

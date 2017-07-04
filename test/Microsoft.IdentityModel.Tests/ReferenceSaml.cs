@@ -51,14 +51,14 @@ namespace Microsoft.IdentityModel.Tests
             get
             {
                 var audiences = new Collection<string> { Default.Audience };
-                var conditions = new Collection<SamlCondition> { new SamlAudienceRestriction(audiences) };
+                var conditions = new Collection<SamlCondition> { new SamlAudienceRestrictionCondition(audiences) };
                 return new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, conditions);
             }
         }
 
         public static SamlSubject SamlSubject
         {
-            get { return new SamlSubject(string.Empty, string.Empty,string.Empty, new string[] { Default.ConfirmationMethod }, string.Empty); }
+            get { return new SamlSubject(string.Empty, string.Empty,string.Empty, new string[] { Default.SamlConfirmationMethod }, string.Empty); }
         }
 
         public static SamlAttributeStatement SamlAttributeStatement

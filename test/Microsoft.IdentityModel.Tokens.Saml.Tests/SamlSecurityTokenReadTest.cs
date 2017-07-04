@@ -26,12 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
-using Microsoft.IdentityModel.Tokens.Saml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
@@ -41,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SamlReadFromTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SamlSecurityTokenReadFrom(SamlSecurityTokenTheoryData theoryData)
+        public void SamlSecurityTokenReadFrom(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SamlSecurityTokenReadFrom", theoryData);
             var context = new CompareContext($"{this}.SamlSecurityTokenReadFrom, {theoryData.TestId}");
@@ -63,30 +60,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SamlSecurityTokenTheoryData> SamlReadFromTheoryData
+        public static TheoryData<SamlTheoryData> SamlReadFromTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<SamlSecurityTokenTheoryData>();
-
-                theoryData.Add(new SamlSecurityTokenTheoryData
+                return new TheoryData<SamlTheoryData>
                 {
-                    First = true,
-                    SamlSecurityTokenTestSet = RefrenceTokens.SamlSecurityTokenValid,
-                    SamlSerializer = new SamlSerializer(),
-                    TestId = nameof(RefrenceTokens.SamlSecurityTokenValid)
-                });
-
-                return theoryData;
+                    new SamlTheoryData
+                    {
+                        First = true,
+                        SamlSecurityTokenTestSet = RefrenceTokens.SamlSecurityTokenValid,
+                        SamlSerializer = new SamlSerializer(),
+                        TestId = nameof(RefrenceTokens.SamlSecurityTokenValid)
+                    }
+                };
             }
         }
 
-    }
-
-    public class SamlSecurityTokenTheoryData : TheoryDataBase
-    {
-        public SamlSecurityTokenTestSet SamlSecurityTokenTestSet { get; set; }
-
-        public SamlSerializer SamlSerializer { get; set; }
     }
 }

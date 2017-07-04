@@ -60,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string dnsAddress,
             string ipAddress,
             IEnumerable<SamlAuthorityBinding> authorityBindings)
-            : base(samlSubject)
         {
             if (string.IsNullOrEmpty(authenticationMethod))
                 throw LogArgumentNullException(nameof(authenticationMethod));
@@ -69,6 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             AuthenticationInstant = authenticationInstant.ToUniversalTime();
             DnsAddress = dnsAddress;
             IPAddress = ipAddress;
+            Subject = samlSubject;
 
             AuthorityBindings = (authorityBindings == null) ? new List<SamlAuthorityBinding>() : new List<SamlAuthorityBinding>(authorityBindings);
         }

@@ -46,33 +46,27 @@ namespace Microsoft.IdentityModel.Tests
     {
         public static string ActorIssuer
         {
-            get { return "http://Default.ActorIssuer.com/Actor"; }
+            get => "http://Default.ActorIssuer.com/Actor";
         }
 
         public static string Acr
         {
-            get { return "Default.Acr"; }
+            get => "Default.Acr";
         }
 
         public static string Amr
         {
-            get { return "Default.Amr"; }
+            get => "Default.Amr";
         }
 
         public static List<string> Amrs
         {
-            get { return new List<string> { "Default.Amr1", "Default.Amr2", "Default.Amr3", "Default.Amr4" };
-            }
-        }
-
-        public static string SamlAssertionID
-        {
-            get { return "_b95759d0-73ae-4072-a140-567ade10a7ad"; }
+            get => new List<string> { "Default.Amr1", "Default.Amr2", "Default.Amr3", "Default.Amr4" };
         }
 
         public static string AsymmetricJwt
         {
-            get { return Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2)); }
+            get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2));
         }
 
         public static SecurityTokenDescriptor AsymmetricSignSecurityTokenDescriptor(List<Claim> claims)
@@ -82,32 +76,32 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SigningCredentials AsymmetricSigningCredentials
         {
-            get { return new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm); }
+            get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm);
         }
 
         public static SignatureProvider AsymmetricSignatureProvider
         {
-            get { return CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256); }
+            get => CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
         }
 
         public static SecurityKey AsymmetricSigningKey
         {
-            get { return new X509SecurityKey(KeyingMaterial.DefaultCert_2048); }
+            get => new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
         }
 
         public static TokenValidationParameters AsymmetricEncryptSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(SymmetricEncryptionKey256, AsymmetricSigningKey); }
+            get => TokenValidationParameters(SymmetricEncryptionKey256, AsymmetricSigningKey);
         }
 
         public static TokenValidationParameters AsymmetricSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(null, AsymmetricSigningKey); }
+            get => TokenValidationParameters(null, AsymmetricSigningKey);
         }
 
         public static string Audience
         {
-            get { return "http://Default.Audience.com"; }
+            get => "http://Default.Audience.com";
         }
 
         public static List<string> Audiences
@@ -127,14 +121,17 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string AuthenticationType
         {
-            get { return "Default.Federation"; }
+            get => "Default.Federation";
         }
 
-        public static string AuthorizedParty { get { return "http://relyingparty.azp.com"; } }
+        public static string AuthorizedParty
+        {
+            get => "http://relyingparty.azp.com";
+        }
 
         public static string Azp
         {
-            get { return "http://Default.Azp.com"; }
+            get => "http://Default.Azp.com";
         }
 
         public static string CertificateData
@@ -144,42 +141,22 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string ClaimsIdentityLabel
         {
-            get { return "Default.ClaimsIdentityLabel"; }
+            get => "Default.ClaimsIdentityLabel";
         }
 
         public static string ClaimsIdentityLabelDup
         {
-            get { return "Default.ClaimsIdentityLabelDup"; }
+            get => "Default.ClaimsIdentityLabelDup";
         }
 
         public static ClaimsPrincipal ClaimsPrincipal
         {
-            get { return new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity); }
+            get => new ClaimsPrincipal(ClaimSets.DefaultClaimsIdentity);
         }
 
         public static string ClientId
         {
-            get { return "http://Default.ClientId"; }
-        }
-
-        public static string ConfirmationMethod
-        {
-            get { return "urn:oasis:names:tc:SAML:1.0:cm:bearer"; }
-        }
-
-        public static string Country
-        {
-            get { return "USA"; }
-        }
-
-        public static string Email
-        {
-            get { return "Bob@contoso.com"; }
-        }
-
-        public static string GivenName
-        {
-            get { return "Bob"; }
+            get => "http://Default.ClientId";
         }
 
         public static KeyInfo KeyInfo
@@ -191,19 +168,14 @@ namespace Microsoft.IdentityModel.Tests
             };
         }
 
-        public static string HomePhone
-        {
-            get { return "555.1212"; }
-        }
-
         public static DateTime IssueInstant
         {
-            get { return DateTime.Parse("2017 - 03 - 17T18: 33:37.095Z"); }
+            get => DateTime.Parse("2017 - 03 - 17T18: 33:37.095Z");
         }
 
         public static string Issuer
         {
-            get { return "http://Default.Issuer.com"; }
+            get => "http://Default.Issuer.com";
         }
 
         public static string Jwt(SecurityTokenDescriptor tokenDescriptor)
@@ -211,49 +183,29 @@ namespace Microsoft.IdentityModel.Tests
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
         }
 
-        public static string Name
-        {
-            get { return "Jean-Sébastien"; }
-        }
-
         public static string NameClaimType
         {
-            get { return "Default.NameClaimType"; }
+            get => "Default.NameClaimType";
         }
 
         public static string Nonce
         {
-            get { return "Default.Nonce"; }
+            get => "Default.Nonce";
         }
 
         public static DateTime NotBefore
         {
-            get { return DateTime.Parse("2017-03-17T18:33:37.080Z"); }
+            get => DateTime.Parse("2017-03-17T18:33:37.080Z");
         }
 
         public static DateTime NotOnOrAfter
         {
-            get { return DateTime.Parse("2017-03-18T18:33:37.080Z"); }
+            get => DateTime.Parse("2017-03-18T18:33:37.080Z");
         }
 
         public static string OriginalIssuer
         {
-            get { return "http://Default.OriginalIssuer.com"; }
-        }
-
-        public static string Role
-        {
-            get { return "role"; }
-        }
-
-        public static string SamlAttributeClaimNamespace
-        {
-            get { return "http://schemas.xmlsoap.org/ws/2005/05/identity/claims"; }
-        }
-
-        public static string SamlTargetNamespace
-        {
-            get { return "urn:oasis:names:tc:SAML:1.0:assertion"; }
+            get => "http://Default.OriginalIssuer.com";
         }
 
         public static Reference Reference
@@ -288,7 +240,17 @@ namespace Microsoft.IdentityModel.Tests
         }
         public static string RoleClaimType
         {
-            get { return "Default.RoleClaimType"; }
+            get => "Default.RoleClaimType";
+        }
+
+        public static string SamlAssertionID
+        {
+            get => "_b95759d0-73ae-4072-a140-567ade10a7ad";
+        }
+
+        public static string SamlConfirmationMethod
+        {
+            get => "urn:oasis:names:tc:SAML:1.0:cm:bearer";
         }
 
         public static SecurityTokenDescriptor SecurityTokenDescriptor()
@@ -457,12 +419,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SymmetricJwe
         {
-            get { return Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2)); }
+            get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2));
         }
 
         public static string SymmetricJws
         {
-            get { return Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2)); }
+            get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2));
         }
 
         public static SecurityTokenDescriptor SymmetricEncryptSignSecurityTokenDescriptor()
@@ -552,7 +514,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static TokenValidationParameters SymmetricEncryptSignTokenValidationParameters
         {
-            get { return TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey256); }
+            get => TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey256);
         }
 
         public static TokenValidationParameters SymmetricEncryptSignInfiniteLifetimeTokenValidationParameters

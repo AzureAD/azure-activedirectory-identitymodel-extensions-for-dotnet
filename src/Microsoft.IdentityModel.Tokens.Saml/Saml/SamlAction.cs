@@ -75,13 +75,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
             set
             {
+                // optional, use default if not set.
                 if (value == null)
-                    throw LogArgumentNullException(nameof(value));
+                {
+                    _namespace = new Uri(SamlConstants.DefaultActionNamespace);
+                }
+                else
+                {
 
-                if (!value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11502));
+                    if (!value.IsAbsoluteUri)
+                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11502));
 
-                _namespace = new Uri(SamlConstants.DefaultActionNamespace);
+                    _namespace = value;
+                }
             }
         }
 

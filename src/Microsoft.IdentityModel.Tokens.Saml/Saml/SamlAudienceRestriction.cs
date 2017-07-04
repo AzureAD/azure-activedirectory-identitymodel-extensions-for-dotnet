@@ -33,33 +33,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// <summary>
     /// Represents the AudienceRestrictionCondition.
     /// </summary>
-    public class SamlAudienceRestriction : SamlCondition
+    public class SamlAudienceRestrictionCondition : SamlCondition
     {
         // TODO - remove this internal
-        internal SamlAudienceRestriction()
+        internal SamlAudienceRestrictionCondition()
         {
             Audiences = new List<string>();
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="SamlAudienceRestriction"/>.
+        /// Creates an instance of <see cref="SamlAudienceRestrictionCondition"/>.
         /// </summary>
         /// <param name="audience">The audience element contained in this restriction.</param>
-        public SamlAudienceRestriction(string audience)
+        public SamlAudienceRestrictionCondition(string audience)
             : this(new string[] { audience })
         { }
 
         /// <summary>
-        /// Creates an instance of <see cref="SamlAudienceRestriction"/>.
+        /// Creates an instance of <see cref="SamlAudienceRestrictionCondition"/>.
         /// </summary>
-        /// <param name="audiences"><see cref="IEnumerable{String}"/>.</param>
-        public SamlAudienceRestriction(IEnumerable<string> audiences)
+        /// <param name="audiences">An <see cref="IEnumerable{String}"/> containing the audiences for a <see cref="SamlAssertion"/>.</param>
+        public SamlAudienceRestrictionCondition(IEnumerable<string> audiences)
         {
             Audiences = (audiences == null) ? throw LogArgumentNullException(nameof(audiences)) : new List<string>(audiences);
         }
 
         /// <summary>
-        /// Gets the audiences for which the assertion is addressed.
+        /// Gets the <see cref="ICollection{stringT}"/> of audiences for a <see cref="SamlAssertion"/>.
         /// </summary>
         public ICollection<string> Audiences
         {

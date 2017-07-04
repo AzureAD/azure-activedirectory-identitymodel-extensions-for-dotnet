@@ -76,13 +76,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             SamlAccessDecision accessDecision,
             IEnumerable<SamlAction> actions,
             SamlEvidence evidence)
-            : base(subject)
         {
             Actions = (actions == null) ? throw LogArgumentNullException(nameof(actions)) : new List<SamlAction>(actions);
             Evidence = evidence;
             AccessDecision = accessDecision;
             Resource = resource;
-
+            Subject = subject;
             CheckObjectValidity();
         }
 

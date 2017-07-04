@@ -201,13 +201,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public bool CanRead { get; set; }
 
-        public SecurityToken CompareTo { get; set; }
-
-        public Type ExceptionType { get; set; }
-
         public SecurityTokenHandler Handler { get; set; }
 
         public string Issuer { get; set; }
+
+        public SamlSerializer SamlSerializer { get; set; }
+
+        public SamlSecurityTokenTestSet SamlSecurityTokenTestSet { get; set; }
 
         public SecurityTokenDescriptor TokenDescriptor { get; set; }
 

@@ -70,21 +70,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         public override string Issuer
         {
-            get
-            {
-                return Assertion.Issuer;
-            }
+            get { return Assertion.Issuer; }
         }
 
         /// <summary>
-        /// Gets the collection of <see cref="SecurityKey"/> contained in this token.
+        /// Gets the <see cref="SecurityKey"/> contained in this token.
         /// </summary>
         public override SecurityKey SecurityKey
         {
-            get
-            {
-                return Assertion.SecurityKey;
-            }
+            get { return Assertion.SecurityKey; }
         }
 
         /// <summary>

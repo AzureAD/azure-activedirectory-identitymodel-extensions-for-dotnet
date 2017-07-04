@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public class SamlSerializer
     {
         /// <summary>
-        /// Instaniates a new instance of <see cref="SamlSerializer"/>.
+        /// Instantiates a new instance of <see cref="SamlSerializer"/>.
         /// </summary>
         public SamlSerializer()
         {
@@ -400,9 +400,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// &lt;saml:Condition> element that specifies an xsi:type
         /// of saml:AudienceRestrictionType.
         /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAudienceRestriction"/> element.</param>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAudienceRestrictionCondition"/> element.</param>
         /// <returns></returns>
-        protected virtual SamlAudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
+        protected virtual SamlAudienceRestrictionCondition ReadAudienceRestrictionCondition(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
 
@@ -416,7 +416,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AudienceRestrictionType, SamlConstants.Namespace);
 
                 reader.ReadStartElement();
-                var audienceRestrictionCondition = new SamlAudienceRestriction();
+                var audienceRestrictionCondition = new SamlAudienceRestrictionCondition();
 
                 while (reader.IsStartElement())
                 {
@@ -663,7 +663,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(reader));
 
             if (reader.IsStartElement(SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace))
-                return ReadAudienceRestriction(reader);
+                return ReadAudienceRestrictionCondition(reader);
             else if (reader.IsStartElement(SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace))
                 return ReadDoNotCacheCondition(reader);
             else

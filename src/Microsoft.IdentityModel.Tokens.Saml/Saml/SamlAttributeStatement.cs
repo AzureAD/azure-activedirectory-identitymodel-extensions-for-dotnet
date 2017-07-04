@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="samlSubject">The subject of the attribute statement.</param>
         /// <param name="attributes"><see cref="IEnumerable{SamlAttribute}"/>.</param>
         public SamlAttributeStatement(SamlSubject samlSubject, IEnumerable<SamlAttribute> attributes)
-            : base(samlSubject)
         {
+            Subject = samlSubject;
             Attributes = (attributes == null) ? throw LogArgumentNullException(nameof(attributes)) : new List<SamlAttribute>(attributes);
         }
 
