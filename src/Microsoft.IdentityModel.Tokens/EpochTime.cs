@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="secondsSinceUnixEpoch">Number of seconds.</param>
         /// <returns>The DateTime in UTC.</returns>
-        public static DateTime DateTime(long secondsSinceUnixEpoch)
+        public static DateTime DateTime(double secondsSinceUnixEpoch)
         {
             if (secondsSinceUnixEpoch <= 0)
             {

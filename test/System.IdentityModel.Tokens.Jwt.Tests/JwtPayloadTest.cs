@@ -138,22 +138,71 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
-        public void FirstClassProperties()
+        public void DateTimeClaims_AuthTime()
         {
             var context = new CompareContext();
 
-            JwtPayload jwtPayload = new JwtPayload();
-            int? time = 10000;
+            var jwtPayload = new JwtPayload();
+            double time = 1472097744.75859;
+            jwtPayload.Add("auth_time", time);
+
+            double? authTime = jwtPayload.AuthTime;
+            Assert.True(authTime == time, "authTime != time");
+
+            TestUtilities.AssertFailIfErrors(GetType() + ".Claims", context.Diffs);
+        }
+
+        [Fact]
+        public void DateTimeClaims_Exp()
+        {
+            var context = new CompareContext();
+
+            var jwtPayload = new JwtPayload();
+            double time = 1472097744.75859;
             jwtPayload.Add("exp", time);
-            DateTime payloadTime = EpochTime.DateTime(time.Value);
+            DateTime payloadTime = EpochTime.DateTime(time);
             DateTime payloadValidTo = jwtPayload.ValidTo;
 
-            Assert.True(EpochTime.DateTime(time.Value) == jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
+            Assert.True(payloadTime == payloadValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
 
-            int? expirationTime = jwtPayload.Exp;
+            double? expirationTime = jwtPayload.Exp;
             Assert.True(expirationTime == time, "expirationTime != time");
 
-            TestUtilities.AssertFailIfErrors(GetType().ToString() + ".Claims", context.Diffs);
+            TestUtilities.AssertFailIfErrors(GetType() + ".Claims", context.Diffs);
+        }
+
+        [Fact]
+        public void DateTimeClaims_Iat()
+        {
+            var context = new CompareContext();
+
+            var jwtPayload = new JwtPayload();
+            double time = 1472096557.74376;
+            jwtPayload.Add("iat", time);
+
+            double? issueAtTime = jwtPayload.Iat;
+            Assert.True(issueAtTime == time, "issueAtTime != time");
+
+            TestUtilities.AssertFailIfErrors(GetType() + ".Claims", context.Diffs);
+        }
+
+        [Fact]
+        public void DateTimeClaims_Nbf()
+        {
+            var context = new CompareContext();
+
+            var jwtPayload = new JwtPayload();
+            double time = 1472096544.75759;
+            jwtPayload.Add("nbf", time);
+            DateTime payloadTime = EpochTime.DateTime(time);
+            DateTime payloadValidFrom = jwtPayload.ValidFrom;
+
+            Assert.True(payloadTime == payloadValidFrom, "EpochTime.DateTime( time ) != jwtPayload.ValidFrom");
+
+            double? fromTime = jwtPayload.Nbf;
+            Assert.True(fromTime == time, "fromTime != time");
+
+            TestUtilities.AssertFailIfErrors(GetType() + ".Claims", context.Diffs);
         }
 
         [Fact]
@@ -221,6 +270,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var longMaxValue = long.MaxValue.ToString();
                 var longMinValue = long.MinValue.ToString();
                 var longValue = ((long)int.MaxValue + 100).ToString();
+                var doubleMaxValue = double.MaxValue.ToString("r");
+                var doubleMinValue = double.MinValue.ToString("r");
 
                 var dataset = new TheoryData<List<Claim>, JwtPayload, JwtPayload>();
                 SetDataSet(
@@ -234,6 +285,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         new Claim("ClaimValueTypes.int.MinValue", intMinValue, ClaimValueTypes.Integer),
                         new Claim("ClaimValueTypes.long.MaxValue", longMaxValue, ClaimValueTypes.Integer64),
                         new Claim("ClaimValueTypes.long.MinValue", longMinValue, ClaimValueTypes.Integer64),
+                        new Claim("ClaimValueTypes.double.MaxValue", doubleMaxValue, ClaimValueTypes.Double),
+                        new Claim("ClaimValueTypes.double.MinValue", doubleMinValue, ClaimValueTypes.Double),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.Json1", @"{""jsonProperty1"":""jsonvalue1""}", JsonClaimValueTypes.Json),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.Json2", @"{""jsonProperty2"":""jsonvalue2""}", JsonClaimValueTypes.Json),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray", "1", ClaimValueTypes.Integer),
@@ -245,7 +298,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new List<Claim>
                     {
                         new Claim("aud", "http://test.local/api/", ClaimValueTypes.String, "http://test.local/api/"),
-                        new Claim("exp", "1460647835", ClaimValueTypes.Integer, "http://test.local/api/"),
+                        new Claim("exp", "1472097744.75859", ClaimValueTypes.Double, "http://test.local/api/"),
                         new Claim("emailaddress", "user1@contoso.com", ClaimValueTypes.String, "http://test.local/api/"),
                         new Claim("emailaddress", "user2@contoso.com", ClaimValueTypes.String, "http://test.local/api/"),
                         new Claim("name", "user", ClaimValueTypes.String, "http://test.local/api/"),

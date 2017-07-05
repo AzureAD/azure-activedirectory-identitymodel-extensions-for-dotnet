@@ -156,11 +156,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
         /// </summary>
         /// <remarks>If the 'auth_time' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? AuthTime
+        public double? AuthTime
         {
             get
             {
-                return this.GetIntClaim(JwtRegisteredClaimNames.AuthTime);
+                return this.GetDoubleClaim(JwtRegisteredClaimNames.AuthTime);
             }
         }
 
@@ -199,14 +199,14 @@ namespace System.IdentityModel.Tokens.Jwt
                 return this.GetStandardClaim(JwtRegisteredClaimNames.CHash);
             }
         }
-        
+
         /// <summary>
         /// Gets the 'value' of the 'expiration' claim { exp, 'value' }.
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? Exp
+        public double? Exp
         {
-            get { return this.GetIntClaim(JwtRegisteredClaimNames.Exp); }
+            get { return this.GetDoubleClaim(JwtRegisteredClaimNames.Exp); }
         }
 
         /// <summary>
@@ -225,9 +225,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
         /// </summary>
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        public int? Iat
+        public double? Iat
         {
-            get { return this.GetIntClaim(JwtRegisteredClaimNames.Iat); }
+            get { return this.GetDoubleClaim(JwtRegisteredClaimNames.Iat); }
         }
 
         /// <summary>
@@ -246,9 +246,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'expiration' claim { nbf, 'value' }.
         /// </summary>
         /// <remarks>If the 'notbefore' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? Nbf
+        public double? Nbf
         {
-            get { return this.GetIntClaim(JwtRegisteredClaimNames.Nbf); }
+            get { return this.GetDoubleClaim(JwtRegisteredClaimNames.Nbf); }
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 return this.GetStandardClaim(JwtRegisteredClaimNames.Nonce);
             }
         }
-        
+
         /// <summary>
         /// Gets the 'value' of the 'subject' claim { sub, 'value' }.
         /// </summary>
@@ -598,19 +598,18 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        internal int? GetIntClaim(string claimType)
+        private double? GetDoubleClaim(string claimType)
         {
-            int? retval = null;
+            double? retval = null;
 
             object value;
             if (TryGetValue(claimType, out value))
             {
-                IList<object> claimValues = value as IList<object>;
+                var claimValues = value as IList<object>;
                 if (claimValues != null)
                 {
                     foreach (object obj in claimValues)
                     {
-                        retval = null;
                         if (obj == null)
                         {
                             continue;
@@ -618,13 +617,13 @@ namespace System.IdentityModel.Tokens.Jwt
 
                         try
                         {
-                            retval = Convert.ToInt32(obj, CultureInfo.InvariantCulture);
+                            retval = Convert.ToDouble(obj, CultureInfo.InvariantCulture);
                         }
-                        catch (System.FormatException)
+                        catch (FormatException)
                         {
                             retval = null;
                         }
-                        catch (System.InvalidCastException)
+                        catch (InvalidCastException)
                         {
                             retval = null;
                         }
@@ -643,9 +642,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        retval = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                        retval = Convert.ToDouble(value, CultureInfo.InvariantCulture);
                     }
-                    catch (System.FormatException)
+                    catch (FormatException)
                     {
                         retval = null;
                     }
@@ -654,8 +653,6 @@ namespace System.IdentityModel.Tokens.Jwt
                         retval = null;
                     }
                 }
-
-                return retval;
             }
 
             return retval;
@@ -714,7 +711,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // if there are multiple dates, take the first one.
             try
             {
-                long secondsAfterBaseTime;
+                double secondsAfterBaseTime;
                 IList<object> dateValues = dateValue as IList<object>;
                 if (dateValues != null)
                 {
@@ -729,7 +726,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 // null converts to 0.
-                secondsAfterBaseTime = Convert.ToInt64(dateValue, CultureInfo.InvariantCulture);
+                secondsAfterBaseTime = Convert.ToDouble(dateValue, CultureInfo.InvariantCulture);
                 return EpochTime.DateTime(secondsAfterBaseTime);
             }
             catch (Exception ex)
