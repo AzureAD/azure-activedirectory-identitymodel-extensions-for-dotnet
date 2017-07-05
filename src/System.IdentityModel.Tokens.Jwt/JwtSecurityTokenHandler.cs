@@ -1305,19 +1305,46 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private string DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
+        private byte[] DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
         {
             var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Header.Enc);
             if (decryptionProvider == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, jwtToken.Header.Enc)));
 
-            return UTF8Encoding.UTF8.GetString(
-                decryptionProvider.Decrypt(
-                    Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
-                    Encoding.ASCII.GetBytes(jwtToken.RawHeader),
-                    Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
-                    Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag)
-                ));
+            return decryptionProvider.Decrypt(
+                Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
+                Encoding.ASCII.GetBytes(jwtToken.RawHeader),
+                Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
+                Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag)
+            );
+        }
+
+        /// <summary>
+        /// Decompress JWT token bytes.
+        /// </summary>
+        /// <param name="tokenBytes"></param>
+        /// <param name="decompressionAlgorithm"></param>
+        /// <param name="compressionProviderFactory"></param>
+        /// <exception cref="ArgumentNullException">if 'tokenBytes' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'decompressionAlgorithm' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'compressionProviderFactory' is null.</exception>
+        /// <exception cref="NotSupportedException">if the decompression algorithm is not supported.</exception>
+        /// <returns>Decompressed JWT token</returns>
+        protected string DecompressToken(byte[] tokenBytes, string decompressionAlgorithm, CompressionProviderFactory compressionProviderFactory)
+        {
+            if (tokenBytes == null)
+                throw LogHelper.LogArgumentNullException(nameof(tokenBytes));
+
+            if (string.IsNullOrEmpty(decompressionAlgorithm))
+                throw LogHelper.LogArgumentNullException(nameof(decompressionAlgorithm));
+
+            if (compressionProviderFactory == null)
+                throw LogHelper.LogArgumentNullException(nameof(compressionProviderFactory));
+
+            if (!compressionProviderFactory.IsSupportedAlgorithm(decompressionAlgorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10739, decompressionAlgorithm)));
+
+            return compressionProviderFactory.Decompress(decompressionAlgorithm, tokenBytes);
         }
 
         /// <summary>
@@ -1330,6 +1357,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
         /// <exception cref="SecurityTokenException">if 'jwtToken.Header.alg' is not equal to 'dir'.</exception>
+        /// <exception cref="SecurityTokenException">if decompression failed.</exception>
         /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         protected string DecryptToken(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
@@ -1344,6 +1372,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
+            var decryptionSucceed = false;
+            byte[] decryptedTokenBytes = null;
 
             // keep track of exceptions thrown, keys that were tried
             StringBuilder exceptionStrings = new StringBuilder();
@@ -1365,7 +1395,9 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 try
                 {
-                    return DecryptToken(jwtToken, cryptoProviderFactory, key);
+                    decryptedTokenBytes = DecryptToken(jwtToken, cryptoProviderFactory, key);
+                    decryptionSucceed = true;
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -1376,10 +1408,23 @@ namespace System.IdentityModel.Tokens.Jwt
                     keysAttempted.AppendLine(key.ToString());
             }
 
-            if (keysAttempted.Length > 0)
+            if (!decryptionSucceed && keysAttempted.Length > 0)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, jwtToken.RawData)));
 
-            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, jwtToken.RawData)));
+            if (!decryptionSucceed)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, jwtToken.RawData)));
+
+            if (string.IsNullOrEmpty(jwtToken.Header.Zip))
+                return UTF8Encoding.UTF8.GetString(decryptedTokenBytes);
+
+            try
+            {
+                return DecompressToken(decryptedTokenBytes, jwtToken.Header.Zip, validationParameters.CompressionProviderFactory);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10673, jwtToken.Header.Zip), ex));
+            }        
         }
 
         private IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)

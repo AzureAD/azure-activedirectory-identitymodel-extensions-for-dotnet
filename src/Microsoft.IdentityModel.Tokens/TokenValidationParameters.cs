@@ -138,6 +138,7 @@ namespace Microsoft.IdentityModel.Tokens
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
             CryptoProviderFactory = other.CryptoProviderFactory;
+            CompressionProviderFactory = other.CompressionProviderFactory;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
@@ -303,6 +304,15 @@ namespace Microsoft.IdentityModel.Tokens
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10245, securityToken);
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
+        }
+
+        /// <summary>
+        /// Users can override the default <see cref="CompressionProviderFactory"/> with this property. This factory will be used for creating compression providers.
+        /// </summary>
+        public CompressionProviderFactory CompressionProviderFactory
+        {
+            get;
+            set;
         }
 
         /// <summary>
