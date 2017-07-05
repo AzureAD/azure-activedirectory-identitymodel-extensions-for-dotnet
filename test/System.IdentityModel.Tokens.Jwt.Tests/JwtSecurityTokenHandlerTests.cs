@@ -1307,11 +1307,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     }
 
     /// <summary>
-    /// A custom compression provider class implementing ICompressionProvider interface.
+    /// A custom compression provider class implementing CompressionProvider.
     /// </summary>
-    public class SampleCustomCompressionProvider : ICompressionProvider
+    public class SampleCustomCompressionProvider : CompressionProvider
     {
-        public string Decompress(string algorithm, byte[] value)
+        public override string Decompress(string algorithm, byte[] value)
         {
             if (!IsSupportedAlgorithm(algorithm))
                 return null;
@@ -1320,24 +1320,24 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return UTF8Encoding.UTF8.GetString(value);
         }
 
-        public bool IsSupportedAlgorithm(string algorithm)
+        public override bool IsSupportedAlgorithm(string algorithm)
         {
             return algorithm != null && algorithm.Equals("MyAlgorithm");
         }
     }
 
     /// <summary>
-    /// A custom compression provider class implementing ICompressionProvider interface, 
+    /// A custom compression provider class implementing CompressionProvider, 
     /// which accepts any algorithm but always return null for decompression.
     /// </summary>
-    public class SampleCustomCompressionProviderDecompressAlwaysFail : ICompressionProvider
+    public class SampleCustomCompressionProviderDecompressAlwaysFail : CompressionProvider
     {
-        public string Decompress(string algorithm, byte[] value)
+        public override string Decompress(string algorithm, byte[] value)
         {
             return null;
         }
 
-        public bool IsSupportedAlgorithm(string algorithm)
+        public override bool IsSupportedAlgorithm(string algorithm)
         {
             return true;
         }

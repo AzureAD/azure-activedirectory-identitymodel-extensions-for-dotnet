@@ -545,6 +545,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 var validationParameters = TokenValidationParameters(KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
                 validationParameters.CompressionProviderFactory = new CompressionProviderFactory();
+                validationParameters.ValidateLifetime = false;
                 return validationParameters;
             }
         }

@@ -28,21 +28,26 @@
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Custom compression provider interface.
+    /// Custom compression provider abstract class.
     /// </summary>
-    public interface ICompressionProvider
+    public abstract class CompressionProvider
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        protected CompressionProvider() { }
+
         /// <summary>
         /// Called to determine if an algorithm is supported.
         /// </summary>
         /// <param name="algorithm">the algorithm that defines the compression method.</param>
         /// <returns>true if supported</returns>
-        bool IsSupportedAlgorithm(string algorithm);
+        public abstract bool IsSupportedAlgorithm(string algorithm);
 
         /// <summary>
         /// Decompress.
         /// </summary>
-        string Decompress(string algorithm, byte[] value);
+        public abstract string Decompress(string algorithm, byte[] value);
 
         // TODO
         ///// <summary>
@@ -51,6 +56,6 @@ namespace Microsoft.IdentityModel.Tokens
         ///// <param name="algorithm"></param>
         ///// <param name="value"></param>
         ///// <returns></returns>
-        //byte[] Compress(string algorithm, string value);
+        //public abstract byte[] Compress(string algorithm, string value);
     }
 }

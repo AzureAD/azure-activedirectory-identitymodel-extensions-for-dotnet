@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Extensibility point for custom compression support application wide.
         /// </summary>
-        public ICompressionProvider CustomCompressionProvider { get; set; }
+        public CompressionProvider CustomCompressionProvider { get; set; }
 
         /// <summary>
         /// Static constructor that initializes the default <see cref="CompressionProviderFactory"/>.
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
         public string Decompress(string algorithm, byte[] value)
         {
             if (algorithm == null)
-                throw LogHelper.LogArgumentNullException(algorithm);
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (value == null)
                 return null;
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
         //public byte[] Compress(string algorithm, string value)
         //{
         //    if (algorithm == null)
-        //        throw LogHelper.LogArgumentNullException(algorithm);
+        //        throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
         //    if (string.IsNullOrEmpty(value))
         //        return null;
@@ -208,11 +208,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Compression bytes</returns>
         public static byte[] CompressWithDeflate(string value)
         {
-            using (MemoryStream output = new MemoryStream())
+            if (value == null)
+                throw LogHelper.LogArgumentNullException(nameof(value));
+
+            using (var output = new MemoryStream())
             {
-                using (DeflateStream deflateStream = new DeflateStream(output, CompressionMode.Compress))
+                using (var deflateStream = new DeflateStream(output, CompressionMode.Compress))
                 {
-                    using (StreamWriter writer = new StreamWriter(deflateStream, Encoding.UTF8))
+                    using (var writer = new StreamWriter(deflateStream, Encoding.UTF8))
                     {
                         writer.Write(value);
                     }
@@ -229,11 +232,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Decompression string</returns>
         public static string DecompressWithDeflate(byte[] value)
         {
-            using (MemoryStream inputStream = new MemoryStream(value))
+            if (value == null)
+                throw LogHelper.LogArgumentNullException(nameof(value));
+
+            using (var inputStream = new MemoryStream(value))
             {
-                using (DeflateStream deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress))
+                using (var deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress))
                 {
-                    using (StreamReader reader = new StreamReader(deflateStream, Encoding.UTF8))
+                    using (var reader = new StreamReader(deflateStream, Encoding.UTF8))
                     {
                         return reader.ReadToEnd();
                     }
